@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+  ~ Colombia / South America
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://mko-utils.com/xsd/WebModule.xsd"
+            elementFormDefault="qualified">
+    <xsd:element name="module">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="page-group" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element name="page" maxOccurs="unbounded"
+                                         minOccurs="0">
+                                <xsd:complexType>
+                                    <xsd:attribute name="id" type="xsd:string" use="required" />
+                                    <xsd:attribute name="name" type="xsd:string" use="required" />
+                                    <xsd:attribute name="longName" type="xsd:string" />
+                                    <xsd:attribute name="path" type="xsd:string"
+                                                   form="unqualified" use="required" />
+                                    <xsd:attribute name="visible" type="xsd:boolean" />
+                                    <xsd:attribute name="listeners" type="xsd:string" />
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:sequence>
+                        <xsd:attribute name="id" type="xsd:string" use="required" />
+                        <xsd:attribute name="name" type="xsd:string" use="required" />
+                        <xsd:attribute name="longName" type="xsd:string" />
+                        <xsd:attribute name="icon" type="xsd:string" />
+                        <xsd:attribute name="visible" type="xsd:boolean"
+                                       default="true" />
+                        <xsd:attribute name="listeners" type="xsd:string" />
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>
+            <xsd:attribute name="name" type="xsd:string" use="required" />
+            <xsd:attribute name="page" type="xsd:string" use="required" />
+            <xsd:attribute name="extends" type="xsd:string" />
+            <xsd:attribute name="icon" type="xsd:string" />
+            <xsd:attribute name="description" type="xsd:string" />
+            <xsd:attribute name="bundle" type="xsd:string" />
+            <xsd:attribute name="visible" type="xsd:boolean"
+                           default="true" />
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>
+

@@ -1,0 +1,137 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+
+<?page title="${applicationInfo.name} - ${accountContext.account.name}"?>
+
+<?meta charset="utf-8"?>
+<?meta http-equiv="X-UA-Compatible" content="IE=edge"?>
+<?meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"?>
+<?meta name="name" content="${applicationInfo.name}"?>
+<?meta name="description" content="${applicationInfo.description}"?>
+<?meta name="author" content="${applicationInfo.author}"?>
+<?meta name="version" content="${applicationInfo.version}"?>
+<?meta name="build" content="${applicationInfo.build}"?>
+
+<?link href="${contextPath}/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet"?>
+<?link href="${contextPath}/css/colors.css" rel="stylesheet"?>
+<?link href="${contextPath}/css/template.css" rel="stylesheet"?>
+<!--
+  ~ Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+  ~ Colombia / South America
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!-- Custom fonts for this template-->
+<?link href="${contextPath}/vendor/font-awesome/css/font-awesome.css" rel="stylesheet" type="text/css"?>
+<!-- Custom styles for this template-->
+<?link href="${contextPath}/css/sb-admin.css" rel="stylesheet"?>
+
+
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native">
+
+    <n:nav class="navbar navbar-expand-lg navbar-dark fixed-top ${applicationInfo.defaultSkin}" id="mainNav">
+        <n:a class="navbar-brand" href="index.html">${applicationInfo.name}</n:a>
+        <n:button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+                  data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+                  aria-label="Toggle navigation">
+            <n:span class="navbar-toggler-icon"></n:span>
+        </n:button>
+        <n:div class="collapse navbar-collapse" id="navbarResponsive">
+
+            <div apply="${navBuilder}">
+                <custom-attributes
+                        builderClass="tools.dynamia.zk.app.bstemplate.BootstrapMenuBuilder"/>
+            </div>
+
+
+            <n:ul class="navbar-nav sidenav-toggler">
+                <!-- Bottom Navigation Toggler -->
+                <n:li class="nav-item">
+                    <n:a class="nav-link text-center" id="sidenavToggler">
+                        <n:i class="fa fa-fw fa-angle-left"></n:i>
+                    </n:a>
+                </n:li>
+            </n:ul>
+        </n:div>
+        <!-- Top Menu -->
+        <n:ul class="navbar-nav ml-auto">
+            <n:li class="nav-item dropdown">
+                <n:a class="nav-link dropdown-toggle mr-lg-2" id="messagesDropdown" href="#" data-toggle="dropdown"
+                     aria-haspopup="true" aria-expanded="false">
+                    <n:i class="fa fa-fw fa-envelope"></n:i>
+                    <n:span class="d-lg-none">Messages
+                        <n:span class="badge badge-pill badge-primary">12 New</n:span>
+                    </n:span>
+                </n:a>
+            </n:li>
+
+        </n:ul>
+    </n:nav>
+
+    <!-- Page Content -->
+    <div sclass="content-wrapper" apply="${navComposer}">
+        <n:div class="container-fluid">
+            <!-- Breadcrumbs-->
+            <n:ol class="breadcrumb">
+                <n:li class="breadcrumb-item">
+                    <span sclass="moduleTitle"/>
+                </n:li>
+
+                <n:li class="breadcrumb-item active">
+                    <span sclass="pageTitle"/>
+                </n:li>
+            </n:ol>
+            <n:div class="row">
+                <n:div class="col-12">
+                    <!-- Page Workspace -->
+                    <div id="workspace" sclass="workspace">
+                        <custom-attributes builderClass="workspace.builders.Basic"/>
+                    </div>
+                </n:div>
+            </n:div>
+        </n:div>
+        <!-- /.container-fluid-->
+        <!-- /.content-wrapper-->
+        <n:footer class="sticky-footer">
+            <n:div class="container">
+                <n:div class="text-center">
+                    <n:small>${applicationInfo.name} - v${applicationInfo.version} build
+                        ${applicationInfo.build}
+                    </n:small>
+                </n:div>
+            </n:div>
+        </n:footer>
+    </div>
+    <!-- Scroll to Top Button-->
+    <n:a class="scroll-to-top rounded" href="#page-top">
+        <n:i class="fa fa-angle-up"></n:i>
+    </n:a>
+
+    <!-- Bootstrap core J<avaScript-->
+    <script src="${contextPath}/vendor/jquery/jquery.min.js"/>
+    <script src="${contextPath}/vendor/bootstrap/js/bootstrap.bundle.min.js"/>
+    <!-- Core plugin JavaScript-->
+    <script src="${contextPath}/vendor/jquery-easing/jquery.easing.min.js"/>
+    <!-- Custom scripts for all pages-->
+    <script src="${contextPath}/js/sb-admin.js"/>
+    <script type="javascript">
+        zk.afterMount(function () {
+        initTemplate(jQuery);
+        });
+
+        $(document).ready(function () {
+        $("body").attr("class", "fixed-nav sticky-footer bg-dark");
+        });
+    </script>
+
+</zk>

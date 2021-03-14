@@ -1,0 +1,15 @@
+.classpath
+.project
+pom.xml.versionsBackup
+.directory
+.settings/
+target/
+tmp/
+logs/
+*.log
+*.log.*
+nbactions.xml
+*.iml
+.idea/
+*.versionsBackup
+nb-configuration.xml

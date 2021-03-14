@@ -1,0 +1,16 @@
+.z-listheader, .z-tree-header, .z-treecol {
+    background: #495057;
+    border-color: #495057;
+}
+
+.actiontb-a.btn {
+    margin-right: 0 !important;
+}
+
+.actiontb-a.FindAction {
+    height: 40px !important;
+}
+
+.crudview-header{
+    min-height:  42px !important;
+}

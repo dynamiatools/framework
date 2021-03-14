@@ -1,0 +1,14 @@
+beanClass: tools.dynamia.zk.viewers.DummyBean
+view : form
+hidden: [age]
+fields:
+  name:
+    label: First Name
+    description: dasdas
+  lastName:
+    label: Last Name
+    params:
+      width: 23px
+params:
+ width: 100px
+ height: 200px

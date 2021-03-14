@@ -1,0 +1,79 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+
+<zk:zk xmlns="native" xmlns:x="xhtml" xmlns:z="zul" xmlns:zk="zk">
+    <x:html sclass="no-js" lang="en">
+        <x:head>
+            <meta charset="UTF-8"/>
+            <!-- Chrome, Firefox OS and Opera -->
+            <meta name="theme-color"
+                  content="${appTemplate.skin.baseColor}"/>
+            <!-- Windows Phone -->
+            <meta name="msapplication-navbutton-color"
+                  content="${appTemplate.skin.baseColor}"/>
+            <!-- iOS Safari -->
+            <meta name="apple-mobile-web-app-status-bar-style"
+                  content="${appTemplate.skin.baseColor}"/>
+
+
+            <title>
+                ${applicationInfo.name} - ${accountContext.account.name}
+                | Login
+            </title>
+            <meta
+                    content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
+                    name='viewport'/>
+
+            <link rel="shortcut icon" href="${contextPath}/favicon.ico"/>
+            <link rel="icon" type="image/vnd.microsoft.icon"
+                  href="${contextPath}/favicon.ico"/>
+
+
+            <!-- Bootstrap 3.3.2 -->
+            <link
+                    href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"
+                    rel="stylesheet" type="text/css"/>
+            <!-- Font Awesome Icons -->
+            <link
+                    href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"
+                    rel="stylesheet" type="text/css"/>
+            <!-- Theme style -->
+            <link
+                    href="${contextPath}/zkau/web/templates/dynamical/css/AdminLTE.min.css"
+                    rel="stylesheet" type="text/css"/>
+        </x:head>
+
+        <borderlayout id="main" apply="${navComposer}" visible="true">
+            <north sclass="z-toolbar header">
+                <div>
+                    <div sclass="logo"></div>
+                </div>
+            </north>
+
+            <west sclass="menu" size="250px" collapsible="true"
+                  title="Modulos" splittable="true" autoscroll="true">
+                <div height="100%">
+                    <borderlayout height="100%">
+
+                        <center autoscroll="true" apply="${navBuilder}"/>
+
+                        <south title="Calendar" collapsible="true">
+                            <calendar width="100%"/>
+                        </south>
+
+                    </borderlayout>
+
+                </div>
+            </west>
+
+            <center sclass="content" autoscroll="true">
+                <window id="workspace" height="100%"/>
+            </center>
+
+            <south sclass="z-toolbar footer">
+                <toolbarbutton id="dynamia" label="Dynamia Tools"
+                               href="http://www.dynamia.tools" target="blank"/>
+
+            </south>
+        </borderlayout>
+    </x:html>
+</zk:zk>

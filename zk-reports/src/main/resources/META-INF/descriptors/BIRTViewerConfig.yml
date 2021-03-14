@@ -1,0 +1,27 @@
+view: config
+id: BIRTViewerCFG
+
+fields:
+    viewerURL:
+        label: Viewer URL
+        component: textbox
+        params:
+            parameterName: BirtViewerURL
+            cacheable: true
+            
+    filesLocation:
+        label: BIRT Reports Location
+        description: Server directory in wich rptdesign files are located
+        component: directorybox
+        params:
+            parameterName: BirtReportsPath
+            cacheable: true
+            
+    resourcesLocation:
+        label: BIRT Resources Folder
+        description: Server directory in wich resources files are located
+        component: directorybox
+        params:
+            parameterName: BirtResourcesPath            
+            cacheable: true
+    

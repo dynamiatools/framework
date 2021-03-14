@@ -1,0 +1,25 @@
+beanClass: tools.dynamia.zk.viewers.DummyBean
+view : table
+autofields: false
+
+#The fields
+fields:
+  
+  name:
+    label: First Name
+    description: The first name
+    
+  lastName:
+    label: Last Name
+    params:
+        header:
+            align: center
+            width: 100px
+        footer:
+            function: count
+
+
+#The view descriptor parameters
+params:
+ orderBy: name
+

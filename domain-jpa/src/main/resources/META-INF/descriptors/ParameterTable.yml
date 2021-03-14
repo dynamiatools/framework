@@ -1,0 +1,16 @@
+view: form
+beanClass: tools.dynamia.domain.jpa.JpaParameter
+autofields: false
+
+fields:
+    label:
+    name:
+    description:
+    value:
+        params:
+            span: 3
+    cacheable:
+    disabled:
+
+layout:
+    columns: 3

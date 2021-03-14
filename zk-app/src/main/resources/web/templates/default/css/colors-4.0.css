@@ -1,0 +1,1571 @@
+/*
+ * Copyright (C) 2009 - 2019 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Colombia - South America
+ * All Rights Reserved.
+ *
+ * DynamiaTools is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License (LGPL v3) as
+ * published by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * DynamiaTools is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with DynamiaTools.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.red.lighten-5 {
+    background: #FFEBEE !important;
+}
+
+.red.lighten-4 {
+    background: #FFCDD2 !important;
+}
+
+.red.lighten-3 {
+    background: #EF9A9A !important;
+}
+
+.red.lighten-2 {
+    background: #E57373 !important;
+}
+
+.red.lighten-1 {
+    background: #EF5350 !important;
+}
+
+.red {
+    background: #F44336 !important;
+}
+
+.red-text {
+    color: #F44336 !important;
+}
+
+.red.darken-1 {
+    background: #E53935 !important;
+}
+
+.red.darken-2 {
+    background: #D32F2F !important;
+}
+
+.red.darken-3 {
+    background: #C62828 !important;
+}
+
+.red.darken-4 {
+    background: #B71C1C !important;
+}
+
+.red.accent-1 {
+    background: #FF8A80 !important;
+}
+
+.red.accent-2 {
+    background: #FF5252 !important;
+}
+
+.red.accent-3 {
+    background: #FF1744 !important;
+}
+
+.red.accent-4 {
+    background: #D50000 !important;
+}
+
+.pink.lighten-5 {
+    background: #fce4ec !important;
+}
+
+.pink.lighten-4 {
+    background: #f8bbd0 !important;
+}
+
+.pink.lighten-3 {
+    background: #f48fb1 !important;
+}
+
+.pink.lighten-2 {
+    background: #f06292 !important;
+}
+
+.pink.lighten-1 {
+    background: #ec407a !important;
+}
+
+.pink {
+    background: #e91e63 !important;
+}
+
+.pink-text {
+    color: #e91e63 !important;
+}
+
+.pink.darken-1 {
+    background: #d81b60 !important;
+}
+
+.pink.darken-2 {
+    background: #c2185b !important;
+}
+
+.pink.darken-3 {
+    background: #ad1457 !important;
+}
+
+.pink.darken-4 {
+    background: #880e4f !important;
+}
+
+.pink.accent-1 {
+    background: #ff80ab !important;
+}
+
+.pink.accent-2 {
+    background: #ff4081 !important;
+}
+
+.pink.accent-3 {
+    background: #f50057 !important;
+}
+
+.pink.accent-4 {
+    background: #c51162 !important;
+}
+
+.purple.lighten-5 {
+    background: #f3e5f5 !important;
+}
+
+.purple.lighten-4 {
+    background: #e1bee7 !important;
+}
+
+.purple.lighten-3 {
+    background: #ce93d8 !important;
+}
+
+.purple.lighten-2 {
+    background: #ba68c8 !important;
+}
+
+.purple.lighten-1 {
+    background: #ab47bc !important;
+}
+
+.purple {
+    background: #9c27b0 !important;
+}
+
+.purple-text {
+    color: #9c27b0 !important;
+}
+
+.purple.darken-1 {
+    background: #8e24aa !important;
+}
+
+.purple.darken-2 {
+    background: #7b1fa2 !important;
+}
+
+.purple.darken-3 {
+    background: #6a1b9a !important;
+}
+
+.purple.darken-4 {
+    background: #4a148c !important;
+}
+
+.purple.accent-1 {
+    background: #ea80fc !important;
+}
+
+.purple.accent-2 {
+    background: #e040fb !important;
+}
+
+.purple.accent-3 {
+    background: #d500f9 !important;
+}
+
+.purple.accent-4 {
+    background: #aa00ff !important;
+}
+
+.deep-purple.lighten-5 {
+    background: #ede7f6 !important;
+}
+
+.deep-purple.lighten-4 {
+    background: #d1c4e9 !important;
+}
+
+.deep-purple.lighten-3 {
+    background: #b39ddb !important;
+}
+
+.deep-purple.lighten-2 {
+    background: #9575cd !important;
+}
+
+.deep-purple.lighten-1 {
+    background: #7e57c2 !important;
+}
+
+.deep-purple {
+    background: #673ab7 !important;
+}
+
+.deep-purple-text {
+    color: #673ab7 !important;
+}
+
+.deep-purple.darken-1 {
+    background: #5e35b1 !important;
+}
+
+.deep-purple.darken-2 {
+    background: #512da8 !important;
+}
+
+.deep-purple.darken-3 {
+    background: #4527a0 !important;
+}
+
+.deep-purple.darken-4 {
+    background: #311b92 !important;
+}
+
+.deep-purple.accent-1 {
+    background: #b388ff !important;
+}
+
+.deep-purple.accent-2 {
+    background: #7c4dff !important;
+}
+
+.deep-purple.accent-3 {
+    background: #651fff !important;
+}
+
+.deep-purple.accent-4 {
+    background: #6200ea !important;
+}
+
+.indigo.lighten-5 {
+    background: #e8eaf6 !important;
+}
+
+.indigo.lighten-4 {
+    background: #c5cae9 !important;
+}
+
+.indigo.lighten-3 {
+    background: #9fa8da !important;
+}
+
+.indigo.lighten-2 {
+    background: #7986cb !important;
+}
+
+.indigo.lighten-1 {
+    background: #5c6bc0 !important;
+}
+
+.indigo {
+    background: #3f51b5 !important;
+}
+
+.indigo-text {
+    color: #3f51b5 !important;
+}
+
+.indigo.darken-1 {
+    background: #3949ab !important;
+}
+
+.indigo.darken-2 {
+    background: #303f9f !important;
+}
+
+.indigo.darken-3 {
+    background: #283593 !important;
+}
+
+.indigo.darken-4 {
+    background: #1a237e !important;
+}
+
+.indigo.accent-1 {
+    background: #8c9eff !important;
+}
+
+.indigo.accent-2 {
+    background: #536dfe !important;
+}
+
+.indigo.accent-3 {
+    background: #3d5afe !important;
+}
+
+.indigo.accent-4 {
+    background: #304ffe !important;
+}
+
+.blue.lighten-5 {
+    background: #E3F2FD !important;
+}
+
+.blue.lighten-4 {
+    background: #BBDEFB !important;
+}
+
+.blue.lighten-3 {
+    background: #90CAF9 !important;
+}
+
+.blue.lighten-2 {
+    background: #64B5F6 !important;
+}
+
+.blue.lighten-1 {
+    background: #42A5F5 !important;
+}
+
+.blue {
+    background: #2196F3 !important;
+}
+
+.blue-text {
+    color: #2196F3 !important;
+}
+
+.blue.darken-1 {
+    background: #1E88E5 !important;
+}
+
+.blue.darken-2 {
+    background: #1976D2 !important;
+}
+
+.blue.darken-3 {
+    background: #1565C0 !important;
+}
+
+.blue.darken-4 {
+    background: #0D47A1 !important;
+}
+
+.blue.accent-1 {
+    background: #82B1FF !important;
+}
+
+.blue.accent-2 {
+    background: #448AFF !important;
+}
+
+.blue.accent-3 {
+    background: #2979FF !important;
+}
+
+.blue.accent-4 {
+    background: #2962FF !important;
+}
+
+.light-blue.lighten-5 {
+    background: #e1f5fe !important;
+}
+
+.light-blue.lighten-4 {
+    background: #b3e5fc !important;
+}
+
+.light-blue.lighten-3 {
+    background: #81d4fa !important;
+}
+
+.light-blue.lighten-2 {
+    background: #4fc3f7 !important;
+}
+
+.light-blue.lighten-1 {
+    background: #29b6f6 !important;
+}
+
+.light-blue {
+    background: #03a9f4 !important;
+}
+
+.light-blue-text {
+    color: #03a9f4 !important;
+}
+
+.light-blue.darken-1 {
+    background: #039be5 !important;
+}
+
+.light-blue.darken-2 {
+    background: #0288d1 !important;
+}
+
+.light-blue.darken-3 {
+    background: #0277bd !important;
+}
+
+.light-blue.darken-4 {
+    background: #01579b !important;
+}
+
+.light-blue.accent-1 {
+    background: #80d8ff !important;
+}
+
+.light-blue.accent-2 {
+    background: #40c4ff !important;
+}
+
+.light-blue.accent-3 {
+    background: #00b0ff !important;
+}
+
+.light-blue.accent-4 {
+    background: #0091ea !important;
+}
+
+.cyan.lighten-5 {
+    background: #e0f7fa !important;
+}
+
+.cyan.lighten-4 {
+    background: #b2ebf2 !important;
+}
+
+.cyan.lighten-3 {
+    background: #80deea !important;
+}
+
+.cyan.lighten-2 {
+    background: #4dd0e1 !important;
+}
+
+.cyan.lighten-1 {
+    background: #26c6da !important;
+}
+
+.cyan {
+    background: #00bcd4 !important;
+}
+
+.cyan-text {
+    color: #00bcd4 !important;
+}
+
+.cyan.darken-1 {
+    background: #00acc1 !important;
+}
+
+.cyan.darken-2 {
+    background: #0097a7 !important;
+}
+
+.cyan.darken-3 {
+    background: #00838f !important;
+}
+
+.cyan.darken-4 {
+    background: #006064 !important;
+}
+
+.cyan.accent-1 {
+    background: #84ffff !important;
+}
+
+.cyan.accent-2 {
+    background: #18ffff !important;
+}
+
+.cyan.accent-3 {
+    background: #00e5ff !important;
+}
+
+.cyan.accent-4 {
+    background: #00b8d4 !important;
+}
+
+.teal.lighten-5 {
+    background: #e0f2f1 !important;
+}
+
+.teal.lighten-4 {
+    background: #b2dfdb !important;
+}
+
+.teal.lighten-3 {
+    background: #80cbc4 !important;
+}
+
+.teal.lighten-2 {
+    background: #4db6ac !important;
+}
+
+.teal.lighten-1 {
+    background: #26a69a !important;
+}
+
+.teal {
+    background: #009688 !important;
+}
+
+.teal-text {
+    color: #009688 !important;
+}
+
+.teal.darken-1 {
+    background: #00897b !important;
+}
+
+.teal.darken-2 {
+    background: #00796b !important;
+}
+
+.teal.darken-3 {
+    background: #00695c !important;
+}
+
+.teal.darken-4 {
+    background: #004d40 !important;
+}
+
+.teal.accent-1 {
+    background: #a7ffeb !important;
+}
+
+.teal.accent-2 {
+    background: #64ffda !important;
+}
+
+.teal.accent-3 {
+    background: #1de9b6 !important;
+}
+
+.teal.accent-4 {
+    background: #00bfa5 !important;
+}
+
+.green.lighten-5 {
+    background: #E8F5E9 !important;
+}
+
+.green.lighten-4 {
+    background: #C8E6C9 !important;
+}
+
+.green.lighten-3 {
+    background: #A5D6A7 !important;
+}
+
+.green.lighten-2 {
+    background: #81C784 !important;
+}
+
+.green.lighten-1 {
+    background: #66BB6A !important;
+}
+
+.green {
+    background: #4CAF50 !important;
+}
+
+.green-text {
+    color: #4CAF50 !important;
+}
+
+.green.darken-1 {
+    background: #43A047 !important;
+}
+
+.green.darken-2 {
+    background: #388E3C !important;
+}
+
+.green.darken-3 {
+    background: #2E7D32 !important;
+}
+
+.green.darken-4 {
+    background: #1B5E20 !important;
+}
+
+.green.accent-1 {
+    background: #B9F6CA !important;
+}
+
+.green.accent-2 {
+    background: #69F0AE !important;
+}
+
+.green.accent-3 {
+    background: #00E676 !important;
+}
+
+.green.accent-4 {
+    background: #00C853 !important;
+}
+
+.light-green.lighten-5 {
+    background: #f1f8e9 !important;
+}
+
+.light-green.lighten-4 {
+    background: #dcedc8 !important;
+}
+
+.light-green.lighten-3 {
+    background: #c5e1a5 !important;
+}
+
+.light-green.lighten-2 {
+    background: #aed581 !important;
+}
+
+.light-green.lighten-1 {
+    background: #9ccc65 !important;
+}
+
+.light-green {
+    background: #8bc34a !important;
+}
+
+.light-green-text {
+    color: #8bc34a !important;
+}
+
+.light-green.darken-1 {
+    background: #7cb342 !important;
+}
+
+.light-green.darken-2 {
+    background: #689f38 !important;
+}
+
+.light-green.darken-3 {
+    background: #558b2f !important;
+}
+
+.light-green.darken-4 {
+    background: #33691e !important;
+}
+
+.light-green.accent-1 {
+    background: #ccff90 !important;
+}
+
+.light-green.accent-2 {
+    background: #b2ff59 !important;
+}
+
+.light-green.accent-3 {
+    background: #76ff03 !important;
+}
+
+.light-green.accent-4 {
+    background: #64dd17 !important;
+}
+
+.lime.lighten-5 {
+    background: #f9fbe7 !important;
+}
+
+.lime.lighten-4 {
+    background: #f0f4c3 !important;
+}
+
+.lime.lighten-3 {
+    background: #e6ee9c !important;
+}
+
+.lime.lighten-2 {
+    background: #dce775 !important;
+}
+
+.lime.lighten-1 {
+    background: #d4e157 !important;
+}
+
+.lime {
+    background: #cddc39 !important;
+}
+
+.lime-text {
+    color: #cddc39 !important;
+}
+
+.lime.darken-1 {
+    background: #c0ca33 !important;
+}
+
+.lime.darken-2 {
+    background: #afb42b !important;
+}
+
+.lime.darken-3 {
+    background: #9e9d24 !important;
+}
+
+.lime.darken-4 {
+    background: #827717 !important;
+}
+
+.lime.accent-1 {
+    background: #f4ff81 !important;
+}
+
+.lime.accent-2 {
+    background: #eeff41 !important;
+}
+
+.lime.accent-3 {
+    background: #c6ff00 !important;
+}
+
+.lime.accent-4 {
+    background: #aeea00 !important;
+}
+
+.yellow.lighten-5 {
+    background: #fffde7 !important;
+}
+
+.yellow.lighten-4 {
+    background: #fff9c4 !important;
+}
+
+.yellow.lighten-3 {
+    background: #fff59d !important;
+}
+
+.yellow.lighten-2 {
+    background: #fff176 !important;
+}
+
+.yellow.lighten-1 {
+    background: #ffee58 !important;
+}
+
+.yellow {
+    background: #ffeb3b !important;
+}
+
+.yellow-text {
+    color: #ffeb3b !important;
+}
+
+.yellow.darken-1 {
+    background: #fdd835 !important;
+}
+
+.yellow.darken-2 {
+    background: #fbc02d !important;
+}
+
+.yellow.darken-3 {
+    background: #f9a825 !important;
+}
+
+.yellow.darken-4 {
+    background: #f57f17 !important;
+}
+
+.yellow.accent-1 {
+    background: #ffff8d !important;
+}
+
+.yellow.accent-2 {
+    background: #ffff00 !important;
+}
+
+.yellow.accent-3 {
+    background: #ffea00 !important;
+}
+
+.yellow.accent-4 {
+    background: #ffd600 !important;
+}
+
+.amber.lighten-5 {
+    background: #fff8e1 !important;
+}
+
+.amber.lighten-4 {
+    background: #ffecb3 !important;
+}
+
+.amber.lighten-3 {
+    background: #ffe082 !important;
+}
+
+.amber.lighten-2 {
+    background: #ffd54f !important;
+}
+
+.amber.lighten-1 {
+    background: #ffca28 !important;
+}
+
+.amber {
+    background: #ffc107 !important;
+}
+
+.amber-text {
+    color: #ffc107 !important;
+}
+
+.amber.darken-1 {
+    background: #ffb300 !important;
+}
+
+.amber.darken-2 {
+    background: #ffa000 !important;
+}
+
+.amber.darken-3 {
+    background: #ff8f00 !important;
+}
+
+.amber.darken-4 {
+    background: #ff6f00 !important;
+}
+
+.amber.accent-1 {
+    background: #ffe57f !important;
+}
+
+.amber.accent-2 {
+    background: #ffd740 !important;
+}
+
+.amber.accent-3 {
+    background: #ffc400 !important;
+}
+
+.amber.accent-4 {
+    background: #ffab00 !important;
+}
+
+.orange.lighten-5 {
+    background: #fff3e0 !important;
+}
+
+.orange.lighten-4 {
+    background: #ffe0b2 !important;
+}
+
+.orange.lighten-3 {
+    background: #ffcc80 !important;
+}
+
+.orange.lighten-2 {
+    background: #ffb74d !important;
+}
+
+.orange.lighten-1 {
+    background: #ffa726 !important;
+}
+
+.orange {
+    background: #ff9800 !important;
+}
+
+.orange-text {
+    color: #ff9800 !important;
+}
+
+.orange.darken-1 {
+    background: #fb8c00 !important;
+}
+
+.orange.darken-2 {
+    background: #f57c00 !important;
+}
+
+.orange.darken-3 {
+    background: #ef6c00 !important;
+}
+
+.orange.darken-4 {
+    background: #e65100 !important;
+}
+
+.orange.accent-1 {
+    background: #ffd180 !important;
+}
+
+.orange.accent-2 {
+    background: #ffab40 !important;
+}
+
+.orange.accent-3 {
+    background: #ff9100 !important;
+}
+
+.orange.accent-4 {
+    background: #ff6d00 !important;
+}
+
+.deep-orange.lighten-5 {
+    background: #fbe9e7 !important;
+}
+
+.deep-orange.lighten-4 {
+    background: #ffccbc !important;
+}
+
+.deep-orange.lighten-3 {
+    background: #ffab91 !important;
+}
+
+.deep-orange.lighten-2 {
+    background: #ff8a65 !important;
+}
+
+.deep-orange.lighten-1 {
+    background: #ff7043 !important;
+}
+
+.deep-orange {
+    background: #ff5722 !important;
+}
+
+.deep-orange-text {
+    color: #ff5722 !important;
+}
+
+.deep-orange.darken-1 {
+    background: #f4511e !important;
+}
+
+.deep-orange.darken-2 {
+    background: #e64a19 !important;
+}
+
+.deep-orange.darken-3 {
+    background: #d84315 !important;
+}
+
+.deep-orange.darken-4 {
+    background: #bf360c !important;
+}
+
+.deep-orange.accent-1 {
+    background: #ff9e80 !important;
+}
+
+.deep-orange.accent-2 {
+    background: #ff6e40 !important;
+}
+
+.deep-orange.accent-3 {
+    background: #ff3d00 !important;
+}
+
+.deep-orange.accent-4 {
+    background: #dd2c00 !important;
+}
+
+.brown.lighten-5 {
+    background: #efebe9 !important;
+}
+
+.brown.lighten-4 {
+    background: #d7ccc8 !important;
+}
+
+.brown.lighten-3 {
+    background: #bcaaa4 !important;
+}
+
+.brown.lighten-2 {
+    background: #a1887f !important;
+}
+
+.brown.lighten-1 {
+    background: #8d6e63 !important;
+}
+
+.brown {
+    background: #795548 !important;
+}
+
+.brown-text {
+    color: #795548 !important;
+}
+
+.brown.darken-1 {
+    background: #6d4c41 !important;
+}
+
+.brown.darken-2 {
+    background: #5d4037 !important;
+}
+
+.brown.darken-3 {
+    background: #4e342e !important;
+}
+
+.brown.darken-4 {
+    background: #3e2723 !important;
+}
+
+.blue-grey.lighten-5 {
+    background: #eceff1 !important;
+}
+
+.blue-grey.lighten-4 {
+    background: #cfd8dc !important;
+}
+
+.blue-grey.lighten-3 {
+    background: #b0bec5 !important;
+}
+
+.blue-grey.lighten-2 {
+    background: #90a4ae !important;
+}
+
+.blue-grey.lighten-1 {
+    background: #78909c !important;
+}
+
+.blue-grey {
+    background: #607d8b !important;
+}
+
+.blue-grey-text {
+    color: #607d8b !important;
+}
+
+.blue-grey.darken-1 {
+    background: #546e7a !important;
+}
+
+.blue-grey.darken-2 {
+    background: #455a64 !important;
+}
+
+.blue-grey.darken-3 {
+    background: #37474f !important;
+}
+
+.blue-grey.darken-4 {
+    background: #263238 !important;
+}
+
+.grey.lighten-5 {
+    background: #fafafa !important;
+}
+
+.grey.lighten-4 {
+    background: #f5f5f5 !important;
+}
+
+.grey.lighten-3 {
+    background: #eeeeee !important;
+}
+
+.grey.lighten-2 {
+    background: #e0e0e0 !important;
+}
+
+.grey.lighten-1 {
+    background: #bdbdbd !important;
+}
+
+.grey {
+    background: #9e9e9e !important;
+}
+
+.grey-text {
+    color: #9e9e9e !important;
+}
+
+.grey.darken-1 {
+    background: #757575 !important;
+}
+
+.grey.darken-2 {
+    background: #616161 !important;
+}
+
+.grey.darken-3 {
+    background: #424242 !important;
+}
+
+.grey.darken-4 {
+    background: #212121 !important;
+}
+
+.shades.black {
+    background: #000000 !important;
+}
+
+.shades.white {
+    background: #FFFFFF !important;
+}
+
+.shades.transparent {
+    background: transparent !important;
+}
+
+.black {
+    background: #000000 !important;
+}
+
+.black-text, .btn-link {
+    color: #000000 !important;
+}
+
+.white {
+    background: #FFFFFF !important;
+}
+
+.white-text {
+    color: #FFFFFF !important;
+}
+
+.transparent {
+    background: transparent !important;
+}
+
+.transparent-text {
+    color: transparent !important;
+}
+
+.light-blue-text {
+    color: #82B1FF !important;
+}
+
+.dark-grey-text {
+    color: #4f4f4f !important;
+}
+
+.danger-color {
+    background: #ff3547 !important;
+}
+
+.danger-color-dark {
+    background: #CC0000 !important;
+}
+
+.warning-color {
+    background: #ffbb33 !important;
+}
+
+.warning-color-dark {
+    background: #FF8800 !important;
+}
+
+.success-color {
+    background: #00C851 !important;
+}
+
+.success-color-dark {
+    background: #007E33 !important;
+}
+
+.info-color {
+    background: #33b5e5 !important;
+}
+
+.info-color-dark {
+    background: #0099CC !important;
+}
+
+.default-color {
+    background: #2BBBAD !important;
+}
+
+.default-color-dark {
+    background: #00695c !important;
+}
+
+.primary-color {
+    background: #4285F4 !important;
+}
+
+.primary-color-dark {
+    background: #0d47a1 !important;
+}
+
+.secondary-color {
+    background: #aa66cc !important;
+}
+
+.secondary-color-dark {
+    background: #9933CC !important;
+}
+
+.elegant-color {
+    background: #2E2E2E !important;
+}
+
+.elegant-color-dark {
+    background: #212121 !important;
+}
+
+.stylish-color {
+    background: #4B515D !important;
+}
+
+.stylish-color-dark {
+    background: #3E4551 !important;
+}
+
+.special-color {
+    background: #37474F !important;
+}
+
+.special-color-dark {
+    background: #263238 !important;
+}
+
+.unique-color {
+    background: #3F729B !important;
+}
+
+.unique-color-dark {
+    background: #1C2331 !important;
+}
+
+.mdb-color {
+    background: #45526E !important;
+}
+
+.rgba-blue-light {
+    background: rgba(3, 169, 244, 0.3) !important;
+}
+
+.rgba-red-light {
+    background: rgba(244, 67, 54, 0.3) !important;
+}
+
+.rgba-pink-light {
+    background: rgba(233, 30, 99, 0.3) !important;
+}
+
+.rgba-purple-light {
+    background: rgba(156, 39, 176, 0.3) !important;
+}
+
+.rgba-indigo-light {
+    background: rgba(63, 81, 181, 0.3) !important;
+}
+
+.rgba-cyan-light {
+    background: rgba(0, 188, 212, 0.3) !important;
+}
+
+.rgba-teal-light {
+    background: rgba(0, 150, 136, 0.3) !important;
+}
+
+.rgba-green-light {
+    background: rgba(76, 175, 80, 0.3) !important;
+}
+
+.rgba-lime-light {
+    background: rgba(205, 220, 57, 0.3) !important;
+}
+
+.rgba-yellow-light {
+    background: rgba(255, 235, 59, 0.3) !important;
+}
+
+.rgba-orange-light {
+    background: rgba(255, 152, 0, 0.3) !important;
+}
+
+.rgba-brown-light {
+    background: rgba(121, 85, 72, 0.3) !important;
+}
+
+.rgba-grey-light {
+    background: rgba(158, 158, 158, 0.3) !important;
+}
+
+.rgba-bluegrey-light {
+    background: rgba(96, 125, 139, 0.3) !important;
+}
+
+.rgba-black-light {
+    background: rgba(0, 0, 0, 0.3) !important;
+}
+
+.rgba-stylish-light {
+    background: rgba(62, 69, 81, 0.3) !important;
+}
+
+.rgba-white-light {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+.rgba-blue-strong {
+    background: rgba(3, 169, 244, 0.7) !important;
+}
+
+.rgba-red-strong {
+    background: rgba(244, 67, 54, 0.7) !important;
+}
+
+.rgba-pink-strong {
+    background: rgba(233, 30, 99, 0.7) !important;
+}
+
+.rgba-purple-strong {
+    background: rgba(156, 39, 176, 0.7) !important;
+}
+
+.rgba-indigo-strong {
+    background: rgba(63, 81, 181, 0.7) !important;
+}
+
+.rgba-cyan-strong {
+    background: rgba(0, 188, 212, 0.7) !important;
+}
+
+.rgba-teal-strong {
+    background: rgba(0, 150, 136, 0.7) !important;
+}
+
+.rgba-green-strong {
+    background: rgba(76, 175, 80, 0.7) !important;
+}
+
+.rgba-lime-strong {
+    background: rgba(205, 220, 57, 0.7) !important;
+}
+
+.rgba-yellow-strong {
+    background: rgba(255, 235, 59, 0.7) !important;
+}
+
+.rgba-orange-strong {
+    background: rgba(255, 152, 0, 0.7) !important;
+}
+
+.rgba-brown-strong {
+    background: rgba(121, 85, 72, 0.7) !important;
+}
+
+.rgba-grey-strong {
+    background: rgba(158, 158, 158, 0.7) !important;
+}
+
+.rgba-bluegrey-strong {
+    background: rgba(96, 125, 139, 0.7) !important;
+}
+
+.rgba-black-strong {
+    background: rgba(0, 0, 0, 0.7) !important;
+}
+
+.rgba-stylish-strong {
+    background: rgba(62, 69, 81, 0.7) !important;
+}
+
+.rgba-white-strong {
+    background: rgba(255, 255, 255, 0.7) !important;
+}
+
+.rgba-blue-slight {
+    background: rgba(3, 169, 244, 0.1) !important;
+}
+
+.rgba-red-slight {
+    background: rgba(244, 67, 54, 0.1) !important;
+}
+
+.rgba-pink-slight {
+    background: rgba(233, 30, 99, 0.1) !important;
+}
+
+.rgba-purple-slight {
+    background: rgba(156, 39, 176, 0.1) !important;
+}
+
+.rgba-indigo-slight {
+    background: rgba(63, 81, 181, 0.1) !important;
+}
+
+.rgba-cyan-slight {
+    background: rgba(0, 188, 212, 0.1) !important;
+}
+
+.rgba-teal-slight {
+    background: rgba(0, 150, 136, 0.1) !important;
+}
+
+.rgba-green-slight {
+    background: rgba(76, 175, 80, 0.1) !important;
+}
+
+.rgba-lime-slight {
+    background: rgba(205, 220, 57, 0.1) !important;
+}
+
+.rgba-yellow-slight {
+    background: rgba(255, 235, 59, 0.1) !important;
+}
+
+.rgba-orange-slight {
+    background: rgba(255, 152, 0, 0.1) !important;
+}
+
+.rgba-brown-slight {
+    background: rgba(121, 85, 72, 0.1) !important;
+}
+
+.rgba-grey-slight {
+    background: rgba(158, 158, 158, 0.1) !important;
+}
+
+.rgba-bluegrey-slight {
+    background: rgba(96, 125, 139, 0.1) !important;
+}
+
+.rgba-black-slight {
+    background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.rgba-stylish-slight {
+    background: rgba(62, 69, 81, 0.1) !important;
+}
+
+.rgba-white-slight {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.bg-primary {
+    background: #4285F4 !important;
+}
+
+.bg-danger {
+    background: #ff3547 !important;
+}
+
+.bg-warning {
+    background: #FF8800 !important;
+}
+
+.bg-success {
+    background: #00C851 !important;
+}
+
+.bg-info {
+    background: #33b5e5 !important;
+}
+
+.bg-default {
+    background: #2BBBAD !important;
+}
+
+.bg-secondary {
+    background: #aa66cc !important;
+}
+
+.bg-elegant {
+    background: #2E2E2E !important;
+}
+
+.bg-unique {
+    background: #880e4f !important;
+}
+
+.bg-dark-green {
+    background: #388E3C !important;
+}
+
+.bg-mdb-color {
+    background: #59698D !important;
+}
+
+.bg-red {
+    background: #D32F2F !important;
+}
+
+.bg-pink {
+    background: #ec407a !important;
+}
+
+.bg-purple {
+    background: #8e24aa !important;
+}
+
+.bg-deep-purple {
+    background: #512da8 !important;
+}
+
+.bg-indigo {
+    background: #3f51b5 !important;
+}
+
+.bg-blue {
+    background: #1976D2 !important;
+}
+
+.bg-light-blue {
+    background: #82B1FF !important;
+}
+
+.bg-cyan {
+    background: #00bcd4 !important;
+}
+
+.bg-teal {
+    background: #00796b !important;
+}
+
+.bg-green {
+    background: #388E3C !important;
+}
+
+.bg-light-green {
+    background: #8bc34a !important;
+}
+
+.bg-lime {
+    background: #afb42b !important;
+}
+
+.bg-yellow {
+    background: #fbc02d !important;
+}
+
+.bg-amber {
+    background: #ffa000 !important;
+}
+
+.bg-orange {
+    background: #f57c00 !important;
+}
+
+.bg-deep-orange {
+    background: #ff7043 !important;
+}
+
+.bg-brown {
+    background: #795548 !important;
+}
+
+.bg-grey {
+    background: #616161 !important;
+}
+
+.bg-blue-grey {
+    background: #78909c !important;
+}
+

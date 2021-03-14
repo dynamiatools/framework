@@ -1,0 +1,11 @@
+view: table
+beanClass: tools.dynamia.domain.jpa.JpaParameter
+autofields: false
+
+fields:
+    label:
+    name:
+    description:
+    value:        
+    cacheable:
+    disabled:

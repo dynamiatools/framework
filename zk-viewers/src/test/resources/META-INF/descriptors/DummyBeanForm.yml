@@ -1,0 +1,45 @@
+beanClass: tools.dynamia.zk.viewers.DummyBean
+view : form
+hidden: [age]
+customizer: tools.dynamia.zk.viewers.DummyViewCustomizer
+
+#The fields
+fields:
+  
+  name:
+    label: First Name
+    description: dasdas
+    
+  lastName:
+    label: Last Name
+    params:
+      width: 23px
+      multiline: true
+      convertToString: true=string
+      
+  ownField:
+    Label: This field is not in the bean
+    component: intbox
+      
+#The field groups
+groups:
+  
+  group1:
+    label: The Group
+    fields: [name]
+    
+  group2:
+    label: The Other Group
+    fields: [lastName,age]
+
+#The view descriptor parameters
+params:
+ width: 100px
+ height: 200px
+
+#The view descriptor layout
+layout:
+  columns: 2
+  boolean: true
+  boolean2: Yes
+  boolean3: false
