@@ -1,4 +1,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia/tools.dynamia.zk.app)](https://search.maven.org/search?q=tools.dynamia)
+[![Build Status](https://travis-ci.com/dynamiatools/framework.svg?branch=main)](https://travis-ci.com/dynamiatools/framework)
+
 
 # Overview
 
