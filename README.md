@@ -1,6 +1,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia/tools.dynamia.zk.app)](https://search.maven.org/search?q=tools.dynamia)
 ![Java Version Required](https://img.shields.io/badge/java-%3E%3D11-blue)
-[![Build Status](https://travis-ci.com/dynamiatools/framework.svg?branch=main)](https://travis-ci.com/dynamiatools/framework)
+[![Java CI with Maven](https://github.com/dynamiatools/framework/actions/workflows/maven.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/maven.yml)
 
 
 # Overview
