@@ -1,6 +1,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia/tools.dynamia.zk.app)](https://search.maven.org/search?q=tools.dynamia)
+![Java Version Required](https://img.shields.io/badge/java-%3E%3D11-blue)
 [![Build Status](https://travis-ci.com/dynamiatools/framework.svg?branch=main)](https://travis-ci.com/dynamiatools/framework)
-[![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/dynamiatools/framework.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/dynamiatools/framework/context:java)
+
 
 # Overview
 
