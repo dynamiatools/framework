@@ -7,7 +7,7 @@
 
 DynamiaTools is a framework for building Java 11+ web applications fast and easy using standard design patterns, views
 descriptors for automatic UI generation, actions, services and modules. Based in Spring 5 (https://spring.io), ZK
-9 (https://www.zkoss.org) and JPA 2.
+9 (https://www.zkoss.org) for web UI and JPA 2.
 
 ## With DynamiaTools you can
 
