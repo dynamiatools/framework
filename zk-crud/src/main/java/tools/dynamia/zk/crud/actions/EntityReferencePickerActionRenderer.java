@@ -52,6 +52,9 @@ public class EntityReferencePickerActionRenderer extends ZKActionRenderer<Entity
         entityPicker.addEventListener(Events.ON_SELECT, e -> {
             ActionEvent event = actionEventBuilder.buildActionEvent(entityPicker, null);
             event.setData(entityPicker.getSelected());
+            if(entityPicker.getSelected()!=null) {
+                entityPicker.setValue(entityPicker.getSelected().getName());
+            }
             action.actionPerformed(event);
         });
 
