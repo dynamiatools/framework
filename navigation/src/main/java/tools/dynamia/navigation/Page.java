@@ -41,7 +41,7 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
     private boolean showAsPopup;
     private PageGroup pageGroup;
     private boolean closable = true;
-    private List<PageAction> actions = new ArrayList<>();
+    private final List<PageAction> actions = new ArrayList<>();
     private Callback onCloseCallback;
     private Callback onOpenCallback;
     private boolean featured;

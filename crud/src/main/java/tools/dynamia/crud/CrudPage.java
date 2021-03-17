@@ -77,8 +77,7 @@ public class CrudPage extends AbstractCrudPage<Object> {
         if (crudServiceName != null && !crudServiceName.isEmpty()) {
             descriptor.addParam(Viewers.PARAM_CRUDSERVICE_NAME, crudServiceName);
         }
-        View crudView = Viewers.getView(descriptor);
-        return crudView;
+        return Viewers.getView(descriptor);
     }
 
     @Override

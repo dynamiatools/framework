@@ -40,9 +40,9 @@ import java.util.Map;
  */
 public class TabPanel extends AbstractZKWorkspaceBuilder {
 
-    private LoggingService logger = new SLF4JLoggingService();
+    private final LoggingService logger = new SLF4JLoggingService();
     private static final String TAB_PAGE = "tab-page";
-    private transient Tabbox tabbox;
+    private final transient Tabbox tabbox;
     private final Locale locale = Messages.getDefaultLocale();
 
     public TabPanel() {

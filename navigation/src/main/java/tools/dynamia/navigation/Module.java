@@ -28,13 +28,13 @@ import java.util.*;
 public class Module extends NavigationElement<Module> implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -817147208762427863L;
-    private Collection<PageGroup> pageGroups = new ArrayList<>();
+    private final Collection<PageGroup> pageGroups = new ArrayList<>();
     private Page mainPage;
     private PageGroup defaultGroup = new PageGroup();
-    private transient LoggingService logger = new SLF4JLoggingService();
-    private Map<String, Object> properties = new HashMap<>();
+    private final transient LoggingService logger = new SLF4JLoggingService();
+    private final Map<String, Object> properties = new HashMap<>();
     private Class baseClass;
-    private List<Class> additionalBaseClasses = new ArrayList<>();
+    private final List<Class> additionalBaseClasses = new ArrayList<>();
 
     public Module(String id, String name, String description) {
         super(id, name, description);

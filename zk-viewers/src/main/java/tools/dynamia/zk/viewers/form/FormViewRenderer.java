@@ -134,7 +134,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         rows.setParent(grid);
 
         Row row = null;
-        Collections.sort(viewDesc.getFields(), new IndexableComparator());
+        viewDesc.getFields().sort(new IndexableComparator());
 
 
         for (Field field : viewDesc.getFields()) {
@@ -148,7 +148,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
             }
         }
 
-        Collections.sort(viewDesc.getFieldGroups(), new IndexableComparator());
+        viewDesc.getFieldGroups().sort(new IndexableComparator());
         for (FieldGroup fieldGroup : viewDesc.getFieldGroups()) {
             List<Field> groupFields = getGroupFields(viewDesc, fieldGroup);
             if (!groupFields.isEmpty()) {
@@ -195,8 +195,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
             ZKUtil.configureComponentIcon(IconsTheme.get().getIcon(fieldGroup.getIcon()), icon, IconSize.NORMAL);
         }
         title.appendChild(new Text(label));
-        FormFieldGroupComponent groupComponent = new FormFieldGroupComponent(fieldGroup.getName(), group);
-        return groupComponent;
+        return new FormFieldGroupComponent(fieldGroup.getName(), group);
     }
 
     protected void renderField(Component row, Field field, Binder binder, FormView<T> view, T value) {

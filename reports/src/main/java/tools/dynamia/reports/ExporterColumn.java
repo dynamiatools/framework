@@ -96,7 +96,7 @@ public class ExporterColumn<T> implements Serializable {
         this.entityAlias = entityAlias;
     }
 
-    private Map<String, Object> params = new HashMap<>();
+    private final Map<String, Object> params = new HashMap<>();
 
     public void addParam(String name, Object value) {
         params.put(name, value);

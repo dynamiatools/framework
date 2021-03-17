@@ -60,16 +60,16 @@ public class EntityFiltersPanel extends Borderlayout implements View {
     private static final long serialVersionUID = 6522069747991047688L;
     private static final String PATH = "path";
 
-    private Class<?> entityClass;
+    private final Class<?> entityClass;
 
     private Button searchButton;
 
-    private List<FilterField> filters = new ArrayList<>();
-    private Map<FilterField, EntityFilterCustomizer> filterCustomizers = new HashMap<>();
+    private final List<FilterField> filters = new ArrayList<>();
+    private final Map<FilterField, EntityFilterCustomizer> filterCustomizers = new HashMap<>();
     private Vlayout filtersPanel;
-    private LoggingService logger = new SLF4JLoggingService(EntityFiltersPanel.class);
+    private final LoggingService logger = new SLF4JLoggingService(EntityFiltersPanel.class);
     private ViewDescriptor viewDescriptor;
-    private Map<String, FormFieldComponent> componentsFieldsMap = new HashMap<>();
+    private final Map<String, FormFieldComponent> componentsFieldsMap = new HashMap<>();
     private View parentView;
     private Object value;
 

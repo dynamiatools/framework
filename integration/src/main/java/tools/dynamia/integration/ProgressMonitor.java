@@ -48,7 +48,7 @@ public class ProgressMonitor {
     /**
      * The messages.
      */
-    private List<String> messages = new ArrayList<>();
+    private final List<String> messages = new ArrayList<>();
 
     private boolean stopped;
 

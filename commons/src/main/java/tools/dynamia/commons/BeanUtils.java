@@ -121,7 +121,7 @@ public final class BeanUtils {
     }
 
     /**
-     * New instance.
+     * Create a new instance using default constructor
      *
      * @param <T>   the generic type
      * @param clazz the clazz
@@ -129,7 +129,7 @@ public final class BeanUtils {
      */
     public static <T> T newInstance(final Class<T> clazz) {
         try {
-            return clazz.newInstance();
+            return clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             throw new ReflectionException(e);
         }
@@ -171,7 +171,7 @@ public final class BeanUtils {
                 Method method = null;
 
                 if (args != null && args.length > 0) {
-                    Class argClass[] = new Class[args.length];
+                    Class[] argClass = new Class[args.length];
                     for (int i = 0; i < args.length; i++) {
                         argClass[i] = args[i].getClass();
                     }
@@ -214,7 +214,7 @@ public final class BeanUtils {
             final int dotIndex = propertyName.indexOf('.');
             final String subProperty = propertyName.substring(0, dotIndex);
             final Object subBean = invokeMethod(bean, formatGetMethod(subProperty));
-            final String rest = propertyName.substring(dotIndex + 1, propertyName.length());
+            final String rest = propertyName.substring(dotIndex + 1);
             result = invokeGetMethod(subBean, rest);
         } else {
             result = invokeMethod(bean, formatGetMethod(propertyName));
@@ -243,7 +243,7 @@ public final class BeanUtils {
             final int dotIndex = propertyName.indexOf('.');
             final String subProperty = propertyName.substring(0, dotIndex);
             final Object subBean = invokeMethod(bean, formatGetMethod(subProperty));
-            final String rest = propertyName.substring(dotIndex + 1, propertyName.length());
+            final String rest = propertyName.substring(dotIndex + 1);
             result = invokeGetMethod(subBean, rest);
         } else {
             result = invokeMethod(bean, formatBooleanGetMethod(propertyName));
@@ -364,8 +364,7 @@ public final class BeanUtils {
      * @return the string
      */
     public static String formatGetMethod(final String propertyName) {
-        String getMethod = "get" + StringUtils.capitalize(propertyName);
-        return getMethod;
+        return "get" + StringUtils.capitalize(propertyName);
     }
 
     /**
@@ -376,8 +375,7 @@ public final class BeanUtils {
      * @return the string
      */
     public static String formatBooleanGetMethod(final String propertyName) {
-        String getMethod = "is" + StringUtils.capitalize(propertyName);
-        return getMethod;
+        return "is" + StringUtils.capitalize(propertyName);
     }
 
     /**
@@ -387,8 +385,7 @@ public final class BeanUtils {
      * @return the string
      */
     public static String formatSetMethod(final String propertyName) {
-        String setMethod = "set" + StringUtils.capitalize(propertyName);
-        return setMethod;
+        return "set" + StringUtils.capitalize(propertyName);
     }
 
     /**
@@ -636,8 +633,7 @@ public final class BeanUtils {
      * @return the all fields
      */
     public static List<Field> getAllFields(final Class clazz) {
-        List<Field> allFields = new ArrayList<>();
-        allFields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+        List<Field> allFields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
 
         if (clazz.getSuperclass() != null) {
             allFields.addAll(0, getAllFields(clazz.getSuperclass()));

@@ -56,9 +56,7 @@ public class DateboxRangeActionRenderer extends ZKActionRenderer<Component> {
             dateRangebox.setValue(new DateRange(startDate, endDate));
         }
         dateRangebox.setTooltiptext(action.getLocalizedDescription(Messages.getDefaultLocale()));
-        dateRangebox.addEventListener(Events.ON_CHANGE, event -> {
-            fireActionEvent(dateRangebox, action, actionEventBuilder);
-        });
+        dateRangebox.addEventListener(Events.ON_CHANGE, event -> fireActionEvent(dateRangebox, action, actionEventBuilder));
 
         super.configureProperties(dateRangebox, action);
 

@@ -41,7 +41,7 @@ public class DefaultApplicationTemplate implements ApplicationTemplate {
      *
      */
     private static final long serialVersionUID = 3095224909833774279L;
-    private Map<String, Object> properties;
+    private final Map<String, Object> properties;
 
     @Autowired
     private ViewTypeFactory viewTypeFactory;

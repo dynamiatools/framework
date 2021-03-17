@@ -198,7 +198,7 @@ public abstract class StringUtils {
         if (!hasLength(str)) {
             return str;
         }
-        StringBuffer buf = new StringBuffer(str);
+        StringBuilder buf = new StringBuilder(str);
         while (buf.length() > 0 && Character.isWhitespace(buf.charAt(0))) {
             buf.deleteCharAt(0);
         }
@@ -220,7 +220,7 @@ public abstract class StringUtils {
         if (!hasLength(str)) {
             return str;
         }
-        StringBuffer buf = new StringBuffer(str);
+        StringBuilder buf = new StringBuilder(str);
         int index = 0;
         while (buf.length() > index) {
             if (Character.isWhitespace(buf.charAt(index))) {
@@ -243,7 +243,7 @@ public abstract class StringUtils {
         if (!hasLength(str)) {
             return str;
         }
-        StringBuffer buf = new StringBuffer(str);
+        StringBuilder buf = new StringBuilder(str);
         while (buf.length() > 0 && Character.isWhitespace(buf.charAt(0))) {
             buf.deleteCharAt(0);
         }
@@ -261,7 +261,7 @@ public abstract class StringUtils {
         if (!hasLength(str)) {
             return str;
         }
-        StringBuffer buf = new StringBuffer(str);
+        StringBuilder buf = new StringBuilder(str);
         while (buf.length() > 0 && Character.isWhitespace(buf.charAt(buf.length() - 1))) {
             buf.deleteCharAt(buf.length() - 1);
         }
@@ -280,7 +280,7 @@ public abstract class StringUtils {
         if (!hasLength(str)) {
             return str;
         }
-        StringBuffer buf = new StringBuffer(str);
+        StringBuilder buf = new StringBuilder(str);
         while (buf.length() > 0 && buf.charAt(0) == leadingCharacter) {
             buf.deleteCharAt(0);
         }
@@ -299,7 +299,7 @@ public abstract class StringUtils {
         if (!hasLength(str)) {
             return str;
         }
-        StringBuffer buf = new StringBuffer(str);
+        StringBuilder buf = new StringBuilder(str);
         while (buf.length() > 0 && buf.charAt(buf.length() - 1) == trailingCharacter) {
             buf.deleteCharAt(buf.length() - 1);
         }
@@ -406,14 +406,14 @@ public abstract class StringUtils {
         if (!hasLength(inString) || !hasLength(oldPattern) || newPattern == null) {
             return inString;
         }
-        StringBuffer sbuf = new StringBuffer();
+        StringBuilder sbuf = new StringBuilder();
         // output StringBuffer we'll build up
         int pos = 0; // our position in the old string
         int index = inString.indexOf(oldPattern);
         // the index of an occurrence we've found, or -1
         int patLen = oldPattern.length();
         while (index >= 0) {
-            sbuf.append(inString.substring(pos, index));
+            sbuf.append(inString, pos, index);
             sbuf.append(newPattern);
             pos = index + patLen;
             index = inString.indexOf(oldPattern, pos);
@@ -446,7 +446,7 @@ public abstract class StringUtils {
         if (!hasLength(inString) || !hasLength(charsToDelete)) {
             return inString;
         }
-        StringBuffer out = new StringBuffer();
+        StringBuilder out = new StringBuilder();
         for (int i = 0; i < inString.length(); i++) {
             char c = inString.charAt(i);
             if (charsToDelete.indexOf(c) == -1) {
@@ -541,7 +541,7 @@ public abstract class StringUtils {
         if (str == null || str.length() == 0) {
             return str;
         }
-        StringBuffer buf = new StringBuffer(str.length());
+        StringBuilder buf = new StringBuilder(str.length());
         if (capitalize) {
             buf.append(Character.toUpperCase(str.charAt(0)));
         } else {
@@ -798,10 +798,8 @@ public abstract class StringUtils {
         if (isEmptyArray(array2)) {
             return array1;
         }
-        List<String> result = new ArrayList<>();
-        result.addAll(Arrays.asList(array1));
-        for (int i = 0; i < array2.length; i++) {
-            String str = array2[i];
+        List<String> result = new ArrayList<>(Arrays.asList(array1));
+        for (String str : array2) {
             if (!result.contains(str)) {
                 result.add(str);
             }
@@ -835,7 +833,7 @@ public abstract class StringUtils {
         if (collection == null) {
             return null;
         }
-        return collection.toArray(new String[collection.size()]);
+        return collection.toArray(new String[0]);
     }
 
     /**
@@ -851,7 +849,7 @@ public abstract class StringUtils {
             return null;
         }
         List<String> list = Collections.list(enumeration);
-        return list.toArray(new String[list.size()]);
+        return list.toArray(new String[0]);
     }
 
     /**
@@ -884,8 +882,7 @@ public abstract class StringUtils {
         if (isEmptyArray(array)) {
             return array;
         }
-        Set<String> set = new TreeSet<>();
-        set.addAll(Arrays.asList(array));
+        Set<String> set = new TreeSet<>(Arrays.asList(array));
         return toStringArray(set);
     }
 
@@ -956,10 +953,10 @@ public abstract class StringUtils {
             return null;
         }
         Properties result = new Properties();
-        for (int i = 0; i < array.length; i++) {
-            String element = array[i];
+        for (String s : array) {
+            String element = s;
             if (charsToDelete != null) {
-                element = deleteAny(array[i], charsToDelete);
+                element = deleteAny(s, charsToDelete);
             }
             String[] splittedElement = split(element, delimiter);
             if (splittedElement == null) {
@@ -1112,9 +1109,8 @@ public abstract class StringUtils {
      * @return a Set of String entries in the list
      */
     public static Set<String> commaDelimitedListToSet(String str) {
-        Set<String> set = new TreeSet<>();
         String[] tokens = commaDelimitedListToStringArray(str);
-        set.addAll(Arrays.asList(tokens));
+        Set<String> set = new TreeSet<>(Arrays.asList(tokens));
         return set;
     }
 
@@ -1132,7 +1128,7 @@ public abstract class StringUtils {
         if (coll == null || coll.isEmpty()) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         Iterator<?> it = coll.iterator();
         while (it.hasNext()) {
             sb.append(prefix).append(it.next()).append(suffix);
@@ -1178,7 +1174,7 @@ public abstract class StringUtils {
         if (isEmptyArray(arr)) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < arr.length; i++) {
             if (i > 0) {
                 sb.append(delim);
@@ -1307,8 +1303,7 @@ public abstract class StringUtils {
      * @return the last character
      */
     public static String getLastCharacter(String string) {
-        String lastchar = string.substring(string.length() - 1);
-        return lastchar;
+        return string.substring(string.length() - 1);
     }
 
     /**
@@ -1318,8 +1313,7 @@ public abstract class StringUtils {
      * @return the first character
      */
     public static String getFirstCharacter(String string) {
-        String firstchar = string.substring(0, 1);
-        return firstchar;
+        return string.substring(0, 1);
     }
 
     /**
@@ -1356,11 +1350,11 @@ public abstract class StringUtils {
 
             MessageDigest md = MessageDigest.getInstance(algorithmame);
 
-            byte message[] = md.digest(text.getBytes());
+            byte[] message = md.digest(text.getBytes());
 
-            StringBuffer hexString = new StringBuffer();
-            for (int i = 0; i < message.length; i++) {
-                String hex = Integer.toHexString(0xFF & message[i]);
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : message) {
+                String hex = Integer.toHexString(0xFF & b);
                 if (hex.length() == 1) {
                     hexString.append('0');
                 }
@@ -1430,7 +1424,7 @@ public abstract class StringUtils {
      * @return
      */
     public static String formatDuration(long time) {
-        var duration = java.time.Duration.ofMillis((Long) time);
+        var duration = java.time.Duration.ofMillis(time);
         long seconds = duration.getSeconds();
         long absSeconds = Math.abs(seconds);
         String positive = String.format(

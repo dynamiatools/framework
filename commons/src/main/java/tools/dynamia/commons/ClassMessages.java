@@ -32,12 +32,12 @@ public class ClassMessages {
     /**
      * The clazz.
      */
-    private Class clazz;
+    private final Class clazz;
 
     /**
      * The locale.
      */
-    private Locale locale;
+    private final Locale locale;
 
     /**
      * Gets the.

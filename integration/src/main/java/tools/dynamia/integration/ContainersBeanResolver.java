@@ -32,8 +32,7 @@ public class ContainersBeanResolver implements BeanResolver {
      */
     @Override
     public Object resolve(EvaluationContext context, String beanName) {
-        Object object = Containers.get().findObject(beanName);
-        return object;
+        return Containers.get().findObject(beanName);
     }
 
 }

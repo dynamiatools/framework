@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  */
 public class CustomQueryCondition extends AbstractQueryCondition<Object> {
 
-    private String text;
+    private final String text;
     private Consumer<AbstractQuery> applyConsumer;
 
     public CustomQueryCondition(String text) {

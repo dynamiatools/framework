@@ -24,10 +24,7 @@ import net.sf.jasperreports.engine.export.oasis.JROdtExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Mario A. Serrano Leones
@@ -44,7 +41,7 @@ public abstract class ReportExporter {
      * @param outputType
      */
     public static void export(Report report, File outputFile, ReportOutputType outputType) {
-        export(Arrays.asList(report), outputFile, outputType, null);
+        export(Collections.singletonList(report), outputFile, outputType, null);
     }
 
     /**
@@ -54,7 +51,7 @@ public abstract class ReportExporter {
      * @param exportParameters
      */
     public static void export(Report report, File outputFile, ReportOutputType outputType, Map exportParameters) {
-        export(Arrays.asList(report), outputFile, outputType, exportParameters);
+        export(Collections.singletonList(report), outputFile, outputType, exportParameters);
     }
 
     /**
@@ -63,7 +60,7 @@ public abstract class ReportExporter {
      * @param outputType
      */
     public static void export(Report report, OutputStream outputStream, ReportOutputType outputType) {
-        export(Arrays.asList(report), outputStream, outputType, null);
+        export(Collections.singletonList(report), outputStream, outputType, null);
     }
 
     /**
@@ -73,7 +70,7 @@ public abstract class ReportExporter {
      * @param exportParameters
      */
     public static void export(Report report, OutputStream outputStream, ReportOutputType outputType, Map exportParameters) {
-        export(Arrays.asList(report), outputStream, outputType, exportParameters);
+        export(Collections.singletonList(report), outputStream, outputType, exportParameters);
     }
 
     /**
@@ -136,7 +133,7 @@ public abstract class ReportExporter {
      * @return
      */
     public static byte[] export(Report report, ReportOutputType outputType) {
-        return export(Arrays.asList(report), outputType, null);
+        return export(Collections.singletonList(report), outputType, null);
     }
 
     /**
@@ -146,7 +143,7 @@ public abstract class ReportExporter {
      * @return
      */
     public static byte[] export(Report report, ReportOutputType outputType, Map exportParameters) {
-        return export(Arrays.asList(report), outputType, exportParameters);
+        return export(Collections.singletonList(report), outputType, exportParameters);
     }
 
     /**

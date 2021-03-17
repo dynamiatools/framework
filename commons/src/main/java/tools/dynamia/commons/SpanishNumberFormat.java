@@ -27,31 +27,31 @@ public class SpanishNumberFormat {
     /**
      * The _grupos.
      */
-    private static String[] _grupos = {"", "millon", "billon", "trillon"};
+    private static final String[] _grupos = {"", "millon", "billon", "trillon"};
 
     /**
      * The _unidades.
      */
-    private static String[] _unidades = {"", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"};
+    private static final String[] _unidades = {"", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"};
 
     /**
      * The _decena1.
      */
-    private static String[] _decena1 = {"", "once", "doce", "trece", "catorce", "quince",
+    private static final String[] _decena1 = {"", "once", "doce", "trece", "catorce", "quince",
         "dieciseis", "diecisiete", "dieciocho", "diecinueve"
     };
 
     /**
      * The _decenas.
      */
-    private static String[] _decenas = {"", "diez", "veinte", "treinta", "cuarenta", "cincuenta",
+    private static final String[] _decenas = {"", "diez", "veinte", "treinta", "cuarenta", "cincuenta",
         "sesenta", "setenta", "ochenta", "noventa"
     };
 
     /**
      * The _centenas.
      */
-    private static String[] _centenas = {"", "cien", "doscientos", "trescientos", "cuatrocientos",
+    private static final String[] _centenas = {"", "cien", "doscientos", "trescientos", "cuatrocientos",
         "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos"
     };
 
@@ -104,7 +104,7 @@ public class SpanishNumberFormat {
      * @return the string
      */
     public static String convert(long n) {
-        String resultado = "";
+        StringBuilder resultado = new StringBuilder();
         int grupo = 0;
         while (n != 0 && grupo < _grupos.length) {
             long fragmento = n % 1000000;
@@ -118,25 +118,22 @@ public class SpanishNumberFormat {
             }
             if ((millarAlto != 0) || (millarBajo != 0)) {
                 if (millarAlto > 1) {
-                    resultado = millarATexto(millarAlto) + " mil "
+                    resultado.insert(0, millarATexto(millarAlto) + " mil "
                             + millarATexto(millarBajo) + " "
-                            + nombreGrupo + " "
-                            + resultado;
+                            + nombreGrupo + " ");
                 }
                 if (millarAlto == 0) {
-                    resultado = millarATexto(millarBajo) + " "
-                            + nombreGrupo + " "
-                            + resultado;
+                    resultado.insert(0, millarATexto(millarBajo) + " "
+                            + nombreGrupo + " ");
                 }
                 if (millarAlto == 1) {
-                    resultado = "mil " + millarATexto(millarBajo) + " "
-                            + nombreGrupo + " "
-                            + resultado;
+                    resultado.insert(0, "mil " + millarATexto(millarBajo) + " "
+                            + nombreGrupo + " ");
                 }
             }
             grupo++;
         }
-        return resultado;
+        return resultado.toString();
     }
 
     private SpanishNumberFormat() {

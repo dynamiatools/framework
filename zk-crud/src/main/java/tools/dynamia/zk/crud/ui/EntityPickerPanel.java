@@ -45,15 +45,15 @@ public class EntityPickerPanel<E> extends Div {
      *
      */
     private static final long serialVersionUID = 1L;
-    private CrudService crudService = Containers.get().findObject(CrudService.class);
+    private final CrudService crudService = Containers.get().findObject(CrudService.class);
     private E selected;
     private TableView<E> tableView;
     private Class<E> entityClass;
     private String[] fields;
-    private DynamicListItemRenderer renderer = new DynamicListItemRenderer();
+    private final DynamicListItemRenderer renderer = new DynamicListItemRenderer();
     private String entityName;
     private String param;
-    private QueryParameters defaultParameters = new QueryParameters();
+    private final QueryParameters defaultParameters = new QueryParameters();
 
     public EntityPickerPanel(Class entityClass) {
         setEntityClass(entityClass);

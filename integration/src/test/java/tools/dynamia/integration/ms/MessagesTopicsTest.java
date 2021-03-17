@@ -28,11 +28,9 @@ import tools.dynamia.integration.ms.listeners.RegexInfoTopicMessageListener;
 
 public class MessagesTopicsTest {
 
-    private SimpleObjectContainer soc;
-
     @Before
     public void init() {
-        soc = new SimpleObjectContainer();
+        SimpleObjectContainer soc = new SimpleObjectContainer();
         soc.addObject("ml1", new ErrorWarnLogMessageListener());
         soc.addObject("ml2", new AllLogMessageListener());
         soc.addObject("ml3", new AllErrorTopicMessageListener());
@@ -76,7 +74,7 @@ public class MessagesTopicsTest {
 
     @Test
     public void shouldBeOneListenerButArraySizeTimes() {
-        String topics[] = {"info", "info.system", "someinfo", "main.info.log"};
+        String[] topics = {"info", "info.system", "someinfo", "main.info.log"};
         SimpleMessageChannel channel = new SimpleMessageChannel("infoChannel");
         int times = 0;
         for (String topic : topics) {

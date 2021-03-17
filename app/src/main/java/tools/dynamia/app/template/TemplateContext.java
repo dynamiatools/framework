@@ -20,7 +20,7 @@ import tools.dynamia.app.ApplicationInfo;
 
 public class TemplateContext {
 
-    private ApplicationInfo applicationInfo;
+    private final ApplicationInfo applicationInfo;
 
     public TemplateContext(ApplicationInfo applicationInfo) {
         super();

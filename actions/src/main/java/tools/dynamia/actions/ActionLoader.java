@@ -30,7 +30,7 @@ import java.util.*;
  */
 public class ActionLoader<T extends Action> {
 
-    private Class<T> targetActionClass;
+    private final Class<T> targetActionClass;
     private Map<String, Object> actionAttributes = null;
     private boolean ignoreRestrictions;
 
@@ -56,7 +56,7 @@ public class ActionLoader<T extends Action> {
                 }
             }
         }
-        Collections.sort(actions, new ActionComparator());
+        actions.sort(new ActionComparator());
         return actions;
     }
 
@@ -113,13 +113,11 @@ public class ActionLoader<T extends Action> {
         List<Action> actionsCommands = new ArrayList<>();
 
         if (object != null) {
-            Method methods[] = BeanUtils.getMethodsWithAnnotation(object.getClass(), ActionCommand.class);
+            Method[] methods = BeanUtils.getMethodsWithAnnotation(object.getClass(), ActionCommand.class);
             for (Method method : methods) {
                 ActionCommand actionCommand = method.getAnnotation(ActionCommand.class);
                 FastAction action = new FastAction(actionCommand.name(), actionCommand.image(),
-                        actionCommand.description(), null, evt -> {
-                    invokeActionCommand(object, method, evt);
-                });
+                        actionCommand.description(), null, evt -> invokeActionCommand(object, method, evt));
 
                 if (actionCommand.name().isEmpty()) {
                     action.setName(method.getName());

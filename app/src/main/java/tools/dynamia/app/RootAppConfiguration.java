@@ -48,7 +48,7 @@ public class RootAppConfiguration {
     @Autowired
     private Environment environment;
 
-    private LoggingService logger = new SLF4JLoggingService();
+    private final LoggingService logger = new SLF4JLoggingService();
 
     public RootAppConfiguration() {
         logger.info("Starting Application Configuration ");
@@ -72,9 +72,8 @@ public class RootAppConfiguration {
         if (resource.exists()) {
             pro.load(resource.getInputStream());
         }
-        ApplicationInfo applicationInfo = ApplicationInfo.load(pro);
 
-        return applicationInfo;
+        return ApplicationInfo.load(pro);
     }
 
     @Bean

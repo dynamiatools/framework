@@ -34,7 +34,7 @@ public class ComboboxToolbarbuttonActionRenderer extends ZKActionRenderer<Compon
 
     private boolean showlabels;
     private boolean toggleMode;
-    private List comboboxModel;
+    private final List comboboxModel;
 
     public ComboboxToolbarbuttonActionRenderer(List comboboxModel) {
         this.comboboxModel = comboboxModel;

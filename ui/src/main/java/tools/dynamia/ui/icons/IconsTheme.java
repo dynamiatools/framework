@@ -31,9 +31,9 @@ import java.util.Map;
 public class IconsTheme {
 
     private static IconsTheme instance;
-    private Map<String, Icon> iconsCache = new HashMap<>();
-    private LoggingService logger = Containers.get().findObject(LoggingService.class);
-    private List<Icon> all = new ArrayList<>();
+    private final Map<String, Icon> iconsCache = new HashMap<>();
+    private final LoggingService logger = Containers.get().findObject(LoggingService.class);
+    private final List<Icon> all = new ArrayList<>();
 
     public static IconsTheme get() {
         if (instance == null) {

@@ -24,7 +24,7 @@ import java.io.File;
  */
 public class FileTemplate implements Template {
 
-    private File file;
+    private final File file;
 
     public FileTemplate(File file) {
         this.file = file;

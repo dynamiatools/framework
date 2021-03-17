@@ -127,7 +127,7 @@ public abstract class ZKUtil {
      * @param listener the listener
      */
     public static void showQuestion(String question, String title, EventListener<Messagebox.ClickEvent> listener) {
-        Messagebox.Button buttons[] = {Messagebox.Button.YES, Messagebox.Button.NO};
+        Messagebox.Button[] buttons = {Messagebox.Button.YES, Messagebox.Button.NO};
         Messagebox.show(question, title, buttons, Messagebox.QUESTION, listener);
     }
 

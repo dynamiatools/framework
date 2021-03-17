@@ -36,9 +36,9 @@ import java.util.Map;
  */
 public class Menu implements NavigationViewBuilder<Menubar> {
 
-    private transient Menubar menubar;
-    private transient Map<Module, org.zkoss.zul.Menu> modulesContent = new HashMap<>();
-    private transient Map<PageGroup, org.zkoss.zul.Menu> pgContent = new HashMap<>();
+    private final transient Menubar menubar;
+    private final transient Map<Module, org.zkoss.zul.Menu> modulesContent = new HashMap<>();
+    private final transient Map<PageGroup, org.zkoss.zul.Menu> pgContent = new HashMap<>();
 
     public Menu() {
         menubar = new Menubar();

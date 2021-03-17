@@ -29,7 +29,7 @@ import java.io.FileNotFoundException;
 @InstallAction
 public class DownloadBIRTReportAction extends BIRTReportAction {
 
-    private ClassMessages messages = ClassMessages.get(DownloadBIRTReportAction.class);
+    private final ClassMessages messages = ClassMessages.get(DownloadBIRTReportAction.class);
 
     public DownloadBIRTReportAction() {
         setName(messages.get("DownloadReport"));

@@ -49,7 +49,7 @@ public class UserAgentInfo {
     // DetectTierRichCss()
     private boolean isTierGenericMobile = false; // Stores the result of
     // DetectTierOtherPhones()
-    private boolean isGalaxyTab = false;
+    private final boolean isGalaxyTab = false;
 
     // Initialize some initial smartphone string variables.
     public static final String engineWebKit = "webkit";

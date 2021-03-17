@@ -26,7 +26,7 @@ import static java.util.function.Predicate.not;
 
 public class InMemoryNotificationRepository implements NotificationRepository {
 
-    private List<INotification> data = new ArrayList<>();
+    private final List<INotification> data = new ArrayList<>();
 
     @Override
     public void save(INotification notification) {

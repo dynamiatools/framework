@@ -27,7 +27,7 @@ import java.util.List;
 @SuppressWarnings("rawtypes")
 public class SimpleMessageChannel implements MessageChannel {
 
-	private String name;
+	private final String name;
 	private boolean async = false;
 
 	/**

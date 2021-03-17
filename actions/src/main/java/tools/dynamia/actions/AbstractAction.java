@@ -44,7 +44,7 @@ public abstract class AbstractAction implements Action {
     private boolean enabled = true;
     private ActionRenderer actionRenderer = null;
     private int keyCode;
-    private ClassMessages messages = ClassMessages.get(getClass());
+    private final ClassMessages messages = ClassMessages.get(getClass());
 
 
     @Override

@@ -42,7 +42,7 @@ import java.util.Map;
  */
 public class ReportFiller {
 
-    private static LoggingService logger = new SLF4JLoggingService(ReportFiller.class);
+    private static final LoggingService logger = new SLF4JLoggingService(ReportFiller.class);
 
     /**
      *
@@ -81,8 +81,7 @@ public class ReportFiller {
         File filledReportFile = File.createTempFile("dmreport" + System.currentTimeMillis(), ".jrprint");
         try (FileOutputStream out = new FileOutputStream(filledReportFile)) {
             Object template = getTemplate(reportDescriptor);
-            Map<String, Object> params = new HashMap<>();
-            params.putAll(reportDescriptor.getParameters());
+            Map<String, Object> params = new HashMap<>(reportDescriptor.getParameters());
             
             if (datasource instanceof JRDataSource) {
                 JRDataSource jrds = (JRDataSource) datasource;
@@ -133,8 +132,7 @@ public class ReportFiller {
         JasperPrint jasperPrint = null;
 
         Object template = getTemplate(reportDescriptor);
-        Map<String, Object> params = new HashMap<>();
-        params.putAll(reportDescriptor.getParameters());
+        Map<String, Object> params = new HashMap<>(reportDescriptor.getParameters());
         if (datasource instanceof JRDataSource) {
             JRDataSource jrds = (JRDataSource) datasource;
             if (template instanceof String) {

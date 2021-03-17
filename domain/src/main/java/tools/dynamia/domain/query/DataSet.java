@@ -30,7 +30,7 @@ public class DataSet<T> implements Serializable {
     /**
      * The data.
      */
-    private T data;
+    private final T data;
 
     /**
      * Instantiates a new data set.

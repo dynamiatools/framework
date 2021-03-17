@@ -39,7 +39,7 @@ public class BeanSorter<T> implements Serializable {
     /**
      * The comparator.
      */
-    private DynamicComparator<T> comparator;
+    private final DynamicComparator<T> comparator;
 
     /**
      * The old column.
@@ -54,7 +54,7 @@ public class BeanSorter<T> implements Serializable {
     /**
      * The property change support.
      */
-    private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     /**
      * Instantiates a new bean sorter.
@@ -140,7 +140,7 @@ public class BeanSorter<T> implements Serializable {
 
         if (oldAscending != comparator.isAscending()
                 || !oldColumn.equals(comparator.getField())) {
-            Collections.sort(data, comparator);
+            data.sort(comparator);
             oldAscending = comparator.isAscending();
             oldColumn = comparator.getField();
         }

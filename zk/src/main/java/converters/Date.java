@@ -29,7 +29,7 @@ import java.text.DateFormat;
 
 public class Date implements Converter<Object, Object, Component> {
 
-    private DateFormat formatter;
+    private final DateFormat formatter;
 
     public Date() {
         formatter = DateFormat.getDateInstance(DateFormat.MEDIUM, Messages.getDefaultLocale());

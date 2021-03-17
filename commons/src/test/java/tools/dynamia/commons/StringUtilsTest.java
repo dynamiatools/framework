@@ -25,7 +25,6 @@ import java.util.Set;
  *
  * @author Mario A. Serrano Leones
  */
-@SuppressWarnings({"unchecked", "rawtypes"})
 public class StringUtilsTest extends TestCase {
 
     public StringUtilsTest(String testName) {

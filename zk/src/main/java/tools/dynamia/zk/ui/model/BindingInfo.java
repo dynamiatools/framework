@@ -20,8 +20,8 @@ import org.zkoss.zk.ui.Component;
 
 public class BindingInfo {
 
-    private Component component;
-    private String attribute;
+    private final Component component;
+    private final String attribute;
 
     public BindingInfo(Component component, String attribute) {
         super();

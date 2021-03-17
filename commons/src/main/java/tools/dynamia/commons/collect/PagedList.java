@@ -29,7 +29,7 @@ public class PagedList<T> extends AbstractList<T> {
     /**
      * The data source.
      */
-    private PagedListDataSource<T> dataSource;
+    private final PagedListDataSource<T> dataSource;
 
     /**
      * Instantiates a new paged list.
@@ -73,16 +73,21 @@ public class PagedList<T> extends AbstractList<T> {
         return dataSource.toString();
     }
 
-    /* (non-Javadoc)
-	 * @see java.util.AbstractCollection#toArray()
+
+    /**
+     * Create and return an array with CURRENT page data. NOT ALL DATA like a normal List
+     * @return array
      */
     @Override
     public Object[] toArray() {
         return dataSource.getPageData().toArray();
     }
 
-    /* (non-Javadoc)
-	 * @see java.util.AbstractCollection#toArray(java.lang.Object[])
+    /**
+     * Create and return an array with CURRENT page data. NOT ALL DATA like a normal List
+     * @param a
+     * @param <U>
+     * @return array
      */
     @Override
     public <U extends Object> U[] toArray(U[] a) {

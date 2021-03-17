@@ -76,7 +76,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
     /**
      * The logger.
      */
-    private LoggingService logger = new SLF4JLoggingService(YamlViewDescriptorReader.class);
+    private final LoggingService logger = new SLF4JLoggingService(YamlViewDescriptorReader.class);
 
     /**
      * The Constant TYPE_MAP.

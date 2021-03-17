@@ -89,7 +89,7 @@ public class ExportCSVAction extends AbstractExportAction {
 		ProgressMonitor monitor = new ProgressMonitor();
 
 		LongOperation operation = LongOperation.create().execute(() -> exporter.export(temp, data, monitor))
-				.onFinish(() -> download(temp)).onException(ex -> ex.printStackTrace()).start();
+				.onFinish(() -> download(temp)).onException(Throwable::printStackTrace).start();
 
 		// Update ui each 4 secs
 		LongOperationMonitorWindow monitorWindow = new LongOperationMonitorWindow(operation, monitor);

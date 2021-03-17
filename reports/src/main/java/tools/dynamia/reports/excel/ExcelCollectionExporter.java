@@ -34,7 +34,7 @@ import java.util.Map;
  */
 public class ExcelCollectionExporter<T> extends AbstractExcelExporter<T, Collection<T>> {
 
-    private LoggingService logger = new SLF4JLoggingService(ExcelCollectionExporter.class);
+    private final LoggingService logger = new SLF4JLoggingService(ExcelCollectionExporter.class);
     private String trueValue = "true";
     private String falseValue = "false";
 
@@ -82,7 +82,7 @@ public class ExcelCollectionExporter<T> extends AbstractExcelExporter<T, Collect
                     }
 
                     if (value instanceof Boolean) {
-                        value = ((Boolean) value).booleanValue() ? trueValue : falseValue;
+                        value = (Boolean) value ? trueValue : falseValue;
                     }
 
                 } catch (Exception e) {

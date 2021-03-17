@@ -24,5 +24,5 @@ import java.io.Serializable;
  */
 public interface EntitySelectionListener<T> {
 
-    public void entitySelected(T entity);
+    void entitySelected(T entity);
 }

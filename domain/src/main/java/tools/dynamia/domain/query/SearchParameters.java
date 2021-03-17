@@ -118,8 +118,7 @@ public class SearchParameters implements Serializable {
      * @return the search parameters
      */
     public static SearchParameters create(String... fields) {
-        SearchParameters sp = new SearchParameters(fields);
-        return sp;
+        return new SearchParameters(fields);
     }
 
     /**

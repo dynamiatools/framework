@@ -18,9 +18,9 @@ package tools.dynamia.crud;
 
 public class ChangedStateEvent {
 
-    private CrudState newState;
-    private CrudState oldState;
-    private GenericCrudView crudView;
+    private final CrudState newState;
+    private final CrudState oldState;
+    private final GenericCrudView crudView;
 
     public ChangedStateEvent(CrudState newState, CrudState oldState, GenericCrudView crudView) {
         super();

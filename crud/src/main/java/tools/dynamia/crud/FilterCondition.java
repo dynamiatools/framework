@@ -38,9 +38,9 @@ public enum FilterCondition {
     GREATER(msg("greater"), GreaterThan.class, ApplicableClass.get(Date.class, Number.class)),
     GREATER_EQ(msg("greatereq"), GreaterEqualsThan.class, ApplicableClass.get(Date.class, Number.class));
 
-    private String label;
-    private Class<? extends QueryCondition> conditionClass;
-    private ApplicableClass[] applicableClasses;
+    private final String label;
+    private final Class<? extends QueryCondition> conditionClass;
+    private final ApplicableClass[] applicableClasses;
 
     FilterCondition(String label, Class<? extends QueryCondition> conditionClass, ApplicableClass[] applicableClasses) {
         this.label = label;

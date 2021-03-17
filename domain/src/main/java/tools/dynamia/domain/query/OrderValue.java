@@ -23,8 +23,8 @@ import java.io.Serializable;
  * Util class to hold values for ordering queries
  */
 public class OrderValue implements Serializable {
-    private String label;
-    private String value;
+    private final String label;
+    private final String value;
 
     public OrderValue(String label, String value) {
         super();

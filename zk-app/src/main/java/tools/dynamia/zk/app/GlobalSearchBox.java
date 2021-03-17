@@ -36,7 +36,7 @@ public class GlobalSearchBox extends Combobox {
      *
      */
     private static final long serialVersionUID = -3070761233489513310L;
-    private GlobalSearchService service;
+    private final GlobalSearchService service;
 
     public GlobalSearchBox() {
         service = Containers.get().findObject(GlobalSearchService.class);

@@ -29,17 +29,17 @@ public class Formatters {
     /**
      * The integer.
      */
-    private static NumberFormat integer = NumberFormat.getIntegerInstance();
+    private static final NumberFormat integer = NumberFormat.getIntegerInstance();
 
     /**
      * The decimal.
      */
-    private static NumberFormat decimal = NumberFormat.getNumberInstance();
+    private static final NumberFormat decimal = NumberFormat.getNumberInstance();
 
     /**
      * The currency.
      */
-    private static NumberFormat currency = NumberFormat.getCurrencyInstance();
+    private static final NumberFormat currency = NumberFormat.getCurrencyInstance();
 
     /**
      * Format integer.

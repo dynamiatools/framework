@@ -46,17 +46,13 @@ public interface ApplicationTemplate extends Serializable {
     void init(TemplateContext context);
 
     default Skin getSkin(String name) {
-        if (name == null || name.isEmpty()) {
-            return null;
+        Skin result = null;
+        if (name != null && !name.isEmpty()) {
+            var skin = getSkins().stream().filter(s -> s.getName().equalsIgnoreCase(name)).findFirst();
+            result = skin.orElse(null);
         }
 
-        Optional<Skin> skin = getSkins().stream().filter(s -> s.getName().equalsIgnoreCase(name)).findFirst();
-
-        if (skin.isPresent()) {
-            return skin.get();
-        } else {
-            return null;
-        }
+        return result;
     }
 
 }

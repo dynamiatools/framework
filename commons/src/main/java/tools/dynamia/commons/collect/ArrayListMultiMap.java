@@ -61,9 +61,7 @@ public class ArrayListMultiMap<K, V> implements ListMultiMap<K, V>, Serializable
         }
         if (value instanceof Collection) {
             final Collection<V> newValues = (Collection<V>) value;
-            for (V object : newValues) {
-                values.add(object);
-            }
+            values.addAll(newValues);
         } else {
             values.add(value);
         }
@@ -73,8 +71,9 @@ public class ArrayListMultiMap<K, V> implements ListMultiMap<K, V>, Serializable
     /* (non-Javadoc)
      * @see tools.dynamia.commons.collect.MultiMap#put(java.lang.Object, java.lang.Object, java.lang.Object[])
      */
+    @SafeVarargs
     @Override
-    public void put(final K key, final V value, final V... values) {
+    public final void put(final K key, final V value, final V... values) {
         put(key, value);
         for (V other : values) {
             put(key, other);

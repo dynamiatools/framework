@@ -63,12 +63,12 @@ public enum DayOfWeek {
     /**
      * The cron name.
      */
-    private String cronName;
+    private final String cronName;
 
     /**
      * The number.
      */
-    private int number;
+    private final int number;
 
     /**
      * Instantiates a new day of week.

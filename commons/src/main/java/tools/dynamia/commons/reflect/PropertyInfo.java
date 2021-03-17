@@ -39,17 +39,17 @@ public class PropertyInfo implements Serializable {
     /**
      * The name.
      */
-    private String name;
+    private final String name;
 
     /**
      * The type.
      */
-    private Class<?> type;
+    private final Class<?> type;
 
     /**
      * The owner class.
      */
-    private Class<?> ownerClass;
+    private final Class<?> ownerClass;
 
     /**
      * The generic type.
@@ -64,7 +64,7 @@ public class PropertyInfo implements Serializable {
     /**
      * The access mode.
      */
-    private AccessMode accessMode;
+    private final AccessMode accessMode;
 
     private Method readMethod;
     private Method writeMethod;

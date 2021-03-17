@@ -29,8 +29,8 @@ import java.util.*;
  */
 public abstract class AbstractFontIconsProvider implements IconsProvider {
 
-    private Map<String, Icon> icons = new HashMap<>();
-    private LoggingService logger = new SLF4JLoggingService(getClass());
+    private final Map<String, Icon> icons = new HashMap<>();
+    private final LoggingService logger = new SLF4JLoggingService(getClass());
 
     public AbstractFontIconsProvider() {
         init();
@@ -62,9 +62,7 @@ public abstract class AbstractFontIconsProvider implements IconsProvider {
             init();
         }
 
-        Icon icon = icons.get(name);
-
-        return icon;
+        return icons.get(name);
     }
 
     public abstract Properties getNamesMapping();

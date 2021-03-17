@@ -27,11 +27,9 @@ import tools.dynamia.integration.ms.listeners.ThrowExceptionMessageListener;
 
 public class MessageChannelTest {
 
-    private SimpleObjectContainer soc;
-
     @Before
     public void init() {
-        soc = new SimpleObjectContainer();
+        SimpleObjectContainer soc = new SimpleObjectContainer();
         soc.addObject("ml1", new DummyMessageListener());
         soc.addObject("ml2", new AllMessageListener());
         soc.addObject("ml3", new ThrowExceptionMessageListener());

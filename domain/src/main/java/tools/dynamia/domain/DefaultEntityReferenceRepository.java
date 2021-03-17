@@ -40,10 +40,10 @@ import java.util.Map;
  */
 public class DefaultEntityReferenceRepository<ID extends Serializable> extends CrudServiceListenerAdapter implements EntityReferenceRepository<ID> {
 
-    private LoggingService logger = new SLF4JLoggingService(DefaultEntityReferenceRepository.class);
+    private final LoggingService logger = new SLF4JLoggingService(DefaultEntityReferenceRepository.class);
 
     private CrudService crudService;
-    private Class<?> entityClass;
+    private final Class<?> entityClass;
     private int maxResult = 60;
     private String[] findFields;
     private boolean cacheable;
@@ -161,7 +161,7 @@ public class DefaultEntityReferenceRepository<ID extends Serializable> extends C
     }
 
     @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes"})
     public List<EntityReference<ID>> find(String text, Map<String, Object> params) {
 
         List<EntityReference<ID>> entityReferences = new ArrayList<>();

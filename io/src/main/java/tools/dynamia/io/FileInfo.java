@@ -42,22 +42,22 @@ public class FileInfo {
     /**
      * The file.
      */
-    private File file;
+    private final File file;
 
     /**
      * The file size.
      */
-    private String fileSize;
+    private final String fileSize;
 
     /**
      * The file date.
      */
-    private Date fileDate;
+    private final Date fileDate;
 
     /**
      * The extension.
      */
-    private String extension;
+    private final String extension;
 
     /**
      * The directory.
@@ -68,7 +68,7 @@ public class FileInfo {
 
     private String icon;
 
-    private Map<String, Object> metaData = new ConcurrentHashMap<>();
+    private final Map<String, Object> metaData = new ConcurrentHashMap<>();
 
     /**
      * Instantiates a new file info.

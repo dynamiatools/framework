@@ -36,7 +36,7 @@ public class SpringResource implements Resource {
     /**
      * The internal resource.
      */
-    private org.springframework.core.io.Resource internalResource;
+    private final org.springframework.core.io.Resource internalResource;
 
     /**
      * Instantiates a new spring resource.

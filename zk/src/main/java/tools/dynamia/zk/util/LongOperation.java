@@ -34,7 +34,7 @@ public class LongOperation implements Runnable {
     private DesktopCache desktopCache;
     private Thread thread;
     private TaskExecutor taskExecutor;
-    private AtomicBoolean cancelled = new AtomicBoolean(false);
+    private final AtomicBoolean cancelled = new AtomicBoolean(false);
     private Callback onFinishCallbak;
     private Callback onCancelCallback;
     private Consumer<Exception> onExceptionConsumer;

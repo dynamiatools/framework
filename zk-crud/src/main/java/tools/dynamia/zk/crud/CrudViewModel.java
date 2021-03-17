@@ -44,7 +44,7 @@ public class CrudViewModel<T> extends AbstractViewModel<T> {
 
     public static final String MODEL_CLASS = "modelClass";
 
-    private CrudService crudService;
+    private final CrudService crudService;
     private Class<T> modelClass;
     private Object parent;
     private String parentName;

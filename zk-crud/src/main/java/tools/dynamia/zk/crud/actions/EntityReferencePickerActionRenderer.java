@@ -29,7 +29,7 @@ import java.io.Serializable;
 
 public class EntityReferencePickerActionRenderer extends ZKActionRenderer<EntityReferencePickerBox> {
 
-    private String entityAlias;
+    private final String entityAlias;
     private Serializable selectedId;
 
 

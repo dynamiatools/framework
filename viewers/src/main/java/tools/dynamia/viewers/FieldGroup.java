@@ -36,11 +36,11 @@ public class FieldGroup implements Serializable, Indexable, Cloneable {
     private String label;
     private String description;
     private String icon;
-    private List<Field> fields = new ArrayList<>();
+    private final List<Field> fields = new ArrayList<>();
     private int index;
     private boolean collapse;
 
-    private Map<String, Object> params = new HashMap<>();
+    private final Map<String, Object> params = new HashMap<>();
 
     /**
      * Instantiates a new field group.
@@ -246,7 +246,7 @@ public class FieldGroup implements Serializable, Indexable, Cloneable {
             return false;
         }
         final FieldGroup other = (FieldGroup) obj;
-        return (this.name == null) ? (other.name == null) : this.name.equals(other.name);
+        return Objects.equals(this.name, other.name);
     }
 
     /*

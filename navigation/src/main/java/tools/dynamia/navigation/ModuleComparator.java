@@ -26,12 +26,6 @@ public class ModuleComparator implements Comparator<Module> {
 
     @Override
     public int compare(Module o1, Module o2) {
-        if (o1.getPosition() > o2.getPosition()) {
-            return 1;
-        } else if (o1.getPosition() < o2.getPosition()) {
-            return -1;
-        } else {
-            return 0;
-        }
+        return Double.compare(o1.getPosition(), o2.getPosition());
     }
 }

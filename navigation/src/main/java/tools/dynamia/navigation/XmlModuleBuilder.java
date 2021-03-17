@@ -40,9 +40,9 @@ import java.util.ResourceBundle;
  */
 public class XmlModuleBuilder implements ModuleBuilder {
 
-    private Document xml;
-    private SAXReader saxReader = new SAXReader();
-    private LoggingService logger = Containers.get().findObject(LoggingService.class);
+    private final Document xml;
+    private final SAXReader saxReader = new SAXReader();
+    private final LoggingService logger = Containers.get().findObject(LoggingService.class);
 
     public XmlModuleBuilder(File file) {
         try {

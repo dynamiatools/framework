@@ -26,8 +26,8 @@ import java.util.Locale;
  */
 public class MessagesMap extends HashMap<String, String> {
 
-    private Class messageClass;
-    private Locale locale;
+    private final Class messageClass;
+    private final Locale locale;
 
 
     public MessagesMap(Class messageClass, Locale locale) {

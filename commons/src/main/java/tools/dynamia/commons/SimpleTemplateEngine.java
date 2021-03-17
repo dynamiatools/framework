@@ -27,12 +27,12 @@ public class SimpleTemplateEngine {
     /**
      * The left limiter.
      */
-    private String leftLimiter;
+    private final String leftLimiter;
 
     /**
      * The right limiter.
      */
-    private String rightLimiter;
+    private final String rightLimiter;
 
     /**
      * Instantiates a new simple template engine.

@@ -90,14 +90,13 @@ public class PolymorphicReflectionTest {
 
     class ChildBean extends ParentBean {
 
-        private int age = 11;
-
         @Override
         public String getName() {
             return "alejandro";
         }
 
         public int getAge() {
+            int age = 11;
             return age;
         }
 

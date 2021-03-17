@@ -33,10 +33,10 @@ import java.util.Date;
 public class HtmlTableBuilder implements Serializable {
 
     public static int LEFT = -1, CENTER = 0, RIGHT = 1;
-    private StringBuilder sb = new StringBuilder();
-    private NumberFormat numberFormat = NumberFormat.getInstance();
-    private DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT);
-    private NumberFormat decimalFormat = DecimalFormat.getInstance();
+    private final StringBuilder sb = new StringBuilder();
+    private final NumberFormat numberFormat = NumberFormat.getInstance();
+    private final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT);
+    private final NumberFormat decimalFormat = DecimalFormat.getInstance();
     private boolean rowCreated;
     private String title;
     private int titleLevel = 1;

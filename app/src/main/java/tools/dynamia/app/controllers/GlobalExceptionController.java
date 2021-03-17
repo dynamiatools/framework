@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class GlobalExceptionController {
 
-    private LoggingService logger = new SLF4JLoggingService(GlobalExceptionController.class);
+    private final LoggingService logger = new SLF4JLoggingService(GlobalExceptionController.class);
 
     @ExceptionHandler(NavigationNotAllowedException.class)
     public ModelAndView handleNavigationNotAllowed(HttpServletRequest req, Exception e) {

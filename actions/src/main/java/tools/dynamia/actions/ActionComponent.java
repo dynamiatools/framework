@@ -29,10 +29,10 @@ public class ActionComponent implements Serializable {
      *
      */
     private static final long serialVersionUID = 1L;
-    private Action action;
-    private ActionEventBuilder eventBuilder;
+    private final Action action;
+    private final ActionEventBuilder eventBuilder;
     private String align = "left";
-    private Map<String, Object> attributes = new HashMap<>();
+    private final Map<String, Object> attributes = new HashMap<>();
 
     public ActionComponent(Action action, ActionEventBuilder eventBuilder) {
         super();

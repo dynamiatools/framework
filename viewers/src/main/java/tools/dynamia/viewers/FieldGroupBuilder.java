@@ -27,7 +27,7 @@ public class FieldGroupBuilder {
     /**
      * The group.
      */
-    private FieldGroup group;
+    private final FieldGroup group;
 
     /**
      * The fields.

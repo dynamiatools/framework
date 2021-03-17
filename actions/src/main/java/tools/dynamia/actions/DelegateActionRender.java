@@ -26,7 +26,7 @@ import java.util.Optional;
  */
 public class DelegateActionRender implements ActionRenderer<Object> {
 
-	private String providerName;
+	private final String providerName;
 	private ActionRenderer defaultRenderer;
 
 	public DelegateActionRender(String providerName) {

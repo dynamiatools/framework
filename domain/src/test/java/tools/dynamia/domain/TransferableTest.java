@@ -65,7 +65,7 @@ public class TransferableTest {
         assertEquals(entity.getOtherEntity().getName(), dto.getOtherEntity());
     }
 
-    class BasicEntityUtilsProvider implements EntityUtilsProvider {
+    static class BasicEntityUtilsProvider implements EntityUtilsProvider {
 
         @Override
         public Serializable findId(Object entity) {

@@ -30,15 +30,10 @@ import java.util.regex.Pattern;
 public class EmailValidator implements ConstraintValidator<Email, CharSequence> {
 
     /**
-     * The matcher.
-     */
-    private Matcher matcher;
-
-    /**
      * The Constant EMAIL_PATTERN.
      */
     public static final String EMAIL_PATTERN
-            = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+            = "^[_A-Za-z0-9-+]+(\\.[_A-Za-z0-9-]+)*@"
             + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 
     /**
@@ -59,7 +54,10 @@ public class EmailValidator implements ConstraintValidator<Email, CharSequence> 
     @Override
     public boolean isValid(CharSequence value, ConstraintValidatorContext context) {
         if (value != null) {
-            matcher = pattern.matcher(value);
+            /**
+             * The matcher.
+             */
+            Matcher matcher = pattern.matcher(value);
             return matcher.matches();
         } else {
             return true;

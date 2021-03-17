@@ -78,7 +78,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
             }
         }
 
-        Collections.sort(viewDesc.getFieldGroups(), new IndexableComparator());
+        viewDesc.getFieldGroups().sort(new IndexableComparator());
         for (FieldGroup fieldGroup : viewDesc.getFieldGroups()) {
             List<Field> groupFields = getGroupFields(viewDesc, fieldGroup);
 

@@ -167,9 +167,8 @@ public class QueryBuilder implements Cloneable {
      * @return the query builder
      */
     public static QueryBuilder fromParameters(Class<?> type, String var, QueryParameters parameters) {
-        QueryBuilder query = QueryBuilder.select().from(type, var).where(parameters);
 
-        return query;
+        return QueryBuilder.select().from(type, var).where(parameters);
     }
 
     private void configureParameters() {

@@ -34,17 +34,17 @@ public class TreeCrudUtil<T> {
     /**
      * The crud service.
      */
-    private CrudService crudService;
+    private final CrudService crudService;
 
     /**
      * The entity class.
      */
-    private Class<T> entityClass;
+    private final Class<T> entityClass;
 
     /**
      * The parent name.
      */
-    private String parentName;
+    private final String parentName;
 
     /**
      * Instantiates a new tree crud util.

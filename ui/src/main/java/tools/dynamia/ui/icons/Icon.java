@@ -25,10 +25,10 @@ import java.io.Serializable;
 public class Icon implements Serializable {
 
     public final static Icon NONE = new Icon(null, null, null, null, IconType.IMAGE);
-    private String name;
-    private String internalName;
-    private String directory;
-    private String extension;
+    private final String name;
+    private final String internalName;
+    private final String directory;
+    private final String extension;
     private IconType type = IconType.IMAGE;
 
     /**

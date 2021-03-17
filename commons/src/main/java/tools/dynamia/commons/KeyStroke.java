@@ -23,7 +23,7 @@ import java.io.Serializable;
  * Helper class to store key strokes and callbacks
  */
 public class KeyStroke implements Serializable {
-    private String ctrlkeys;
+    private final String ctrlkeys;
     private String label;
     private transient Callback callback;
     private boolean executing;

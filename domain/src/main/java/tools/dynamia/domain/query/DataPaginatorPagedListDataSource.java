@@ -40,7 +40,7 @@ public class DataPaginatorPagedListDataSource<T> implements PagedListDataSource<
     /**
      * The data paginator.
      */
-    private DataPaginator dataPaginator;
+    private final DataPaginator dataPaginator;
 
     /**
      * The active page data.
@@ -73,7 +73,6 @@ public class DataPaginatorPagedListDataSource<T> implements PagedListDataSource<
     /* (non-Javadoc)
      * @see tools.dynamia.commons.collect.PagedListDataSource#getData(int)
      */
-    @SuppressWarnings("unchecked")
     @Override
     public T getData(int index) {
         lastPage = getActivePage();
@@ -104,8 +103,7 @@ public class DataPaginatorPagedListDataSource<T> implements PagedListDataSource<
 
     public List<T> loadActivePageData() {
         CrudService crudService = Containers.get().findObject(CrudService.class);
-        List<T> pageData = (List<T>) crudService.find(getQueryMetadata());
-        return pageData;
+        return (List<T>) crudService.find(getQueryMetadata());
     }
 
     /* (non-Javadoc)

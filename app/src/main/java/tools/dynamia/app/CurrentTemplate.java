@@ -72,8 +72,7 @@ public class CurrentTemplate implements Serializable {
     }
 
     private void loadDefaultLogo() {
-        String logoPath = applicationInfo.getDefaultLogo();
-        logoURL = logoPath;
+        logoURL = applicationInfo.getDefaultLogo();
     }
 
     public void setLogoURL(String logo) {
@@ -107,8 +106,7 @@ public class CurrentTemplate implements Serializable {
     public String getIconURL() {
         if (iconURL == null) {
             if (applicationInfo.getDefaultIcon() != null) {
-                String iconPath = applicationInfo.getDefaultIcon();
-                iconURL = iconPath;
+                iconURL = applicationInfo.getDefaultIcon();
             } else {
                 iconURL = getLogoURL();
             }

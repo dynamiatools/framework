@@ -23,7 +23,7 @@ import java.util.Map;
 
 public abstract class ImageCache {
 
-    private static Map<String, AImage> cache = new HashMap<>();
+    private static final Map<String, AImage> cache = new HashMap<>();
 
     public static void add(String name, AImage image) {
         cache.put(name, image);

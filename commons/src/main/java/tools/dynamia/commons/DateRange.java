@@ -140,6 +140,6 @@ public class DateRange implements Serializable {
 
     @Override
     public String toString() {
-        return String.valueOf(startDate) + "  /  " + String.valueOf(endDate);
+        return startDate + "  /  " + endDate;
     }
 }

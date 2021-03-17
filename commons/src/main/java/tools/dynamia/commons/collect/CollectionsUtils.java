@@ -142,9 +142,7 @@ public class CollectionsUtils {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static List iteratorToList(Iterator iterator) {
         List list = new ArrayList<>();
-        iterator.forEachRemaining(t -> {
-            list.add(t);
-        });
+        iterator.forEachRemaining(list::add);
         return list;
     }
 

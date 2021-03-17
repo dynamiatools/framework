@@ -52,8 +52,7 @@ public class JasperReportCompiler implements ReportCompiler {
     private File findJasper(File reportFile) {
         File dir = reportFile.getParentFile();
         String name = IOUtils.getFileNameWithoutExtension(reportFile);
-        File jasperFile = new File(dir, name + ".jasper");
-        return jasperFile;
+        return new File(dir, name + ".jasper");
     }
 
 }

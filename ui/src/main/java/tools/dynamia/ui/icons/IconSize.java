@@ -23,7 +23,7 @@ package tools.dynamia.ui.icons;
 public enum IconSize {
 
     SMALL("16"), NORMAL("24"), LARGE("32");
-    private String dir;
+    private final String dir;
 
     IconSize(String dir) {
         this.dir = dir;

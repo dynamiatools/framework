@@ -68,10 +68,10 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
     private Binder binder;
     private boolean readOnly;
     private ViewDescriptor viewDescriptor;
-    private Map<String, FormFieldComponent> componentsFieldsMap = new HashMap<>();
-    private Map<String, FormFieldGroupComponent> groupsComponentsMap = new HashMap<>();
+    private final Map<String, FormFieldComponent> componentsFieldsMap = new HashMap<>();
+    private final Map<String, FormFieldGroupComponent> groupsComponentsMap = new HashMap<>();
     private View parentView;
-    private List<View> subviews = new ArrayList<>();
+    private final List<View> subviews = new ArrayList<>();
 
     // Renderer data
     protected int _realCols;
@@ -79,7 +79,7 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
     protected FormViewRenderer<T> _renderer;
     private boolean autosaveBindings = true;
     private String title;
-    private H3 titleTag;
+    private final H3 titleTag;
     private Object source;
     private String customView;
 

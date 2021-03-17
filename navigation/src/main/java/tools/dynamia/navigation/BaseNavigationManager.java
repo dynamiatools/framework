@@ -136,7 +136,7 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
 
     @Override
     public void navigateTo(String path, Map<String, Object> params) {
-        if (path.indexOf("/") < 0) {
+        if (!path.contains("/")) {
             setActiveModule(container.getModuleById(path));
         } else {
             Page page = findPage(path);

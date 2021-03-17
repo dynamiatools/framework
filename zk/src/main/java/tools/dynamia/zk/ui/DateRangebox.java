@@ -32,8 +32,8 @@ public class DateRangebox extends Span {
 
 
     private DateRange value;
-    private Datebox start;
-    private Datebox end;
+    private final Datebox start;
+    private final Datebox end;
 
 
     public DateRangebox() {

@@ -22,7 +22,7 @@ public class NavigationNotAllowedException extends RuntimeException {
      *
      */
     private static final long serialVersionUID = -6714211373877978620L;
-    private NavigationElement navigationElement;
+    private final NavigationElement navigationElement;
 
     public NavigationNotAllowedException(NavigationElement navigationElement, String message) {
         super(message);

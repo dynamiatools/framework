@@ -107,6 +107,7 @@ public class MessageCallbakTest {
     }
 
     @MessageChannelExchange(channel = CALLBACK_CHANNEL)
+    static
     class ResultMessageListener implements MessageListener<NumberMessage> {
 
         Map<String, Message> messagesWithoutResult = new HashMap<>();
@@ -127,9 +128,10 @@ public class MessageCallbakTest {
     }
 
     @MessageChannelExchange(channel = "calculator")
+    static
     class CalculatorServiceListener implements MessageListener<MapMessage> {
 
-        private MessageService service;
+        private final MessageService service;
 
         public CalculatorServiceListener(MessageService service) {
             super();

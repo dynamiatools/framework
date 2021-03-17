@@ -30,7 +30,7 @@ import java.lang.reflect.Parameter;
 
 public class EventQueueSubscriber {
 
-    private Object target;
+    private final Object target;
 
     public EventQueueSubscriber(Object target) {
         super();

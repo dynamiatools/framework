@@ -26,8 +26,8 @@ import tools.dynamia.zk.crud.ui.EntityPickerBox;
 
 public class EntityPickerActionRenderer extends ZKActionRenderer<EntityPickerBox> {
 
-    private Class entityClass;
-    private QueryParameters defaultParams = new QueryParameters();
+    private final Class entityClass;
+    private final QueryParameters defaultParams = new QueryParameters();
 
     public EntityPickerActionRenderer(Class entityClass) {
         super();

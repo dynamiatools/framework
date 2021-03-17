@@ -44,7 +44,7 @@ public class DateSelector extends Div {
         BindingComponentIndex.getInstance().put("selected", DateSelector.class);
     }
 
-    private ClassMessages messages = ClassMessages.get(DateSelector.class);
+    private final ClassMessages messages = ClassMessages.get(DateSelector.class);
     private Combobox daycombo;
     private Combobox monthcombo;
     private Intbox yearbox;

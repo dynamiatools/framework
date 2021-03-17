@@ -61,7 +61,7 @@ public class TreeViewRowRenderer<E> implements TreeitemRenderer<TreeViewNode<E>>
     public final void setViewDescriptor(ViewDescriptor descriptor) {
         this.viewDescriptor = descriptor;
         try {
-            Collections.sort(descriptor.getFields(), new IndexableComparator());
+            descriptor.getFields().sort(new IndexableComparator());
         } catch (ConcurrentModificationException e) {
             //ignore
         }
@@ -71,7 +71,6 @@ public class TreeViewRowRenderer<E> implements TreeitemRenderer<TreeViewNode<E>>
         this.treeView = tableView;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public void render(Treeitem item, TreeViewNode<E> node, int index) throws Exception {
         if (node != null) {

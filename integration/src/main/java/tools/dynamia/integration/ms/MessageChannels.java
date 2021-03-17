@@ -53,7 +53,7 @@ public class MessageChannels {
             }
         }
 
-        Collections.sort(result, new MessageChannelExchangeComparator());
+        result.sort(new MessageChannelExchangeComparator());
 
         return result;
     }

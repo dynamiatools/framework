@@ -55,7 +55,7 @@ public class Icons extends HashMap<String, String> {
         if (key == null) {
             return null;
         }
-        String name = key.toString();
+        String name = key;
         return IconsTheme.get().getIcon(name);
     }
 

@@ -184,12 +184,10 @@ public class TableViewDescriptorBuilder extends ViewDescriptorBuilder {
 
     public static class HeaderBuilder {
 
-        private ColumnBuilder column;
-        private Map<String, Object> params = new HashMap<>();
+        private final Map<String, Object> params = new HashMap<>();
 
         private void init(ColumnBuilder column) {
-            this.column = column;
-            this.column.params(Viewers.PARAM_HEADER, params);
+            column.params(Viewers.PARAM_HEADER, params);
         }
 
         public HeaderBuilder align(String align) {
@@ -205,12 +203,10 @@ public class TableViewDescriptorBuilder extends ViewDescriptorBuilder {
 
     public static class FooterBuilder {
 
-        private ColumnBuilder column;
-        private Map<String, Object> params = new HashMap<>();
+        private final Map<String, Object> params = new HashMap<>();
 
         private void init(ColumnBuilder column) {
-            this.column = column;
-            this.column.params(Viewers.PARAM_FOOTER, params);
+            column.params(Viewers.PARAM_FOOTER, params);
         }
 
         public FooterBuilder function(String name) {

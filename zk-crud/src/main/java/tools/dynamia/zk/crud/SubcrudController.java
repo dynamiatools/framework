@@ -42,12 +42,12 @@ public class SubcrudController<E> extends CrudController<E> implements SubcrudCo
      *
      */
     private static final long serialVersionUID = 2791457285184056200L;
-    private String parentName;
+    private final String parentName;
     private Object parent;
-    private List<E> toBeUpdatedEntities = new ArrayList<>();
-    private List<E> toBeCreatedEntities = new ArrayList<>();
-    private List<E> toBeDeletedEntities = new ArrayList<>();
-    private String childrenName;
+    private final List<E> toBeUpdatedEntities = new ArrayList<>();
+    private final List<E> toBeCreatedEntities = new ArrayList<>();
+    private final List<E> toBeDeletedEntities = new ArrayList<>();
+    private final String childrenName;
 
     public SubcrudController(Object parent, String parentName, String childrenName) {
         this(null, parent, parentName, childrenName);

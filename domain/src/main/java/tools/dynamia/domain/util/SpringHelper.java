@@ -30,12 +30,7 @@ public class SpringHelper {
     /**
      * The app context.
      */
-    private ApplicationContext appContext;
-
-    /**
-     * The contexts.
-     */
-    private String[] contexts = {"applicationContext.xml", "dataAccessLayer.xml"};
+    private final ApplicationContext appContext;
 
     /**
      * The instance.
@@ -46,6 +41,10 @@ public class SpringHelper {
      * Instantiates a new spring helper.
      */
     public SpringHelper() {
+        /**
+         * The contexts.
+         */
+        String[] contexts = {"applicationContext.xml", "dataAccessLayer.xml"};
         appContext = new ClassPathXmlApplicationContext(contexts);
     }
 

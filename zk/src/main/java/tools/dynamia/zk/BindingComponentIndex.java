@@ -29,7 +29,7 @@ import tools.dynamia.zk.ui.DecimalboxCalculator;
 /**
  * @author Mario A. Serrano Leones
  */
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({"rawtypes"})
 public class BindingComponentIndex extends HashSetMultiMap<String, String> {
 
     private final static BindingComponentIndex instance = new BindingComponentIndex();

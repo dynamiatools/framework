@@ -26,7 +26,7 @@ import java.io.Serializable;
 public class EntityWrapper<E> implements Serializable {
 
     private static final long serialVersionUID = 2183965104645026082L;
-    private E entity;
+    private final E entity;
     private boolean selected;
 
     public EntityWrapper(E entity) {

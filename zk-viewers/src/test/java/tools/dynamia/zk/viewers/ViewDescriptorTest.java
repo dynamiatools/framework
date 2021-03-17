@@ -68,7 +68,7 @@ public class ViewDescriptorTest {
         assertTrue(descriptor1.equals(descriptor2) && descriptor2.equals(descriptor3) && descriptor3.equals(descriptor1));
     }
 
-    class MyBean {
+    static class MyBean {
 
         private String name;
         private int age;

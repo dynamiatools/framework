@@ -217,10 +217,9 @@ public final class DataPaginator implements Serializable {
         }
 
         int ps = getPageSize();
-        int ai = absoluteIndex;
 
-        int newPage = ai / ps + 1; // new page
-        int relativeIndex = ai - (ps * newPage - ps); // relative index
+        int newPage = absoluteIndex / ps + 1; // new page
+        int relativeIndex = absoluteIndex - (ps * newPage - ps); // relative index
 
         if (newPage > getPagesNumber()) {
             throw new IndexOutOfBoundsException(absoluteIndex + " index not found in current selection");

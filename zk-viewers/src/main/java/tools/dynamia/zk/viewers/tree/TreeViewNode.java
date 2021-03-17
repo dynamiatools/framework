@@ -34,7 +34,7 @@ public class TreeViewNode<E> implements Serializable {
     private static final long serialVersionUID = 1741561796996850134L;
     private TreeViewNode<E> parent;
     private E data;
-    private List<TreeViewNode<E>> children = new ArrayList<>();
+    private final List<TreeViewNode<E>> children = new ArrayList<>();
     protected boolean root;
 
     private String icon;

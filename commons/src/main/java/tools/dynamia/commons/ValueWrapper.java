@@ -25,12 +25,12 @@ public class ValueWrapper {
     /**
      * The value.
      */
-    private Object value;
+    private final Object value;
 
     /**
      * The value class.
      */
-    private Class<?> valueClass;
+    private final Class<?> valueClass;
 
     /**
      * Instantiates a new value wrapper.

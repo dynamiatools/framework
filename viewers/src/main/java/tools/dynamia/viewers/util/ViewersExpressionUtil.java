@@ -33,12 +33,12 @@ public class ViewersExpressionUtil {
     /**
      * The parser.
      */
-    private static ExpressionParser parser;
+    private static final ExpressionParser parser;
 
     /**
      * The context.
      */
-    private static StandardEvaluationContext context;
+    private static final StandardEvaluationContext context;
 
     static {
         parser = new SpelExpressionParser();
@@ -90,8 +90,7 @@ public class ViewersExpressionUtil {
         if (isExpression(text)) {
             //Remove ${ and } from start and end
             String expString = text.substring(2, text.length() - 1);
-            Expression exp = parser.parseExpression(expString);
-            return exp;
+            return parser.parseExpression(expString);
         } else {
             return null;
         }

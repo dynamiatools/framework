@@ -43,7 +43,7 @@ public abstract class AbstractCrudService implements CrudService {
     /**
      * The logger.
      */
-    private LoggingService logger = new SLF4JLoggingService(CrudService.class);
+    private final LoggingService logger = new SLF4JLoggingService(CrudService.class);
 
     /*
      * (non-Javadoc)

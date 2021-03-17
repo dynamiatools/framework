@@ -36,22 +36,22 @@ public class QueryExample {
     /**
      * The example.
      */
-    private Object example;
+    private final Object example;
 
     /**
      * The exclude zeroes.
      */
-    private boolean excludeZeroes;
+    private final boolean excludeZeroes;
 
     /**
      * The exclude falses.
      */
-    private boolean excludeFalses;
+    private final boolean excludeFalses;
 
     /**
      * The excluded fields.
      */
-    private Set<String> excludedFields = new HashSet<>();
+    private final Set<String> excludedFields = new HashSet<>();
 
     /**
      * Instantiates a new query example.
@@ -220,7 +220,7 @@ public class QueryExample {
      * @throws Exception the exception
      */
     private void parseContactInfo(String name, Object obj, QueryParameters params) throws Exception {
-        Field fields[] = AbstractContactInfo.class.getDeclaredFields();
+        Field[] fields = AbstractContactInfo.class.getDeclaredFields();
         for (Field field : fields) {
             if (isValidFieldName(field.getName())) {
                 field.setAccessible(true);

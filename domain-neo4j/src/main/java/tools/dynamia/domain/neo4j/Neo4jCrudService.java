@@ -145,7 +145,7 @@ public class Neo4jCrudService extends AbstractCrudService implements GraphCrudSe
 
     @Override
     public <T> List<T> findAll(Class<T> type) {
-        return new ArrayList<T>(s().loadAll(type));
+        return new ArrayList<>(s().loadAll(type));
     }
 
     @Override
@@ -176,7 +176,7 @@ public class Neo4jCrudService extends AbstractCrudService implements GraphCrudSe
             sortOrder.add(s.isAscending() ? SortOrder.Direction.ASC : SortOrder.Direction.DESC, s.getColumnName());
         }
 
-        List<T> result = new ArrayList<T>(s().loadAll(type, filters, sortOrder, pagination, depth));
+        List<T> result = new ArrayList<>(s().loadAll(type, filters, sortOrder, pagination, depth));
 
         fireListeners(parameters, EventType.AFTER_QUERY);
         return result;
@@ -218,18 +218,14 @@ public class Neo4jCrudService extends AbstractCrudService implements GraphCrudSe
             Optional<T> result = s().loadAll(type, new Filter(property, ComparisonOperator.EQUALS, value), new Pagination(0, 1)).stream()
                     .findFirst();
 
-            if (result.isPresent()) {
-                return result.get();
-            } else {
-                return null;
-            }
+            return result.orElse(null);
         }
     }
 
     @Override
     public <T> T findSingle(Class<T> entityClass, QueryParameters params) {
 
-        Optional<T> result = null;
+        Optional<T> result;
         if (params.size() == 1 && params.containsKey("id")) {
             result = Optional.of(s().load(entityClass, (Serializable) params.get("id"), params.getDepth()));
         } else {
@@ -244,11 +240,7 @@ public class Neo4jCrudService extends AbstractCrudService implements GraphCrudSe
             fireListeners(params, EventType.AFTER_QUERY);
         }
 
-        if (result.isPresent()) {
-            return result.get();
-        } else {
-            return null;
-        }
+        return result.orElse(null);
     }
 
     @Override

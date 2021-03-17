@@ -24,7 +24,7 @@ import tools.dynamia.navigation.RendereablePage;
  *
  * @author Mario A. Serrano Leones
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes"})
 public abstract class AbstractCrudPage<T> extends RendereablePage<T> {
 
     private static final long serialVersionUID = -4645019919823261595L;

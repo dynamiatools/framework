@@ -45,7 +45,7 @@ public class MultiView<T> extends Tabbox implements View<T>, EventListener<Event
     private T value;
     private ViewDescriptor viewDescriptor;
 
-    private List<View> subviews = new ArrayList<>();
+    private final List<View> subviews = new ArrayList<>();
     private View parentView;
     private Object source;
 

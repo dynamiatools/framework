@@ -42,8 +42,7 @@ public class InputPanel extends Div {
     private Label label;
     private Button okButton;
     private Object value;
-    private Binder binder = ZKBindingUtil.createBinder();
-    private Class inputClass;
+    private final Class inputClass;
 
     public InputPanel() {
         this(null, null, String.class);
@@ -62,6 +61,7 @@ public class InputPanel extends Div {
         this.value = value;
         renderView(label);
 
+        Binder binder = ZKBindingUtil.createBinder();
         ZKBindingUtil.initBinder(binder, this, this);
         ZKBindingUtil.bindComponent(binder, textbox, "inputPanel.value", null);
         ZKBindingUtil.bindBean(this, "inputPanel", this);

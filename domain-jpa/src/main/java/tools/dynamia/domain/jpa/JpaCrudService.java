@@ -86,7 +86,7 @@ public class JpaCrudService extends AbstractCrudService {
     /**
      * The logger.
      */
-    private LoggingService logger = new SLF4JLoggingService(JpaCrudService.class);
+    private final LoggingService logger = new SLF4JLoggingService(JpaCrudService.class);
 
     /**
      * Inits the.
@@ -513,9 +513,8 @@ public class JpaCrudService extends AbstractCrudService {
         }
         queryMetada.getParameters().applyTo(wrap(query));
         JpaUtils.configurePaginator(em, query, null, queryMetada.getParameters());
-        List result = mapResultsToBeanMaps(queryMetada.getQueryBuilder(), query.getResultList());
 
-        return result;
+        return mapResultsToBeanMaps(queryMetada.getQueryBuilder(), query.getResultList());
     }
 
     /*

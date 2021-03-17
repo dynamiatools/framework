@@ -19,6 +19,7 @@ package tools.dynamia.actions;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Actions in the same group are rendered together
@@ -34,7 +35,7 @@ public class ActionGroup implements Serializable {
     public static final ActionGroup NONE = new ActionGroup("NONE", "left");
     private String name;
     private String align;
-    private List<Action> actions = new ArrayList<>();
+    private final List<Action> actions = new ArrayList<>();
 
     public static ActionGroup get(String name, String align) {
         return new ActionGroup(name, align);
@@ -84,7 +85,7 @@ public class ActionGroup implements Serializable {
             return false;
         }
         final ActionGroup other = (ActionGroup) obj;
-        return (this.name == null) ? (other.name == null) : this.name.equals(other.name);
+        return Objects.equals(this.name, other.name);
     }
 
     @Override

@@ -34,17 +34,17 @@ public class QueryMetadata implements Serializable {
     /**
      * The query text.
      */
-    private String queryText;
+    private final String queryText;
 
     /**
      * The query builder.
      */
-    private QueryBuilder queryBuilder;
+    private final QueryBuilder queryBuilder;
 
     /**
      * The query parameters.
      */
-    private QueryParameters queryParameters;
+    private final QueryParameters queryParameters;
 
     /**
      * Instantiates a new query metadata.

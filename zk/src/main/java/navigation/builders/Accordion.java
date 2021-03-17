@@ -35,8 +35,8 @@ import java.util.Map;
  */
 public class Accordion implements NavigationViewBuilder<Tabbox> {
 
-    private transient Tabbox tabbox;
-    private transient Map<Module, Vbox> modulesContent = new HashMap<>();
+    private final transient Tabbox tabbox;
+    private final transient Map<Module, Vbox> modulesContent = new HashMap<>();
 
     public Accordion() {
         tabbox = new Tabbox();

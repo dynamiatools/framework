@@ -36,20 +36,18 @@ import java.util.Set;
 public class DefaultValidatorService implements ValidatorService {
 
 	/**
-	 * The validator factory.
-	 */
-	private ValidatorFactory validatorFactory;
-
-	/**
 	 * The validator.
 	 */
-	private Validator validator;
+	private final Validator validator;
 
 	/**
 	 * Instantiates a new validator service impl.
 	 */
 	public DefaultValidatorService() {
-		validatorFactory = Validation.buildDefaultValidatorFactory();
+		/**
+		 * The validator factory.
+		 */
+		ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
 		validator = validatorFactory.getValidator();
 	}
 
@@ -61,11 +59,6 @@ public class DefaultValidatorService implements ValidatorService {
 	 * Object)
 	 */
 	@Override
-	/**
-	 * Validate obj and throw a ValidationError exception if the object has an
-	 * invalid value, nothing happens if the obj is ok. Use this method as a
-	 * filter
-	 */
 	public void validate(Object obj) {
 		fireExternalsValidators(obj);
 
@@ -108,11 +101,6 @@ public class DefaultValidatorService implements ValidatorService {
 	 * Object)
 	 */
 	@Override
-	/**
-	 * Validate all obj properties and return all the constraint violations
-	 *
-	 * @return Set<ConstraintViolation>
-	 */
 	public <T> Set<ConstraintViolation<T>> validateAll(T obj) {
 		return validator.validate(obj);
 

@@ -44,13 +44,13 @@ public class Infobox extends Div {
     private String background;
     private String iconBackground;
 
-    private Div uiProgress;
-    private Div uiProgressBar;
-    private Label uiProgressDescription;
-    private Div uiContent;
-    private Span uiIcon;
-    private Label uiText;
-    private Label uiNumber;
+    private final Div uiProgress;
+    private final Div uiProgressBar;
+    private final Label uiProgressDescription;
+    private final Div uiContent;
+    private final Span uiIcon;
+    private final Label uiText;
+    private final Label uiNumber;
 
 
     public Infobox() {

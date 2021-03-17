@@ -31,7 +31,7 @@ public class ApplicableClass {
 	/**
 	 * The target class.
 	 */
-	private Class targetClass;
+	private final Class targetClass;
 
 	/**
 	 * Checks if is applicable.

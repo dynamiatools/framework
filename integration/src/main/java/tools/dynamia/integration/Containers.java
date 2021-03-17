@@ -43,7 +43,7 @@ public class Containers {
      */
     private static Containers instance;
 
-    private static LoggingService logger = new SLF4JLoggingService(Containers.class);
+    private static final LoggingService logger = new SLF4JLoggingService(Containers.class);
 
     /**
      * Gets the.

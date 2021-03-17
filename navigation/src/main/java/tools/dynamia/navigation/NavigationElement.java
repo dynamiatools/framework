@@ -23,10 +23,7 @@ import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.ui.icons.IconsTheme;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -44,7 +41,7 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
     private String renderOnUserRoles;
     private double position = 0;
     private boolean reference;
-    private Map<String, Object> attributes = new HashMap<>();
+    private final Map<String, Object> attributes = new HashMap<>();
     private boolean alwaysAllowed = false;
     private IconSize iconSize = IconSize.SMALL;
     private String badge;
@@ -237,7 +234,7 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
             return false;
         }
         final NavigationElement other = (NavigationElement) obj;
-        return (this.id == null) ? (other.id == null) : this.id.equals(other.id);
+        return Objects.equals(this.id, other.id);
     }
 
     @Override

@@ -61,7 +61,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor 
      * The field groups.
      */
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-    private List<FieldGroup> fieldGroups = new ArrayList<>();
+    private final List<FieldGroup> fieldGroups = new ArrayList<>();
 
     /**
      * The view type name.
@@ -76,7 +76,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor 
     /**
      * The logger.
      */
-    private LoggingService logger = new SLF4JLoggingService(ViewDescriptor.class);
+    private final LoggingService logger = new SLF4JLoggingService(ViewDescriptor.class);
 
     /**
      * The autofields.
@@ -259,8 +259,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor 
      */
     @Override
     public Field getField(String name) {
-        for (Iterator<Field> it = fields.iterator(); it.hasNext(); ) {
-            Field field = it.next();
+        for (Field field : fields) {
             if (field.getName().equals(name)) {
                 return field;
             }
@@ -631,7 +630,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor 
                         }
                     });
                 } catch (Exception e) {
-                    throw new InvalidViewDescriptorFieldException("Cannot parse field Descriptor parameters for: " + field.getName() + " -> " + descriptor.params(), e);
+                    throw new InvalidViewDescriptorFieldException("Cannot parse field Descriptor parameters for: " + field.getName() + " -> " + Arrays.toString(descriptor.params()), e);
                 }
             }
         }

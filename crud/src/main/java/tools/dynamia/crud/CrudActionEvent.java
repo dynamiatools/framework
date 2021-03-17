@@ -28,8 +28,8 @@ public class CrudActionEvent extends ActionEvent {
      */
     private static final long serialVersionUID = 1L;
 
-    private GenericCrudView crudView;
-    private CrudControllerAPI controller;
+    private final GenericCrudView crudView;
+    private final CrudControllerAPI controller;
 
     public CrudActionEvent(Object data, Object source, GenericCrudView view, CrudControllerAPI controller) {
         this(data, source, null, view, controller);

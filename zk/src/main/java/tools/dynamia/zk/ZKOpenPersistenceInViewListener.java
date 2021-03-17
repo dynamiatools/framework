@@ -31,7 +31,7 @@ import java.util.List;
 public class ZKOpenPersistenceInViewListener implements ExecutionInit, ExecutionCleanup {
 
 
-    private OpenPersistenceInViewProvider provider;
+    private final OpenPersistenceInViewProvider provider;
 
 
     public ZKOpenPersistenceInViewListener() {
@@ -53,7 +53,6 @@ public class ZKOpenPersistenceInViewListener implements ExecutionInit, Execution
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public void cleanup(Execution exec, Execution parent, List errs) {
         if (parent == null) {

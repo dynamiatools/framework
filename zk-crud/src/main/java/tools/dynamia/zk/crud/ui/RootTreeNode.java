@@ -26,7 +26,7 @@ public class RootTreeNode<E> extends EntityTreeNode<E> {
 	 *
 	 */
 	private static final long serialVersionUID = -1401576873934370681L;
-	private boolean visible;
+	private final boolean visible;
 
 	public RootTreeNode(Object entity) {
 		this(entity, null);

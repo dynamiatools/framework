@@ -25,7 +25,7 @@ import java.util.Map;
 
 public class JpaQuery extends AbstractQuery<Query> {
 
-    private Map<String, Object> parameters = new HashMap<>();
+    private final Map<String, Object> parameters = new HashMap<>();
 
     public JpaQuery(Query delegate) {
         super(delegate);

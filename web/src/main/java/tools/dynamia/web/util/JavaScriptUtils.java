@@ -33,7 +33,7 @@ import java.util.Map;
 public class JavaScriptUtils {
 
     private static ScriptEngine scriptEngine;
-    private static LoggingService LOGGER = new SLF4JLoggingService(JavaScriptUtils.class);
+    private static final LoggingService LOGGER = new SLF4JLoggingService(JavaScriptUtils.class);
 
     private JavaScriptUtils() {
         throw new IllegalStateException("this is a private constructor");

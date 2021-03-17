@@ -67,6 +67,7 @@ public class Inlist<T> extends AbstractQueryCondition<List<T>> {
 	 * @param values
 	 *            the values
 	 */
+	@SafeVarargs
 	public Inlist(T... values) {
 		super(Arrays.asList(values));
 	}
@@ -79,6 +80,7 @@ public class Inlist<T> extends AbstractQueryCondition<List<T>> {
 	 * @param values
 	 *            the values
 	 */
+	@SafeVarargs
 	public Inlist(BooleanOp booleanOp, T... values) {
 		super(Arrays.asList(values), booleanOp);
 	}

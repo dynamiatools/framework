@@ -49,7 +49,7 @@ public class CrudTreeViewBuilder implements CrudDataSetViewBuilder {
         return TreeCrudController.class;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     @Override
     public DataSetView build(GenericCrudView view) {
         CrudView crudView;

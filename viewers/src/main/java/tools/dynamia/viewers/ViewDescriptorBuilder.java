@@ -226,8 +226,7 @@ public class ViewDescriptorBuilder {
      * @return the field group builder
      */
     public static FieldGroupBuilder group(String name, String label, String icon) {
-        FieldGroupBuilder group = new FieldGroupBuilder(name);
-        return group;
+        return new FieldGroupBuilder(name);
     }
 
     /**

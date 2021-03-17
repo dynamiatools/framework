@@ -22,7 +22,7 @@ package tools.dynamia.templates;
  */
 public class StringTemplate implements Template {
 
-    private String text;
+    private final String text;
 
     public StringTemplate(String text) {
         this.text = text;

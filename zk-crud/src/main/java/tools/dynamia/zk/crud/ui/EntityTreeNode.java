@@ -93,16 +93,14 @@ public class EntityTreeNode<E> extends TreeViewNode<E> implements Serializable {
     }
 
     public EntityTreeNode<E> addChild(E entity) {
-        EntityTreeNode<E> node = new EntityTreeNode<E>(entity);
+        EntityTreeNode<E> node = new EntityTreeNode<>(entity);
         this.addChild(node);
         return node;
     }
 
     public List<EntityTreeNode<E>> addChildren(List<? extends E> entities) {
         List<EntityTreeNode<E>> newChildren = new ArrayList<>();
-        entities.forEach(e -> {
-            newChildren.add(addChild(e));
-        });
+        entities.forEach(e -> newChildren.add(addChild(e)));
 
         return newChildren;
     }

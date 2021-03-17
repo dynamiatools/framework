@@ -137,8 +137,7 @@ public abstract class AbstractViewDescriptorFactory implements ViewDescriptorFac
             if (extendsValue.equals("parent") && beanClass != null) {
                 viewDescriptor = findAndMergeWithParent(beanClass, viewType, viewDescriptor);
             } else if (!extendsValue.isEmpty()) {
-                String descriptorId = extendsValue;
-                ViewDescriptor parent = getDescriptor(descriptorId);
+                ViewDescriptor parent = getDescriptor(extendsValue);
                 merge(viewDescriptor, parent);
             }
 
@@ -521,7 +520,7 @@ public abstract class AbstractViewDescriptorFactory implements ViewDescriptorFac
         /**
          * The resource.
          */
-        private Resource resource;
+        private final Resource resource;
 
         /**
          * The last modified.

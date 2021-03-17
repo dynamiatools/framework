@@ -34,12 +34,12 @@ import java.util.stream.Collectors;
 public class PageGroup extends NavigationElement<PageGroup> implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -7191971531078734873L;
-    private Collection<Page> pages = new ArrayList<>();
-    private Collection<PageGroup> pageGroups = new ArrayList<>();
+    private final Collection<Page> pages = new ArrayList<>();
+    private final Collection<PageGroup> pageGroups = new ArrayList<>();
     private Module parentModule;
     private PageGroup parentGroup;
     private String listeners;
-    private static LoggingService logger = new SLF4JLoggingService(PageGroup.class);
+    private static final LoggingService logger = new SLF4JLoggingService(PageGroup.class);
 
     public PageGroup() {
     }

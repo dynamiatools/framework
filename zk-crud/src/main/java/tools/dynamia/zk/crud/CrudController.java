@@ -72,11 +72,11 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     protected CrudService crudService;
     private boolean autoClearPage = false;
     private boolean autoReloadEntity = true;
-    private List<SubcrudController> subcontrollers = new ArrayList<>();
+    private final List<SubcrudController> subcontrollers = new ArrayList<>();
     // util
     private String name;
     private Window currentDialog;
-    private BeanSorter sorter = new BeanSorter();
+    private final BeanSorter sorter = new BeanSorter();
     private DataPaginator dataPaginator;
     // auto wired zk components
     private Paginal paginator;
@@ -84,7 +84,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     private boolean alwaysFindByExample = false;
     private boolean saved;
     private boolean deleted;
-    private Map<String, Object> defaultEntityValues = new HashMap<>();
+    private final Map<String, Object> defaultEntityValues = new HashMap<>();
     private boolean confirmBeforeSave;
     private Callback onSaveCallback;
     private boolean queryProjection;
@@ -148,7 +148,6 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
         return crudService;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
@@ -239,9 +238,8 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
         List<String> fields = Viewers.getFields(dataSetView.getViewDescriptor()).stream().map(Field::getName).collect(Collectors.toList());
         fields = new ArrayList<>(fields);
         fields.add(0, "id");
-        QueryBuilder query = QueryBuilder.select(fields.toArray(new String[0])).from(entityClass, "e").where(getParams())
+        return QueryBuilder.select(fields.toArray(new String[0])).from(entityClass, "e").where(getParams())
                 .resultType(BeanMap.class);
-        return query;
     }
 
     /*
@@ -292,7 +290,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     public void newExample() {
         if (entityClass != null) {
             try {
-                example = entityClass.newInstance();
+                example = BeanUtils.newInstance(entityClass);
             } catch (Exception ex) {
                 logger.error("Error creating new example object", ex);
             }
@@ -724,9 +722,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
                 if (onSaveCallback != null) {
                     onSaveCallback.doSomething();
                 }
-            } catch (WrongValueException e) {
-                throw e;
-            } catch (WrongValuesException e) {
+            } catch (WrongValueException | WrongValuesException e) {
                 throw e;
             } catch (Exception e) {
                 logger.error("Error al guardar " + entityClass, e);
@@ -793,9 +789,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
             setSelected(getEntity());
             doEdit();
             saved = true;
-        } catch (WrongValueException e) {
-            throw e;
-        } catch (WrongValuesException e) {
+        } catch (WrongValueException | WrongValuesException e) {
             throw e;
         } catch (Exception e) {
             logger.error("Error al guardar " + entityClass, e);
@@ -890,9 +884,8 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     }
 
     public Object getArg(Object name) {
-        Object arg = Executions.getCurrent().getArg().get(name);
 
-        return arg;
+        return Executions.getCurrent().getArg().get(name);
     }
 
     protected void afterInit() {

@@ -29,7 +29,7 @@ import java.util.function.Function;
  */
 public class SimpleCache<K, V> {
 
-    private Map<K, V> data = new ConcurrentHashMap<>();
+    private final Map<K, V> data = new ConcurrentHashMap<>();
 
     /**
      * Add to Cache

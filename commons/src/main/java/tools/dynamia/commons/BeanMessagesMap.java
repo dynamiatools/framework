@@ -26,14 +26,10 @@ import java.util.Locale;
  */
 public class BeanMessagesMap extends HashMap<String, String> {
 
-    private Class messageClass;
-    private Locale locale;
-    private BeanMessages messages;
+    private final BeanMessages messages;
 
 
     public BeanMessagesMap(Class messageClass, Locale locale) {
-        this.messageClass = messageClass;
-        this.locale = locale;
         this.messages = BeanMessages.get(messageClass, locale);
 
     }

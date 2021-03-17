@@ -99,6 +99,7 @@ public class VirtualFile extends File {
 
     @Override
     public File[] listFiles(FileFilter filter) {
+        assert filter != null;
         return getChildren().stream().filter(filter::accept).toArray(File[]::new);
     }
 

@@ -36,7 +36,7 @@ import tools.dynamia.integration.sterotypes.Service;
 @Service
 public class PeriodicTaskExecutor {
 
-    private LoggingService logger = new SLF4JLoggingService(PeriodicTaskExecutor.class);
+    private final LoggingService logger = new SLF4JLoggingService(PeriodicTaskExecutor.class);
 
     public PeriodicTaskExecutor() {
         logger.info("Starting " + getClass());

@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class SessionTracker implements HttpSessionListener {
 
-    private static List<HttpSession> activeSessions = Collections.synchronizedList(new ArrayList<>());
+    private static final List<HttpSession> activeSessions = Collections.synchronizedList(new ArrayList<>());
 
     @Override
     public void sessionCreated(HttpSessionEvent evt) {

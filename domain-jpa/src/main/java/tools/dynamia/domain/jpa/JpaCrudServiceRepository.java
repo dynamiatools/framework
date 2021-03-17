@@ -38,7 +38,7 @@ import java.util.List;
  */
 public class JpaCrudServiceRepository<T, ID extends Serializable> extends SimpleJpaRepository<T, ID> {
 
-    private CrudService crudService = Containers.get().findObject(JpaCrudService.class);
+    private final CrudService crudService = Containers.get().findObject(JpaCrudService.class);
 
     public JpaCrudServiceRepository(JpaEntityInformation entityInformation,
                                     EntityManager entityManager) {

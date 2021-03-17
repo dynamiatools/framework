@@ -32,8 +32,8 @@ import java.util.Map;
  */
 public abstract class AbstractExcelExporter<T, DATA> {
 
-    private List<ExporterColumn<T>> columns = new ArrayList<>();
-    private Map<String, String> columnsTitle = new HashMap<>();
+    private final List<ExporterColumn<T>> columns = new ArrayList<>();
+    private final Map<String, String> columnsTitle = new HashMap<>();
     private EnumValueType defaultEnumValueType = EnumValueType.NAME;
 
     private ExcelFileWriter excelWriter;
@@ -58,13 +58,13 @@ public abstract class AbstractExcelExporter<T, DATA> {
     }
 
     public AbstractExcelExporter addColumn(String name, String title) {
-        columns.add(new ExporterColumn<T>(name, title));
+        columns.add(new ExporterColumn<>(name, title));
 
         return this;
     }
 
     public AbstractExcelExporter addColumn(String name, String title, EnumValueType enumValueType) {
-        ExporterColumn<T> col = new ExporterColumn<T>(name, title);
+        ExporterColumn<T> col = new ExporterColumn<>(name, title);
         col.setEnumValueType(enumValueType);
         columns.add(col);
 

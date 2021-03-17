@@ -35,13 +35,13 @@ import java.util.Map;
 
 public class BootstrapMenuBuilder implements NavigationViewBuilder<Component> {
 
-    private Ul sidebar;
-    private Map<Module, Component> modulesContent = new HashMap<>();
-    private Map<PageGroup, Component> pgContent = new HashMap<>();
-    private Map<Page, Component> pageContent = new HashMap<>();
+    private final Ul sidebar;
+    private final Map<Module, Component> modulesContent = new HashMap<>();
+    private final Map<PageGroup, Component> pgContent = new HashMap<>();
+    private final Map<Page, Component> pageContent = new HashMap<>();
     private Menupopup contextMenu;
     private Page selectedPage;
-    private Locale locale = Messages.getDefaultLocale();
+    private final Locale locale = Messages.getDefaultLocale();
 
     public BootstrapMenuBuilder() {
         sidebar = new Ul();

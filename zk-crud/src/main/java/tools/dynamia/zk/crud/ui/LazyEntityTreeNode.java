@@ -55,9 +55,7 @@ public class LazyEntityTreeNode<E> extends EntityTreeNode<E> {
 
 	public LazyEntityTreeNode(E entity, Supplier<List<E>> supplier) {
 		super(entity);
-		this.loader = (node) -> {
-			supplier.get().forEach(e -> node.addChild(e));
-		};
+		this.loader = (node) -> supplier.get().forEach(node::addChild);
 	}
 
 	public ChildrenLoader<E> getLoader() {

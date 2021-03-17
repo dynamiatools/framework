@@ -41,8 +41,8 @@ import java.util.List;
  */
 public abstract class AbstractListToJsonConverter<T> implements AttributeConverter<List<T>, String> {
 
-    private LoggingService logger = new SLF4JLoggingService();
-    private Class<T> objectClass;
+    private final LoggingService logger = new SLF4JLoggingService();
+    private final Class<T> objectClass;
 
     public AbstractListToJsonConverter(Class<T> objectClass) {
         this.objectClass = objectClass;

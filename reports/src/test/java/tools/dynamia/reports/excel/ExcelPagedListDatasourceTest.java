@@ -39,7 +39,7 @@ public class ExcelPagedListDatasourceTest {
         int expectedTotalSize = 1000;
         int expectedPages = expectedTotalSize / pagedSize;
 
-        PagedList<String> list = new PagedList<>(new ExcelPagedListDatasource<String>(firstSheet, pagedSize) {
+        PagedList<String> list = new PagedList<>(new ExcelPagedListDatasource<>(firstSheet, pagedSize) {
 
             @Override
             public String parseRowData(Row row) {
@@ -51,7 +51,7 @@ public class ExcelPagedListDatasourceTest {
         assertEquals(expectedPages, list.getDataSource().getPageCount());
 
         List<String> inMemoryList = new ArrayList<>();
-        for (String string : list) {
+        for (String string : list) { //all pages
             inMemoryList.add(string);
         }
         assertEquals(inMemoryList.size(), list.size());

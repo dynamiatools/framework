@@ -54,7 +54,7 @@ public class ZKNavigationManager extends BaseNavigationManager implements Serial
 
     private Desktop currentDesktop;
     private boolean autoSyncClientURL = true;
-    private List<Callback> runLaterQueue = new ArrayList<>();
+    private final List<Callback> runLaterQueue = new ArrayList<>();
 
     @Autowired
     public ZKNavigationManager(ModuleContainer container) {

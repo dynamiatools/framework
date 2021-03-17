@@ -28,7 +28,7 @@ import java.util.Set;
 public class SelectedEntity<T extends AbstractEntity> implements Serializable {
 
     private T value;
-    private Set<EntitySelectionListener<T>> listeners = Collections.synchronizedSet(new HashSet<>());
+    private final Set<EntitySelectionListener<T>> listeners = Collections.synchronizedSet(new HashSet<>());
 
     public T getValue() {
         return value;
@@ -54,8 +54,7 @@ public class SelectedEntity<T extends AbstractEntity> implements Serializable {
     public void removeListener(Class listenerClass) {
         EntitySelectionListener<T> toRemove = null;
         if (!listeners.isEmpty()) {
-            for (Iterator<EntitySelectionListener<T>> it = listeners.iterator(); it.hasNext(); ) {
-                EntitySelectionListener<T> listener = it.next();
+            for (EntitySelectionListener<T> listener : listeners) {
                 if (listener.getClass().equals(listenerClass)) {
                     toRemove = listener;
                     break;
@@ -67,8 +66,7 @@ public class SelectedEntity<T extends AbstractEntity> implements Serializable {
 
     private void fireListeners() {
         if (!listeners.isEmpty()) {
-            for (Iterator<EntitySelectionListener<T>> it = listeners.iterator(); it.hasNext(); ) {
-                EntitySelectionListener<T> listener = it.next();
+            for (EntitySelectionListener<T> listener : listeners) {
                 listener.entitySelected(value);
             }
         }

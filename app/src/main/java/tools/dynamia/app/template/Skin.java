@@ -24,10 +24,10 @@ public class Skin implements Serializable {
      *
      */
     private static final long serialVersionUID = -4543799834003076100L;
-    private String id;
-    private String name;
-    private String filename;
-    private String description;
+    private final String id;
+    private final String name;
+    private final String filename;
+    private final String description;
     private String baseBackgroundColor;
     private String baseColor;
 

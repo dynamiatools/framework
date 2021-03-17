@@ -28,7 +28,7 @@ import java.text.DateFormat;
 
 public class LongDate implements Converter<Object, Object, Component> {
 
-    private static DateFormat df = DateFormat.getDateInstance(DateFormat.LONG);
+    private static final DateFormat df = DateFormat.getDateInstance(DateFormat.LONG);
 
     @Override
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {

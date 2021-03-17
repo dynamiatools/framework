@@ -25,7 +25,7 @@ import tools.dynamia.app.ApplicationInfo;
  */
 public class TemplateViewResolver extends InternalResourceViewResolver {
 
-	private ApplicationInfo applicationInfo;
+	private final ApplicationInfo applicationInfo;
 
 	public TemplateViewResolver(ApplicationInfo applicationInfo) {
 		this.applicationInfo = applicationInfo;

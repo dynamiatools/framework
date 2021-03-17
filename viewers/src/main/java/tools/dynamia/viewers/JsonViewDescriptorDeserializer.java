@@ -37,8 +37,8 @@ import java.util.*;
 
 public class JsonViewDescriptorDeserializer extends StdDeserializer<Object> {
 
-    private ViewDescriptor viewDescriptor;
-    private StdDateFormat dateFormat = new StdDateFormat();
+    private final ViewDescriptor viewDescriptor;
+    private final StdDateFormat dateFormat = new StdDateFormat();
     private static final LoggingService LOGGER = new SLF4JLoggingService(JsonViewDescriptorDeserializer.class);
 
     public JsonViewDescriptorDeserializer(ViewDescriptor viewDescriptor) {
@@ -53,7 +53,7 @@ public class JsonViewDescriptorDeserializer extends StdDeserializer<Object> {
 
 
     @Override
-    public Object deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public Object deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
         JsonNode node = jp.getCodec().readTree(jp);
         return parseNode(viewDescriptor.getBeanClass(), node, viewDescriptor);
 

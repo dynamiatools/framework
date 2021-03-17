@@ -98,11 +98,11 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
     private CrudController controller;
     private CrudState state;
     private ViewDescriptor viewDescriptor;
-    private List<CrudStateChangedListener> localListeners = new ArrayList<>();
+    private final List<CrudStateChangedListener> localListeners = new ArrayList<>();
     // -----------------------------------
     private Menupopup contextMenu;
     private List<CrudAction> applicableActions;
-    private List<CrudAction> actions = new ArrayList<>();
+    private final List<CrudAction> actions = new ArrayList<>();
     private String crudServiceName;
     private String formViewDescriptorId;
 
@@ -595,7 +595,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
         this.formViewDescriptorId = formViewDescriptorId;
     }
 
-    private class ComponentComparator implements Comparator<Component> {
+    private static class ComponentComparator implements Comparator<Component> {
 
         @Override
         public int compare(Component o1, Component o2) {

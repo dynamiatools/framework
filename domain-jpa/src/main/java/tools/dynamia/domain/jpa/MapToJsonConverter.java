@@ -30,7 +30,7 @@ import java.util.Map;
  */
 public class MapToJsonConverter implements AttributeConverter<Map<String, Object>, String> {
 
-    private LoggingService logger = new SLF4JLoggingService();
+    private final LoggingService logger = new SLF4JLoggingService();
 
     @Override
     public String convertToDatabaseColumn(Map<String, Object> map) {

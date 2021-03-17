@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public class PageEvent implements Serializable {
 
-    private String name;
+    private final String name;
     private Page page;
     private Object data;
     private Map<String, Object> params;

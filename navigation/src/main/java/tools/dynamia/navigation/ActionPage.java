@@ -27,7 +27,7 @@ import tools.dynamia.integration.Containers;
  */
 public class ActionPage extends Page {
 
-    private Class<? extends Action> actionClass;
+    private final Class<? extends Action> actionClass;
 
     public ActionPage(Class<? extends Action> actionClass) {
         this(actionClass.getName(), null, actionClass);

@@ -44,16 +44,16 @@ public class CoolLabel extends Div {
         ComponentAliasIndex.getInstance().add(CoolLabel.class);
     }
 
-    private Label titleLabel;
-    private Label subtitleLabel;
-    private Label descriptionLabel;
+    private final Label titleLabel;
+    private final Label subtitleLabel;
+    private final Label descriptionLabel;
     private Image image;
     private File imageFile;
     private String imageURL;
     private String noImagePath = "/zkau/web/tools/images/no-photo.jpg";
     private Image noImage;
     private int progress;
-    private Progressmeter progressmeter;
+    private final Progressmeter progressmeter;
     private boolean showImage = true;
 
     public CoolLabel() {

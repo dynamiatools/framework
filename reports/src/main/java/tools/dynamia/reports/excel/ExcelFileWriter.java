@@ -37,7 +37,7 @@ public class ExcelFileWriter {
 
     private static final LoggingService LOGGER = new SLF4JLoggingService(ExcelFileWriter.class);
 
-    private File file;
+    private final File file;
     private Workbook workbook;
     private Sheet sheet;
     private int lastRowNum;
@@ -47,7 +47,6 @@ public class ExcelFileWriter {
     private CellStyle borderStyle;
     private CellStyle dateStyle;
     private CellStyle mixStyle;
-    private CellStyle headerStyle;
     private final Map<String, CellStyle> CACHE = new HashMap<>();
 
 
@@ -83,7 +82,7 @@ public class ExcelFileWriter {
 
         Font font = workbook.createFont();
         font.setBold(true);
-        headerStyle = workbook.createCellStyle();
+        CellStyle headerStyle = workbook.createCellStyle();
         headerStyle.setFont(font);
 
     }
@@ -110,7 +109,6 @@ public class ExcelFileWriter {
 
         if (value != null) {
             if (value instanceof Number) {
-                cell.setCellType(CellType.NUMERIC);
                 cell.setCellValue(((Number) value).doubleValue());
             } else if (value instanceof Date) {
                 cell.setCellValue((Date) value);
@@ -121,10 +119,8 @@ public class ExcelFileWriter {
                 }
 
             } else if (value instanceof Boolean) {
-                cell.setCellType(CellType.BOOLEAN);
                 cell.setCellValue((Boolean) value);
             } else {
-                cell.setCellType(CellType.STRING);
                 try {
                     cell.setCellValue(value.toString());
                 } catch (Exception e) {

@@ -25,10 +25,10 @@ import java.util.Date;
  */
 public class Report implements Serializable {
 
-    private Object content;
-    private String name;
-    private Date date;
-    private ReportOutputType defaultOutputType;
+    private final Object content;
+    private final String name;
+    private final Date date;
+    private final ReportOutputType defaultOutputType;
 
     /**
      *

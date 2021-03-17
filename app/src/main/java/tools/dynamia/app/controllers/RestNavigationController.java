@@ -404,7 +404,7 @@ public class RestNavigationController {
         throw new PageNotFoundException("Invalid Path " + path);
     }
 
-    class SimpleResult {
+    static class SimpleResult {
         private Object data;
         private String response;
 
@@ -430,7 +430,7 @@ public class RestNavigationController {
         }
     }
 
-    class ListResult {
+    static class ListResult {
         private List data;
         @JsonInclude(JsonInclude.Include.NON_NULL)
         private DataPaginator pageable;

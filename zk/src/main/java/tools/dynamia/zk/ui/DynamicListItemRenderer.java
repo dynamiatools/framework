@@ -28,7 +28,7 @@ import tools.dynamia.domain.AbstractEntity;
  */
 public class DynamicListItemRenderer implements ListitemRenderer<Object> {
 
-    private String fields[];
+    private String[] fields;
 
     @Override
     public void render(Listitem item, Object data, int index) {

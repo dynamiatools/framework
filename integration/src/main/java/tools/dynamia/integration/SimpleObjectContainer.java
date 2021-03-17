@@ -30,7 +30,7 @@ public class SimpleObjectContainer implements ObjectContainer {
     /**
      * The objects.
      */
-    private Map<Object, String> objects = new HashMap<>();
+    private final Map<Object, String> objects = new HashMap<>();
 
     private String name = getClass().getSimpleName();
 

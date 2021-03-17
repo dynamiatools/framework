@@ -21,8 +21,8 @@ import org.zkoss.zk.ui.Component;
 
 public class TableFieldComponent {
 
-    private String fieldName;
-    private Component component;
+    private final String fieldName;
+    private final Component component;
 
     public TableFieldComponent(String fieldName, Component component) {
         super();

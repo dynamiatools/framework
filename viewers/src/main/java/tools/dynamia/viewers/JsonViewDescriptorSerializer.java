@@ -43,11 +43,11 @@ import java.util.Date;
 
 public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
 
-    private ViewDescriptor viewDescriptor;
-    private StdDateFormat fullDateFormat = new StdDateFormat();
-    private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-    private DateFormat basicDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    private final ViewDescriptor viewDescriptor;
+    private final StdDateFormat fullDateFormat = new StdDateFormat();
+    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private final DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+    private final DateFormat basicDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private final static LoggingService LOGGER = new SLF4JLoggingService(JsonViewDescriptorSerializer.class);
 
     public JsonViewDescriptorSerializer(ViewDescriptor viewDescriptor) {
@@ -223,7 +223,7 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
         gen.writeStringField(fieldName, df.format(date));
     }
 
-    class FieldMetadata {
+    static class FieldMetadata {
 
         private String label;
         private String description;

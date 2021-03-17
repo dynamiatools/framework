@@ -30,7 +30,7 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 @EnableWebSocket
 public class WebSocketGlobalCommandConfig implements WebSocketConfigurer {
 
-    private LoggingService logger = new SLF4JLoggingService(WebSocketGlobalCommandConfig.class);
+    private final LoggingService logger = new SLF4JLoggingService(WebSocketGlobalCommandConfig.class);
 
     public WebSocketGlobalCommandConfig() {
         logger.info("Starting " + getClass());

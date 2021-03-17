@@ -29,7 +29,6 @@ import java.util.Map;
  */
 public class MessagePopup extends MessageDialog {
 
-    private Map<String, Object> config;
     private String posicion = "right,bottom";
     private int timeout = 4000;
 
@@ -38,7 +37,6 @@ public class MessagePopup extends MessageDialog {
 
     public MessagePopup(Map<String, Object> config) {
 
-        this.config = config;
         Object pos = config.get("position");
         if (pos != null) {
             posicion = "" + pos;

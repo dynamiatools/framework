@@ -30,7 +30,7 @@ import java.util.Locale;
 
 public class Currency implements Converter<Object, Object, Component> {
 
-    private NumberFormat formatter;
+    private final NumberFormat formatter;
 
     public Currency() {
         Locale locale = Messages.getDefaultLocale();

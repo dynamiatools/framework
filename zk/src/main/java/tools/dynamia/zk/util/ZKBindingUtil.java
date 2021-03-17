@@ -38,7 +38,7 @@ public class ZKBindingUtil {
 
     private static final String CONVERTER = "converter";
     private static final String VALUE = "value";
-    private static LoggingService logger = new SLF4JLoggingService(ZKBindingUtil.class);
+    private static final LoggingService logger = new SLF4JLoggingService(ZKBindingUtil.class);
     public static final String KEY_EXP_PREFIX = "_ExpPrefix";
 
     public static Binder createBinder() {

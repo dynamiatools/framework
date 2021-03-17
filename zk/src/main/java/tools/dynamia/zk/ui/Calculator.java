@@ -30,21 +30,20 @@ public class Calculator extends Keypad {
 
     private Number result;
 
-    private List<Key> calculatorKeys = Arrays.asList(
-            new Key("%"), new Key("/"), new Key("x", "*"), new Key("-"), NEW_ROW,
-            new Key("7"), new Key("8"), new Key("9"), new Key("+", 1, 2), NEW_ROW,
-            new Key("4"), new Key("5"), new Key("6"), NEW_ROW,
-            new Key("1"), new Key("2"), new Key("3"),
-            new Key("=", 1, 2)
-                    .setCommand(e -> calc())
-                    .setSclass("kp-key-green"), NEW_ROW,
-            new Key("0", 2, 1), new Key(","), NEW_ROW,
-            new Key("").setLabel("CE").setCommand(e -> clear()), new Key("("), new Key(")"),
-            new Key("").setLabel("backspace").setIcon("fa fa-arrow-left").setCommand(e -> backspace()));
-
 
     public Calculator() {
         super(new Textbox());
+        List<Key> calculatorKeys = Arrays.asList(
+                new Key("%"), new Key("/"), new Key("x", "*"), new Key("-"), NEW_ROW,
+                new Key("7"), new Key("8"), new Key("9"), new Key("+", 1, 2), NEW_ROW,
+                new Key("4"), new Key("5"), new Key("6"), NEW_ROW,
+                new Key("1"), new Key("2"), new Key("3"),
+                new Key("=", 1, 2)
+                        .setCommand(e -> calc())
+                        .setSclass("kp-key-green"), NEW_ROW,
+                new Key("0", 2, 1), new Key(","), NEW_ROW,
+                new Key("").setLabel("CE").setCommand(e -> clear()), new Key("("), new Key(")"),
+                new Key("").setLabel("backspace").setIcon("fa fa-arrow-left").setCommand(e -> backspace()));
         setDefaultKeys(calculatorKeys);
         init();
         getDisplayBox().setSclass("kp-display-box");

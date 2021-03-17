@@ -115,12 +115,12 @@ public class StringSimplifier {
      * @return the string
      */
     private static String stripNonDiacritics(String orig) {
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         String lastchar = null;
         for (int i = 0; i < orig.length(); i++) {
             String source = orig.substring(i, i + 1);
             String replace = NONDIACRITICS.get(source);
-            String toReplace = replace == null ? String.valueOf(source) : replace;
+            String toReplace = replace == null ? source : replace;
             if (DEFAULT_REPLACE.equals(lastchar) && DEFAULT_REPLACE.equals(toReplace)) {
                 toReplace = "";
             } else {

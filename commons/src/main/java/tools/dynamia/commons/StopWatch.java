@@ -20,8 +20,8 @@ import java.util.concurrent.TimeUnit;
 
 public class StopWatch {
 
-    private long rate;
-    private long startTime;
+    private final long rate;
+    private final long startTime;
     private long currentTime;
     private long lastNow;
 

@@ -40,12 +40,12 @@ import java.util.*;
  */
 public class JpaConfigurationAdapter {
 
-    private LoggingService logger = new SLF4JLoggingService(getClass());
+    private final LoggingService logger = new SLF4JLoggingService(getClass());
 
 
-    private PropertiesContainer properties;
+    private final PropertiesContainer properties;
 
-    private Set<String> additionalPackagesToScan = new HashSet<>();
+    private final Set<String> additionalPackagesToScan = new HashSet<>();
 
     public JpaConfigurationAdapter(PropertiesContainer properties) {
         this.properties = properties;
@@ -251,7 +251,7 @@ public class JpaConfigurationAdapter {
             packages.addAll(additionalPackagesToScan);
         }
 
-        return packages.toArray(new String[packages.size()]);
+        return packages.toArray(new String[0]);
     }
 
     @Bean

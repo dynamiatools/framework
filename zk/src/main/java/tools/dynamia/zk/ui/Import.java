@@ -44,7 +44,7 @@ public class Import extends Div implements DynamicPropertied, AfterCompose, IdSp
      */
     private static final long serialVersionUID = -8236823411921386808L;
     private String src;
-    private Map<String, Object> args = new HashMap<>();
+    private final Map<String, Object> args = new HashMap<>();
 
 
     private boolean valueRequired = false;

@@ -22,7 +22,6 @@ import org.zkoss.bind.Converter;
 import org.zkoss.zk.ui.Component;
 
 
-@SuppressWarnings("deprecation")
 public abstract class FormConverter<UI, BEAN> implements Converter<Object, Object, Component> {
 
     @Override

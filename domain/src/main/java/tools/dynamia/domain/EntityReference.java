@@ -30,7 +30,7 @@ public class EntityReference<ID extends Serializable> implements Serializable {
     private String name;
     private String className;
     private String description;
-    private Map<String, Object> attributes = new HashMap<>();
+    private final Map<String, Object> attributes = new HashMap<>();
 
     public EntityReference() {
     }

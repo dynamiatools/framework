@@ -37,12 +37,12 @@ public class ViewDescriptorMessages {
     /**
      * The view descriptor.
      */
-    private ViewDescriptor viewDescriptor;
+    private final ViewDescriptor viewDescriptor;
 
     /**
      * The locale.
      */
-    private Locale locale;
+    private final Locale locale;
 
     /**
      * Instantiates a new view descriptor messages.

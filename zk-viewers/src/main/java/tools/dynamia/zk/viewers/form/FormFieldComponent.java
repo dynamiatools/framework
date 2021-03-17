@@ -23,9 +23,9 @@ import org.zkoss.zk.ui.HtmlBasedComponent;
 
 public class FormFieldComponent {
 
-    private String fieldName;
-    private Label label;
-    private Component inputComponent;
+    private final String fieldName;
+    private final Label label;
+    private final Component inputComponent;
     private Component inputComponentAlt;
 
     public FormFieldComponent(String fieldName, Component label, Component inputComponent) {
@@ -96,8 +96,8 @@ public class FormFieldComponent {
     }
 
 
-    public class Label {
-        private Component delegated;
+    public static class Label {
+        private final Component delegated;
 
         public Label(Component delegated) {
             super();

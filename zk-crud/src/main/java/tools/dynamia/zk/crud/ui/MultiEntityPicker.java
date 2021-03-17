@@ -73,14 +73,7 @@ public class MultiEntityPicker extends Div {
             addColumn("Seleccionados", null);
             addColumn("", "40px");
         }
-        listbox.setItemRenderer(new ListitemRenderer() {
-
-            @Override
-            public void render(Listitem item, Object data, int index) {
-                renderEntity(item, data);
-
-            }
-        });
+        listbox.setItemRenderer((ListitemRenderer) (item, data, index) -> renderEntity(item, data));
     }
 
     private void addEntity(Object selected) {
@@ -159,12 +152,9 @@ public class MultiEntityPicker extends Div {
                 removeBtn.setImage(icon);
             }
 
-            removeBtn.addEventListener(Events.ON_CLICK, new EventListener() {
-                @Override
-                public void onEvent(Event event) {
-                    item.detach();
-                    selectedEntities.remove(item.getValue());
-                }
+            removeBtn.addEventListener(Events.ON_CLICK, (EventListener) event -> {
+                item.detach();
+                selectedEntities.remove(item.getValue());
             });
         }
     }

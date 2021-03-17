@@ -18,5 +18,5 @@
 package tools.dynamia.domain.notifications;
 
 public enum NotificationType {
-    NORMAL, DANGER, WARNING, SUCCESS;
+    NORMAL, DANGER, WARNING, SUCCESS
 }

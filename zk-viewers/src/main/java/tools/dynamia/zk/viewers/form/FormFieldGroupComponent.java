@@ -24,8 +24,8 @@ import java.util.List;
 
 public class FormFieldGroupComponent {
 
-    private String groupName;
-    private Component groupComponent;
+    private final String groupName;
+    private final Component groupComponent;
     private List<FormFieldComponent> fieldsComponents = new ArrayList<>();
 
     public FormFieldGroupComponent(String groupName, Component groupComponent) {

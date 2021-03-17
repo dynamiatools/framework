@@ -34,7 +34,6 @@ public class EntityLink extends A {
         ComponentAliasIndex.getInstance().add("entitylink", EntityLink.class);
     }
 
-    private String tooltiptext = Messages.get(ViewDataAction.class, "viewData");
     private Object entity;
     private String labelField;
     private Callback onClickCallback = () -> {
@@ -53,6 +52,7 @@ public class EntityLink extends A {
         this.entity = entity;
         renderLabel();
         initEvents();
+        String tooltiptext = Messages.get(ViewDataAction.class, "viewData");
         setTooltiptext(tooltiptext);
     }
 

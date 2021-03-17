@@ -69,7 +69,7 @@ public class ActionCommandTest {
 
     }
 
-    class CalculatorForm {
+    static class CalculatorForm {
 
         private int a;
         private int b;

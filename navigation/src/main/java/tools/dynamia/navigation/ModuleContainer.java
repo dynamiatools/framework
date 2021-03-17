@@ -171,7 +171,7 @@ public final class ModuleContainer implements Serializable {
 
         try {
             if (page == null) {
-                String p[] = path.split("/");
+                String[] p = path.split("/");
                 Module pathModule = getModuleById(p[0]);
                 if (pathModule != null) {
                     if (p.length == 2) {
@@ -267,7 +267,7 @@ public final class ModuleContainer implements Serializable {
 
         if (path.contains("/")) {
             try {
-                String p[] = path.split("/");
+                String[] p = path.split("/");
                 pathModule = getModuleById(p[0]);
             } catch (Exception e) {
             }

@@ -32,7 +32,7 @@ import java.util.Locale;
 
 public class Decimal implements Converter<Object, Object, Component> {
 
-    private NumberFormat formatter;
+    private final NumberFormat formatter;
 
     public Decimal() {
         Locale locale = Messages.getDefaultLocale();

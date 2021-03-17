@@ -22,11 +22,11 @@ import tools.dynamia.domain.query.QueryCondition;
 
 public class FilterField {
 
-    private PropertyInfo info;
+    private final PropertyInfo info;
     private String label;
-    private QueryCondition condition;
-    private String path;
-    private Binder binder;
+    private final QueryCondition condition;
+    private final String path;
+    private final Binder binder;
 
     public FilterField(String path, PropertyInfo info, String label, QueryCondition condition, Binder binder) {
         super();

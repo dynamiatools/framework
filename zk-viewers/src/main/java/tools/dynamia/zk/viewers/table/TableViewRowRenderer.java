@@ -65,7 +65,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
 
     public final void setViewDescriptor(ViewDescriptor descriptor) {
         this.viewDescriptor = descriptor;
-        Collections.sort(descriptor.getFields(), new IndexableComparator());
+        descriptor.getFields().sort(new IndexableComparator());
     }
 
     public final void setTableView(TableView tableView) {
@@ -75,8 +75,6 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
     public TableView getTableView() {
         return tableView;
     }
-
-    @SuppressWarnings("rawtypes")
 
     @Override
     public void render(Listitem item, Object data, int index) {

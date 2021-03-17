@@ -40,9 +40,7 @@ public class JpaConvertersTest {
         entity.getData().put("name", "harold");
         entity.getData().put("age", 20);
 
-        crudService.executeWithinTransaction(() -> {
-            crudService.create(entity);
-        });
+        crudService.executeWithinTransaction(() -> crudService.create(entity));
 
 
         var other = crudService.find(DummyEntityJson.class, entity.getId());
@@ -58,9 +56,7 @@ public class JpaConvertersTest {
         entity.getAddresses().add(new Address("Main Av 123", "Int 001", "New York City", "New York"));
         entity.getAddresses().add(new Address("Cra 1", "Apto 123", "Medellin", "Antioquia"));
 
-        crudService.executeWithinTransaction(() -> {
-            crudService.create(entity);
-        });
+        crudService.executeWithinTransaction(() -> crudService.create(entity));
 
 
         var other = crudService.find(DummyEntityJson.class, entity.getId());

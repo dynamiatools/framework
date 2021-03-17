@@ -22,8 +22,8 @@ import java.util.Map;
 
 public class PageRequest {
 
-    private Page page;
-    private Map<String, Object> params;
+    private final Page page;
+    private final Map<String, Object> params;
 
     public PageRequest(Page page, Map<String, Object> params) {
         super();

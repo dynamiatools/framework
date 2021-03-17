@@ -32,7 +32,7 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     private Object reportTemplate;
     private Object dataSource;
     private Map<String, Object> parameters = new HashMap<>();
-    private Map exporterParameters = new HashMap();
+    private final Map exporterParameters = new HashMap();
     private ReportOutputType defaultOutputType;
 
     public SimpleReportDescriptor() {

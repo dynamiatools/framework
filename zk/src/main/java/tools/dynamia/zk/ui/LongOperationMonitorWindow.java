@@ -32,13 +32,13 @@ public class LongOperationMonitorWindow extends Window {
      */
     private static final long serialVersionUID = -2630380982547205553L;
     public static final int DEFAULT_REFRESH_RATE = 2000;
-    private ClassMessages messages = ClassMessages.get(LongOperationMonitorWindow.class);
-    private ProgressMonitor monitor;
+    private final ClassMessages messages = ClassMessages.get(LongOperationMonitorWindow.class);
+    private final ProgressMonitor monitor;
 
     private Progressmeter progress;
     private String messageTemplate = messages.get("DefaultProgressMessage");
     private int refreshRate;
-    private LongOperation longOperation;
+    private final LongOperation longOperation;
     private Caption titleCaption;
     private Label messageLabel;
 

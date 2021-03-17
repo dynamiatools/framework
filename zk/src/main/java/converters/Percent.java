@@ -30,7 +30,7 @@ import java.text.NumberFormat;
 
 public class Percent implements Converter<Object, Object, Component> {
 
-    private NumberFormat nf = NumberFormat.getPercentInstance(Messages.getDefaultLocale());
+    private final NumberFormat nf = NumberFormat.getPercentInstance(Messages.getDefaultLocale());
 
     @Override
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {

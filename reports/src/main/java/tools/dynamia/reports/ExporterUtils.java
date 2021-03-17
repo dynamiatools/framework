@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class ExporterUtils {
 
-	private static Map<String, Object> cache = new HashMap<>();
+	private static final Map<String, Object> cache = new HashMap<>();
 	
 	public static void clearCache(){
 		cache.clear();

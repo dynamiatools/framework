@@ -45,7 +45,6 @@ public class BIRTReportViewer extends Div {
     private String location;
     private String viewerURL;
     private String resourceFolder;
-    private List<FileInfo> model;
     private Listbox listbox;
 
     public BIRTReportViewer() {
@@ -77,7 +76,7 @@ public class BIRTReportViewer extends Div {
     }
 
     private void initModel() {
-        model = reportsRepository.scan("");
+        List<FileInfo> model = reportsRepository.scan("");
         ZKUtil.fillListbox(listbox, model, true);
     }
 

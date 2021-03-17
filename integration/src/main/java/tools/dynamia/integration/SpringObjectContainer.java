@@ -39,7 +39,7 @@ import java.util.Optional;
 @Component
 public class SpringObjectContainer implements ObjectContainer, ApplicationContextAware {
 
-    private LoggingService logger = new SLF4JLoggingService(SpringObjectContainer.class, "Containers");
+    private final LoggingService logger = new SLF4JLoggingService(SpringObjectContainer.class, "Containers");
 
     /**
      * The app context.
@@ -101,10 +101,8 @@ public class SpringObjectContainer implements ObjectContainer, ApplicationContex
     public <T> List<T> getObjects(Class<T> type) {
         List<T> beans = new ArrayList<>();
         Map<String, T> map = appContext.getBeansOfType(type);
-        if (map != null && !map.isEmpty()) {
-            for (T t : map.values()) {
-                beans.add(t);
-            }
+        if (!map.isEmpty()) {
+            beans.addAll(map.values());
         }
         return beans;
     }

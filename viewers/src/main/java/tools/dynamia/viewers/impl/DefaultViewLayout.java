@@ -34,7 +34,7 @@ public class DefaultViewLayout implements ViewLayout {
     /**
      * The map.
      */
-    private Map<String, Object> map = new HashMap<>();
+    private final Map<String, Object> map = new HashMap<>();
 
     /* (non-Javadoc)
      * @see com.dynamia.tools.viewers.ViewLayout#getParams()

@@ -27,7 +27,7 @@ import tools.dynamia.zk.reports.ui.BIRTReportEditor;
 @InstallAction
 public class DeleteBIRTReportAction extends BIRTReportAction {
 
-    private ClassMessages messages = ClassMessages.get(DeleteBIRTReportAction.class);
+    private final ClassMessages messages = ClassMessages.get(DeleteBIRTReportAction.class);
 
     public DeleteBIRTReportAction() {
         setName(messages.get("DeleteReport"));

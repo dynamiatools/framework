@@ -31,7 +31,7 @@ public class FieldBuilder {
     /**
      * The field.
      */
-    private Field field;
+    private final Field field;
 
     /**
      * Instantiates a new field builder.

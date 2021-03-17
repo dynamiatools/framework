@@ -33,11 +33,11 @@ import java.util.Map;
 
 public class ViewDescriptorDataSource extends JRAbstractBeanDataSource {
 
-    private ViewDescriptor viewDescriptor;
+    private final ViewDescriptor viewDescriptor;
     private Object currentBean;
     private Iterator iterator;
-    private Collection data;
-    private Map<String, Object> cache = new HashMap<>();
+    private final Collection data;
+    private final Map<String, Object> cache = new HashMap<>();
 
     public ViewDescriptorDataSource(ViewDescriptor viewDescriptor, Collection beanCollection) {
         super(false);

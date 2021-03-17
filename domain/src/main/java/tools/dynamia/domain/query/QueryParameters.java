@@ -40,10 +40,10 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
     private List<Group> groups = new ArrayList<>();
     private Class<?> type;
 
-    private Map<String, Object> hints = new HashMap<>();
+    private final Map<String, Object> hints = new HashMap<>();
     private int depth = 0;
     private int maxResults;
-    private List<String> sortedKeys = new ArrayList<>();
+    private final List<String> sortedKeys = new ArrayList<>();
 
     public QueryParameters() {
     }
@@ -73,7 +73,7 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
      *
      * @param m the m
      */
-    public QueryParameters(Map<? extends String, ? extends Object> m) {
+    public QueryParameters(Map<? extends String, ?> m) {
         if (m != null) {
             for (String key : m.keySet()) {
                 add(key, m.get(key));

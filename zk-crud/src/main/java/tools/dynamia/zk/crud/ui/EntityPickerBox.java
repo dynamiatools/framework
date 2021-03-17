@@ -73,8 +73,8 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
 
     private static final LoggingService logger = new SLF4JLoggingService(EntityPickerBox.class);
 
-    private QueryParameters defaultParameters = new QueryParameters();
-    private CrudService crudService = Containers.get().findObject(CrudService.class);
+    private final QueryParameters defaultParameters = new QueryParameters();
+    private final CrudService crudService = Containers.get().findObject(CrudService.class);
 
     private String[] fields;
 
@@ -90,7 +90,6 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
     private boolean autoselect;
     private long lastSearchTimestamp;
     private String lastSearchText;
-    private final long DELAY = 500;//ms
     private List result;
     private String defaultItemLabel;
 
@@ -246,6 +245,8 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
 
     private void search(String param) {
 
+        //ms
+        long DELAY = 500;
         if (lastSearchTimestamp > 0 && (System.currentTimeMillis() - lastSearchTimestamp) < DELAY) {
             return;
         }
@@ -303,7 +304,6 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public final void setEntityClass(String entityClass) {
         try {
             Class clazz = Class.forName(entityClass);

@@ -50,7 +50,7 @@ public class DefaultViewDescriptorFactory extends AbstractViewDescriptorFactory 
     /**
      * Default view descriptors cache
      */
-    private SimpleCache<String, SimpleCache<Class, ViewDescriptor>> cache = new SimpleCache<>();
+    private final SimpleCache<String, SimpleCache<Class, ViewDescriptor>> cache = new SimpleCache<>();
 
     /* (non-Javadoc)
      * @see com.dynamia.tools.viewers.impl.AbstractViewDescriptorFactory#getDefaultViewDescriptor(java.lang.Class, java.lang.String)

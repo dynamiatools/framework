@@ -28,7 +28,7 @@ import java.text.DecimalFormat;
 
 public class Double implements Converter<Object, Object, Component> {
 
-    private static DecimalFormat nf = new DecimalFormat("##.##");
+    private static final DecimalFormat nf = new DecimalFormat("##.##");
 
 
     @Override

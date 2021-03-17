@@ -32,12 +32,12 @@ public class GenericMessage<T> implements Message {
     /**
      * The headers.
      */
-    private Map<String, Object> headers = new HashMap<>();
+    private final Map<String, Object> headers = new HashMap<>();
 
     /**
      * The content.
      */
-    private T content;
+    private final T content;
 
     /**
      * Instantiates a new simple message.

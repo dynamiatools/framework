@@ -29,7 +29,7 @@ import java.util.Properties;
  */
 public class SimpleMessageService implements MessageService {
 
-    private SimpleObjectContainer container = new SimpleObjectContainer("LocalMessageChannels");
+    private final SimpleObjectContainer container = new SimpleObjectContainer("LocalMessageChannels");
 
     @Override
     public MessageChannel createChannel(String name) {

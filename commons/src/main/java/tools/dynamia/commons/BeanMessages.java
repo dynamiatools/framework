@@ -93,27 +93,27 @@ public class BeanMessages {
     /**
      * The bean class.
      */
-    private Class<?> beanClass;
+    private final Class<?> beanClass;
 
     /**
      * The locale.
      */
-    private Locale locale;
+    private final Locale locale;
 
     /**
      * The bundles.
      */
-    private List<ResourceBundle> bundles = new ArrayList<>();
+    private final List<ResourceBundle> bundles = new ArrayList<>();
 
     /**
      * The logger.
      */
-    private LoggingService logger = new SLF4JLoggingService(BeanMessages.class);
+    private final LoggingService logger = new SLF4JLoggingService(BeanMessages.class);
 
     /**
      * The cache.
      */
-    private Map<String, String> cache = new ConcurrentHashMap<>();
+    private final Map<String, String> cache = new ConcurrentHashMap<>();
 
     /**
      * Instantiates a new bean messages.

@@ -52,7 +52,7 @@ public abstract class IOUtils {
     /**
      * The default resource locator.
      */
-    private static ResourceLocator DEFAULT_RESOURCE_LOCATOR;
+    private static final ResourceLocator DEFAULT_RESOURCE_LOCATOR;
     private static final LoggingService LOGGER = new SLF4JLoggingService(IOUtils.class);
 
     /**

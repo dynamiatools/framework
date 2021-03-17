@@ -194,7 +194,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
             indexFooter.setParent(foot);
         }
 
-        Collections.sort(descriptor.getFields(), new IndexableComparator());
+        descriptor.getFields().sort(new IndexableComparator());
         List<TableViewFooter> footersWithFunctions = new ArrayList<>();
 
         for (Field field : descriptor.getFields()) {
@@ -252,11 +252,9 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
                 if (value != null) {
                     if (processor != null) {
                         var result = processor.compute(value, new HashMap<>(), footersWithFunctions);
-                        result.forEach((f, v) -> {
-                            footersWithFunctions.stream()
-                                    .filter(ft -> ft.equals(f)).findFirst()
-                                    .ifPresent(tableViewFooter -> tableViewFooter.setValue(v));
-                        });
+                        result.forEach((f, v) -> footersWithFunctions.stream()
+                                .filter(ft -> ft.equals(f)).findFirst()
+                                .ifPresent(tableViewFooter -> tableViewFooter.setValue(v)));
                     } else {
                         footersWithFunctions.forEach(footer -> {
                             if (value instanceof Collection) {

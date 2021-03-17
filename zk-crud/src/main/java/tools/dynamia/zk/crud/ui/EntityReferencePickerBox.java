@@ -56,13 +56,12 @@ public class EntityReferencePickerBox extends Bandbox implements CanBeReadonly {
         ComponentAliasIndex.getInstance().add("entityrefpicker", EntityReferencePickerBox.class);
     }
 
-    private QueryParameters defaultParameters = new QueryParameters();
+    private final QueryParameters defaultParameters = new QueryParameters();
     private String[] fields;
     private String entityClassName;
     private String entityAlias;
     private EntityReference selected;
     private EntityReferenceRepository repository;
-    private Bandpopup bandpopup;
     private TableView resultTable;
     private String lastSearchText;
     private String defaultItemLabel;
@@ -84,7 +83,7 @@ public class EntityReferencePickerBox extends Bandbox implements CanBeReadonly {
 
     private void init() {
         setSclass("entitypickerbox-popup");
-        bandpopup = new Bandpopup();
+        Bandpopup bandpopup = new Bandpopup();
         bandpopup.setStyle("padding: 0");
         resultTable = new TableView();
         resultTable.setMold("default");
@@ -206,7 +205,6 @@ public class EntityReferencePickerBox extends Bandbox implements CanBeReadonly {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public final void setEntityClassName(String entityClass) {
         this.entityClassName = entityClass;
         initRepository();

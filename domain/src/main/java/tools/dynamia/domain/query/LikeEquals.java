@@ -29,7 +29,7 @@ public class LikeEquals extends AbstractQueryCondition<Object> {
     /**
      * The auto searchable string.
      */
-    private boolean autoSearchableString;
+    private final boolean autoSearchableString;
 
     /**
      * Instantiates a new like equals.

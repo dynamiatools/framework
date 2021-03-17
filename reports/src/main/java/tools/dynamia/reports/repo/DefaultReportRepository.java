@@ -34,7 +34,7 @@ import java.util.List;
 @Service
 public class DefaultReportRepository extends CrudServiceListenerAdapter<Parameter> implements ReportsRepository {
 
-	private LoggingService logger = new SLF4JLoggingService(getClass());
+	private final LoggingService logger = new SLF4JLoggingService(getClass());
 
 	private static final String PARAM_NAME = "GLOBAL_REPORTS_LOCATION";
 	private String reportLocation;
@@ -42,7 +42,7 @@ public class DefaultReportRepository extends CrudServiceListenerAdapter<Paramete
 	@Autowired
 	private Parameters appParams;
 
-	private ReportExplorer explorer;
+	private final ReportExplorer explorer;
 
 	public DefaultReportRepository() {
 		explorer = new ReportExplorer(new JasperReportExplorerFilter(), new JasperReportCompiler());

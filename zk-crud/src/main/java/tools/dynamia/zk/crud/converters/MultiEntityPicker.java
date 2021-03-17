@@ -31,9 +31,6 @@ import java.util.List;
 public class MultiEntityPicker extends FormConverter<List, List> {
 
     @Override
-    /**
-     * Convert values from ui to bean
-     */
     public List convertToUi(List beanValue, Object formValue, Component comp) {
         tools.dynamia.zk.crud.ui.MultiEntityPicker mep = (tools.dynamia.zk.crud.ui.MultiEntityPicker) comp;
         Field field = getField(comp);

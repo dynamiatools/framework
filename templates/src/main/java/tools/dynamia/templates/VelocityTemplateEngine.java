@@ -33,7 +33,7 @@ public class VelocityTemplateEngine implements TemplateEngine {
 
 	private static final String LOG_TAG = "VelocityTemplateEngine";
 
-	private VelocityEngine velocityEngine = new VelocityEngine();
+	private final VelocityEngine velocityEngine = new VelocityEngine();
 
 	@Override
 	public String evaluate(String template, Map<String, Object> params) {

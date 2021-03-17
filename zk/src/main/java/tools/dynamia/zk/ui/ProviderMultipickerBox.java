@@ -48,7 +48,7 @@ public class ProviderMultipickerBox extends Bandbox {
     private String idField = "id";
     private String nameField = "name";
     private Class<?> providerClass;
-    private Listbox itemsList;
+    private final Listbox itemsList;
 
     public ProviderMultipickerBox() {
         setReadonly(true);

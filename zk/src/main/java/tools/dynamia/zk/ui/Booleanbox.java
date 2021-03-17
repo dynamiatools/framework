@@ -110,7 +110,7 @@ public class Booleanbox extends Combobox {
         this.falseLabel = falseLabel;
     }
 
-    class BooleanWrapper {
+    static class BooleanWrapper {
         Boolean value;
 
         public BooleanWrapper(Boolean value) {

@@ -19,7 +19,7 @@ package tools.dynamia.domain.query;
 
 public abstract class AbstractQuery<T> {
 
-    private T delegate;
+    private final T delegate;
 
     public AbstractQuery(T delegate) {
         this.delegate = delegate;

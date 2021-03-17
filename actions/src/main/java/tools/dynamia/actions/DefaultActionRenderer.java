@@ -21,9 +21,7 @@ public class DefaultActionRenderer implements ActionRenderer<ActionComponent> {
     @Override
     public ActionComponent render(Action action, ActionEventBuilder actionEventBuilder) {
 
-        ActionComponent comp = new ActionComponent(action, actionEventBuilder);
-
-        return comp;
+        return new ActionComponent(action, actionEventBuilder);
     }
 
 }

@@ -17,11 +17,6 @@
 package tools.dynamia.domain.query;
 
 /**
- * The Class IsNotNull.
- *
- * @author Mario A. Serrano Leones
- */
-/**
  * Render an is not null condition
  *
  * @author Mario A. Serrano Leones

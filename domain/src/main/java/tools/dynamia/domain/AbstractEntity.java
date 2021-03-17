@@ -128,7 +128,7 @@ public abstract class AbstractEntity<ID extends Serializable> implements Seriali
      * @param newValue
      */
     protected void notifyChange(String propertyName, Object oldValue, Object newValue) {
-        if (oldValue == null || oldValue != newValue || !oldValue.equals(newValue)) {
+        if (oldValue == null || oldValue != newValue) {
             propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
         }
     }

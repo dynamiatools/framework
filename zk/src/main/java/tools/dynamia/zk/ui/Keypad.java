@@ -121,9 +121,8 @@ public class Keypad extends Div {
     }
 
     private Component newRow() {
-        Row row = new Row();
 
-        return row;
+        return new Row();
     }
 
     public void clear() {
@@ -271,7 +270,7 @@ public class Keypad extends Div {
 
     class KeyButton extends Button {
 
-        private Key key;
+        private final Key key;
 
         public KeyButton(Key key) {
             this.key = key;

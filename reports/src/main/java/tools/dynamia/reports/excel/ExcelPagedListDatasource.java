@@ -26,8 +26,8 @@ import java.util.List;
 
 public abstract class ExcelPagedListDatasource<T> extends DataPaginatorPagedListDataSource<T> {
 
-    private Sheet sheet;
-    private boolean containsHeaders;
+    private final Sheet sheet;
+    private final boolean containsHeaders;
 
     /**
      * POI Excel Sheet, default page size is 100

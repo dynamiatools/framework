@@ -60,8 +60,8 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
     private Div toolbarRegion;
     private Component actionsRegion;
     private Toolbar toolbar;
-    private List<Action> actions = new ArrayList<>();
-    private MultiMap<String, EventListener> events = new ArrayListMultiMap<>();
+    private final List<Action> actions = new ArrayList<>();
+    private final MultiMap<String, EventListener> events = new ArrayListMultiMap<>();
     private boolean autoheight;
     private String viewStyle;
     private String viewSclass;
@@ -162,9 +162,7 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
 
         if (view instanceof Component) {
             Component viewComp = (Component) view;
-            events.forEach((name, values) -> values.forEach(listener -> {
-                viewComp.addEventListener(name, listener);
-            }));
+            events.forEach((name, values) -> values.forEach(listener -> viewComp.addEventListener(name, listener)));
             viewComp.setParent(contentRegion);
 
         }
@@ -308,8 +306,6 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
     @Override
     protected void renderProperties(ContentRenderer renderer) throws IOException {
         super.renderProperties(renderer);
-        // renderer.render("value", value);
-        //  renderer.render("viewType", viewType);
     }
 
     @Override

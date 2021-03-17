@@ -29,10 +29,10 @@ import java.util.Objects;
 public class DecimalboxCalculator extends Span implements CanBeReadonly {
 
 
-    private Decimalbox decimalbox;
-    private Calculator calculator;
-    private A calcButton;
-    private Popup calcPopup;
+    private final Decimalbox decimalbox;
+    private final Calculator calculator;
+    private final A calcButton;
+    private final Popup calcPopup;
     private BigDecimal value;
 
     public DecimalboxCalculator() {

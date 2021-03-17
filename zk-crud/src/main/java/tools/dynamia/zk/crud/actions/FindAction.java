@@ -120,7 +120,7 @@ public class FindAction extends AbstractCrudAction implements CrudControllerAwar
     private String[] initFields(CrudActionEvent evt) {
         if (getAttribute("searchFields") != null && getAttribute("searchFields") instanceof List) {
             List<String> searchFields = (List) getAttribute("searchFields");
-            return searchFields.toArray(new String[searchFields.size()]);
+            return searchFields.toArray(new String[0]);
         } else {
             return loadFieldsFromDescriptor(evt);
         }
@@ -136,7 +136,7 @@ public class FindAction extends AbstractCrudAction implements CrudControllerAwar
                 fieldsNames.add(field.getName());
             }
         }
-        return fieldsNames.toArray(new String[fieldsNames.size()]);
+        return fieldsNames.toArray(new String[0]);
 
     }
 }

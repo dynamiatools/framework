@@ -104,9 +104,7 @@ public class MessageDialog implements MessageDisplayer {
 
     @Override
     public <T> void showInput(String title, Class<T> valueClass, T defaultValue, Consumer<T> onValue) {
-        ZKUtil.showInputDialog(title, valueClass, defaultValue, evt -> {
-            onValue.accept((T) evt.getData());
-        });
+        ZKUtil.showInputDialog(title, valueClass, defaultValue, evt -> onValue.accept((T) evt.getData()));
     }
 
 }

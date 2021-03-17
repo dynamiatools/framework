@@ -56,9 +56,9 @@ public class ApplicationInfo implements Serializable, PropertiesContainer {
     public static final String JPA_DIALECT = "jpaDialect";
     public static final String WEB_CACHE_ENABLED = "webCacheEnabled";
 
-    private Map<String, String> properties;
-    private Map<String, String> systemProperties;
-    private Map<String, String> systemEnvironment;
+    private final Map<String, String> properties;
+    private final Map<String, String> systemProperties;
+    private final Map<String, String> systemEnvironment;
 
     private ApplicationInfo() {
         systemProperties = new HashMap(System.getProperties());

@@ -29,7 +29,7 @@ import java.util.List;
 
 public class ComboboxActionRenderer extends ZKActionRenderer<Combobox> {
 
-    private List model;
+    private final List model;
     private boolean readonly = true;
     private Object defaultValue;
     private ComboitemRenderer comboitemRenderer;

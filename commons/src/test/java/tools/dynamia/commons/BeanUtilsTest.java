@@ -39,7 +39,7 @@ public class BeanUtilsTest {
      */
     @Test
     public void testInvokeMethod() {
-        Object bean = new String("Bean");
+        Object bean = "Bean";
         String methodName = "length";
 
         Object[] args = null;
@@ -172,7 +172,7 @@ public class BeanUtilsTest {
         assertTrue(BeanUtils.isAssignable(Integer.class, Object.class));
     }
 
-    class DummyClass extends LinkedList<String> {
+    static class DummyClass extends LinkedList<String> {
 
         /**
          *

@@ -61,7 +61,7 @@ public class CrudTableViewBuilder implements CrudDataSetViewBuilder {
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     public DataSetView build(GenericCrudView view) {
         CrudView crudView;
         if (view instanceof CrudView) {
@@ -104,9 +104,8 @@ public class CrudTableViewBuilder implements CrudDataSetViewBuilder {
     }
 
     private void initSorter(CrudView crudView, TableViewHeader header, boolean inMemory) {
-        String name = header.getField().getName();
 
-        final String finalName = name;
+        final String finalName = header.getField().getName();
         header.setSortAscending(new FieldComparator(finalName, true));
         header.setSortDescending(new FieldComparator(finalName, false));
         header.addEventListener(Events.ON_SORT, event -> {

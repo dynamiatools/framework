@@ -75,8 +75,9 @@ public class HashSetMultiMap<K, V> implements SetMultiMap<K, V> {
     /* (non-Javadoc)
      * @see tools.dynamia.commons.collect.MultiMap#put(java.lang.Object, java.lang.Object, java.lang.Object[])
      */
+    @SafeVarargs
     @Override
-    public void put(final K key, final V value, V... values) {
+    public final void put(final K key, final V value, V... values) {
         put(key, value);
         for (V newValue : values) {
             put(key, newValue);

@@ -27,12 +27,12 @@ public class Group {
     /**
      * The params.
      */
-    private QueryParameters params;
+    private final QueryParameters params;
 
     /**
      * The boolean op.
      */
-    private BooleanOp booleanOp;
+    private final BooleanOp booleanOp;
 
     /**
      * Instantiates a new group.

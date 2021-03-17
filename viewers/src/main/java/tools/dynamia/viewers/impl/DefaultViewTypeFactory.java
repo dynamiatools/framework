@@ -38,8 +38,8 @@ public class DefaultViewTypeFactory implements ViewTypeFactory {
     /**
      * The cache.
      */
-    private SimpleCache<String, ViewType> cache = new SimpleCache<>();
-    private SimpleCache<String, Class<? extends ViewRenderer>> viewRenderers = new SimpleCache<>();
+    private final SimpleCache<String, ViewType> cache = new SimpleCache<>();
+    private final SimpleCache<String, Class<? extends ViewRenderer>> viewRenderers = new SimpleCache<>();
 
     /*
 	 * (non-Javadoc)

@@ -22,7 +22,7 @@ package tools.dynamia.navigation;
  */
 public class JavaModuleBuilder implements ModuleBuilder {
 
-    private Module module;
+    private final Module module;
     private PageGroup currentGroup;
 
     public JavaModuleBuilder(String name) {

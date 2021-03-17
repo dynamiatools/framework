@@ -40,12 +40,12 @@ import java.util.Map;
 @Service
 public class ApplicationParameters implements Parameters {
 
-    private CrudService crudService;
+    private final CrudService crudService;
 
     /**
      * The cache.
      */
-    private SimpleCache<String, Parameter> cache = new SimpleCache<>();
+    private final SimpleCache<String, Parameter> cache = new SimpleCache<>();
 
     @Autowired
     public ApplicationParameters(CrudService crudService) {

@@ -35,6 +35,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * The Class DomainUtils.
@@ -306,11 +307,7 @@ public abstract class DomainUtils {
      * @return
      */
     public static BigDecimal getZeroIfNull(BigDecimal number) {
-        if (number == null) {
-            return BigDecimal.ZERO;
-        } else {
-            return number;
-        }
+        return Objects.requireNonNullElse(number, BigDecimal.ZERO);
     }
 
 

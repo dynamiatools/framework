@@ -77,9 +77,8 @@ public class StringPojoParser {
      */
     public static Map<String, Object> parseJsonToMap(String json) {
         try {
-            Map<String, Object> map = createJsonMapper().readValue(json, new TypeReference<Map<String, Object>>() {
+            return createJsonMapper().readValue(json, new TypeReference<>() {
             });
-            return map;
         } catch (Exception e) {
             throw new JsonParsingException(e);
         }

@@ -20,9 +20,10 @@ import java.io.Serializable;
 
 public class ProgressEvent implements Serializable {
 
-    private long current, max;
+    private final long current;
+    private final long max;
     private int percent;
-    private String message;
+    private final String message;
 
     public ProgressEvent(long current, long max, int percent, String message) {
         super();

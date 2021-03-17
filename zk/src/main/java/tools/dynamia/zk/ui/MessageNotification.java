@@ -27,7 +27,6 @@ import java.util.Map;
  */
 public class MessageNotification extends MessageDialog {
 
-    private Map<String, Object> config;
     private String position = "bottom_right";
     private int timeout = 3000;
 
@@ -36,7 +35,6 @@ public class MessageNotification extends MessageDialog {
 
     public MessageNotification(Map<String, Object> config) {
 
-        this.config = config;
         Object pos = config.get("position");
         if (pos != null) {
             position = "" + pos;

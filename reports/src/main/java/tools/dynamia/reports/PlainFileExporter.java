@@ -37,15 +37,15 @@ public class PlainFileExporter<T> {
 	private String encoding = "UTF-8";
 	private String separator = "\t";
 	private String lineSeparator = "\n";
-	private List<ExporterColumn<T>> columns = new ArrayList<>();
+	private final List<ExporterColumn<T>> columns = new ArrayList<>();
 	private ObjectMatcher<T> matcher;
 
 	public void addColumn(String name, String title) {
-		columns.add(new ExporterColumn<T>(name, title));
+		columns.add(new ExporterColumn<>(name, title));
 	}
 
 	public void addColumn(String name, String title, ExporterFieldLoader<T> loader) {
-		ExporterColumn<T> column = new ExporterColumn<T>(name, title);
+		ExporterColumn<T> column = new ExporterColumn<>(name, title);
 		columns.add(column);
 	}
 

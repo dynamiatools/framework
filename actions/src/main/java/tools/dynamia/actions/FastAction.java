@@ -24,7 +24,7 @@ import tools.dynamia.commons.BeanUtils;
 public class FastAction extends AbstractAction {
 
 
-    private OnActionPerfomed onActionPerfomed;
+    private final OnActionPerfomed onActionPerfomed;
 
     public FastAction(String name, OnActionPerfomed onActionPerfomed) {
         this(name, null, onActionPerfomed);

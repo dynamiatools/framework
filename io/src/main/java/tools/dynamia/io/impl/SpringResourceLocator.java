@@ -55,7 +55,7 @@ public class SpringResourceLocator implements ResourceLocator, ApplicationContex
      */
     @Override
     public Resource[] getResources(String location) throws IOException {
-        org.springframework.core.io.Resource res[] = appContext.getResources(location);
+        org.springframework.core.io.Resource[] res = appContext.getResources(location);
         if (res != null && res.length > 0) {
             Resource[] resources = new Resource[res.length];
             for (int i = 0; i < resources.length; i++) {

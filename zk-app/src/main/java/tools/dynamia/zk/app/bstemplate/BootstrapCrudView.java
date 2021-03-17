@@ -97,9 +97,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
         actionsButton.setPopup(menuId + ", after_start");
         ZKUtil.configureComponentIcon("process", actionsButton, IconSize.NORMAL);
 
-        addCrudStateChangedListener(evt -> {
-            controlChangedState(evt);
-        });
+        addCrudStateChangedListener(this::controlChangedState);
     }
 
     @Override
@@ -192,9 +190,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
             }
         } else {
 
-            actionGroup.getActions().forEach(a -> {
-                showAction(actionGroup, a);
-            });
+            actionGroup.getActions().forEach(a -> showAction(actionGroup, a));
         }
     }
 
@@ -299,16 +295,12 @@ public class BootstrapCrudView<T> extends CrudView<T> {
     private void controlChangedState(ChangedStateEvent evt) {
         CrudState crudState = evt.getNewState();
 
-        switch (crudState) {
-
-            case READ:
-                borderlayout.getNorth().setVisible(true);
-                break;
-            default:
-                if (leftActions!=null && leftActions.getChildren().isEmpty() && rightActions!=null && rightActions.getChildren().isEmpty()) {
-                    borderlayout.getNorth().setVisible(false);
-                }
-                break;
+        if (crudState == CrudState.READ) {
+            borderlayout.getNorth().setVisible(true);
+        } else {
+            if (leftActions != null && leftActions.getChildren().isEmpty() && rightActions != null && rightActions.getChildren().isEmpty()) {
+                borderlayout.getNorth().setVisible(false);
+            }
         }
     }
 
@@ -330,7 +322,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
 
     @Override
     protected void addFormViewToContainer(String formViewTitle) {
-        ZKWrapperView<Object> wrapperView = new ZKWrapperView<Object>(formView);
+        ZKWrapperView<Object> wrapperView = new ZKWrapperView<>(formView);
         formActions.setParent(wrapperView);
         formViewContainer.addView(formViewTitle, wrapperView);
     }

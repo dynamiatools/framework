@@ -40,7 +40,7 @@ public class HttpRestClient {
     private final String username;
     private final String password;
     private RestTemplate rest;
-    private Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers = new HashMap<>();
 
     public HttpRestClient(String url) {
         this(url, null, null, null);

@@ -29,11 +29,11 @@ public class CollectionWrapper<T> {
     /**
      * The collection.
      */
-    private Collection<T> collection;
+    private final Collection<T> collection;
     private String name;
     private String description;
     private Object value;
-    private long id = System.nanoTime();
+    private final long id = System.nanoTime();
 
     /**
      * Instantiates a new collection wrapper.

@@ -29,8 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class WebSocketGlobalCommandHandler extends TextWebSocketHandler {
 
-    private Map<String, String> desktops = new ConcurrentHashMap<>();
-    private Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+    private final Map<String, String> desktops = new ConcurrentHashMap<>();
+    private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {

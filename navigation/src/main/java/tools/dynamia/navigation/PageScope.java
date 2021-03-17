@@ -27,7 +27,7 @@ import tools.dynamia.integration.Containers;
  */
 public class PageScope implements Scope {
 
-    private transient LoggingService logger = new SLF4JLoggingService(PageScope.class);
+    private final transient LoggingService logger = new SLF4JLoggingService(PageScope.class);
 
     @Override
     public Object get(String name, ObjectFactory objectFactory) {

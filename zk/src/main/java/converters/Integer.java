@@ -28,7 +28,7 @@ import java.text.NumberFormat;
 
 public class Integer implements Converter<Object, Object, Component> {
 
-    private static NumberFormat nf = NumberFormat.getIntegerInstance();
+    private static final NumberFormat nf = NumberFormat.getIntegerInstance();
 
     @Override
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {

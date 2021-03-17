@@ -76,8 +76,7 @@ public class EnumIconImage extends Span {
     private String getIconName() {
         try {
             if (value != null) {
-                String name = iconsNames[value.ordinal()];
-                return name;
+                return iconsNames[value.ordinal()];
             }
 
         } catch (Exception e) {

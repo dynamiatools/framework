@@ -33,7 +33,7 @@ import java.io.IOException;
 @InstallAction
 public class UploadBIRTReportAction extends BIRTReportAction {
 
-    private ClassMessages messages = ClassMessages.get(UploadBIRTReportAction.class);
+    private final ClassMessages messages = ClassMessages.get(UploadBIRTReportAction.class);
 
     public UploadBIRTReportAction() {
         setName(messages.get("UploadReport"));

@@ -18,9 +18,9 @@ package tools.dynamia.integration.ms;
 
 public class MessageEvent<T extends Message> {
 
-    private T message;
-    private String topic;
-    private String callback;
+    private final T message;
+    private final String topic;
+    private final String callback;
 
     public MessageEvent(T message, String topic, String callback) {
         this.message = message;

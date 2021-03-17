@@ -214,8 +214,7 @@ public class JdbcHelper {
 			methodName = "{call " + methodName + " }";
 		}
 		showSQL("Calling procedure: " + methodName);
-		CallableStatement call = getConnection().prepareCall(methodName);
-		return call;
+		return getConnection().prepareCall(methodName);
 	}
 
 	/**

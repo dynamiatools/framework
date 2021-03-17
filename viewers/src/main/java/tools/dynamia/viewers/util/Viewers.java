@@ -110,8 +110,7 @@ public class Viewers {
     public static ViewDescriptor findViewDescriptor(Class clazz, String name) {
         ViewDescriptorFactory vdf = Containers.get().findObject(ViewDescriptorFactory.class);
 
-        ViewDescriptor viewDescriptor = vdf.findDescriptor(clazz, name);
-        return viewDescriptor;
+        return vdf.findDescriptor(clazz, name);
     }
 
     /**
@@ -125,8 +124,7 @@ public class Viewers {
     public static ViewDescriptor findViewDescriptor(Class clazz, String device, String name) {
         ViewDescriptorFactory vdf = Containers.get().findObject(ViewDescriptorFactory.class);
 
-        ViewDescriptor viewDescriptor = vdf.findDescriptor(clazz, device, name);
-        return viewDescriptor;
+        return vdf.findDescriptor(clazz, device, name);
     }
 
     /**
@@ -139,8 +137,7 @@ public class Viewers {
     public static ViewDescriptor getViewDescriptor(Class clazz, String name) {
         ViewDescriptorFactory vdf = Containers.get().findObject(ViewDescriptorFactory.class);
 
-        ViewDescriptor viewDescriptor = vdf.getDescriptor(clazz, name);
-        return viewDescriptor;
+        return vdf.getDescriptor(clazz, name);
     }
 
     /**
@@ -154,8 +151,7 @@ public class Viewers {
     public static ViewDescriptor getViewDescriptor(Class clazz, String device, String name) {
         ViewDescriptorFactory vdf = Containers.get().findObject(ViewDescriptorFactory.class);
 
-        ViewDescriptor viewDescriptor = vdf.getDescriptor(clazz, device, name);
-        return viewDescriptor;
+        return vdf.getDescriptor(clazz, device, name);
     }
 
     /**
@@ -248,7 +244,7 @@ public class Viewers {
      * @return the fields
      */
     public static List<Field> getFields(ViewDescriptor viewDescriptor) {
-        Collections.sort(viewDescriptor.getFields(), new IndexableComparator());
+        viewDescriptor.getFields().sort(new IndexableComparator());
         return viewDescriptor.getFields();
     }
 
@@ -266,7 +262,7 @@ public class Viewers {
             }
         }
 
-        return names.toArray(new String[names.size()]);
+        return names.toArray(new String[0]);
 
     }
 

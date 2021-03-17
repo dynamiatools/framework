@@ -45,8 +45,7 @@ public class Entity implements Converter<Object, Object, Component> {
             if (val != null) {
                 EntityPickerBox entityPicker = (EntityPickerBox) comp;
                 Long id = Long.valueOf(val.toString());
-                Object entity = crudService.find(entityPicker.getEntityClass(), id);
-                return entity;
+                return crudService.find(entityPicker.getEntityClass(), id);
             }
         } catch (NumberFormatException e) {
         }

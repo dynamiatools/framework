@@ -25,7 +25,7 @@ import tools.dynamia.navigation.RendereablePage;
  */
 public class ComponentPage extends RendereablePage<Component> {
 
-    private Component component;
+    private final Component component;
 
     public ComponentPage(String id, String name, Component component) {
         this.component = component;

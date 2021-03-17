@@ -28,7 +28,7 @@ import tools.dynamia.domain.query.DataPaginator;
  */
 public class PaginationController {
 
-    private Paging paginator;
+    private final Paging paginator;
     private final Callback callback;
     private DataPaginator dataPaginator;
 

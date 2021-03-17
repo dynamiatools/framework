@@ -34,9 +34,9 @@ import java.util.Map;
  */
 public abstract class AbstractIconsProvider implements IconsProvider {
 
-	private LoggingService logger = new SLF4JLoggingService(getClass());
-	private Map<String, Icon> icons = new HashMap<>();
-	private List<Icon> all = new ArrayList<>();
+	private final LoggingService logger = new SLF4JLoggingService(getClass());
+	private final Map<String, Icon> icons = new HashMap<>();
+	private final List<Icon> all = new ArrayList<>();
 
 	public AbstractIconsProvider() {
 		init();

@@ -82,7 +82,7 @@ public class SkinCombobox extends Combobox {
         ZKUtil.fillCombobox(this, ApplicationTemplates.getAllSkins(CurrentTemplate.get().getTemplate()));
     }
 
-    class SkinItemRenderer implements ComboitemRenderer<Skin> {
+    static class SkinItemRenderer implements ComboitemRenderer<Skin> {
 
         @Override
         public void render(Comboitem item, Skin data, int index) {

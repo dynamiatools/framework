@@ -30,8 +30,8 @@ import java.util.Map;
  */
 public class EntityHandler<T> {
 
-    private Class<T> type;
-    private CrudService crudService;
+    private final Class<T> type;
+    private final CrudService crudService;
 
 
     public EntityHandler(Class clazz) {
