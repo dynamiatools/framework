@@ -28,6 +28,7 @@ public class EntityPickerActionRenderer extends ZKActionRenderer<EntityPickerBox
 
     private final Class entityClass;
     private final QueryParameters defaultParams = new QueryParameters();
+    private String popupWidth;
 
     public EntityPickerActionRenderer(Class entityClass) {
         super();
@@ -56,4 +57,15 @@ public class EntityPickerActionRenderer extends ZKActionRenderer<EntityPickerBox
         return defaultParams;
     }
 
+    public String getPopupWidth() {
+        return popupWidth;
+    }
+
+    public void setPopupWidth(String popupWidth) {
+        this.popupWidth = popupWidth;
+    }
+
+    public Class getEntityClass() {
+        return entityClass;
+    }
 }

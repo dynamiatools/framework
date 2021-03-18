@@ -31,6 +31,7 @@ public class EntityReferencePickerActionRenderer extends ZKActionRenderer<Entity
 
     private final String entityAlias;
     private Serializable selectedId;
+    private String popupWidth;
 
 
     public EntityReferencePickerActionRenderer(String entityAlias) {
@@ -48,6 +49,7 @@ public class EntityReferencePickerActionRenderer extends ZKActionRenderer<Entity
         entityPicker.setEntityAlias(entityAlias);
         entityPicker.setSelectedId(selectedId);
         configureProperties(entityPicker, action);
+        entityPicker.setPopupWidth(popupWidth);
 
         entityPicker.addEventListener(Events.ON_SELECT, e -> {
             ActionEvent event = actionEventBuilder.buildActionEvent(entityPicker, null);
@@ -62,4 +64,11 @@ public class EntityReferencePickerActionRenderer extends ZKActionRenderer<Entity
     }
 
 
+    public String getPopupWidth() {
+        return popupWidth;
+    }
+
+    public void setPopupWidth(String popupWidth) {
+        this.popupWidth = popupWidth;
+    }
 }
