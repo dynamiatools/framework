@@ -22,6 +22,8 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Miscellaneous {@link String} utility methods.
@@ -1433,5 +1435,18 @@ public abstract class StringUtils {
                 (absSeconds % 3600) / 60,
                 absSeconds % 60);
         return seconds < 0 ? "-" + positive : positive;
+    }
+
+    /**
+     * Concat all object in to a string
+     *
+     * @param values
+     * @return a new String
+     */
+
+    public static String concat(Object... values) {
+        return Stream.of(values).filter(Objects::nonNull)
+                .map(String::valueOf)
+                .collect(Collectors.joining());
     }
 }
