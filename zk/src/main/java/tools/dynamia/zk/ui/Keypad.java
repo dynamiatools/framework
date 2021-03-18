@@ -59,7 +59,7 @@ public class Keypad extends Div {
             new Key("7"), new Key("8"), new Key("9"), NEW_ROW,
             new Key("0"), new Key("00"), new Key("000"), NEW_ROW,
             new Key("").setLabel("C").setCommand(e -> clear()),
-            new Key("").setLabel("backspace").setIcon("fa fa-long-arrow-left").setCommand(e -> backspace()),
+            new Key("").setLabel("backspace").setIcon("fa fa-arrow-left").setCommand(e -> backspace()),
             new Key("").setLabel("OK").setCommand(e -> ok())));
     private boolean disabled;
 
