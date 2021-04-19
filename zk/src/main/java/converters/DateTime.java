@@ -29,16 +29,12 @@ import java.text.DateFormat;
 
 public class DateTime implements Converter<Object, Object, Component> {
 
-    private final DateFormat df;
-
-    public DateTime() {
-        df = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, Messages.getDefaultLocale());
-    }
 
     @Override
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {
 
         if (val instanceof java.util.Date) {
+            DateFormat df = buildFormatter();
             Util.applyStylesClass((java.util.Date) val, comp);
             return df.format(val);
         }
@@ -47,8 +43,11 @@ public class DateTime implements Converter<Object, Object, Component> {
 
     @Override
     public Object coerceToBean(Object val, Component comp, BindContext ctx) {
-        return Util.coerceToBean(val, df);
+        return Util.coerceToBean(val, buildFormatter());
     }
 
+    private DateFormat buildFormatter() {
+        return DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, Messages.getDefaultLocale());
+    }
 
 }

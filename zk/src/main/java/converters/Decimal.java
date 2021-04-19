@@ -20,11 +20,9 @@ import org.zkoss.bind.BindContext;
 import org.zkoss.bind.Converter;
 import org.zkoss.zk.ui.Component;
 import tools.dynamia.commons.Messages;
-import tools.dynamia.integration.ms.Message;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Locale;
 
 /**
  * @author Mario A. Serrano Leones
@@ -32,17 +30,12 @@ import java.util.Locale;
 
 public class Decimal implements Converter<Object, Object, Component> {
 
-    private final NumberFormat formatter;
-
-    public Decimal() {
-        Locale locale = Messages.getDefaultLocale();
-        formatter = DecimalFormat.getInstance(locale);
-    }
 
     @Override
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {
 
         if (val instanceof Number) {
+            NumberFormat formatter = buildFormatter();
             Util.applyStylesClass((Number) val, comp);
             return formatter.format(val);
         }
@@ -51,11 +44,17 @@ public class Decimal implements Converter<Object, Object, Component> {
 
     @Override
     public Object coerceToBean(Object val, Component comp, BindContext ctx) {
-        return Util.coerceToBean(val, formatter);
+        return Util.coerceToBean(val, buildFormatter());
     }
 
     public String format(Number number) {
         return (String) coerceToUi(number, null, null);
+    }
+
+    private NumberFormat buildFormatter() {
+        var locale = Messages.getDefaultLocale();
+        var formatter = DecimalFormat.getInstance(locale);
+        return formatter;
     }
 
 }

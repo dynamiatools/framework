@@ -29,17 +29,12 @@ import java.text.DateFormat;
 
 public class Date implements Converter<Object, Object, Component> {
 
-    private final DateFormat formatter;
-
-    public Date() {
-        formatter = DateFormat.getDateInstance(DateFormat.MEDIUM, Messages.getDefaultLocale());
-    }
 
     @Override
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {
 
         if (val instanceof java.util.Date) {
-
+            DateFormat formatter = buildFormatter();
             return formatter.format(val);
         }
         return null;
@@ -47,7 +42,12 @@ public class Date implements Converter<Object, Object, Component> {
 
     @Override
     public Object coerceToBean(Object val, Component comp, BindContext ctx) {
+        DateFormat formatter = buildFormatter();
         return Util.coerceToBean(val, formatter);
+    }
+
+    private DateFormat buildFormatter() {
+        return DateFormat.getDateInstance(DateFormat.MEDIUM, Messages.getDefaultLocale());
     }
 
 }

@@ -22,7 +22,6 @@ import org.zkoss.zk.ui.Component;
 import tools.dynamia.commons.Messages;
 
 import java.text.NumberFormat;
-import java.util.Locale;
 
 /**
  * @author Mario A. Serrano Leones
@@ -30,19 +29,11 @@ import java.util.Locale;
 
 public class CurrencySimple implements Converter<Object, Object, Component> {
 
-    private final NumberFormat formatter;
-
-    public CurrencySimple() {
-        Locale locale = Messages.getDefaultLocale();
-        formatter = NumberFormat.getCurrencyInstance(locale);
-        formatter.setMaximumFractionDigits(0);
-    }
-
-
     @Override
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {
 
         if (val instanceof Number) {
+            NumberFormat formatter = buildFormatter();
             Util.applyStylesClass((Number) val, comp);
             return formatter.format(val);
         }
@@ -51,7 +42,15 @@ public class CurrencySimple implements Converter<Object, Object, Component> {
 
     @Override
     public Object coerceToBean(Object val, Component comp, BindContext ctx) {
+        NumberFormat formatter = buildFormatter();
         return Util.coerceToBean(val, formatter);
+    }
+
+    private NumberFormat buildFormatter() {
+        var locale = Messages.getDefaultLocale();
+        var formatter = NumberFormat.getCurrencyInstance(locale);
+        formatter.setMaximumFractionDigits(0);
+        return formatter;
     }
 
     public String format(Number number) {
