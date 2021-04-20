@@ -19,6 +19,7 @@ package tools.dynamia.commons;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.AccessMode;
+import tools.dynamia.commons.reflect.ClassReflectionInfo;
 import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.commons.reflect.ReflectionException;
 
@@ -576,21 +577,26 @@ public final class BeanUtils {
      * @return the properties info
      */
     public static List<PropertyInfo> getPropertiesInfo(final Class clazz) {
-        List<PropertyInfo> infos = new ArrayList<>();
+        var cached = ClassReflectionInfo.getFromCache(clazz);
 
-        try {
-            BeanInfo beanInfo = java.beans.Introspector.getBeanInfo(clazz);
-            for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
+        if (cached == null) {
+            try {
+                List<PropertyInfo> infos = new ArrayList<>();
+                BeanInfo beanInfo = java.beans.Introspector.getBeanInfo(clazz);
+                for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
 
-                final PropertyInfo pi = getPropertyInfo(descriptor);
-                if (pi != null) {
-                    infos.add(pi);
+                    final PropertyInfo pi = getPropertyInfo(descriptor);
+                    if (pi != null) {
+                        infos.add(pi);
+                    }
                 }
+                cached = new ClassReflectionInfo(clazz, infos);
+                ClassReflectionInfo.addToCache(cached);
+            } catch (IntrospectionException e1) {
+                throw new ReflectionException(e1);
             }
-        } catch (IntrospectionException e1) {
-            throw new ReflectionException(e1);
         }
-        return infos;
+        return cached.getProperties();
     }
 
     /**
