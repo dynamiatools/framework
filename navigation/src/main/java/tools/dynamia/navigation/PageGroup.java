@@ -40,6 +40,7 @@ public class PageGroup extends NavigationElement<PageGroup> implements Serializa
     private PageGroup parentGroup;
     private String listeners;
     private static final LoggingService logger = new SLF4JLoggingService(PageGroup.class);
+    private boolean dynamic;
 
     public PageGroup() {
     }
@@ -190,5 +191,13 @@ public class PageGroup extends NavigationElement<PageGroup> implements Serializa
 
     public List<Page> findFeaturedPages() {
         return getPages().stream().filter(Page::isFeatured).collect(Collectors.toList());
+    }
+
+    public boolean isDynamic() {
+        return dynamic;
+    }
+
+    public void setDynamic(boolean dynamic) {
+        this.dynamic = dynamic;
     }
 }
