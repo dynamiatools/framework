@@ -17,11 +17,18 @@
 package tools.dynamia.ui;
 
 import tools.dynamia.commons.Callback;
+import tools.dynamia.commons.Messages;
 import tools.dynamia.integration.Containers;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 public class UIMessages {
+
+    private UIMessages() {
+    }
 
     /**
      * Show a normal user message
@@ -55,6 +62,7 @@ public class UIMessages {
 
     /**
      * Show Message with source object
+     *
      * @param text
      * @param title
      * @param type
@@ -145,7 +153,51 @@ public class UIMessages {
         getDisplayer().showInput(title, valueClass, defaultValue, onValue);
     }
 
-    private UIMessages() {
+    /**
+     * Return a localized message using the first non-null value from {@link LocalizedMessagesProvider} providers
+     *
+     * @param key
+     * @param classfier
+     * @param locale
+     * @param defaultValue
+     * @return
+     */
+    public static String getLocalizedMessage(String key, String classfier, Locale locale, String defaultValue) {
+        var providers = new ArrayList<>(Containers.get().findObjects(LocalizedMessagesProvider.class));
+        providers.sort(Comparator.comparingInt(LocalizedMessagesProvider::getPriority));
+
+        if (!providers.isEmpty()) {
+            String message = null;
+            for (var provider : providers) {
+                message = provider.getMessage(key, classfier, locale, defaultValue);
+                if (message != null) {
+                    return message;
+                }
+            }
+        }
+        return defaultValue;
+    }
+
+    /**
+     * Localize message using key and default locale
+     *
+     * @param key
+     * @return
+     */
+    public static String getLocalizedMessage(String key) {
+        return getLocalizedMessage(key, null, Messages.getDefaultLocale(), key);
+    }
+
+    /**
+     * Localize message using a key with custom classifer or group and default locale
+     *
+     * @param key
+     * @param classifier
+     * @param defaultValue
+     * @return
+     */
+    public static String getLocalizedMessage(String key, String classifier, String defaultValue) {
+        return getLocalizedMessage(key, classifier, Messages.getDefaultLocale(), defaultValue);
     }
 
 }
