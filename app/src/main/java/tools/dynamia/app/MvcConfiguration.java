@@ -92,6 +92,7 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
         map.put("font/**", handler);
         map.put("plugins/**", handler);
         map.put("vendor/**", handler);
+        map.put("vendors/**", handler);
 
         SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
         mapping.setUrlMap(map);

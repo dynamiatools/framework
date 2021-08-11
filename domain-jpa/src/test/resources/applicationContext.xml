@@ -67,8 +67,7 @@
 
     </bean>
 
-    <bean
-            class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor"/>
+    <bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor"/>
 
 
 </beans>
