@@ -128,6 +128,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
     private void renderActions(Listitem item, Object data, Binder binder) {
         try {
             BoostrapButtonActionRenderer defaultRenderer = new BoostrapButtonActionRenderer();
+            defaultRenderer.setSmall(true);
 
             Map actions = (Map) viewDescriptor.getParams().get(Viewers.PARAM_ACTIONS);
             if (actions == null) {

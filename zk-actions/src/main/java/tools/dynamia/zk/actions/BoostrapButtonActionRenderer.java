@@ -23,6 +23,10 @@ import tools.dynamia.actions.ActionEventBuilder;
 
 public class BoostrapButtonActionRenderer extends ButtonActionRenderer {
 
+    private boolean small;
+    private boolean large;
+    private boolean block;
+
     @Override
     public Button render(Action action, ActionEventBuilder actionEventBuilder) {
         Button button = super.render(action, actionEventBuilder);
@@ -32,6 +36,16 @@ public class BoostrapButtonActionRenderer extends ButtonActionRenderer {
 
         button.setZclass("btn btn-" + type);
 
+        if (isSmall()) {
+            button.addSclass("btn-sm");
+        } else if (isLarge()) {
+            button.addSclass("btn-lg");
+        }
+
+        if (isBlock()) {
+            button.addSclass("btn-block");
+        }
+
         String zclass = (String) action.getAttribute("zclass");
         if (zclass != null) {
             button.setZclass(zclass);
@@ -39,5 +53,42 @@ public class BoostrapButtonActionRenderer extends ButtonActionRenderer {
 
 
         return button;
+    }
+
+    public boolean isSmall() {
+        return small;
+    }
+
+    /**
+     * Add style class btn-sm
+     * @param small
+     */
+    public void setSmall(boolean small) {
+        this.small = small;
+    }
+
+
+    public boolean isBlock() {
+        return block;
+    }
+
+    /**
+     * Add style class btn-block
+     * @param block
+     */
+    public void setBlock(boolean block) {
+        this.block = block;
+    }
+
+    public boolean isLarge() {
+        return large;
+    }
+
+    /**
+     * Add style class btn-lg
+     * @param large
+     */
+    public void setLarge(boolean large) {
+        this.large = large;
     }
 }
