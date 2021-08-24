@@ -16,6 +16,10 @@
  */
 package tools.dynamia.integration.ms;
 
+/**
+ * Represent a message event
+ * @param <T>
+ */
 public class MessageEvent<T extends Message> {
 
     private final T message;
@@ -40,4 +44,12 @@ public class MessageEvent<T extends Message> {
         return callback;
     }
 
+    @Override
+    public String toString() {
+        return "MessageEvent{" +
+                "message=" + message +
+                ", topic='" + topic + '\'' +
+                ", callback='" + callback + '\'' +
+                '}';
+    }
 }

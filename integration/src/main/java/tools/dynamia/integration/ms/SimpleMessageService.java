@@ -75,11 +75,16 @@ public class SimpleMessageService implements MessageService {
 
     @Override
     public void publish(String channelName, Message message, String topic, String callback) {
+        MessageChannel channel = null;
         try {
-            MessageChannel channel = createChannel(channelName, null);
-            channel.publish(message, topic, callback);
+            channel = createChannel(channelName, null);
+            if (channel == null) {
+                LOGGER.error("Cannot create channel " + channelName + ". Null returned");
+            } else {
+                channel.publish(message, topic, callback);
+            }
         } catch (Exception e) {
-            LOGGER.error("Error publishing Message " + message + " to channel " + channelName + ". Topic: " + topic);
+            LOGGER.error("Error publishing Message " + message + " to channel " + channelName + "  (" + channel + "). Topic: " + topic + " - exception " + e.getMessage());
             if (e.getClass().getName().contains("ValidationError")) {
                 throw e;
             }
