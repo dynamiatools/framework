@@ -55,6 +55,8 @@ public class CoolLabel extends Div {
     private int progress;
     private final Progressmeter progressmeter;
     private boolean showImage = true;
+    private boolean breakLinesSubtitle;
+    private boolean breakLinesDescription;
 
     public CoolLabel() {
         setSclass("cool-lb");
@@ -256,5 +258,31 @@ public class CoolLabel extends Div {
     private void fireOnTitleChanged() {
         Events.postEvent(new Event(ON_TITLE_CHANGED, this, getTitle()));
 
+    }
+
+    public boolean isBreakLinesSubtitle() {
+        return breakLinesSubtitle;
+    }
+
+    public void setBreakLinesSubtitle(boolean breakLinesSubtitle) {
+        this.breakLinesSubtitle = breakLinesSubtitle;
+        if(breakLinesSubtitle){
+            subtitleLabel.setStyle("white-space: pre-line");
+        }else{
+            subtitleLabel.setStyle("display: block");
+        }
+    }
+
+    public boolean isBreakLinesDescription() {
+        return breakLinesDescription;
+    }
+
+    public void setBreakLinesDescription(boolean breakLinesDescription) {
+        this.breakLinesDescription = breakLinesDescription;
+        if(breakLinesDescription){
+            descriptionLabel.setStyle("white-space: pre-line");
+        }else{
+            descriptionLabel.setStyle("display: block");
+        }
     }
 }
