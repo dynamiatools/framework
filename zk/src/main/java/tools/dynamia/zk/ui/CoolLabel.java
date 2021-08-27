@@ -267,7 +267,7 @@ public class CoolLabel extends Div {
     public void setBreakLinesSubtitle(boolean breakLinesSubtitle) {
         this.breakLinesSubtitle = breakLinesSubtitle;
         if(breakLinesSubtitle){
-            subtitleLabel.setStyle("white-space: pre-line");
+            subtitleLabel.setStyle("display: block; white-space: pre-line");
         }else{
             subtitleLabel.setStyle("display: block");
         }
@@ -280,7 +280,7 @@ public class CoolLabel extends Div {
     public void setBreakLinesDescription(boolean breakLinesDescription) {
         this.breakLinesDescription = breakLinesDescription;
         if(breakLinesDescription){
-            descriptionLabel.setStyle("white-space: pre-line");
+            descriptionLabel.setStyle("display: block; white-space: pre-line");
         }else{
             descriptionLabel.setStyle("display: block");
         }

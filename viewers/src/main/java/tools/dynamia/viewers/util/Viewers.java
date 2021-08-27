@@ -99,6 +99,7 @@ public class Viewers {
     public static final String PARAM_CUSTOM_VIEW = "customView";
     public static final String PARAM_ACTION = "action";
     public static final String PARAM_MULTI_FUNCTION_PROCESSOR = "multiFunctionProcessor";
+    public static final String PARAM_PAGINATION = "pagination";
 
     /**
      * Find view descriptor.

@@ -58,7 +58,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
         table.setHflex("1");
         table.setSclass("table-view");
 
-        if (descriptor.getParams().get("pagination") != Boolean.FALSE) {
+        if (descriptor.getParams().get(Viewers.PARAM_PAGINATION) != Boolean.FALSE) {
             table.setMold("paging");
         }
 
