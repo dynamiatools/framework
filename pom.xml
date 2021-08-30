@@ -95,7 +95,7 @@
         <neo4jogm.version>3.2.21</neo4jogm.version>
 
         <!-- Web -->
-        <zk.version>9.6.0</zk.version>
+        <zk.version>9.6.0.1</zk.version>
         <jackson.version>2.12.4</jackson.version>
         <jsonrpc.version>1.6</jsonrpc.version>
         <httpcomponents.version>4.5.13</httpcomponents.version>
