@@ -103,6 +103,7 @@
 
         <!--Reports -->
         <jasperreports.version>6.9.0</jasperreports.version>
+        <itext.version>2.1.7</itext.version>
         <poi.version>4.1.2</poi.version>
         <snakeyaml.version>1.29</snakeyaml.version>
         <zing.version>3.4.1</zing.version>
