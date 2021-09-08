@@ -20,6 +20,7 @@ package tools.dynamia.zk.ui;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Textbox;
 import tools.dynamia.commons.StringUtils;
+import tools.dynamia.commons.math.MathFunction;
 import tools.dynamia.web.util.JavaScriptUtils;
 
 import java.util.Arrays;
@@ -62,14 +63,10 @@ public class Calculator extends Keypad {
         try {
             String exp = getValue();
             exp = exp.replace("%", "/100");
-            result = (Number) JavaScriptUtils.eval(exp);
-            if (result != null) {
-                setValue(String.valueOf(result));
-                Events.postEvent(Events.ON_OK, this, result);
-                getDisplayBox().setStyle(null);
-            } else {
-                styleError();
-            }
+            result = MathFunction.evaluate(exp);
+            setValue(String.valueOf(result));
+            Events.postEvent(Events.ON_OK, this, result);
+            getDisplayBox().setStyle(null);
         } catch (Exception e) {
             styleError();
         }
