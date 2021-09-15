@@ -87,9 +87,9 @@
 
         <!-- Core -->
         <spring.version>5.3.9</spring.version>
-        <springboot.version>2.5.3</springboot.version>
-        <springdata.version>2.5.3</springdata.version>
-        <springdatarest.version>3.5.3</springdatarest.version>
+        <springboot.version>2.5.4</springboot.version>
+        <springdata.version>2.5.4</springdata.version>
+        <springdatarest.version>3.5.4</springdatarest.version>
 
         <aspectj.version>1.9.6</aspectj.version>
         <neo4jogm.version>3.2.21</neo4jogm.version>
@@ -109,12 +109,12 @@
         <zing.version>3.4.1</zing.version>
 
         <!--Logging -->
-        <slf4j.version>1.7.30</slf4j.version>
+        <slf4j.version>1.7.32</slf4j.version>
 
         <!--Testing -->
         <junit.version>4.13.2</junit.version>
         <h2.version>1.4.200</h2.version>
-        <hibernate.version>5.5.6.Final</hibernate.version>
+        <hibernate.version>5.5.7.Final</hibernate.version>
         <hibernatevalidator.version>6.2.0.Final</hibernatevalidator.version>
         <validationapi.version>2.0.1.Final</validationapi.version>
 
