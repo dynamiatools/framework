@@ -88,6 +88,9 @@ public class SimpleMessageService implements MessageService {
             if (e.getClass().getName().contains("ValidationError")) {
                 throw e;
             }
+            if (e.getCause() != null && e.getCause().getClass().getName().contains("ValidationError")) {
+                throw e;
+            }
         }
     }
 
