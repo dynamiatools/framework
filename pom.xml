@@ -86,17 +86,17 @@
         <main.baseUri>${project.baseUri}</main.baseUri>
 
         <!-- Core -->
-        <spring.version>5.3.9</spring.version>
-        <springboot.version>2.5.4</springboot.version>
-        <springdata.version>2.5.4</springdata.version>
-        <springdatarest.version>3.5.4</springdatarest.version>
+        <spring.version>5.3.12</spring.version>
+        <springboot.version>2.5.6</springboot.version>
+        <springdata.version>2.5.6</springdata.version>
+        <springdatarest.version>3.5.6</springdatarest.version>
 
         <aspectj.version>1.9.6</aspectj.version>
         <neo4jogm.version>3.2.21</neo4jogm.version>
 
         <!-- Web -->
         <zk.version>9.6.0.1</zk.version>
-        <jackson.version>2.12.4</jackson.version>
+        <jackson.version>2.13.0</jackson.version>
         <jsonrpc.version>1.6</jsonrpc.version>
         <httpcomponents.version>4.5.13</httpcomponents.version>
         <dom4j.version>2.1.3</dom4j.version>
@@ -114,7 +114,7 @@
         <!--Testing -->
         <junit.version>4.13.2</junit.version>
         <h2.version>1.4.200</h2.version>
-        <hibernate.version>5.5.7.Final</hibernate.version>
+        <hibernate.version>5.5.8.Final</hibernate.version>
         <hibernatevalidator.version>6.2.0.Final</hibernatevalidator.version>
         <validationapi.version>2.0.1.Final</validationapi.version>
 
