@@ -56,7 +56,7 @@ public class RestNavigationController {
 
     private final static String PAGE = "{page:[a-z\\-]+}";
     private final static String ID = "{id:[0-9]+}";
-    private final static int DEFAULT_PAGINATION_SIZE = 100;
+    private final static int DEFAULT_PAGINATION_SIZE = 50;
 
     @Autowired
     private CrudService crudService;
@@ -203,15 +203,7 @@ public class RestNavigationController {
         CrudPage page = findCrudPage(path);
         Class entityClass = page.getEntityClass();
 
-        ViewDescriptor readDescriptor = Viewers.findViewDescriptor(entityClass, "json");
-        if (readDescriptor == null) {
-            readDescriptor = Viewers.findViewDescriptor(entityClass, "tree");
-        }
-
-        if (readDescriptor == null) {
-            readDescriptor = Viewers.getViewDescriptor(entityClass, "table");
-
-        }
+        ViewDescriptor readDescriptor = getJsonTableDescriptor(entityClass);
         ResponseEntity<String> metadata = getMetadata(request, readDescriptor);
         if (metadata != null) {
             return metadata;
@@ -234,38 +226,42 @@ public class RestNavigationController {
         }
 
 
-        ListResult result = new ListResult();
-
         List content = crudService.executeQuery(query);
-        if (content instanceof PagedList) {
+        var paginator = query.getQueryParameters().getPaginator();
+        if (paginator != null) {
+            paginator.setPage(currentPage);
+        }
+
+        ListResult result = buildListResult(content, paginator, currentPage);
+
+
+        return buildJsonResponse(readDescriptor, result, "OK");
+    }
+
+    public static ListResult buildListResult(List content, DataPaginator paginator, int currenPage) {
+        ListResult result = new ListResult();
+        if (content instanceof PagedList && paginator != null) {
             PagedList pagedList = (PagedList) content;
-            if (currentPage > 0) {
-                pagedList.getDataSource().setActivePage(currentPage);
+            if (currenPage > 0) {
+                pagedList.getDataSource().setActivePage(currenPage);
+
             }
-            content = pagedList.getDataSource().getPageData();
-            result.setPageable(query.getQueryParameters().getPaginator());
+            result.setData(pagedList.getDataSource().getPageData());
+            result.setPageable(paginator);
+        } else {
+            result.setData(content);
         }
         result.setResponse("OK");
-        result.setData(content);
-
-
-        return new ResponseEntity<>(new JsonView<>(result, readDescriptor).renderJson(), HttpStatus.OK);
+        return result;
     }
+
 
     private ResponseEntity<String> readOne(String path, Long id, HttpServletRequest request) {
 
         CrudPage page = findCrudPage(path);
         Class entityClass = page.getEntityClass();
 
-        ViewDescriptor readDescriptor = Viewers.findViewDescriptor(entityClass, "json-form");
-
-        if (readDescriptor == null) {
-            readDescriptor = Viewers.getViewDescriptor(entityClass, "json");
-        }
-
-        if (readDescriptor == null) {
-            readDescriptor = Viewers.getViewDescriptor(entityClass, "form");
-        }
+        ViewDescriptor readDescriptor = getJsonFormDescriptor(entityClass);
         ResponseEntity<String> metadata = getMetadata(request, readDescriptor);
         if (metadata != null) {
             return metadata;
@@ -276,8 +272,48 @@ public class RestNavigationController {
             return new ResponseEntity<>("Entity " + entityClass.getSimpleName() + " with id " + id + " not found\n", HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(new JsonView<>(new SimpleResult(result, "OK"), readDescriptor).renderJson(), HttpStatus.OK);
+        return buildJsonResponse(readDescriptor, result, "OK");
     }
+
+    public static ResponseEntity<String> buildJsonResponse(Object result) {
+        var descriptor = getJsonFormDescriptor(result.getClass());
+        return buildJsonResponse(descriptor, result, "ok");
+    }
+
+    public static ResponseEntity<String> buildJsonResponse(ViewDescriptor readDescriptor, Object result, String message) {
+        return new ResponseEntity<>(new JsonView<>(new SimpleResult(result, message), readDescriptor).renderJson(), HttpStatus.OK);
+    }
+
+    public static ResponseEntity<String> buildJsonResponse(ViewDescriptor readDescriptor, ListResult result, String message) {
+        return new ResponseEntity<>(new JsonView<>(new SimpleResult(result, message), readDescriptor).renderJson(), HttpStatus.OK);
+    }
+
+    public static ViewDescriptor getJsonFormDescriptor(Class entityClass) {
+        ViewDescriptor readDescriptor = Viewers.findViewDescriptor(entityClass, "json-form");
+
+        if (readDescriptor == null) {
+            readDescriptor = Viewers.getViewDescriptor(entityClass, "json");
+        }
+
+        if (readDescriptor == null) {
+            readDescriptor = Viewers.getViewDescriptor(entityClass, "form");
+        }
+        return readDescriptor;
+    }
+
+    public static ViewDescriptor getJsonTableDescriptor(Class entityClass) {
+        ViewDescriptor readDescriptor = Viewers.findViewDescriptor(entityClass, "json");
+        if (readDescriptor == null) {
+            readDescriptor = Viewers.findViewDescriptor(entityClass, "tree");
+        }
+
+        if (readDescriptor == null) {
+            readDescriptor = Viewers.getViewDescriptor(entityClass, "table");
+
+        }
+        return readDescriptor;
+    }
+
 
     private ResponseEntity<String> create(String path, String jsonData, HttpServletRequest request) {
 
@@ -285,17 +321,15 @@ public class RestNavigationController {
         Class entityClass = page.getEntityClass();
 
 
-        ViewDescriptor descriptor = Viewers.findViewDescriptor(entityClass, "json-form");
-        if (descriptor == null) {
-            descriptor = Viewers.getViewDescriptor(entityClass, "form");
-        }
+        ViewDescriptor descriptor = getJsonFormDescriptor(entityClass);
+
         JsonView jsonView = new JsonView(descriptor);
         jsonView.parse(jsonData);
         Object newEntity = jsonView.getValue();
 
         newEntity = crudService.create(newEntity);
 
-        return new ResponseEntity<>(new JsonView<>(new SimpleResult(newEntity, "Created Successfully"), descriptor).renderJson(), HttpStatus.OK);
+        return buildJsonResponse(descriptor, newEntity, "Created Successfully");
     }
 
     private ResponseEntity<String> update(String path, Long id, String jsonData, HttpServletRequest request) {
@@ -332,7 +366,7 @@ public class RestNavigationController {
 
 
         Object updatedEntity = crudService.update(entity);
-        return new ResponseEntity<>(new JsonView<>(new SimpleResult(updatedEntity, "Updated Successfully"), descriptor).renderJson(), HttpStatus.OK);
+        return buildJsonResponse(descriptor, updatedEntity, "Updated Successfully");
     }
 
     private ResponseEntity<String> delete(String path, Long id, HttpServletRequest request) {
@@ -348,11 +382,11 @@ public class RestNavigationController {
         }
         crudService.delete(entityClass, id);
 
-        return new ResponseEntity<>(new JsonView<>(new SimpleResult(result, "Deleted Successfully"), readDescriptor).renderJson(), HttpStatus.OK);
+        return buildJsonResponse(readDescriptor, result, "Deleted Successfully");
     }
 
 
-    private void parseConditions(QueryBuilder query, ViewDescriptor descriptor) {
+    public static void parseConditions(QueryBuilder query, ViewDescriptor descriptor) {
         try {
             if (descriptor.getParams().containsKey("conditions")) {
                 Map<String, String> conditions = (Map<String, String>) descriptor.getParams().get("conditions");
@@ -363,7 +397,7 @@ public class RestNavigationController {
         }
     }
 
-    private int getParameterNumber(HttpServletRequest request, String name) {
+    public static int getParameterNumber(HttpServletRequest request, String name) {
         int param = 0;
         if (request.getParameter(name) != null) {
             try {
@@ -375,7 +409,7 @@ public class RestNavigationController {
         return param;
     }
 
-    public ResponseEntity<String> getMetadata(HttpServletRequest request, ViewDescriptor viewDescriptor) {
+    public static ResponseEntity<String> getMetadata(HttpServletRequest request, ViewDescriptor viewDescriptor) {
         if (request.getParameter("_metadata") != null) {
             ObjectMapper mapper = new ObjectMapper();
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
