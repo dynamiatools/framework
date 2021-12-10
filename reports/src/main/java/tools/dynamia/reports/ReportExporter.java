@@ -16,12 +16,12 @@
  */
 package tools.dynamia.reports;
 
-import net.sf.jasperreports.engine.JRExporter;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.*;
 import net.sf.jasperreports.engine.export.oasis.JROdtExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.export.*;
+import tools.dynamia.commons.StringUtils;
 
 import java.io.*;
 import java.util.*;
@@ -104,20 +104,21 @@ public abstract class ReportExporter {
      */
     public static void export(List<Report> reports, OutputStream outputStream, ReportOutputType outputType, Map exportParameters) {
         try {
-            JRExporter exporter = buildExporter(outputType);
+            var exporter = buildExporter(outputType, outputStream);
             if (exportParameters != null && !exportParameters.isEmpty()) {
-                exporter.setParameters(exportParameters);
+                //exporter.setParameters(exportParameters);
             }
             List<JasperPrint> list = getJasperPrints(reports);
 
-            exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, outputStream);
             if (!list.isEmpty()) {
-                exporter.setParameter(JRExporterParameter.JASPER_PRINT_LIST, list);
+                var items = new ArrayList<ExporterInputItem>();
+                list.forEach(jp -> items.add(new SimpleExporterInputItem(jp)));
+                exporter.setExporterInput(new SimpleExporterInput(items));
             } else if (reports.size() == 1) {
                 Report report = reports.get(0);
                 if (report.getContent() instanceof File) {
                     File reportFile = (File) report.getContent();
-                    exporter.setParameter(JRExporterParameter.INPUT_FILE, reportFile);
+                    exporter.setExporterInput(new SimpleExporterInput(reportFile));
                 }
             }
 
@@ -166,14 +167,16 @@ public abstract class ReportExporter {
         }
     }
 
-    private static JRExporter buildExporter(ReportOutputType reportOuputType) throws Exception {
-        JRExporter exporter = null;
+    private static Exporter buildExporter(ReportOutputType reportOuputType, OutputStream outputStream) throws Exception {
+        Exporter exporter = null;
+        boolean ready = false;
         switch (reportOuputType) {
             case CSV:
                 exporter = new JRCsvExporter();
                 break;
             case HTML:
-                exporter = new HtmlExporter();
+                exporter = buildHtmlExporter(outputStream);
+                ready = true;
                 break;
             case JAVA2D:
                 exporter = new JRGraphics2DExporter();
@@ -194,8 +197,46 @@ public abstract class ReportExporter {
                 exporter = new JRPrintServiceExporter();
                 break;
         }
+        if (!ready) {
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
+        }
 
         return exporter;
+    }
+
+    private static HtmlExporter buildHtmlExporter(OutputStream outputStream) {
+        var html = new HtmlExporter();
+        Map<String, String> images = new HashMap<>();
+        Map<String, String> dataTypes = Map.of(
+                "jpg", "image/jpg",
+                "png", "image/png",
+                "svg", "image/svg+xml");
+
+        var htmlOutput = new SimpleHtmlExporterOutput(outputStream);
+        htmlOutput.setImageHandler(new HtmlResourceHandler() {
+
+            @Override
+            public void handleResource(String id, byte[] data) {
+                var ext = StringUtils.getFilenameExtension(id);
+                String type = null;
+                if (ext != null && !ext.isBlank()) {
+                    type = dataTypes.get(ext.toLowerCase().trim());
+                }
+                if (type == null) {
+                    type = dataTypes.get("jpg");
+                }
+
+                images.put(id, "data:" + type + ";base64," + Base64.getEncoder().encodeToString(data));
+            }
+
+            @Override
+            public String getResourcePath(String id) {
+                return images.get(id);
+            }
+        });
+        html.setExporterOutput(htmlOutput);
+
+        return html;
     }
 
     private static List<JasperPrint> getJasperPrints(List<Report> reports) {
