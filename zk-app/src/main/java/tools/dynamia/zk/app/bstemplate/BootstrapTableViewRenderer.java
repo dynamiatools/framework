@@ -37,7 +37,9 @@ public class BootstrapTableViewRenderer<T> extends TableViewRenderer<T> {
 
         if (HttpUtils.isSmartphone()) {
             view.setSclass("tableview-mobile");
-            view.getPagingChild().setMold(null);
+            if (view.getPagingChild() != null) {
+                view.getPagingChild().setMold(null);
+            }
         }
         return view;
     }
