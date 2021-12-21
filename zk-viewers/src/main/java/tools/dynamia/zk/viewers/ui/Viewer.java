@@ -21,6 +21,7 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.HtmlBasedComponent;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.sys.ContentRenderer;
 import org.zkoss.zul.*;
 import tools.dynamia.actions.*;
@@ -528,5 +529,32 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
 
     public ViewDescriptor getViewDescriptor() {
         return descriptor;
+    }
+
+    /**
+     * Show this viewer as a modal window
+     * @param title
+     * @param autoscroll
+     * @param onClose
+     * @return
+     */
+    public Window showModal(String title, boolean autoscroll, EventListener<Event> onClose) {
+        var win = ZKUtil.showDialog(title, this);
+        if (autoscroll) {
+            win.setContentStyle("overflow: auto");
+        }
+        if (onClose != null) {
+            win.addEventListener(Events.ON_CLOSE, onClose);
+        }
+        return win;
+    }
+
+    /**
+     * Show this viewer as a modal Window
+     * @param title
+     * @return
+     */
+    public Window showModal(String title) {
+        return showModal(title, true, null);
     }
 }

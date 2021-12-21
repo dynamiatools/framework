@@ -86,13 +86,13 @@
         <main.baseUri>${project.baseUri}</main.baseUri>
 
         <!-- Core -->
-        <spring.version>5.3.12</spring.version>
-        <springboot.version>2.5.6</springboot.version>
-        <springdata.version>2.5.6</springdata.version>
-        <springdatarest.version>3.5.6</springdatarest.version>
+        <spring.version>5.3.14</spring.version>
+        <springboot.version>2.6.1</springboot.version>
+        <springdata.version>2.6.0</springdata.version>
+        <springdatarest.version>3.6.0</springdatarest.version>
 
-        <aspectj.version>1.9.6</aspectj.version>
-        <neo4jogm.version>3.2.21</neo4jogm.version>
+        <aspectj.version>1.9.7</aspectj.version>
+        <neo4jogm.version>3.2.28</neo4jogm.version>
 
         <!-- Web -->
         <zk.version>9.6.0.1</zk.version>
@@ -105,7 +105,7 @@
         <jasperreports.version>6.9.0</jasperreports.version>
         <itext.version>2.1.7</itext.version>
         <poi.version>4.1.2</poi.version>
-        <snakeyaml.version>1.29</snakeyaml.version>
+        <snakeyaml.version>1.30</snakeyaml.version>
         <zing.version>3.4.1</zing.version>
 
         <!--Logging -->
@@ -114,8 +114,8 @@
         <!--Testing -->
         <junit.version>4.13.2</junit.version>
         <h2.version>1.4.200</h2.version>
-        <hibernate.version>5.5.8.Final</hibernate.version>
-        <hibernatevalidator.version>6.2.0.Final</hibernatevalidator.version>
+        <hibernate.version>5.6.3.Final</hibernate.version>
+        <hibernatevalidator.version>6.2.1.Final</hibernatevalidator.version>
         <validationapi.version>2.0.1.Final</validationapi.version>
 
         <java.version>11</java.version>
