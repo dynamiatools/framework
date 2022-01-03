@@ -1,5 +1,5 @@
 [![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia/tools.dynamia.zk.app)](https://search.maven.org/search?q=tools.dynamia)
-![Java Version Required](https://img.shields.io/badge/java-%3E%3D11-blue)
+![Java Version Required](https://img.shields.io/badge/java-11+-blue)
 [![Java CI with Maven](https://github.com/dynamiatools/framework/actions/workflows/maven.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/maven.yml)
 
 
@@ -61,13 +61,13 @@ class MyApplication {
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.zk.app</artifactId>
-        <version>4.0.3</version>
+        <version>4.0.5</version>
     </dependency>
 
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.domain.jpa</artifactId>
-        <version>4.0.3</version>
+        <version>4.0.5</version>
     </dependency>    
 </dependencies>
 ```
@@ -75,8 +75,8 @@ class MyApplication {
 **Gradle**
 
 ```groovy
-compile 'tools.dynamia:tools.dynamia.zk.app:4.0.3'
-compile 'tools.dynamia:tools.dynamia.domain.jpa:4.0.3'
+compile 'tools.dynamia:tools.dynamia.zk.app:4.0.5'
+compile 'tools.dynamia:tools.dynamia.domain.jpa:4.0.5'
 ```
 
 Artifacts are available in **Maven Central** repositories
@@ -100,7 +100,7 @@ DynamiaTools is available under Apache 2 License
 
 ## History
 
-We start developing DynamiaTools 12 years ago as an internal utility library for our projects at Dynamia Soluciones
+We start developing DynamiaTools 13 years ago as an internal utility library for our projects at Dynamia Soluciones
 IT (https://www.dynamiasoluciones.com). We needed that our developers could create web applications fast without too
 much knowledge about specific frameworks or APIs like Spring or JPA.
 
