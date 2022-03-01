@@ -17,7 +17,6 @@
 package tools.dynamia.domain;
 
 import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.collect.PagedList;
 import tools.dynamia.commons.logger.LoggingService;
@@ -26,6 +25,7 @@ import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.util.CrudServiceListenerAdapter;
 import tools.dynamia.domain.util.DomainUtils;
+import tools.dynamia.integration.CacheManagerUtils;
 import tools.dynamia.integration.Containers;
 
 import java.io.Serializable;
@@ -47,18 +47,17 @@ public class DefaultEntityReferenceRepository<ID extends Serializable> extends C
     private int maxResult = 60;
     private String[] findFields;
     private boolean cacheable;
-    private String cacheName;
+    private String cacheName = "EntityReferencesCache";
+    private String alias;
 
     public DefaultEntityReferenceRepository(Class<?> entityClass) {
         this.entityClass = entityClass;
-        initCacheName();
     }
 
     public DefaultEntityReferenceRepository(Class<?> entityClass, String... findFields) {
         super();
         this.entityClass = entityClass;
         this.findFields = findFields;
-        initCacheName();
     }
 
     public DefaultEntityReferenceRepository(CrudService crudService, Class<?> entityClass, String... findFields) {
@@ -66,12 +65,8 @@ public class DefaultEntityReferenceRepository<ID extends Serializable> extends C
         this.crudService = crudService;
         this.entityClass = entityClass;
         this.findFields = findFields;
-        initCacheName();
     }
 
-    private void initCacheName() {
-        cacheName = getAlias() + "RefCache";
-    }
 
     public boolean isCacheable() {
         return cacheable;
@@ -102,7 +97,14 @@ public class DefaultEntityReferenceRepository<ID extends Serializable> extends C
 
     @Override
     public String getAlias() {
-        return entityClass.getSimpleName();
+        if (alias == null) {
+            alias = entityClass.getSimpleName();
+        }
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     @Override
@@ -249,14 +251,14 @@ public class DefaultEntityReferenceRepository<ID extends Serializable> extends C
     protected void saveToCache(Object key, Object value) {
         Cache cache = getCache();
         if (cache != null) {
-            cache.put(key, value);
+            cache.put(fixKey(key), value);
         }
     }
 
     protected void removeFromCache(Object key) {
         Cache cache = getCache();
         if (cache != null) {
-            cache.evict(key);
+            cache.evict(fixKey(key));
         }
     }
 
@@ -265,7 +267,7 @@ public class DefaultEntityReferenceRepository<ID extends Serializable> extends C
 
         Cache cache = getCache();
         if (cache != null) {
-            value = cache.get(key, clazz);
+            value = cache.get(fixKey(key), clazz);
         }
 
         return value;
@@ -273,18 +275,7 @@ public class DefaultEntityReferenceRepository<ID extends Serializable> extends C
 
     protected Cache getCache() {
         if (isCacheable()) {
-            CacheManager cacheManager = Containers.get().findObject(CacheManager.class);
-            if (cacheManager != null) {
-                Cache cache = cacheManager.getCache(cacheName);
-
-                if (cache == null) {
-                    logger.warn("Cacheable is active but cache with name [" + cacheName + "] is not found.  entity class ["
-                            + getEntityClassName() + "]");
-                }
-                return cache;
-            } else {
-                logger.warn("CacheManager not found, make sure that a Spring cache manager is configured");
-            }
+            return CacheManagerUtils.getCache(cacheName);
         }
         return null;
     }
@@ -302,13 +293,17 @@ public class DefaultEntityReferenceRepository<ID extends Serializable> extends C
     private void clearCache(Object entity) {
         if (entityClass != null && isCacheable() && entity != null && entity.getClass() == entityClass) {
             try {
-                Object id = DomainUtils.findEntityId(entity);
-                if (id != null) {
-                    removeFromCache(id);
+                Object key = DomainUtils.findEntityId(entity);
+                if (key != null) {
+                    removeFromCache(fixKey(key));
                 }
             } catch (Exception e) {
                 logger.error("Error clearing cache from EntityReferenceRepository - Entity: " + entityClass, e);
             }
         }
+    }
+
+    protected String fixKey(Object key) {
+        return getEntityClassName() + "_" + key;
     }
 }
