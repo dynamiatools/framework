@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
+import java.util.function.Supplier;
 
 
 /**
@@ -78,12 +79,27 @@ public class SchedulerUtil {
         } else {
             throw new TaskException("No AsyncTaskExecutor found to run task " + task);
         }
+    }
 
+    /**
+     * Functional override of runWithResult({@link TaskWithResult }
+     *
+     * @param task
+     * @param <T>
+     * @return
+     */
+    public static <T> Future<T> runWithResult(Supplier<T> task) {
+        return runWithResult(new TaskWithResult<T>() {
+            @Override
+            public T doWorkWithResult() {
+                return task.get();
+            }
+        });
     }
 
     /**
      * Schedule a WorkerTask using the cron expression passed. This method use
-     * Spring TaskScheduler to perform scheduling
+     * Spring TaskScheduler to perform scheduling. Check {@link org.springframework.scheduling.support.CronExpression}
      *
      * @param cron     the cron
      * @param timeZone the time zone
