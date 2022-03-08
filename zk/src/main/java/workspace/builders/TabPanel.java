@@ -167,7 +167,15 @@ public class TabPanel extends AbstractZKWorkspaceBuilder {
     protected void postUpdate(Component pageComponent, Page page, Map<String, Object> params) {
         if (pageComponent.getParent() instanceof Tabpanel) {
             Tabpanel tabpanel = (Tabpanel) pageComponent.getParent();
+            if (tabpanel == null) {
+                return;
+            }
             Tab tab = tabpanel.getLinkedTab();
+            if (tab == null) {
+                //tab no longer exists, abort mission
+                return;
+            }
+
             if (params != null) {
                 if (params.get("PAGE_TITLE") != null) {
                     tab.setLabel(params.get("PAGE_TITLE").toString());
