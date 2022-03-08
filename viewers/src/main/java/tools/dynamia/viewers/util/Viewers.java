@@ -17,6 +17,7 @@
 package tools.dynamia.viewers.util;
 
 import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.domain.Descriptor;
 import tools.dynamia.domain.Descriptors;
@@ -100,6 +101,7 @@ public class Viewers {
     public static final String PARAM_ACTION = "action";
     public static final String PARAM_MULTI_FUNCTION_PROCESSOR = "multiFunctionProcessor";
     public static final String PARAM_PAGINATION = "pagination";
+    public static final String PARAM_MULTIVIEW = "multiview";
 
     /**
      * Find view descriptor.
@@ -326,4 +328,22 @@ public class Viewers {
     private Viewers() {
     }
 
+    /**
+     * Build a classifer name using {@link ViewDescriptor} type and beanClass simple name or viewDescriptorId
+     *
+     * @param viewDescriptor
+     * @return
+     */
+    public static String buildMessageClasffier(ViewDescriptor viewDescriptor) {
+        String classifier = "";
+        if (viewDescriptor != null) {
+            classifier = StringUtils.capitalize(viewDescriptor.getViewTypeName());
+            if (viewDescriptor.getBeanClass() != null) {
+                classifier += " " + StringUtils.addSpaceBetweenWords(viewDescriptor.getBeanClass().getSimpleName());
+            } else {
+                classifier += " " + StringUtils.capitalize(viewDescriptor.getId());
+            }
+        }
+        return classifier;
+    }
 }

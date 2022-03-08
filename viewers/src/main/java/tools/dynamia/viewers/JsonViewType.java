@@ -21,9 +21,12 @@ import tools.dynamia.integration.sterotypes.Component;
 
 @Component
 public class JsonViewType implements ViewType {
+
+    public static final String NAME = "json";
+
     @Override
     public String getName() {
-        return "json";
+        return NAME;
     }
 
     @Override

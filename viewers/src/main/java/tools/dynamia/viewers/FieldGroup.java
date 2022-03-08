@@ -288,6 +288,10 @@ public class FieldGroup implements Serializable, Indexable, Cloneable {
         this.viewDescriptor = viewDescriptor;
     }
 
+    public ViewDescriptor getViewDescriptor() {
+        return viewDescriptor;
+    }
+
     public boolean isCollapse() {
         return collapse;
     }
