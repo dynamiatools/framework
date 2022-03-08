@@ -337,12 +337,14 @@ public class Viewers {
     public static String buildMessageClasffier(ViewDescriptor viewDescriptor) {
         String classifier = "";
         if (viewDescriptor != null) {
-            classifier = StringUtils.capitalize(viewDescriptor.getViewTypeName());
             if (viewDescriptor.getBeanClass() != null) {
-                classifier += " " + StringUtils.addSpaceBetweenWords(viewDescriptor.getBeanClass().getSimpleName());
+                classifier = StringUtils.addSpaceBetweenWords(viewDescriptor.getBeanClass().getSimpleName());
             } else {
-                classifier += " " + StringUtils.capitalize(viewDescriptor.getId());
+                classifier = StringUtils.capitalize(viewDescriptor.getId());
             }
+
+            classifier += " " + StringUtils.capitalize(viewDescriptor.getViewTypeName());
+
         }
         return classifier;
     }
