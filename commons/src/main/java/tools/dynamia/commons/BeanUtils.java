@@ -812,17 +812,17 @@ public final class BeanUtils {
             } else {
                 getPropertiesInfo(bean.getClass()).stream()
                         .filter(p -> (p.isStandardClass() || p.isEnum()) && !p.isArray() && !p.isCollection()).forEach(p -> {
-                    try {
-                        Object value = BeanUtils.invokeGetMethod(bean, p);
-                        if (value == null) {
-                            value = defaultValue;
-                        }
-                        values.put(prefix + p.getName(), value);
-                    } catch (Exception e) {
-                        // ignore
-                    }
+                            try {
+                                Object value = BeanUtils.invokeGetMethod(bean, p);
+                                if (value == null) {
+                                    value = defaultValue;
+                                }
+                                values.put(prefix + p.getName(), value);
+                            } catch (Exception e) {
+                                // ignore
+                            }
 
-                });
+                        });
             }
         } else {
             if (LOGGER.isDebugEnabled()) {
@@ -867,8 +867,12 @@ public final class BeanUtils {
      * @param source
      */
     public static void setupBean(Object bean, Object source) {
-        Map<String, Object> values = getValuesMaps("", source);
-        setupBean(bean, values);
+        if (source instanceof Map) {
+            setupBean(bean, (Map) source);
+        } else {
+            Map<String, Object> values = getValuesMaps("", source);
+            setupBean(bean, values);
+        }
     }
 
     /**
