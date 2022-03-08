@@ -27,9 +27,11 @@ import tools.dynamia.viewers.ViewType;
 @Component
 public class ConfigViewType implements ViewType {
 
+    public static final String NAME = "config";
+
     @Override
     public String getName() {
-        return "config";
+        return NAME;
     }
 
     @Override

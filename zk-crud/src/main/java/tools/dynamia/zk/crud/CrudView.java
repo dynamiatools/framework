@@ -38,6 +38,7 @@ import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.ObjectMatcher;
 import tools.dynamia.navigation.NavigationManager;
 import tools.dynamia.navigation.Page;
+import tools.dynamia.ui.LocalizedMessagesProvider;
 import tools.dynamia.viewers.*;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.web.util.HttpUtils;
@@ -48,11 +49,13 @@ import tools.dynamia.zk.actions.MenuitemActionRenderer;
 import tools.dynamia.zk.actions.ToolbarbuttonActionRenderer;
 import tools.dynamia.zk.navigation.ComponentPage;
 import tools.dynamia.zk.ui.CanBeReadonly;
+import tools.dynamia.zk.ui.Import;
 import tools.dynamia.zk.util.ZKUtil;
 import tools.dynamia.zk.viewers.form.FormFieldComponent;
 import tools.dynamia.zk.viewers.form.FormView;
 import tools.dynamia.zk.viewers.mv.MultiView;
 import tools.dynamia.zk.viewers.mv.MultiViewListener;
+import tools.dynamia.zk.viewers.mv.ViewLoader;
 import tools.dynamia.zk.viewers.ui.Viewer;
 
 import java.io.Serializable;
@@ -108,6 +111,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
 
     private Object source;
     private boolean queryProjection;
+    private LocalizedMessagesProvider messagesProvider;
 
     public CrudView() {
         buildGeneralView();
@@ -199,15 +203,31 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
             formViewTitle = Messages.get(CrudView.class, DEFAULT_FORM_VIEW_TITLE);
         }
 
+        if (messagesProvider != null) {
+            formViewTitle = messagesProvider.getMessage("Form Title", Viewers.buildMessageClasffier(formView.getViewDescriptor()),
+                    Messages.getDefaultLocale(),
+                    formViewTitle);
+        }
+
         formViewContainer = new MultiView();
         formViewContainer.setVflex("1");
+        var multiViewParams = formView.getViewDescriptor().getParams().get(Viewers.PARAM_MULTIVIEW);
+        if (multiViewParams instanceof Map) {
+            BeanUtils.setupBean(formViewContainer, multiViewParams);
+        }
         addFormViewToContainer(formViewTitle);
         formViewContainer.setParentView(this);
 
         // Find collection and viewers fields and add Subviews
         for (Field field : formView.getViewDescriptor().getFields()) {
+            String label = field.getLocalizedLabel(Messages.getDefaultLocale());
+            if (messagesProvider != null) {
+                label = messagesProvider.getMessage(field.getName(), Viewers.buildMessageClasffier(field.getViewDescriptor()), Messages.getDefaultLocale(), label);
+            }
+
+
             if (field.isCollection() && field.getComponentClass() == CrudView.class) {
-                addSubCrudView(formView, field);
+                addSubCrudView(formView, field, label);
             } else if (field.getComponentClass() == Viewer.class) {
                 addSubGenericView(field);
             }
@@ -516,7 +536,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
         ((Component) dataSetView).setParent(getActiveViewParent());
     }
 
-    protected void addSubCrudView(FormView<T> formView, final Field field) {
+    protected void addSubCrudView(FormView<T> formView, final Field field, final String label) {
         if (field.getParams().get(Viewers.PARAM_INPLACE) == Boolean.TRUE) {
             View view = loadSubview(field);
             Component parent = null;
@@ -531,19 +551,19 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
             if (parent != null) {
                 ((Component) view).setParent(parent);
             } else {
-                this.formView.addSubview(field.getLocalizedLabel(Messages.getDefaultLocale()), view);
+                this.formView.addSubview(label, view);
             }
             if (view instanceof CrudView) {
                 ((CrudView) view).getController().doQuery();
             }
         } else {
-            formViewContainer.addView(field.getLocalizedLabel(Messages.getDefaultLocale()), p -> CrudView.this.loadSubview(field));
+            formViewContainer.addView(label, p -> CrudView.this.loadSubview(field));
         }
     }
 
     protected void addSubGenericView(final Field field) {
 
-        if (field.getParams().get(Viewers.PARAM_INPLACE) != Boolean.TRUE && !"crudview".equalsIgnoreCase(field.getComponent())) {
+        if (field.getParams().get(Viewers.PARAM_INPLACE) != Boolean.TRUE) {
 
             MultiViewListener listener = null;
             if (field.getParams().get(Viewers.PARAM_MULTIVIEW_LISTENER) != null) {
@@ -593,6 +613,14 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
 
     public void setFormViewDescriptorId(String formViewDescriptorId) {
         this.formViewDescriptorId = formViewDescriptorId;
+    }
+
+    public LocalizedMessagesProvider getMessagesProvider() {
+        return messagesProvider;
+    }
+
+    public void setMessagesProvider(LocalizedMessagesProvider messagesProvider) {
+        this.messagesProvider = messagesProvider;
     }
 
     private static class ComponentComparator implements Comparator<Component> {

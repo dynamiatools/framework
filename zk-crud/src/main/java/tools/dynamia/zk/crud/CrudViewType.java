@@ -27,9 +27,11 @@ import tools.dynamia.viewers.ViewType;
 @Component
 public class CrudViewType implements ViewType {
 
+    public static final String NAME = "crud";
+
     @Override
     public String getName() {
-        return "crud";
+        return NAME;
     }
 
     @Override

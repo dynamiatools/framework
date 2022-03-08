@@ -27,9 +27,11 @@ import tools.dynamia.viewers.ViewType;
 @Component
 public class EntityPickerViewType implements ViewType {
 
+    public static final String NAME = "entitypicker";
+
     @Override
     public String getName() {
-        return "entitypicker";
+        return NAME;
     }
 
     @Override

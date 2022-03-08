@@ -21,9 +21,12 @@ import tools.dynamia.viewers.ViewRenderer;
 import tools.dynamia.viewers.ViewType;
 
 public class SimpleCrudViewType implements ViewType {
+
+    public static final String NAME = "simplecrud";
+
     @Override
     public String getName() {
-        return "simplecrud";
+        return NAME;
     }
 
     @Override

@@ -21,15 +21,16 @@ import tools.dynamia.viewers.ViewRenderer;
 import tools.dynamia.viewers.ViewType;
 
 /**
- *
  * @author Mario A. Serrano Leones
  */
 @Component
 public class EntityFiltersPanelViewType implements ViewType {
 
+    public static final String NAME = "entityfilters";
+
     @Override
     public String getName() {
-        return "entityfilters";
+        return NAME;
     }
 
     @Override
