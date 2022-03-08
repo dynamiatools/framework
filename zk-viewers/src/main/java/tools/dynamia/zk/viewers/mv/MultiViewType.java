@@ -22,9 +22,11 @@ import tools.dynamia.viewers.ViewType;
 
 public class MultiViewType implements ViewType {
 
+    public static final String NAME = "multiview";
+
     @Override
     public String getName() {
-        return "multiview";
+        return NAME;
     }
 
     @Override

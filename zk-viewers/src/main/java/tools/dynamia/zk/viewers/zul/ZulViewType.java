@@ -29,9 +29,11 @@ import tools.dynamia.viewers.ViewType;
 @Component
 public class ZulViewType implements ViewType {
 
+    public static final String NAME = "zul";
+
     @Override
     public String getName() {
-        return "zul";
+        return NAME;
     }
 
     @Override

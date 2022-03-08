@@ -31,9 +31,11 @@ import tools.dynamia.viewers.ViewType;
 @Component
 public class ExportTableViewType implements ViewType {
 
+    public static final String NAME = "export";
+
     @Override
     public String getName() {
-        return "export";
+        return NAME;
     }
 
     @Override

@@ -31,9 +31,11 @@ import tools.dynamia.viewers.ViewType;
 @Component
 public class TableViewType implements ViewType {
 
+    public static final String NAME = "table";
+
     @Override
     public String getName() {
-        return "table";
+        return NAME;
     }
 
     @Override

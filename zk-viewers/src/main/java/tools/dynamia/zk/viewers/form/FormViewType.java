@@ -31,9 +31,11 @@ import tools.dynamia.viewers.ViewType;
 @Component
 public class FormViewType implements ViewType {
 
+    public static final String NAME = "form";
+
     @Override
     public String getName() {
-        return "form";
+        return NAME;
     }
 
     @Override

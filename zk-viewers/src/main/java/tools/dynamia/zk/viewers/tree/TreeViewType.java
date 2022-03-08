@@ -32,9 +32,11 @@ import tools.dynamia.viewers.ViewType;
 @SuppressWarnings("rawtypes")
 public class TreeViewType implements ViewType {
 
+    public static final String NAME = "tree";
+
     @Override
     public String getName() {
-        return "tree";
+        return NAME;
     }
 
     @Override
