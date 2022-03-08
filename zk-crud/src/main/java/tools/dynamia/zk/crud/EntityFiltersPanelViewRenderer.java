@@ -25,7 +25,8 @@ import tools.dynamia.zk.crud.ui.EntityFiltersPanel;
 /**
  * @author Mario A. Serrano Leones
  */
-class EntityFiltersPanelViewRenderer implements ViewRenderer {
+public class EntityFiltersPanelViewRenderer implements ViewRenderer {
+
 
     @Override
     public View render(ViewDescriptor descriptor, Object value) {
@@ -36,8 +37,13 @@ class EntityFiltersPanelViewRenderer implements ViewRenderer {
         } catch (Exception e) {
         }
         filterPanel.setValue(value);
+        customize(filterPanel);
 
         return filterPanel;
+
+    }
+
+    protected void customize(EntityFiltersPanel filterPanel) {
 
     }
 

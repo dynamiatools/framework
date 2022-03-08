@@ -17,7 +17,6 @@
 package tools.dynamia.zk.crud.ui;
 
 import org.zkoss.bind.Binder;
-import org.zkoss.zhtml.Text;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.HtmlBasedComponent;
 import org.zkoss.zk.ui.event.Events;
@@ -34,6 +33,7 @@ import tools.dynamia.domain.EntityReference;
 import tools.dynamia.domain.Reference;
 import tools.dynamia.domain.query.QueryCondition;
 import tools.dynamia.domain.query.QueryParameters;
+import tools.dynamia.ui.LocalizedMessagesProvider;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.View;
@@ -56,22 +56,22 @@ public class EntityFiltersPanel extends Borderlayout implements View {
     /**
      *
      */
+    private final LoggingService logger = new SLF4JLoggingService(EntityFiltersPanel.class);
     public static final String ON_SEARCH = "onSearch";
     private static final long serialVersionUID = 6522069747991047688L;
     private static final String PATH = "path";
+    private final Map<FilterField, EntityFilterCustomizer> filterCustomizers = new HashMap<>();
+    private final Map<String, FormFieldComponent> componentsFieldsMap = new HashMap<>();
+    private final List<FilterField> filters = new ArrayList<>();
 
     private final Class<?> entityClass;
 
     private Button searchButton;
-
-    private final List<FilterField> filters = new ArrayList<>();
-    private final Map<FilterField, EntityFilterCustomizer> filterCustomizers = new HashMap<>();
     private Vlayout filtersPanel;
-    private final LoggingService logger = new SLF4JLoggingService(EntityFiltersPanel.class);
     private ViewDescriptor viewDescriptor;
-    private final Map<String, FormFieldComponent> componentsFieldsMap = new HashMap<>();
     private View parentView;
     private Object value;
+    private LocalizedMessagesProvider messagesProvider;
 
 
     public EntityFiltersPanel(Class<?> entityClass) {
@@ -188,7 +188,9 @@ public class EntityFiltersPanel extends Borderlayout implements View {
             path = (String) field.getParams().get(PATH);
         }
         String label = field.getLocalizedLabel(Messages.getDefaultLocale());
-
+        if (messagesProvider != null) {
+            label = messagesProvider.getMessage(field.getName(), Viewers.buildMessageClasffier(field.getViewDescriptor()), Messages.getDefaultLocale(), label);
+        }
 
         if (prop != null) {
             if (prop.is(Boolean.class) || prop.is(boolean.class)) {
@@ -224,12 +226,12 @@ public class EntityFiltersPanel extends Borderlayout implements View {
             if (comp instanceof InputElement) {
                 InputElement input = (InputElement) comp;
                 input.setHflex("1");
-                input.setPlaceholder("Desde");
+                input.setPlaceholder(Messages.get(EntityFiltersPanel.class, "from"));
             }
             if (comp2 instanceof InputElement) {
                 InputElement input = (InputElement) comp2;
                 input.setHflex("1");
-                input.setPlaceholder("Hasta");
+                input.setPlaceholder(Messages.get(EntityFiltersPanel.class, "from"));
             }
 
 
@@ -518,5 +520,17 @@ public class EntityFiltersPanel extends Borderlayout implements View {
     @Override
     public void setParentView(View parentView) {
         this.parentView = parentView;
+    }
+
+    public LocalizedMessagesProvider getMessagesProvider() {
+        return messagesProvider;
+    }
+
+    public void setMessagesProvider(LocalizedMessagesProvider messagesProvider) {
+        this.messagesProvider = messagesProvider;
+    }
+
+    public void setMessagesProvider(String messagesProvider) {
+        this.messagesProvider = BeanUtils.newInstance(messagesProvider);
     }
 }

@@ -27,19 +27,22 @@ import tools.dynamia.zk.viewers.ZKWrapperView;
  *
  * @author Mario A. Serrano Leones
  */
-class EntityPickerViewRenderer implements ViewRenderer {
+public class EntityPickerViewRenderer implements ViewRenderer {
 
     @Override
     public View render(ViewDescriptor descriptor, Object value) {
-        EntityPickerBox box = new EntityPickerBox(descriptor.getBeanClass(), value);
+        EntityPickerBox entityPickerBox = new EntityPickerBox(descriptor.getBeanClass(), value);
 
         try {
-            BeanUtils.setupBean(box, descriptor.getParams());
+            BeanUtils.setupBean(entityPickerBox, descriptor.getParams());
         } catch (Exception e) {
         }
+        customize(entityPickerBox);
+        return new ZKWrapperView(entityPickerBox);
 
-        return new ZKWrapperView(box);
+    }
 
+    protected void customize(EntityPickerBox entityPickerBox) {
     }
 
 }
