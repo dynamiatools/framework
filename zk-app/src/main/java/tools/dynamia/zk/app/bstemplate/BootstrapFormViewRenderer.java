@@ -135,11 +135,15 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
         String labelText = field.getLocalizedLabel(Messages.getDefaultLocale());
         if (isExpression(labelText)) {
             labelText = $s(labelText);
+        } else {
+            labelText = filterFieldLabel(field, labelText);
         }
 
         String decriptionText = field.getLocalizedDescription(Messages.getDefaultLocale());
         if (isExpression(decriptionText)) {
             decriptionText = $s(decriptionText);
+        } else {
+            decriptionText = filterFieldDescription(field, decriptionText);
         }
 
         Label label = new Label(labelText);
@@ -324,6 +328,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
         header.appendChild(title);
 
         String label = fieldGroup.getLocalizedLabel(Messages.getDefaultLocale());
+        label = filterFieldGroupLabel(fieldGroup, label);
 
         if (fieldGroup.getIcon() != null) {
             I icon = new I();
