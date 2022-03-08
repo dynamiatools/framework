@@ -33,6 +33,9 @@ import java.util.List;
 @SuppressWarnings("rawtypes")
 public class MultiView<T> extends Tabbox implements View<T>, EventListener<Event> {
 
+    public static final String MULTI_VIEW_LISTENER = "multiViewListener";
+    public static final String VIEW_LOADER = "viewLoader";
+
     static {
         BindingComponentIndex.getInstance().put("value", MultiView.class);
         ComponentAliasIndex.getInstance().add(MultiView.class);
@@ -125,10 +128,10 @@ public class MultiView<T> extends Tabbox implements View<T>, EventListener<Event
     protected void loadTab(Tab tab) {
         View subview = null;
         Tabpanel panel = tab.getLinkedPanel();
-        MultiViewListener listener = (MultiViewListener) tab.getAttribute("multiViewListener");
+        MultiViewListener listener = (MultiViewListener) tab.getAttribute(MULTI_VIEW_LISTENER);
 
         if (panel.getChildren().isEmpty()) {
-            ViewLoader loader = (ViewLoader) tab.getAttribute("viewLoader");
+            ViewLoader loader = (ViewLoader) tab.getAttribute(VIEW_LOADER);
             if (loader != null) {
                 subview = loader.loadSubview(this);
                 subview.setParentView(this);

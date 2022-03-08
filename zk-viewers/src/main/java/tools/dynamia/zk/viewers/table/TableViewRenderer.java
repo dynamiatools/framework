@@ -28,6 +28,7 @@ import tools.dynamia.commons.Messages;
 import tools.dynamia.domain.fx.CrudServiceMultiFunctionProcessor;
 import tools.dynamia.domain.fx.Functions;
 import tools.dynamia.domain.fx.MultiFunctionProcessor;
+import tools.dynamia.ui.LocalizedMessagesProvider;
 import tools.dynamia.viewers.*;
 import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
@@ -39,6 +40,8 @@ import java.util.*;
  * @author Mario A. Serrano Leones
  */
 public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
+
+    private LocalizedMessagesProvider messagesProvider;
 
     @Override
     public View<List<T>> render(ViewDescriptor descriptor, List<T> value) {
@@ -80,7 +83,9 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
             auxhead.setParent(table);
 
             descriptor.getFieldGroups().forEach(grp -> {
-                Auxheader auxheader = new Auxheader(grp.getLocalizedLabel(Messages.getDefaultLocale()));
+                String grplabel = grp.getLocalizedLabel(Messages.getDefaultLocale());
+                grplabel = filterFieldGroupLabel(grp, grplabel);
+                Auxheader auxheader = new Auxheader(grplabel);
                 BeanUtils.setupBean(auxheader, grp.getParams());
                 if (auxheader.getColspan() == 1 && grp.getFields().size() > 1) {
                     auxheader.setColspan(grp.getFields().size());
@@ -114,8 +119,13 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
             if (field.isVisible()) {
 
                 String label = field.getLocalizedLabel(Messages.getDefaultLocale());
+                label = filterFieldLabel(field, label);
+
+                String description = field.getLocalizedDescription(Messages.getDefaultLocale());
+                description = filterFieldDescription(field,description);
+
                 TableViewHeader header = new TableViewHeader(table, label);
-                header.setTooltiptext(field.getLocalizedDescription(Messages.getDefaultLocale()));
+                header.setTooltiptext(description);
                 header.setParent(head);
                 header.setField(field);
                 ZKViewersUtil.setupFieldIcon(field, header);
@@ -271,4 +281,35 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
         }
     }
 
+    protected String filterFieldLabel(Field field, String label) {
+        if (messagesProvider == null) {
+            return label;
+        } else {
+            return messagesProvider.getMessage(field.getName(), Viewers.buildMessageClasffier(field.getViewDescriptor()), Messages.getDefaultLocale(), label);
+        }
+    }
+
+    protected String filterFieldGroupLabel(FieldGroup fieldGroup, String label) {
+        if (messagesProvider == null) {
+            return label;
+        } else {
+            return messagesProvider.getMessage("Group " + fieldGroup.getName(), Viewers.buildMessageClasffier(fieldGroup.getViewDescriptor()), Messages.getDefaultLocale(), label);
+        }
+    }
+
+    protected String filterFieldDescription(Field field, String description) {
+        if (messagesProvider == null) {
+            return description;
+        } else {
+            return messagesProvider.getMessage(field.getName() + " Description", Viewers.buildMessageClasffier(field.getViewDescriptor()), Messages.getDefaultLocale(), description);
+        }
+    }
+
+    public LocalizedMessagesProvider getMessagesProvider() {
+        return messagesProvider;
+    }
+
+    public void setMessagesProvider(LocalizedMessagesProvider messagesProvider) {
+        this.messagesProvider = messagesProvider;
+    }
 }

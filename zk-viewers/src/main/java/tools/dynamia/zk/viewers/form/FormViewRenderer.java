@@ -30,6 +30,7 @@ import org.zkoss.zul.impl.InputElement;
 import org.zkoss.zul.impl.NumberInputElement;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.Messages;
+import tools.dynamia.ui.LocalizedMessagesProvider;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.ui.icons.IconsTheme;
 import tools.dynamia.viewers.*;
@@ -55,6 +56,8 @@ import static tools.dynamia.viewers.util.ViewersExpressionUtil.isExpression;
  * @author Mario A. Serrano Leones
  */
 public class FormViewRenderer<T> implements ViewRenderer<T> {
+
+    private LocalizedMessagesProvider messagesProvider;
 
     @Override
     public View<T> render(ViewDescriptor descriptor, T value) {
@@ -187,6 +190,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         cell.appendChild(title);
 
         String label = fieldGroup.getLocalizedLabel(Messages.getDefaultLocale());
+        label = filterFieldGroupLabel(fieldGroup, label);
 
         if (fieldGroup.getIcon() != null) {
             I icon = new I();
@@ -205,11 +209,15 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         String labelText = field.getLocalizedLabel(Messages.getDefaultLocale());
         if (isExpression(labelText)) {
             labelText = $s(labelText);
+        } else {
+            labelText = filterFieldLabel(field, labelText);
         }
 
         String decriptionText = field.getLocalizedDescription(Messages.getDefaultLocale());
         if (isExpression(decriptionText)) {
             decriptionText = $s(decriptionText);
+        } else {
+            decriptionText = filterFieldDescription(field, decriptionText);
         }
 
         Object sl = field.getParams().get(Viewers.PARAM_SHOW_LABEL);
@@ -418,6 +426,30 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
     }
 
+    protected String filterFieldLabel(Field field, String label) {
+        if (messagesProvider == null) {
+            return label;
+        } else {
+            return messagesProvider.getMessage(field.getName(), Viewers.buildMessageClasffier(field.getViewDescriptor()), Messages.getDefaultLocale(), label);
+        }
+    }
+
+    protected String filterFieldGroupLabel(FieldGroup fieldGroup, String label) {
+        if (messagesProvider == null) {
+            return label;
+        } else {
+            return messagesProvider.getMessage("Group " + fieldGroup.getName(), Viewers.buildMessageClasffier(fieldGroup.getViewDescriptor()), Messages.getDefaultLocale(), label);
+        }
+    }
+
+    protected String filterFieldDescription(Field field, String description) {
+        if (messagesProvider == null) {
+            return description;
+        } else {
+            return messagesProvider.getMessage(field.getName() + " Description", Viewers.buildMessageClasffier(field.getViewDescriptor()), Messages.getDefaultLocale(), description);
+        }
+    }
+
     protected FormView<T> newFormView() {
         FormView<T> formView = new FormView<>();
         Grid grid = new Grid();
@@ -440,4 +472,11 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
     }
 
 
+    public LocalizedMessagesProvider getMessagesProvider() {
+        return messagesProvider;
+    }
+
+    public void setMessagesProvider(LocalizedMessagesProvider messagesProvider) {
+        this.messagesProvider = messagesProvider;
+    }
 }

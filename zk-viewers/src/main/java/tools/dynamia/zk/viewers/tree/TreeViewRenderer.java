@@ -22,7 +22,9 @@ package tools.dynamia.zk.viewers.tree;
 import tools.dynamia.commons.Messages;
 import org.zkoss.zul.*;
 import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.ui.LocalizedMessagesProvider;
 import tools.dynamia.viewers.*;
+import tools.dynamia.viewers.util.Viewers;
 
 import java.util.Map;
 
@@ -30,6 +32,8 @@ import java.util.Map;
  * @author Mario A. Serrano Leones
  */
 public class TreeViewRenderer<T> implements ViewRenderer<TreeModel<TreeViewNode<T>>> {
+
+    private LocalizedMessagesProvider messagesProvider;
 
     @Override
     public View<TreeModel<TreeViewNode<T>>> render(ViewDescriptor descriptor, TreeModel<TreeViewNode<T>> value) {
@@ -105,4 +109,27 @@ public class TreeViewRenderer<T> implements ViewRenderer<TreeModel<TreeViewNode<
         return descriptor.getParams().containsKey("nodeIcon") || descriptor.getParams().containsKey("leafNodeIcon");
     }
 
+    protected String filterFieldGroupLabel(FieldGroup fieldGroup, String label) {
+        if (messagesProvider == null) {
+            return label;
+        } else {
+            return messagesProvider.getMessage("Group " + fieldGroup.getName(), Viewers.buildMessageClasffier(fieldGroup.getViewDescriptor()), Messages.getDefaultLocale(), label);
+        }
+    }
+
+    protected String filterFieldDescription(Field field, String description) {
+        if (messagesProvider == null) {
+            return description;
+        } else {
+            return messagesProvider.getMessage(field.getName() + " Description", Viewers.buildMessageClasffier(field.getViewDescriptor()), Messages.getDefaultLocale(), description);
+        }
+    }
+
+    public LocalizedMessagesProvider getMessagesProvider() {
+        return messagesProvider;
+    }
+
+    public void setMessagesProvider(LocalizedMessagesProvider messagesProvider) {
+        this.messagesProvider = messagesProvider;
+    }
 }
