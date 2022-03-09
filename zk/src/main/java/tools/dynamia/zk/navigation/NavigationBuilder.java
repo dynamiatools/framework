@@ -40,17 +40,19 @@ public class NavigationBuilder extends GenericForwardComposer {
     @Autowired
     private ModuleContainer moduleContainer;
 
-    private String navigationView;
+    private String viewBuilderClass;
+    private NavigationViewBuilder viewBuilder;
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
-        navigationView = (String) self.getAttribute("builderClass");
+        viewBuilderClass = (String) self.getAttribute("builderClass");
         buildNavigation();
+        ZKNavigationManager.getInstance().setCurrentNavBuilder(this);
     }
 
     private void buildNavigation() {
-        NavigationViewBuilder viewBuilder = createViewBuilder();
+        this.viewBuilder = instanceNavigationBuilder();
         List<Module> modules = new ArrayList<>(moduleContainer.getModules());
         navManager.getAvailablesPages().clear();
         modules.sort(new ModuleComparator());
@@ -109,13 +111,13 @@ public class NavigationBuilder extends GenericForwardComposer {
         }
     }
 
-    private NavigationViewBuilder createViewBuilder() {
-        if (navigationView != null && !navigationView.isEmpty()) {
+    private NavigationViewBuilder instanceNavigationBuilder() {
+        if (viewBuilderClass != null && !viewBuilderClass.isEmpty()) {
             try {
-                Class clazz = Class.forName(navigationView);
+                Class clazz = Class.forName(viewBuilderClass);
                 return (NavigationViewBuilder) clazz.getDeclaredConstructor().newInstance();
             } catch (Exception e) {
-                throw new RuntimeException("Navigation view builder cannot be created: " + navigationView, e);
+                throw new RuntimeException("Navigation view builder cannot be created: " + viewBuilderClass, e);
             }
         } else {
             return new Menu();
@@ -123,4 +125,7 @@ public class NavigationBuilder extends GenericForwardComposer {
 
     }
 
+    public NavigationViewBuilder getViewBuilder() {
+        return viewBuilder;
+    }
 }

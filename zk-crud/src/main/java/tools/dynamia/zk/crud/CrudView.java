@@ -970,6 +970,9 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
 
     @Override
     public void setTitle(String title) {
+        if (title!=null && messagesProvider != null) {
+            title = messagesProvider.getMessage(title, Viewers.buildMessageClasffier(getFormView().getViewDescriptor()), Messages.getDefaultLocale(), title);
+        }
         getFormView().setTitle(title);
     }
 

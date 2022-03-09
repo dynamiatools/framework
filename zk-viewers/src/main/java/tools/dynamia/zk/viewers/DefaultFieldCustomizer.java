@@ -30,16 +30,14 @@ import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.FieldCustomizer;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.ComponentAliasIndex;
-import tools.dynamia.zk.ui.Colorbox;
-import tools.dynamia.zk.ui.DateRangebox;
-import tools.dynamia.zk.ui.DayWeekbox;
-import tools.dynamia.zk.ui.DecimalboxCalculator;
+import tools.dynamia.zk.ui.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * @author Mario A. Serrano Leones
@@ -62,6 +60,7 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
         INDEX.put(DayWeekbox.class, DayOfWeek.class);
         INDEX.put(DateRangebox.class, DateRange.class);
         INDEX.put(Timebox.class, LocalTime.class);
+        INDEX.put(LocaleCombobox.class, Locale.class);
     }
 
     @Override

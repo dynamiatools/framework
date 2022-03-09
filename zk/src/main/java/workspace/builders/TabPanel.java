@@ -138,13 +138,17 @@ public class TabPanel extends AbstractZKWorkspaceBuilder {
         if (page.isShowAsPopup()) {
             return container;
         } else {
-            Tab tab = new Tab(page.getLocalizedName(locale));
+            String label = page.getLocalizedName(locale);
 
             if (page.getLongName() != null) {
-                tab.setLabel(page.getLongName());
+                label = page.getLongName();
             } else if (page.getLongNameSupplier() != null) {
-                tab.setLabel(page.getLongNameSupplier().get());
+                label = page.getLongNameSupplier().get();
             }
+
+            label = filterPageLabel(page,locale, label);
+
+            Tab tab = new Tab(label);
             tab.getAttributes().put(TAB_PAGE, page);
             tab.setClosable(page.isClosable());
             ZKUtil.configureComponentIcon(page.getIcon(), tab, IconSize.SMALL);
@@ -161,6 +165,10 @@ public class TabPanel extends AbstractZKWorkspaceBuilder {
 
             return panel;
         }
+    }
+
+    protected String filterPageLabel(Page page,Locale locale, String label) {
+        return label;
     }
 
     @Override

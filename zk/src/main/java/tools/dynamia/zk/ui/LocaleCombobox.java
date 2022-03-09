@@ -36,6 +36,7 @@ public class LocaleCombobox extends Combobox {
     static {
         ComponentAliasIndex.getInstance().add("localebox", LocaleCombobox.class);
         BindingComponentIndex.getInstance().put("selected", LocaleCombobox.class);
+
     }
 
     private String selected;
