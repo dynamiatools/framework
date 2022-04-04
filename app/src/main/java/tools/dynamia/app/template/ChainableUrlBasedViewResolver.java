@@ -27,7 +27,6 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- *
  * @author Mario A. Serrano Leones
  */
 public class ChainableUrlBasedViewResolver extends UrlBasedViewResolver {
@@ -40,8 +39,13 @@ public class ChainableUrlBasedViewResolver extends UrlBasedViewResolver {
     @Override
     protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 
-        String url = getPrefix() + viewName + getSuffix();
+        if (isStatic(viewName)) {
+            return new InternalResourceView(viewName);
+        }
 
+
+
+        String url = getPrefix() + viewName + getSuffix();
         InputStream stream = getServletContext().getResourceAsStream(url);
 
         if (stream == null) {
@@ -57,6 +61,10 @@ public class ChainableUrlBasedViewResolver extends UrlBasedViewResolver {
         }
 
         return super.buildView(viewName);
+    }
+
+    private boolean isStatic(String viewName) {
+        return viewName != null && viewName.startsWith("static/");
     }
 
     private static class NonExistentView extends AbstractUrlBasedView {
@@ -75,8 +83,8 @@ public class ChainableUrlBasedViewResolver extends UrlBasedViewResolver {
 
         @Override
         protected void renderMergedOutputModel(Map<String, Object> model,
-                HttpServletRequest request,
-                HttpServletResponse response) {
+                                               HttpServletRequest request,
+                                               HttpServletResponse response) {
 
             // Purposely empty, it should never get called
         }

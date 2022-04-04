@@ -18,6 +18,8 @@ package tools.dynamia.app;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -36,6 +38,8 @@ import tools.dynamia.app.template.ChainableUrlBasedViewResolver;
 import tools.dynamia.app.template.TemplateResourceHandler;
 import tools.dynamia.app.template.TemplateViewResolver;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,17 +52,20 @@ import java.util.Map;
 @EnableWebMvc
 public abstract class MvcConfiguration implements WebMvcConfigurer {
 
-    @Autowired
-    private ApplicationInfo applicationInfo;
+    private final ApplicationInfo applicationInfo;
+    private final TemplateResourceHandler handler;
 
-    @Autowired
-    private TemplateResourceHandler handler;
-
+    public MvcConfiguration(ApplicationInfo applicationInfo, TemplateResourceHandler handler) {
+        this.applicationInfo = applicationInfo;
+        this.handler = handler;
+    }
 
     @Override
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("*.ico").addResourceLocations("/");
-        registry.addResourceHandler("static/**").addResourceLocations("/static/");
+        registry.addResourceHandler("*.ico").addResourceLocations("/", "classpath:/static/");
+        registry.addResourceHandler("/static/**")
+                .addResourceLocations("/static/", "classpath:/static/", "file:static/")
+                .setCacheControl(CacheControl.maxAge(Duration.of(31536000, ChronoUnit.SECONDS)));
     }
 
     @Override
@@ -95,6 +102,7 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
         map.put("vendors/**", handler);
 
         SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
+
         mapping.setUrlMap(map);
 
         return mapping;
@@ -103,7 +111,7 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
     @Bean
     public ViewResolver defaultViewResolver() {
         UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
-        vr.setOrder(0);
+        vr.setOrder(getViewResolverOrder("defaultViewResolverOrder", 1));
         vr.setPrefix("/WEB-INF/views/");
         vr.setCache(applicationInfo.isWebCacheEnabled());
         return vr;
@@ -112,7 +120,7 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
     @Bean
     public ViewResolver zkViewResolver() {
         UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
-        vr.setOrder(1);
+        vr.setOrder(getViewResolverOrder("zkViewResolverOrder", 9));
         vr.setPrefix("/zkau/web/views/");
         vr.setSuffix(".zul");
         vr.setCache(applicationInfo.isWebCacheEnabled());
@@ -122,7 +130,7 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
     @Bean
     public ViewResolver themeZulViewResolver() {
         UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
-        vr.setOrder(2);
+        vr.setOrder(getViewResolverOrder("themeZulViewResolverOrder", 100));
         vr.setPrefix("/zkau/web/templates/" + applicationInfo.getTemplate().toLowerCase() + "/views/");
         vr.setSuffix(".zul");
         vr.setCache(applicationInfo.isWebCacheEnabled());
@@ -137,9 +145,21 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
     @Bean
     public ViewResolver templateViewResolver() {
         TemplateViewResolver vr = new TemplateViewResolver(applicationInfo);
-        vr.setOrder(Integer.MAX_VALUE);
+        vr.setOrder(getViewResolverOrder("templateViewResolverOrder", Integer.MAX_VALUE));
         vr.setCache(applicationInfo.isWebCacheEnabled());
         return vr;
+    }
+
+    protected int getViewResolverOrder(String name, int defaultValue) {
+        int order = defaultValue;
+        try {
+            if (name != null && applicationInfo != null && applicationInfo.getProperty(name) != null) {
+                order = Integer.parseInt(applicationInfo.getProperty(name));
+            }
+        } catch (NumberFormatException e) {
+            //invalid number, just ignore
+        }
+        return order;
     }
 
 }

@@ -17,6 +17,7 @@
 package tools.dynamia.app;
 
 import org.springframework.context.annotation.ComponentScan;
+import tools.dynamia.app.template.TemplateResourceHandler;
 
 /**
  *
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(value = { "tools.dynamia", "com.dynamia", "com.dynamiasoluciones" })
 public abstract class DynamiaAppConfiguration extends MvcConfiguration {
 
-	
-	
+    public DynamiaAppConfiguration(ApplicationInfo applicationInfo, TemplateResourceHandler handler) {
+        super(applicationInfo, handler);
+    }
 }
