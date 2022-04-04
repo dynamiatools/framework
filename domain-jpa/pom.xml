@@ -23,13 +23,13 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>4.0.6</version>
+        <version>4.0.7</version>
     </parent>
 
     <name>DynamiaTools - Domain JPA</name>
     <url>https://dynamia.tools/docs/domain</url>
     <artifactId>tools.dynamia.domain.jpa</artifactId>
-    <version>4.0.6</version>
+    <version>4.0.7</version>
     <packaging>jar</packaging>
 
     <licenses>
@@ -69,40 +69,25 @@
 
 
         <!-- Spring dependencies -->
-
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
-            <version>${spring.version}</version>
         </dependency>
-
-
         <dependency>
             <groupId>javax.persistence</groupId>
             <artifactId>javax.persistence-api</artifactId>
-            <version>2.2</version>
         </dependency>
-
-
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
-            <version>${validationapi.version}</version>
         </dependency>
-
-
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>
-            <version>${springdata.version}</version>
         </dependency>
-
-
-
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>${h2.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -110,7 +95,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
+
             <scope>test</scope>
         </dependency>
 
@@ -118,13 +103,11 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
-            <version>${hibernate.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>${hibernatevalidator.version}</version>
         </dependency>
 
         <dependency>

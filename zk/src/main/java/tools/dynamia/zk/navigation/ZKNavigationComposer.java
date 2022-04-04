@@ -16,11 +16,10 @@
  */
 package tools.dynamia.zk.navigation;
 
-import org.aspectj.weaver.ast.Call;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.zkoss.zhtml.Text;
-import org.zkoss.zk.ui.event.EventQueues;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zk.ui.util.Clients;
@@ -28,12 +27,10 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.impl.LabelElement;
 import org.zkoss.zul.impl.XulElement;
 import tools.dynamia.commons.BeanUtils;
-import tools.dynamia.commons.Callback;
 import tools.dynamia.navigation.*;
 import tools.dynamia.zk.util.ZKUtil;
 import workspace.builders.TabPanel;
 
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

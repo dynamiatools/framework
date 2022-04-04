@@ -61,13 +61,13 @@ class MyApplication {
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.zk.app</artifactId>
-        <version>4.0.5</version>
+        <version>4.0.7</version>
     </dependency>
 
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.domain.jpa</artifactId>
-        <version>4.0.5</version>
+        <version>4.0.7</version>
     </dependency>    
 </dependencies>
 ```
@@ -75,8 +75,8 @@ class MyApplication {
 **Gradle**
 
 ```groovy
-compile 'tools.dynamia:tools.dynamia.zk.app:4.0.5'
-compile 'tools.dynamia:tools.dynamia.domain.jpa:4.0.5'
+compile 'tools.dynamia:tools.dynamia.zk.app:4.0.7'
+compile 'tools.dynamia:tools.dynamia.domain.jpa:4.0.7'
 ```
 
 Artifacts are available in **Maven Central** repositories

@@ -28,11 +28,11 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>4.0.6</version>
+        <version>4.0.7</version>
     </parent>
 
     <name>DynamiaTools - IO</name>
-    <version>4.0.6</version>
+    <version>4.0.7</version>
     <description>A set of classes and interfaces that help in any kind io task</description>
     <url>https://dynamia.tools/docs/io</url>
 
@@ -59,13 +59,13 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <version>${spring.version}</version>
+
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
+
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -76,7 +76,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
+
             <scope>test</scope>
         </dependency>
 
