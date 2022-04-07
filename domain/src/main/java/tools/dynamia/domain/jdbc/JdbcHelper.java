@@ -16,7 +16,6 @@
  */
 package tools.dynamia.domain.jdbc;
 
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.logger.LoggingService;
@@ -27,8 +26,8 @@ import tools.dynamia.commons.reflect.ReflectionException;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.*;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 
 /**
  * The Class JdbcHelper.

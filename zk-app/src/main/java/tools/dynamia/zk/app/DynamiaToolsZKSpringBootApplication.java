@@ -16,10 +16,11 @@
  */
 package tools.dynamia.zk.app;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 import org.springframework.web.context.request.RequestContextListener;
 import org.zkoss.zk.au.http.DHtmlUpdateServlet;
 import org.zkoss.zk.ui.http.DHtmlLayoutServlet;
@@ -28,6 +29,8 @@ import tools.dynamia.app.ApplicationInfo;
 import tools.dynamia.app.DynamiaAppConfiguration;
 import tools.dynamia.app.RootAppConfiguration;
 import tools.dynamia.app.template.TemplateResourceHandler;
+import tools.dynamia.domain.services.CrudService;
+import tools.dynamia.domain.services.impl.NoOpCrudService;
 import tools.dynamia.integration.ms.MessageService;
 import tools.dynamia.integration.ms.SimpleMessageService;
 
@@ -46,8 +49,15 @@ public class DynamiaToolsZKSpringBootApplication extends DynamiaAppConfiguration
     }
 
     @Bean
+    @ConditionalOnMissingBean(MessageService.class)
     public MessageService messageService() {
         return new SimpleMessageService();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(CrudService.class)
+    public CrudService noOpCrudService() {
+        return new NoOpCrudService();
     }
 
     /*

@@ -39,7 +39,6 @@ import static tools.dynamia.domain.query.QueryParameters.with;
 public class JpaCrudServiceTest {
 
     @Autowired
-    @Qualifier("jpacrud")
     private CrudService crudService;
 
     @Test

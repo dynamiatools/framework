@@ -19,29 +19,39 @@ package tools.dynamia.web.util;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * Very simple session tracker. Do not use it in cluster environment
  *
  * @author Mario A. Serrano Leones
  */
 public class SessionTracker implements HttpSessionListener {
 
-    private static final List<HttpSession> activeSessions = Collections.synchronizedList(new ArrayList<>());
+
+    private static final Map<String, HttpSession> activeSessions = new ConcurrentHashMap<>();
 
     @Override
     public void sessionCreated(HttpSessionEvent evt) {
-        activeSessions.add(evt.getSession());
+        activeSessions.put(evt.getSession().getId(), evt.getSession());
+
     }
 
     @Override
     public void sessionDestroyed(HttpSessionEvent evt) {
-        activeSessions.remove(evt.getSession());
+        activeSessions.remove(evt.getSession().getId());
     }
 
-    public static List<HttpSession> getActiveSessions() {
-        return activeSessions;
+    public static Collection<HttpSession> getActiveSessions() {
+        return activeSessions.values();
+    }
+
+    public static HttpSession getSessionById(String sessionId) {
+        return activeSessions.get(sessionId);
+    }
+
+    public static int getActionSessionsCount() {
+        return getActiveSessions().size();
     }
 }

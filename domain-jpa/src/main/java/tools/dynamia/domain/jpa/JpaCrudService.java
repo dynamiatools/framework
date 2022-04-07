@@ -16,7 +16,6 @@
  */
 package tools.dynamia.domain.jpa;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -38,6 +37,7 @@ import tools.dynamia.domain.services.impl.AbstractCrudService;
 import tools.dynamia.domain.util.CrudServiceListener;
 import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.integration.Containers;
+import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.io.converters.Converters;
 
 import javax.annotation.PostConstruct;
@@ -64,6 +64,7 @@ import static tools.dynamia.domain.util.QueryBuilder.select;
  * @since 1.0
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
+@Service("jpaCrudService")
 public class JpaCrudService extends AbstractCrudService {
 
     public static final String HINT_FETCH_GRAPH = "javax.persistence.fetchgraph";
@@ -74,14 +75,14 @@ public class JpaCrudService extends AbstractCrudService {
     @PersistenceContext
     private EntityManager em;
 
-    @Autowired
-    private PlatformTransactionManager txManager;
 
-    /**
-     * The validator service.
-     */
-    @Autowired
-    private ValidatorService validatorService;
+    private final PlatformTransactionManager txManager;
+    private final ValidatorService validatorService;
+
+    public JpaCrudService(PlatformTransactionManager txManager, ValidatorService validatorService) {
+        this.txManager = txManager;
+        this.validatorService = validatorService;
+    }
 
     /**
      * The logger.

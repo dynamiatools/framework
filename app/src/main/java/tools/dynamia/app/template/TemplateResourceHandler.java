@@ -16,7 +16,6 @@
  */
 package tools.dynamia.app.template;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -27,19 +26,24 @@ import tools.dynamia.app.ApplicationInfo;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * Template resource handler find resources in current {@link ApplicationTemplate} directory
  * @author Mario A. Serrano Leones
  */
 @Component
 public class TemplateResourceHandler extends ResourceHttpRequestHandler {
 
-    @Autowired
-    private ApplicationInfo app;
+
+    private final ApplicationInfo appInfo;
     private String relativeContext;
+
+    public TemplateResourceHandler(ApplicationInfo appInfo) {
+        this.appInfo = appInfo;
+    }
 
     @Override
     protected Resource getResource(HttpServletRequest request) {
 
-        ApplicationTemplate theme = ApplicationTemplates.findTemplate(app.getTemplate());
+        ApplicationTemplate theme = ApplicationTemplates.findTemplate(appInfo.getTemplate());
         String path = request.getRequestURI().substring(request.getContextPath().length());
 
         if (relativeContext != null && path.startsWith(relativeContext)) {

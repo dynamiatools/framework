@@ -41,6 +41,13 @@ public class SimpleReportDescriptor implements ReportDescriptor {
 
     /**
      * @param reportTemplate
+     */
+    public SimpleReportDescriptor(Object reportTemplate) {
+        this(reportTemplate, new JREmptyDataSource(), new HashMap<>());
+    }
+
+    /**
+     * @param reportTemplate
      * @param dataSource
      */
     public SimpleReportDescriptor(Object reportTemplate, Object dataSource) {

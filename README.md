@@ -35,12 +35,10 @@ descriptors for automatic UI generation, actions, services and modules. Based in
 ```java
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import tools.dynamia.domain.jpa.EnableDynamiaToolsJPA;
 import tools.dynamia.zk.app.EnableDynamiaTools;
 
 @SpringBootApplication
 @EnableDynamiaTools
-@EnableDynamiaToolsJPA
 class MyApplication {
 
     public static void main(String[] args) {

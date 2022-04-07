@@ -68,7 +68,12 @@
             <artifactId>tools.dynamia.reports</artifactId>
             <version>4.0.7</version>
         </dependency>
-
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>${jasperreports.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 </project>

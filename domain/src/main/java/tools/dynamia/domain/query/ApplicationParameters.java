@@ -16,20 +16,17 @@
  */
 package tools.dynamia.domain.query;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+
 import org.springframework.transaction.annotation.Transactional;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.SimpleCache;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.util.DomainUtils;
-import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.integration.Containers;
+import tools.dynamia.integration.sterotypes.Service;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The Class ApplicationParameters.
@@ -40,14 +37,13 @@ import java.util.Map;
 @Service
 public class ApplicationParameters implements Parameters {
 
-    private final CrudService crudService;
-
     /**
-     * The cache.
+     * Local parameter cache
      */
     private final SimpleCache<String, Parameter> cache = new SimpleCache<>();
 
-    @Autowired
+    private final CrudService crudService;
+
     public ApplicationParameters(CrudService crudService) {
         this.crudService = crudService;
     }

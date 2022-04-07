@@ -35,7 +35,7 @@
     <url>https://dynamia.tools/docs/reports</url>
 
     <licenses>
-       <license>
+        <license>
             <name>APACHE LICENSE, VERSION 2.0</name>
             <url>https://www.apache.org/licenses/LICENSE-2.0</url>
             <distribution>repo</distribution>
@@ -74,19 +74,9 @@
             <groupId>net.sf.jasperreports</groupId>
             <artifactId>jasperreports</artifactId>
             <version>${jasperreports.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.lowagie</groupId>
-                    <artifactId>itext</artifactId>
-                </exclusion>
-            </exclusions>
+            <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.lowagie</groupId>
-            <artifactId>itext</artifactId>
-            <version>${itext.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>

@@ -29,7 +29,6 @@
     <context:component-scan base-package="tools.dynamia"/>
 
 
-    <bean id="jpacrud" class="tools.dynamia.domain.jpa.JpaCrudService"/>
 
     <bean id="defaultValidatorService"
           class="tools.dynamia.domain.services.impl.DefaultValidatorService"/>

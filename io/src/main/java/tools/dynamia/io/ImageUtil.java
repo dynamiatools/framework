@@ -16,7 +16,7 @@
  */
 package tools.dynamia.io;
 
-import com.mortennobel.imagescaling.ResampleOp;
+
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.io.qr.QRCode;
@@ -54,7 +54,7 @@ public class ImageUtil {
     }
 
     /**
-     * Resize image.
+     * Resize image. See {@link ImageScaler} for custom image resize
      *
      * @param input       the input
      * @param output      the output
@@ -66,19 +66,7 @@ public class ImageUtil {
         try {
 
             BufferedImage image = ImageIO.read(input);
-
-            double thumbRatio = (double) thumbWidth / (double) thumbHeight;
-            int imageWidth = image.getWidth(null);
-            int imageHeight = image.getHeight(null);
-            double imageRatio = (double) imageWidth / (double) imageHeight;
-            if (thumbRatio < imageRatio) {
-                thumbHeight = (int) (thumbWidth / imageRatio);
-            } else {
-                thumbWidth = (int) (thumbHeight * imageRatio);
-            }
-
-            ResampleOp op = new ResampleOp(thumbWidth, thumbHeight);
-            BufferedImage newImage = op.filter(image, null);
+            BufferedImage newImage = ImageScaler.resize(image, thumbWidth, thumbHeight);
             output.getParentFile().mkdirs();
             output.createNewFile();
             ImageIO.write(newImage, formatName, output);
@@ -219,6 +207,7 @@ public class ImageUtil {
 
     /**
      * Generate qr code in base 64
+     *
      * @param content
      * @return
      */
@@ -232,12 +221,13 @@ public class ImageUtil {
 
     /**
      * Generate qr code in base 64 with specific width and height
+     *
      * @param content
      * @return
      */
     public static String generateQRBase64(String content, int width, int height) {
         try {
-            return IOUtils.encodeBase64(generateQR(content,width,height));
+            return IOUtils.encodeBase64(generateQR(content, width, height));
         } catch (IOException e) {
             throw new QRGenerationException("Exception generating base 64 qr code", e);
         }

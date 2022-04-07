@@ -25,7 +25,6 @@ import org.neo4j.ogm.cypher.query.Pagination;
 import org.neo4j.ogm.cypher.query.SortOrder;
 import org.neo4j.ogm.model.Result;
 import org.neo4j.ogm.session.Session;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.commons.BeanUtils;
@@ -39,18 +38,23 @@ import tools.dynamia.domain.services.impl.AbstractCrudService;
 import tools.dynamia.domain.util.CrudServiceListener;
 import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.integration.Containers;
+import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.io.converters.Converters;
 
 import java.io.Serializable;
 import java.util.*;
 
+@Service("neo4jCrudService")
 public class Neo4jCrudService extends AbstractCrudService implements GraphCrudService {
 
-    @Autowired
-    private Session session;
 
-    @Autowired
-    private ValidatorService validatorService;
+    private final Session session;
+    private final ValidatorService validatorService;
+
+    public Neo4jCrudService(Session session, ValidatorService validatorService) {
+        this.session = session;
+        this.validatorService = validatorService;
+    }
 
     private Session s() {
         return session;

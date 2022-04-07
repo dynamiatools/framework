@@ -31,7 +31,6 @@ import tools.dynamia.domain.services.CrudService;
 public class JpaConvertersTest {
 
     @Autowired
-    @Qualifier("jpacrud")
     private CrudService crudService;
 
     @Test

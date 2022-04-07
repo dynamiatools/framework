@@ -59,14 +59,10 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -76,15 +72,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.mortennobel</groupId>
-            <artifactId>java-image-scaling</artifactId>
-            <version>0.8.6</version>
-            <type>jar</type>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.google.zxing/core -->

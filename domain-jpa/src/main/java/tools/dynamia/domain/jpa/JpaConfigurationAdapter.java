@@ -275,12 +275,6 @@ public class JpaConfigurationAdapter {
         return new JpaTransactionManager(entityManagerFactory().getObject());
     }
 
-    @Bean
-    @Primary
-    public CrudService jpaCrudService() {
-        return new JpaCrudService();
-    }
-
     /**
      * Configure entity manager factory.
      *
