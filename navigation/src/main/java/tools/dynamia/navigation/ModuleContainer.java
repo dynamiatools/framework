@@ -56,7 +56,7 @@ public final class ModuleContainer implements Serializable {
 
         if (providers != null) {
             List<Module> modulesReferences = new ArrayList<>();
-
+            LOGGER.info("Loading " + providers.size() + " modules");
             for (ModuleProvider moduleProvider : providers) {
                 Module module = moduleProvider.getModule();
                 if (module != null) {
@@ -80,9 +80,12 @@ public final class ModuleContainer implements Serializable {
 
     public void installModule(Module module) {
         if (module != null) {
-            LOGGER.info("Installing new WebModule ");
             install(module);
-            LOGGER.info("Web module " + module.getName() + " installed");
+            if (module.isReference()) {
+                LOGGER.info("Module Reference [" + module.getId() + "] installed ");
+            } else {
+                LOGGER.info("Module [" + module.getId() + "] installed ");
+            }
         }
     }
 

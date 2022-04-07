@@ -76,7 +76,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor 
     /**
      * The logger.
      */
-    private final LoggingService logger = new SLF4JLoggingService(ViewDescriptor.class);
+    private final LoggingService logger = new SLF4JLoggingService(getClass());
 
     /**
      * The autofields.

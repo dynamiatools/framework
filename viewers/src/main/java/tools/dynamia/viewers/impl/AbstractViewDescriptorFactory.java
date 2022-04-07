@@ -49,7 +49,7 @@ public abstract class AbstractViewDescriptorFactory implements ViewDescriptorFac
     /**
      * The logger.
      */
-    private final LoggingService logger = new SLF4JLoggingService(AbstractViewDescriptorFactory.class);
+    private final LoggingService logger = new SLF4JLoggingService(getClass());
 
     /**
      * View Descriptors Cache

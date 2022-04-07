@@ -102,8 +102,9 @@ public abstract class WebSocketPushSender {
     public static void initWS() {
         if (ZKUtil.isInEventListener()) {
             try {
+                LOGGER.info("Requesting to initialize Websocket connection");
                 Clients.evalJavaScript("initWebSocket('/ws-commands');");
-            }catch (Exception e){
+            } catch (Exception e) {
                 //
             }
         }
