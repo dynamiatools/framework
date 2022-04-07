@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
  * @author Mario A. Serrano Leones
  */
 public class ReportFiller {
@@ -45,9 +44,8 @@ public class ReportFiller {
     private static final LoggingService logger = new SLF4JLoggingService(ReportFiller.class);
 
     /**
-     *
      * @param reportDescriptor
-     * @param inMemory
+     *
      * @return
      */
     public static Report fill(ReportDescriptor reportDescriptor) {
@@ -81,8 +79,8 @@ public class ReportFiller {
         File filledReportFile = File.createTempFile("dmreport" + System.currentTimeMillis(), ".jrprint");
         try (FileOutputStream out = new FileOutputStream(filledReportFile)) {
             Object template = getTemplate(reportDescriptor);
-            Map<String, Object> params = new HashMap<>(reportDescriptor.getParameters());
-            
+            Map<String, Object> params = buildParams(reportDescriptor.getParameters());
+
             if (datasource instanceof JRDataSource) {
                 JRDataSource jrds = (JRDataSource) datasource;
                 if (template instanceof String) {
@@ -125,6 +123,23 @@ public class ReportFiller {
         }
 
         return filledReportFile;
+    }
+
+    private static Map<String, Object> buildParams(Map<String, Object> parameters) {
+        var params = new HashMap<>(parameters);
+
+        params.entrySet()
+                .stream().filter(e -> e.getValue() instanceof ReportDataSource)
+                .forEach(e -> {
+                    var datasource = (ReportDataSource) e.getValue();
+                    if (datasource.getValue() instanceof Collection) {
+                        params.put(e.getKey(), new JRBeanCollectionDataSource((Collection<?>) datasource.getValue()));
+                    } else if (datasource.getValue() instanceof JRDataSource) {
+                        params.put(e.getKey(), datasource.getValue());
+                    }
+                });
+
+        return params;
     }
 
     private static JasperPrint createInMemoryReport(ReportDescriptor reportDescriptor) throws Exception {

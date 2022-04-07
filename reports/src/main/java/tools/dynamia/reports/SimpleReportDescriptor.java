@@ -74,7 +74,7 @@ public class SimpleReportDescriptor implements ReportDescriptor {
                                   ReportOutputType defaultOutputType) {
         this.name = name;
         this.reportTemplate = reportTemplate;
-        this.dataSource = dataSource;
+        this.dataSource = dataSource instanceof ReportDataSource ? ((ReportDataSource) dataSource).getValue() : dataSource;
         this.parameters = parameters;
         this.defaultOutputType = defaultOutputType;
     }

@@ -105,9 +105,7 @@ public abstract class ReportExporter {
     public static void export(List<Report> reports, OutputStream outputStream, ReportOutputType outputType, Map exportParameters) {
         try {
             var exporter = buildExporter(outputType, outputStream);
-            if (exportParameters != null && !exportParameters.isEmpty()) {
-                //exporter.setParameters(exportParameters);
-            }
+
             List<JasperPrint> list = getJasperPrints(reports);
 
             if (!list.isEmpty()) {
