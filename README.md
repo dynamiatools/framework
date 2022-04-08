@@ -38,7 +38,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import tools.dynamia.zk.app.EnableDynamiaTools;
 
 @SpringBootApplication
-@EnableDynamiaTools
+@EnableDynamiaTools // <- this is all you need
 class MyApplication {
 
     public static void main(String[] args) {
