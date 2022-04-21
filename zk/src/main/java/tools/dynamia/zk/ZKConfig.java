@@ -31,7 +31,7 @@ import java.util.Map;
 public class ZKConfig {
 
     @Bean
-    public CustomScopeConfigurer zkscopes() {
+    public static CustomScopeConfigurer zkscopes() {
         CustomScopeConfigurer configurer = new CustomScopeConfigurer();
         Map<String, Object> scopes = new HashMap<>();
         scopes.put("zk-desktop", new DesktopScope());

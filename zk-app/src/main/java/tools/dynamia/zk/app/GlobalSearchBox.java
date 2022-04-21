@@ -36,11 +36,9 @@ public class GlobalSearchBox extends Combobox {
      *
      */
     private static final long serialVersionUID = -3070761233489513310L;
-    private final GlobalSearchService service;
+
 
     public GlobalSearchBox() {
-        service = Containers.get().findObject(GlobalSearchService.class);
-
         addEventListener(Events.ON_CHANGING, this::search);
         addEventListener(Events.ON_OK, this::open);
     }
@@ -49,7 +47,7 @@ public class GlobalSearchBox extends Combobox {
         setValue(null);
         setSelectedItem(null);
         GlobalSearchResult result = (GlobalSearchResult) ((ListModelList) getModel()).getSelection().iterator().next();
-        service.openGlobalSearchResult(result, (hostname, uri, parms) -> {
+        service().openGlobalSearchResult(result, (hostname, uri, parms) -> {
             String p = "";
             if (parms != null) {
                 p = "?" + HttpUtils.formatRequestParams(new HashMap<>(parms));
@@ -64,12 +62,16 @@ public class GlobalSearchBox extends Combobox {
         InputEvent e = (InputEvent) evt;
         String query = e.getValue();
         if (query != null && query.length() >= 2) {
-            List<GlobalSearchResult> results = service.search(query);
+            List<GlobalSearchResult> results = service().search(query);
             if (results != null && !results.isEmpty()) {
                 setModel(new ListModelList<>(results));
                 open();
             }
         }
+    }
+
+    private GlobalSearchService service() {
+        return Containers.get().findObject(GlobalSearchService.class);
     }
 
 }

@@ -17,8 +17,8 @@
 package tools.dynamia.app;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
 import tools.dynamia.app.template.ApplicationTemplate;
 import tools.dynamia.app.template.ApplicationTemplates;
 import tools.dynamia.app.template.Skin;
@@ -28,7 +28,7 @@ import java.io.Serializable;
 import java.util.List;
 
 @Component("appTemplate")
-@Scope("session")
+@SessionScope
 public class CurrentTemplate implements Serializable {
 
     /**
@@ -36,10 +36,9 @@ public class CurrentTemplate implements Serializable {
      */
     private static final long serialVersionUID = 2751145128618217182L;
 
-    @Autowired
-    private ApplicationInfo applicationInfo;
 
-    private ApplicationTemplate template;
+
+    private transient ApplicationTemplate template;
     private Skin skin;
     private String logoURL;
     private String iconURL;
@@ -50,7 +49,7 @@ public class CurrentTemplate implements Serializable {
 
     public Skin getSkin() {
         if (skin == null) {
-            skin = getTemplate().getSkin(applicationInfo.getDefaultSkin());
+            skin = getTemplate().getSkin(getAppInfo().getDefaultSkin());
         }
 
         if (skin == null) {
@@ -72,7 +71,11 @@ public class CurrentTemplate implements Serializable {
     }
 
     private void loadDefaultLogo() {
-        logoURL = applicationInfo.getDefaultLogo();
+        logoURL = getAppInfo().getDefaultLogo();
+    }
+
+    private ApplicationInfo getAppInfo() {
+        return Containers.get().findObject(ApplicationInfo.class);
     }
 
     public void setLogoURL(String logo) {
@@ -100,13 +103,14 @@ public class CurrentTemplate implements Serializable {
 
     private void init() {
 
-        template = ApplicationTemplates.findTemplate(applicationInfo.getTemplate());
+        template = ApplicationTemplates.findTemplate(getAppInfo().getTemplate());
     }
 
     public String getIconURL() {
         if (iconURL == null) {
-            if (applicationInfo.getDefaultIcon() != null) {
-                iconURL = applicationInfo.getDefaultIcon();
+            var appInfo = getAppInfo();
+            if (appInfo.getDefaultIcon() != null) {
+                iconURL = appInfo.getDefaultIcon();
             } else {
                 iconURL = getLogoURL();
             }

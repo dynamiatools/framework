@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import tools.dynamia.commons.SimpleCache;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
+import tools.dynamia.integration.Containers;
 
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
@@ -39,8 +40,7 @@ public final class ModuleContainer implements Serializable {
     private final Collection<Module> modules;
     private final Collection<Page> featuredPages;
 
-    @Autowired
-    private Collection<ModuleProvider> providers;
+    private transient Collection<ModuleProvider> _providers;
     private final SimpleCache<String, Page> INDEX = new SimpleCache<>();
 
 
@@ -54,10 +54,10 @@ public final class ModuleContainer implements Serializable {
     @PostConstruct
     private void loadModules() {
 
-        if (providers != null) {
+        if (getModulesProviders() != null) {
             List<Module> modulesReferences = new ArrayList<>();
-            LOGGER.info("Loading " + providers.size() + " modules");
-            for (ModuleProvider moduleProvider : providers) {
+            LOGGER.info("Loading " + getModulesProviders().size() + " modules");
+            for (ModuleProvider moduleProvider : getModulesProviders()) {
                 Module module = moduleProvider.getModule();
                 if (module != null) {
                     if (module.getBaseClass() == null && !module.isReference()) {
@@ -76,6 +76,13 @@ public final class ModuleContainer implements Serializable {
                 installModule(moduleRef);
             }
         }
+    }
+
+    public Collection<ModuleProvider> getModulesProviders() {
+        if(_providers==null){
+            _providers= Containers.get().findObjects(ModuleProvider.class);
+        }
+        return _providers;
     }
 
     public void installModule(Module module) {

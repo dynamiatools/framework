@@ -31,7 +31,7 @@ public class Module extends NavigationElement<Module> implements Serializable, C
     private final Collection<PageGroup> pageGroups = new ArrayList<>();
     private Page mainPage;
     private PageGroup defaultGroup = new PageGroup();
-    private final transient LoggingService logger = new SLF4JLoggingService();
+    private final LoggingService logger = new SLF4JLoggingService();
     private final Map<String, Object> properties = new HashMap<>();
     private Class baseClass;
     private final List<Class> additionalBaseClasses = new ArrayList<>();

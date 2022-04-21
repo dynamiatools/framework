@@ -16,8 +16,8 @@
  */
 package tools.dynamia.app;
 
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
 import tools.dynamia.integration.Containers;
 
 import java.io.Serializable;
@@ -27,7 +27,7 @@ import java.util.Date;
  * @author Mario Serrano Leones
  */
 @Component("userInfo")
-@Scope("session")
+@SessionScope
 public class ApplicationUserInfo implements Serializable {
 
     public static ApplicationUserInfo get() {

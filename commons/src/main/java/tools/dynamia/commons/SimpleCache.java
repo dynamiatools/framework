@@ -17,6 +17,7 @@
 
 package tools.dynamia.commons;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -27,7 +28,7 @@ import java.util.function.Function;
  * @param <K>
  * @param <V>
  */
-public class SimpleCache<K, V> {
+public class SimpleCache<K, V> implements Serializable {
 
     private final Map<K, V> data = new ConcurrentHashMap<>();
 

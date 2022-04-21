@@ -23,11 +23,11 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>4.0.7</version>
+        <version>4.0.8</version>
     </parent>
 
     <artifactId>tools.dynamia.actions</artifactId>
-    <version>4.0.7</version>
+    <version>4.0.8</version>
     <name>DynamiaTools - Actions</name>
     <url>https://dynamia.tools/docs/actions</url>
 
@@ -64,12 +64,12 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.integration</artifactId>
-            <version>4.0.7</version>
+            <version>4.0.8</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.commons</artifactId>
-            <version>4.0.7</version>
+            <version>4.0.8</version>
         </dependency>
 
     </dependencies>

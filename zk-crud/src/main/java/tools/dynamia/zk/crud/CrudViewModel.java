@@ -44,7 +44,7 @@ public class CrudViewModel<T> extends AbstractViewModel<T> {
 
     public static final String MODEL_CLASS = "modelClass";
 
-    private final CrudService crudService;
+
     private Class<T> modelClass;
     private Object parent;
     private String parentName;
@@ -53,19 +53,14 @@ public class CrudViewModel<T> extends AbstractViewModel<T> {
     private QueryParameters params = new QueryParameters();
 
     public CrudViewModel() {
-        this.crudService = crudService();
+
     }
 
     public CrudViewModel(Class<T> modelClass) {
-        this.crudService = crudService();
-        this.modelClass = modelClass;
-
-    }
-
-    public CrudViewModel(CrudService crudService, Class<T> modelClass) {
-        this.crudService = crudService;
         this.modelClass = modelClass;
     }
+
+
 
     @Init
     protected void init() {
@@ -97,9 +92,9 @@ public class CrudViewModel<T> extends AbstractViewModel<T> {
     @NotifyChange("result")
     public void query() {
         if (params != null) {
-            this.result = crudService.find(modelClass, params);
+            this.result = crudService().find(modelClass, params);
         } else {
-            this.result = crudService.findAll(modelClass);
+            this.result = crudService().findAll(modelClass);
         }
         this.result = new ArrayList<>(this.result);
     }
@@ -117,7 +112,7 @@ public class CrudViewModel<T> extends AbstractViewModel<T> {
     public void save(@BindingParam("entity") T entity) {
         try {
             createRelationship(entity);
-            T savedEntity = crudService.save(entity);
+            T savedEntity = crudService().save(entity);
             if (result != null) {
                 int index = result.indexOf(entity);
                 result.set(index, savedEntity);
@@ -135,7 +130,7 @@ public class CrudViewModel<T> extends AbstractViewModel<T> {
         if (entity != null) {
             UIMessages.showQuestion("Esta seguro de borrar " + entity + "?", () -> {
                 try {
-                    crudService.executeWithinTransaction(() -> crudService.delete(entity));
+                    crudService().executeWithinTransaction(() -> crudService().delete(entity));
                     UIMessages.showMessage("Borrado OK");
                     ZKBindingUtil.postNotifyChange(this, "result");
                 } catch (ValidationError e) {

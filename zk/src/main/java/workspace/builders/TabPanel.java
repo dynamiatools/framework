@@ -30,6 +30,7 @@ import tools.dynamia.zk.AbstractZKWorkspaceBuilder;
 import tools.dynamia.zk.navigation.ZKNavigationManager;
 import tools.dynamia.zk.util.ZKUtil;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -38,11 +39,11 @@ import java.util.Map;
 /**
  * @author Mario A. Serrano Leones
  */
-public class TabPanel extends AbstractZKWorkspaceBuilder {
+public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable {
 
     private final LoggingService logger = new SLF4JLoggingService();
     private static final String TAB_PAGE = "tab-page";
-    private final transient Tabbox tabbox;
+    private final Tabbox tabbox;
     private final Locale locale = Messages.getDefaultLocale();
 
     public TabPanel() {

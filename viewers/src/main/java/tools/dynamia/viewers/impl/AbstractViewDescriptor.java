@@ -27,6 +27,7 @@ import tools.dynamia.viewers.*;
 import tools.dynamia.viewers.util.ViewDescriptorReaderUtils;
 import tools.dynamia.viewers.util.Viewers;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -35,7 +36,7 @@ import java.util.stream.Stream;
  *
  * @author Mario A. Serrano Leones
  */
-public abstract class AbstractViewDescriptor implements MergeableViewDescriptor {
+public abstract class AbstractViewDescriptor implements MergeableViewDescriptor, Serializable {
 
     /**
      * The id.

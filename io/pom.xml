@@ -28,11 +28,11 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>4.0.7</version>
+        <version>4.0.8</version>
     </parent>
 
     <name>DynamiaTools - IO</name>
-    <version>4.0.7</version>
+    <version>4.0.8</version>
     <description>A set of classes and interfaces that help in any kind io task</description>
     <url>https://dynamia.tools/docs/io</url>
 

@@ -25,7 +25,7 @@ import tools.dynamia.viewers.ViewLayout;
  * @author Mario A. Serrano Leones
  */
 @SuppressWarnings({"rawtypes"})
-public class DefaultViewDescriptor extends AbstractViewDescriptor {
+public class DefaultViewDescriptor extends AbstractViewDescriptor{
 
     /**
      * The layout.

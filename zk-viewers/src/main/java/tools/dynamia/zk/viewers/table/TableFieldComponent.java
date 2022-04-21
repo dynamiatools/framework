@@ -19,7 +19,9 @@ package tools.dynamia.zk.viewers.table;
 
 import org.zkoss.zk.ui.Component;
 
-public class TableFieldComponent {
+import java.io.Serializable;
+
+public class TableFieldComponent implements Serializable {
 
     private final String fieldName;
     private final Component component;

@@ -22,9 +22,11 @@ import org.springframework.web.context.annotation.SessionScope;
 import tools.dynamia.commons.SimpleCache;
 import tools.dynamia.integration.Containers;
 
+import java.io.Serializable;
+
 @Component
 @SessionScope
-public class SessionCache extends SimpleCache<String, Object> {
+public class SessionCache extends SimpleCache<String, Object> implements Serializable {
 
     public static SessionCache getInstance() {
         return Containers.get().findObject(SessionCache.class);

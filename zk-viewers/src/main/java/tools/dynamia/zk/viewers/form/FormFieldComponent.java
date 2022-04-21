@@ -21,7 +21,9 @@ import org.zkoss.zhtml.Text;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.HtmlBasedComponent;
 
-public class FormFieldComponent {
+import java.io.Serializable;
+
+public class FormFieldComponent implements Serializable {
 
     private final String fieldName;
     private final Label label;
