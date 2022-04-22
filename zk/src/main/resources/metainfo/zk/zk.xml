@@ -65,6 +65,7 @@
         <device-type>ajax</device-type>
         <automatic-timeout/> <!-- the same as <automatic-timeout>true</automatic-timeout> -->
         <timeout-uri>/</timeout-uri>
+        <timer-keep-alive>true</timer-keep-alive>
     </session-config>
 
     <library-property>
