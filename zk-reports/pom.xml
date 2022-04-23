@@ -73,6 +73,12 @@
             <artifactId>jasperreports</artifactId>
             <version>${jasperreports.version}</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.lowagie</groupId>
+                    <artifactId>itext</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
