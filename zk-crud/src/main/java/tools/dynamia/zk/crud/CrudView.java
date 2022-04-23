@@ -886,6 +886,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
         });
 
         Page page = new ComponentPage("edit" + clazz.getName(), title, viewer);
+        page.setTemporal(true);
         page.setAlwaysAllowed(true);
         NavigationManager.getCurrent().setCurrentPage(page);
     }
@@ -904,6 +905,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
 
         Page page = new ComponentPage("create" + clazz.getName(), title, viewer);
         page.setAlwaysAllowed(true);
+        page.setTemporal(true);
         NavigationManager.getCurrent().setCurrentPage(page);
     }
 
@@ -970,7 +972,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
 
     @Override
     public void setTitle(String title) {
-        if (title!=null && messagesProvider != null) {
+        if (title != null && messagesProvider != null) {
             title = messagesProvider.getMessage(title, Viewers.buildMessageClasffier(getFormView().getViewDescriptor()), Messages.getDefaultLocale(), title);
         }
         getFormView().setTitle(title);
