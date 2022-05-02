@@ -41,6 +41,7 @@ import tools.dynamia.zk.viewers.form.FormFieldComponent;
 import tools.dynamia.zk.viewers.form.FormView;
 import tools.dynamia.zk.viewers.ui.Viewer;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -63,19 +64,20 @@ public class ViewDataAction extends AbstractCrudAction implements ReadableOnly {
 
     @Override
     public void actionPerformed(CrudActionEvent evt) {
+
         Object data = evt.getData();
+        Serializable id = DomainUtils.findEntityId(data);
+        if (id != null) {
+            data = crudService.find(data.getClass(), id);
+        }
+
         view(data);
+
+
     }
 
     public void view(Object data) {
         if (data != null) {
-
-            Object id = DomainUtils.findEntityId(data);
-            if (id != null) {
-                data = crudService.reload(data);
-            }
-
-
             final Object entity = data;
             Div content = new Div();
             content.setStyle("overflow: auto");

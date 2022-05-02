@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 
 /**
  * @author Mario A. Serrano Leones
@@ -70,6 +71,7 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
     private int maxResults;
     private Menupopup contextMenu;
     private Object source;
+    private Consumer onSourceChange;
     private boolean projection;
     private PagedList<T> pageList;
     private boolean readonly;
@@ -316,6 +318,9 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
     @Override
     public void setSource(Object source) {
         this.source = source;
+        if (onSourceChange != null) {
+            onSourceChange.accept(source);
+        }
     }
 
     public int getMaxResults() {
@@ -362,5 +367,9 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
         } catch (Exception e) {
             //cannot doit
         }
+    }
+
+    public void onSourceChanged(Consumer onSourceChange) {
+        this.onSourceChange = onSourceChange;
     }
 }

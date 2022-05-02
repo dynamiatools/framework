@@ -62,6 +62,7 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 /**
  * @author Mario A. Serrano Leones
@@ -110,8 +111,10 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
     private String formViewDescriptorId;
 
     private Object source;
+    private Consumer onSourceChange;
     private boolean queryProjection;
     private LocalizedMessagesProvider messagesProvider;
+
 
     public CrudView() {
         buildGeneralView();
@@ -593,6 +596,9 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
     @Override
     public void setSource(Object source) {
         this.source = source;
+        if (onSourceChange != null) {
+            onSourceChange.accept(source);
+        }
     }
 
     public boolean isQueryProjection() {
@@ -986,6 +992,10 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
     @Override
     public String toString() {
         return super.toString() + ". " + getViewDescriptor();
+    }
+
+    public void onSourceChanged(Consumer onSourceChange) {
+        this.onSourceChange = onSourceChange;
     }
 
 }

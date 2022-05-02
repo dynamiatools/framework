@@ -139,6 +139,10 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
                     Map headerParams = (Map) field.getParams().get("header");
                     if (headerParams != null) {
                         BeanUtils.setupBean(header, headerParams);
+
+                        if(headerParams.containsKey(Viewers.PARAM_BINDINGS)){
+
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * @author Mario A. Serrano Leones
@@ -81,7 +82,10 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
     private String title;
     private final H3 titleTag;
     private Object source;
+    private Consumer onSourceChange;
     private String customView;
+
+
 
     public FormView() {
         titleTag = new H3();
@@ -261,6 +265,9 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
     @Override
     public void setSource(Object source) {
         this.source = source;
+        if (onSourceChange != null) {
+            onSourceChange.accept(source);
+        }
     }
 
     public String getCustomView() {
@@ -277,5 +284,9 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
         if (parent != null && customView != null && getChildren().isEmpty()) {
             ZKUtil.createComponent(customView, this, viewDescriptor.getParams());
         }
+    }
+
+    public void onSourceChanged(Consumer onSourceChange) {
+        this.onSourceChange = onSourceChange;
     }
 }
