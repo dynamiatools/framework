@@ -30,28 +30,37 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SessionTracker implements HttpSessionListener {
 
 
-    private static final Map<String, HttpSession> activeSessions = new ConcurrentHashMap<>();
+    private static final List<HttpSession> activeSessions = Collections.synchronizedList(new ArrayList<>());
 
     @Override
     public void sessionCreated(HttpSessionEvent evt) {
-        activeSessions.put(evt.getSession().getId(), evt.getSession());
+        var session = evt.getSession();
+        activeSessions.add(session);
 
     }
 
     @Override
     public void sessionDestroyed(HttpSessionEvent evt) {
-        activeSessions.remove(evt.getSession().getId());
+        var session = evt.getSession();
+        boolean remove = activeSessions.remove(session);
+        if (!remove) {
+            activeSessions.removeIf(s -> s.getId().equals(session.getId()));
+        }
     }
 
     public static Collection<HttpSession> getActiveSessions() {
-        return activeSessions.values();
+        return activeSessions;
     }
 
     public static HttpSession getSessionById(String sessionId) {
-        return activeSessions.get(sessionId);
+        return activeSessions.stream().filter(s -> s.getId().equals(sessionId)).findFirst().orElse(null);
     }
 
     public static int getActionSessionsCount() {
         return getActiveSessions().size();
+    }
+
+    public static void clear() {
+        activeSessions.clear();
     }
 }
