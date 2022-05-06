@@ -16,8 +16,8 @@
  */
 package tools.dynamia.commons;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
+import tools.dynamia.commons.math.MathFunction;
+
 import javax.script.ScriptException;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -167,15 +167,12 @@ public class BigDecimalUtils {
      */
     public static BigDecimal evaluate(String mathExpression, Map<String, Number> vars) throws ScriptException {
 
-        ScriptEngineManager mgr = new ScriptEngineManager();
-        ScriptEngine script = mgr.getEngineByName("JavaScript");
-        for (Map.Entry<String, Number> entry : vars.entrySet()) {
-            script.put(entry.getKey(), entry.getValue());
+        String parsedExpression = mathExpression.trim();
+        for (Map.Entry<String, Number> var : vars.entrySet()) {
+            parsedExpression = parsedExpression.replace(var.getKey(), String.valueOf(var.getValue()));
         }
 
-        Number result = (Number) script.eval(mathExpression);
-
-        return new BigDecimal(result.toString());
+        return BigDecimal.valueOf(MathFunction.evaluate(parsedExpression));
     }
 
     /**

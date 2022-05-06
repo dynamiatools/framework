@@ -57,4 +57,10 @@ public interface NotificationRepository {
      * @return
      */
     long getNotificationCount();
+
+    /**
+     * Let you know if this repository has new notificactions.
+     * @return
+     */
+    boolean hasNew();
 }

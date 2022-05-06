@@ -49,7 +49,8 @@ public class TemplateResourceHandler extends ResourceHttpRequestHandler {
         if (relativeContext != null && path.startsWith(relativeContext)) {
             path = path.replace(relativeContext, "");
         }
-        Resource resource = new ServletContextResource(request.getSession(false).getServletContext(), path);
+
+        Resource resource = new ServletContextResource(request.getServletContext(), path);
 
         if (resource.exists()) {
             return resource;

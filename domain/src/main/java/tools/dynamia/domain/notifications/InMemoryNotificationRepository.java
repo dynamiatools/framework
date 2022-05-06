@@ -27,10 +27,13 @@ import static java.util.function.Predicate.not;
 public class InMemoryNotificationRepository implements NotificationRepository {
 
     private final List<INotification> data = new ArrayList<>();
+    private boolean hasNew;
 
     @Override
     public void save(INotification notification) {
         data.add(notification);
+        hasNew = true;
+
     }
 
     @Override
@@ -40,6 +43,7 @@ public class InMemoryNotificationRepository implements NotificationRepository {
 
     @Override
     public List<INotification> getNotifications() {
+        hasNew = false;
         return data.stream().filter(not(INotification::isReaded)).collect(Collectors.toList());
     }
 
@@ -48,6 +52,7 @@ public class InMemoryNotificationRepository implements NotificationRepository {
         if (source == null || source.isBlank()) {
             return Collections.emptyList();
         }
+        hasNew = false;
         return data.stream().filter(not(INotification::isReaded))
                 .filter(n -> source.equals(n.getSource())).collect(Collectors.toList());
 
@@ -56,5 +61,10 @@ public class InMemoryNotificationRepository implements NotificationRepository {
     @Override
     public long getNotificationCount() {
         return data.stream().filter(not(INotification::isReaded)).count();
+    }
+
+    @Override
+    public boolean hasNew() {
+        return hasNew;
     }
 }

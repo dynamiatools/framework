@@ -74,7 +74,6 @@ public class PageNavigationController {
             }
         }
         ModelAndView mv = new ModelAndView("index");
-        mv.addObject("contextPath", request.getContextPath());
         if (request.getParameter("zoom") != null) {
             mv.addObject("zoom", "zoom: " + request.getParameter("zoom") + ";");
         }
