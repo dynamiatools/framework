@@ -296,6 +296,9 @@ public class EntityFiltersPanel extends Borderlayout implements View {
         }
 
         if (comp instanceof InputElement) {
+            if(comp instanceof Textbox){
+                ZKUtil.typeSearch((Textbox) comp);
+            }
             comp.addEventListener(Events.ON_OK, e -> Events.postEvent(ON_SEARCH, EntityFiltersPanel.this, getQueryParameters()));
         }
 

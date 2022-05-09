@@ -1031,4 +1031,10 @@ public abstract class ZKUtil {
     public static void updateClientURI(String pagetitle, String uri) {
         Clients.evalJavaScript(String.format("changeURI('%s','%s');", pagetitle, uri));
     }
+
+    public static void typeSearch(Textbox textbox) {
+        if (textbox != null) {
+            textbox.setClientAttribute("type", "search");
+        }
+    }
 }

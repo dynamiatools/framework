@@ -21,7 +21,6 @@ import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Datebox;
-import org.zkoss.zul.Label;
 import org.zkoss.zul.Span;
 import tools.dynamia.commons.DateRange;
 
@@ -46,7 +45,6 @@ public class DateRangebox extends Span {
         this.start = new Datebox();
         this.end = new Datebox();
         appendChild(start);
-        appendChild(new Label(" - "));
         appendChild(end);
         start.addEventListener(Events.ON_CHANGE, this::fireEvent);
         end.addEventListener(Events.ON_CHANGE, this::fireEvent);
