@@ -22,14 +22,14 @@
     <parent>
         <artifactId>tools.dynamia.parent</artifactId>
         <groupId>tools.dynamia</groupId>
-        <version>4.0.8</version>
+        <version>4.0.9</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <name>DynamiaTools - Domain Neo4j</name>
     <url>https://dynamia.tools/docs/domain</url>
     <artifactId>tools.dynamia.domain.neo4j</artifactId>
-    <version>4.0.8</version>
+    <version>4.0.9</version>
     <packaging>jar</packaging>
     <licenses>
        <license>

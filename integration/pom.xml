@@ -27,12 +27,12 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>4.0.8</version>
+        <version>4.0.9</version>
     </parent>
 
     <name>DynamiaTools - Integration</name>
     <description>A set of classes and interfaces that help integrate modules</description>
-    <version>4.0.8</version>
+    <version>4.0.9</version>
     <url>https://dynamia.tools/docs/integration</url>
 
     <licenses>
