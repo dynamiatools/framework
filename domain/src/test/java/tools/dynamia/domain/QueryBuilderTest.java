@@ -23,6 +23,9 @@ import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.util.QueryBuilder;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import static org.junit.Assert.assertEquals;
 import static tools.dynamia.domain.query.QueryConditions.eq;
 import static tools.dynamia.domain.query.QueryConditions.in;
@@ -105,5 +108,33 @@ public class QueryBuilderTest {
 
     }
 
+
+    @Test
+    public void shouldGenerateUpdateQuery() {
+        var fields = new TreeMap<String, Object>();
+        fields.put("label", "'El Param'");
+        fields.put("p.id", "p.id+1");
+        fields.put("value", 1000);
+
+
+        var query = QueryBuilder.update(Parameter.class, "p").set(fields)
+                .where("p.id > 1000");
+        var expected = "update " + Parameter.class.getName() + " p set p.label='El Param', p.id=p.id+1, p.value=:newValuevalue where p.id > 1000";
+        var queryText = query.toString();
+
+        assertEquals(expected, queryText);
+    }
+
+    @Test
+    public void shouldGenerateDeleteQuery() {
+
+
+        var query = QueryBuilder.delete(Parameter.class, "p")
+                .where("p.id > 1000");
+        var expected = "delete from " + Parameter.class.getName() + " p where p.id > 1000";
+        var queryText = query.toString();
+
+        assertEquals(expected, queryText);
+    }
 
 }

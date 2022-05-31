@@ -18,10 +18,12 @@ package tools.dynamia.domain.util;
 
 import tools.dynamia.commons.BeanMap;
 import tools.dynamia.commons.BeanSorter;
+import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.query.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This is a simple JPA query text builder.
@@ -30,6 +32,13 @@ import java.util.List;
  */
 @SuppressWarnings({"rawtypes"})
 public class QueryBuilder implements Cloneable {
+
+
+    enum QueryType {
+        SELECT, UPDATE, DELETE;
+    }
+
+    private QueryType queryType = QueryType.SELECT;
 
     private static final String FROM_WORD = "from";
 
@@ -48,6 +57,7 @@ public class QueryBuilder implements Cloneable {
     private String customSelect;
     private String customFrom;
     private boolean builded;
+    private Map<String, Object> mapFields;
 
 
     public boolean isAppendVarNameToFields() {
@@ -93,18 +103,19 @@ public class QueryBuilder implements Cloneable {
      * use or, ands, create projections using a result type with appropiate
      * constructor
      *
-     * @param queryType  the type
+     * @param entityType the type
      * @param resultType
      * @param var        the var
      * @param fields     the fields
      * @return the query builder
      */
-    public static QueryBuilder select(Class<?> queryType, Class resultType, String var, String... fields) {
+    public static QueryBuilder select(Class<?> entityType, Class resultType, String var, String... fields) {
         QueryBuilder qb = new QueryBuilder();
-        qb.type = queryType;
+        qb.type = entityType;
         qb.var = var;
         qb.resultType = resultType;
         qb.fields = fields;
+        qb.queryType = QueryType.SELECT;
         return qb;
     }
 
@@ -117,18 +128,19 @@ public class QueryBuilder implements Cloneable {
     public static QueryBuilder select(String... fields) {
         QueryBuilder qb = new QueryBuilder();
         qb.fields = fields;
+        qb.queryType = QueryType.SELECT;
         return qb;
     }
 
     /**
      * Query type and query var
      *
-     * @param type
+     * @param entityType
      * @param var
      * @return
      */
-    public QueryBuilder from(Class<?> type, String var) {
-        this.type = type;
+    public QueryBuilder from(Class<?> entityType, String var) {
+        this.type = entityType;
         this.var = var;
         this.customFrom = null;
         return this;
@@ -402,6 +414,19 @@ public class QueryBuilder implements Cloneable {
     @Override
     public String toString() {
 
+        switch (queryType) {
+            case SELECT:
+                return buildSelect();
+            case UPDATE:
+                return buildUpdate();
+            case DELETE:
+                return buildDelete();
+            default:
+                return buildSelect();
+        }
+    }
+
+    private String buildSelect() {
         configureParameters();
 
         if (customSelect != null && !customSelect.isEmpty()) {
@@ -420,7 +445,6 @@ public class QueryBuilder implements Cloneable {
             if (resultType != null && resultType != BeanMap.class) {
                 fieldList = " new " + resultType.getName() + "(" + parseFields + ") ";
             }
-
             select = "select " + fieldList;
         }
 
@@ -437,6 +461,71 @@ public class QueryBuilder implements Cloneable {
 
         return select + SPACE + from + SPACE + parseJoins + whereWord + SPACE + parse(wheres, " ") + parseGroups + parseOrders;
     }
+
+    private String buildUpdate() {
+        configureParameters();
+
+        if (mapFields == null || mapFields.isEmpty()) {
+            throw new ValidationError("No fields to update provided");
+        }
+
+
+        String parseFields = var;
+
+        List<String> fieldsList = new ArrayList<>();
+        mapFields.forEach((field, value) -> {
+
+            String parsedValue;
+            if (value instanceof String) {
+                parsedValue = (String) value;
+            } else {
+                String key = "newValue" + field.replace(".", "");
+                getQueryParameters().add(key, value);
+                parsedValue = ":" + key;
+            }
+
+            var exp = field + "=" + parsedValue;
+            addField(fieldsList, exp);
+        });
+
+        parseFields = parse(fieldsList, ", ");
+
+
+        String fieldList = parseFields;
+
+        String update = "update";
+
+
+        if (customFrom != null) {
+            from = customFrom + SPACE;
+        } else {
+            from = SPACE + type.getName() + SPACE + var;
+        }
+
+        String whereWord = getWhereWord();
+        String parseJoins = joins.isEmpty() ? "" : parse(joins, " ") + SPACE;
+
+        return update + from + SPACE + parseJoins + "set" + SPACE + fieldList + SPACE + whereWord + SPACE + parse(wheres, " ");
+    }
+
+    private String buildDelete() {
+        configureParameters();
+
+        String delete = "delete";
+
+
+        if (customFrom != null) {
+            from = customFrom + SPACE;
+        } else {
+            from = SPACE + type.getName() + SPACE + var;
+        }
+
+        String whereWord = getWhereWord();
+        String parseJoins = joins.isEmpty() ? "" : parse(joins, " ") + SPACE;
+
+        return delete + SPACE + FROM_WORD + from + SPACE + parseJoins + whereWord + SPACE + parse(wheres, " ");
+    }
+
 
     private String parse(List<String> list, String delimiter) {
         String parsed = "";
@@ -587,6 +676,42 @@ public class QueryBuilder implements Cloneable {
 
     public String[] getFields() {
         return fields;
+    }
+
+    /**
+     * Update query
+     *
+     * @param entityType
+     * @param var
+     * @return
+     */
+    public static QueryBuilder update(Class entityType, String var) {
+        var builder = new QueryBuilder();
+        builder.queryType = QueryType.UPDATE;
+        builder.type = entityType;
+        builder.var = var;
+        builder.customSelect = null;
+
+        return builder;
+    }
+
+    public QueryBuilder set(Map<String, Object> fields) {
+        if (queryType != QueryType.UPDATE) {
+            throw new ValidationError("Query builder type should be " + QueryType.UPDATE);
+        }
+
+        this.mapFields = fields;
+        return this;
+    }
+
+    public static QueryBuilder delete(Class entityType, String var) {
+        var builder = new QueryBuilder();
+        builder.queryType = QueryType.DELETE;
+        builder.type = entityType;
+        builder.var = var;
+        builder.customSelect = null;
+
+        return builder;
     }
 
 }

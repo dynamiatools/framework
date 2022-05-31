@@ -219,6 +219,16 @@ public interface CrudService {
     int execute(String queryText, QueryParameters parameters);
 
     /**
+     * Execute a query builder and return affected rows or entries. Userfull for UPDATE or DELETE queries
+     *
+     * @param query
+     * @return
+     */
+    default int execute(QueryBuilder query) {
+        return execute(query.toString(), query.getQueryParameters());
+    }
+
+    /**
      * Find by example.
      *
      * @param <T>     the generic type
