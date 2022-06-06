@@ -137,4 +137,10 @@ public class QueryBuilderTest {
         assertEquals(expected, queryText);
     }
 
+    public void shouldSendPrintln(){
+        var num = 1;
+        var numer2 = 2;
+
+    }
+
 }

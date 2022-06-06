@@ -216,7 +216,9 @@ public class EntityFiltersPanel extends Borderlayout implements View {
         labelComp.setValue(label);
 
         filterGroup.setStyle("padding-top: 10px");
-        filterGroup.appendChild(labelComp);
+        if (field.getParams().get(Viewers.PARAM_SHOW_LABEL) != Boolean.FALSE) {
+            filterGroup.appendChild(labelComp);
+        }
 
 
         if (filterCondition == FilterCondition.BETWEEN) {
@@ -296,7 +298,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
         }
 
         if (comp instanceof InputElement) {
-            if(comp instanceof Textbox){
+            if (comp instanceof Textbox) {
                 ZKUtil.typeSearch((Textbox) comp);
             }
             comp.addEventListener(Events.ON_OK, e -> Events.postEvent(ON_SEARCH, EntityFiltersPanel.this, getQueryParameters()));

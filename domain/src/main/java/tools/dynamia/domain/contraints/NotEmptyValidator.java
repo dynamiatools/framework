@@ -61,4 +61,8 @@ public class NotEmptyValidator implements ConstraintValidator<NotEmpty, Object> 
 
         return true;
     }
+
+    public boolean isValid(Object value) {
+        return isValid(value, null);
+    }
 }
