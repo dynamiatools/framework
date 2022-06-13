@@ -24,7 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>tools.dynamia</groupId>
     <artifactId>tools.dynamia.parent</artifactId>
-    <version>4.0.9</version>
+    <version>4.1.0</version>
     <packaging>pom</packaging>
     <organization>
         <name>Dynamia Soluciones IT SAS</name>
@@ -84,7 +84,7 @@
 
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
-        <springboot.version>2.6.7</springboot.version>
+        <springboot.version>2.6.8</springboot.version>
         <neo4jogm.version>3.2.32</neo4jogm.version>
 
         <!-- Web -->
