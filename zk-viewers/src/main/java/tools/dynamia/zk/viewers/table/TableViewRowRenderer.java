@@ -30,7 +30,7 @@ import tools.dynamia.commons.BeanMap;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.commons.reflect.ReflectionException;
-import tools.dynamia.domain.PropertyChangeListenerContainer;
+import tools.dynamia.commons.PropertyChangeListenerContainer;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.IndexableComparator;
@@ -42,7 +42,6 @@ import tools.dynamia.zk.ui.Import;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 

@@ -16,6 +16,8 @@
  */
 package tools.dynamia.domain;
 
+import tools.dynamia.commons.PropertyChangeListenerContainer;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;

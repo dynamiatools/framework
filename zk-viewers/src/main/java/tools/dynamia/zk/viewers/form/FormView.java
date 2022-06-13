@@ -29,7 +29,7 @@ import org.zkoss.zk.ui.IdSpace;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Div;
 import tools.dynamia.commons.Callback;
-import tools.dynamia.domain.PropertyChangeListenerContainer;
+import tools.dynamia.commons.PropertyChangeListenerContainer;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.FieldGroup;
 import tools.dynamia.viewers.View;

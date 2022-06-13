@@ -25,7 +25,7 @@ import org.zkoss.zk.ui.HtmlBasedComponent;
 import org.zkoss.zul.*;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.reflect.ReflectionException;
-import tools.dynamia.domain.PropertyChangeListenerContainer;
+import tools.dynamia.commons.PropertyChangeListenerContainer;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.IndexableComparator;
