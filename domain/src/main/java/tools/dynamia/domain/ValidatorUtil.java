@@ -19,6 +19,7 @@ package tools.dynamia.domain;
 import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.domain.contraints.EmailValidator;
+import tools.dynamia.domain.services.ValidatorService;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.ms.Message;
 
@@ -191,12 +192,44 @@ public class ValidatorUtil {
 
     /**
      * Validate if number is negative and throw {@link ValidationError} with message
+     *
      * @param number
      * @param message
      */
     public static void validateNegative(Number number, String message) {
         if (number != null && number.doubleValue() < 0) {
             throw new ValidationError(message);
+        }
+    }
+
+    /**
+     * Validate if the value is true. If not throw an exception
+     *
+     * @param value
+     * @param message
+     */
+    public static void validateTrue(boolean value, String message) {
+        if (!value) {
+            throw new ValidationError(message);
+        }
+    }
+
+    /**
+     * Validate if the value is false. If not throw an exception
+     *
+     * @param value
+     * @param message
+     */
+    public static void validateFalse(boolean value, String message) {
+        if (value) {
+            throw new ValidationError(message);
+        }
+    }
+
+    public static void validate(Object object) {
+        var service = Containers.get().findObject(ValidatorService.class);
+        if (service != null) {
+            service.validate(object);
         }
     }
 
