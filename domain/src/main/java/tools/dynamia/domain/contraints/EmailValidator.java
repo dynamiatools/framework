@@ -32,9 +32,7 @@ public class EmailValidator implements ConstraintValidator<Email, CharSequence> 
     /**
      * The Constant EMAIL_PATTERN.
      */
-    public static final String EMAIL_PATTERN
-            = "^[_A-Za-z0-9-+]+(\\.[_A-Za-z0-9-]+)*@"
-            + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+    public static final String EMAIL_PATTERN = "^(.+)@(.+)$";
 
     /**
      * The Constant pattern.
