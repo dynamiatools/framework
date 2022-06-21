@@ -16,6 +16,7 @@
  */
 package tools.dynamia.domain.jpa;
 
+import tools.dynamia.commons.StringUtils;
 import tools.dynamia.domain.util.AbstractContactInfo;
 
 import javax.persistence.Embeddable;
@@ -124,7 +125,7 @@ public class ContactInfo extends AbstractContactInfo implements java.io.Serializ
 
     @Override
     public void setEmail(String email) {
-        this.email = email;
+        this.email = StringUtils.trimAllWhitespace(email);
     }
 
     @Override

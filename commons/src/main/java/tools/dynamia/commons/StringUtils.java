@@ -1449,4 +1449,8 @@ public abstract class StringUtils {
                 .map(String::valueOf)
                 .collect(Collectors.joining());
     }
+
+    public static boolean isBlank(String value) {
+        return value != null && value.isBlank();
+    }
 }
