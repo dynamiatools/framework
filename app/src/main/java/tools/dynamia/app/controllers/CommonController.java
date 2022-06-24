@@ -20,6 +20,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import tools.dynamia.app.CurrentTemplate;
+import tools.dynamia.app.IndexInterceptor;
+import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Controller;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,19 +30,21 @@ import javax.servlet.http.HttpServletRequest;
 @Order(1)
 public class CommonController {
 
-	@RequestMapping("/")
-	public ModelAndView index(HttpServletRequest request) {
-		ModelAndView mv = new ModelAndView("index");
+    @RequestMapping("/")
+    public ModelAndView index(HttpServletRequest request) {
+        ModelAndView mv = new ModelAndView("index");
 
-		if (request.getParameter("zoom") != null) {
-			mv.addObject("zoom", "zoom: " + request.getParameter("zoom") + ";");
-		}
+        if (request.getParameter("zoom") != null) {
+            mv.addObject("zoom", "zoom: " + request.getParameter("zoom") + ";");
+        }
 
-		if (request.getParameter("skin") != null) {
-			CurrentTemplate.get().setSkin(request.getParameter("skin"));
-		}
+        if (request.getParameter("skin") != null) {
+            CurrentTemplate.get().setSkin(request.getParameter("skin"));
+        }
 
-		return mv;
-	}
+        Containers.get().findObjects(IndexInterceptor.class).forEach(indexInterceptor -> indexInterceptor.afterIndex(mv, request));
+
+        return mv;
+    }
 
 }

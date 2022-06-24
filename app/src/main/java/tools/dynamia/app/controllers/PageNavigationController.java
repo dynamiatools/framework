@@ -21,9 +21,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+import tools.dynamia.app.PageNavigationInterceptor;
+import tools.dynamia.integration.Containers;
 import tools.dynamia.navigation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.awt.*;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -88,11 +91,13 @@ public class PageNavigationController {
             mv.addObject("navPage", page);
             mv.addObject("pageName", page.getName());
 
+            Containers.get().findObjects(PageNavigationInterceptor.class).forEach(pageNavigationInterceptor -> pageNavigationInterceptor.afterPage(page, mv, request));
 
         } catch (PageNotFoundException | NavigationNotAllowedException e) {
             mv.setViewName("error/404");
             mv.addObject("message", e.getMessage());
         }
+
 
         return mv;
 

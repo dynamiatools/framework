@@ -17,6 +17,8 @@
 package tools.dynamia.navigation;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import tools.dynamia.commons.SimpleCache;
 import tools.dynamia.commons.logger.LoggingService;
@@ -33,6 +35,7 @@ import java.util.List;
  * @author Ing. Mario Serrano Leones
  */
 @Component
+
 public final class ModuleContainer implements Serializable {
 
     private final transient LoggingService LOGGER = new SLF4JLoggingService(ModuleContainer.class);
@@ -40,6 +43,7 @@ public final class ModuleContainer implements Serializable {
     private final Collection<Module> modules;
     private final Collection<Page> featuredPages;
 
+    @Autowired
     private transient Collection<ModuleProvider> _providers;
     private final SimpleCache<String, Page> INDEX = new SimpleCache<>();
 
@@ -79,9 +83,7 @@ public final class ModuleContainer implements Serializable {
     }
 
     public Collection<ModuleProvider> getModulesProviders() {
-        if(_providers==null){
-            _providers= Containers.get().findObjects(ModuleProvider.class);
-        }
+
         return _providers;
     }
 
