@@ -86,6 +86,17 @@ public interface CrudService {
     <T> T find(Class<T> type, Serializable id);
 
     /**
+     * A shortcut method to find an entity by a field called remoteId. If this field dont exist an exception
+     * will throw
+     *
+     * @param type
+     * @param remoteId
+     * @param <T>
+     * @return
+     */
+    <T> T findByRemoteId(Class<T> type, Serializable remoteId);
+
+    /**
      * update (reattach or merge) the entity t.
      *
      * @param <T> the generic type

@@ -16,6 +16,7 @@
  */
 package tools.dynamia.domain.jpa;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import tools.dynamia.domain.Auditable;
 
 import javax.persistence.MappedSuperclass;
@@ -42,12 +43,14 @@ public abstract class BaseEntity extends SimpleEntity implements Serializable, A
      * The creation date.
      */
     @Temporal(javax.persistence.TemporalType.DATE)
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private Date creationDate = new Date();
 
     /**
      * The creation time.
      */
     @Temporal(javax.persistence.TemporalType.TIME)
+    @JsonFormat(pattern = "hh:mm:ss")
     private Date creationTime = new Date();
 
 

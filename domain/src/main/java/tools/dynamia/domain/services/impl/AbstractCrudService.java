@@ -84,6 +84,11 @@ public abstract class AbstractCrudService implements CrudService {
         return findSingle(type, "id", id);
     }
 
+    @Override
+    public <T> T findByRemoteId(Class<T> type, Serializable remoteId) {
+        return findSingle(type, "remoteId", remoteId);
+    }
+
     /*
      * (non-Javadoc)
      *

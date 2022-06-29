@@ -32,6 +32,7 @@ public abstract class SimpleEntity extends AbstractEntity<Long> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long remoteId;
 
     /**
      * The Constant serialVersionUID.
@@ -45,9 +46,9 @@ public abstract class SimpleEntity extends AbstractEntity<Long> {
     private int version;
 
     /*
-	 * (non-Javadoc)
-	 * 
-	 * @see AbstractEntity#getId()
+     * (non-Javadoc)
+     *
+     * @see AbstractEntity#getId()
      */
     @Override
     public Long getId() {
@@ -55,9 +56,9 @@ public abstract class SimpleEntity extends AbstractEntity<Long> {
     }
 
     /*
-	 * (non-Javadoc)
-	 * 
-	 * @see AbstractEntity#setId(java.io.Serializable)
+     * (non-Javadoc)
+     *
+     * @see AbstractEntity#setId(java.io.Serializable)
      */
     @Override
     public void setId(Long id) {
@@ -65,7 +66,13 @@ public abstract class SimpleEntity extends AbstractEntity<Long> {
         this.id = id;
         notifyChange("id", oldId, id);
     }
-    
-    
 
+
+    public Long getRemoteId() {
+        return remoteId;
+    }
+
+    public void setRemoteId(Long remoteId) {
+        this.remoteId = remoteId;
+    }
 }
