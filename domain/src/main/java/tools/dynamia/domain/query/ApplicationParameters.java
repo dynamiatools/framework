@@ -250,4 +250,10 @@ public class ApplicationParameters implements Parameters {
 
         return Long.parseLong(value);
     }
+
+    @Override
+    public Parameter findParameter(Class<? extends Parameter> parameterClass, String name, QueryParameters filters) {
+        filters.add("name", QueryConditions.eq(name));
+        return crudService.findSingle(parameterClass, filters);
+    }
 }

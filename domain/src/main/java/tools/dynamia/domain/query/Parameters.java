@@ -144,8 +144,16 @@ public interface Parameters {
 
     /**
      * Increase and return next counter value
+     *
      * @param counterParam
      * @return
      */
     long findNextCounterValue(Parameter counterParam);
+
+    /**
+     * @param parameterClass
+     * @param name
+     * @param filters
+     */
+    Parameter findParameter(Class<? extends Parameter> parameterClass, String name, QueryParameters filters);
 }
