@@ -85,7 +85,7 @@ public class MathFunction {
                 hasNumber = true;
                 number += character;
                 if (i == (f_x.length() - 1)) {
-                    value = new Double(number).doubleValue();
+                    value = Double.parseDouble(number);
                     number = "";
                     hasNumber = false;
                 }
@@ -93,7 +93,7 @@ public class MathFunction {
             } else if (character == '+') {
 
                 if (hasNumber) {
-                    final Double numb = new Double(number);
+                    final Double numb = Double.valueOf(number);
                     final String new_f_x = f_x.substring(i + 1, f_x.length());
                     value = numb + eval(new_f_x, xi);
                     i += new_f_x.length();
@@ -114,7 +114,7 @@ public class MathFunction {
             } else if (character == '*') {
 
                 if (hasNumber) {
-                    final Double numb = new Double(number);
+                    final Double numb = Double.valueOf(number);
                     final String new_f_x = nextFunction(f_x.substring(i + 1, f_x.length()));
                     value = numb * eval(new_f_x, xi);
                     i += new_f_x.length();
@@ -135,7 +135,7 @@ public class MathFunction {
             } else if (character == '-') {
 
                 if (hasNumber) {
-                    final Double numb = new Double(number);
+                    final Double numb = Double.valueOf(number);
                     final String new_f_x = nextMinusFunction(f_x.substring(i + 1, f_x.length()));
                     value = numb - eval(new_f_x, xi);
                     i += new_f_x.length();
@@ -156,7 +156,7 @@ public class MathFunction {
             } else if (character == '/') {
 
                 if (hasNumber) {
-                    final Double numb = new Double(number);
+                    final Double numb = Double.valueOf(number);
                     final String new_f_x = nextFunction(f_x.substring(i + 1, f_x.length()));
                     value = numb / eval(new_f_x, xi);
                     i += new_f_x.length();
@@ -177,7 +177,7 @@ public class MathFunction {
             } else if (character == '^') {
 
                 if (hasNumber) {
-                    final Double numb = new Double(number);
+                    final Double numb = Double.valueOf(number);
                     final String new_f_x = nextFunction(f_x.substring(i + 1, f_x.length()));
                     value = StrictMath.pow(numb.doubleValue(), eval(new_f_x, xi));
                     i += new_f_x.length();

@@ -7,13 +7,13 @@
 
 DynamiaTools Framework v${project.version} - build ${timestamp}
 Powered by: Dynamia Soluciones IT SAS
-Community Edition License: Apache 2
+Community Edition License: Apache 2.0
 https://dynamia.tools
 https://twitter.com/dynamiatools
 https://www.dynamiasoluciones.com
 Copyright (c) - All rights reserved.
 
 ZK CE Framework v${zk.version}
-Spring Framework v${spring.version}
+Spring Boot v${springboot.version}
 
 ---------------------------------------------------------------

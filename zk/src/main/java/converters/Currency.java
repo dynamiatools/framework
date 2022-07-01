@@ -24,8 +24,11 @@ import tools.dynamia.commons.Messages;
 import java.text.NumberFormat;
 
 /**
+ * Convert numbers to string using currency format using {@link Messages}.getDefaultLocale()
+ *
  * @author Mario A. Serrano Leones
  */
+
 
 public class Currency implements Converter<Object, Object, Component> {
 
