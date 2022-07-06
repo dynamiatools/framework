@@ -89,7 +89,7 @@ public class HttpRestClient {
     }
 
     public List getList(String uri) {
-        return exchange(HttpMethod.POST, uri, null, List.class);
+        return exchange(HttpMethod.GET, uri, null, List.class);
     }
 
 

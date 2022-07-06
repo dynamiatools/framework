@@ -18,12 +18,16 @@ package tools.dynamia.zk.ui;
 
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.*;
+import tools.dynamia.commons.Callback;
 import tools.dynamia.commons.ClassMessages;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.StopWatch;
 import tools.dynamia.integration.ProgressMonitor;
+import tools.dynamia.ui.UIMessages;
 import tools.dynamia.zk.util.LongOperation;
 import tools.dynamia.zk.util.ZKUtil;
+
+import java.util.function.Consumer;
 
 public class LongOperationMonitorWindow extends Window {
 
@@ -65,6 +69,25 @@ public class LongOperationMonitorWindow extends Window {
         wind.setPosition("center");
         wind.doModal();
         return wind;
+    }
+
+    /**
+     * Run and show a progress window for a long running operation
+     *
+     * @param title
+     * @param finishMessage
+     * @param operation
+     * @return
+     */
+    public static LongOperationMonitorWindow start(String title, String finishMessage, Consumer<ProgressMonitor> operation) {
+        var monitor = new ProgressMonitor();
+        var longOp = LongOperation.create()
+                .execute(() -> operation.accept(monitor))
+                .onFinish(() -> UIMessages.showMessage(finishMessage));
+
+        longOp.start();
+
+        return show(title, longOp, monitor);
     }
 
     private void initMonitor() {
