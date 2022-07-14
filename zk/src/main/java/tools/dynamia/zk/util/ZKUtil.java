@@ -16,6 +16,7 @@
  */
 package tools.dynamia.zk.util;
 
+import org.zkoss.bind.annotation.Init;
 import org.zkoss.zhtml.impl.AbstractTag;
 import org.zkoss.zk.ui.*;
 import org.zkoss.zk.ui.event.EventListener;
@@ -51,6 +52,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -512,6 +514,19 @@ public abstract class ZKUtil {
      */
     public static <T> InputPanel showInputDialog(String label, Class<T> inputClass, EventListener eventListener) {
         return showInputDialog(label, inputClass, null, eventListener);
+    }
+
+    public static InputPanel showInputPassword(String label, Consumer<String> inputPassword) {
+        var inputPanel = showInputDialog(label, String.class, event -> {
+            var password = (String) event.getData();
+            if (password != null && !password.isBlank()) {
+                inputPassword.accept(password);
+            }
+        });
+
+        ((Textbox) inputPanel.getTextbox()).setType("password");
+
+        return inputPanel;
     }
 
     /**
