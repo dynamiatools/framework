@@ -12,12 +12,15 @@ public class BasicEntityJsonSerializer extends JsonSerializer<AbstractEntity> {
 
     public static final String NAME = "name";
     public static final String ID = "id";
+    public static final String CLASS = "class";
+    public static final String URL = "url";
 
     @Override
     public void serialize(AbstractEntity value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         if (value != null && value.getId() != null) {
             gen.writeStartObject();
-            gen.writeStringField(NAME, value.toString());
+            gen.writeStringField(CLASS, value.getClass().getName());
+            gen.writeStringField(NAME, value.toName());
             if (value.getId() instanceof Long) {
                 gen.writeNumberField(ID, (Long) value.getId());
             } else {
@@ -25,10 +28,10 @@ public class BasicEntityJsonSerializer extends JsonSerializer<AbstractEntity> {
             }
 
             if (value instanceof URLable) {
-                gen.writeStringField("url", ((URLable) value).toURL());
+                gen.writeStringField(URL, ((URLable) value).toURL());
             }
 
-            gen.writeStringField("class", value.getClass().getSimpleName());
+
             gen.writeEndObject();
         }
     }

@@ -31,7 +31,7 @@ import static tools.dynamia.domain.util.DomainUtils.lookupCrudService;
  * @author Ing. Mario Serrano Leones
  */
 public abstract class AbstractEntity<ID extends Serializable> implements Serializable, Identifiable<ID>,
-        PropertyChangeListenerContainer, Referenceable<ID>, Jsonable, Xmlable, Mappable {
+        PropertyChangeListenerContainer, Referenceable<ID>, Jsonable, Xmlable, Mappable, Nameable {
 
 
     private static final long serialVersionUID = 1L;

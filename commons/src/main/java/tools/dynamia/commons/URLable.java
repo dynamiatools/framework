@@ -23,4 +23,8 @@ package tools.dynamia.commons;
 public interface URLable {
 
     String toURL();
+
+    default void url(String url) {
+
+    }
 }
