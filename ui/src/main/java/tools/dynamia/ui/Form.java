@@ -17,19 +17,14 @@
 package tools.dynamia.ui;
 
 import tools.dynamia.commons.Callback;
-import tools.dynamia.commons.PropertiesContainer;
-import tools.dynamia.commons.PropertyChangeListenerContainer;
+import tools.dynamia.commons.PropertyChangeSupport;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 
-public class Form implements PropertyChangeListenerContainer {
+public class Form extends PropertyChangeSupport {
 
     private Callback onSubmitCallback;
     private Callback onCancelCallback;
     private Callback onCloseCallback;
-
-    private transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
 
     protected void submit() {
@@ -64,30 +59,6 @@ public class Form implements PropertyChangeListenerContainer {
 
 
     /**
-     * Add a PropertyChangeListener to get object change, subclasses must invoke
-     * notifyChange to fire listeners
-     *
-     * @param listener
-     */
-    @Override
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        if (propertyChangeSupport == null) {
-            propertyChangeSupport = new PropertyChangeSupport(this);
-        }
-        propertyChangeSupport.addPropertyChangeListener(listener);
-    }
-
-    /**
-     * Remove PropertyChangeListener
-     *
-     * @param listener
-     */
-    @Override
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.removePropertyChangeListener(listener);
-    }
-
-    /**
      * Notify PropertyChangeListeners change, this method automatically check if the
      * oldValue and newValue are different to fire the listeners.
      *
@@ -97,7 +68,7 @@ public class Form implements PropertyChangeListenerContainer {
      */
     protected void notifyChange(String propertyName, Object oldValue, Object newValue) {
         if (oldValue == null || oldValue != newValue) {
-            propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
+            firePropertyChange(propertyName, oldValue, newValue);
         }
     }
 

@@ -18,7 +18,6 @@ package tools.dynamia.commons;
 
 import tools.dynamia.commons.math.MathFunction;
 
-import javax.script.ScriptException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.List;
@@ -162,10 +161,9 @@ public class BigDecimalUtils {
      *
      * @param mathExpression the math expression
      * @param vars           the vars
-     * @return the big decimal
-     * @throws ScriptException the script exception
+     * @return the big decimal     *
      */
-    public static BigDecimal evaluate(String mathExpression, Map<String, Number> vars) throws ScriptException {
+    public static BigDecimal evaluate(String mathExpression, Map<String, Number> vars) {
 
         String parsedExpression = mathExpression.trim();
         for (Map.Entry<String, Number> var : vars.entrySet()) {

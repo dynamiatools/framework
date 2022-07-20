@@ -29,6 +29,8 @@ import org.zkoss.zk.ui.IdSpace;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Div;
 import tools.dynamia.commons.Callback;
+import tools.dynamia.commons.PropertyChangeEvent;
+import tools.dynamia.commons.PropertyChangeListener;
 import tools.dynamia.commons.PropertyChangeListenerContainer;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.FieldGroup;
@@ -41,8 +43,6 @@ import tools.dynamia.zk.ui.CanBeReadonly;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -84,7 +84,6 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
     private Object source;
     private Consumer onSourceChange;
     private String customView;
-
 
 
     public FormView() {

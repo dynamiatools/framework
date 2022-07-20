@@ -16,11 +16,11 @@
  */
 package tools.dynamia.domain;
 
-import tools.dynamia.commons.PropertyChangeListenerContainer;
+import tools.dynamia.commons.*;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
+
 import java.io.Serializable;
+import java.util.Objects;
 
 import static tools.dynamia.domain.util.DomainUtils.lookupCrudService;
 
@@ -130,7 +130,7 @@ public abstract class AbstractEntity<ID extends Serializable> implements Seriali
      * @param newValue
      */
     protected void notifyChange(String propertyName, Object oldValue, Object newValue) {
-        if (oldValue == null || oldValue != newValue) {
+        if (oldValue == null || !Objects.equals(oldValue, newValue)) {
             propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
         }
     }

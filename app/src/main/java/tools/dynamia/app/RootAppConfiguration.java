@@ -25,7 +25,9 @@ import org.springframework.core.env.Environment;
 import tools.dynamia.app.template.ApplicationTemplate;
 import tools.dynamia.app.template.ApplicationTemplates;
 import tools.dynamia.app.template.TemplateContext;
+import tools.dynamia.commons.LocaleProvider;
 import tools.dynamia.commons.StringUtils;
+import tools.dynamia.commons.SystemLocaleProvider;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.domain.services.ValidatorService;
@@ -105,7 +107,7 @@ public class RootAppConfiguration {
             if (applicationInfo.getName() == null) {
                 applicationInfo.setName(environment.getProperty("spring.application.name"));
             }
-            if(applicationInfo.getName()==null || applicationInfo.getName().isEmpty()){
+            if (applicationInfo.getName() == null || applicationInfo.getName().isEmpty()) {
                 applicationInfo.setName("DynamiaTools App");
             }
 
@@ -127,5 +129,9 @@ public class RootAppConfiguration {
         return () -> new Module(StringUtils.randomString(), "No modules registered");
     }
 
+    @Bean
+    public LocaleProvider systemLocaleProvider() {
+        return new SystemLocaleProvider();
+    }
 
 }

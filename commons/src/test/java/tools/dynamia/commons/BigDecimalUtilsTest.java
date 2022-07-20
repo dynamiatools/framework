@@ -19,7 +19,7 @@ package tools.dynamia.commons;
 import my.company.Dummy;
 import org.junit.Test;
 
-import javax.script.ScriptException;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +43,7 @@ public class BigDecimalUtilsTest {
     }
 
     @Test
-    public void shouldComputeScript() throws ScriptException {
+    public void shouldComputeScript() {
         MapBuilder<String, Number> map = new MapBuilder<>();
 
         int expected = 617;

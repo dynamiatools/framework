@@ -16,7 +16,6 @@
  */
 package tools.dynamia.commons;
 
-import java.beans.PropertyChangeListener;
 
 public interface PropertyChangeListenerContainer {
 

@@ -17,7 +17,7 @@
 package tools.dynamia.domain.jpa;
 
 import tools.dynamia.commons.BeanUtils;
-import tools.dynamia.domain.Identifiable;
+import tools.dynamia.commons.Identifiable;
 import tools.dynamia.domain.query.DataPaginator;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.util.QueryBuilder;

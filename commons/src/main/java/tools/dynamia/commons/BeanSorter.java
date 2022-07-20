@@ -16,20 +16,17 @@
  */
 package tools.dynamia.commons;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
 
 
 /**
  * Archivo: BeanSorter.java Fecha Creacion: 4/05/2009
  *
- * @author Ing. Mario Serrano Leones
  * @param <T> the generic type
+ * @author Ing. Mario Serrano Leones
  */
-public class BeanSorter<T> implements Serializable {
+public class BeanSorter<T> extends PropertyChangeSupport implements Serializable {
 
     /**
      * The Constant serialVersionUID.
@@ -54,7 +51,7 @@ public class BeanSorter<T> implements Serializable {
     /**
      * The property change support.
      */
-    private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+
 
     /**
      * Instantiates a new bean sorter.
@@ -76,7 +73,7 @@ public class BeanSorter<T> implements Serializable {
      * Instantiates a new bean sorter.
      *
      * @param defaultField the default field
-     * @param asc the asc
+     * @param asc          the asc
      */
     public BeanSorter(String defaultField, boolean asc) {
         comparator = new DynamicComparator<>(defaultField);
@@ -91,7 +88,7 @@ public class BeanSorter<T> implements Serializable {
     public void setColumnName(String column) {
         oldColumn = comparator.getField();
         comparator.setField(column);
-        propertyChangeSupport.firePropertyChange("columnName", oldColumn, column);
+        firePropertyChange("columnName", oldColumn, column);
 
     }
 
@@ -112,7 +109,7 @@ public class BeanSorter<T> implements Serializable {
     public void setAscending(boolean ascending) {
         oldAscending = comparator.isAscending();
         comparator.setAscending(ascending);
-        propertyChangeSupport.firePropertyChange("ascending", oldAscending, ascending);
+        firePropertyChange("ascending", oldAscending, ascending);
     }
 
     /**
@@ -146,21 +143,5 @@ public class BeanSorter<T> implements Serializable {
         }
     }
 
-    /**
-     * Adds the property change listener.
-     *
-     * @param listener the listener
-     */
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.addPropertyChangeListener(listener);
-    }
 
-    /**
-     * Removes the property change listener.
-     *
-     * @param listener the listener
-     */
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.removePropertyChangeListener(listener);
-    }
 }

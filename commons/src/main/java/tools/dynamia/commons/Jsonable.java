@@ -15,13 +15,17 @@
  * limitations under the License.
  */
 
-package tools.dynamia.domain;
+package tools.dynamia.commons;
 
-import java.io.Serializable;
+import tools.dynamia.commons.StringPojoParser;
 
-public interface Identifiable<ID extends Serializable> {
+/**
+ * Allow POJO classes to be converted to json strings
+ */
+public interface Jsonable {
 
-    ID getId();
 
-    void setId(ID id);
+    default String toJson() {
+        return StringPojoParser.convertPojoToJson(this);
+    }
 }

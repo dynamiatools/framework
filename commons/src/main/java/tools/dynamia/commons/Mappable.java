@@ -14,18 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package tools.dynamia.commons;
 
-package tools.dynamia.domain;
+import tools.dynamia.commons.BeanUtils;
 
-import tools.dynamia.commons.StringPojoParser;
+import java.util.Map;
 
 /**
- * Allow POJO classes to be converted to json strings
+ * Allow POJO classes to be converted to map
+ *
+ * @author Ing. Mario Serrano
  */
-public interface Jsonable {
+public interface Mappable {
 
-
-    default String toJson() {
-        return StringPojoParser.convertPojoToJson(this);
+    default Map<String, Object> toMap() {
+        return BeanUtils.getValuesMaps(this);
     }
+
 }

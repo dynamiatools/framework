@@ -16,7 +16,6 @@
  */
 package tools.dynamia.commons;
 
-import org.springframework.stereotype.Service;
 
 import java.util.Locale;
 
@@ -24,9 +23,8 @@ import java.util.Locale;
  * Priority 1000
  *
  * @author Mario
- *
  */
-@Service
+
 public class SystemLocaleProvider implements LocaleProvider {
 
     @Override

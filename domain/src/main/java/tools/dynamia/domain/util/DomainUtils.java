@@ -20,7 +20,7 @@ import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.domain.EntityReferenceRepository;
 import tools.dynamia.domain.EntityUtilsProvider;
-import tools.dynamia.domain.Identifiable;
+import tools.dynamia.commons.Identifiable;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.query.Parameter;
 import tools.dynamia.domain.services.CrudService;

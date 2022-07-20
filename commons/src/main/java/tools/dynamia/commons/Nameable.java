@@ -1,4 +1,4 @@
-package tools.dynamia.domain;
+package tools.dynamia.commons;
 
 public interface Nameable {
 
@@ -7,6 +7,6 @@ public interface Nameable {
     }
 
     default void name(String name) {
-        
+
     }
 }

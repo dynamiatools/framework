@@ -18,6 +18,8 @@ package tools.dynamia.domain;
 
 import org.springframework.cache.Cache;
 import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.Identifiable;
+import tools.dynamia.commons.Mappable;
 import tools.dynamia.commons.collect.PagedList;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;

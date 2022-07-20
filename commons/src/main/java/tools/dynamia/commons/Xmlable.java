@@ -14,21 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tools.dynamia.domain;
 
-import tools.dynamia.commons.BeanUtils;
+package tools.dynamia.commons;
 
-import java.util.Map;
+import tools.dynamia.commons.StringPojoParser;
 
 /**
- * Allow POJO classes to be converted to map
- *
- * @author Ing. Mario Serrano
+ * Allow POJO classes to be converted to XML strings
  */
-public interface Mappable {
+public interface Xmlable {
 
-    default Map<String, Object> toMap() {
-        return BeanUtils.getValuesMaps(this);
+
+    default String toXml() {
+        return StringPojoParser.convertPojoToXml(this);
     }
-
 }

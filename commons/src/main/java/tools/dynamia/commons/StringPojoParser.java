@@ -47,7 +47,7 @@ public class StringPojoParser {
         }
     }
 
-    private static ObjectMapper createJsonMapper() {
+    public static ObjectMapper createJsonMapper() {
         var jsonMapper = new ObjectMapper();
         jsonMapper.enable(SerializationFeature.INDENT_OUTPUT);
         jsonMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -116,7 +116,7 @@ public class StringPojoParser {
         }
     }
 
-    private static XmlMapper createXmlMapper() {
+    public static XmlMapper createXmlMapper() {
         var xmlMapper = new XmlMapper();
         xmlMapper.enable(SerializationFeature.INDENT_OUTPUT);
         xmlMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -142,6 +142,7 @@ public class StringPojoParser {
 
     /**
      * Parse json to a of Lis<Pojo>
+     *
      * @param json
      * @param pojoType
      * @param <T>

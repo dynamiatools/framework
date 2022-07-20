@@ -32,7 +32,7 @@
     <url>https://dynamia.tools/docs/common</url>
 
     <licenses>
-       <license>
+        <license>
             <name>APACHE LICENSE, VERSION 2.0</name>
             <url>https://www.apache.org/licenses/LICENSE-2.0</url>
             <distribution>repo</distribution>
@@ -72,10 +72,8 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-        </dependency>
+
+
     </dependencies>
 
     <build>
