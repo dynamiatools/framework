@@ -30,7 +30,7 @@ import org.zkoss.zul.impl.InputElement;
 import org.zkoss.zul.impl.NumberInputElement;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.Messages;
-import tools.dynamia.ui.LocalizedMessagesProvider;
+import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.ui.icons.IconsTheme;
 import tools.dynamia.viewers.*;
@@ -44,7 +44,6 @@ import tools.dynamia.zk.util.ZKUtil;
 import tools.dynamia.zk.viewers.ZKViewersUtil;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

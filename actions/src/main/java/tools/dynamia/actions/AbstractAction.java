@@ -17,6 +17,7 @@
 package tools.dynamia.actions;
 
 import tools.dynamia.commons.ClassMessages;
+import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
@@ -32,6 +33,7 @@ import java.util.Map;
  * @author Mario A. Serrano Leones
  */
 public abstract class AbstractAction implements Action {
+    public static final String CLASSIFIER = "* UI Actions";
     private final LoggingService logger = new SLF4JLoggingService(getClass());
 
     private String name;
@@ -45,6 +47,8 @@ public abstract class AbstractAction implements Action {
     private ActionRenderer actionRenderer = null;
     private int keyCode;
     private final ClassMessages messages = ClassMessages.get(getClass());
+    private LocalizedMessagesProvider localizedMessagesProvider;
+    private String messageClassifier = CLASSIFIER;
 
 
     @Override
@@ -191,6 +195,11 @@ public abstract class AbstractAction implements Action {
     @Override
     public String getLocalizedName(Locale locale) {
         String key = getId() + ".name";
+
+        if (localizedMessagesProvider != null) {
+            return localizedMessagesProvider.getMessage(key, getMessageClassifier(), locale, getName());
+        }
+
         String localizedName = Messages.get(getClass(), key, locale);
         if (key.equals(localizedName)) {
             return getName();
@@ -202,6 +211,11 @@ public abstract class AbstractAction implements Action {
     @Override
     public String getLocalizedDescription(Locale locale) {
         String key = getId() + ".description";
+        if (localizedMessagesProvider != null) {
+            return localizedMessagesProvider.getMessage(key, CLASSIFIER, locale, getDescription());
+        }
+
+
         String localizedDescription = Messages.get(getClass(), key, locale);
         if (key.equals(localizedDescription)) {
             return getDescription();
@@ -254,4 +268,20 @@ public abstract class AbstractAction implements Action {
         return messages.get(key, params);
     }
 
+    @Override
+    public LocalizedMessagesProvider getLocalizedMessagesProvider() {
+        return localizedMessagesProvider;
+    }
+
+    public void setLocalizedMessagesProvider(LocalizedMessagesProvider localizedMessagesProvider) {
+        this.localizedMessagesProvider = localizedMessagesProvider;
+    }
+
+    public String getMessageClassifier() {
+        return messageClassifier;
+    }
+
+    public void setMessageClassifier(String messageClassifier) {
+        this.messageClassifier = messageClassifier;
+    }
 }

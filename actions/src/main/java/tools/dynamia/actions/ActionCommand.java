@@ -35,6 +35,10 @@ public @interface ActionCommand {
 
     String image() default "";
 
+    boolean autolocalize() default true;
+
+    String classier() default "";
+
     Class<? extends ActionRenderer<?>> actionRenderer() default DefaultActionRenderer.class;
 
     int order() default 0;

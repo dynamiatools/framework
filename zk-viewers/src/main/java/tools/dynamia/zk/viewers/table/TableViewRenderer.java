@@ -28,7 +28,7 @@ import tools.dynamia.commons.Messages;
 import tools.dynamia.domain.fx.CrudServiceMultiFunctionProcessor;
 import tools.dynamia.domain.fx.Functions;
 import tools.dynamia.domain.fx.MultiFunctionProcessor;
-import tools.dynamia.ui.LocalizedMessagesProvider;
+import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.viewers.*;
 import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;

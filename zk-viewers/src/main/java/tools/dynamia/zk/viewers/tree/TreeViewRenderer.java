@@ -22,7 +22,7 @@ package tools.dynamia.zk.viewers.tree;
 import tools.dynamia.commons.Messages;
 import org.zkoss.zul.*;
 import tools.dynamia.commons.BeanUtils;
-import tools.dynamia.ui.LocalizedMessagesProvider;
+import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.viewers.*;
 import tools.dynamia.viewers.util.Viewers;
 

@@ -30,7 +30,6 @@ import java.util.Locale;
 public class Page extends NavigationElement<Page> implements Serializable, Cloneable {
 
 
-
     public static Page getCurrent() {
         return NavigationManager.getCurrent().getCurrentPage();
     }
@@ -79,7 +78,7 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
     @Override
     public String getVirtualPath() {
         try {
-            if(virtualPath==null) {
+            if (virtualPath == null) {
                 if (getPageGroup() != null) {
                     if (getPageGroup().getParentModule() != null && getPageGroup() == getPageGroup().getParentModule().getDefaultPageGroup()) {
                         virtualPath = getPageGroup().getParentModule().getId() + "/" + getId();
@@ -255,6 +254,7 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
 
     /**
      * Return the priority of this page. By default is 100.
+     *
      * @return
      */
     public int getPriority() {
@@ -263,6 +263,7 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
 
     /**
      * Set the priority of this page. By default is 100
+     *
      * @param priority
      */
     public void setPriority(int priority) {
@@ -271,6 +272,19 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
 
     public boolean isTemporal() {
         return temporal;
+    }
+
+    /**
+     * If always allowed is true, temporal is setting to true
+     *
+     * @param alwaysAllowed
+     */
+    @Override
+    public void setAlwaysAllowed(boolean alwaysAllowed) {
+        super.setAlwaysAllowed(alwaysAllowed);
+        if (alwaysAllowed) {
+            setTemporal(true);
+        }
     }
 
     public void setTemporal(boolean temporal) {

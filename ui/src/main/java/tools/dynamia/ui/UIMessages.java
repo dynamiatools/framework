@@ -17,11 +17,13 @@
 package tools.dynamia.ui;
 
 import tools.dynamia.commons.Callback;
+import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.integration.Containers;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
@@ -71,6 +73,24 @@ public class UIMessages {
     public static void showMessage(String text, String title, MessageType type, Object source) {
         MessageDisplayer displayer = getDisplayer();
         displayer.showMessage(text, title, type, source);
+    }
+
+
+    /**
+     * Show a localized message using default {@link LocalizedMessagesProvider}
+     *
+     * @param template
+     * @param messageType
+     * @param vars
+     */
+    public static void showLocalizedMessage(String template, MessageType messageType, Object... vars) {
+        String localizedMessage = getLocalizedMessage(template, "* UI Messages");
+        String message = String.format(localizedMessage, vars);
+        showMessage(message, messageType);
+    }
+
+    public static void showLocalizedMessage(String template, Object... vars) {
+        showLocalizedMessage(template, MessageType.NORMAL, vars);
     }
 
     private static MessageDisplayer getDisplayer() {
@@ -124,6 +144,38 @@ public class UIMessages {
      */
     public static void showQuestion(String text, String title, Callback onYesResponse, Callback onNoResponse) {
         getDisplayer().showQuestion(text, title, onYesResponse, onNoResponse);
+    }
+
+    /**
+     * Show Questing with localized message
+     *
+     * @param template
+     * @param vars
+     * @param onYesResponse
+     */
+    public static void showLocalizedQuestion(String template, Object[] vars, Callback onYesResponse) {
+        String localizedMessage = getLocalizedMessage(template, "* UI Messages");
+        String message = String.format(localizedMessage, vars);
+        showQuestion(message, onYesResponse);
+    }
+
+    /**
+     * @param template
+     * @param vars
+     * @param onYesResponse
+     */
+    public static void showLocalizedQuestion(String template, List<Object> vars, Callback onYesResponse) {
+        showLocalizedQuestion(template, vars.toArray(), onYesResponse);
+
+    }
+
+    /**
+     * @param template
+     * @param onYesResponse
+     */
+    public static void showLocalizedQuestion(String template, Callback onYesResponse) {
+        showLocalizedQuestion(template, new Object[0], onYesResponse);
+
     }
 
     /**
@@ -186,6 +238,18 @@ public class UIMessages {
      */
     public static String getLocalizedMessage(String key) {
         return getLocalizedMessage(key, null, Messages.getDefaultLocale(), key);
+    }
+
+
+    /**
+     * Localize message using key, classifer and default locale
+     *
+     * @param key
+     * @param classier
+     * @return
+     */
+    public static String getLocalizedMessage(String key, String classier) {
+        return getLocalizedMessage(key, classier, Messages.getDefaultLocale(), key);
     }
 
     /**

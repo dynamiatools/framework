@@ -1,4 +1,4 @@
-package tools.dynamia.ui;
+package tools.dynamia.commons;
 
 import java.util.Locale;
 

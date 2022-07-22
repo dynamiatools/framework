@@ -33,7 +33,7 @@ import tools.dynamia.domain.EntityReference;
 import tools.dynamia.domain.Reference;
 import tools.dynamia.domain.query.QueryCondition;
 import tools.dynamia.domain.query.QueryParameters;
-import tools.dynamia.ui.LocalizedMessagesProvider;
+import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.View;

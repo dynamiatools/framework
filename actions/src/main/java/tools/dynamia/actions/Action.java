@@ -16,13 +16,16 @@
  */
 package tools.dynamia.actions;
 
+import tools.dynamia.commons.LocalizedMessagesProvider;
+import tools.dynamia.commons.Messages;
+
 import java.util.Locale;
 import java.util.Map;
 
 
 /**
- *  Represent a single application (or user) action. You can extend {@link AbstractAction} and in the
- *  class contructor setup the properties and  implement actionPerformed(evt) method.
+ * Represent a single application (or user) action. You can extend {@link AbstractAction} and in the
+ * class contructor setup the properties and  implement actionPerformed(evt) method.
  *
  * @author Mario A. Serrano Leones
  */
@@ -109,13 +112,13 @@ public interface Action extends Comparable<Action> {
 
 
     default String getLocalizedName() {
-        return getLocalizedName(Locale.getDefault());
+        return getLocalizedName(Messages.getDefaultLocale());
     }
 
     String getLocalizedName(Locale locale);
 
     default String getLocalizedDescription() {
-        return getLocalizedDescription(Locale.getDefault());
+        return getLocalizedDescription(Messages.getDefaultLocale());
     }
 
     String getLocalizedDescription(Locale locale);
@@ -123,6 +126,10 @@ public interface Action extends Comparable<Action> {
     default int getKeyCode() {
         return 0;
     }
+
+    LocalizedMessagesProvider getLocalizedMessagesProvider();
+
+    String getMessageClassifier();
 
     /**
      * When action is performed.

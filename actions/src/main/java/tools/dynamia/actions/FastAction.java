@@ -26,6 +26,7 @@ public class FastAction extends AbstractAction {
 
     private final OnActionPerfomed onActionPerfomed;
 
+
     public FastAction(String name, OnActionPerfomed onActionPerfomed) {
         this(name, null, onActionPerfomed);
     }

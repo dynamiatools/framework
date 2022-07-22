@@ -17,6 +17,7 @@
 package tools.dynamia.actions;
 
 import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.ObjectMatcher;
 
@@ -26,6 +27,7 @@ import java.util.*;
 
 /**
  * Load actions and control access using {@link ActionRestriction}
+ *
  * @param <T>
  */
 public class ActionLoader<T extends Action> {
@@ -33,6 +35,8 @@ public class ActionLoader<T extends Action> {
     private final Class<T> targetActionClass;
     private Map<String, Object> actionAttributes = null;
     private boolean ignoreRestrictions;
+
+    private boolean autolocalize = true;
 
     public ActionLoader(Class<T> targetClass) {
         super();
@@ -44,12 +48,17 @@ public class ActionLoader<T extends Action> {
     }
 
     public List<T> load(ObjectMatcher<T> matcher) {
+        final var localizer = findDefaultLocalizedMessagesProvider();
         Collection<T> allActions = Containers.get().findObjects(targetActionClass, matcher);
         List<T> actions = new ArrayList<>();
         for (T action : allActions) {
             if (isActionAllowed(action)) {
                 actions.add(action);
                 configureAttributes(action);
+                if (isAutolocalize() && action instanceof AbstractAction) {
+                    ((AbstractAction) action).setLocalizedMessagesProvider(localizer);
+                }
+
                 if (action instanceof ActionLifecycleAware) {
                     ActionLifecycleAware ala = (ActionLifecycleAware) action;
                     ala.onCreate();
@@ -114,6 +123,7 @@ public class ActionLoader<T extends Action> {
 
         if (object != null) {
             Method[] methods = BeanUtils.getMethodsWithAnnotation(object.getClass(), ActionCommand.class);
+            final var localizer = findDefaultLocalizedMessagesProvider();
             for (Method method : methods) {
                 ActionCommand actionCommand = method.getAnnotation(ActionCommand.class);
                 FastAction action = new FastAction(actionCommand.name(), actionCommand.image(),
@@ -121,6 +131,10 @@ public class ActionLoader<T extends Action> {
 
                 if (actionCommand.name().isEmpty()) {
                     action.setName(method.getName());
+                }
+
+                if (actionCommand.autolocalize()) {
+                    action.setLocalizedMessagesProvider(localizer);
                 }
 
                 action.setActionRendererClass(actionCommand.actionRenderer());
@@ -164,4 +178,15 @@ public class ActionLoader<T extends Action> {
                 .orElse(null);
     }
 
+    public boolean isAutolocalize() {
+        return autolocalize;
+    }
+
+    public void setAutolocalize(boolean autolocalize) {
+        this.autolocalize = autolocalize;
+    }
+
+    private static LocalizedMessagesProvider findDefaultLocalizedMessagesProvider() {
+        return Containers.get().findObject(LocalizedMessagesProvider.class);
+    }
 }
