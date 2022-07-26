@@ -28,6 +28,7 @@ import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.crud.CrudState;
+import tools.dynamia.domain.LazyLoadable;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.ui.MessageType;
@@ -79,6 +80,11 @@ public class ViewDataAction extends AbstractCrudAction implements ReadableOnly {
     public void view(Object data) {
         if (data != null) {
             final Object entity = data;
+
+            if (entity instanceof LazyLoadable) {
+                ((LazyLoadable) entity).lazyLoad();
+            }
+
             Div content = new Div();
             content.setStyle("overflow: auto");
             if (HttpUtils.isSmartphone()) {
