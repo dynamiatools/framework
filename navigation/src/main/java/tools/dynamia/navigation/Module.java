@@ -21,6 +21,7 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * @author Ing. Mario Serrano Leones
@@ -98,10 +99,9 @@ public class Module extends NavigationElement<Module> implements Serializable, C
     }
 
     public PageGroup getPageGroupById(String id) {
-        PageGroup pgDummy = new PageGroup();
-        pgDummy.setId(id);
+
         for (PageGroup pg : pageGroups) {
-            if (pg.equals(pgDummy)) {
+            if (pg.getId().equalsIgnoreCase(id)) {
                 return pg;
             }
         }
@@ -225,5 +225,30 @@ public class Module extends NavigationElement<Module> implements Serializable, C
 
     public boolean isEmpty() {
         return getPageGroups().isEmpty() && getDefaultPageGroup().getPages().isEmpty();
+    }
+
+    /**
+     * Traverse all pages in all (NON dynamic) groups and subgroups
+     *
+     * @param action
+     */
+    public void forEachPage(Consumer<Page> action) {
+        var allGroups = new ArrayList<PageGroup>();
+        allGroups.add(defaultGroup);
+        allGroups.addAll(pageGroups);
+
+        allGroups.forEach(grp -> forEachPageGroup(action, grp));
+    }
+
+    private void forEachPageGroup(Consumer<Page> action, PageGroup grp) {
+        if (!grp.isDynamic()) {
+            var pages = grp.getPages();
+            if (pages != null && !pages.isEmpty()) {
+                pages.forEach(action);
+            }
+            if (grp.getPageGroups() != null && !grp.getPageGroups().isEmpty()) {
+                grp.getPageGroups().forEach(subgrp -> forEachPageGroup(action, subgrp));
+            }
+        }
     }
 }

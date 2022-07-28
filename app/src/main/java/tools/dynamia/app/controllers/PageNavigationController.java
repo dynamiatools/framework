@@ -16,25 +16,39 @@
  */
 package tools.dynamia.app.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.AbstractController;
 import tools.dynamia.app.PageNavigationInterceptor;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.navigation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-@Controller
+@Controller("pageNavigationController")
 @RequestMapping("/page")
 public class PageNavigationController {
+
+
+    @RequestMapping()
+    public ModelAndView route(HttpServletRequest request){
+        var pagePath = request.getRequestURI();
+        if (pagePath.startsWith("/page/")) {
+            pagePath = pagePath.replaceFirst("/page/", "");
+        }
+        return PageNavigationController.navigate(pagePath, request);
+    }
 
     @RequestMapping(value = "/{module}/{group}/{page}", method = RequestMethod.GET)
     public ModelAndView defaultPages(@PathVariable String module, @PathVariable String group, @PathVariable String page,
@@ -64,7 +78,7 @@ public class PageNavigationController {
 
     }
 
-    private ModelAndView navigate(String path, HttpServletRequest request) {
+    public static ModelAndView navigate(String path, HttpServletRequest request) {
         if (new File(request.getRequestURI()).isFile()) {
             return null;
         }

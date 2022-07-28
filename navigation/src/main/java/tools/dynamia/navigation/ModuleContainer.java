@@ -32,10 +32,11 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * {@link Module} container. Load modules using {@link ModuleProvider}s
+ *
  * @author Ing. Mario Serrano Leones
  */
 @Component
-
 public final class ModuleContainer implements Serializable {
 
     private final transient LoggingService LOGGER = new SLF4JLoggingService(ModuleContainer.class);

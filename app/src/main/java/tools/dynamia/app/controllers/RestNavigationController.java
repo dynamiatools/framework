@@ -23,7 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
@@ -49,152 +51,53 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-@RestController
-@RequestMapping(value = "/api", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+@RestController("restNavigationController")
 @Order(1000)
 public class RestNavigationController {
 
-    private final static String PAGE = "{page:[a-z\\-]+}";
-    private final static String ID = "{id:[0-9]+}";
+
     private final static int DEFAULT_PAGINATION_SIZE = 50;
 
     @Autowired
     private CrudService crudService;
 
-    //READ ALL
 
-    @GetMapping("/{module}/" + PAGE)
-    public ResponseEntity<String> readAll(@PathVariable String module, @PathVariable String page, HttpServletRequest request) {
-
-        String path = module + "/" + page;
-        return readAll(path, request);
-
+    private String getPath(HttpServletRequest request) {
+        var path = request.getRequestURI();
+        if (path.startsWith("/api/")) {
+            path = path.replaceFirst("/api/", "");
+        }
+        return path;
     }
 
-    @GetMapping("/{module}/{group}/" + PAGE)
-    public ResponseEntity<String> readAll(@PathVariable("module") String module, @PathVariable("group") String group,
-                                          @PathVariable("page") String page, HttpServletRequest request) {
-        String path = module + "/" + group + "/" + page;
+
+    public ResponseEntity<String> routeReadAll(HttpServletRequest request) {
+        String path = getPath(request);
         return readAll(path, request);
     }
 
-    @GetMapping("/{module}/{group}/{subgroup}/" + PAGE)
-    public ResponseEntity<String> readAll(@PathVariable("module") String module, @PathVariable("group") String group,
-                                          @PathVariable("subgroup") String subgroup, @PathVariable("page") String page,
-                                          HttpServletRequest request) {
-
-        String path = module + "/" + group + "/" + subgroup + "/" + page;
-        return readAll(path, request);
-
+    public ResponseEntity<String> routeReadOne(@PathVariable Long id, HttpServletRequest request) {
+        return readOne(getPath(request).replace("/" + id, ""), id, request);
     }
 
-    //READ ONE
 
-    @GetMapping("/{module}/{page}/" + ID)
-    public ResponseEntity<String> readOne(@PathVariable String module, @PathVariable String page, @PathVariable Long id, HttpServletRequest request) {
-
-        String path = module + "/" + page;
-        return readOne(path, id, request);
-
-    }
-
-    @GetMapping("/{module}/{group}/{page}/" + ID)
-    public ResponseEntity<String> readOne(@PathVariable String module, @PathVariable String group, @PathVariable String page,
-                                          @PathVariable Long id, HttpServletRequest request) {
-        String path = module + "/" + group + "/" + page;
-        return readOne(path, id, request);
-    }
-
-    @GetMapping("/{module}/{group}/{subgroup}/{page}/" + ID)
-    public ResponseEntity<String> readOne(@PathVariable String module, @PathVariable String group,
-                                          @PathVariable String subgroup, @PathVariable String page, @PathVariable Long id, HttpServletRequest request) {
-
-        String path = module + "/" + group + "/" + subgroup + "/" + page;
-        return readOne(path, id, request);
-
-    }
-
-    //CREATE
-
-    @PostMapping("/{module}/" + PAGE)
-    public ResponseEntity<String> create(@PathVariable String module, @PathVariable String page, @RequestBody String jsonData, HttpServletRequest request) {
-
-        String path = module + "/" + page;
+    public ResponseEntity<String> routeCreate(@RequestBody String jsonData, HttpServletRequest request) {
+        String path = getPath(request);
         return create(path, jsonData, request);
 
     }
 
-    @PostMapping("/{module}/{group}/" + PAGE)
-    public ResponseEntity<String> create(@PathVariable String module, @PathVariable String group, @PathVariable String page, @RequestBody String jsonData,
-                                         HttpServletRequest request) {
-        String path = module + "/" + group + "/" + page;
-        return create(path, jsonData, request);
-    }
-
-    @PostMapping("/{module}/{group}/{subgroup}/" + PAGE)
-    public ResponseEntity<String> create(@PathVariable String module, @PathVariable String group, @PathVariable String subgroup,
-                                         @PathVariable String page, @RequestBody String jsonData, HttpServletRequest request) {
-
-        String path = module + "/" + group + "/" + subgroup + "/" + page;
-        return create(path, jsonData, request);
-
-    }
-
-
-    //UPDATE
-
-    @PutMapping("/{module}/{page}/" + ID)
-    public ResponseEntity<String> update(@PathVariable String module, @PathVariable String page, @PathVariable Long id,
-                                         @RequestBody String jsonData, HttpServletRequest request) {
-
-        String path = module + "/" + page;
-        return update(path, id, jsonData, request);
-
-    }
-
-    @PutMapping("/{module}/{group}/{page}/" + ID)
-    public ResponseEntity<String> update(@PathVariable String module, @PathVariable String group, @PathVariable String page,
-                                         @PathVariable Long id, @RequestBody String jsonData, HttpServletRequest request) {
-        String path = module + "/" + group + "/" + page;
+    public ResponseEntity<String> routeUpdate(@PathVariable Long id, @RequestBody String jsonData, HttpServletRequest request) {
+        String path = getPath(request).replace("/" + id, "");
         return update(path, id, jsonData, request);
     }
 
-    @PutMapping("/{module}/{group}/{subgroup}/{page}/" + ID)
-    public ResponseEntity<String> update(@PathVariable String module, @PathVariable String group,
-                                         @PathVariable String subgroup, @PathVariable String page, @PathVariable Long id,
-                                         @RequestBody String jsonData, HttpServletRequest request) {
-
-        String path = module + "/" + group + "/" + subgroup + "/" + page;
-        return update(path, id, jsonData, request);
-
-    }
-
-
-    //DELETE
-
-    @DeleteMapping("/{module}/{page}/{id}")
-    public ResponseEntity<String> delete(@PathVariable String module, @PathVariable String page, @PathVariable Long id, HttpServletRequest request) {
-
-        String path = module + "/" + page;
+    public ResponseEntity<String> routeDelete(@PathVariable Long id, HttpServletRequest request) {
+        String path = getPath(request).replace("/" + id, "");
         return delete(path, id, request);
 
     }
 
-    @DeleteMapping("/{module}/{group}/{page}/{id}")
-    public ResponseEntity<String> delete(@PathVariable String module, @PathVariable String group, @PathVariable String page,
-                                         @PathVariable Long id, HttpServletRequest request) {
-        String path = module + "/" + group + "/" + page;
-        return delete(path, id, request);
-    }
-
-    @DeleteMapping("/{module}/{group}/{subgroup}/{page}/{id}")
-    public ResponseEntity<String> delete(@PathVariable String module, @PathVariable String group,
-                                         @PathVariable String subgroup, @PathVariable String page, @PathVariable Long id, HttpServletRequest request) {
-
-        String path = module + "/" + group + "/" + subgroup + "/" + page;
-        return delete(path, id, request);
-
-    }
 
     //INTERNAL OPERATIONS
 
@@ -281,11 +184,15 @@ public class RestNavigationController {
     }
 
     public static ResponseEntity<String> buildJsonResponse(ViewDescriptor readDescriptor, Object result, String message) {
-        return new ResponseEntity<>(new JsonView<>(new SimpleResult(result, message), readDescriptor).renderJson(), HttpStatus.OK);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(new JsonView<>(new SimpleResult(result, message), readDescriptor).renderJson(), headers, HttpStatus.OK);
     }
 
     public static ResponseEntity<String> buildJsonResponse(ViewDescriptor readDescriptor, ListResult result, String message) {
-        return new ResponseEntity<>(new JsonView<>(new SimpleResult(result, message), readDescriptor).renderJson(), HttpStatus.OK);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(new JsonView<>(result, readDescriptor).renderJson(), headers, HttpStatus.OK);
     }
 
     public static ViewDescriptor getJsonFormDescriptor(Class entityClass) {
@@ -427,8 +334,11 @@ public class RestNavigationController {
 
 
     private CrudPage findCrudPage(String path) {
-        Page page = NavigationManager.getCurrent().findPage(path);
-        if (page == null) {
+
+        Page page = null;
+        try {
+            page = NavigationManager.getCurrent().findPage(path);
+        } catch (PageNotFoundException e) {
             page = NavigationManager.getCurrent().findPageByPrettyVirtualPath(path);
         }
         if (page instanceof CrudPage) {
