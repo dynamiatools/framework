@@ -18,6 +18,7 @@ package tools.dynamia.integration.ms;
 
 /**
  * Represent a message event
+ *
  * @param <T>
  */
 public class MessageEvent<T extends Message> {
@@ -42,6 +43,15 @@ public class MessageEvent<T extends Message> {
 
     public String getCallback() {
         return callback;
+    }
+
+    /**
+     * Shortcut to getMessage().getContent()
+     *
+     * @return
+     */
+    public Object getContent() {
+        return getMessage().getContent();
     }
 
     @Override
