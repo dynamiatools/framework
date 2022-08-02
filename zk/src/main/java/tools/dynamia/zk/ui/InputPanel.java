@@ -107,6 +107,7 @@ public class InputPanel extends Div {
 
 
         okButton = new Button("OK");
+        okButton.setAutodisable("self");
         okButton.setParent(box);
         okButton.setIconSclass("z-icon-check");
         okButton.setSclass("btn btn-success");

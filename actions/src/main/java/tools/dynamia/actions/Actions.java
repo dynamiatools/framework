@@ -1,5 +1,7 @@
 package tools.dynamia.actions;
 
+import tools.dynamia.commons.MapBuilder;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +20,7 @@ public class Actions {
     public static void run(Action action, ActionEventBuilder eventBuilder, Object source, Object data, Map<String, Object> params) {
         if (action != null) {
             if (params == null) {
-                params = Map.of(ACTION_PARAM, action);
+                params = MapBuilder.put(ACTION_PARAM, action);
             } else if (!params.containsKey(ACTION_PARAM)) {
                 params = new HashMap<>(params);
                 params.put(ACTION_PARAM, action);
