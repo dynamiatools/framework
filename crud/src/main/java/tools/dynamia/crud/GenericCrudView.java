@@ -17,24 +17,67 @@
 package tools.dynamia.crud;
 
 import tools.dynamia.domain.ValidationError;
+import tools.dynamia.viewers.DataSetView;
 import tools.dynamia.viewers.View;
 
 import java.util.List;
 
+/**
+ * CrudView API
+ *
+ * @param <T>
+ */
 public interface GenericCrudView<T> extends View<T> {
 
+    /**
+     * Retunr current {@link CrudAction}s
+     *
+     * @return
+     */
     List<CrudAction> getActions();
 
+    /**
+     * Update crud state
+     *
+     * @param crudState
+     */
     void setState(CrudState crudState);
 
+    /**
+     * Return current state
+     *
+     * @return
+     */
     CrudState getState();
 
-    CrudControllerAPI getController();
+    /**
+     * Get controller
+     *
+     * @return
+     */
+    CrudControllerAPI<T> getController();
 
-    void setController(CrudControllerAPI controller);
+    /**
+     * Update crud controller
+     *
+     * @param controller
+     */
+
+    void setController(CrudControllerAPI<T> controller);
 
     void handleValidationError(ValidationError error);
 
     void setTitle(String title);
+
+    DataSetView<T> getDataSetView();
+
+    View<T> getFormView();
+
+    View getParentView();
+
+    Class getObjectClass();
+
+    Object getSource();
+
 
 }
