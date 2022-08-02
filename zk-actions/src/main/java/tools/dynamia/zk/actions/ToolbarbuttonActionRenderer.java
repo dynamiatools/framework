@@ -20,9 +20,12 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Toolbarbutton;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionEventBuilder;
+import tools.dynamia.actions.Actions;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.zk.util.ZKUtil;
+
+import java.util.Map;
 
 public class ToolbarbuttonActionRenderer extends ZKActionRenderer<Toolbarbutton> {
 
@@ -68,8 +71,8 @@ public class ToolbarbuttonActionRenderer extends ZKActionRenderer<Toolbarbutton>
             btn.setZclass(zclass);
         }
 
-        btn.addEventListener(Events.ON_CLICK,
-                event -> action.actionPerformed(actionEventBuilder.buildActionEvent(event.getTarget(), null)));
+        btn.addEventListener(Events.ON_CLICK, event -> Actions.run(action, actionEventBuilder, event.getTarget()));
+
 
         super.configureProperties(btn, action);
         btn.setAutodisable("self");

@@ -19,13 +19,12 @@ package tools.dynamia.zk.actions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Textbox;
-import tools.dynamia.actions.Action;
-import tools.dynamia.actions.ActionEvent;
-import tools.dynamia.actions.ActionEventBuilder;
-import tools.dynamia.actions.ActionRenderer;
+import tools.dynamia.actions.*;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.web.util.HttpUtils;
 import tools.dynamia.zk.util.ZKUtil;
+
+import java.util.Map;
 
 public class FindActionRenderer implements ActionRenderer {
 
@@ -118,9 +117,8 @@ public class FindActionRenderer implements ActionRenderer {
 
     private void fireEvent(final Action action, final ActionEventBuilder actionEventBuilder, final Textbox search,
                            Event event) {
-        ActionEvent evt = actionEventBuilder.buildActionEvent(event.getTarget(), null);
-        evt.setData(search.getValue());
-        action.actionPerformed(evt);
+
+        Actions.run(action, actionEventBuilder, event.getTarget(), search.getValue());
     }
 
     public String getStartValue() {

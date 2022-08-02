@@ -16,6 +16,7 @@
  */
 package tools.dynamia.zk.actions;
 
+import tools.dynamia.actions.Actions;
 import tools.dynamia.commons.Messages;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Combobox;
@@ -26,6 +27,7 @@ import tools.dynamia.actions.ActionEventBuilder;
 import tools.dynamia.zk.util.ZKUtil;
 
 import java.util.List;
+import java.util.Map;
 
 public class ComboboxActionRenderer extends ZKActionRenderer<Combobox> {
 
@@ -53,11 +55,8 @@ public class ComboboxActionRenderer extends ZKActionRenderer<Combobox> {
         combobox.setReadonly(isReadonly());
         combobox.setTooltiptext(action.getLocalizedName(Messages.getDefaultLocale()));
 
-        combobox.addEventListener(Events.ON_SELECT, e -> {
-            ActionEvent event = actionEventBuilder.buildActionEvent(combobox, null);
-            event.setData(combobox.getSelectedItem().getValue());
-            action.actionPerformed(event);
-        });
+        combobox.addEventListener(Events.ON_SELECT, e -> Actions.run(action, actionEventBuilder, combobox,
+                (Object) combobox.getSelectedItem().getValue()));
 
         if (comboitemRenderer != null) {
             combobox.setItemRenderer(comboitemRenderer);

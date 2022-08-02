@@ -20,12 +20,14 @@ import org.zkoss.zk.ui.event.Events;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionEventBuilder;
+import tools.dynamia.actions.Actions;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.zk.actions.ZKActionRenderer;
 import tools.dynamia.zk.crud.ui.EntityPickerBox;
 import tools.dynamia.zk.crud.ui.EntityReferencePickerBox;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class EntityReferencePickerActionRenderer extends ZKActionRenderer<EntityReferencePickerBox> {
 
@@ -52,12 +54,10 @@ public class EntityReferencePickerActionRenderer extends ZKActionRenderer<Entity
         entityPicker.setPopupWidth(popupWidth);
 
         entityPicker.addEventListener(Events.ON_SELECT, e -> {
-            ActionEvent event = actionEventBuilder.buildActionEvent(entityPicker, null);
-            event.setData(entityPicker.getSelected());
+            Actions.run(action,actionEventBuilder,entityPicker,entityPicker.getSelected());
             if(entityPicker.getSelected()!=null) {
                 entityPicker.setValue(entityPicker.getSelected().getName());
             }
-            action.actionPerformed(event);
         });
 
         return entityPicker;

@@ -16,6 +16,7 @@
  */
 package tools.dynamia.zk.actions;
 
+import tools.dynamia.actions.Actions;
 import tools.dynamia.commons.Messages;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Datebox;
@@ -26,6 +27,7 @@ import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.web.util.HttpUtils;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @author Mario A. Serrano Leones
@@ -36,17 +38,12 @@ public class DateboxActionRenderer extends ZKActionRenderer<Datebox> {
     public Datebox render(final Action action, final ActionEventBuilder actionEventBuilder) {
         final Datebox box = new Datebox(new Date());
         box.setTooltiptext(action.getLocalizedDescription(Messages.getDefaultLocale()));
-        box.addEventListener(Events.ON_CHANGE, event -> {
-            Date data = box.getValue();
-            ActionEvent evt = actionEventBuilder.buildActionEvent(box, MapBuilder.put("date", data));
-            evt.setData(data);
-            action.actionPerformed(evt);
-        });
+        box.addEventListener(Events.ON_CHANGE, event -> Actions.run(action,actionEventBuilder,box,box.getValue(), Map.of("date",box.getValue())));
 
         if (HttpUtils.isSmartphone()) {
             box.setWidth("100%");
         }
-        super.configureProperties(box,action);
+        super.configureProperties(box, action);
         return box;
     }
 

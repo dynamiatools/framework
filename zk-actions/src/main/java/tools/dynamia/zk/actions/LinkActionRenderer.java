@@ -16,6 +16,7 @@
  */
 package tools.dynamia.zk.actions;
 
+import tools.dynamia.actions.Actions;
 import tools.dynamia.commons.Messages;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.A;
@@ -23,6 +24,8 @@ import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionEventBuilder;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.zk.util.ZKUtil;
+
+import java.util.Map;
 
 public class LinkActionRenderer extends ZKActionRenderer<A> {
 
@@ -34,7 +37,8 @@ public class LinkActionRenderer extends ZKActionRenderer<A> {
         if (action.getImage() != null) {
             ZKUtil.configureComponentIcon(link.getImage(), link, IconSize.SMALL);
         }
-        link.addEventListener(Events.ON_CLICK, evt -> actionEventBuilder.buildActionEvent(evt.getTarget(), null));
+        link.addEventListener(Events.ON_CLICK, evt ->
+                Actions.run(action, actionEventBuilder, evt.getTarget()));
 
         super.configureProperties(link, action);
 

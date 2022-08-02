@@ -18,12 +18,14 @@ package tools.dynamia.zk.crud;
 
 import org.springframework.stereotype.Component;
 import tools.dynamia.actions.ActionEventBuilder;
+import tools.dynamia.actions.Actions;
 import tools.dynamia.crud.ChangedStateEvent;
 import tools.dynamia.crud.CrudAction;
 import tools.dynamia.crud.CrudStateChangedListener;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class AutoExecuteActionCrudStateChangedListener implements CrudStateChangedListener {
@@ -35,8 +37,7 @@ public class AutoExecuteActionCrudStateChangedListener implements CrudStateChang
         if (actions != null) {
             actions.stream().filter(a -> a.getAttribute("autoexecute") == Boolean.TRUE).forEach(a -> {
                 if (evt.getCrudView() instanceof ActionEventBuilder) {
-                    ActionEventBuilder evtBuilder = (ActionEventBuilder) evt.getCrudView();
-                    a.actionPerformed(evtBuilder.buildActionEvent(evt.getCrudView(), new HashMap<>()));
+                    Actions.run(a, (ActionEventBuilder) evt.getCrudView(), evt.getCrudView());
                 }
             });
         }

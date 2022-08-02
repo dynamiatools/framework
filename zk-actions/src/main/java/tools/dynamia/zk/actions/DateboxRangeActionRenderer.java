@@ -16,6 +16,7 @@
  */
 package tools.dynamia.zk.actions;
 
+import tools.dynamia.actions.Actions;
 import tools.dynamia.commons.Messages;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Events;
@@ -30,6 +31,7 @@ import tools.dynamia.zk.ui.DateRangebox;
 
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * @author Mario A. Serrano Leones
@@ -74,10 +76,11 @@ public class DateboxRangeActionRenderer extends ZKActionRenderer<Component> {
     private void fireActionEvent(DateRangebox dateRangebox, Action action, ActionEventBuilder
             actionEventBuilder) {
         DateRange dateRange = dateRangebox.getValue();
-        ActionEvent evt = actionEventBuilder.buildActionEvent(this, MapBuilder.put("minDate", dateRange.getStartDate(),
-                "maxDate", dateRange.getEndDate()));
-        evt.setData(dateRange);
-        action.actionPerformed(evt);
+
+        Actions.run(action, actionEventBuilder, this, dateRange,
+                Map.of("minDate", dateRange.getStartDate(),
+                        "maxDate", dateRange.getEndDate(),
+                        "action", action));
     }
 
     public String getFormat() {

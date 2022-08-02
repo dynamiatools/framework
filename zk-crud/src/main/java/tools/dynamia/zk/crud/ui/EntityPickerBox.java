@@ -169,7 +169,7 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
             resultTable.setItemRenderer((ListitemRenderer<Object>) (item, data, index) -> {
                 String noneLabel = defaultItemLabel != null ? defaultItemLabel : noneText;
                 item.setValue(data);
-                item.setLabel(data != null ? data.toString() : noneLabel);
+                item.setLabel(data != null ? BeanUtils.getInstanceName(data) : noneLabel);
             });
         } else {
             DefaultViewDescriptor resultDescriptor = new DefaultViewDescriptor(entityClass, "table", false);
