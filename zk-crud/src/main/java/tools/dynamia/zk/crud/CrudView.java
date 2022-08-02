@@ -316,6 +316,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
         this.viewDescriptor = viewDescriptor;
     }
 
+    @Override
     public FormView<T> getFormView() {
         if (formView == null) {
             buildFormView();
@@ -326,6 +327,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
         return formView;
     }
 
+    @Override
     public DataSetView getDataSetView() {
         if (dataSetView == null) {
             buildDataSetView();
@@ -996,4 +998,8 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
         this.onSourceChange = onSourceChange;
     }
 
+    @Override
+    public Class getObjectClass() {
+        return objectClass;
+    }
 }
