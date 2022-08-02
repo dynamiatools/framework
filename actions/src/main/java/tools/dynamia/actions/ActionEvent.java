@@ -35,6 +35,8 @@ public class ActionEvent implements Serializable {
     private Object source;
     private Map<String, Object> params = new HashMap<>();
 
+    private boolean propagatable = true;
+
     public ActionEvent(Object data, Object source) {
         super();
         this.data = data;
@@ -52,6 +54,7 @@ public class ActionEvent implements Serializable {
 
     /**
      * Data associated to the action
+     *
      * @return
      */
     public Object getData() {
@@ -64,6 +67,7 @@ public class ActionEvent implements Serializable {
 
     /**
      * The action event source or origin.
+     *
      * @return
      */
     public Object getSource() {
@@ -86,4 +90,11 @@ public class ActionEvent implements Serializable {
         return value;
     }
 
+    public void stopPropagation() {
+        this.propagatable = false;
+    }
+
+    public boolean isPropagatable() {
+        return propagatable;
+    }
 }

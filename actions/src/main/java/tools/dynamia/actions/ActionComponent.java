@@ -41,7 +41,7 @@ public class ActionComponent implements Serializable {
     }
 
     public void doAction() {
-        action.actionPerformed(eventBuilder.buildActionEvent(this, getAttributes()));
+        Actions.run(action,eventBuilder,this,getAttributes());
     }
 
     public String getLabel() {

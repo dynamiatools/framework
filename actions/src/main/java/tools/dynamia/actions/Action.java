@@ -19,6 +19,7 @@ package tools.dynamia.actions;
 import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -137,4 +138,5 @@ public interface Action extends Comparable<Action> {
      * @param evt the evt
      */
     void actionPerformed(ActionEvent evt);
+
 }
