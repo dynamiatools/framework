@@ -16,23 +16,21 @@
  */
 package tools.dynamia.zk.ui;
 
-import org.zkoss.zul.*;
+import org.zkoss.zul.Comboitem;
+import org.zkoss.zul.ComboitemRenderer;
 import tools.dynamia.commons.BeanUtils;
 
-public class SimpleTreeItemRenderer implements TreeitemRenderer {
+/**
+ * Basi {@link org.zkoss.zul.ComboitemRenderer} that use {@link tools.dynamia.commons.InstanceName} to render label
+ *
+ * @author Mario A. Serrano Leones
+ */
+public class SimpleComboItemRenderer implements ComboitemRenderer<Object> {
 
     @Override
-    public void render(Treeitem item, Object node, int index) {
-
-        final TreeNode dtn = (TreeNode) node;
-        final Object data = dtn.getData();
-        item.setValue(data);
-
-        Treerow treeRow = new Treerow();
-        item.appendChild(treeRow);
-
-        treeRow.appendChild(new Treecell(BeanUtils.getInstanceName(data)));
+    public void render(Comboitem comboitem, Object o, int i) throws Exception {
+        comboitem.setLabel(BeanUtils.getInstanceName(o));
+        comboitem.setValue(o);
 
     }
-
 }

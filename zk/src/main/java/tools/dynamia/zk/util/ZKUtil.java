@@ -47,6 +47,7 @@ import tools.dynamia.zk.navigation.ZKNavigationManager;
 import tools.dynamia.zk.ui.CanBeReadonly;
 import tools.dynamia.zk.ui.InputPanel;
 import tools.dynamia.zk.ui.MessageDialog;
+import tools.dynamia.zk.ui.SimpleListItemRenderer;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
@@ -834,6 +835,7 @@ public abstract class ZKUtil {
         Listbox listbox = new Listbox();
         listbox.setVflex("1");
         listbox.setHflex("1");
+        listbox.setItemRenderer(new SimpleListItemRenderer());
         fillListbox(listbox, model, true);
         Window win = showDialog(title, listbox, "500px", "500px");
         listbox.addEventListener(Events.ON_SELECT, (SelectEvent evt) -> {
@@ -851,6 +853,7 @@ public abstract class ZKUtil {
         // listbox.setHflex("1");
         listbox.setWidth("100%");
         listbox.setCheckmark(true);
+        listbox.setItemRenderer(new SimpleListItemRenderer());
 
         fillListbox(listbox, model, true);
         listbox.setMultiple(true);

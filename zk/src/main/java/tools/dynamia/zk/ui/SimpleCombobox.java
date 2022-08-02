@@ -19,6 +19,7 @@ package tools.dynamia.zk.ui;
 
 import org.zkoss.zul.AbstractListModel;
 import org.zkoss.zul.Combobox;
+import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.ui.model.SimpleItem;
@@ -44,7 +45,7 @@ public class SimpleCombobox extends Combobox {
             if (data instanceof SimpleItem) {
                 item.setLabel(((SimpleItem) data).getLabel().replace("_", " "));
             } else {
-                item.setLabel(data.toString());
+                item.setLabel(BeanUtils.getInstanceName(data));
             }
         });
 

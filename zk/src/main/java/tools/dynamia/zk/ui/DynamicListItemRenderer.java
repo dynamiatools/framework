@@ -24,6 +24,8 @@ import tools.dynamia.domain.AbstractEntity;
 
 /**
  *
+ * Render dynamic cells for each field
+ *
  * @author Mario A. Serrano Leones
  */
 public class DynamicListItemRenderer implements ListitemRenderer<Object> {
@@ -41,7 +43,7 @@ public class DynamicListItemRenderer implements ListitemRenderer<Object> {
         }
 
         if (fields == null || fields.length == 0) {
-            Listcell cell = new Listcell(data.toString());
+            Listcell cell = new Listcell(BeanUtils.getInstanceName(data));
             cell.setParent(item);
         } else {
             for (String field : fields) {

@@ -72,7 +72,26 @@ public class LongOperationMonitorWindow extends Window {
     }
 
     /**
-     * Run and show a progress window for a long running operation
+     * Run and show a progress window for a long-running operation
+     *
+     * @param title
+     * @param operation
+     * @param onFinish
+     * @return
+     */
+    public static LongOperationMonitorWindow start(String title, Consumer<ProgressMonitor> operation, Callback onFinish) {
+        var monitor = new ProgressMonitor();
+        var longOp = LongOperation.create()
+                .execute(() -> operation.accept(monitor))
+                .onFinish(onFinish);
+
+        longOp.start();
+
+        return show(title, longOp, monitor);
+    }
+
+    /**
+     * Run and show a progress window for a long-running operation
      *
      * @param title
      * @param finishMessage
@@ -80,14 +99,7 @@ public class LongOperationMonitorWindow extends Window {
      * @return
      */
     public static LongOperationMonitorWindow start(String title, String finishMessage, Consumer<ProgressMonitor> operation) {
-        var monitor = new ProgressMonitor();
-        var longOp = LongOperation.create()
-                .execute(() -> operation.accept(monitor))
-                .onFinish(() -> UIMessages.showMessage(finishMessage));
-
-        longOp.start();
-
-        return show(title, longOp, monitor);
+        return start(title, operation, () -> UIMessages.showMessage(finishMessage));
     }
 
     private void initMonitor() {

@@ -16,22 +16,21 @@
  */
 package tools.dynamia.zk.ui;
 
-import org.zkoss.zul.*;
+import org.zkoss.zul.Listitem;
+import org.zkoss.zul.ListitemRenderer;
 import tools.dynamia.commons.BeanUtils;
 
-public class SimpleTreeItemRenderer implements TreeitemRenderer {
+/**
+ * Basi {@link ListitemRenderer} that use {@link tools.dynamia.commons.InstanceName} to render label
+ *
+ * @author Mario A. Serrano Leones
+ */
+public class SimpleListItemRenderer implements ListitemRenderer<Object> {
 
     @Override
-    public void render(Treeitem item, Object node, int index) {
-
-        final TreeNode dtn = (TreeNode) node;
-        final Object data = dtn.getData();
+    public void render(Listitem item, Object data, int index) {
+        item.setLabel(BeanUtils.getInstanceName(data));
         item.setValue(data);
-
-        Treerow treeRow = new Treerow();
-        item.appendChild(treeRow);
-
-        treeRow.appendChild(new Treecell(BeanUtils.getInstanceName(data)));
 
     }
 
