@@ -32,6 +32,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Reflection utility class for working with beans
@@ -904,4 +905,41 @@ public final class BeanUtils {
         return StringUtils.uncapitalize(parentClass.getSimpleName());
     }
 
+    /**
+     * Return the value of the field or method annoted with {@link InstanceName} or invoke toString() method if
+     * not InstanceName is found
+     *
+     * @param object
+     * @return
+     */
+    public static String getInstanceName(Object object) {
+        if (object == null) {
+            return "";
+        }
+
+        try {
+            var fields = getFieldsWithAnnotation(object.getClass(), InstanceName.class);
+            if (fields.length > 0) {
+                var field = Stream.of(fields).filter(f -> f.getType() == String.class).findFirst().orElse(null);
+                if (field != null) {
+                    field.setAccessible(true);
+                    return (String) field.get(object);
+                }
+            }
+
+            var methods = getMethodsWithAnnotation(object.getClass(), InstanceName.class);
+            if (methods.length > 0) {
+                var method = Stream.of(methods).filter(m -> m.getReturnType() == String.class)
+                        .findFirst().orElse(null);
+                if (method != null) {
+                    return (String) method.invoke(object);
+                }
+
+            }
+
+        } catch (Exception e) {
+            //
+        }
+        return object.toString();
+    }
 }
