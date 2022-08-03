@@ -92,6 +92,7 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
     private String lastSearchText;
     private List result;
     private String defaultItemLabel;
+    private int maxResults = 20;
 
     public EntityPickerBox() {
         init();
@@ -253,7 +254,8 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
 
         if (entityClass != null && !Objects.equals(lastSearchText, param) || lastSearchTimestamp == 0) {
 
-            defaultParameters.setMaxResults(30);
+
+            defaultParameters.setMaxResults(maxResults);
             this.result = crudService.findByFields(entityClass, param, defaultParameters, getFields());
             if (result != null && !result.isEmpty()) {
                 autoboxed = false;
@@ -539,5 +541,17 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
 
     public void setDefaultItemLabel(String defaultItemLabel) {
         this.defaultItemLabel = defaultItemLabel;
+    }
+
+    public int getMaxResults() {
+        return maxResults;
+    }
+
+    public void setMaxResults(int maxResults) {
+        this.maxResults = maxResults;
+    }
+
+    public QueryParameters getDefaultParameters() {
+        return defaultParameters;
     }
 }

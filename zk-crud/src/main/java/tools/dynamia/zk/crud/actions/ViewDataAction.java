@@ -155,7 +155,7 @@ public class ViewDataAction extends AbstractCrudAction implements ReadableOnly {
             }
 
 
-            ZKUtil.showDialog(data.toString(), content, width, height);
+            ZKUtil.showDialog(BeanUtils.getInstanceName(data), content, width, height);
         } else {
             UIMessages.showMessage(Messages.get(ViewDataAction.class, "select_row"), MessageType.ERROR);
         }
