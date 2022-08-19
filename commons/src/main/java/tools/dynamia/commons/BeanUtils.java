@@ -938,6 +938,7 @@ public final class BeanUtils {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             //
         }
         return object.toString();

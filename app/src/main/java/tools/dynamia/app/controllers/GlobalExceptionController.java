@@ -48,25 +48,36 @@ public class GlobalExceptionController implements ErrorController {
 
     @RequestMapping(value = {"/errors", "/error"})
     public ModelAndView error(HttpServletRequest request) {
-        Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
-        Throwable throwable = (Throwable) request.getAttribute("javax.servlet.error.exception");
+        var statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
+        var messageObj = request.getAttribute("javax.servlet.error.message");
+        var throwable = (Throwable) request.getAttribute("javax.servlet.error.exception");
+        var requestUri = (String) request.getAttribute("javax.servlet.error.request_uri");
 
-        String requestUri = (String) request.getAttribute("javax.servlet.error.request_uri");
+
+        if (statusCode == null && throwable == null) {
+            logger.warn("Unknow error redirecting to /");
+            return new ModelAndView("redirect:/");
+        }
+
+        if (messageObj == null) {
+            messageObj = "";
+        }
+
         if (requestUri == null) {
             requestUri = "Unknown";
         }
 
-        logger.error("ERROR " + statusCode + ": " + requestUri + " on  " + request.getServerName(), throwable);
+        logger.error("ERROR " + statusCode + ": " + requestUri + " on  " + request.getServerName() + ". " + messageObj, throwable);
 
         ModelAndView mv = new ModelAndView("error/error");
 
         mv.addObject("title", "Error");
         mv.addObject("statusCode", statusCode);
         mv.addObject("uri", requestUri);
-        mv.addObject("message", throwable != null ? throwable.getMessage() : "");
+        mv.addObject("message", messageObj + " " + (throwable != null ? throwable.getMessage() : ""));
         mv.addObject("exception", throwable);
 
-        if (statusCode == 404) {
+        if (statusCode!=null && statusCode == 404) {
             mv.setViewName("error/404");
             mv.addObject("pageAlias", requestUri);
         }

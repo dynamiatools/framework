@@ -18,6 +18,7 @@ package tools.dynamia.domain.util;
 
 import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.domain.CurrencyExchangeProvider;
 import tools.dynamia.domain.EntityReferenceRepository;
 import tools.dynamia.domain.EntityUtilsProvider;
 import tools.dynamia.commons.Identifiable;
@@ -512,5 +513,14 @@ public abstract class DomainUtils {
         var crud = lookupCrudService();
         crud.increaseCounter(entity, counterName);
         return crud.getFieldValue(entity, counterName, Long.class);
+    }
+
+    /**
+     * Find an instance of {@link CurrencyExchangeProvider}
+     *
+     * @return null if nothing was found
+     */
+    public static CurrencyExchangeProvider getCurrencyExchangeProvider() {
+        return Containers.get().findObject(CurrencyExchangeProvider.class);
     }
 }

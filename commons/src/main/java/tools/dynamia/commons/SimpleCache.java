@@ -18,6 +18,7 @@
 package tools.dynamia.commons;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -34,6 +35,7 @@ public class SimpleCache<K, V> implements Serializable {
 
     /**
      * Add to Cache
+     *
      * @param key
      * @param value
      */
@@ -43,6 +45,7 @@ public class SimpleCache<K, V> implements Serializable {
 
     /**
      * Get value from cache
+     *
      * @param key
      * @return
      */
@@ -52,6 +55,7 @@ public class SimpleCache<K, V> implements Serializable {
 
     /**
      * Get value from cache, if null loader function is called to obtain/create value
+     *
      * @param key
      * @param loaderFunction
      * @return
@@ -69,6 +73,7 @@ public class SimpleCache<K, V> implements Serializable {
 
     /**
      * Remove key from cache
+     *
      * @param key
      * @return
      */
@@ -85,9 +90,15 @@ public class SimpleCache<K, V> implements Serializable {
 
     /**
      * Check if cache is empty
+     *
      * @return
      */
     public boolean isEmpty() {
         return data.isEmpty();
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + "\n" + data;
     }
 }
