@@ -187,6 +187,8 @@ public class ActionLoader<T extends Action> {
     }
 
     private static LocalizedMessagesProvider findDefaultLocalizedMessagesProvider() {
-        return Containers.get().findObject(LocalizedMessagesProvider.class);
+        return Containers.get().findObjects(LocalizedMessagesProvider.class)
+                .stream().min(Comparator.comparingInt(LocalizedMessagesProvider::getPriority))
+                .orElse(null);
     }
 }
