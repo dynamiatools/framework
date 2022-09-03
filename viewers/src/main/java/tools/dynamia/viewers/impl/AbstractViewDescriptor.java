@@ -29,6 +29,7 @@ import tools.dynamia.viewers.util.Viewers;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -260,12 +261,10 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
      */
     @Override
     public Field getField(String name) {
-        for (Field field : fields) {
-            if (field.getName().equals(name)) {
-                return field;
-            }
-        }
-        return null;
+        return fields.stream()
+                .filter(f -> f.getName().equals(name))
+                .findFirst()
+                .orElse(null);
     }
 
     /*
@@ -595,7 +594,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
     }
 
     private void createField(PropertyInfo property) {
-        if(property==null){
+        if (property == null) {
             return;
         }
         Field field = new Field(property.getName(), property.getType());
@@ -752,4 +751,8 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
         return autofields;
     }
 
+    @Override
+    public List<Field> sortFields() {
+        return getFields().stream().sorted(new IndexableComparator()).collect(Collectors.toList());
+    }
 }

@@ -113,9 +113,9 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
             indexHeader.setParent(head);
         }
 
-        descriptor.getFields().sort(new IndexableComparator());
 
-        for (Field field : descriptor.getFields()) {
+
+        for (Field field : descriptor.sortFields()) {
             if (field.isVisible()) {
 
                 String label = field.getLocalizedLabel(Messages.getDefaultLocale());
@@ -208,10 +208,10 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
             indexFooter.setParent(foot);
         }
 
-        descriptor.getFields().sort(new IndexableComparator());
+
         List<TableViewFooter> footersWithFunctions = new ArrayList<>();
 
-        for (Field field : descriptor.getFields()) {
+        for (Field field : descriptor.sortFields()) {
             if (field.isVisible()) {
                 TableViewFooter footer = new TableViewFooter(table, field);
                 footer.setTooltiptext(field.getDescription());

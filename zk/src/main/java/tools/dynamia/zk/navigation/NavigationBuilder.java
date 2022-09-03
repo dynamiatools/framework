@@ -26,7 +26,9 @@ import tools.dynamia.navigation.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Mario A. Serrano Leones
@@ -84,7 +86,8 @@ public class NavigationBuilder extends GenericForwardComposer {
     }
 
     private void buildPageGroups(Module module, NavigationViewBuilder viewBuilder) {
-        for (PageGroup pageGroup : module.getPageGroups()) {
+        var groups = new ArrayList<>(module.getPageGroups());
+        for (PageGroup pageGroup : groups) {
             buildPageGroupAndSubgroups(pageGroup, viewBuilder);
         }
     }
@@ -102,7 +105,7 @@ public class NavigationBuilder extends GenericForwardComposer {
     }
 
     private void buildPages(PageGroup pageGroup, NavigationViewBuilder viewBuilder) {
-        Collection<Page> pages = pageGroup.getPages();
+        var pages = new ArrayList<>(pageGroup.getPages());
         for (Page p : pages) {
             if (NavigationRestrictions.allowAccess(p) && p.isVisible()) {
                 viewBuilder.createPageView(p);

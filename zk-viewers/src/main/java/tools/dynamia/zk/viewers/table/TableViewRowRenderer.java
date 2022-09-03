@@ -42,8 +42,11 @@ import tools.dynamia.zk.ui.Import;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Mario A. Serrano Leones
@@ -53,6 +56,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
 
     private ViewDescriptor viewDescriptor;
     private TableView tableView;
+    private List<Field> fields;
 
     public TableViewRowRenderer() {
     }
@@ -64,7 +68,8 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
 
     public final void setViewDescriptor(ViewDescriptor descriptor) {
         this.viewDescriptor = descriptor;
-        descriptor.getFields().sort(new IndexableComparator());
+        this.fields = descriptor.sortFields();
+
     }
 
     public final void setTableView(TableView tableView) {
@@ -96,7 +101,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
             renderCommonsCell(item, index);
         }
 
-        for (Field field : viewDescriptor.getFields()) {
+        for (Field field : fields) {
             Viewers.customizeField("table", field);
             renderFieldCell(binder, item, data, fieldsComponentsMap, field, index);
         }

@@ -77,8 +77,8 @@ public class TreeViewRenderer<T> implements ViewRenderer<TreeModel<TreeViewNode<
         }
 
 
-        descriptor.getFields().sort(new IndexableComparator());
-        for (Field field : descriptor.getFields()) {
+
+        for (Field field : descriptor.sortFields()) {
             if (field.isVisible()) {
                 TreeViewHeader header = new TreeViewHeader(tree, field.getLocalizedLabel(Messages.getDefaultLocale()));
                 header.setTooltiptext(field.getLocalizedDescription(Messages.getDefaultLocale()));

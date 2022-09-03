@@ -137,7 +137,7 @@ public interface ViewDescriptor {
     /**
      * Adds the param.
      *
-     * @param name the name
+     * @param name  the name
      * @param value the value
      */
     void addParam(String name, Object value);
@@ -169,10 +169,18 @@ public interface ViewDescriptor {
      * @return
      */
     String getDevice();
-    
+
     /**
-     * 
      * @return
      */
     boolean isAutofields();
+
+    /**
+     * Return fields sorted by index
+     *
+     * @return
+     */
+    List<Field> sortFields();
+
+
 }

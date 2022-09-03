@@ -55,7 +55,6 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
 
         Div row = null;
 
-        viewDesc.getFields().sort(new IndexableComparator());
 
         Div panel = new Div();
         panel.setZclass("panel");
@@ -64,7 +63,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
         panelBody.setZclass("panel-body");
         panelBody.setParent(panel);
 
-        for (Field field : viewDesc.getFields()) {
+        for (Field field : viewDesc.sortFields()) {
             if (field.isVisible() && field.getGroup() == null && ViewRendererUtil.isFieldRenderable(viewDesc, field)) {
 
                 if (!hasSpace(row, realCols, field)) {

@@ -247,8 +247,7 @@ public class Viewers {
      * @return the fields
      */
     public static List<Field> getFields(ViewDescriptor viewDescriptor) {
-        viewDescriptor.getFields().sort(new IndexableComparator());
-        return viewDescriptor.getFields();
+       return viewDescriptor.sortFields();
     }
 
     /**

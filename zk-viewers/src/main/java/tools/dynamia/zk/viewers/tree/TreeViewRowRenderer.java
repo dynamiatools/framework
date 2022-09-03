@@ -60,11 +60,6 @@ public class TreeViewRowRenderer<E> implements TreeitemRenderer<TreeViewNode<E>>
 
     public final void setViewDescriptor(ViewDescriptor descriptor) {
         this.viewDescriptor = descriptor;
-        try {
-            descriptor.getFields().sort(new IndexableComparator());
-        } catch (ConcurrentModificationException e) {
-            //ignore
-        }
     }
 
     public final void setTreeView(TreeView tableView) {
