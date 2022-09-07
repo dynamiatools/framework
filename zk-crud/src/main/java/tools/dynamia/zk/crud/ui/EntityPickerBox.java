@@ -93,6 +93,10 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
     private List result;
     private String defaultItemLabel;
     private int maxResults = 20;
+    private boolean autosearch = true;
+    private String emptyMessage;
+
+    private int requiredTextSize = 0;
 
     public EntityPickerBox() {
         init();
@@ -141,14 +145,16 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
         inputField.addEventListener(Events.ON_CHANGING, evt -> {
             InputEvent event = (InputEvent) evt;
             String newValue = event.getValue();
-            if (newValue != null) {
+            if (newValue != null && newValue.length() >= requiredTextSize) {
                 search(newValue);
             }
         });
 
         inputField.addEventListener(Events.ON_OPEN, evt -> {
             if (resultTable.getModel() == null || resultTable.getModel().getSize() == 0) {
-                search("%");
+                if (isAutosearch()) {
+                    search("%");
+                }
             }
         });
 
@@ -202,6 +208,7 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
         resultTable.setAutopaging(false);
         resultTable.setHeight("250px");
         resultTable.setHflex("1");
+        resultTable.setEmptyMessage(emptyMessage);
 
         inputField.getDropdown().appendChild(resultTable);
         resultTable.addEventListener(Events.ON_SELECT, evt -> {
@@ -553,5 +560,32 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
 
     public QueryParameters getDefaultParameters() {
         return defaultParameters;
+    }
+
+    public boolean isAutosearch() {
+        return autosearch;
+    }
+
+    public void setAutosearch(boolean autosearch) {
+        this.autosearch = autosearch;
+    }
+
+    public String getEmptyMessage() {
+        return emptyMessage;
+    }
+
+    public void setEmptyMessage(String emptyMessage) {
+        this.emptyMessage = emptyMessage;
+        if (resultTable != null) {
+            resultTable.setEmptyMessage(emptyMessage);
+        }
+    }
+
+    public int getRequiredTextSize() {
+        return requiredTextSize;
+    }
+
+    public void setRequiredTextSize(int requiredTextSize) {
+        this.requiredTextSize = requiredTextSize;
     }
 }

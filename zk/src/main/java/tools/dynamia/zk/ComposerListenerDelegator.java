@@ -31,9 +31,6 @@ public class ComposerListenerDelegator implements Composer {
 
     private static final LoggingService LOGGER = new SLF4JLoggingService(ComposerListenerDelegator.class);
 
-    public ComposerListenerDelegator() {
-        LOGGER.info("Starting " + getClass());
-    }
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
