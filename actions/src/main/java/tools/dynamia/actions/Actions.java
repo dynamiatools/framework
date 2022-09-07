@@ -27,7 +27,7 @@ public class Actions {
             }
 
             var event = eventBuilder.buildActionEvent(source, params);
-            if (event.getData() == null) {
+            if (data != null) {
                 event.setData(data);
             }
 
