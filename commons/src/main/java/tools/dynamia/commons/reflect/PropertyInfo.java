@@ -117,13 +117,7 @@ public class PropertyInfo implements Serializable {
      * @return
      */
     public boolean isStandardClass() {
-        if (getType().isPrimitive()) {
-            return true;
-        }
-
-        String name = getType().getName();
-        return name.startsWith("java.lang") || name.startsWith("java.util") || name.startsWith("java.math");
-
+        return BeanUtils.isStantardClass(getType());
     }
 
     /**

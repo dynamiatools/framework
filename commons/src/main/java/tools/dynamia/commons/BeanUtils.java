@@ -32,6 +32,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -737,8 +738,7 @@ public final class BeanUtils {
      * @return true, if is annotated
      */
     public static boolean isAnnotated(Class annotationClass, Class targetClass) {
-        Annotation annotation = targetClass.getAnnotation(annotationClass);
-        return annotation != null;
+        return targetClass.getAnnotation(annotationClass)!=null;
     }
 
     /**
@@ -749,13 +749,10 @@ public final class BeanUtils {
      * @return the methods with annotation
      */
     public static Method[] getMethodsWithAnnotation(Class<?> targetClass, Class<? extends Annotation> annotationClass) {
-        List<Method> annotatedMethods = new ArrayList<>();
-        for (Method method : targetClass.getMethods()) {
-            if (method.isAnnotationPresent(annotationClass)) {
-                annotatedMethods.add(method);
-            }
-        }
-        return annotatedMethods.toArray(new Method[0]);
+        return Stream.of(targetClass.getMethods()).filter(m -> m.isAnnotationPresent(annotationClass))
+                .collect(Collectors.toList())
+                .toArray(Method[]::new);
+
     }
 
     /**
@@ -766,13 +763,9 @@ public final class BeanUtils {
      * @return the Fields with annotation
      */
     public static Field[] getFieldsWithAnnotation(Class<?> targetClass, Class<? extends Annotation> annotationClass) {
-        List<Field> annotatedFields = new ArrayList<>();
-        for (Field field : targetClass.getFields()) {
-            if (field.isAnnotationPresent(annotationClass)) {
-                annotatedFields.add(field);
-            }
-        }
-        return annotatedFields.toArray(new Field[0]);
+        return Stream.of(targetClass.getFields()).filter(f->f.isAnnotationPresent(annotationClass))
+                .collect(Collectors.toList())
+                .toArray(Field[]::new);
     }
 
     /**
@@ -938,9 +931,28 @@ public final class BeanUtils {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-            //
+            //fail, just ignore
         }
         return object.toString();
+    }
+
+    /**
+     * Return if class type is primitive or from standard java packaage
+     *
+     * @param type
+     * @return
+     */
+    public static boolean isStantardClass(Class<?> type) {
+        if (type == null) {
+            return false;
+        }
+
+        if (type.isPrimitive()) {
+            return true;
+        }
+
+        String name = type.getName();
+        return name.startsWith("java.lang") || name.startsWith("java.util") || name.startsWith("java.math") || name.startsWith("java.sql");
+
     }
 }
