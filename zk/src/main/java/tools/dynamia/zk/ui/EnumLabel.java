@@ -18,6 +18,7 @@
 package tools.dynamia.zk.ui;
 
 import org.zkoss.zul.Label;
+import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
 
@@ -30,11 +31,26 @@ public class EnumLabel extends Label {
 
     static {
         ComponentAliasIndex.getInstance().add("enumlabel", EnumLabel.class);
-        BindingComponentIndex.getInstance().put("value", EnumLabel.class);
+        BindingComponentIndex.getInstance().put("enum", EnumLabel.class);
     }
 
     private String sclassPrefix = "";
     private String defaultSclass = "";
+
+    private Enum enumValue;
+
+
+    public Enum getEnum() {
+        return enumValue;
+    }
+
+    public void setEnum(Enum enumValue) {
+        if (!Objects.equals(this.enumValue, enumValue)) {
+            this.enumValue = enumValue;
+            setValue(BeanUtils.getInstanceName(enumValue));
+        }
+
+    }
 
     @Override
     public void setValue(String value) {
@@ -63,6 +79,10 @@ public class EnumLabel extends Label {
     }
 
     private void renderStyles() {
-        setSclass(defaultSclass + "  " + sclassPrefix + getValue());
-     }
+        if (enumValue != null) {
+            setSclass(defaultSclass + "  " + sclassPrefix + enumValue);
+        } else {
+            setSclass(defaultSclass + "  " + sclassPrefix + getValue());
+        }
+    }
 }

@@ -32,6 +32,8 @@ import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.viewers.*;
 import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
+import tools.dynamia.zk.util.ZKBindingUtil;
+import tools.dynamia.zk.util.ZKUtil;
 import tools.dynamia.zk.viewers.ZKViewersUtil;
 
 import java.util.*;
@@ -71,9 +73,35 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
         renderGroups(table, descriptor);
         renderHeaders(table, descriptor);
         renderFooters(table, descriptor);
+        renderEnumStyles(table, descriptor);
         ViewRendererUtil.afterRender(descriptor, table);
         table.setValue(value);
         return table;
+    }
+
+    private void renderEnumStyles(TableView<T> table, ViewDescriptor descriptor) {
+
+        if (descriptor.getParams().containsKey(Viewers.PARAM_ENUM_COLORS)) {
+            try {
+                Map cfg = (Map) descriptor.getParams().get(Viewers.PARAM_ENUM_COLORS);
+                Map colors = (Map) cfg.get(Viewers.PARAM_COLORS);
+
+                colors.forEach((name, color) -> {
+                    System.out.println("Create style for " + name + " = " + color);
+                    Style style = new Style();
+                    style.setId("tableViewEnumStyle"+name);
+                    style.setContent(".table-view .e_" + name + ".z-listitem .z-listcell{background: " + color + " }");
+
+                    var page = ZKUtil.getFirstPage();
+                    style.setPage(page);
+                    System.out.println("Style UUID "+style.getUuid());
+                });
+
+            } catch (Exception e) {
+                //fail.. just ignore
+            }
+        }
+
     }
 
     private void renderGroups(TableView<T> table, ViewDescriptor descriptor) {
@@ -114,7 +142,6 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
         }
 
 
-
         for (Field field : descriptor.sortFields()) {
             if (field.isVisible()) {
 
@@ -122,7 +149,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
                 label = filterFieldLabel(field, label);
 
                 String description = field.getLocalizedDescription(Messages.getDefaultLocale());
-                description = filterFieldDescription(field,description);
+                description = filterFieldDescription(field, description);
 
                 TableViewHeader header = new TableViewHeader(table, label);
                 header.setTooltiptext(description);
@@ -140,7 +167,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
                     if (headerParams != null) {
                         BeanUtils.setupBean(header, headerParams);
 
-                        if(headerParams.containsKey(Viewers.PARAM_BINDINGS)){
+                        if (headerParams.containsKey(Viewers.PARAM_BINDINGS)) {
 
                         }
                     }
@@ -284,6 +311,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
             });
         }
     }
+
 
     protected String filterFieldLabel(Field field, String label) {
         if (messagesProvider == null) {

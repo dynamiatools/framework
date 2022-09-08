@@ -180,20 +180,13 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                 Map cfg = (Map) viewDescriptor.getParams().get(Viewers.PARAM_ENUM_COLORS);
                 String name = (String) cfg.get(Viewers.PARAM_NAME);
                 Map colors = (Map) cfg.get(Viewers.PARAM_COLORS);
-
                 Enum enumValue = (Enum) BeanUtils.invokeGetMethod(data, name);
                 String color = (String) colors.get(enumValue.name());
                 if (color != null) {
-                    item.setStyle("background-color: " + color + " !important;");
-                    item.getChildren().forEach(c -> {
-                        if (c instanceof Listcell) {
-                            ((Listcell) c).setStyle(item.getStyle());
-                        }
-                    });
+                    item.addSclass("e_"+enumValue);
                 }
             } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                //fail.. just ignore
             }
         }
     }
@@ -213,9 +206,12 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                     cellValue = BeanUtils.invokeBooleanGetMethod(data, field.getName());
                 } else {
                     cellValue = BeanUtils.invokeGetMethod(data, field.getName());
+                    if (cellValue != null && !BeanUtils.isStantardClass(cellValue.getClass())) {
+                        cellValue = BeanUtils.getInstanceName(cellValue);
+                    }
                 }
             } catch (ReflectionException e) {
-                // Suertee
+                // nothing to do
             }
 
             boolean renderWhenNull = field.getParams().get(Viewers.PARAM_RENDER_WHEN_NULL) == Boolean.TRUE;

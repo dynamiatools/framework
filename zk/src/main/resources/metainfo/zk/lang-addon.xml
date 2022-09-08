@@ -694,7 +694,7 @@
 
         <annotation>
             <annotation-name>default-bind</annotation-name>
-            <property-name>value</property-name>
+            <property-name>enum</property-name>
             <attribute>
                 <attribute-name>access</attribute-name>
                 <attribute-value>load</attribute-value>

@@ -20,6 +20,7 @@ import org.zkoss.bind.BindUtils;
 import org.zkoss.bind.Binder;
 import org.zkoss.bind.DefaultBinder;
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zul.A;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import tools.dynamia.commons.logger.LoggingService;
@@ -133,7 +134,8 @@ public class ZKBindingUtil {
 
         binder.addPropertyLoadBindings(component, bindingAttribute, expression, null, null, null, converterExpression,
                 null);
-        if (!(component instanceof Label) && !(component instanceof Image) && !(component instanceof CoolLabel)) {
+
+        if (!(component instanceof Label) && !(component instanceof Image) && !(component instanceof CoolLabel) && !(component instanceof A)) {
 
             binder.addPropertySaveBindings(component, bindingAttribute, expression, null, saveAfterCmds, null,
                     converterExpression, null, null, null);
