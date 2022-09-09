@@ -174,7 +174,7 @@ public class JpaCrudService extends AbstractCrudService {
      */
     @Override
     public <T> T find(Class<T> type, Serializable id) {
-        return findSingle(type, "id", id);
+        return em.find(type,id);
     }
 
     /*
