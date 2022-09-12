@@ -84,7 +84,7 @@
 
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
-        <springboot.version>2.7.2</springboot.version>
+        <springboot.version>2.7.3</springboot.version>
         <neo4jogm.version>3.2.35</neo4jogm.version>
 
         <!-- Web -->
