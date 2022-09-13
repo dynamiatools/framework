@@ -41,16 +41,14 @@ import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.io.converters.Converters;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.Tuple;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static tools.dynamia.domain.jpa.JpaUtils.wrap;
 import static tools.dynamia.domain.query.QueryConditions.eq;
@@ -173,8 +171,34 @@ public class JpaCrudService extends AbstractCrudService {
      * Class, java.io.Serializable)
      */
     @Override
-    public <T> T find(Class<T> type, Serializable id) {
-        return em.find(type,id);
+    public <T> T find(Class<T> type, final Serializable id) {
+        if (id == null) {
+            return null;
+        }
+
+        Object targetId = id;
+        if (id instanceof String) {
+            if (id.toString().isBlank()) {
+                return null;
+            }
+
+            //check id type and convert
+            var field = BeanUtils.getFirstFieldWithAnnotation(type, Id.class);
+            if (field != null && field.getType() != String.class) {
+                var converter = Converters.getConverter(field.getType());
+                if (converter != null) {
+                    try {
+                        var value = converter.toObject(id.toString());
+                        if (value != null) {
+                            targetId = value;
+                        }
+                    } catch (Exception e) {
+//cannot convert
+                    }
+                }
+            }
+        }
+        return em.find(type, targetId);
     }
 
     /*

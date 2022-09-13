@@ -738,7 +738,7 @@ public final class BeanUtils {
      * @return true, if is annotated
      */
     public static boolean isAnnotated(Class annotationClass, Class targetClass) {
-        return targetClass.getAnnotation(annotationClass)!=null;
+        return targetClass.getAnnotation(annotationClass) != null;
     }
 
     /**
@@ -763,9 +763,22 @@ public final class BeanUtils {
      * @return the Fields with annotation
      */
     public static Field[] getFieldsWithAnnotation(Class<?> targetClass, Class<? extends Annotation> annotationClass) {
-        return Stream.of(targetClass.getFields()).filter(f->f.isAnnotationPresent(annotationClass))
+        return BeanUtils.getAllFields(targetClass).stream().filter(f -> f.isAnnotationPresent(annotationClass))
                 .collect(Collectors.toList())
                 .toArray(Field[]::new);
+    }
+
+    /**
+     * Find and return the first field annotated with annotationClass
+     *
+     * @param targetClass
+     * @param annotationClass
+     * @return
+     */
+    public static Field getFirstFieldWithAnnotation(Class<?> targetClass, Class<? extends Annotation> annotationClass) {
+        return BeanUtils.getAllFields(targetClass).stream()
+                .filter(f -> f.isAnnotationPresent(annotationClass))
+                .findFirst().orElse(null);
     }
 
     /**
