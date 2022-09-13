@@ -87,14 +87,12 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
                 Map colors = (Map) cfg.get(Viewers.PARAM_COLORS);
 
                 colors.forEach((name, color) -> {
-                    System.out.println("Create style for " + name + " = " + color);
                     Style style = new Style();
                     style.setId("tableViewEnumStyle"+name);
                     style.setContent(".table-view .e_" + name + ".z-listitem .z-listcell{background: " + color + " }");
 
                     var page = ZKUtil.getFirstPage();
                     style.setPage(page);
-                    System.out.println("Style UUID "+style.getUuid());
                 });
 
             } catch (Exception e) {
