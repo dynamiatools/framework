@@ -21,6 +21,7 @@ import tools.dynamia.commons.Identifiable;
 import tools.dynamia.domain.query.DataPaginator;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.util.QueryBuilder;
+import tools.dynamia.io.converters.Converters;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -143,4 +144,55 @@ public abstract class JpaUtils {
     private JpaUtils() {
     }
 
+
+    public static <T> Object checkIdType(Class<T> type, Serializable id) {
+        Object targetId = id;
+        if (id instanceof String) {
+            if (id.toString().isBlank()) {
+                return null;
+            }
+
+            //check id type and convert
+            var field = BeanUtils.getFirstFieldWithAnnotation(type, Id.class);
+            if (field != null && field.getType() != String.class) {
+                var converter = Converters.getConverter(field.getType());
+                if (converter != null) {
+                    try {
+                        var value = converter.toObject(id.toString());
+                        if (value != null) {
+                            targetId = value;
+                        }
+                    } catch (Exception e) {
+//cannot convert
+                    }
+                }
+            }
+        }
+        return targetId;
+    }
+
+    /**
+     * Create an entity graph that include all relationships
+     *
+     * @param type
+     * @param em
+     * @param <T>
+     * @return
+     */
+    public static <T> EntityGraph<T> createEntityGraph(Class<T> type, EntityManager em) {
+        var graph = em.createEntityGraph(type);
+        var properties = BeanUtils.getPropertiesInfo(type);
+
+        properties.forEach(p -> {
+            if (p.isAnnotationPresent(OneToOne.class) || p.isAnnotationPresent(ManyToOne.class)) {
+                graph.addAttributeNodes(p.getName());
+            }
+
+            if (p.isCollection() && (p.isAnnotationPresent(OneToMany.class) || p.isAnnotationPresent(ManyToMany.class))) {
+                graph.addSubgraph(p.getName());
+            }
+        });
+
+        return graph;
+    }
 }
