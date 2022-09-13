@@ -18,6 +18,10 @@ public class ZKLocalizedMessageProvider implements LocalizedMessagesProvider {
 
     @Override
     public String getMessage(String key, String classifier, Locale locale, String defaultValue) {
-        return loader.getLabel(locale, key);
+        var label = loader.getLabel(locale, key);
+        if (label == null && defaultValue != null) {
+            label = defaultValue;
+        }
+        return label;
     }
 }
