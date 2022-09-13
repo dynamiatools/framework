@@ -86,6 +86,15 @@ public interface CrudService {
     <T> T find(Class<T> type, Serializable id);
 
     /**
+     * Load and entity and all its relationship graph
+     * @param type
+     * @param id
+     * @return
+     * @param <T>
+     */
+    <T> T load(Class<T> type, Serializable id);
+
+    /**
      * A shortcut method to find an entity by a field called remoteId. If this field dont exist an exception
      * will throw
      *

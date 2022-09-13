@@ -48,7 +48,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static tools.dynamia.domain.jpa.JpaUtils.wrap;
 import static tools.dynamia.domain.query.QueryConditions.eq;
@@ -66,6 +65,7 @@ import static tools.dynamia.domain.util.QueryBuilder.select;
 public class JpaCrudService extends AbstractCrudService {
 
     public static final String HINT_FETCH_GRAPH = "javax.persistence.fetchgraph";
+    public static final String HINT_LOAD_GRAPH = "javax.persistence.loadgraph";
 
     /**
      * The em.
@@ -176,29 +176,24 @@ public class JpaCrudService extends AbstractCrudService {
             return null;
         }
 
-        Object targetId = id;
-        if (id instanceof String) {
-            if (id.toString().isBlank()) {
-                return null;
-            }
-
-            //check id type and convert
-            var field = BeanUtils.getFirstFieldWithAnnotation(type, Id.class);
-            if (field != null && field.getType() != String.class) {
-                var converter = Converters.getConverter(field.getType());
-                if (converter != null) {
-                    try {
-                        var value = converter.toObject(id.toString());
-                        if (value != null) {
-                            targetId = value;
-                        }
-                    } catch (Exception e) {
-//cannot convert
-                    }
-                }
-            }
-        }
+        Object targetId = JpaUtils.checkIdType(type, id);
+        if (targetId == null) return null;
         return em.find(type, targetId);
+    }
+
+    @Override
+    public <T> T load(Class<T> type, Serializable id) {
+        if (id == null) {
+            return null;
+        }
+
+        Object targetId = JpaUtils.checkIdType(type, id);
+        if (targetId == null) return null;
+
+        var entityGraph = JpaUtils.createEntityGraph(type, em);
+
+
+        return em.find(type, targetId, Map.of(HINT_LOAD_GRAPH, entityGraph));
     }
 
     /*

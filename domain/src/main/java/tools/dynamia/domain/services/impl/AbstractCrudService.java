@@ -85,6 +85,11 @@ public abstract class AbstractCrudService implements CrudService {
     }
 
     @Override
+    public <T> T load(Class<T> type, Serializable id) {
+        return find(type, id);
+    }
+
+    @Override
     public <T> T findByRemoteId(Class<T> type, Serializable remoteId) {
         return findSingle(type, "remoteId", remoteId);
     }
