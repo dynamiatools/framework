@@ -21,4 +21,6 @@ public interface OpenPersistenceInViewProvider {
     boolean beforeView();
 
     void afterView(boolean participate);
+
+    boolean isDisabled();
 }

@@ -103,4 +103,9 @@ public class OpenNeo4jSessionInViewProvider implements OpenPersistenceInViewProv
 		}
 		return session;
 	}
+
+	@Override
+	public boolean isDisabled() {
+		return false;
+	}
 }

@@ -45,7 +45,7 @@ public class ZKOpenPersistenceInViewListener implements ExecutionInit, Execution
 
     @Override
     public void init(Execution exec, Execution parent) {
-        if (provider != null && parent == null) {
+        if (provider != null && !provider.isDisabled() && parent == null) {
             boolean participate = provider.beforeView();
 
             HttpServletRequest request = (HttpServletRequest) exec.getNativeRequest();
@@ -55,7 +55,7 @@ public class ZKOpenPersistenceInViewListener implements ExecutionInit, Execution
 
     @Override
     public void cleanup(Execution exec, Execution parent, List errs) {
-        if (provider != null && parent == null) {
+        if (provider != null && !provider.isDisabled() && parent == null) {
             HttpServletRequest request = (HttpServletRequest) exec.getNativeRequest();
             Object attr = request.getAttribute("EMF.PARTICIPATE");
             boolean participate = attr == Boolean.TRUE;

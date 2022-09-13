@@ -112,4 +112,9 @@ public class OpenEntityManagerInViewPattern implements OpenPersistenceInViewProv
     private EntityManager createEntityManager() {
         return getEntityManagerFactory().createEntityManager();
     }
+
+    @Override
+    public boolean isDisabled() {
+        return false;
+    }
 }
