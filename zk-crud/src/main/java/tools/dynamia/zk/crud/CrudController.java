@@ -755,7 +755,11 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
         if (!(this instanceof SubcrudController)) {
             if (!subcontrollers.isEmpty()) {
                 for (SubcrudController subcontroller : subcontrollers) {
-                    subcontroller.doDeletes();
+                    try {
+                        subcontroller.doDeletes();
+                    } catch (Exception e) {
+                        logger.warn("Exception running subcrud controller " + subcontroller + ": " + e.getMessage());
+                    }
                 }
             }
         }
@@ -766,8 +770,12 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
 
             if (!subcontrollers.isEmpty()) {
                 for (SubcrudController subcontroller : subcontrollers) {
-                    subcontroller.doCreates();
-                    subcontroller.doUpdates();
+                    try {
+                        subcontroller.doCreates();
+                        subcontroller.doUpdates();
+                    } catch (Exception e) {
+                        logger.warn("Exception running subcrud controller " + subcontroller + ": " + e.getMessage());
+                    }
                 }
             }
         }
@@ -809,8 +817,9 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
         Object ent = getSelected();
         if (ent != null) {
             beforeEdit();
-            if (DomainUtils.findEntityId(ent) != null) {
-                setEntity(crudService.find(entityClass, DomainUtils.findEntityId(ent)));
+            var entityId = DomainUtils.findEntityId(ent);
+            if (entityId != null) {
+                setEntity(crudService.load(entityClass, entityId));
             } else {
                 setEntity((E) ent);
             }

@@ -228,7 +228,9 @@ public class SubcrudController<E> extends CrudController<E> implements SubcrudCo
 
     public void doCreates() {
         for (E entity : toBeCreatedEntities) {
-            crudService.create(entity);
+            if (DomainUtils.findEntityId(entity) == null) {
+                crudService.create(entity);
+            }
         }
         toBeCreatedEntities.clear();
 
