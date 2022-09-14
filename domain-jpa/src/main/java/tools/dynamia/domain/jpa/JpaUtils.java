@@ -18,6 +18,7 @@ package tools.dynamia.domain.jpa;
 
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.Identifiable;
+import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.domain.query.DataPaginator;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.util.QueryBuilder;
@@ -184,15 +185,40 @@ public abstract class JpaUtils {
         var properties = BeanUtils.getPropertiesInfo(type);
 
         properties.forEach(p -> {
-            if (p.isAnnotationPresent(OneToOne.class) || p.isAnnotationPresent(ManyToOne.class)) {
+            if (isToOne(p)) {
                 graph.addAttributeNodes(p.getName());
             }
 
-            if (p.isCollection() && (p.isAnnotationPresent(OneToMany.class) || p.isAnnotationPresent(ManyToMany.class))) {
-                graph.addSubgraph(p.getName());
+            if (isToMany(p)) {
+               graph.addSubgraph(p.getName());
             }
         });
 
         return graph;
+    }
+
+    private static void loadSubgraph(Subgraph<Object> subgraph, PropertyInfo collection) {
+        if(collection.getGenericType()!=null){
+            var subproperties = BeanUtils.getPropertiesInfo(collection.getGenericType());
+
+            subproperties.forEach(p -> {
+                if (isToOne(p)) {
+                    subgraph.addAttributeNodes(p.getName());
+                }
+
+                if (isToMany(p)) {
+                    var innerSubgraph = subgraph.addSubgraph(p.getName());
+                    loadSubgraph(innerSubgraph,p);
+                }
+            });
+        }
+    }
+
+    private static boolean isToMany(PropertyInfo p) {
+        return p.isCollection() && (p.isAnnotationPresent(OneToMany.class) || p.isAnnotationPresent(ManyToMany.class));
+    }
+
+    private static boolean isToOne(PropertyInfo p) {
+        return p.isAnnotationPresent(OneToOne.class) || p.isAnnotationPresent(ManyToOne.class);
     }
 }

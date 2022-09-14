@@ -52,6 +52,7 @@ import java.util.stream.Collectors;
  * @author Mario A. Serrano Leones
  */
 public class TableViewRowRenderer implements ListitemRenderer<Object> {
+    private static final String VIEW_TYPE_NAME = "table";
     public static String ROW_BINDER_NAME = "rowBinder";
 
     private ViewDescriptor viewDescriptor;
@@ -102,7 +103,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
         }
 
         for (Field field : fields) {
-            Viewers.customizeField("table", field);
+            Viewers.customizeField(VIEW_TYPE_NAME, field);
             renderFieldCell(binder, item, data, fieldsComponentsMap, field, index);
         }
 
@@ -161,10 +162,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                     }
                     if (actionParams != null && actionParams.containsKey(Viewers.PARAM_BINDINGS)) {
                         Map bindingMap = (Map) actionParams.get(Viewers.PARAM_BINDINGS);
-                        if (bindingMap != null) {
-                            bindingMap.put(ZKBindingUtil.KEY_EXP_PREFIX, Viewers.BEAN);
-                        }
-                        ZKBindingUtil.bindComponent(binder, actionComp, bindingMap);
+                        ZKBindingUtil.bindComponent(binder, actionComp, bindingMap, Viewers.BEAN);
                     }
                 }
 
@@ -183,7 +181,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                 Enum enumValue = (Enum) BeanUtils.invokeGetMethod(data, name);
                 String color = (String) colors.get(enumValue.name());
                 if (color != null) {
-                    item.addSclass("e_"+enumValue);
+                    item.addSclass("e_" + enumValue);
                 }
             } catch (Exception e) {
                 //fail.. just ignore
@@ -197,7 +195,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
         if (field.isVisible()) {
             Listcell cell = new Listcell();
             cell.setParent(item);
-            BeanUtils.setupBean(cell, (Map) field.getParams().get("cell"));
+            BeanUtils.setupBean(cell, (Map) field.getParam("cell"));
             Object cellValue = "";
 
             try {
@@ -214,10 +212,10 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                 // nothing to do
             }
 
-            boolean renderWhenNull = field.getParams().get(Viewers.PARAM_RENDER_WHEN_NULL) == Boolean.TRUE;
+            boolean renderWhenNull = field.getParam(Viewers.PARAM_RENDER_WHEN_NULL) == Boolean.TRUE;
 
             if (cellValue == null && !renderWhenNull) {
-                cellValue = field.getParams().get(Viewers.PARAM_NULLVALUE);
+                cellValue = field.getParam(Viewers.PARAM_NULLVALUE);
                 Label nullValue = new Label((String) cellValue);
                 nullValue.setSclass(Viewers.PARAM_NULLVALUE);
                 nullValue.setParent(cell);
@@ -232,8 +230,8 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                 }
                 BeanUtils.setupBean(comp, field.getParams());
 
-                if (field.getParams().containsKey(Viewers.PARAMS_ATTRIBUTES)) {
-                    Map attributes = (Map) field.getParams().get(Viewers.PARAMS_ATTRIBUTES);
+                if (field.containsParam(Viewers.PARAMS_ATTRIBUTES)) {
+                    Map attributes = (Map) field.getParam(Viewers.PARAMS_ATTRIBUTES);
                     if (attributes != null) {
                         attributes.forEach((k, v) -> comp.setAttribute(k.toString(), v));
                     }
@@ -244,16 +242,15 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
 
                 ComponentCustomizerUtil.customizeComponent(field, comp, field.getComponentCustomizer());
                 fieldsComponentsMap.put(field.getName(), new TableFieldComponent(field.getName(), comp));
-                if (field.getParams().get(Viewers.PARAM_IGNORE_BINDINGS) != Boolean.TRUE) {
+                if (field.getParam(Viewers.PARAM_IGNORE_BINDINGS) != Boolean.TRUE) {
                     if (isBindiable(field, comp)) {
-                        Object bmapObject = field.getParams().get(Viewers.PARAM_BINDINGS);
-                        if (bmapObject != null && bmapObject instanceof Map) {
+                        Object bmapObject = field.getParam(Viewers.PARAM_BINDINGS);
+                        if (bmapObject instanceof Map) {
                             Map bindingMap = (Map) bmapObject;
-                            bindingMap.put(ZKBindingUtil.KEY_EXP_PREFIX, Viewers.BEAN);
-                            ZKBindingUtil.bindComponent(binder, comp, bindingMap);
+                            ZKBindingUtil.bindComponent(binder, comp, bindingMap, Viewers.BEAN);
                         } else {
-                            String converterExpression = (String) field.getParams().get(Viewers.PARAM_CONVERTER);
-                            String attr = (String) field.getParams().get(Viewers.PARAM_BINDING_ATTRIBUTE);
+                            String converterExpression = (String) field.getParam(Viewers.PARAM_CONVERTER);
+                            String attr = (String) field.getParam(Viewers.PARAM_BINDING_ATTRIBUTE);
                             String expression = data instanceof BeanMap ? Viewers.BEAN + "['" + field.getName() + "']" : Viewers.BEAN + "." + field.getName();
                             ZKBindingUtil.bindComponent(binder, comp, attr, expression, converterExpression);
                         }

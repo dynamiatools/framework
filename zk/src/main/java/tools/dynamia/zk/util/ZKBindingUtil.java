@@ -20,11 +20,10 @@ import org.zkoss.bind.BindUtils;
 import org.zkoss.bind.Binder;
 import org.zkoss.bind.DefaultBinder;
 import org.zkoss.zk.ui.Component;
-import org.zkoss.zul.A;
-import org.zkoss.zul.Image;
-import org.zkoss.zul.Label;
+import org.zkoss.zul.*;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
+import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ui.CoolLabel;
 
@@ -63,17 +62,21 @@ public class ZKBindingUtil {
         bindComponent(binder, component, null, expression, converterExpression);
     }
 
-    @SuppressWarnings("rawtypes")
     public static void bindComponent(Binder binder, Component component, Map bindindingMap) {
+        bindComponent(binder, component, bindindingMap, "");
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static void bindComponent(Binder binder, Component component, Map bindindingMap, String prefix) {
         if (bindindingMap == null) {
             logger.warn("Binding map is null, nothing to do");
             return;
         }
 
-        String prefix = "";
-        if (bindindingMap.containsKey(KEY_EXP_PREFIX)) {
-            prefix = bindindingMap.get(KEY_EXP_PREFIX) + ".";
-            bindindingMap.remove(KEY_EXP_PREFIX);
+        if (prefix == null) {
+            prefix = "";
+        } else if (!prefix.isBlank() && !prefix.endsWith(".")) {
+            prefix = prefix + ".";
         }
 
 
@@ -87,18 +90,18 @@ public class ZKBindingUtil {
                 Map bindingDetail = (Map) entry.getValue();
                 expression = (String) bindingDetail.get(VALUE);
                 converter = (String) bindingDetail.get(CONVERTER);
-
             } else if (entry.getValue() instanceof String) {
                 expression = entry.getValue().toString();
             }
 
-            if (expression != null && !expression.isEmpty()) {
+            if (expression != null && !expression.isBlank()) {
 
-                if (expression.contains(prefix)) {
+                if (!prefix.isBlank() && expression.startsWith(prefix)) {
                     prefix = "";
                 }
 
-                bindComponent(binder, component, bindingAttribute, prefix + expression, converter);
+                final String finalExp = prefix + expression;
+                bindComponent(binder, component, bindingAttribute, finalExp, converter);
             }
         }
     }
@@ -132,10 +135,17 @@ public class ZKBindingUtil {
             }
         }
 
+        if (expression != null && expression.startsWith("bean.bean.")) {
+            //bug, temp fix
+            expression = expression.replace("bean.bean.", "bean.");
+
+        }
+
         binder.addPropertyLoadBindings(component, bindingAttribute, expression, null, null, null, converterExpression,
                 null);
 
-        if (!(component instanceof Label) && !(component instanceof Image) && !(component instanceof CoolLabel) && !(component instanceof A)) {
+        if (!(component instanceof Label) && !(component instanceof Image)
+                && !(component instanceof Div) && !(component instanceof A) && !(component instanceof Span)) {
 
             binder.addPropertySaveBindings(component, bindingAttribute, expression, null, saveAfterCmds, null,
                     converterExpression, null, null, null);

@@ -31,6 +31,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * The Class Field.
@@ -272,6 +273,21 @@ public class Field implements Serializable, Indexable, Cloneable {
      */
     public Map<String, Object> getParams() {
         return params;
+    }
+
+    public Object getParam(String name) {
+        if (params == null) {
+            return null;
+        }
+        return getParams().get(name);
+    }
+
+    public boolean containsParam(String name) {
+        if (params == null) {
+            return false;
+        }
+
+        return getParams().containsKey(name);
     }
 
     /**

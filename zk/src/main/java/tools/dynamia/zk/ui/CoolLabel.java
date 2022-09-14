@@ -30,6 +30,7 @@ import tools.dynamia.zk.ImageCache;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 public class CoolLabel extends Div {
 
@@ -57,6 +58,8 @@ public class CoolLabel extends Div {
     private boolean showImage = true;
     private boolean breakLinesSubtitle;
     private boolean breakLinesDescription;
+
+    private String title;
 
     public CoolLabel() {
         setSclass("cool-lb");
@@ -147,9 +150,9 @@ public class CoolLabel extends Div {
         }
     }
 
-    public void setImageURL(URLable urLable) {
-        if (urLable != null) {
-            setImageURL(urLable.toURL());
+    public void setImageURL(URLable urlable) {
+        if (urlable != null) {
+            setImageURL(urlable.toURL());
         }
     }
 
@@ -179,15 +182,15 @@ public class CoolLabel extends Div {
     }
 
     public void setTitle(String title) {
-        if (title != null && !title.equals(titleLabel.getValue())) {
+        if (!Objects.equals(this.title,title)) {
+            this.title = title;
+            titleLabel.setValue(title);
             fireOnTitleChanged();
         }
-        titleLabel.setValue(title);
-
     }
 
     public String getTitle() {
-        return titleLabel.getValue();
+        return this.title;
     }
 
     public void setSubtitle(String subtitle) {

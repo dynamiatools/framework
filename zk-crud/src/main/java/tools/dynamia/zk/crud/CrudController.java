@@ -819,7 +819,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
             beforeEdit();
             var entityId = DomainUtils.findEntityId(ent);
             if (entityId != null) {
-                setEntity(crudService.load(entityClass, entityId));
+                setEntity(crudService.find(entityClass, entityId));
             } else {
                 setEntity((E) ent);
             }

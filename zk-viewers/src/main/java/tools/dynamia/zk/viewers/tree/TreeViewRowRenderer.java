@@ -16,7 +16,6 @@
  */
 
 
-
 package tools.dynamia.zk.viewers.tree;
 
 import org.zkoss.bind.Binder;
@@ -152,7 +151,7 @@ public class TreeViewRowRenderer<E> implements TreeitemRenderer<TreeViewNode<E>>
             }
 
             if (cellValue == null) {
-                cellValue = field.getParams().get(Viewers.PARAM_NULLVALUE);
+                cellValue = field.getParam(Viewers.PARAM_NULLVALUE);
                 Label nullValue = new Label((String) cellValue);
                 nullValue.setSclass(Viewers.PARAM_NULLVALUE);
                 nullValue.setParent(cell);
@@ -167,13 +166,12 @@ public class TreeViewRowRenderer<E> implements TreeitemRenderer<TreeViewNode<E>>
                 ComponentCustomizerUtil.customizeComponent(field, comp, field.getComponentCustomizer());
                 fieldsComponentsMap.put(field.getName(), new TreeFieldComponent(field.getName(), comp));
                 if (isBindiable(field, comp)) {
-                    Object bmapObject = field.getParams().get(Viewers.PARAM_BINDINGS);
+                    Object bmapObject = field.getParam(Viewers.PARAM_BINDINGS);
                     if (bmapObject != null && bmapObject instanceof Map) {
                         Map bindingMap = (Map) bmapObject;
-                        bindingMap.put(ZKBindingUtil.KEY_EXP_PREFIX, Viewers.BEAN);
-                        ZKBindingUtil.bindComponent(binder, comp, bindingMap);
+                        ZKBindingUtil.bindComponent(binder, comp, bindingMap, Viewers.BEAN);
                     } else {
-                        String converterExpression = (String) field.getParams().get(Viewers.PARAM_CONVERTER);
+                        String converterExpression = (String) field.getParam(Viewers.PARAM_CONVERTER);
                         String attr = BindingComponentIndex.getInstance().getAttribute(comp.getClass());
                         String expression = Viewers.BEAN + "." + field.getName();
                         ZKBindingUtil.bindComponent(binder, comp, expression, converterExpression);

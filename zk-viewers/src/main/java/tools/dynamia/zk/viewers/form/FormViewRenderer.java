@@ -219,7 +219,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
             decriptionText = filterFieldDescription(field, decriptionText);
         }
 
-        Object sl = field.getParams().get(Viewers.PARAM_SHOW_LABEL);
+        Object sl = field.getParam(Viewers.PARAM_SHOW_LABEL);
         if (sl != null && (sl == Boolean.FALSE || sl.toString().equalsIgnoreCase("false"))) {
             showLabel = false;
         }
@@ -230,8 +230,8 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
             label = new Label(labelText);
             label.setTooltiptext($s(decriptionText));
             label.setSclass("form-view-lbl " + (field.isRequired() ? "required" : ""));
-            if (field.getParams().get("labelStyle") != null) {
-                label.setStyle((String) field.getParams().get("labelStyle"));
+            if (field.getParam("labelStyle") != null) {
+                label.setStyle((String) field.getParam("labelStyle"));
             }
             ZKViewersUtil.setupFieldIcon(field, label);
 
@@ -239,7 +239,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
         int colspan = 1;
         try {
-            colspan = Integer.parseInt(field.getParams().get(Viewers.PARAM_SPAN).toString());
+            colspan = Integer.parseInt(field.getParam(Viewers.PARAM_SPAN).toString());
         } catch (Exception e) {
         }
 
@@ -281,7 +281,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
             Form form = new Form();
             component.setParent(form);
             form.setParent(compCell);
-            Object config = field.getParams().get("config");
+            Object config = field.getParam("config");
             if (config instanceof java.util.Map) {
                 BeanUtils.invokeSetMethod(component, "config", config);
             }
@@ -321,9 +321,9 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
     protected void applyFieldConstraints(Component comp, Field field) {
 
-        if (comp instanceof InputElement && field.getParams().get(Viewers.PARAM_CONSTRAINT) instanceof Constraint) {
+        if (comp instanceof InputElement && field.getParam(Viewers.PARAM_CONSTRAINT) instanceof Constraint) {
             InputElement inputElement = (InputElement) comp;
-            inputElement.setConstraint((Constraint) field.getParams().get(Viewers.PARAM_CONSTRAINT));
+            inputElement.setConstraint((Constraint) field.getParam(Viewers.PARAM_CONSTRAINT));
 
         }
 
@@ -334,27 +334,26 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
             return;
         }
 
-        if (field.getParams().get(Viewers.PARAM_IGNORE_BINDINGS) == Boolean.TRUE) {
+        if (field.getParam(Viewers.PARAM_IGNORE_BINDINGS) == Boolean.TRUE) {
             return;
         }
 
-        Object bmapObject = field.getParams().get(Viewers.PARAM_BINDINGS);
+        Object bmapObject = field.getParam(Viewers.PARAM_BINDINGS);
         if (bmapObject != null && bmapObject instanceof Map) {
             Map bindingMap = (Map) bmapObject;
-            bindingMap.put(ZKBindingUtil.KEY_EXP_PREFIX, Viewers.BEAN);
-            ZKBindingUtil.bindComponent(binder, comp, bindingMap);
+            ZKBindingUtil.bindComponent(binder, comp, bindingMap,Viewers.BEAN);
         } else {
             String attr = BindingComponentIndex.getInstance().getAttribute(comp.getClass());
-            if (field.getParams().get(Viewers.PARAM_BINDING_ATTRIBUTE) instanceof String) {
-                attr = field.getParams().get(Viewers.PARAM_BINDING_ATTRIBUTE).toString();
+            if (field.getParam(Viewers.PARAM_BINDING_ATTRIBUTE) instanceof String) {
+                attr = field.getParam(Viewers.PARAM_BINDING_ATTRIBUTE).toString();
             }
 
             String converterExpression = null;
 
-            converterExpression = (String) field.getParams().get(Viewers.PARAM_CONVERTER);
+            converterExpression = (String) field.getParam(Viewers.PARAM_CONVERTER);
 
             if (attr != null && !attr.isEmpty()) {
-                String bindName = (String) field.getParams().get(Viewers.PARAM_BIND);
+                String bindName = (String) field.getParam(Viewers.PARAM_BIND);
                 if (bindName == null) {
                     bindName = field.getName();
                 }
@@ -396,7 +395,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
         int colspan = 1;
         try {
-            colspan = Integer.parseInt(field.getParams().get(Viewers.PARAM_SPAN).toString());
+            colspan = Integer.parseInt(field.getParam(Viewers.PARAM_SPAN).toString());
         } catch (Exception e) {
         }
 
@@ -416,7 +415,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         }
 
         if (field.getParams().containsKey(Viewers.PARAMS_ATTRIBUTES)) {
-            Map attributes = (Map) field.getParams().get(Viewers.PARAMS_ATTRIBUTES);
+            Map attributes = (Map) field.getParam(Viewers.PARAMS_ATTRIBUTES);
             if (attributes != null) {
                 attributes.forEach((k, v) -> comp.setAttribute(k.toString(), v));
             }
