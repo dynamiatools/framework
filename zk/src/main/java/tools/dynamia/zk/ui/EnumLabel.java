@@ -27,7 +27,7 @@ import java.util.Objects;
 /**
  * Label commponent for enums
  */
-public class EnumLabel extends Label {
+public class EnumLabel extends Label  implements LoadableOnly{
 
     static {
         ComponentAliasIndex.getInstance().add("enumlabel", EnumLabel.class);

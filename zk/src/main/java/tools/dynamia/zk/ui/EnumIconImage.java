@@ -29,7 +29,7 @@ import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.util.ZKUtil;
 
-public class EnumIconImage extends Span {
+public class EnumIconImage extends Span  implements LoadableOnly{
 
     /**
      *

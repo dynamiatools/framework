@@ -21,6 +21,7 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.*;
+import tools.dynamia.actions.ReadableOnly;
 import tools.dynamia.commons.URLable;
 import tools.dynamia.io.IOUtils;
 import tools.dynamia.io.Resource;
@@ -32,7 +33,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
-public class CoolLabel extends Div {
+
+public class CoolLabel extends Div implements LoadableOnly {
 
     public static final String ON_TITLE_CHANGED = "onTitleChanged";
     /**

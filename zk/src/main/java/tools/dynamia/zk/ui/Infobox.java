@@ -28,7 +28,7 @@ import tools.dynamia.zk.ComponentAliasIndex;
 
 import java.util.Objects;
 
-public class Infobox extends Div {
+public class Infobox extends Div  implements LoadableOnly{
 
     static {
         ComponentAliasIndex.getInstance().put("infobox", Infobox.class);

@@ -23,7 +23,7 @@ import org.zkoss.zul.Include;
  *
  * @author Mario A. Serrano Leones
  */
-public class ContentArea extends Center {
+public class ContentArea extends Center  implements LoadableOnly{
 
     private boolean autotitle = true;
     private String contentClass;

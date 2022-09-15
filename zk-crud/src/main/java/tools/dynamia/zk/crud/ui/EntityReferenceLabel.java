@@ -25,10 +25,11 @@ import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.web.util.SessionCache;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
+import tools.dynamia.zk.ui.LoadableOnly;
 
 import java.io.Serializable;
 
-public class EntityReferenceLabel extends Label {
+public class EntityReferenceLabel extends Label  implements LoadableOnly {
 
     /**
      *

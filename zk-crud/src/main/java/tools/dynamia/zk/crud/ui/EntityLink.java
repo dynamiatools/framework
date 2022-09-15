@@ -26,8 +26,9 @@ import tools.dynamia.integration.Containers;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.crud.actions.ViewDataAction;
+import tools.dynamia.zk.ui.LoadableOnly;
 
-public class EntityLink extends A {
+public class EntityLink extends A  implements LoadableOnly {
 
     static {
         BindingComponentIndex.getInstance().put("entity", EntityLink.class);

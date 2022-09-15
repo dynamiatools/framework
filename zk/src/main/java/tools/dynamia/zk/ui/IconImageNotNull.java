@@ -31,7 +31,7 @@ import tools.dynamia.zk.util.ZKUtil;
  *
  * @author Mario A. Serrano Leones
  */
-public class IconImageNotNull extends Span {
+public class IconImageNotNull extends Span  implements LoadableOnly {
 
 	/**
 	 *

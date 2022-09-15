@@ -26,6 +26,8 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ui.CoolLabel;
+import tools.dynamia.zk.ui.EnumIconImage;
+import tools.dynamia.zk.ui.LoadableOnly;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -144,8 +146,7 @@ public class ZKBindingUtil {
         binder.addPropertyLoadBindings(component, bindingAttribute, expression, null, null, null, converterExpression,
                 null);
 
-        if (!(component instanceof Label) && !(component instanceof Image)
-                && !(component instanceof Div) && !(component instanceof A) && !(component instanceof Span)) {
+        if (!(component instanceof Label) && !(component instanceof Image) && !(component instanceof LoadableOnly) && !(component instanceof A)) {
 
             binder.addPropertySaveBindings(component, bindingAttribute, expression, null, saveAfterCmds, null,
                     converterExpression, null, null, null);
