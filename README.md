@@ -6,7 +6,7 @@
 # Overview
 
 DynamiaTools is a framework for building Java 11+ web applications fast and easy using standard design patterns, views
-descriptors for automatic UI generation, actions, services and modules. Based in Spring 5 (https://spring.io), ZK
+descriptors for automatic UI generation, actions, services and modules. Powered by **Spring Boot** (https://spring.io), ZK
 9 (https://www.zkoss.org) for web UI and JPA 2.
 
 ## With DynamiaTools you can
@@ -14,7 +14,8 @@ descriptors for automatic UI generation, actions, services and modules. Based in
 - Create fully functional web applications without too much knowledge about Web Development.
 - Write modular applications. Yes, you could create a module (jar file)  and reuse it.
 - It helps you to keep your project DRY.
-- Automatically create CRUDs for you.
+- Automatic CRUD.
+- Automatic REST endpoints.
 - Extends the framework with new modules, actions and services.
 - Use HTML5 in your application thanks to ZK framework, this means you can use bootstrap, css3, and many HTML5
   technologies
