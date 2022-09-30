@@ -42,43 +42,44 @@ public class PageNavigationController {
 
 
     @RequestMapping()
-    public ModelAndView route(HttpServletRequest request){
+    public ModelAndView route(HttpServletRequest request, HttpServletResponse response) {
         var pagePath = request.getRequestURI();
         if (pagePath.startsWith("/page/")) {
             pagePath = pagePath.replaceFirst("/page/", "");
         }
-        return PageNavigationController.navigate(pagePath, request);
+        return PageNavigationController.navigate(pagePath, request, response);
     }
 
     @RequestMapping(value = "/{module}/{group}/{page}", method = RequestMethod.GET)
     public ModelAndView defaultPages(@PathVariable String module, @PathVariable String group, @PathVariable String page,
-                                     HttpServletRequest request) {
+                                     HttpServletRequest request, HttpServletResponse response) {
 
         String path = module + "/" + group + "/" + page;
 
-        return navigate(path, request);
+        return navigate(path, request, response);
 
     }
 
     @RequestMapping(value = "/{module}/{page}", method = RequestMethod.GET)
     public ModelAndView directPages(@PathVariable String module, @PathVariable String page,
-                                    HttpServletRequest request) {
+                                    HttpServletRequest request, HttpServletResponse response) {
 
         String path = module + "/" + page;
-        return navigate(path, request);
+        return navigate(path, request, response);
 
     }
 
     @RequestMapping(value = "/{module}/{group}/{subgroup}/{page}", method = RequestMethod.GET)
     public ModelAndView twoGroupsPages(@PathVariable String module, @PathVariable String group,
-                                       @PathVariable String subgroup, @PathVariable String page, HttpServletRequest request) {
+                                       @PathVariable String subgroup, @PathVariable String page, HttpServletRequest request
+            , HttpServletResponse response) {
 
         String path = module + "/" + group + "/" + subgroup + "/" + page;
-        return navigate(path, request);
+        return navigate(path, request, response);
 
     }
 
-    public static ModelAndView navigate(String path, HttpServletRequest request) {
+    public static ModelAndView navigate(String path, HttpServletRequest request, HttpServletResponse response) {
         if (new File(request.getRequestURI()).isFile()) {
             return null;
         }
@@ -104,6 +105,8 @@ public class PageNavigationController {
 
             mv.addObject("navPage", page);
             mv.addObject("pageName", page.getName());
+
+            CommonController.setupSkin(request, response, mv);
 
             Containers.get().findObjects(PageNavigationInterceptor.class).forEach(pageNavigationInterceptor -> pageNavigationInterceptor.afterPage(page, mv, request));
 

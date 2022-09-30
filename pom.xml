@@ -24,7 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>tools.dynamia</groupId>
     <artifactId>tools.dynamia.parent</artifactId>
-    <version>4.1.0</version>
+    <version>4.2.0</version>
     <packaging>pom</packaging>
     <organization>
         <name>Dynamia Soluciones IT SAS</name>
@@ -84,8 +84,8 @@
 
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
-        <springboot.version>2.7.3</springboot.version>
-        <neo4jogm.version>3.2.35</neo4jogm.version>
+        <springboot.version>2.7.4</springboot.version>
+        <neo4jogm.version>3.2.37</neo4jogm.version>
 
         <!-- Web -->
         <zk.version>9.6.0.2</zk.version>
@@ -96,8 +96,8 @@
         <!--Reports -->
         <jasperreports.version>6.9.0</jasperreports.version>
         <itext.version>2.1.7</itext.version>
-        <poi.version>5.2.2</poi.version>
-        <snakeyaml.version>1.30</snakeyaml.version>
+        <poi.version>5.2.3</poi.version>
+        <snakeyaml.version>1.33</snakeyaml.version>
         <zing.version>3.4.1</zing.version>
 
         <!--Logging -->

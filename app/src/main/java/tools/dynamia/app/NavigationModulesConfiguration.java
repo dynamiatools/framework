@@ -14,6 +14,7 @@ import tools.dynamia.navigation.ModuleContainer;
 import tools.dynamia.navigation.Page;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class NavigationModulesConfiguration {
     public void setPageMapper(ModuleContainer container, List<RequestMappingHandlerMapping> mappings,
                               PageNavigationController controller) throws NoSuchMethodException {
 
-        Method method = PageNavigationController.class.getMethod("route", HttpServletRequest.class);
+        Method method = PageNavigationController.class.getMethod("route", HttpServletRequest.class, HttpServletResponse.class);
         var mapping = mappings.stream().findFirst().get();
         container.getModules().forEach(module ->
                 module.forEachPage(p -> {
