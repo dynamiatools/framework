@@ -26,11 +26,6 @@
     </listener>
 
     <listener>
-        <description>Spring JPA Open Persistence in view</description>
-        <listener-class>tools.dynamia.zk.ZKOpenPersistenceInViewListener</listener-class>
-    </listener>
-
-    <listener>
         <description>WebSocket Listerner Helper</description>
         <listener-class>tools.dynamia.zk.websocket.WebSocketDesktopListener</listener-class>
     </listener>

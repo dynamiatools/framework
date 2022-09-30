@@ -24,27 +24,54 @@ import tools.dynamia.app.IndexInterceptor;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Controller;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.stream.Stream;
 
 @Controller
 @Order(1)
 public class CommonController {
 
     @RequestMapping("/")
-    public ModelAndView index(HttpServletRequest request) {
+    public ModelAndView index(HttpServletRequest request, HttpServletResponse response) {
         ModelAndView mv = new ModelAndView("index");
 
         if (request.getParameter("zoom") != null) {
             mv.addObject("zoom", "zoom: " + request.getParameter("zoom") + ";");
         }
 
-        if (request.getParameter("skin") != null) {
-            CurrentTemplate.get().setSkin(request.getParameter("skin"));
-        }
+        setupSkin(request, response, mv);
 
         Containers.get().findObjects(IndexInterceptor.class).forEach(indexInterceptor -> indexInterceptor.afterIndex(mv, request));
 
         return mv;
+    }
+
+    public static void setupSkin(HttpServletRequest request, HttpServletResponse response, ModelAndView mv) {
+
+        boolean updateCookie = true;
+
+        var skin = request.getParameter("skin");
+
+        if (skin == null || skin.isBlank()) {
+            skin = Stream.of(request.getCookies()).filter(c -> c.getName().equals("skin")).map(Cookie::getValue)
+                    .findFirst().orElse(null);
+            updateCookie = false;
+
+        }
+
+        if (skin != null) {
+            CurrentTemplate.get().setSkin(skin);
+            if (updateCookie) {
+                response.addCookie(new Cookie("skin", skin));
+            }
+        }
+
+        var currentSkin = CurrentTemplate.get().getSkin();
+        if (currentSkin != null && currentSkin.isCustomLayout() && currentSkin.getLayoutView() != null) {
+            mv.setViewName(currentSkin.getLayoutView());
+        }
     }
 
 }

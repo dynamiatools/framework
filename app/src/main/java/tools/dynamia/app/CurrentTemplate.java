@@ -16,13 +16,13 @@
  */
 package tools.dynamia.app;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 import tools.dynamia.app.template.ApplicationTemplate;
 import tools.dynamia.app.template.ApplicationTemplates;
 import tools.dynamia.app.template.Skin;
 import tools.dynamia.integration.Containers;
+import tools.dynamia.web.util.HttpUtils;
 
 import java.io.Serializable;
 import java.util.List;
@@ -35,7 +35,6 @@ public class CurrentTemplate implements Serializable {
      *
      */
     private static final long serialVersionUID = 2751145128618217182L;
-
 
 
     private transient ApplicationTemplate template;
@@ -59,7 +58,10 @@ public class CurrentTemplate implements Serializable {
     }
 
     public void setSkin(String skinId) {
-        this.skin = ApplicationTemplates.findSkin(getTemplate(), skinId);
+        var newskin = ApplicationTemplates.findSkin(getTemplate(), skinId);
+        if (newskin != null) {
+            this.skin = newskin;
+        }
     }
 
     public String getLogoURL() {

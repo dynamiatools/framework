@@ -18,6 +18,9 @@ package tools.dynamia.app.template;
 
 import java.io.Serializable;
 
+/**
+ * Represent a variation of layout or color from an {@link ApplicationTemplate}
+ */
 public class Skin implements Serializable {
 
     /**
@@ -31,12 +34,31 @@ public class Skin implements Serializable {
     private String baseBackgroundColor;
     private String baseColor;
 
+    private boolean customLayout;
+    private String layoutView;
+
     public Skin(String id, String name, String filename, String description) {
         super();
         this.id = id;
         this.name = name;
         this.filename = filename;
         this.description = description;
+    }
+
+    public boolean isCustomLayout() {
+        return customLayout;
+    }
+
+    public void setCustomLayout(boolean customLayout) {
+        this.customLayout = customLayout;
+    }
+
+    public String getLayoutView() {
+        return layoutView;
+    }
+
+    public void setLayoutView(String layoutView) {
+        this.layoutView = layoutView;
     }
 
     public String getBaseBackgroundColor() {

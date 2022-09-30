@@ -20,9 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.zkoss.lang.Library;
+import org.zkoss.zk.ui.Executions;
 import tools.dynamia.app.ApplicationInfo;
 import tools.dynamia.ui.MessageDisplayer;
 import tools.dynamia.zk.ui.MessageNotification;
+import tools.dynamia.zk.util.ZKUtil;
 
 import javax.annotation.PostConstruct;
 
@@ -36,6 +38,12 @@ public class ZKAppConfiguration {
 
     @Autowired
     private ApplicationInfo appInfo;
+
+    public static void updateSkin(String skin) {
+        if (ZKUtil.isInEventListener()) {
+            Executions.getCurrent().sendRedirect("/?skin=" + skin, true);
+        }
+    }
 
     @PostConstruct
     public void init() {

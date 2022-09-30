@@ -43,6 +43,15 @@ public interface ApplicationTemplate extends Serializable {
 
     Skin getDefaultSkin();
 
+
+    default void installSkin(Skin skin) {
+        if(getSkins().stream().noneMatch(s->s.getId().equals(skin.getId()))) {
+            getSkins().add(skin);
+        }else{
+            System.err.println("Already skin installed with id "+skin.getId());
+        }
+    }
+
     void init(TemplateContext context);
 
     default Skin getSkin(String name) {
