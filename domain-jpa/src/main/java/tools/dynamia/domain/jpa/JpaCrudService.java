@@ -77,6 +77,8 @@ public class JpaCrudService extends AbstractCrudService {
     private final PlatformTransactionManager txManager;
     private final ValidatorService validatorService;
 
+    private boolean fullyLoadEntities = false;
+
     public JpaCrudService(PlatformTransactionManager txManager, ValidatorService validatorService) {
         this.txManager = txManager;
         this.validatorService = validatorService;
@@ -171,6 +173,7 @@ public class JpaCrudService extends AbstractCrudService {
      * Class, java.io.Serializable)
      */
     @Override
+    @Transactional
     public <T> T find(Class<T> type, final Serializable id) {
         if (id == null) {
             return null;
@@ -178,22 +181,26 @@ public class JpaCrudService extends AbstractCrudService {
 
         Object targetId = JpaUtils.checkIdType(type, id);
         if (targetId == null) return null;
-        return em.find(type, targetId);
+        var entity = em.find(type, targetId);
+        if (entity != null && isFullyLoadEntities()) {
+            JpaUtils.initializeEntity(entity);
+        }
+
+        return entity;
     }
 
     @Override
+    @Transactional
     public <T> T load(Class<T> type, Serializable id) {
-        if (id == null) {
+        if (id == null || type == null) {
             return null;
         }
 
-        Object targetId = JpaUtils.checkIdType(type, id);
-        if (targetId == null) return null;
-
-        var entityGraph = JpaUtils.createEntityGraph(type, em);
+        var entity = find(type, id);
+        JpaUtils.initializeEntity(entity);
 
 
-        return em.find(type, targetId, Map.of(HINT_LOAD_GRAPH, entityGraph));
+        return entity;
     }
 
     /*
@@ -366,6 +373,7 @@ public class JpaCrudService extends AbstractCrudService {
      * QueryParameters)
      */
     @Override
+    @Transactional
     public <T> List<T> find(Class<T> type, QueryParameters parameters) {
         parameters.setType(type);
         return executeQuery((QueryBuilder) null, parameters);
@@ -379,6 +387,7 @@ public class JpaCrudService extends AbstractCrudService {
      * domain.util.QueryBuilder, QueryParameters)
      */
     @Override
+    @Transactional
     public <T> List<T> executeQuery(QueryBuilder queryBuilder, QueryParameters parameters) {
         try {
             if (queryBuilder != null && parameters.getType() == null) {
@@ -460,16 +469,19 @@ public class JpaCrudService extends AbstractCrudService {
     }
 
     @Override
+    @Transactional
     public <T> List<T> executeQuery(QueryBuilder queryBuilder) {
         return executeQuery(queryBuilder, queryBuilder.getQueryParameters());
     }
 
     @Override
+    @Transactional
     public <T> List<T> executeQuery(String queryText) {
         return executeQuery(queryText, null);
     }
 
     @Override
+    @Transactional
     public <T> List<T> executeQuery(String queryText, QueryParameters parameters) {
 
         Query query = em.createQuery(queryText);
@@ -495,6 +507,7 @@ public class JpaCrudService extends AbstractCrudService {
      * Class, java.lang.String, QueryParameters)
      */
     @Override
+    @Transactional
     public <T> T executeProjection(Class<T> resultClass, String projectionQueryText, QueryParameters parameters) {
         Query query = this.em.createQuery(projectionQueryText);
         parameters.applyTo(wrap(query));
@@ -508,6 +521,7 @@ public class JpaCrudService extends AbstractCrudService {
      * QueryParameters)
      */
     @Override
+    @Transactional
     public int execute(String queryText, QueryParameters parameters) {
         Query query = em.createQuery(queryText);
         if (parameters != null) {
@@ -524,6 +538,7 @@ public class JpaCrudService extends AbstractCrudService {
      * .domain.query.QueryMetadata)
      */
     @Override
+    @Transactional
     public List find(QueryMetadata queryMetada) {
         Query query = null;
         if (queryMetada.getQueryBuilder() != null && queryMetada.getQueryBuilder().getResultType() == BeanMap.class) {
@@ -545,6 +560,7 @@ public class JpaCrudService extends AbstractCrudService {
      * java.lang.String, java.lang.String[])
      */
     @Override
+    @Transactional
     public <T> List<T> findByFields(Class<T> type, String param, String... fields) {
         return findByFields(type, param, null, fields);
     }
@@ -558,6 +574,7 @@ public class JpaCrudService extends AbstractCrudService {
      * java.lang.String[])
      */
     @Override
+    @Transactional
     public <T> List<T> findByFields(Class<T> entityClass, String param, QueryParameters defaultParams,
                                     String... fields) {
         List<T> result = null;
@@ -915,14 +932,15 @@ public class JpaCrudService extends AbstractCrudService {
      * @see CrudService#reload(java.lang.Object)
      */
     @Override
+    @Transactional
     public <T> T reload(T entity) {
         if (entity instanceof AbstractEntity) {
-            entity = (T) find(entity.getClass(), ((AbstractEntity) entity).getId());
+            entity = (T) load(entity.getClass(), ((AbstractEntity) entity).getId());
         } else {
             try {
                 Serializable id = JpaUtils.getJPAIdValue(entity);
                 if (id != null) {
-                    entity = (T) find(entity.getClass(), id);
+                    entity = (T) load(entity.getClass(), id);
                 }
             } catch (Exception e) {
             }
@@ -968,5 +986,14 @@ public class JpaCrudService extends AbstractCrudService {
                 .setParameter("entity", entity)
                 .getSingleResult();
 
+    }
+
+    public boolean isFullyLoadEntities() {
+        return fullyLoadEntities;
+    }
+
+
+    public void setFullyLoadEntities(boolean fullyLoadEntities) {
+        this.fullyLoadEntities = fullyLoadEntities;
     }
 }
