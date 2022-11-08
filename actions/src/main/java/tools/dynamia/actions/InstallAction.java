@@ -18,6 +18,7 @@ package tools.dynamia.actions;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.annotation.*;
 

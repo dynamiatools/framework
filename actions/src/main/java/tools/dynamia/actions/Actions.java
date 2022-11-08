@@ -1,6 +1,7 @@
 package tools.dynamia.actions;
 
 import tools.dynamia.commons.MapBuilder;
+import tools.dynamia.integration.Containers;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,11 @@ public class Actions {
             }
 
             if (event.isPropagatable()) {
-                action.actionPerformed(event);
+                var actionRunner = Containers.get().findObject(ActionRunner.class);
+                if (actionRunner == null) {
+                    actionRunner = new DefaultActionRunner();
+                }
+                actionRunner.run(action, event);
             }
 
             if (event.isPropagatable() && action instanceof ActionFilter) {
