@@ -16,6 +16,7 @@
  */
 package tools.dynamia.domain.jpa;
 
+import org.hibernate.Hibernate;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.Identifiable;
 import tools.dynamia.commons.reflect.PropertyInfo;
@@ -190,7 +191,7 @@ public abstract class JpaUtils {
             }
 
             if (isToMany(p)) {
-               graph.addSubgraph(p.getName());
+                graph.addSubgraph(p.getName());
             }
         });
 
@@ -198,7 +199,7 @@ public abstract class JpaUtils {
     }
 
     private static void loadSubgraph(Subgraph<Object> subgraph, PropertyInfo collection) {
-        if(collection.getGenericType()!=null){
+        if (collection.getGenericType() != null) {
             var subproperties = BeanUtils.getPropertiesInfo(collection.getGenericType());
 
             subproperties.forEach(p -> {
@@ -208,7 +209,7 @@ public abstract class JpaUtils {
 
                 if (isToMany(p)) {
                     var innerSubgraph = subgraph.addSubgraph(p.getName());
-                    loadSubgraph(innerSubgraph,p);
+                    loadSubgraph(innerSubgraph, p);
                 }
             });
         }
@@ -220,5 +221,35 @@ public abstract class JpaUtils {
 
     private static boolean isToOne(PropertyInfo p) {
         return p.isAnnotationPresent(OneToOne.class) || p.isAnnotationPresent(ManyToOne.class);
+    }
+
+    /**
+     * Initialize all entity properties, incluing toOne and toMany asocciation. Should be called inside a Transaction
+     *
+     * @param entity
+     */
+    public static void initializeEntity(Object entity) {
+        if (entity == null) {
+            return;
+        }
+
+        Hibernate.initialize(entity);
+        var properties = BeanUtils.getPropertiesInfo(entity.getClass());
+
+        properties.forEach(p -> {
+            if (isToOne(p)) {
+                var property = BeanUtils.invokeGetMethod(entity, p);
+                if (property != null) {
+                    Hibernate.initialize(property);
+                }
+            }
+
+            if (isToMany(p)) {
+                var collection = BeanUtils.invokeGetMethod(entity, p);
+                if (collection != null) {
+                    Hibernate.initialize(collection);
+                }
+            }
+        });
     }
 }
