@@ -55,9 +55,11 @@ public class CommonController {
         var skin = request.getParameter("skin");
 
         if (skin == null || skin.isBlank()) {
-            skin = Stream.of(request.getCookies()).filter(c -> c.getName().equals("skin")).map(Cookie::getValue)
-                    .findFirst().orElse(null);
-            updateCookie = false;
+            if(request.getCookies()!=null) {
+                skin = Stream.of(request.getCookies()).filter(c -> c.getName().equals("skin")).map(Cookie::getValue)
+                        .findFirst().orElse(null);
+                updateCookie = false;
+            }
 
         }
 
