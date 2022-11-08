@@ -1,4 +1,4 @@
-package tools.dynamia.domain;
+package tools.dynamia.integration.ms;
 
 import org.springframework.transaction.annotation.Transactional;
 import tools.dynamia.integration.ms.Message;
