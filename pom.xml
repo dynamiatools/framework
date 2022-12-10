@@ -62,9 +62,12 @@
         <module>actions</module>
         <module>io</module>
         <module>templates</module>
+
         <module>domain</module>
         <module>domain-jpa</module>
         <module>domain-neo4j</module>
+        <module>domain-mongodb</module>
+
         <module>crud</module>
         <module>ui</module>
         <module>viewers</module>
@@ -80,12 +83,14 @@
         <module>zk-viewers</module>
         <module>zk-app</module>
 
+
     </modules>
 
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
-        <springboot.version>2.7.5</springboot.version>
-        <neo4jogm.version>3.2.37</neo4jogm.version>
+        <springboot.version>2.7.6</springboot.version>
+        <neo4jogm.version>3.2.38</neo4jogm.version>
+        <mongodb.version>1</mongodb.version>
 
         <!-- Web -->
         <zk.version>9.6.0.2</zk.version>
