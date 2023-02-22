@@ -28,7 +28,7 @@
     <packaging>pom</packaging>
     <organization>
         <name>Dynamia Soluciones IT SAS</name>
-        <url>http://www.dynamiasoluciones.com</url>
+        <url>https://www.dynamiasoluciones.com</url>
     </organization>
     <inceptionYear>2009</inceptionYear>
     <url>https://www.dynamia.tools</url>
@@ -88,7 +88,7 @@
 
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
-        <springboot.version>2.7.6</springboot.version>
+        <springboot.version>2.7.8</springboot.version>
         <neo4jogm.version>3.2.38</neo4jogm.version>
         <mongodb.version>1</mongodb.version>
 
