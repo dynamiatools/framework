@@ -264,4 +264,35 @@ public class UIMessages {
         return getLocalizedMessage(key, classifier, Messages.getDefaultLocale(), defaultValue);
     }
 
+    /**
+     * Helper method to show exception message to UI
+     * @param message
+     * @param title
+     * @param exception
+     */
+    public static void showException(String message, String title, Exception exception) {
+        getDisplayer().showException(message, title, exception);
+    }
+
+    /**
+     * Helper method to show exception message to UI
+     * @param message
+     * @param exception
+     */
+    public static void showException(String message, Exception exception) {
+        getDisplayer().showException(message, exception);
+    }
+
+    /**
+     * Helper method to show exception message to UI
+     * @param template
+     * @param e
+     * @param vars
+     */
+    public static void showLocalizedException(String template, Exception e, Object... vars) {
+        String localizedMessage = getLocalizedMessage(template, "* UI Messages");
+        String message = String.format(localizedMessage, vars);
+        showException(message, e);
+    }
+
 }

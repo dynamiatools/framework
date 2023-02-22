@@ -42,4 +42,16 @@ public interface MessageDisplayer {
     <T> void showInput(String title, Class<T> valueClass, Consumer<T> onValue);
 
     <T> void showInput(String title, Class<T> valueClass, T defaultValue, Consumer<T> onValue);
+
+    default void showException(String message, String title, MessageType type, Exception exception) {
+        showMessage(message, title, type);
+    }
+
+    default void showException(String message, String title, Exception exception) {
+        showMessage(message, title, MessageType.ERROR, exception);
+    }
+
+    default void showException(String message, Exception exception) {
+        showMessage(message, null, MessageType.ERROR, exception);
+    }
 }
