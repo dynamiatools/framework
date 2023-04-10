@@ -50,7 +50,7 @@ public class JpaCrudServiceRepository<T, ID extends Serializable> extends Simple
     public List<T> findAll(Sort sort) {
         Sort.Order order = sort.iterator().next();
         if (order != null) {
-            return crudService.find(getDomainClass(), new QueryParameters(new BeanSorter(order.getProperty(), order.isAscending()), null));
+            return crudService.find(getDomainClass(), new QueryParameters(new BeanSorter<>(order.getProperty(), order.isAscending()), null));
         } else {
             return crudService.findAll(getDomainClass());
         }

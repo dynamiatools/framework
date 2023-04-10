@@ -130,7 +130,7 @@ public class Uploadlink extends Toolbarbutton {
             return false;
         }
         name = name.toLowerCase();
-        return (name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg"));
+        return (name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".webp"));
     }
 
     protected void onFileUpload() {

@@ -31,6 +31,8 @@ import java.util.Date;
  */
 public class ValidatorUtil {
 
+    final static EmailValidator EMAIL_VALIDATOR = new EmailValidator();
+
     /**
      * Execute validators.
      *
@@ -170,10 +172,20 @@ public class ValidatorUtil {
      * @param message
      */
     public static void validateEmail(String email, String message) {
-        var emailValidator = new EmailValidator();
-        if (!emailValidator.isValid(email, null)) {
+
+        if (!EMAIL_VALIDATOR.isValid(email)) {
             throw new ValidationError(message);
         }
+    }
+
+    /**
+     * Check if email is valid
+     *
+     * @param email
+     * @return
+     */
+    public static boolean isValidEmail(String email) {
+        return EMAIL_VALIDATOR.isValid(email);
     }
 
     /**

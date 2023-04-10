@@ -38,8 +38,12 @@ public class ImageUtil {
     public static final String DOT_JPG = ".jpg";
     public static final String JPG = "jpg";
     public static final String DOT_JPEG = ".jpeg";
+
+    public static final String DOT_WEBP = ".webp";
     public static final String PNG = "png";
     public static final String GIF = "gif";
+
+    public static final String WEBP = "webp";
 
     /**
      * Resize jpeg image.
@@ -83,7 +87,8 @@ public class ImageUtil {
      */
     public static boolean isImage(File file) {
         if (!file.exists()) {
-            return file.getName().endsWith(JPG) || file.getName().endsWith(PNG) || file.getName().endsWith(GIF);
+            var name = file.getName().toLowerCase();
+            return name.endsWith(JPG) || name.endsWith(PNG) || name.endsWith(GIF) || name.endsWith(WEBP);
         }
 
         String mimetype = getMimetype(file);
