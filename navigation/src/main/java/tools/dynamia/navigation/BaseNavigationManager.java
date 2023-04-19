@@ -41,6 +41,8 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
     private final ModuleContainer container;
     private List<Page> availablesPages = new ArrayList<>();
 
+    private NavigationBuilder currentNavigationBuilder;
+
     public BaseNavigationManager(ModuleContainer container) {
         this.logger = new SLF4JLoggingService(BaseNavigationManager.class);
         this.attributes = new HashMap<>();
@@ -246,5 +248,15 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
     @Override
     public void reload() {
         setRawCurrentPage(null);
+    }
+
+    @Override
+    public NavigationBuilder getCurrentNavigationBuilder() {
+        return currentNavigationBuilder;
+    }
+
+    @Override
+    public void setCurrentNavigationBuilder(NavigationBuilder currentNavigationBuilder) {
+        this.currentNavigationBuilder = currentNavigationBuilder;
     }
 }

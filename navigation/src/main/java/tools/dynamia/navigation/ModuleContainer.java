@@ -39,6 +39,10 @@ import java.util.List;
 @Component
 public final class ModuleContainer implements Serializable {
 
+    public static ModuleContainer getInstance(){
+        return Containers.get().findObject(ModuleContainer.class);
+    }
+
     private final transient LoggingService LOGGER = new SLF4JLoggingService(ModuleContainer.class);
 
     private final Collection<Module> modules;

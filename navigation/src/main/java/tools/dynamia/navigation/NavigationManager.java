@@ -141,4 +141,9 @@ public interface NavigationManager {
     NavigationElement findElement(String path);
 
     void reload();
+
+
+    NavigationBuilder getCurrentNavigationBuilder();
+
+    void setCurrentNavigationBuilder(NavigationBuilder navigationBuilder);
 }

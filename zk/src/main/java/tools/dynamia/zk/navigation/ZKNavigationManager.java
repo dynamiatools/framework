@@ -52,7 +52,7 @@ public class ZKNavigationManager extends BaseNavigationManager implements Serial
 
     private static final long serialVersionUID = 1L;
     private transient ZKNavigationComposer currentComposer;
-    private transient NavigationBuilder currentNavBuilder;
+
 
     public static ZKNavigationManager getInstance() {
         return Containers.get().findObject(ZKNavigationManager.class);
@@ -158,11 +158,4 @@ public class ZKNavigationManager extends BaseNavigationManager implements Serial
         runLaterQueue.add(callback);
     }
 
-    public NavigationBuilder getCurrentNavBuilder() {
-        return currentNavBuilder;
-    }
-
-    public void setCurrentNavBuilder(NavigationBuilder currentNavBuilder) {
-        this.currentNavBuilder = currentNavBuilder;
-    }
 }
