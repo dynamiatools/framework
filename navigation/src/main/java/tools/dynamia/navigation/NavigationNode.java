@@ -20,13 +20,12 @@ public class NavigationNode {
     private String internalPath;
     private String path;
 
-    private double position = 0;
+    private Double position;
+    private Boolean featured;
 
     @JsonIgnore
     private NavigationNode parent;
     private List<NavigationNode> children;
-
-
 
 
     @JsonIgnore
@@ -51,8 +50,9 @@ public class NavigationNode {
         this.internalPath = element.getVirtualPath();
         this.path = element.getPrettyVirtualPath();
 
-        this.position = element.getPosition();
+        this.position = element.getPosition() != 0.0 ? element.getPosition() : null;
         this.type = element.getClass().getSimpleName();
+        this.featured = element instanceof Page ? ((Page) element).isFeatured() : null;
     }
 
     public void addChild(NavigationNode node) {
@@ -161,11 +161,11 @@ public class NavigationNode {
         this.internalPath = internalPath;
     }
 
-    public double getPosition() {
+    public Double getPosition() {
         return position;
     }
 
-    public void setPosition(double position) {
+    public void setPosition(Double position) {
         this.position = position;
     }
 
@@ -180,5 +180,13 @@ public class NavigationNode {
     @Override
     public String toString() {
         return internalPath;
+    }
+
+    public Boolean isFeatured() {
+        return featured;
+    }
+
+    public void setFeatured(Boolean featured) {
+        this.featured = featured;
     }
 }
