@@ -88,7 +88,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
 
                 colors.forEach((name, color) -> {
                     Style style = new Style();
-                    style.setId("tableViewEnumStyle"+name);
+                    style.setId("tableViewEnumStyle" + name);
                     style.setContent(".table-view .e_" + name + ".z-listitem .z-listcell{background: " + color + " }");
 
                     var page = ZKUtil.getFirstPage();
@@ -272,41 +272,21 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
 
     private void setupFootersFunctions(TableView<T> table, List<TableViewFooter> footersWithFunctions) {
         if (footersWithFunctions != null && !footersWithFunctions.isEmpty()) {
+            table.setFootersWithFunctions(footersWithFunctions);
 
-            MultiFunctionProcessor p = null;
+            MultiFunctionProcessor processor = null;
             if (table.getViewDescriptor().getParams().containsKey(Viewers.PARAM_MULTI_FUNCTION_PROCESSOR)) {
                 String processorName = table.getViewDescriptor().getParams().get(Viewers.PARAM_MULTI_FUNCTION_PROCESSOR).toString();
                 if (processorName.equals("crud") || processorName.equals("auto")) {
-                    p = new CrudServiceMultiFunctionProcessor();
+                    processor = new CrudServiceMultiFunctionProcessor();
                 } else {
-                    p = BeanUtils.newInstance(processorName);
+                    processor = BeanUtils.newInstance(processorName);
                 }
             }
-            final MultiFunctionProcessor processor = p;
 
-            table.addEventListener(TableView.ON_VALUE_CHANGED, event -> {
-                Object value = event.getData();
-                footersWithFunctions.forEach(TableViewFooter::clear);
+            table.setMultiFunctionProcesor(processor);
 
-                if (value != null) {
-                    if (processor != null) {
-                        var result = processor.compute(value, new HashMap<>(), footersWithFunctions);
-                        result.forEach((f, v) -> footersWithFunctions.stream()
-                                .filter(ft -> ft.equals(f)).findFirst()
-                                .ifPresent(tableViewFooter -> tableViewFooter.setValue(v)));
-                    } else {
-                        footersWithFunctions.forEach(footer -> {
-                            if (value instanceof Collection) {
-                                if (!((Collection) value).isEmpty()) {
-                                    Map args = MapBuilder.put("property", footer.getField().getName());
-                                    Object result = Functions.compute(footer.getFunction(), value, args);
-                                    footer.setValue(result);
-                                }
-                            }
-                        });
-                    }
-                }
-            });
+            table.addEventListener(TableView.ON_VALUE_CHANGED, event -> table.computeFooters());
         }
     }
 

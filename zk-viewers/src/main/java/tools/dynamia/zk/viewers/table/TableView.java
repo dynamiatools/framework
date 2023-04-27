@@ -21,7 +21,10 @@ package tools.dynamia.zk.viewers.table;
 import org.zkoss.bind.Binder;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.*;
+import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.commons.collect.PagedList;
+import tools.dynamia.domain.fx.Functions;
+import tools.dynamia.domain.fx.MultiFunctionProcessor;
 import tools.dynamia.domain.query.DataSet;
 import tools.dynamia.viewers.DataSetView;
 import tools.dynamia.viewers.View;
@@ -32,10 +35,7 @@ import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.ui.CanBeReadonly;
 import tools.dynamia.zk.util.ZKBindingUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -75,6 +75,8 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
     private boolean projection;
     private PagedList<T> pageList;
     private boolean readonly;
+    private List<TableViewFooter> footersWithFunctions;
+    private MultiFunctionProcessor multiFunctionProcesor;
 
 
     public TableView() {
@@ -371,5 +373,49 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
 
     public void onSourceChanged(Consumer onSourceChange) {
         this.onSourceChange = onSourceChange;
+    }
+
+    void setFootersWithFunctions(List<TableViewFooter> footersWithFunctions) {
+        this.footersWithFunctions = footersWithFunctions;
+    }
+
+    List<TableViewFooter> getFootersWithFunctions() {
+        return footersWithFunctions;
+    }
+
+    /**
+     * Update all footer with functions
+     */
+    public void computeFooters() {
+        if (footersWithFunctions != null) {
+            footersWithFunctions.forEach(TableViewFooter::clear);
+
+            if (value != null) {
+                if (multiFunctionProcesor != null) {
+                    var result = multiFunctionProcesor.compute(value, new HashMap<>(), footersWithFunctions);
+                    result.forEach((f, v) -> footersWithFunctions.stream()
+                            .filter(ft -> ft.equals(f)).findFirst()
+                            .ifPresent(tableViewFooter -> tableViewFooter.setValue(v)));
+                } else {
+                    footersWithFunctions.forEach(footer -> {
+                        if (value instanceof Collection) {
+                            if (!((Collection) value).isEmpty()) {
+                                Map args = MapBuilder.put("property", footer.getField().getName());
+                                Object result = Functions.compute(footer.getFunction(), value, args);
+                                footer.setValue(result);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    public void setMultiFunctionProcesor(MultiFunctionProcessor multiFunctionProcesor) {
+        this.multiFunctionProcesor = multiFunctionProcesor;
+    }
+
+    public MultiFunctionProcessor getMultiFunctionProcesor() {
+        return multiFunctionProcesor;
     }
 }
