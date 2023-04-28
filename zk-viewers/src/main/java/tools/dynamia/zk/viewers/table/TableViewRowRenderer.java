@@ -120,7 +120,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                     Field field = viewDescriptor.getField(evt.getPropertyName());
                     if (field != null) {
                         binder.loadComponent(item, false);
-                        Events.postEvent(new Event(TableView.ON_VALUE_CHANGED, tableView, tableView.getValue()));
+                        tableView.computeFooters();
                     }
                 });
             }

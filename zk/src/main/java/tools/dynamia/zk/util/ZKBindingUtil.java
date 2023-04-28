@@ -21,6 +21,7 @@ import org.zkoss.bind.Binder;
 import org.zkoss.bind.DefaultBinder;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zul.*;
+import tools.dynamia.commons.PropertyChangeEvent;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.viewers.util.Viewers;
@@ -29,6 +30,7 @@ import tools.dynamia.zk.ui.CoolLabel;
 import tools.dynamia.zk.ui.EnumIconImage;
 import tools.dynamia.zk.ui.LoadableOnly;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
@@ -156,33 +158,53 @@ public class ZKBindingUtil {
     /**
      * Notify changes on all property of view model
      *
-     * @param viewmodel
+     * @param bean
      */
-    public static void postNotifyChange(Object viewmodel) {
-        postNotifyChange(viewmodel, "*");
+    public static void postNotifyChange(Object bean) {
+        postNotifyChange(bean, "*");
+    }
+
+    /**
+     * Notify changes of all property of all elements in the collections
+     *
+     * @param objects
+     */
+    public static void postNotifyChange(Collection<?> objects) {
+        objects.forEach(ZKBindingUtil::postNotifyChange);
     }
 
     /**
      * Notify changes on property of view model
      *
-     * @param viewmodel
+     * @param bean
      * @param property
      */
-    public static void postNotifyChange(Object viewmodel, String property) {
+    public static void postNotifyChange(Object bean, String property) {
         if (ZKUtil.isInEventListener()) {
-            BindUtils.postNotifyChange(null, null, viewmodel, property);
+            BindUtils.postNotifyChange(bean, property);
         }
     }
 
     /**
      * Notify changed on properties of view model
      *
-     * @param viewmodel
+     * @param bean
      * @param properties
      */
-    public static void postNotifyChange(Object viewmodel, String... properties) {
-        if (properties != null) {
-            Stream.of(properties).forEach(p -> postNotifyChange(viewmodel, p));
+    public static void postNotifyChange(Object bean, String... properties) {
+        if (ZKUtil.isInEventListener()) {
+            BindUtils.postNotifyChange(bean, properties);
+        }
+    }
+
+    /**
+     * Notify change of {@link PropertyChangeEvent} source and property
+     *
+     * @param evt
+     */
+    public static void postNotifyChange(PropertyChangeEvent evt) {
+        if (evt != null && evt.getSource() != null && evt.getPropertyName() != null) {
+            postNotifyChange(evt.getSource(), evt.getPropertyName());
         }
     }
 
@@ -191,11 +213,13 @@ public class ZKBindingUtil {
      *
      * @param queue
      * @param scope
-     * @param viewmodel
+     * @param bean
      * @param property
      */
-    public static void postNotifyChange(String queue, String scope, Object viewmodel, String property) {
-        BindUtils.postNotifyChange(queue, scope, viewmodel, property);
+    public static void postNotifyChange(String queue, String scope, Object bean, String property) {
+        if (ZKUtil.isInEventListener()) {
+            BindUtils.postNotifyChange(queue, scope, bean, property);
+        }
 
     }
 

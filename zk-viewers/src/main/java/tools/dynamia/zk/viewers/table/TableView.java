@@ -22,6 +22,8 @@ import org.zkoss.bind.Binder;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.*;
 import tools.dynamia.commons.MapBuilder;
+import tools.dynamia.commons.PropertyChangeEvent;
+import tools.dynamia.commons.PropertyChangeListenerContainer;
 import tools.dynamia.commons.collect.PagedList;
 import tools.dynamia.domain.fx.Functions;
 import tools.dynamia.domain.fx.MultiFunctionProcessor;
@@ -322,6 +324,10 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
         this.source = source;
         if (onSourceChange != null) {
             onSourceChange.accept(source);
+        }
+
+        if (source instanceof PropertyChangeListenerContainer) {
+            ((PropertyChangeListenerContainer) source).addPropertyChangeListener(l -> computeFooters());
         }
     }
 
