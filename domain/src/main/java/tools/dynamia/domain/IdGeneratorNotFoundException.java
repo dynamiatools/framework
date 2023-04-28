@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,22 +20,22 @@ public class IdGeneratorNotFoundException extends RuntimeException {
 
     public IdGeneratorNotFoundException() {
         super();
-        
+
     }
 
     public IdGeneratorNotFoundException(String arg0, Throwable arg1) {
         super(arg0, arg1);
-        
+
     }
 
     public IdGeneratorNotFoundException(String arg0) {
         super(arg0);
-        
+
     }
 
     public IdGeneratorNotFoundException(Throwable arg0) {
         super(arg0);
-        
+
     }
 
 }

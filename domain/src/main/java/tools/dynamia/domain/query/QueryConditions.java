@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -439,7 +439,7 @@ public abstract class QueryConditions {
 
 	/**
 	 * Create an in condition using a subquery (JPAQL)
-	 * 
+	 *
 	 * @param subquery
 	 */
 	public static QueryCondition in(String subquery) {
@@ -448,7 +448,7 @@ public abstract class QueryConditions {
 
 	/**
 	 * Create an in condition using a subquery (JPAQL)
-	 * 
+	 *
 	 * @param subquery
 	 */
 	public static QueryCondition in(String subquery, BooleanOp booleanOp) {
@@ -460,7 +460,7 @@ public abstract class QueryConditions {
 	/**
 	 * Create an in condition using a subquery (JPAQL) and params are applied to
 	 * subquery
-	 * 
+	 *
 	 * @param subquery
 	 * @param params
 	 */
@@ -471,7 +471,7 @@ public abstract class QueryConditions {
 	/**
 	 * Create an in condition using a subquery (JPAQL) and params are applied to
 	 * subquery
-	 * 
+	 *
 	 * @param subquery
 	 * @param params
 	 */
@@ -595,7 +595,7 @@ public abstract class QueryConditions {
 
 	/**
 	 * Create a NOT in condition using a subquery (JPAQL)
-	 * 
+	 *
 	 * @param subquery
 	 */
 	public static QueryCondition notIn(String subquery) {
@@ -604,7 +604,7 @@ public abstract class QueryConditions {
 
 	/**
 	 * Create a NOT in condition using a subquery (JPAQL)
-	 * 
+	 *
 	 * @param subquery
 	 */
 	public static QueryCondition notIn(String subquery, BooleanOp booleanOp) {
@@ -616,7 +616,7 @@ public abstract class QueryConditions {
 	/**
 	 * Create a NOT in condition using a subquery (JPAQL) and params are applied
 	 * to subquery
-	 * 
+	 *
 	 * @param subquery
 	 * @param params
 	 */
@@ -627,7 +627,7 @@ public abstract class QueryConditions {
 	/**
 	 * Create a NOT in condition using a subquery (JPAQL) and params are applied
 	 * to subquery
-	 * 
+	 *
 	 * @param subquery
 	 * @param params
 	 */

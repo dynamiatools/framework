@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+  ~ Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
   ~ Colombia / South America
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -111,7 +111,7 @@
 
         <java.version>11</java.version>
         <target.version>11</target.version>
-        <maven.compiler>3.8.1</maven.compiler>
+        <maven.compiler>3.11.0</maven.compiler>
         <source.encoding>UTF-8</source.encoding>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

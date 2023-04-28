@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,7 +40,7 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * tools.dynamia.app.services.impl.GlobalSearchService#search(java.lang.
 	 * String)
@@ -53,7 +53,7 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * tools.dynamia.app.services.impl.GlobalSearchService#search(java.lang.
 	 * String, int)
@@ -87,7 +87,7 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see tools.dynamia.app.services.impl.GlobalSearchService#
 	 * openGlobalSearchResult (tools.dynamia.app.GlobalSearchResult,
 	 * tools.dynamia.web.util.RequestSender)

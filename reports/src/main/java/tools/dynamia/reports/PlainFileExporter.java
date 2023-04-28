@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -120,7 +120,7 @@ public class PlainFileExporter<T> {
 						} catch (Exception e) {
 							System.err.printf("PFE: Error invoking get method %s in bean %s \n", col.getName(), bean);
 						}
-						
+
 						String formatPattern = col.getFormatPattern();
 						if (formatPattern != null && !formatPattern.isEmpty()) {
 							if (value instanceof Date) {
@@ -129,11 +129,11 @@ public class PlainFileExporter<T> {
 								value = new DecimalFormat(formatPattern).format(value);
 							}
 						}
-						
+
 						if (value == null || value.equals("null")) {
 							value = " ";
 						}
-						
+
 
 						writer.append(value.toString()).append(separator);
 					}

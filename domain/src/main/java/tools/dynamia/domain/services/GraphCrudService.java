@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,7 @@ public interface GraphCrudService extends CrudService {
 
 	/**
 	 * Save with depth
-	 * 
+	 *
 	 * @param t
 	 * @param depth
 	 */
@@ -33,7 +33,7 @@ public interface GraphCrudService extends CrudService {
 
 	/**
 	 * Load entity and relationships with depth
-	 * 
+	 *
 	 * @param type
 	 * @param id
 	 * @param depth
@@ -43,7 +43,7 @@ public interface GraphCrudService extends CrudService {
 
 	/**
 	 * Query for Object
-	 * 
+	 *
 	 * @param type
 	 * @param query
 	 * @param params

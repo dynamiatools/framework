@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -490,7 +490,7 @@ public class JdbcHelper {
 
 	/**
 	 * Get column value by name, if column not found, return null.
-	 * 
+	 *
 	 * @param rs
 	 * @param name
 	 * @return
@@ -507,7 +507,7 @@ public class JdbcHelper {
 
 	/**
 	 * Get column value by index, if column not found, return null.
-	 * 
+	 *
 	 * @param rs
 	 * @param index
 	 * @return
@@ -559,7 +559,7 @@ public class JdbcHelper {
 	/**
 	 * Add new sql to current batch statement or executeUpdate if drive dont
 	 * support Batch updates
-	 * 
+	 *
 	 * @param sql
 	 */
 	public void addBatch(String sql) {
@@ -584,7 +584,7 @@ public class JdbcHelper {
 	 * Execute and commit batch. If batch statement if not supported just
 	 * execute commit and return an empty array of int[]. Finally it clear batch
 	 * and set auto commit true.
-	 * 
+	 *
 	 * @return
 	 */
 	public int[] executeBatch() {

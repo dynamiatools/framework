@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,17 +33,17 @@ public class ReportExporterException extends RuntimeException {
 
     public ReportExporterException() {
         super();
-        
+
     }
 
     public ReportExporterException(String message, Throwable cause) {
         super(message, cause);
-        
+
     }
 
     public ReportExporterException(String message) {
         super(message);
-        
+
     }
 
 }

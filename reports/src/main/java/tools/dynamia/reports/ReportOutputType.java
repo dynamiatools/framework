@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ public enum ReportOutputType {
     HTML("html", "text/html"),
     CSV("csv", "text/plain"),
     JAVA2D("", ""),
-    PLAIN("txt", "text/plain"),    
+    PLAIN("txt", "text/plain"),
     PRINTER("printer", null);
 
     private final String extension;

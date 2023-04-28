@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@ package tools.dynamia.app;
 /**
  * Allow execute unknow commands from application global search result
  *
- * @author Ing. Mario Serrano 
+ * @author Ing. Mario Serrano
  */
 public interface GlobalSearchCommandExecutor {
 

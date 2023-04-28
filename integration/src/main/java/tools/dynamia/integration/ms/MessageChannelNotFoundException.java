@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,7 +32,7 @@ public class MessageChannelNotFoundException extends MessageException {
      */
     public MessageChannelNotFoundException() {
         super();
-        
+
     }
 
     /**
@@ -43,7 +43,7 @@ public class MessageChannelNotFoundException extends MessageException {
      */
     public MessageChannelNotFoundException(String message, Throwable cause) {
         super(message, cause);
-        
+
     }
 
     /**
@@ -53,7 +53,7 @@ public class MessageChannelNotFoundException extends MessageException {
      */
     public MessageChannelNotFoundException(String message) {
         super(message);
-        
+
     }
 
     /**
@@ -63,7 +63,7 @@ public class MessageChannelNotFoundException extends MessageException {
      */
     public MessageChannelNotFoundException(Throwable cause) {
         super(cause);
-        
+
     }
 
 }

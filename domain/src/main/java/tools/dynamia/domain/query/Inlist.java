@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -87,7 +87,7 @@ public class Inlist<T> extends AbstractQueryCondition<List<T>> {
 
 	/**
 	 * Create an inlist condition using a subquery (JPAQL)
-	 * 
+	 *
 	 * @param subquery
 	 */
 	public Inlist(String subquery) {
@@ -97,7 +97,7 @@ public class Inlist<T> extends AbstractQueryCondition<List<T>> {
 	/**
 	 * Create an inlist condition using a subquery (JPAQL) and params are
 	 * applied to subquery
-	 * 
+	 *
 	 * @param subquery
 	 * @param params
 	 */
@@ -108,7 +108,7 @@ public class Inlist<T> extends AbstractQueryCondition<List<T>> {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.dynamia.tools.domain.query.AbstractQueryCondition#render(java.lang.
 	 * String)
@@ -126,7 +126,7 @@ public class Inlist<T> extends AbstractQueryCondition<List<T>> {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.dynamia.tools.domain.query.AbstractQueryCondition#apply(java.lang.
 	 * String, javax.persistence.Query)
@@ -144,7 +144,7 @@ public class Inlist<T> extends AbstractQueryCondition<List<T>> {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.dynamia.tools.domain.query.AbstractQueryCondition#getOperator()
 	 */
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +33,7 @@ public class InvalidViewDescriptorFieldException extends RuntimeException {
      * Instantiates a new invalid view descriptor field exception.
      */
     public InvalidViewDescriptorFieldException() {
-        
+
     }
 
     /**
@@ -43,7 +43,7 @@ public class InvalidViewDescriptorFieldException extends RuntimeException {
      */
     public InvalidViewDescriptorFieldException(String message) {
         super(message);
-        
+
     }
 
     /**
@@ -53,7 +53,7 @@ public class InvalidViewDescriptorFieldException extends RuntimeException {
      */
     public InvalidViewDescriptorFieldException(Throwable cause) {
         super(cause);
-        
+
     }
 
     /**
@@ -64,7 +64,7 @@ public class InvalidViewDescriptorFieldException extends RuntimeException {
      */
     public InvalidViewDescriptorFieldException(String message, Throwable cause) {
         super(message, cause);
-        
+
     }
 
 }

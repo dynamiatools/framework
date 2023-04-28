@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,22 +24,22 @@ public class ReportCompileException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public ReportCompileException() {
-        
+
     }
 
     public ReportCompileException(String message) {
         super(message);
-        
+
     }
 
     public ReportCompileException(Throwable cause) {
         super(cause);
-        
+
     }
 
     public ReportCompileException(String message, Throwable cause) {
         super(message, cause);
-        
+
     }
 
 }

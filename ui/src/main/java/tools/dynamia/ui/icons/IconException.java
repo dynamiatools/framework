@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,22 +25,22 @@ public class IconException extends RuntimeException {
 
     public IconException() {
         super();
-        
+
     }
 
     public IconException(String message, Throwable cause) {
         super(message, cause);
-        
+
     }
 
     public IconException(String message) {
         super(message);
-        
+
     }
 
     public IconException(Throwable cause) {
         super(cause);
-        
+
     }
 
 }

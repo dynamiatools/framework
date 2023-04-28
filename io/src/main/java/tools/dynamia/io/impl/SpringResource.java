@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,7 +49,7 @@ public class SpringResource implements Resource {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.dynamia.tools.io.Resource#getInputStream()
      */
     @Override
@@ -59,7 +59,7 @@ public class SpringResource implements Resource {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.dynamia.tools.io.Resource#getLastModified()
      */
     @Override
@@ -69,7 +69,7 @@ public class SpringResource implements Resource {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.dynamia.tools.io.Resource#isReadable()
      */
     @Override
@@ -79,7 +79,7 @@ public class SpringResource implements Resource {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.dynamia.tools.io.Resource#isOpen()
      */
     @Override
@@ -89,7 +89,7 @@ public class SpringResource implements Resource {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.dynamia.tools.io.Resource#getURL()
      */
     @Override
@@ -99,7 +99,7 @@ public class SpringResource implements Resource {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.dynamia.tools.io.Resource#getURI()
      */
     @Override
@@ -109,7 +109,7 @@ public class SpringResource implements Resource {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.dynamia.tools.io.Resource#getFilename()
      */
     @Override
@@ -119,7 +119,7 @@ public class SpringResource implements Resource {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.dynamia.tools.io.Resource#getFile()
      */
     @Override
@@ -129,7 +129,7 @@ public class SpringResource implements Resource {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.dynamia.tools.io.Resource#exists()
      */
     @Override
@@ -139,7 +139,7 @@ public class SpringResource implements Resource {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.dynamia.tools.io.Resource#getContentLength()
      */
     @Override
@@ -149,7 +149,7 @@ public class SpringResource implements Resource {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.dynamia.tools.io.Resource#getFileExtension()
      */
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,7 +66,7 @@ public class SLF4JLoggingService implements LoggingService, Serializable {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see tools.dynamia.commons.logger.LoggingService#debug(java.lang.String)
      */
     @Override
@@ -78,7 +78,7 @@ public class SLF4JLoggingService implements LoggingService, Serializable {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see tools.dynamia.commons.logger.LoggingService#info(java.lang.String)
      */
     @Override
@@ -88,7 +88,7 @@ public class SLF4JLoggingService implements LoggingService, Serializable {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see tools.dynamia.commons.logger.LoggingService#warn(java.lang.String)
      */
     @Override
@@ -98,7 +98,7 @@ public class SLF4JLoggingService implements LoggingService, Serializable {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see tools.dynamia.commons.logger.LoggingService#error(java.lang.String)
      */
     @Override
@@ -108,7 +108,7 @@ public class SLF4JLoggingService implements LoggingService, Serializable {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see tools.dynamia.commons.logger.LoggingService#error(java.lang.String,
 	 * java.lang.Throwable)
      */
@@ -119,7 +119,7 @@ public class SLF4JLoggingService implements LoggingService, Serializable {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * tools.dynamia.commons.logger.LoggingService#error(java.lang.Throwable)
      */
@@ -130,7 +130,7 @@ public class SLF4JLoggingService implements LoggingService, Serializable {
 
     /*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see tools.dynamia.commons.logger.LoggingService#isDebugEnabled()
      */
     @Override
