@@ -144,6 +144,7 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
         } else {
             setModel(new TableViewModel<>(this.value, true, isMultiple()));
         }
+
         if (changed) {
             Events.postEvent(ON_VALUE_CHANGED, this, this.value);
         }
@@ -160,19 +161,12 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
 
     @Override
     public void setSelected(Object selected) {
-        if (getModel() instanceof TableViewModel) {
-            TableViewModel model = (TableViewModel) getModel();
-            if (selected != null) {
-                model.addToSelection(selected);
-                if (getSelectedItem() != null) {
-                    getSelectedItem().focus();
-                }
-            } else {
-                setSelectedItem(null);
-            }
+        if (selected != null && getModel() instanceof AbstractListModel) {
+            var model = (AbstractListModel) getModel();
+            model.addToSelection(selected);
         }
-
     }
+
 
     public void setDefaultValue(List<T> defaultValue) {
         this.defaultValue = defaultValue;
