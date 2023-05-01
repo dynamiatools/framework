@@ -23,4 +23,13 @@ import java.io.Serializable;
 
 public record TableFieldComponent(String fieldName, Component component) implements Serializable {
 
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+
+    public Component getComponent() {
+        return component;
+    }
 }

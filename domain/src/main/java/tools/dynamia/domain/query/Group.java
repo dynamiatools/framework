@@ -54,4 +54,6 @@ public record Group(QueryParameters params, BooleanOp booleanOp) {
     public QueryParameters params() {
         return params;
     }
+
+
 }

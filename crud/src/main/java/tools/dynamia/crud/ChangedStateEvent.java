@@ -18,4 +18,18 @@ package tools.dynamia.crud;
 
 public record ChangedStateEvent(CrudState newState, CrudState oldState, GenericCrudView crudView) {
 
+
+    public CrudState getNewState() {
+        return newState;
+    }
+
+
+    public CrudState getOldState() {
+        return oldState;
+    }
+
+
+    public GenericCrudView getCrudView() {
+        return crudView;
+    }
 }

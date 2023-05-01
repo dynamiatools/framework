@@ -18,6 +18,7 @@
 package tools.dynamia.web.util;
 
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -96,6 +97,17 @@ public class HttpRestClient {
         return exchange(HttpMethod.GET, uri, null, List.class);
     }
 
+    /**
+     * Perf
+     * @param uri
+     * @param type
+     * @return
+     * @param <T>
+     */
+    public <T> List<T> getList(String uri, Class<T> type) {
+        return exchange(HttpMethod.GET, url, null, new ParameterizedTypeReference<>() {});
+    }
+
 
     public Map post(String uri, Map<String, Object> body) {
         return post(uri, body, Map.class);
@@ -127,6 +139,13 @@ public class HttpRestClient {
         HttpEntity entity = new HttpEntity<>(body, createHeaders());
 
         ResponseEntity<T> response = rest.exchange(url + uri, method, entity, responseClass);
+        return response.getBody();
+    }
+
+    protected <T> T exchange(HttpMethod method, String uri, Object body, ParameterizedTypeReference<T> type) {
+        HttpEntity entity = new HttpEntity<>(body, createHeaders());
+
+        ResponseEntity<T> response = rest.exchange(url + uri, method, entity, type);
         return response.getBody();
     }
 

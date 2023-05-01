@@ -151,4 +151,8 @@ public record SpringResource(org.springframework.core.io.Resource internalResour
     public String getFileExtension() {
         return StringUtils.getFilenameExtension(getFilename());
     }
+
+    public org.springframework.core.io.Resource getInternalResource(){
+        return internalResource();
+    }
 }

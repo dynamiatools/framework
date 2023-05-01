@@ -25,7 +25,6 @@ public record MessageEvent<T extends Message>(T message, String topic, String ca
 
     /**
      * Shortcut to getMessage().getContent()
-     *
      */
     public Object getContent() {
         return message().getContent();
@@ -38,5 +37,20 @@ public record MessageEvent<T extends Message>(T message, String topic, String ca
                 ", topic='" + topic + '\'' +
                 ", callback='" + callback + '\'' +
                 '}';
+    }
+
+
+    public T getMessage() {
+        return message;
+    }
+
+
+    public String getTopic() {
+        return topic;
+    }
+
+
+    public String getCallback() {
+        return callback;
     }
 }
