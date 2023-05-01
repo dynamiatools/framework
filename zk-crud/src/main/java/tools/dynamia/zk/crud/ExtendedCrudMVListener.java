@@ -24,16 +24,14 @@ public class ExtendedCrudMVListener extends AbstractExtendedMVListener {
 
     @Override
     public void subviewLoaded(final MultiView parentView, View subview) {
-        if (subview instanceof CrudView) {
-            CrudView crudView = (CrudView) subview;
+        if (subview instanceof CrudView crudView) {
             crudView.getController().getDefaultEntityValues().put(beanProperty, parentView.getValue());
         }
     }
 
     @Override
     public void subviewSelected(MultiView parentView, View subview) {
-        if (subview instanceof CrudView) {
-            CrudView crudView = (CrudView) subview;
+        if (subview instanceof CrudView crudView) {
             if (parentView.getValue() != null && parentView.getValue() instanceof AbstractEntity) {
                 crudView.getController().setParemeter(beanProperty, parentView.getValue());
                 crudView.getController().doQuery();

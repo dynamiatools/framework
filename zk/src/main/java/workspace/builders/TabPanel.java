@@ -174,8 +174,7 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
 
     @Override
     protected void postUpdate(Component pageComponent, Page page, Map<String, Object> params) {
-        if (pageComponent.getParent() instanceof Tabpanel) {
-            Tabpanel tabpanel = (Tabpanel) pageComponent.getParent();
+        if (pageComponent.getParent() instanceof Tabpanel tabpanel) {
             if (tabpanel == null) {
                 return;
             }

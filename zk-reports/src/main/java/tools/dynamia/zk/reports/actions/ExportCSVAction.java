@@ -59,8 +59,7 @@ public class ExportCSVAction extends AbstractExportAction {
 	public void actionPerformed(CrudActionEvent evt) {
 		CrudView crudView = (CrudView) evt.getCrudView();
 		DataSetView dataSetView = crudView.getDataSetView();
-		if (dataSetView.getValue() != null && dataSetView.getValue() instanceof Collection) {
-			Collection data = (Collection) dataSetView.getValue();
+		if (dataSetView.getValue() != null && dataSetView.getValue() instanceof Collection data) {
 
 			if (data.size() > LARGE) {
 				UIMessages.showQuestion(MESSAGES.get("confirm_large_export"),

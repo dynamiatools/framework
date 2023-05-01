@@ -167,8 +167,7 @@ public class TreeViewRowRenderer<E> implements TreeitemRenderer<TreeViewNode<E>>
                 fieldsComponentsMap.put(field.getName(), new TreeFieldComponent(field.getName(), comp));
                 if (isBindiable(field, comp)) {
                     Object bmapObject = field.getParam(Viewers.PARAM_BINDINGS);
-                    if (bmapObject != null && bmapObject instanceof Map) {
-                        Map bindingMap = (Map) bmapObject;
+                    if (bmapObject != null && bmapObject instanceof Map bindingMap) {
                         ZKBindingUtil.bindComponent(binder, comp, bindingMap, Viewers.BEAN);
                     } else {
                         String converterExpression = (String) field.getParam(Viewers.PARAM_CONVERTER);

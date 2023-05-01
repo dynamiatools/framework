@@ -85,8 +85,7 @@ public class Booleanbox extends Combobox {
 
         this.selected = selected;
 
-        if (getModel() instanceof AbstractListModel) {
-            AbstractListModel model = (AbstractListModel) getModel();
+        if (getModel() instanceof AbstractListModel model) {
             Optional result = getItems().stream().filter(c -> Objects.equals(c.getValue(), selected)).map(Comboitem::getValue).findFirst();
             if (result.isPresent()) {
                 model.addToSelection(result.get());

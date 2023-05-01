@@ -8,7 +8,7 @@ public abstract class NavigationBuilder {
     private Class<NavigationViewBuilder> viewBuilderClass;
     private NavigationViewBuilder viewBuilder;
 
-    private NavigationTree navigationTree = new NavigationTree();
+    private final NavigationTree navigationTree = new NavigationTree();
 
     public void init() {
         buildNavigation();

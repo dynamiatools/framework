@@ -161,8 +161,7 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
             view.setSource(source);
         }
 
-        if (view instanceof Component) {
-            Component viewComp = (Component) view;
+        if (view instanceof Component viewComp) {
             events.forEach((name, values) -> values.forEach(listener -> viewComp.addEventListener(name, listener)));
             viewComp.setParent(contentRegion);
 
@@ -205,8 +204,7 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
 
             Component actionComponent = (Component) actionRenderer.render(action, this);
 
-            if (actionComponent instanceof Button) {
-                Button button = (Button) actionComponent;
+            if (actionComponent instanceof Button button) {
                 String type = "primary";
                 if (action.getAttribute("type") != null) {
                     type = (String) action.getAttribute("type");
@@ -347,8 +345,7 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
     public void setToolbar(Toolbar toolbar) {
         this.toolbar = toolbar;
 
-        if (toolbar instanceof ActionToolbar) {
-            ActionToolbar actionToolbar = (ActionToolbar) toolbar;
+        if (toolbar instanceof ActionToolbar actionToolbar) {
             if (actionToolbar.getEventBuilder() == null) {
                 actionToolbar.setEventBuilder(this);
             }

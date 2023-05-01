@@ -3,7 +3,7 @@ package tools.dynamia.app;
 import org.springframework.web.servlet.ModelAndView;
 import tools.dynamia.navigation.Page;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public interface PageNavigationInterceptor {
 

@@ -182,11 +182,9 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
 
         String text = navigationElement.getName();
 
-        if (titleComp instanceof Label) {
-            Label label = (Label) titleComp;
+        if (titleComp instanceof Label label) {
             label.setValue(text);
-        } else if (titleComp instanceof LabelElement) {
-            LabelElement element = (LabelElement) titleComp;
+        } else if (titleComp instanceof LabelElement element) {
             element.setLabel(text);
         } else {
             titleComp.getChildren().clear();

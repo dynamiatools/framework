@@ -96,8 +96,7 @@ public class ActionToolbar extends Toolbar {
         if (action.getAttribute("internalId") != null) {
             actionId = action.getAttribute("internalId").toString();
         }
-        if (component instanceof HtmlBasedComponent) {
-            HtmlBasedComponent hcom = (HtmlBasedComponent) component;
+        if (component instanceof HtmlBasedComponent hcom) {
             hcom.setSclass("actiontb-a " + actionId + " " + hcom.getSclass());
         }
 

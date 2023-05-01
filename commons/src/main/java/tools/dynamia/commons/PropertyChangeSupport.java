@@ -5,7 +5,7 @@ import java.util.List;
 
 public class PropertyChangeSupport implements PropertyChangeListenerContainer {
 
-    private List<PropertyChangeListener> listeners = new ArrayList<>();
+    private final List<PropertyChangeListener> listeners = new ArrayList<>();
     private Object source;
 
     public PropertyChangeSupport() {

@@ -150,8 +150,7 @@ public class QueryExample {
      * @return true, if is valid field value
      */
     private boolean isValidFieldValue(Object value) {
-        if (value instanceof AbstractEntity) {
-            AbstractEntity ent = (AbstractEntity) value;
+        if (value instanceof AbstractEntity ent) {
             if (ent.getId() != null) {
                 return true;
             }
@@ -172,8 +171,7 @@ public class QueryExample {
         if (!excludeZeroes) {
             return true;
         }
-        if (value instanceof Number) {
-            Number num = (Number) value;
+        if (value instanceof Number num) {
             return num.longValue() != 0;
         }
         return true;

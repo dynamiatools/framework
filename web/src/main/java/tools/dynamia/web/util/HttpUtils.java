@@ -20,7 +20,7 @@ import org.apache.http.client.fluent.Request;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -106,8 +106,8 @@ public class HttpUtils {
 
     public static long ipV4ToLong(String ip) {
         String[] octets = ip.split("\\.");
-        return (Long.parseLong(octets[0]) << 24) + (Integer.parseInt(octets[1]) << 16)
-                + (Integer.parseInt(octets[2]) << 8) + Integer.parseInt(octets[3]);
+        return (Long.parseLong(octets[0]) << 24) + ((long) Integer.parseInt(octets[1]) << 16)
+                + ((long) Integer.parseInt(octets[2]) << 8) + Integer.parseInt(octets[3]);
     }
 
     public static boolean isIPv4Private(String ip) {

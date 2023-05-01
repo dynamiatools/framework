@@ -183,8 +183,7 @@ public class EntityReferencePickerBox extends Bandbox implements CanBeReadonly {
         }
 
 
-        if (resultTable.getModel() instanceof AbstractListModel) {
-            AbstractListModel model = (AbstractListModel) resultTable.getModel();
+        if (resultTable.getModel() instanceof AbstractListModel model) {
             model.addToSelection(reference);
         }
     }

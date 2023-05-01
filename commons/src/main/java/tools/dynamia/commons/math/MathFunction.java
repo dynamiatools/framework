@@ -94,19 +94,19 @@ public class MathFunction {
 
                 if (hasNumber) {
                     final Double numb = Double.valueOf(number);
-                    final String new_f_x = f_x.substring(i + 1, f_x.length());
+                    final String new_f_x = f_x.substring(i + 1);
                     value = numb + eval(new_f_x, xi);
                     i += new_f_x.length();
                     hasNumber = false;
                     number = "";
                 } else if (hasFunction) {
-                    final String new_f_x = f_x.substring(i + 1, f_x.length());
+                    final String new_f_x = f_x.substring(i + 1);
                     value = eval(function, xi) + eval(new_f_x, xi);
                     i += new_f_x.length();
                     hasFunction = false;
                     function = "";
                 } else {
-                    final String new_f_x = f_x.substring(i + 1, f_x.length());
+                    final String new_f_x = f_x.substring(i + 1);
                     value = value + eval(new_f_x, xi);
                     i += new_f_x.length();
                 }
@@ -115,19 +115,19 @@ public class MathFunction {
 
                 if (hasNumber) {
                     final Double numb = Double.valueOf(number);
-                    final String new_f_x = nextFunction(f_x.substring(i + 1, f_x.length()));
+                    final String new_f_x = nextFunction(f_x.substring(i + 1));
                     value = numb * eval(new_f_x, xi);
                     i += new_f_x.length();
                     hasNumber = false;
                     number = "";
                 } else if (hasFunction) {
-                    final String new_f_x = nextFunction(f_x.substring(i + 1, f_x.length()));
+                    final String new_f_x = nextFunction(f_x.substring(i + 1));
                     value = eval(function, xi) * eval(new_f_x, xi);
                     i += new_f_x.length();
                     hasFunction = false;
                     function = "";
                 } else {
-                    final String new_f_x = nextFunction(f_x.substring(i + 1, f_x.length()));
+                    final String new_f_x = nextFunction(f_x.substring(i + 1));
                     value = value * eval(new_f_x, xi);
                     i += new_f_x.length();
                 }
@@ -136,19 +136,19 @@ public class MathFunction {
 
                 if (hasNumber) {
                     final Double numb = Double.valueOf(number);
-                    final String new_f_x = nextMinusFunction(f_x.substring(i + 1, f_x.length()));
+                    final String new_f_x = nextMinusFunction(f_x.substring(i + 1));
                     value = numb - eval(new_f_x, xi);
                     i += new_f_x.length();
                     hasNumber = false;
                     number = "";
                 } else if (hasFunction) {
-                    final String new_f_x = nextMinusFunction(f_x.substring(i + 1, f_x.length()));
+                    final String new_f_x = nextMinusFunction(f_x.substring(i + 1));
                     value = eval(function, xi) - eval(new_f_x, xi);
                     i += new_f_x.length();
                     hasFunction = false;
                     function = "";
                 } else {
-                    final String new_f_x = nextMinusFunction(f_x.substring(i + 1, f_x.length()));
+                    final String new_f_x = nextMinusFunction(f_x.substring(i + 1));
                     value = value - eval(new_f_x, xi);
                     i += new_f_x.length();
                 }
@@ -157,19 +157,19 @@ public class MathFunction {
 
                 if (hasNumber) {
                     final Double numb = Double.valueOf(number);
-                    final String new_f_x = nextFunction(f_x.substring(i + 1, f_x.length()));
+                    final String new_f_x = nextFunction(f_x.substring(i + 1));
                     value = numb / eval(new_f_x, xi);
                     i += new_f_x.length();
                     hasNumber = false;
                     number = "";
                 } else if (hasFunction) {
-                    final String new_f_x = nextFunction(f_x.substring(i + 1, f_x.length()));
+                    final String new_f_x = nextFunction(f_x.substring(i + 1));
                     value = eval(function, xi) / eval(new_f_x, xi);
                     i += new_f_x.length();
                     hasFunction = false;
                     function = "";
                 } else {
-                    final String new_f_x = nextFunction(f_x.substring(i + 1, f_x.length()));
+                    final String new_f_x = nextFunction(f_x.substring(i + 1));
                     value = value / eval(new_f_x, xi);
                     i += new_f_x.length();
                 }
@@ -178,19 +178,19 @@ public class MathFunction {
 
                 if (hasNumber) {
                     final Double numb = Double.valueOf(number);
-                    final String new_f_x = nextFunction(f_x.substring(i + 1, f_x.length()));
+                    final String new_f_x = nextFunction(f_x.substring(i + 1));
                     value = StrictMath.pow(numb.doubleValue(), eval(new_f_x, xi));
                     i += new_f_x.length();
                     hasNumber = false;
                     number = "";
                 } else if (hasFunction) {
-                    final String new_f_x = nextFunction(f_x.substring(i + 1, f_x.length()));
+                    final String new_f_x = nextFunction(f_x.substring(i + 1));
                     value = StrictMath.pow(eval(function, xi), eval(new_f_x, xi));
                     i += new_f_x.length();
                     hasFunction = false;
                     function = "";
                 } else {
-                    final String new_f_x = nextFunction(f_x.substring(i + 1, f_x.length()));
+                    final String new_f_x = nextFunction(f_x.substring(i + 1));
                     value = StrictMath.pow(value, eval(new_f_x, xi));
                     i += new_f_x.length();
                 }
@@ -384,10 +384,7 @@ public class MathFunction {
      * @return true, if is valid character
      */
     private boolean isValidCharacter(final char character) {
-        boolean result = false;
-        if ((character >= 'a' && character <= 'z')) {
-            result = true;
-        }
+        boolean result = character >= 'a' && character <= 'z';
         return result;
     }
 
@@ -398,10 +395,7 @@ public class MathFunction {
      * @return true, if is valid numeric and character
      */
     private boolean isValidNumericAndCharacter(final char character) {
-        boolean result = false;
-        if ((character >= 'a' && character <= 'z') || (character >= '0' && character <= '9')) {
-            result = true;
-        }
+        boolean result = (character >= 'a' && character <= 'z') || (character >= '0' && character <= '9');
         return result;
     }
 

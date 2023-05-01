@@ -161,8 +161,7 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
 
     @Override
     public void setSelected(Object selected) {
-        if (selected != null && getModel() instanceof AbstractListModel) {
-            var model = (AbstractListModel) getModel();
+        if (selected != null && getModel() instanceof AbstractListModel model) {
             model.addToSelection(selected);
         }
     }
@@ -223,8 +222,7 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
     @Override
     public void setItemRenderer(ListitemRenderer renderer) {
         super.setItemRenderer(renderer);
-        if (renderer instanceof TableViewRowRenderer) {
-            TableViewRowRenderer tvrr = (TableViewRowRenderer) renderer;
+        if (renderer instanceof TableViewRowRenderer tvrr) {
             tvrr.setViewDescriptor(viewDescriptor);
             tvrr.setTableView(this);
         }

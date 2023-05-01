@@ -303,8 +303,7 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
             inputField.setValue(null);
         }
 
-        if (resultTable.getModel() instanceof AbstractListModel) {
-            AbstractListModel model = (AbstractListModel) resultTable.getModel();
+        if (resultTable.getModel() instanceof AbstractListModel model) {
             if (object != null) {
                 model.addToSelection(object);
             } else {

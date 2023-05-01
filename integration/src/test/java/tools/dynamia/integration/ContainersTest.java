@@ -67,12 +67,12 @@ public class ContainersTest {
     public void findObjects() {
         Collection<String> strings = soc.getObjects(String.class);
         assertNotNull(strings);
-        assertTrue(!strings.isEmpty());
+        assertFalse(strings.isEmpty());
         assertEquals(2, strings.size());
 
         strings = Containers.get().findObjects(String.class);
         assertNotNull(strings);
-        assertTrue(!strings.isEmpty());
+        assertFalse(strings.isEmpty());
         assertEquals(2, strings.size());
     }
 

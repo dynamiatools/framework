@@ -35,7 +35,7 @@ import static tools.dynamia.domain.query.QueryConditions.isNotNull;
 import static tools.dynamia.domain.query.QueryParameters.with;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "/applicationContext.xml")
+@ContextConfiguration(classes = TestConfig.class)
 public class JpaCrudServiceTest {
 
     @Autowired

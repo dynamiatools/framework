@@ -2,7 +2,7 @@ package tools.dynamia.app;
 
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public interface IndexInterceptor {
 

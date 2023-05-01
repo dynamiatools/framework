@@ -36,8 +36,7 @@ public class DynamicListItemRenderer implements ListitemRenderer<Object> {
     public void render(Listitem item, Object data, int index) {
         item.setValue(data);
 
-        if (data instanceof AbstractEntity) {
-            AbstractEntity ent = (AbstractEntity) data;
+        if (data instanceof AbstractEntity ent) {
             Listcell idCell = new Listcell(ent.getId().toString());
             idCell.setParent(item);
         }

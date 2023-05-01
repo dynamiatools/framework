@@ -311,8 +311,7 @@ public final class BeanUtils {
         Object realValue = null;
         Method method = null;
 
-        if (value instanceof ValueWrapper) {
-            final ValueWrapper valueWrapper = (ValueWrapper) value;
+        if (value instanceof ValueWrapper valueWrapper) {
             valueClass = valueWrapper.getValueClass();
             realValue = valueWrapper.getValue();
         } else {
@@ -428,8 +427,7 @@ public final class BeanUtils {
         if (classRef != null) {
             Type[] types = classRef.getClass().getGenericInterfaces();
             for (Type type : types) {
-                if (type instanceof ParameterizedType) {
-                    ParameterizedType parameterizedType = (ParameterizedType) type;
+                if (type instanceof ParameterizedType parameterizedType) {
                     if (parameterizedType.getRawType().getTypeName().equals(interfaceClass.getName())) {
                         clazz = (Class) parameterizedType.getActualTypeArguments()[0];
                         break;
@@ -451,8 +449,7 @@ public final class BeanUtils {
     public static Class<?> getFieldGenericType(final Field field) {
         Class<?> genericClass = null;
         final Type genericType = field.getGenericType();
-        if (genericType instanceof ParameterizedType) {
-            final ParameterizedType ptype = (ParameterizedType) genericType;
+        if (genericType instanceof ParameterizedType ptype) {
             genericClass = (Class<?>) ptype.getActualTypeArguments()[0];
         }
         return genericClass;
@@ -470,8 +467,7 @@ public final class BeanUtils {
 
         if (getterMethod != null) {
             final Type genericType = getterMethod.getGenericReturnType();
-            if (genericType instanceof ParameterizedType) {
-                final ParameterizedType ptype = (ParameterizedType) genericType;
+            if (genericType instanceof ParameterizedType ptype) {
                 genericClass = (Class<?>) ptype.getActualTypeArguments()[0];
             }
         }

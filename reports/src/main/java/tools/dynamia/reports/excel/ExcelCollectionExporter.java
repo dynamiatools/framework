@@ -73,8 +73,7 @@ public class ExcelCollectionExporter<T> extends AbstractExcelExporter<T, Collect
                         }
                     }
 
-                    if (value instanceof Enum) {
-                        Enum enumValue = (Enum) value;
+                    if (value instanceof Enum enumValue) {
                         EnumValueType enumValueType = col.getEnumValueType() != null ? col.getEnumValueType() : getDefaultEnumValueType();
                         if (enumValueType != null) {
                             value = enumValueType == EnumValueType.NAME ? enumValue.name() : enumValue.ordinal();

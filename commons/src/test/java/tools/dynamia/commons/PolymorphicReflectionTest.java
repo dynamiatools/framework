@@ -72,7 +72,7 @@ public class PolymorphicReflectionTest {
 
     class ParentBean {
 
-        private String name = "mario";
+        private final String name = "mario";
 
         public String getName() {
             return name;

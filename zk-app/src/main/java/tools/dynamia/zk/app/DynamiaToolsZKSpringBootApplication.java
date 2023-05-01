@@ -18,7 +18,6 @@ package tools.dynamia.zk.app;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
-import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.context.request.RequestContextListener;
@@ -64,23 +63,25 @@ public class DynamiaToolsZKSpringBootApplication extends DynamiaAppConfiguration
      * ZK servlets
      */
     @Bean
-    public ServletRegistrationBean dHtmlLayoutServlet() {
+    public ServletRegistrationBean<DHtmlLayoutServlet> dHtmlLayoutServlet() {
         Map<String, String> params = new HashMap<>();
         params.put("update-uri", "/zkau");
         DHtmlLayoutServlet dHtmlLayoutServlet = new DHtmlLayoutServlet();
-        ServletRegistrationBean reg = new ServletRegistrationBean(dHtmlLayoutServlet, "*.zul", "*.zhtml");
+        var reg = new ServletRegistrationBean<>(dHtmlLayoutServlet, "*.zul", "*.zhtml");
         reg.setLoadOnStartup(1);
         reg.setInitParameters(params);
+        log("ZK DHTML Layout servlet registered");
         return reg;
     }
 
     @Bean
-    public ServletRegistrationBean dHtmlUpdateServlet() {
+    public ServletRegistrationBean<DHtmlUpdateServlet> dHtmlUpdateServlet() {
         Map<String, String> params = new HashMap<>();
         params.put("update-uri", "/zkau/*");
-        ServletRegistrationBean reg = new ServletRegistrationBean(new DHtmlUpdateServlet(), "/zkau/*");
+        var reg = new ServletRegistrationBean<>(new DHtmlUpdateServlet(), "/zkau/*");
         reg.setLoadOnStartup(2);
         reg.setInitParameters(params);
+        log("ZK DHTML Update servlet registered");
         return reg;
     }
 

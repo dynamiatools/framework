@@ -183,8 +183,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
             label.setParent(column);
         }
 
-        if (component instanceof HtmlBasedComponent) {
-            HtmlBasedComponent hcom = (HtmlBasedComponent) component;
+        if (component instanceof HtmlBasedComponent hcom) {
             hcom.setTooltiptext($s(field.getDescription()));
         }
         if (component.getClass().getName().contains("CKeditor")) {
@@ -225,8 +224,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
         int space = 0;
         if (row.getChildren() != null) {
             for (Component comp : row.getChildren()) {
-                if (comp instanceof Cell) {
-                    Cell cell = (Cell) comp;
+                if (comp instanceof Cell cell) {
                     space += cell.getColspan();
                 } else if (comp.getAttribute(Viewers.ATTRIBUTE_COLSPAN) != null) {
                     space += (int) comp.getAttribute(Viewers.ATTRIBUTE_COLSPAN);
@@ -259,8 +257,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
             styleClass = "";
         }
 
-        if (component instanceof InputElement) {
-            InputElement element = (InputElement) component;
+        if (component instanceof InputElement element) {
             if (!field.getParams().containsKey("placeholder")) {
                 element.setPlaceholder(labelText + " " + (field.isRequired() ? "*" : ""));
             }
@@ -277,13 +274,11 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
             }
         }
 
-        if (component instanceof Checkbox) {
-            Checkbox checkbox = (Checkbox) component;
+        if (component instanceof Checkbox checkbox) {
             checkbox.setLabel(" " + labelText);
         }
 
-        if (component instanceof Button) {
-            Button button = (Button) component;
+        if (component instanceof Button button) {
             button.setZclass("none");
             button.setStyle("margin-left: 5px");
             button.setSclass("form-control btn btn-success" + " " + styleClass);
@@ -294,14 +289,12 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
             html.setSclass("form-zcontrol");
         }
 
-        if (component instanceof DateRangebox) {
-            DateRangebox dateRangebox = (DateRangebox) component;
+        if (component instanceof DateRangebox dateRangebox) {
             dateRangebox.setStyle("display: block");
             dateRangebox.setZclass("form-zcontrol");
         }
 
-        if (component instanceof DateSelector) {
-            DateSelector dateSelector = (DateSelector) component;
+        if (component instanceof DateSelector dateSelector) {
             dateSelector.getDaycombo().setSclass("form-zcontrol");
             dateSelector.getMonthcombo().setSclass("form-zcontrol");
             dateSelector.getYearbox().setZclass("form-control");

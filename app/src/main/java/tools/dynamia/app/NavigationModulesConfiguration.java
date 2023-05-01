@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.util.pattern.PathPatternParser;
 import tools.dynamia.app.controllers.PageNavigationController;
 import tools.dynamia.app.controllers.RestNavigationController;
 import tools.dynamia.commons.logger.LoggingService;
@@ -13,8 +14,8 @@ import tools.dynamia.crud.CrudPage;
 import tools.dynamia.navigation.ModuleContainer;
 import tools.dynamia.navigation.Page;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -23,8 +24,14 @@ public class NavigationModulesConfiguration {
 
     public static final String PAGE_URI = "/page/";
     public static final String API_URI = "/api/";
-    private LoggingService logger = new SLF4JLoggingService(NavigationModulesConfiguration.class);
+    private final LoggingService logger = new SLF4JLoggingService(NavigationModulesConfiguration.class);
 
+    private final RequestMappingInfo.BuilderConfiguration options;
+
+    public NavigationModulesConfiguration() {
+        options = new RequestMappingInfo.BuilderConfiguration();
+        options.setPatternParser(new PathPatternParser());
+    }
 
     @Autowired
     public void setPageMapper(ModuleContainer container, List<RequestMappingHandlerMapping> mappings,
@@ -38,7 +45,9 @@ public class NavigationModulesConfiguration {
                     logger.info("Register route for " + route);
 
                     var info = RequestMappingInfo.paths(route)
-                            .methods(RequestMethod.GET).build();
+                            .methods(RequestMethod.GET)
+                            .options(options)
+                            .build();
 
                     mapping.registerMapping(info, controller, method);
                 }));
@@ -92,13 +101,17 @@ public class NavigationModulesConfiguration {
         }
         if (route != null && !route.isBlank()) {
             var info = RequestMappingInfo.paths(route)
-                    .methods(requestMethod).build();
+                    .methods(requestMethod)
+                    .options(options)
+                    .build();
 
             mapping.registerMapping(info, controller, method);
 
             if (!route.equals(routeAlt) && !custom) {
                 var infoAlt = RequestMappingInfo.paths(routeAlt)
-                        .methods(requestMethod).build();
+                        .methods(requestMethod)
+                        .options(options)
+                        .build();
                 mapping.registerMapping(infoAlt, controller, method);
             }
         }

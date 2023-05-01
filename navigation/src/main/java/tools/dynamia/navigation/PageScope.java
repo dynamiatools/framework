@@ -54,7 +54,7 @@ public class PageScope implements Scope {
     @Override
     public String getConversationId() {
         NavigationManager navManager = getNavManager();
-        return navManager.getCurrentPage().getVirtualPath() + navManager.toString();
+        return navManager.getCurrentPage().getVirtualPath() + navManager;
 
     }
 

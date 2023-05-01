@@ -70,7 +70,7 @@ public abstract class AbstractQueryCondition<T> implements QueryCondition<T> {
     @Override
     public String render(String property) {
         String operator = getOperator();
-        return new StringBuilder(property).append(" ").append(operator).append(" :").append(cleanProperty(property)).toString();
+        return property + " " + operator + " :" + cleanProperty(property);
 
     }
 

@@ -16,7 +16,7 @@
  */
 package tools.dynamia.domain.services;
 
-import javax.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolation;
 import java.util.Set;
 
 

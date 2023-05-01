@@ -70,8 +70,7 @@ public class GridExporter {
     private static void exportHeaders(Grid grid, ExcelFileWriter efw) {
         efw.newRow();
         for (Component cmp : grid.getColumns().getChildren()) {
-            if (cmp instanceof Column) {
-                Column column = (Column) cmp;
+            if (cmp instanceof Column column) {
                 efw.addCell(column.getLabel());
             }
         }

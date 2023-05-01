@@ -101,8 +101,7 @@ public abstract class AbstractZKWorkspaceBuilder implements WorkspaceViewBuilder
         params.put("page", page);
 
 
-        if (page instanceof RendereablePage) {
-            RendereablePage renderPage = (RendereablePage) page;
+        if (page instanceof RendereablePage renderPage) {
             Component comp = (Component) renderPage.renderPage();
             if (comp != null) {
                 comp.setParent(pageContainer);

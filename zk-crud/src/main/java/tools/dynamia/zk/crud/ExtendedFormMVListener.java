@@ -28,8 +28,7 @@ public class ExtendedFormMVListener extends AbstractExtendedMVListener {
     @Override
     public void subviewLoaded(MultiView parentView, View subview) {
 
-        if (parentView.getParentView() instanceof CrudView) {
-            CrudView crudView = (CrudView) parentView.getParentView();
+        if (parentView.getParentView() instanceof CrudView crudView) {
             AbstractEntity parentEntity = (AbstractEntity) parentView.getValue();
 
             ExtendedFormSubcrudController subcontroller = new ExtendedFormSubcrudController();

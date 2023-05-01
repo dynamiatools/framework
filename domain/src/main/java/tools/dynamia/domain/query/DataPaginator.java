@@ -143,7 +143,7 @@ public final class DataPaginator implements Serializable {
         this.totalSize = totalSize;
 
         pagesNumber = (int) (((double) totalSize) / ((double) pageSize));
-        if (pagesNumber * pageSize < totalSize) {
+        if ((long) pagesNumber * pageSize < totalSize) {
             pagesNumber++;
         }
     }

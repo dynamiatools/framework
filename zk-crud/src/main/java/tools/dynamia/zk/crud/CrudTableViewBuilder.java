@@ -117,8 +117,7 @@ public class CrudTableViewBuilder implements CrudDataSetViewBuilder {
             Map<String, Object> fieldParams = header.getField().getParams();
             if (fieldParams.get(Viewers.PARAM_BIND) instanceof String) {
                 orderBy = (String) fieldParams.get(Viewers.PARAM_BIND);
-            } else if (fieldParams.get(Viewers.PARAM_BINDINGS) instanceof Map) {
-                Map bindings = (Map) fieldParams.get(Viewers.PARAM_BINDINGS);
+            } else if (fieldParams.get(Viewers.PARAM_BINDINGS) instanceof Map bindings) {
                 StringJoiner joiner = new StringJoiner(",");
 
                 for (Object value : bindings.values()) {

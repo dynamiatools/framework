@@ -78,8 +78,7 @@ public class ActionPanel extends Div {
         Component component = (Component) currentActionRenderer.render(action, eventBuilder);
         component.setParent(this);
 
-        if (component instanceof HtmlBasedComponent) {
-            HtmlBasedComponent hcom = (HtmlBasedComponent) component;
+        if (component instanceof HtmlBasedComponent hcom) {
             hcom.setSclass(hcom.getSclass() + " actionpanel-a");
         }
     }

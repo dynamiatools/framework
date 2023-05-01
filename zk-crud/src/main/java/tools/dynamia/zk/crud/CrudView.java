@@ -139,8 +139,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
         boxToolbarContainer.setPack("stretch");
         boxToolbarContainer.setStyle("width:100%; padding:0px");
         boxToolbarContainer.setSclass(ActionToolbar.CONTAINER_SCLASS);
-        if (layout instanceof Borderlayout) {
-            Borderlayout borderlayout = (Borderlayout) layout;
+        if (layout instanceof Borderlayout borderlayout) {
             boxToolbarContainer.setParent(borderlayout.getNorth());
             toolbarContainer = boxToolbarContainer;
         }
@@ -413,8 +412,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
     public void clearActions() {
         if (applicableActions != null) {
             for (Action action : applicableActions) {
-                if (action instanceof ActionLifecycleAware) {
-                    ActionLifecycleAware ala = (ActionLifecycleAware) action;
+                if (action instanceof ActionLifecycleAware ala) {
                     ala.onDestroy();
                 }
             }
@@ -516,8 +514,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
     protected Component getActiveViewParent() {
         Component activeViewParent = layout;
 
-        if (layout instanceof Borderlayout) {
-            Borderlayout borderlayout = (Borderlayout) layout;
+        if (layout instanceof Borderlayout borderlayout) {
             activeViewParent = borderlayout.getCenter();
         }
         return activeViewParent;

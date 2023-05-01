@@ -81,16 +81,13 @@ public class ReportFiller {
             Object template = getTemplate(reportDescriptor);
             Map<String, Object> params = buildParams(reportDescriptor.getParameters());
 
-            if (datasource instanceof JRDataSource) {
-                JRDataSource jrds = (JRDataSource) datasource;
+            if (datasource instanceof JRDataSource jrds) {
                 if (template instanceof String) {
                     InputStream is = ReportFiller.class.getResourceAsStream(reportDescriptor.getTemplate().toString());
                     JasperFillManager.fillReportToStream(is, out, params, jrds);
-                } else if (template instanceof JasperReport) {
-                    JasperReport jr = (JasperReport) template;
+                } else if (template instanceof JasperReport jr) {
                     JasperFillManager.fillReportToStream(jr, out, params, jrds);
-                } else if (template instanceof File) {
-                    File file = (File) template;
+                } else if (template instanceof File file) {
                     params.put("CURRENT_DIRECTORY", file.getParentFile().getAbsolutePath());
                     InputStream is = new FileInputStream(file);
                     JasperFillManager.fillReportToStream(is, out, params, jrds);
@@ -100,16 +97,13 @@ public class ReportFiller {
                 } else {
                     throw new ReportFillerException("Unknow report template type :" + reportDescriptor.getTemplate());
                 }
-            } else if (datasource instanceof Connection) {
-                Connection connection = (Connection) datasource;
+            } else if (datasource instanceof Connection connection) {
                 if (template instanceof String) {
                     InputStream is = ReportFiller.class.getResourceAsStream(reportDescriptor.getTemplate().toString());
                     JasperFillManager.fillReportToStream(is, out, params, connection);
-                } else if (template instanceof JasperReport) {
-                    JasperReport jr = (JasperReport) template;
+                } else if (template instanceof JasperReport jr) {
                     JasperFillManager.fillReportToStream(jr, out, params, connection);
-                } else if (template instanceof File) {
-                    File file = (File) template;
+                } else if (template instanceof File file) {
                     params.put("CURRENT_DIRECTORY", file.getParentFile().getAbsolutePath());
                     InputStream is = new FileInputStream(file);
                     JasperFillManager.fillReportToStream(is, out, params, connection);
@@ -148,16 +142,13 @@ public class ReportFiller {
 
         Object template = getTemplate(reportDescriptor);
         Map<String, Object> params = new HashMap<>(reportDescriptor.getParameters());
-        if (datasource instanceof JRDataSource) {
-            JRDataSource jrds = (JRDataSource) datasource;
+        if (datasource instanceof JRDataSource jrds) {
             if (template instanceof String) {
                 InputStream is = ReportFiller.class.getResourceAsStream(reportDescriptor.getTemplate().toString());
                 jasperPrint = JasperFillManager.fillReport(is, params, jrds);
-            } else if (template instanceof JasperReport) {
-                JasperReport jr = (JasperReport) template;
+            } else if (template instanceof JasperReport jr) {
                 jasperPrint = JasperFillManager.fillReport(jr, params, jrds);
-            } else if (template instanceof File) {
-                File file = (File) template;
+            } else if (template instanceof File file) {
                 params.put("CURRENT_DIRECTORY", file.getParentFile().getAbsolutePath());
                 InputStream is = new FileInputStream(file);
                 jasperPrint = JasperFillManager.fillReport(is, params, jrds);
@@ -167,16 +158,13 @@ public class ReportFiller {
             } else {
                 throw new ReportFillerException("Unknow report template type :" + reportDescriptor.getTemplate());
             }
-        } else if (datasource instanceof Connection) {
-            Connection connection = (Connection) datasource;
+        } else if (datasource instanceof Connection connection) {
             if (template instanceof String) {
                 InputStream is = ReportFiller.class.getResourceAsStream(reportDescriptor.getTemplate().toString());
                 jasperPrint = JasperFillManager.fillReport(is, params, connection);
-            } else if (template instanceof JasperReport) {
-                JasperReport jr = (JasperReport) template;
+            } else if (template instanceof JasperReport jr) {
                 jasperPrint = JasperFillManager.fillReport(jr, params, connection);
-            } else if (template instanceof File) {
-                File file = (File) template;
+            } else if (template instanceof File file) {
                 params.put("CURRENT_DIRECTORY", file.getParentFile().getAbsolutePath());
                 InputStream is = new FileInputStream(file);
                 jasperPrint = JasperFillManager.fillReport(is, params, connection);

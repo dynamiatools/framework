@@ -27,8 +27,7 @@ public class DummyViewCustomizer implements ViewCustomizer {
 
     @Override
     public void customize(View view) {
-        if (view instanceof FormView && view.getViewDescriptor().getBeanClass() == DummyBean.class) {
-            FormView formView = (FormView) view;
+        if (view instanceof FormView formView && view.getViewDescriptor().getBeanClass() == DummyBean.class) {
             formView.getFieldComponent("dasd").getInputComponent();
 
             formView.getFieldComponent("name").getLabel().setTooltiptext(LABEL_TT);

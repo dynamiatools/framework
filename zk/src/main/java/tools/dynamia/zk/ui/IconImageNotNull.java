@@ -60,7 +60,7 @@ public class IconImageNotNull extends Span  implements LoadableOnly {
 		getChildren().clear();
 		if (value != null) {
 			if (label != null) {
-				setTooltiptext(label + ": " + value.toString());
+				setTooltiptext(label + ": " + value);
 			} else {
 				setTooltiptext(value.toString());
 			}

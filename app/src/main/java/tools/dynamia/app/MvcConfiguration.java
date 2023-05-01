@@ -27,16 +27,17 @@ import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
 import tools.dynamia.app.template.ChainableUrlBasedViewResolver;
 import tools.dynamia.app.template.TemplateResourceHandler;
 import tools.dynamia.app.template.TemplateViewResolver;
+import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.commons.logger.SLF4JLoggingService;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -54,6 +55,8 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
 
     private final ApplicationInfo applicationInfo;
     private final TemplateResourceHandler handler;
+
+    private final LoggingService logger = new SLF4JLoggingService(getClass());
 
     public MvcConfiguration(ApplicationInfo applicationInfo, TemplateResourceHandler handler) {
         this.applicationInfo = applicationInfo;
@@ -81,7 +84,6 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
         converters.add(new ResourceHttpMessageConverter(false));
         converters.add(new StringHttpMessageConverter());
         converters.add(new MappingJackson2HttpMessageConverter());
-        converters.add(new MappingJackson2XmlHttpMessageConverter());
     }
 
     @Bean
@@ -109,7 +111,7 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
-    public ViewResolver defaultViewResolver() {
+    public ViewResolver webinfViewResolver() {
         UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
         vr.setOrder(getViewResolverOrder("defaultViewResolverOrder", 1));
         vr.setPrefix("/WEB-INF/views/");
@@ -162,4 +164,11 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
         return order;
     }
 
+    protected void log(String message) {
+        logger.info(message);
+    }
+
+    protected void log(String message, Throwable error) {
+        logger.error(message, error);
+    }
 }

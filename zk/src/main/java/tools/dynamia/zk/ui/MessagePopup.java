@@ -39,12 +39,12 @@ public class MessagePopup extends MessageDialog {
 
         Object pos = config.get("position");
         if (pos != null) {
-            posicion = "" + pos;
+            posicion = String.valueOf(pos);
         }
         Object time = config.get("timeout");
         if (time != null) {
             try {
-                timeout = Integer.parseInt("" + time);
+                timeout = Integer.parseInt(String.valueOf(time));
             } catch (Exception e) {
             }
         }
@@ -107,7 +107,7 @@ public class MessagePopup extends MessageDialog {
                 Div icon = new Div();
                 icon.setParent(inferior);
                 icon.setSclass("msg-popup-icon msg-popup-icon-" + type.name().toLowerCase());
-                Label msg = new Label("" + message);
+                Label msg = new Label(message);
                 msg.setParent(inferior);
                 msg.setMultiline(true);
                 msg.setSclass("msg-popup-message");

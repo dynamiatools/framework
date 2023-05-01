@@ -16,10 +16,11 @@
  */
 package tools.dynamia.domain.jpa;
 
+import jakarta.persistence.TemporalType;
 import tools.dynamia.domain.Auditable;
 
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Temporal;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Temporal;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -34,13 +35,13 @@ public abstract class BaseEntityUuid extends SimpleEntityUuid implements Seriali
     /**
      * The creation date.
      */
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(TemporalType.DATE)
     private Date creationDate = new Date();
 
     /**
      * The creation time.
      */
-    @Temporal(javax.persistence.TemporalType.TIME)
+    @Temporal(TemporalType.TIME)
     private Date creationTime = new Date();
 
     /**
@@ -51,7 +52,7 @@ public abstract class BaseEntityUuid extends SimpleEntityUuid implements Seriali
     /**
      * The last update.
      */
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdate = new Date();
 
     /**

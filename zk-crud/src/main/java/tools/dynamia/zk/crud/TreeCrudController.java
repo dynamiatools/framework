@@ -152,8 +152,7 @@ public class TreeCrudController<E> extends CrudController<E> implements Children
 
     @Override
     public void onEvent(Event evt) {
-        if (evt.getTarget() instanceof Treeitem) {
-            Treeitem item = (Treeitem) evt.getTarget();
+        if (evt.getTarget() instanceof Treeitem item) {
             if (item.isOpen()) {
                 if (item.getValue() instanceof LazyEntityTreeNode) {
                     LazyEntityTreeNode<E> node = item.getValue();

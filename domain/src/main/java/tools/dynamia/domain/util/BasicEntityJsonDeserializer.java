@@ -41,8 +41,7 @@ public class BasicEntityJsonDeserializer extends StdDeserializer<AbstractEntity>
         }
 
         var result = BeanUtils.newInstance(className);
-        if (result instanceof AbstractEntity) {
-            var entity = (AbstractEntity) result;
+        if (result instanceof AbstractEntity entity) {
             entity.setId(id);
             entity.name(name);
             if (url != null && entity instanceof URLable) {

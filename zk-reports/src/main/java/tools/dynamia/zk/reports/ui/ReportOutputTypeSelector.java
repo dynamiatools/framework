@@ -57,8 +57,7 @@ public class ReportOutputTypeSelector extends Window implements EventListener<Ev
 
     @Override
     public void onEvent(Event event) {
-        if (event.getTarget() instanceof Button) {
-            Button button = (Button) event.getTarget();
+        if (event.getTarget() instanceof Button button) {
             this.selected = (ReportOutputType) button.getAttribute(REPORT_OUTPUT_TYPE);
             Events.sendEvent(new Event(Events.ON_SELECT, this, selected));
         }

@@ -59,10 +59,8 @@ public class MinFunction<T> implements Function<List<T>, Object> {
     @Override
     public Object compute(List<T> data, Map<String, Object> args) {
         Object min = null;
-        if (data instanceof PagedList) {
-            PagedList<T> pagedList = (PagedList<T>) data;
-            if (pagedList.getDataSource() instanceof DataPaginatorPagedListDataSource) {
-                DataPaginatorPagedListDataSource<T> datasource = (DataPaginatorPagedListDataSource<T>) pagedList.getDataSource();
+        if (data instanceof PagedList<T> pagedList) {
+            if (pagedList.getDataSource() instanceof DataPaginatorPagedListDataSource<T> datasource) {
                 String jpqlProjection = datasource.getQueryMetadata().getQueryBuilder().createProjection("min", args.get("property").toString());
                 CrudService crudService = Containers.get().findObject(CrudService.class);
                 min = crudService.executeProjection(BigDecimal.class, jpqlProjection, datasource.getQueryMetadata().getParameters());
@@ -73,8 +71,7 @@ public class MinFunction<T> implements Function<List<T>, Object> {
                     Object field = BeanUtils.invokeGetMethod(t, args.get("property").toString());
                     if (min == null) {
                         min = field;
-                    } else if (field instanceof Comparable) {
-                        Comparable comparable = (Comparable) field;
+                    } else if (field instanceof Comparable comparable) {
                         if (comparable.compareTo(min) < 0) {
                             min = comparable;
                         }

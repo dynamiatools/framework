@@ -23,7 +23,7 @@ import tools.dynamia.domain.query.Parameters;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.integration.Containers;
 
-import javax.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolation;
 import java.util.Collections;
 import java.util.Set;
 

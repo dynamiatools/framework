@@ -104,11 +104,8 @@ public class BootstrapMenuBuilder implements NavigationViewBuilder<Component> {
 
     @Override
     public void createPageGroupView(PageGroup pageGroup) {
-        boolean submenus = true;
-        if (pageGroup.getParentModule() != null
-                && pageGroup.getParentModule().getProperty("submenus") == Boolean.FALSE) {
-            submenus = false;
-        }
+        boolean submenus = pageGroup.getParentModule() == null
+                || pageGroup.getParentModule().getProperty("submenus") != Boolean.FALSE;
         if (submenus) {
             Ul menuPg = new Ul();
             menuPg.setSclass("sidenav-third-level collapse");

@@ -45,8 +45,7 @@ public class EntityTreeViewRowRenderer<E extends AbstractEntity> extends TreeVie
     public void render(Treeitem item, TreeViewNode<E> data, int index) throws Exception {
         super.render(item, data, index); //To change body of generated methods, choose Tools | Templates.
 
-        if (data instanceof EntityTreeNode) {
-            EntityTreeNode node = (EntityTreeNode) data;
+        if (data instanceof EntityTreeNode node) {
             if (node.getOnRightClickListener() != null) {
                 item.addEventListener(Events.ON_RIGHT_CLICK, node.getOnRightClickListener());
             }

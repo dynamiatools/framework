@@ -65,8 +65,7 @@ public class FiltersAction extends AbstractCrudAction implements ReadableOnly {
         Component filterContainerPanel = getFilterContainerPanel(crudView);
         open(filterContainerPanel);
 
-        if (evt.getSource() instanceof Toolbarbutton) {
-            Toolbarbutton button = (Toolbarbutton) evt.getSource();
+        if (evt.getSource() instanceof Toolbarbutton button) {
             if (button.isChecked()) {
                 close(filterContainerPanel, evt);
             } else if (open) {
@@ -118,8 +117,7 @@ public class FiltersAction extends AbstractCrudAction implements ReadableOnly {
                 evt.getController().setParams(params);
                 evt.getController().doQuery();
 
-                if (filtersPanel.getParent() instanceof Window) {
-                    Window window = (Window) filtersPanel.getParent();
+                if (filtersPanel.getParent() instanceof Window window) {
                     window.detach();
                 }
             });

@@ -26,7 +26,7 @@ import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.domain.contraints.NotEmpty;
 import tools.dynamia.domain.util.DomainUtils;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Locale;

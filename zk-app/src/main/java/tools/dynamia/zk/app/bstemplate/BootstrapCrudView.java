@@ -161,8 +161,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
         if (action.getAttribute("internalId") != null) {
             actionId = action.getAttribute("internalId").toString();
         }
-        if (component instanceof HtmlBasedComponent) {
-            HtmlBasedComponent hcom = (HtmlBasedComponent) component;
+        if (component instanceof HtmlBasedComponent hcom) {
             hcom.setSclass("actiontb-a " + actionId + " " + hcom.getSclass());
 
             if (HttpUtils.isSmartphone()) {

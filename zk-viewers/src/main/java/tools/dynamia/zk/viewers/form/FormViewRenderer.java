@@ -257,8 +257,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         }
 
         Component component = createComponent(field, view, value);
-        if (component instanceof HtmlBasedComponent) {
-            HtmlBasedComponent hcom = (HtmlBasedComponent) component;
+        if (component instanceof HtmlBasedComponent hcom) {
             hcom.setTooltiptext(decriptionText);
 
         }
@@ -308,8 +307,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         component.setAttribute(Viewers.ATTRIBUTE_FORM_VIEW, view);
         applyFieldParams(component, field);
         applyFieldConstraints(component, field);
-        if (component instanceof Import) {
-            Import importComp = (Import) component;
+        if (component instanceof Import importComp) {
             importComp.setValue(value);
             importComp.addArgs(field.getParams());
         }
@@ -321,8 +319,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
     protected void applyFieldConstraints(Component comp, Field field) {
 
-        if (comp instanceof InputElement && field.getParam(Viewers.PARAM_CONSTRAINT) instanceof Constraint) {
-            InputElement inputElement = (InputElement) comp;
+        if (comp instanceof InputElement inputElement && field.getParam(Viewers.PARAM_CONSTRAINT) instanceof Constraint) {
             inputElement.setConstraint((Constraint) field.getParam(Viewers.PARAM_CONSTRAINT));
 
         }
@@ -339,8 +336,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         }
 
         Object bmapObject = field.getParam(Viewers.PARAM_BINDINGS);
-        if (bmapObject != null && bmapObject instanceof Map) {
-            Map bindingMap = (Map) bmapObject;
+        if (bmapObject != null && bmapObject instanceof Map bindingMap) {
             ZKBindingUtil.bindComponent(binder, comp, bindingMap,Viewers.BEAN);
         } else {
             String attr = BindingComponentIndex.getInstance().getAttribute(comp.getClass());
@@ -384,8 +380,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         int space = 0;
         if (row.getChildren() != null) {
             for (Object object : row.getChildren()) {
-                if (object instanceof Cell) {
-                    Cell cell = (Cell) object;
+                if (object instanceof Cell cell) {
                     space += cell.getColspan();
                 } else {
                     space++;

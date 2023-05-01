@@ -23,11 +23,11 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>4.2.0</version>
+        <version>5.0.0</version>
     </parent>
 
     <artifactId>tools.dynamia.app</artifactId>
-    <version>4.2.0</version>
+    <version>5.0.0</version>
     <name>DynamiaTools - App</name>
     <url>https://dynamia.tools/docs/app</url>
 
@@ -60,69 +60,65 @@
 
     <dependencies>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.actions</artifactId>
-            <version>4.2.0</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.commons</artifactId>
-            <version>4.2.0</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.crud</artifactId>
-            <version>4.2.0</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.domain</artifactId>
-            <version>4.2.0</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.integration</artifactId>
-            <version>4.2.0</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.io</artifactId>
-            <version>4.2.0</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.navigation</artifactId>
-            <version>4.2.0</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.reports</artifactId>
-            <version>4.2.0</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.templates</artifactId>
-            <version>4.2.0</version>
+            <version>5.0.0</version>
         </dependency>
-        <dependency>
-            <groupId>tools.dynamia</groupId>
-            <artifactId>tools.dynamia.ui</artifactId>
-            <version>4.2.0</version>
-        </dependency>
+
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.viewers</artifactId>
-            <version>4.2.0</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.web</artifactId>
-            <version>4.2.0</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>

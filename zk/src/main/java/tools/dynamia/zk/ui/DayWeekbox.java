@@ -55,8 +55,7 @@ public class DayWeekbox extends Combobox {
     public void setSelected(DayOfWeek selected) {
         this.selected = selected;
 
-        if (getModel() instanceof AbstractListModel) {
-            AbstractListModel model = (AbstractListModel) getModel();
+        if (getModel() instanceof AbstractListModel model) {
             model.addToSelection(selected);
         }
     }

@@ -92,8 +92,7 @@ public class DefaultViewFactory implements ViewFactory {
 
         Class beanClass = null;
 
-        if (value instanceof Collection) {
-            Collection c = (Collection) value;
+        if (value instanceof Collection c) {
             for (Object object : c) {
                 beanClass = object.getClass();
                 break;

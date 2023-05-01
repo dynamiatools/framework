@@ -49,7 +49,7 @@ import tools.dynamia.zk.ui.InputPanel;
 import tools.dynamia.zk.ui.MessageDialog;
 import tools.dynamia.zk.ui.SimpleListItemRenderer;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
@@ -269,8 +269,7 @@ public abstract class ZKUtil {
             } catch (Exception e) {
             }
         }
-        if (comp instanceof InputElement) {
-            InputElement ie = (InputElement) comp;
+        if (comp instanceof InputElement ie) {
             ie.setRawValue(null);
         }
     }
@@ -363,8 +362,7 @@ public abstract class ZKUtil {
 
             Map args = MapBuilder.put("dialog", dialog, "result", data, "data", data);
 
-            if (data instanceof Map) {
-                Map map = (Map) data;
+            if (data instanceof Map map) {
                 for (Object key : map.keySet()) {
                     args.put(key.toString(), map.get(key));
                 }
@@ -475,8 +473,7 @@ public abstract class ZKUtil {
 
             component.setParent(dialog);
 
-            if (component instanceof HtmlBasedComponent && height != null) {
-                HtmlBasedComponent hcomp = (HtmlBasedComponent) component;
+            if (component instanceof HtmlBasedComponent hcomp && height != null) {
                 if (hcomp.getVflex() == null) {
                     hcomp.setVflex("1");
                 }
@@ -731,8 +728,7 @@ public abstract class ZKUtil {
                     element.setSclass(realPath);
                     break;
             }
-        } else if (component instanceof Image && icon.getType() == IconType.IMAGE) {
-            Image image = (Image) component;
+        } else if (component instanceof Image image && icon.getType() == IconType.IMAGE) {
             image.setSrc(realPath);
         }
     }
@@ -982,13 +978,11 @@ public abstract class ZKUtil {
      */
     public static void changeReadOnly(Component comp, boolean readOnly) {
 
-        if (comp instanceof Checkbox) {
-            Checkbox checkbox = (Checkbox) comp;
+        if (comp instanceof Checkbox checkbox) {
             checkbox.setDisabled(readOnly);
         }
 
-        if (comp instanceof InputElement) {
-            InputElement input = (InputElement) comp;
+        if (comp instanceof InputElement input) {
             input.setReadonly(readOnly);
         }
 
@@ -996,19 +990,15 @@ public abstract class ZKUtil {
             ((CanBeReadonly) comp).setReadonly(readOnly);
         }
 
-        if (comp instanceof Button) {
-            Button button = (Button) comp;
+        if (comp instanceof Button button) {
             button.setDisabled(readOnly);
         }
 
-        if (comp instanceof Datebox) {
-            Datebox datebox = (Datebox) comp;
+        if (comp instanceof Datebox datebox) {
             datebox.setButtonVisible(!readOnly);
-        } else if (comp instanceof Combobox) {
-            Combobox combo = (Combobox) comp;
+        } else if (comp instanceof Combobox combo) {
             combo.setButtonVisible(!readOnly);
-        } else if (comp instanceof Bandbox) {
-            Bandbox bandbox = (Bandbox) comp;
+        } else if (comp instanceof Bandbox bandbox) {
             bandbox.setReadonly(readOnly);
         }
 

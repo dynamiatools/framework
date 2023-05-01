@@ -18,8 +18,7 @@ package tools.dynamia.navigation;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -35,7 +34,7 @@ public class TreeSetImplTest {
         mod.addPageGroup(pg1);
         mod.addPageGroup(pg2);
 
-        assertFalse(pg1.equals(pg2));
+        assertNotEquals(pg1, pg2);
         for (PageGroup pageGroup : mod.getPageGroups()) {
         }
         assertEquals(2, mod.getPageGroups().size());

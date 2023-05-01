@@ -21,7 +21,7 @@ import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 
-import javax.persistence.spi.PersistenceUnitInfo;
+import jakarta.persistence.spi.PersistenceUnitInfo;
 import java.net.URL;
 
 

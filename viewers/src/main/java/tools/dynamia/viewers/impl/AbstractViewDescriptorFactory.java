@@ -180,8 +180,7 @@ public abstract class AbstractViewDescriptorFactory implements ViewDescriptorFac
      * @param otherViewDescriptor the other view descriptor
      */
     private void merge(ViewDescriptor viewDescriptor, ViewDescriptor otherViewDescriptor) {
-        if (viewDescriptor instanceof MergeableViewDescriptor && otherViewDescriptor != null) {
-            MergeableViewDescriptor mvd = (MergeableViewDescriptor) viewDescriptor;
+        if (viewDescriptor instanceof MergeableViewDescriptor mvd && otherViewDescriptor != null) {
             mvd.merge(otherViewDescriptor);
         }
     }

@@ -45,8 +45,7 @@ public class Util {
             return;
         }
 
-        if (comp instanceof HtmlBasedComponent) {
-            HtmlBasedComponent hcomp = (HtmlBasedComponent) comp;
+        if (comp instanceof HtmlBasedComponent hcomp) {
             if (num.longValue() > 0) {
                 hcomp.setSclass("conv-positive");
             } else if (num.longValue() < 0) {
@@ -63,8 +62,7 @@ public class Util {
         }
 
 
-        if (comp instanceof HtmlBasedComponent) {
-            HtmlBasedComponent hcomp = (HtmlBasedComponent) comp;
+        if (comp instanceof HtmlBasedComponent hcomp) {
             if (DateTimeUtils.isFuture(date)) {
                 hcomp.setSclass("conv-future");
             } else if (DateTimeUtils.isPast(date)) {

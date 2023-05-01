@@ -22,7 +22,7 @@ import org.zkoss.zk.ui.util.ExecutionInit;
 import tools.dynamia.domain.OpenPersistenceInViewProvider;
 import tools.dynamia.integration.Containers;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**

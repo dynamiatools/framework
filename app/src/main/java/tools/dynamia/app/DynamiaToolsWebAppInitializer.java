@@ -24,8 +24,8 @@ import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatche
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 import java.io.IOException;
 
 public class DynamiaToolsWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {

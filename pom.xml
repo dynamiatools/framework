@@ -24,7 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>tools.dynamia</groupId>
     <artifactId>tools.dynamia.parent</artifactId>
-    <version>4.2.0</version>
+    <version>5.0.0</version>
     <packaging>pom</packaging>
     <organization>
         <name>Dynamia Soluciones IT SAS</name>
@@ -88,29 +88,28 @@
 
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
-        <springboot.version>2.7.11</springboot.version>
+        <springboot.version>3.0.6</springboot.version>
         <neo4jogm.version>3.2.38</neo4jogm.version>
         <mongodb.version>1</mongodb.version>
 
         <!-- Web -->
-        <zk.version>9.6.0.2</zk.version>
+        <zk.version>9.6.0.2-jakarta</zk.version>
         <jsonrpc.version>1.6</jsonrpc.version>
         <httpcomponents.version>4.5.13</httpcomponents.version>
         <dom4j.version>2.1.3</dom4j.version>
 
         <!--Reports -->
-        <jasperreports.version>6.9.0</jasperreports.version>
-        <itext.version>2.1.7</itext.version>
+        <jasperreports.version>6.20.3</jasperreports.version>
         <poi.version>5.2.3</poi.version>
-        <snakeyaml.version>1.33</snakeyaml.version>
+        <snakeyaml.version>2.0</snakeyaml.version>
         <zing.version>3.4.1</zing.version>
 
         <!--Logging -->
-        <slf4j.version>1.7.36</slf4j.version>
+        <slf4j.version>2.0.7</slf4j.version>
 
 
-        <java.version>11</java.version>
-        <target.version>11</target.version>
+        <java.version>17</java.version>
+        <target.version>17</target.version>
         <maven.compiler>3.11.0</maven.compiler>
         <source.encoding>UTF-8</source.encoding>
 
@@ -132,7 +131,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.5.0</version>
                 <configuration>
                     <failOnError>false</failOnError>
                     <doclint>none</doclint>
@@ -161,17 +160,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>3.0.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>3.0.0</version>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
+                <version>1.6.13</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
@@ -196,12 +195,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <scope>provided</scope>
         </dependency>
 
     </dependencies>
@@ -244,7 +237,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
+                        <version>3.0.1</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>

@@ -23,7 +23,7 @@ import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import tools.dynamia.app.ApplicationInfo;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Template resource handler find resources in current {@link ApplicationTemplate} directory

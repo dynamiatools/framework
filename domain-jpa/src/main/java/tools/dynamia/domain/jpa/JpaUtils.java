@@ -25,7 +25,7 @@ import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.io.converters.Converters;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.List;

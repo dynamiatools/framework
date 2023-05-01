@@ -21,7 +21,7 @@ import tools.dynamia.domain.EntityUtilsProvider;
 import tools.dynamia.domain.query.Parameter;
 import tools.dynamia.integration.sterotypes.Provider;
 
-import javax.persistence.Transient;
+import jakarta.persistence.Transient;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 

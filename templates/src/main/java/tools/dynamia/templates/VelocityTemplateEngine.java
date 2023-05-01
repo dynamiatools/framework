@@ -45,8 +45,7 @@ public class VelocityTemplateEngine implements TemplateEngine {
 
 	@Override
 	public String evaluate(String content, Object target) {
-		if (target instanceof VelocityContext) {
-			VelocityContext context = (VelocityContext) target;
+		if (target instanceof VelocityContext context) {
 			StringWriter writer = new StringWriter();
 			StringReader reader = new StringReader(content);
 			evaluate(reader, writer, context);

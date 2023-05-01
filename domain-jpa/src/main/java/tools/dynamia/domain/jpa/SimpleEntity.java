@@ -18,7 +18,7 @@ package tools.dynamia.domain.jpa;
 
 import tools.dynamia.domain.AbstractEntity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * The Class SimpleEntity.

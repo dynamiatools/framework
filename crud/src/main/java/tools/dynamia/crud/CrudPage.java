@@ -24,7 +24,6 @@ import tools.dynamia.commons.Messages;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.ObjectMatcher;
 import tools.dynamia.navigation.PageAction;
-import tools.dynamia.viewers.View;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.ViewDescriptorFactory;
 import tools.dynamia.viewers.util.Viewers;

@@ -106,7 +106,7 @@ public class BIRTReportViewer extends Div {
 
             String label = info.getDescription();
 
-            Listcell cell = new Listcell((index + 1) + "");
+            Listcell cell = new Listcell(String.valueOf(index + 1));
             cell.setParent(item);
 
             cell = new Listcell();
@@ -131,16 +131,15 @@ public class BIRTReportViewer extends Div {
     }
 
     private void viewReport(String label, FileInfo info) {
-        StringBuilder reportURL = new StringBuilder();
-        reportURL.append(viewerURL)
-                .append("frameset?__report=")
-                .append(StringUtils.cleanPath(info.getFile().getAbsolutePath()))
-                .append("&__resourceFolder=")
-                .append(resourceFolder)
-                .append("&__title=")
-                .append(label);
+        String reportURL = viewerURL +
+                "frameset?__report=" +
+                StringUtils.cleanPath(info.getFile().getAbsolutePath()) +
+                "&__resourceFolder=" +
+                resourceFolder +
+                "&__title=" +
+                label;
 
-        Iframe frame = new Iframe(reportURL.toString());
+        Iframe frame = new Iframe(reportURL);
         frame.setHflex("1");
         frame.setVflex("1");
 

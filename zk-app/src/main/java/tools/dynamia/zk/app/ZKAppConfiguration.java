@@ -26,7 +26,7 @@ import tools.dynamia.ui.MessageDisplayer;
 import tools.dynamia.zk.ui.MessageNotification;
 import tools.dynamia.zk.util.ZKUtil;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import static tools.dynamia.commons.BeanUtils.newInstance;
 

@@ -16,7 +16,7 @@
  */
 package tools.dynamia.domain;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 
 /**

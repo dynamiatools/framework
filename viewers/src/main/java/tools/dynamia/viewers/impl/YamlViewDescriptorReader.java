@@ -253,26 +253,23 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      */
     private void parseGroups(Map<?, ?> map, DefaultViewDescriptor descriptor) {
         // GROUPS
-        if (map.containsKey(GROUPS) && map.get(GROUPS) instanceof Map) {
-            Map<?, ?> groups = (Map<?, ?>) map.get(GROUPS);
+        if (map.containsKey(GROUPS) && map.get(GROUPS) instanceof Map<?, ?> groups) {
             for (Object object : groups.entrySet()) {
                 Entry<?, ?> entry = (Entry<?, ?>) object;
                 FieldGroup group = new FieldGroup((String) entry.getKey());
                 group.setViewDescriptor(descriptor);
-                if (entry.getValue() instanceof Map) {
-                    Map<?, ?> groupProps = (Map<?, ?>) entry.getValue();
+                if (entry.getValue() instanceof Map<?, ?> groupProps) {
                     setValue(group, FIELD_LABEL, String.class, groupProps);
                     setValue(group, FIELD_ICON, String.class, groupProps);
                     setValue(group, FIELD_DESCRIPTION, String.class, groupProps);
                     setValue(group, FIELD_INDEX, Integer.class, groupProps);
                     setValue(group, FIELD_COLLAPSE, Boolean.class, groupProps);
 
-                    if (groupProps.containsKey(VD_FIELDS) && groupProps.get(VD_FIELDS) instanceof List) {
-                        List<?> fieldsNames = (List<?>) groupProps.get(VD_FIELDS);
+                    if (groupProps.containsKey(VD_FIELDS) && groupProps.get(VD_FIELDS) instanceof List<?> fieldsNames) {
                         for (Object fn : fieldsNames) {
                             Field field = descriptor.getField(fn.toString());
                             if (field == null) {
-                                logger.warn(fn.toString() + " is not a field. ViewDescriptor "
+                                logger.warn(fn + " is not a field. ViewDescriptor "
                                         + descriptor.getViewTypeName() + " - " + descriptor.getBeanClass());
                             } else {
                                 group.addField(field);
@@ -284,8 +281,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
                                 + descriptor.getViewTypeName() + " - " + descriptor.getBeanClass());
                     }
 
-                    if (groupProps.get(FIELD_PARAMS) instanceof Map) {
-                        Map groupParams = (Map) groupProps.get(FIELD_PARAMS);
+                    if (groupProps.get(FIELD_PARAMS) instanceof Map groupParams) {
                         group.getParams().putAll(groupParams);
                     }
 
@@ -303,8 +299,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      */
     private void parseLayout(Map<?, ?> map, DefaultViewDescriptor descriptor) {
         // LAYOUT
-        if (map.containsKey(VD_LAYOUT) && map.get(VD_LAYOUT) instanceof Map) {
-            Map<?, ?> layout = (Map<?, ?>) map.get(VD_LAYOUT);
+        if (map.containsKey(VD_LAYOUT) && map.get(VD_LAYOUT) instanceof Map<?, ?> layout) {
             for (Object object : layout.entrySet()) {
                 Entry<?, ?> entry = (Entry<?, ?>) object;
                 descriptor.getLayout().addParam(entry.getKey().toString(), entry.getValue());
@@ -320,8 +315,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      */
     private void parseParameters(Map<?, ?> map, DefaultViewDescriptor descriptor) {
         // PARAMETERS
-        if (map.containsKey(FIELD_PARAMS) && map.get(FIELD_PARAMS) instanceof Map) {
-            Map<?, ?> params = (Map<?, ?>) map.get(FIELD_PARAMS);
+        if (map.containsKey(FIELD_PARAMS) && map.get(FIELD_PARAMS) instanceof Map<?, ?> params) {
             for (Object object : params.entrySet()) {
                 Entry<?, ?> entry = (Entry<?, ?>) object;
                 Object value = getEntryValue(entry);
@@ -339,8 +333,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
     @SuppressWarnings({"rawtypes", "unchecked"})
     private void parseFields(Map<?, ?> map, DefaultViewDescriptor descriptor) {
         // FIELDS
-        if (map.containsKey(VD_FIELDS) && map.get(VD_FIELDS) instanceof Map) {
-            Map<?, ?> fields = (Map<?, ?>) map.get(VD_FIELDS);
+        if (map.containsKey(VD_FIELDS) && map.get(VD_FIELDS) instanceof Map<?, ?> fields) {
             for (Object obj : fields.entrySet()) {
                 Entry<String, Map> entry = (Entry<String, Map>) obj;
                 Field field = new Field();
@@ -363,8 +356,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
                 parseFieldClassAlias(fieldProps, field);
 
                 if (fieldProps != null && fieldProps.containsKey(FIELD_PARAMS)
-                        && fieldProps.get(FIELD_PARAMS) instanceof Map) {
-                    Map<?, ?> fieldParams = (Map<?, ?>) fieldProps.get(FIELD_PARAMS);
+                        && fieldProps.get(FIELD_PARAMS) instanceof Map<?, ?> fieldParams) {
                     for (Object object : fieldParams.entrySet()) {
                         Entry<?, ?> entry2 = (Entry<?, ?>) object;
                         Object value = getEntryValue(entry2);

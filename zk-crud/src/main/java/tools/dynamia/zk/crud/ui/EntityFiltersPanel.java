@@ -251,13 +251,11 @@ public class EntityFiltersPanel extends Borderlayout implements View {
             }
             bindComponentToCondition(binder, qc, comp);
 
-            if (comp instanceof InputElement) {
-                InputElement ie = (InputElement) comp;
+            if (comp instanceof InputElement ie) {
                 ie.setStyle("text-align:left");
             }
             comp.setParent(filterGroup);
-            if (comp instanceof HtmlBasedComponent) {
-                HtmlBasedComponent hcomp = (HtmlBasedComponent) comp;
+            if (comp instanceof HtmlBasedComponent hcomp) {
                 hcomp.setHflex("1");
                 if (field.getDescription() != null) {
                     hcomp.setTooltiptext(field.getDescription());
@@ -480,15 +478,13 @@ public class EntityFiltersPanel extends Borderlayout implements View {
             return false;
         }
 
-        if (condition.getValue() instanceof String) {
-            String text = (String) condition.getValue();
+        if (condition.getValue() instanceof String text) {
             if (text.trim().isEmpty()) {
                 return false;
             }
         }
 
-        if (condition.getValue() instanceof Collection) {
-            Collection collection = (Collection) condition.getValue();
+        if (condition.getValue() instanceof Collection collection) {
             if (collection.isEmpty()) {
                 return false;
             }

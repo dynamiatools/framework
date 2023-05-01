@@ -684,8 +684,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
         if (getParams().getSorter() == null) {
             getParams().sort(sorter);
 
-            if (dataSetView instanceof TableView) {
-                TableView tableView = (TableView) dataSetView;
+            if (dataSetView instanceof TableView tableView) {
                 if (tableView.getOrderBy() != null) {
                     getParams().orderBy(tableView.getOrderBy(), true);
                 }

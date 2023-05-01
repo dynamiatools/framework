@@ -59,10 +59,8 @@ public class SumFunction<T> implements Function<List<T>, Number> {
     @Override
     public Number compute(List<T> data, Map<String, Object> args) {
         Number sum = BigDecimal.ZERO;
-        if (data instanceof PagedList) {
-            PagedList<T> pagedList = (PagedList<T>) data;
-            if (pagedList.getDataSource() instanceof DataPaginatorPagedListDataSource) {
-                DataPaginatorPagedListDataSource<T> datasource = (DataPaginatorPagedListDataSource<T>) pagedList.getDataSource();
+        if (data instanceof PagedList<T> pagedList) {
+            if (pagedList.getDataSource() instanceof DataPaginatorPagedListDataSource<T> datasource) {
                 String jpqlProjection = datasource.getQueryMetadata().getQueryBuilder().createProjection("sum", args.get("property").toString());
                 CrudService crudService = Containers.get().findObject(CrudService.class);
                 sum = crudService.executeProjection(Number.class, jpqlProjection, datasource.getQueryMetadata().getParameters());

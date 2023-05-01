@@ -141,8 +141,7 @@ public class TreeView<T> extends Tree implements DataSetView<TreeModel<TreeViewN
     @Override
     public void setItemRenderer(TreeitemRenderer renderer) {
         super.setItemRenderer(renderer);
-        if (renderer instanceof TreeViewRowRenderer) {
-            TreeViewRowRenderer tvrr = (TreeViewRowRenderer) renderer;
+        if (renderer instanceof TreeViewRowRenderer tvrr) {
             tvrr.setViewDescriptor(viewDescriptor);
             tvrr.setTreeView(this);
         }

@@ -713,12 +713,11 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
      */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ViewDescriptor Info: ").append(getClass()).append("   ==> ").append(getBeanClass());
-        sb.append("\n -> ID:").append(getId());
-        sb.append("\n -> Fields Count:").append(getFields().size());
-        sb.append("\n -> Visible Fields Count:").append(getVisibleFields());
-        return sb.toString();
+        String sb = "ViewDescriptor Info: " + getClass() + "   ==> " + getBeanClass() +
+                "\n -> ID:" + getId() +
+                "\n -> Fields Count:" + getFields().size() +
+                "\n -> Visible Fields Count:" + getVisibleFields();
+        return sb;
     }
 
     /**

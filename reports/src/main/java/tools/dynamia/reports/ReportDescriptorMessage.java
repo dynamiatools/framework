@@ -31,7 +31,7 @@ public class ReportDescriptorMessage extends GenericMessage<ReportDescriptor> {
 	}
 
 	public boolean isThrowExceptions() {
-		return Boolean.parseBoolean("" + getHeader(THROW_EXCEPTIONS));
+		return Boolean.parseBoolean(String.valueOf(getHeader(THROW_EXCEPTIONS)));
 	}
 
 }

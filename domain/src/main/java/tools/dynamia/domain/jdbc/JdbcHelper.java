@@ -292,8 +292,7 @@ public class JdbcHelper {
 	public static void applyStatementParams(PreparedStatement stm, Object[] params) throws Exception {
 		int index = 1;
 		for (Object param : params) {
-			if (param instanceof Collection) {
-				Collection col = (Collection) param;
+			if (param instanceof Collection col) {
 				for (Object elem : col) {
 					applyStatementParam(stm, elem, index);
 					index++;
@@ -331,8 +330,7 @@ public class JdbcHelper {
 			s.setString(index, (String) o);
 		} else if (o instanceof java.sql.Date) {
 			s.setDate(index, (java.sql.Date) o);
-		} else if (o instanceof Date) {
-			Date d = (Date) o;
+		} else if (o instanceof Date d) {
 			s.setDate(index, new java.sql.Date(d.getTime()));
 		} else if (o instanceof Boolean) {
 			s.setBoolean(index, (Boolean) o);
@@ -432,8 +430,7 @@ public class JdbcHelper {
 				if (value != null) {
 					if (property.is(Boolean.class) || property.is(boolean.class)) {
 						value = mapBoolean(value);
-					} else if (value instanceof Number) {
-						Number number = (Number) value;
+					} else if (value instanceof Number number) {
 
 						if ((property.is(Long.class) || property.is(long.class))) {
 							value = number.longValue();

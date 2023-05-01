@@ -5,12 +5,12 @@ package tools.dynamia.commons;
  */
 public class PropertyChangeEvent {
 
-    private String propertyName;
+    private final String propertyName;
 
-    private Object source;
+    private final Object source;
 
-    private Object oldValue;
-    private Object newValue;
+    private final Object oldValue;
+    private final Object newValue;
 
 
     public PropertyChangeEvent(String propertyName, Object source, Object oldValue, Object newValue) {

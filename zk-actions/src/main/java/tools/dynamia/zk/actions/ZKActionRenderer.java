@@ -98,8 +98,7 @@ public abstract class ZKActionRenderer<T extends Component> implements ActionRen
     }
 
     protected void configureProperties(T component, Action action) {
-        if (component instanceof HtmlBasedComponent) {
-            HtmlBasedComponent hc = (HtmlBasedComponent) component;
+        if (component instanceof HtmlBasedComponent hc) {
             hc.setSclass(styleClass);
             hc.setStyle(style);
             hc.setWidth(width);
@@ -136,7 +135,7 @@ public abstract class ZKActionRenderer<T extends Component> implements ActionRen
             }
 
             if (styleClassBuilder.length() > 0) {
-                hc.setSclass(getStyleClass() + " " + styleClassBuilder.toString());
+                hc.setSclass(getStyleClass() + " " + styleClassBuilder);
             }
 
             if (styleBuilder.length() > 0) {

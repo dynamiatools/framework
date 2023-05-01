@@ -21,14 +21,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MimeTypeUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.collect.PagedList;
 import tools.dynamia.crud.CrudPage;
@@ -46,7 +48,6 @@ import tools.dynamia.viewers.JsonViewDescriptorDeserializer;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.Viewers;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -143,8 +144,7 @@ public class RestNavigationController {
 
     public static ListResult buildListResult(List content, DataPaginator paginator, int currenPage) {
         ListResult result = new ListResult();
-        if (content instanceof PagedList && paginator != null) {
-            PagedList pagedList = (PagedList) content;
+        if (content instanceof PagedList pagedList && paginator != null) {
             if (currenPage > 0) {
                 pagedList.getDataSource().setActivePage(currenPage);
 

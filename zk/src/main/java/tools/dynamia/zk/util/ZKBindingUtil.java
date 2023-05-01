@@ -90,8 +90,7 @@ public class ZKBindingUtil {
             String expression = null;
             String converter = null;
 
-            if (entry.getValue() instanceof Map) {
-                Map bindingDetail = (Map) entry.getValue();
+            if (entry.getValue() instanceof Map bindingDetail) {
                 expression = (String) bindingDetail.get(VALUE);
                 converter = (String) bindingDetail.get(CONVERTER);
             } else if (entry.getValue() instanceof String) {

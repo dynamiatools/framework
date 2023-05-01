@@ -40,8 +40,9 @@ import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.io.converters.Converters;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.*;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.*;
+
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -159,7 +160,7 @@ public class JpaCrudService extends AbstractCrudService {
     @Transactional
     public <T> T create(T t) {
         fireListeners(t, EventType.BEFORE_CREATE);
-        validatorService.validate(t);
+        validate(t);
         this.em.persist(t);
         fireListeners(t, EventType.AFTER_CREATE);
         return t;
@@ -290,11 +291,12 @@ public class JpaCrudService extends AbstractCrudService {
     @Transactional
     public <T> T update(T t) {
         fireListeners(t, EventType.BEFORE_UPDATE);
-        validatorService.validate(t);
+        validate(t);
         t = em.merge(t);
         fireListeners(t, EventType.AFTER_UPDATE);
         return t;
     }
+
 
     /*
      * (non-Javadoc)
@@ -995,5 +997,11 @@ public class JpaCrudService extends AbstractCrudService {
 
     public void setFullyLoadEntities(boolean fullyLoadEntities) {
         this.fullyLoadEntities = fullyLoadEntities;
+    }
+
+    private <T> void validate(T t) {
+        if (validatorService != null) {
+            validatorService.validate(t);
+        }
     }
 }

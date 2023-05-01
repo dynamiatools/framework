@@ -35,7 +35,7 @@ public class QueryBuilder implements Cloneable {
 
 
     enum QueryType {
-        SELECT, UPDATE, DELETE;
+        SELECT, UPDATE, DELETE
     }
 
     private QueryType queryType = QueryType.SELECT;
@@ -192,10 +192,8 @@ public class QueryBuilder implements Cloneable {
             for (String property : queryParameters.getSortedKeys()) {
                 Object value = queryParameters.get(property);
                 if (value != null) {
-                    if (value instanceof QueryCondition) {
-                        QueryCondition qc = (QueryCondition) value;
-                        if (qc instanceof QueryConditionGroup) {
-                            QueryConditionGroup qcGroup = (QueryConditionGroup) qc;
+                    if (value instanceof QueryCondition qc) {
+                        if (qc instanceof QueryConditionGroup qcGroup) {
                             for (QueryCondition nestedQC : qcGroup.getValue()) {
                                 addCondition(property, nestedQC, nestedQC.getBooleanOperator());
                             }
@@ -399,7 +397,7 @@ public class QueryBuilder implements Cloneable {
     }
 
     private void addFields(List<String> list, String[] fields) {
-        if (fields != null && fields.length > 0) {
+        if (fields != null) {
             for (String field : fields) {
                 addField(list, field);
             }

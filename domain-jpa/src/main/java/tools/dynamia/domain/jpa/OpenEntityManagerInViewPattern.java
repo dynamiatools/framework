@@ -26,9 +26,9 @@ import tools.dynamia.domain.OpenPersistenceInViewProvider;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Provider;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceException;
 
 
 /**

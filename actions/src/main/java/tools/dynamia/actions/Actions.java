@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class Actions {
 
-    private static String ACTION_PARAM = "action";
+    private static final String ACTION_PARAM = "action";
 
     /**
      * Helper method to run actions

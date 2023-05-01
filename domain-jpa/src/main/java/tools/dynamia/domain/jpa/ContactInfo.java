@@ -19,8 +19,8 @@ package tools.dynamia.domain.jpa;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.domain.util.AbstractContactInfo;
 
-import javax.persistence.Embeddable;
-import javax.persistence.Transient;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
 
 
 /**

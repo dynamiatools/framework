@@ -37,12 +37,12 @@ public class MessageNotification extends MessageDialog {
 
         Object pos = config.get("position");
         if (pos != null) {
-            position = "" + pos;
+            position = String.valueOf(pos);
         }
         Object time = config.get("timeout");
         if (time != null) {
             try {
-                timeout = Integer.parseInt("" + time);
+                timeout = Integer.parseInt(String.valueOf(time));
             } catch (Exception e) {
             }
         }

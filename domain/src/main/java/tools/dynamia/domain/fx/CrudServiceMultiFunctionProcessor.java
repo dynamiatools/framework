@@ -44,10 +44,8 @@ public class CrudServiceMultiFunctionProcessor<T> implements MultiFunctionProces
         Map<FunctionProvider, Number> result = new HashMap<>();
         functions.forEach(fx -> result.put(fx, BigDecimal.ZERO));
 
-        if (data instanceof PagedList) {
-            PagedList<T> pagedList = (PagedList<T>) data;
-            if (pagedList.getDataSource() instanceof DataPaginatorPagedListDataSource) {
-                DataPaginatorPagedListDataSource<T> datasource = (DataPaginatorPagedListDataSource<T>) pagedList.getDataSource();
+        if (data instanceof PagedList<T> pagedList) {
+            if (pagedList.getDataSource() instanceof DataPaginatorPagedListDataSource<T> datasource) {
 
                 var query = datasource.getQueryMetadata().getQueryBuilder().clone();
                 var projections = new ArrayList<String>();

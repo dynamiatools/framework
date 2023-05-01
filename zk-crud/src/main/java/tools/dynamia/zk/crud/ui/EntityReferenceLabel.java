@@ -68,7 +68,7 @@ public class EntityReferenceLabel extends Label  implements LoadableOnly {
         if (repository != null && referenceId != null) {
 
             reference = (EntityReference) SessionCache.getInstance()
-                    .getOrLoad("entityRef" + repository.getAlias() + "" + referenceId, s -> repository.load(referenceId));
+                    .getOrLoad("entityRef" + repository.getAlias() + referenceId, s -> repository.load(referenceId));
 
             if (reference != null) {
                 setValue(reference.getName());

@@ -50,8 +50,7 @@ public class EventQueueSubscriber {
         EventQueue<Event> queue = EventQueues.lookup(subscribe.value(), subscribe.scope(), subscribe.autocreate());
         queue.subscribe(evt -> {
             boolean completed = false;
-            if (evt instanceof GlobalCommandEvent) {
-                GlobalCommandEvent globalEvt = (GlobalCommandEvent) evt;
+            if (evt instanceof GlobalCommandEvent globalEvt) {
                 if (subscribe.command().length > 0) {
                     for (String command : subscribe.command()) {
                         if (globalEvt.getCommand().equals(command)) {

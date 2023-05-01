@@ -18,7 +18,7 @@ import java.util.Collection;
  */
 public class ReportDataSource {
 
-    private Object value;
+    private final Object value;
 
     public ReportDataSource(Object value) {
         this.value = value;

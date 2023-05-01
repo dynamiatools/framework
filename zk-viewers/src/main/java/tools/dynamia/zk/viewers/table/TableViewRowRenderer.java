@@ -222,8 +222,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
             } else {
                 Component comp = createFieldComponent(data, cellValue, field, cell);
 
-                if (comp instanceof Import) {
-                    Import importComp = (Import) comp;
+                if (comp instanceof Import importComp) {
                     importComp.setValue(data);
                     importComp.addArgs(field.getParams());
                     importComp.addArg("index", index);
@@ -245,8 +244,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                 if (field.getParam(Viewers.PARAM_IGNORE_BINDINGS) != Boolean.TRUE) {
                     if (isBindiable(field, comp)) {
                         Object bmapObject = field.getParam(Viewers.PARAM_BINDINGS);
-                        if (bmapObject instanceof Map) {
-                            Map bindingMap = (Map) bmapObject;
+                        if (bmapObject instanceof Map bindingMap) {
                             ZKBindingUtil.bindComponent(binder, comp, bindingMap, Viewers.BEAN);
                         } else {
                             String converterExpression = (String) field.getParam(Viewers.PARAM_CONVERTER);
@@ -261,8 +259,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                     String actionId = field.getAction();
                     Action action = ActionLoader.findActionById(Action.class, actionId);
                     if (action != null) {
-                        if (comp instanceof HtmlBasedComponent) {
-                            HtmlBasedComponent hcomp = (HtmlBasedComponent) comp;
+                        if (comp instanceof HtmlBasedComponent hcomp) {
                             if (hcomp.getTooltiptext() == null && action.getDescription() != null) {
                                 hcomp.setTooltiptext(action.getDescription());
                             }

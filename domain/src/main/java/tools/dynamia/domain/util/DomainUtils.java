@@ -142,11 +142,10 @@ public abstract class DomainUtils {
      * @return the big decimal
      */
     public static BigDecimal simpleRound(BigDecimal n, int zeros) {
-        StringBuilder patternBuilder = new StringBuilder();
-        patternBuilder.append("1");
-        patternBuilder.append("0".repeat(Math.max(0, zeros)));
+        String patternBuilder = "1" +
+                "0".repeat(Math.max(0, zeros));
 
-        int pattern = Integer.parseInt(patternBuilder.toString());
+        int pattern = Integer.parseInt(patternBuilder);
 
         long value = n.longValue();
         double dec = (double) value / Double.parseDouble(pattern + ".0");
@@ -195,9 +194,7 @@ public abstract class DomainUtils {
      */
     public static String formatNumberWithZeroes(long number, long numberReference) {
         int numCeros = Long.toString(numberReference).length() - Long.toString(number).length();
-        StringBuilder ceros = new StringBuilder();
-        ceros.append("0".repeat(Math.max(0, numCeros)));
-        return ceros + Long.toString(number);
+        return "0".repeat(Math.max(0, numCeros)) + Long.toString(number);
     }
 
     /**

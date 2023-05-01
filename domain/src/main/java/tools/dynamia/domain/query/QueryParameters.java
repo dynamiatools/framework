@@ -385,8 +385,7 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
                 String key = entry.getKey();
                 Object value = entry.getValue();
                 if (value != null) {
-                    if (value instanceof QueryCondition) {
-                        QueryCondition qc = (QueryCondition) value;
+                    if (value instanceof QueryCondition qc) {
                         qc.apply(key, query);
                     } else if (entry.getKey().equals("id") || entry.getKey().endsWith(".id")) {
                         if (!(value instanceof Long)) {

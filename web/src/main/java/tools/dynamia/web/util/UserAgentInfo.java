@@ -16,7 +16,7 @@
  */
 package tools.dynamia.web.util;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * The DetectSmartPhone class encapsulates information about a browser's

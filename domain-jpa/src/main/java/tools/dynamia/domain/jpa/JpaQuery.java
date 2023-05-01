@@ -19,7 +19,7 @@ package tools.dynamia.domain.jpa;
 
 import tools.dynamia.domain.query.AbstractQuery;
 
-import javax.persistence.Query;
+import jakarta.persistence.Query;
 import java.util.HashMap;
 import java.util.Map;
 

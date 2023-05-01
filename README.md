@@ -1,11 +1,11 @@
 [![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia/tools.dynamia.zk.app)](https://search.maven.org/search?q=tools.dynamia)
-![Java Version Required](https://img.shields.io/badge/java-11+-blue)
+![Java Version Required](https://img.shields.io/badge/java-17-blue)
 [![Java CI with Maven](https://github.com/dynamiatools/framework/actions/workflows/maven.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/maven.yml)
 
 
 # Overview
 
-DynamiaTools is a framework for building Java 11+ web applications fast and easy using standard design patterns, views
+DynamiaTools is a framework for building Java 17+ web applications fast and easy using standard design patterns, views
 descriptors for automatic UI generation, actions, services and modules. Powered by **Spring Boot** (https://spring.io), ZK
 9 (https://www.zkoss.org) for web UI and JPA 2.
 
@@ -60,13 +60,13 @@ class MyApplication {
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.zk.app</artifactId>
-        <version>4.2.0</version>
+        <version>5.0.0</version>
     </dependency>
 
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.domain.jpa</artifactId>
-        <version>4.2.0</version>
+        <version>5.0.0</version>
     </dependency>    
 </dependencies>
 ```
@@ -74,8 +74,8 @@ class MyApplication {
 **Gradle**
 
 ```groovy
-compile 'tools.dynamia:tools.dynamia.zk.app:4.2.0'
-compile 'tools.dynamia:tools.dynamia.domain.jpa:4.2.0'
+compile 'tools.dynamia:tools.dynamia.zk.app:5.0.0'
+compile 'tools.dynamia:tools.dynamia.domain.jpa:5.0.0'
 ```
 
 Artifacts are available in **Maven Central** repositories
@@ -86,7 +86,7 @@ Please visit (https://dynamia.tools) for full documentation and tutorials
 
 ## Building
 
-- Install OpenJDK 11
+- Install OpenJDK 17
 - Install Maven 3.x
 - Install Git
 - Clone this repository
@@ -134,6 +134,10 @@ Please use it, extend it and help us to build a great community around it. We wi
 Currently, we have 10 projects and more than 40 modules powered by DynamiaTools 4.  As you can see this is not
 a new framework but is new in the open source world. This is not the only project we are going to open, we have more
 products to share.
+
+### v5.x
+
+The main goal of 5.x version is to upgrade to latest version of Java 17, spring and hibernate.
 
 ## Want contribute?
 

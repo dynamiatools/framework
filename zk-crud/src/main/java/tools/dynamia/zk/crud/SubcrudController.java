@@ -136,8 +136,7 @@ public class SubcrudController<E> extends CrudController<E> implements SubcrudCo
                 toBeCreatedEntities.remove(getSelected());
             }
 
-            if (dataSetView instanceof TableView) {
-                TableView tableView = (TableView) dataSetView;
+            if (dataSetView instanceof TableView tableView) {
                 tableView.getSelectedItem().detach();
             }
 
@@ -169,8 +168,7 @@ public class SubcrudController<E> extends CrudController<E> implements SubcrudCo
         try {
 
             Object object = BeanUtils.invokeGetMethod(parent, childrenName);
-            if (object != null && object instanceof Collection) {
-                Collection children = (Collection) object;
+            if (object != null && object instanceof Collection children) {
                 children.add(newChild);
 
             }
@@ -215,12 +213,11 @@ public class SubcrudController<E> extends CrudController<E> implements SubcrudCo
     }
 
     private void addInMemoryResults() {
-        if (dataSetView instanceof TableView) {
+        if (dataSetView instanceof TableView tableView) {
             List<E> defaultValues = new ArrayList<>();
             defaultValues.addAll(toBeCreatedEntities);
             defaultValues.addAll(toBeUpdatedEntities);
 
-            TableView tableView = (TableView) dataSetView;
             tableView.setDefaultValue(defaultValues);
         }
 

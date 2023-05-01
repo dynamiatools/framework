@@ -114,8 +114,7 @@ public abstract class ReportExporter {
                 exporter.setExporterInput(new SimpleExporterInput(items));
             } else if (reports.size() == 1) {
                 Report report = reports.get(0);
-                if (report.getContent() instanceof File) {
-                    File reportFile = (File) report.getContent();
+                if (report.getContent() instanceof File reportFile) {
                     exporter.setExporterInput(new SimpleExporterInput(reportFile));
                 }
             }
@@ -240,8 +239,7 @@ public abstract class ReportExporter {
     private static List<JasperPrint> getJasperPrints(List<Report> reports) {
         List<JasperPrint> jasperPrints = new ArrayList<>();
         for (Report report : reports) {
-            if (report.getContent() instanceof JasperPrint) {
-                JasperPrint jrPrint = (JasperPrint) report.getContent();
+            if (report.getContent() instanceof JasperPrint jrPrint) {
                 jasperPrints.add(jrPrint);
             }
         }

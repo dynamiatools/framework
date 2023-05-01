@@ -59,8 +59,7 @@ public class ActionLoader<T extends Action> {
                     ((AbstractAction) action).setLocalizedMessagesProvider(localizer);
                 }
 
-                if (action instanceof ActionLifecycleAware) {
-                    ActionLifecycleAware ala = (ActionLifecycleAware) action;
+                if (action instanceof ActionLifecycleAware ala) {
                     ala.onCreate();
                 }
             }

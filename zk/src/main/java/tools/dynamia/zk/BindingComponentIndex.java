@@ -56,7 +56,7 @@ public class BindingComponentIndex extends HashSetMultiMap<String, String> {
     }
 
     public void put(String key, Class... value) {
-        if (value != null && value.length > 0) {
+        if (value != null) {
             for (Class clazz : value) {
                 put(key, clazz);
             }

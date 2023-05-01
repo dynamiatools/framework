@@ -69,10 +69,7 @@ public class Menu implements NavigationViewBuilder<Menubar> {
 
     @Override
     public void createPageGroupView(PageGroup pageGroup) {
-        boolean submenus = true;
-        if (pageGroup.getParentModule() != null && pageGroup.getParentModule().getProperty("submenus") == Boolean.FALSE) {
-            submenus = false;
-        }
+        boolean submenus = pageGroup.getParentModule() == null || pageGroup.getParentModule().getProperty("submenus") != Boolean.FALSE;
         if (submenus) {
             org.zkoss.zul.Menu menuPg = new org.zkoss.zul.Menu(pageGroup.getName());
             new Menupopup().setParent(menuPg);
