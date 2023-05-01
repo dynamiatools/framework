@@ -166,19 +166,16 @@ public interface ViewDescriptor {
     /**
      * Device name, default is screen
      *
-     * @return
      */
     String getDevice();
 
     /**
-     * @return
      */
     boolean isAutofields();
 
     /**
      * Return fields sorted by index
      *
-     * @return
      */
     List<Field> sortFields();
 

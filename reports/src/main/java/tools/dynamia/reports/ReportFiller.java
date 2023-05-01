@@ -16,7 +16,12 @@
  */
 package tools.dynamia.reports;
 
-import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JREmptyDataSource;
+import net.sf.jasperreports.engine.JRResultSetDataSource;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import tools.dynamia.commons.logger.LoggingService;
@@ -44,9 +49,6 @@ public class ReportFiller {
     private static final LoggingService logger = new SLF4JLoggingService(ReportFiller.class);
 
     /**
-     * @param reportDescriptor
-     *
-     * @return
      */
     public static Report fill(ReportDescriptor reportDescriptor) {
         Report report = null;

@@ -32,7 +32,6 @@ public class ReportFillerException extends RuntimeException {
 
     /**
      *
-     * @param e
      */
     public ReportFillerException(Throwable e) {
         super(e);

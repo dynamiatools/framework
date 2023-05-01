@@ -19,7 +19,13 @@ package tools.dynamia.domain.util;
 import tools.dynamia.commons.BeanMap;
 import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.domain.ValidationError;
-import tools.dynamia.domain.query.*;
+import tools.dynamia.domain.query.AbstractQueryCondition;
+import tools.dynamia.domain.query.BooleanOp;
+import tools.dynamia.domain.query.Group;
+import tools.dynamia.domain.query.QueryCondition;
+import tools.dynamia.domain.query.QueryConditionGroup;
+import tools.dynamia.domain.query.QueryConditions;
+import tools.dynamia.domain.query.QueryParameters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +110,6 @@ public class QueryBuilder implements Cloneable {
      * constructor
      *
      * @param entityType the type
-     * @param resultType
      * @param var        the var
      * @param fields     the fields
      * @return the query builder
@@ -122,8 +127,6 @@ public class QueryBuilder implements Cloneable {
     /**
      * If fields is empty means all fields
      *
-     * @param fields
-     * @return
      */
     public static QueryBuilder select(String... fields) {
         QueryBuilder qb = new QueryBuilder();
@@ -135,9 +138,6 @@ public class QueryBuilder implements Cloneable {
     /**
      * Query type and query var
      *
-     * @param entityType
-     * @param var
-     * @return
      */
     public QueryBuilder from(Class<?> entityType, String var) {
         this.type = entityType;
@@ -150,8 +150,6 @@ public class QueryBuilder implements Cloneable {
      * List result type can be different from query type, use this to create DTO
      * like collections
      *
-     * @param resultType
-     * @return
      */
     public QueryBuilder resultType(Class<?> resultType) {
         this.resultType = resultType;
@@ -212,11 +210,11 @@ public class QueryBuilder implements Cloneable {
         }
         if (queryParameters.getGroups() != null) {
             for (Group group : queryParameters.getGroups()) {
-                if (group.getParams() != null && !group.getParams().isEmpty()) {
-                    QueryBuilder subquery = QueryBuilder.fromParameters(type, var, group.getParams()).build();
+                if (group.params() != null && !group.params().isEmpty()) {
+                    QueryBuilder subquery = QueryBuilder.fromParameters(type, var, group.params()).build();
                     String subqueryWhere = "(" + subquery.parse(subquery.wheres, " ") + ")";
 
-                    if (group.getBooleanOp() == BooleanOp.AND) {
+                    if (group.booleanOp() == BooleanOp.AND) {
                         and(subqueryWhere);
                     } else {
                         or(subqueryWhere);
@@ -244,7 +242,6 @@ public class QueryBuilder implements Cloneable {
      *
      * @param property  the property
      * @param qc        the qc
-     * @param booleanOp
      */
     private void addCondition(String property, QueryCondition qc, BooleanOp booleanOp) {
         String condition = renderCondition(property, qc);
@@ -412,16 +409,12 @@ public class QueryBuilder implements Cloneable {
     @Override
     public String toString() {
 
-        switch (queryType) {
-            case SELECT:
-                return buildSelect();
-            case UPDATE:
-                return buildUpdate();
-            case DELETE:
-                return buildDelete();
-            default:
-                return buildSelect();
-        }
+        return switch (queryType) {
+            case SELECT -> buildSelect();
+            case UPDATE -> buildUpdate();
+            case DELETE -> buildDelete();
+            default -> buildSelect();
+        };
     }
 
     private String buildSelect() {
@@ -679,9 +672,6 @@ public class QueryBuilder implements Cloneable {
     /**
      * Update query
      *
-     * @param entityType
-     * @param var
-     * @return
      */
     public static QueryBuilder update(Class entityType, String var) {
         var builder = new QueryBuilder();

@@ -108,9 +108,6 @@ public class FileInfo {
     /**
      * Create file info with custom name and description
      *
-     * @param file
-     * @param name
-     * @param description
      */
     public FileInfo(File file, String name, String description) {
         this(file);
@@ -229,8 +226,6 @@ public class FileInfo {
     /**
      * Add a custom metadata value
      *
-     * @param name
-     * @param value
      */
     public void addMetadata(String name, Object value) {
         this.metaData.put(name, value);
@@ -239,8 +234,6 @@ public class FileInfo {
     /**
      * Get custom metadata
      *
-     * @param name
-     * @return
      */
     public Object getMetadata(String name) {
         return this.metaData.get(name);

@@ -53,8 +53,7 @@ public class Decimal implements Converter<Object, Object, Component> {
 
     private NumberFormat buildFormatter() {
         var locale = Messages.getDefaultLocale();
-        var formatter = DecimalFormat.getInstance(locale);
-        return formatter;
+        return DecimalFormat.getInstance(locale);
     }
 
 }

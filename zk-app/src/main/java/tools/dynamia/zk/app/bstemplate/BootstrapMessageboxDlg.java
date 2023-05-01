@@ -56,16 +56,10 @@ public class BootstrapMessageboxDlg extends MessageboxDlg {
         String type = "btn-default";
 
         switch (button) {
-            case OK:
-            case YES:
-                type = "btn-primary";
-                break;
-            case CANCEL:
-            case NO:
-                type = "btn-danger";
-                break;
-            default:
-                break;
+            case OK, YES -> type = "btn-primary";
+            case CANCEL, NO -> type = "btn-danger";
+            default -> {
+            }
         }
 
         return type;

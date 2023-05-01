@@ -22,7 +22,6 @@ import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.WebApp;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,6 +35,7 @@ public class ApplicationScope implements Scope {
 
     private static final String APP_SCOPE = "ZK_SPRING_APP_SCOPE";
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object get(String name, ObjectFactory objectFactory) {
         final Execution exec = Executions.getCurrent();
@@ -48,6 +48,7 @@ public class ApplicationScope implements Scope {
             Object scopedObject = appScope.get(name);
             if (scopedObject == null) {
                 scopedObject = objectFactory.getObject();
+                //noinspection unchecked
                 appScope.put(name, scopedObject);
             }
             return scopedObject;

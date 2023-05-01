@@ -158,7 +158,6 @@ public abstract class AbstractAction implements Action {
     /**
      * Shortcut to setAttribute("background","#back")
      *
-     * @param background
      */
     public void setBackground(String background) {
         setAttribute("background", background);
@@ -167,7 +166,6 @@ public abstract class AbstractAction implements Action {
     /**
      * Shortcut to getAttribute("background")
      *
-     * @return
      */
     public String getBackground() {
         return (String) getAttribute("background");
@@ -176,7 +174,6 @@ public abstract class AbstractAction implements Action {
     /**
      * Shortcut to setAttribute("color","#back")
      *
-     * @param color
      */
     public void setColor(String color) {
         setAttribute("color", color);
@@ -185,7 +182,6 @@ public abstract class AbstractAction implements Action {
     /**
      * Shortcut to getAttribute("color")
      *
-     * @return
      */
     public String getColor() {
         return (String) getAttribute("color");
@@ -249,8 +245,6 @@ public abstract class AbstractAction implements Action {
      * Get message based in current locale. It use {@link ClassMessages} to find messages Bundles. Messages.properties files should
      * be in the same package ot this action. One Message.properties by locale, ex. Message_es.properties, Messages_kr.properties
      *
-     * @param key
-     * @return
      */
     protected String msg(String key) {
         return messages.get(key);
@@ -260,9 +254,6 @@ public abstract class AbstractAction implements Action {
      * Get message based in current locale. It use {@link ClassMessages} to find messages Bundles. Messages.properties files should
      * be in the same package ot this action. One Message.properties by locale, ex. Message_es.properties, Messages_kr.properties
      *
-     * @param key
-     * @param params
-     * @return
      */
     protected String msg(String key, Object... params) {
         return messages.get(key, params);

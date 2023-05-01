@@ -133,7 +133,7 @@ public class ImageUtil {
         } else {
             try {
                 return (Color) BeanUtils.getField(Color.class, colorStr).get(null);
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
         return null;
@@ -150,8 +150,6 @@ public class ImageUtil {
     /**
      * Convert a png file to jpg
      *
-     * @param input
-     * @return
      */
     public static File convertPngToJpg(File input) {
         try {
@@ -191,8 +189,6 @@ public class ImageUtil {
     /**
      * Generate QR code jpg image in a temporal file
      *
-     * @param content
-     * @return
      */
     public static File generateQR(String content) {
         return QRCode.from(content).to(ImageType.JPG).file();
@@ -201,10 +197,6 @@ public class ImageUtil {
     /**
      * Generate QR code jpg image in a temporal file with specific width and height
      *
-     * @param content
-     * @param width
-     * @param height
-     * @return
      */
     public static File generateQR(String content, int width, int height) {
         return QRCode.from(content).withSize(width, height).to(ImageType.JPG).file();
@@ -213,8 +205,6 @@ public class ImageUtil {
     /**
      * Generate qr code in base 64
      *
-     * @param content
-     * @return
      */
     public static String generateQRBase64(String content) {
         try {
@@ -227,8 +217,6 @@ public class ImageUtil {
     /**
      * Generate qr code in base 64 with specific width and height
      *
-     * @param content
-     * @return
      */
     public static String generateQRBase64(String content, int width, int height) {
         try {

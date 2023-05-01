@@ -16,6 +16,7 @@
  */
 package tools.dynamia.zk.app;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,8 +26,6 @@ import tools.dynamia.app.ApplicationInfo;
 import tools.dynamia.ui.MessageDisplayer;
 import tools.dynamia.zk.ui.MessageNotification;
 import tools.dynamia.zk.util.ZKUtil;
-
-import jakarta.annotation.PostConstruct;
 
 import static tools.dynamia.commons.BeanUtils.newInstance;
 

@@ -23,11 +23,21 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.sterotypes.Provider;
 import tools.dynamia.io.Resource;
 import tools.dynamia.io.converters.Converters;
-import tools.dynamia.viewers.*;
+import tools.dynamia.viewers.Field;
+import tools.dynamia.viewers.FieldGroup;
+import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.ViewDescriptorReader;
+import tools.dynamia.viewers.ViewDescriptorReaderCustomizer;
+import tools.dynamia.viewers.ViewDescriptorReaderException;
 
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import static tools.dynamia.viewers.util.ViewersExpressionUtil.$s;
@@ -132,6 +142,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
                                                                List<ViewDescriptorReaderCustomizer> customizers) throws Exception {
         ViewDescriptor descriptor = buildViewDescriptor(map);
         for (ViewDescriptorReaderCustomizer c : customizers) {
+            //noinspection unchecked
             c.customize(map, descriptor);
         }
         return descriptor;
@@ -153,9 +164,8 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      *
      * @param map the map
      * @return the view descriptor
-     * @throws Exception the exception
      */
-    private ViewDescriptor buildViewDescriptor(Map<?, ?> map) throws Exception {
+    private ViewDescriptor buildViewDescriptor(Map<?, ?> map) {
         DefaultViewDescriptor descriptor = null;
 
         if (!map.containsKey(VD_VIEW)) {
@@ -282,6 +292,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
                     }
 
                     if (groupProps.get(FIELD_PARAMS) instanceof Map groupParams) {
+                        //noinspection unchecked
                         group.getParams().putAll(groupParams);
                     }
 
@@ -413,7 +424,6 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      *
      * @param map        the map
      * @param descriptor the descriptor
-     * @throws Exception the exception
      */
     private void parseHiddenFields(Map<?, ?> map, DefaultViewDescriptor descriptor) {
         // HIDDEN FIELDS
@@ -490,6 +500,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
                 Map.Entry entry = (Map.Entry) object;
                 if (entry.getValue() instanceof String) {
                     String parsedString = $s((String) entry.getValue());
+                    //noinspection unchecked
                     entry.setValue(parsedString);
                 } else if (entry.getValue() instanceof Map) {
                     parseExpressions((Map) entry.getValue());

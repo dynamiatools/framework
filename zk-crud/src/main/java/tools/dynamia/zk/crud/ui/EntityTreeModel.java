@@ -22,6 +22,7 @@ import org.zkoss.zul.AbstractTreeModel;
  *
  * @author Mario A. Serrano Leones
  */
+@SuppressWarnings("unchecked")
 public class EntityTreeModel<E> extends AbstractTreeModel<EntityTreeNode<E>> {
 
     /**
@@ -29,12 +30,16 @@ public class EntityTreeModel<E> extends AbstractTreeModel<EntityTreeNode<E>> {
      */
     private static final long serialVersionUID = 817662050637827509L;
 
+    @SuppressWarnings("unchecked")
     public EntityTreeModel(EntityTreeNode root) {
+        //noinspection unchecked
         super(root);
+        //noinspection unchecked
         root.setModel(this);
+        //noinspection unchecked
         if (getChildCount(root) > 0) {
             for (Object object : root.getChildren()) {
-                EntityTreeNode<E> node = (EntityTreeNode<E>) object;
+                @SuppressWarnings("unchecked") EntityTreeNode<E> node = (EntityTreeNode<E>) object;
                 node.setModel(this);
             }
         }

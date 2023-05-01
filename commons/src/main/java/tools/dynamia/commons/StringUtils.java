@@ -1112,8 +1112,7 @@ public abstract class StringUtils {
      */
     public static Set<String> commaDelimitedListToSet(String str) {
         String[] tokens = commaDelimitedListToStringArray(str);
-        Set<String> set = new TreeSet<>(Arrays.asList(tokens));
-        return set;
+        return new TreeSet<>(Arrays.asList(tokens));
     }
 
     /**
@@ -1364,7 +1363,7 @@ public abstract class StringUtils {
                 hexString.append(hex);
             }
             text = hexString.toString();
-        } catch (NoSuchAlgorithmException ex) {
+        } catch (NoSuchAlgorithmException ignored) {
         }
         return text;
     }
@@ -1394,9 +1393,6 @@ public abstract class StringUtils {
     /**
      * Null safe equals comparator
      *
-     * @param value
-     * @param value2
-     * @return
      */
     public static boolean equals(String value, String value2) {
         if ((value == null && value2 != null) || (value != null && value2 == null)) {
@@ -1422,8 +1418,6 @@ public abstract class StringUtils {
     /**
      * Format a long time data to duration text using format hh:mm:ss
      *
-     * @param time
-     * @return
      */
     public static String formatDuration(long time) {
         var duration = java.time.Duration.ofMillis(time);
@@ -1440,7 +1434,6 @@ public abstract class StringUtils {
     /**
      * Concat all object in to a string
      *
-     * @param values
      * @return a new String
      */
 

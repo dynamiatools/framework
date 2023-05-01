@@ -108,7 +108,7 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
                     if (fieldInfo != null && fieldInfo.isAnnotationPresent(Reference.class)) {
                         Reference reference = fieldInfo.getAnnotation(Reference.class);
                         EntityReferenceRepository repository = DomainUtils.getEntityReferenceRepositoryByAlias(reference.value());
-                        EntityReference entityReference = repository.load((Serializable) fieldValue);
+                        @SuppressWarnings("unchecked") EntityReference entityReference = repository.load((Serializable) fieldValue);
                         if (entityReference != null) {
                             gen.writeObjectFieldStart(fieldName);
                             writeField(gen, "id", entityReference.getId());
@@ -203,21 +203,12 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
             format = "time";
         }
 
-        DateFormat df = null;
-        switch (format) {
-            case "ISO8601":
-                df = fullDateFormat;
-                break;
-            case "date":
-                df = dateFormat;
-                break;
-            case "time":
-                df = timeFormat;
-                break;
-            case "basic":
-            default:
-                df = basicDateFormat;
-        }
+        DateFormat df = switch (format) {
+            case "ISO8601" -> fullDateFormat;
+            case "date" -> dateFormat;
+            case "time" -> timeFormat;
+            default -> basicDateFormat;
+        };
 
 
         gen.writeStringField(fieldName, df.format(date));

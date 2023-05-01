@@ -30,11 +30,11 @@ public class JavaMailConfigurationAdapter {
 
     protected String host;
     protected int port;
-    protected String protocol = "stmp";
+    protected final String protocol = "stmp";
     protected String username;
     protected String password;
-    protected boolean tlsEnabled = false;
-    protected boolean auth = true;
+    protected final boolean tlsEnabled = false;
+    protected final boolean auth = true;
     protected String from;
     protected String personal;
 

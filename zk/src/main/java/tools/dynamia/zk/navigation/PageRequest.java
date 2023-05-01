@@ -20,23 +20,6 @@ import tools.dynamia.navigation.Page;
 
 import java.util.Map;
 
-public class PageRequest {
-
-    private final Page page;
-    private final Map<String, Object> params;
-
-    public PageRequest(Page page, Map<String, Object> params) {
-        super();
-        this.page = page;
-        this.params = params;
-    }
-
-    public Page getPage() {
-        return page;
-    }
-
-    public Map<String, Object> getParams() {
-        return params;
-    }
+public record PageRequest(Page page, Map<String, Object> params) {
 
 }

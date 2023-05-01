@@ -23,14 +23,12 @@ public interface PropertyChangeListenerContainer {
      * Add a PropertyChangeListener to get object change, subclasses must invoke
      * notifyChange to fire listeners
      *
-     * @param listener
      */
     void addPropertyChangeListener(PropertyChangeListener listener);
 
     /**
      * Remove PropertyChangeListener
      *
-     * @param listener
      */
     void removePropertyChangeListener(PropertyChangeListener listener);
 }

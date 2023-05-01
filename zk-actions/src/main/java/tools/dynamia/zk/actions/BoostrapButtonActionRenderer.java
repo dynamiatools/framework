@@ -61,7 +61,6 @@ public class BoostrapButtonActionRenderer extends ButtonActionRenderer {
 
     /**
      * Add style class btn-sm
-     * @param small
      */
     public void setSmall(boolean small) {
         this.small = small;
@@ -74,7 +73,6 @@ public class BoostrapButtonActionRenderer extends ButtonActionRenderer {
 
     /**
      * Add style class btn-block
-     * @param block
      */
     public void setBlock(boolean block) {
         this.block = block;
@@ -86,7 +84,6 @@ public class BoostrapButtonActionRenderer extends ButtonActionRenderer {
 
     /**
      * Add style class btn-lg
-     * @param large
      */
     public void setLarge(boolean large) {
         this.large = large;

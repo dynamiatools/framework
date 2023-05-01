@@ -35,8 +35,6 @@ public class ViewRendererUtil {
     /**
      * Find first applicable {@link ViewRendererCustomizer}
      *
-     * @param viewDescriptor
-     * @return
      */
     public static ViewRendererCustomizer findViewRendererCustomizer(ViewDescriptor viewDescriptor) {
         if (viewDescriptor == null || viewDescriptor.getBeanClass() == null) {
@@ -51,9 +49,6 @@ public class ViewRendererUtil {
     /**
      * Call this method before render a field, if return false dont render the field
      *
-     * @param descriptor
-     * @param field
-     * @return
      */
     public static boolean isFieldRenderable(ViewDescriptor descriptor, Field field) {
         ViewRendererCustomizer customizer = findViewRendererCustomizer(descriptor);
@@ -63,13 +58,12 @@ public class ViewRendererUtil {
     /**
      * Call this method after all the view is rendered
      *
-     * @param descriptor
-     * @param view
      */
     public static void afterRender(ViewDescriptor descriptor, View view) {
         ViewRendererCustomizer customizer = findViewRendererCustomizer(descriptor);
         try {
             if (customizer != null) {
+                //noinspection unchecked
                 customizer.afterRender(view);
             }
         } catch (ClassCastException e) {
@@ -80,13 +74,12 @@ public class ViewRendererUtil {
     /**
      * Call this method before starting render view internals
      *
-     * @param descriptor
-     * @param view
      */
     public static void beforeRender(ViewDescriptor descriptor, View view) {
         ViewRendererCustomizer customizer = findViewRendererCustomizer(descriptor);
         try {
             if (customizer != null) {
+                //noinspection unchecked
                 customizer.beforeRender(view);
             }
         } catch (ClassCastException e) {
@@ -97,9 +90,6 @@ public class ViewRendererUtil {
     /**
      * Call this method for each field rendered
      *
-     * @param descriptor
-     * @param field
-     * @param component
      */
     public static void afterFieldRender(ViewDescriptor descriptor, Field field, Object component) {
         ViewRendererCustomizer customizer = findViewRendererCustomizer(descriptor);

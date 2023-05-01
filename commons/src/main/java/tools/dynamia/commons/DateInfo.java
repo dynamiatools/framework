@@ -36,9 +36,6 @@ public class DateInfo implements Serializable {
 
     /**
      *
-     * @param year
-     * @param month
-     * @param day
      */
     public DateInfo(int year, int month, int day) {
         this.year = year;
@@ -73,7 +70,6 @@ public class DateInfo implements Serializable {
     /**
      * Create a date object from values
      *
-     * @return
      */
     public Date toDate() {
         return DateTimeUtils.createDate(year, month, day);
@@ -83,7 +79,6 @@ public class DateInfo implements Serializable {
      * Convert current values to a DateRange. Example, if this DateInfo is a
      * year date range start from January 1st to December 31 of setted year
      *
-     * @return
      */
     public DateRange toRange() {
         Date start = null;
@@ -106,7 +101,6 @@ public class DateInfo implements Serializable {
     /**
      * Return true is year value is greater than zero but not month and day
      *
-     * @return
      */
     public boolean isYear() {
         return year > 0 && month == 0 && day == 0;
@@ -115,7 +109,6 @@ public class DateInfo implements Serializable {
     /**
      * Return true is year and month values are greater than zero but not day
      *
-     * @return
      */
     public boolean isMonth() {
         return year > 0 && month > 0 && day == 0;
@@ -124,7 +117,6 @@ public class DateInfo implements Serializable {
     /**
      * Return true if year, month and day values are greater than zero
      *
-     * @return
      */
     public boolean isFullDate() {
         return year > 0 && month > 0 && day > 0;

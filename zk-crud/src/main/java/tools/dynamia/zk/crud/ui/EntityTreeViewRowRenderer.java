@@ -47,9 +47,11 @@ public class EntityTreeViewRowRenderer<E extends AbstractEntity> extends TreeVie
 
         if (data instanceof EntityTreeNode node) {
             if (node.getOnRightClickListener() != null) {
+                //noinspection unchecked
                 item.addEventListener(Events.ON_RIGHT_CLICK, node.getOnRightClickListener());
             }
             if (node.getOnOpenListener() != null) {
+                //noinspection unchecked
                 item.addEventListener(Events.ON_OPEN, node.getOnOpenListener());
             }
         }

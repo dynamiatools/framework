@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
+@SuppressWarnings("unchecked")
 @InstallAction
 public class ExportExcelAction extends AbstractExportAction implements ReadableOnly {
 
@@ -82,18 +83,20 @@ public class ExportExcelAction extends AbstractExportAction implements ReadableO
             if (f.getParams().get("entityAlias") != null) {
                 column.setEntityAlias((String) f.getParams().get("entityAlias"));
             }
+            //noinspection unchecked
             exporter.addColumn(column);
         });
         File temp = createTempFile();
         export(data, temp, exporter);
     }
 
+    @SuppressWarnings("unchecked")
     public static void export(Collection data, File temp, ExcelCollectionExporter exporter) {
 
 
         ProgressMonitor monitor = new ProgressMonitor();
 
-        LongOperation operation = LongOperation.create()
+        @SuppressWarnings("unchecked") LongOperation operation = LongOperation.create()
                 .execute(() -> exporter.export(temp, data, monitor))
                 .onFinish(() -> download(temp))
                 .onException(Throwable::printStackTrace)

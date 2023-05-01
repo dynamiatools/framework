@@ -81,6 +81,7 @@ public class Booleanbox extends Combobox {
         return selected;
     }
 
+    @SuppressWarnings("unchecked")
     public void setSelected(Boolean selected) {
 
         this.selected = selected;
@@ -88,6 +89,7 @@ public class Booleanbox extends Combobox {
         if (getModel() instanceof AbstractListModel model) {
             Optional result = getItems().stream().filter(c -> Objects.equals(c.getValue(), selected)).map(Comboitem::getValue).findFirst();
             if (result.isPresent()) {
+                //noinspection unchecked
                 model.addToSelection(result.get());
             }
         }
@@ -110,7 +112,7 @@ public class Booleanbox extends Combobox {
     }
 
     static class BooleanWrapper {
-        Boolean value;
+        final Boolean value;
 
         public BooleanWrapper(Boolean value) {
             this.value = value;

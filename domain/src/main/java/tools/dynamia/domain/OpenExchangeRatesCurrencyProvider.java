@@ -15,9 +15,9 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * This implementation use https://openexchangerates.org/ API. Free API key only support USD as base (from) currency
- * Usage subject to terms: https://openexchangerates.org/terms
- * https://openexchangerates.org/license".
+ * This implementation use <a href="https://openexchangerates.org/">...</a> API. Free API key only support USD as base (from) currency
+ * Usage subject to terms: <a href="https://openexchangerates.org/terms">...</a>
+ * <a href="https://openexchangerates.org/license">...</a>".
  * <p>
  * Its use internal cache to call API just one by day
  */

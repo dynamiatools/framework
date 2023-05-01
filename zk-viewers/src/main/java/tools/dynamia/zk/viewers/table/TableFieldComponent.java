@@ -21,22 +21,6 @@ import org.zkoss.zk.ui.Component;
 
 import java.io.Serializable;
 
-public class TableFieldComponent implements Serializable {
+public record TableFieldComponent(String fieldName, Component component) implements Serializable {
 
-    private final String fieldName;
-    private final Component component;
-
-    public TableFieldComponent(String fieldName, Component component) {
-        super();
-        this.fieldName = fieldName;
-        this.component = component;
-    }
-
-    public String getFieldName() {
-        return fieldName;
-    }
-
-    public Component getComponent() {
-        return component;
-    }
 }

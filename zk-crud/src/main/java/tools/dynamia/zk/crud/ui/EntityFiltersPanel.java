@@ -20,9 +20,17 @@ import org.zkoss.bind.Binder;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.HtmlBasedComponent;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.*;
+import org.zkoss.zul.Borderlayout;
+import org.zkoss.zul.Button;
+import org.zkoss.zul.Center;
+import org.zkoss.zul.Combobox;
+import org.zkoss.zul.Label;
+import org.zkoss.zul.South;
+import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.impl.InputElement;
 import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
@@ -33,7 +41,6 @@ import tools.dynamia.domain.EntityReference;
 import tools.dynamia.domain.Reference;
 import tools.dynamia.domain.query.QueryCondition;
 import tools.dynamia.domain.query.QueryParameters;
-import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.View;
@@ -49,8 +56,15 @@ import tools.dynamia.zk.util.ZKUtil;
 import tools.dynamia.zk.viewers.DefaultFieldCustomizer;
 import tools.dynamia.zk.viewers.form.FormFieldComponent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+@SuppressWarnings("unchecked")
 public class EntityFiltersPanel extends Borderlayout implements View {
 
     /**
@@ -134,7 +148,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
                 String customizerClass = (String) field.getParams().get(Viewers.PARAM_FILTER_CUSTOMIZER);
                 filterCustomizer = BeanUtils.newInstance(customizerClass);
                 filterCustomizer.init(entityClass, field);
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
 
             if (field.isVisible() && !field.isCollection() && (field.getPropertyInfo() != null || filterCustomizer != null)) {
@@ -314,6 +328,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
 
     }
 
+    @SuppressWarnings("unchecked")
     private List getEnumValues(Field field, PropertyInfo prop) {
         List enumValues = Arrays.asList(prop.getType().getEnumConstants());
         List values = (List) field.getParams().get("enumValues");
@@ -322,8 +337,10 @@ public class EntityFiltersPanel extends Borderlayout implements View {
 
             for (Object enumVal : values) {
                 if (enumVal instanceof String) {
+                    //noinspection unchecked
                     enumValues.add(Enum.valueOf((Class<Enum>) prop.getType(), enumVal.toString()));
                 } else if (BeanUtils.isAssignable(enumVal.getClass(), prop.getType())) {
+                    //noinspection unchecked
                     enumValues.add(enumVal);
                 }
             }
@@ -332,7 +349,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
     }
 
     private Component buildFieldComponent(Field field) {
-        Class<Component> compClass = (Class<Component>) ComponentAliasIndex.getInstance().get(field.getComponent());
+        @SuppressWarnings("unchecked") Class<Component> compClass = (Class<Component>) ComponentAliasIndex.getInstance().get(field.getComponent());
         if (compClass != null) {
             Component comp = BeanUtils.newInstance(compClass);
             if (comp != null) {
@@ -363,7 +380,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
                 try {
                     java.lang.reflect.Field classField = BeanUtils.getField(beanClass, field.getName());
                     return classField.getAnnotation(Reference.class);
-                } catch (NoSuchFieldException e) {
+                } catch (NoSuchFieldException ignored) {
 
                 }
             }

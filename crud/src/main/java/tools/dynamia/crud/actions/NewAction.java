@@ -17,7 +17,6 @@
 package tools.dynamia.crud.actions;
 
 import tools.dynamia.actions.ActionGroup;
-import tools.dynamia.actions.ActionRenderer;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.actions.PrimaryAction;
 import tools.dynamia.commons.BeanMessages;
@@ -53,6 +52,7 @@ public class NewAction extends AbstractCrudAction {
         BeanMessages messages = new BeanMessages(view.getController().getEntityClass());
         view.getController().doCreate();
         view.setState(CrudState.CREATE);
+        //noinspection unchecked
         view.setValue(view.getController().getEntity());
         view.setTitle(getName() + " " + messages.getLocalizedName());
 

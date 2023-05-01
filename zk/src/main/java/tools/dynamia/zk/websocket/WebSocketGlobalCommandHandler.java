@@ -47,13 +47,13 @@ public class WebSocketGlobalCommandHandler extends TextWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+    public void afterConnectionEstablished(WebSocketSession session) {
 
         sessions.put(session.getId(), session);
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
 
 
         String desktopId = desktops.entrySet().stream().filter(e -> e.getValue().equals(session.getId())).map(Map.Entry::getKey).findFirst().orElse(null);

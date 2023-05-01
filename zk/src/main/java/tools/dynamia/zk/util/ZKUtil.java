@@ -16,11 +16,19 @@
  */
 package tools.dynamia.zk.util;
 
-import org.zkoss.bind.annotation.Init;
+import jakarta.servlet.http.HttpSession;
 import org.zkoss.zhtml.impl.AbstractTag;
-import org.zkoss.zk.ui.*;
+import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Desktop;
+import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.HtmlBasedComponent;
+import org.zkoss.zk.ui.Page;
+import org.zkoss.zk.ui.UiException;
+import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
-import org.zkoss.zk.ui.event.*;
+import org.zkoss.zk.ui.event.EventQueues;
+import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.event.SelectEvent;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.*;
 import org.zkoss.zul.ext.Paginal;
@@ -49,10 +57,13 @@ import tools.dynamia.zk.ui.InputPanel;
 import tools.dynamia.zk.ui.MessageDialog;
 import tools.dynamia.zk.ui.SimpleListItemRenderer;
 
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -266,7 +277,7 @@ public abstract class ZKUtil {
         for (Object object : comp.getChildren()) {
             try {
                 clearComponent((Component) object);
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
         if (comp instanceof InputElement ie) {
@@ -489,10 +500,6 @@ public abstract class ZKUtil {
     /**
      * Show a simple InputPanel
      *
-     * @param label
-     * @param inputClass
-     * @param value
-     * @param eventListener
      */
     public static <T> InputPanel showInputDialog(String label, Class<T> inputClass, Object value,
                                                  EventListener eventListener) {
@@ -710,23 +717,17 @@ public abstract class ZKUtil {
 
             LabelImageElement element = (LabelImageElement) component;
             switch (icon.getType()) {
-                case IMAGE:
-                    element.setImage(realPath);
-                    break;
-                case FONT:
-                    element.setIconSclass(realPath);
-                    break;
+                case IMAGE -> element.setImage(realPath);
+                case FONT -> element.setIconSclass(realPath);
             }
         } else if (component instanceof AbstractTag) {
             AbstractTag element = (AbstractTag) component;
             switch (icon.getType()) {
-                case IMAGE:
+                case IMAGE -> {
                     Image img = new Image(realPath);
                     img.setParent(component);
-                    break;
-                case FONT:
-                    element.setSclass(realPath);
-                    break;
+                }
+                case FONT -> element.setSclass(realPath);
             }
         } else if (component instanceof Image image && icon.getType() == IconType.IMAGE) {
             image.setSrc(realPath);
@@ -900,8 +901,6 @@ public abstract class ZKUtil {
     /**
      * Make easy select a combobox item
      *
-     * @param combobox
-     * @param value
      */
     public static void setSelected(Combobox combobox, Object value) {
         if (combobox != null) {
@@ -916,8 +915,6 @@ public abstract class ZKUtil {
 
     /***
      * Make easy selecte a listbox item
-     * @param listbox
-     * @param value
      */
     public static void setSelected(Listbox listbox, Object value) {
         if (listbox != null) {
@@ -932,8 +929,6 @@ public abstract class ZKUtil {
     /**
      * Return and argument from current execution
      *
-     * @param name
-     * @return
      */
     public static Object getExecutionArg(String name) {
         return Executions.getCurrent().getArg().get(name);
@@ -942,7 +937,6 @@ public abstract class ZKUtil {
     /**
      * Return entity binding to current zk execution (or event)
      *
-     * @return
      */
     public static Object getExecutionEntity() {
         return getExecutionArg(ENTITY);
@@ -951,7 +945,6 @@ public abstract class ZKUtil {
     /**
      * Return parent {@link Window} binding to current zk execution (or event)
      *
-     * @return
      */
     public static Window getExecutionParentWindow() {
         return (Window) getExecutionArg(PARENT_WINDOW);
@@ -960,7 +953,6 @@ public abstract class ZKUtil {
     /**
      * Return current navigation {@link tools.dynamia.navigation.Page} binded to current execution or currentPage from {@link tools.dynamia.navigation.NavigationManager}
      *
-     * @return
      */
     public static tools.dynamia.navigation.Page getExecutionNavigationPage() {
         var page = (tools.dynamia.navigation.Page) getExecutionArg(NAVIGATION_PAGE);
@@ -973,8 +965,6 @@ public abstract class ZKUtil {
     /**
      * Automatic change component to read only or disabled. Include children component
      *
-     * @param comp
-     * @param readOnly
      */
     public static void changeReadOnly(Component comp, boolean readOnly) {
 
@@ -1012,14 +1002,6 @@ public abstract class ZKUtil {
     /**
      * Show Dialog with custom properties
      *
-     * @param uri
-     * @param title
-     * @param icon
-     * @param data
-     * @param width
-     * @param height
-     * @param onCloseListener
-     * @return
      */
     public static Window showDialog(String uri, String title, String icon, Object data, String width, String height,
                                     EventListener onCloseListener) {
@@ -1033,8 +1015,6 @@ public abstract class ZKUtil {
     /**
      * Invoke a Javascript util method to update browser uri and page title
      *
-     * @param pagetitle
-     * @param uri
      */
     public static void updateClientURI(String pagetitle, String uri) {
         Clients.evalJavaScript(String.format("changeURI('%s','%s');", pagetitle, uri));

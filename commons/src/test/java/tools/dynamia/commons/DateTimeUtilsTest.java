@@ -22,7 +22,15 @@ import org.junit.Test;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
-import static tools.dynamia.commons.DateTimeUtils.*;
+import static tools.dynamia.commons.DateTimeUtils.addDays;
+import static tools.dynamia.commons.DateTimeUtils.addMonths;
+import static tools.dynamia.commons.DateTimeUtils.addYears;
+import static tools.dynamia.commons.DateTimeUtils.createDate;
+import static tools.dynamia.commons.DateTimeUtils.daysBetween;
+import static tools.dynamia.commons.DateTimeUtils.hoursBetween;
+import static tools.dynamia.commons.DateTimeUtils.monthsBetween;
+import static tools.dynamia.commons.DateTimeUtils.now;
+import static tools.dynamia.commons.DateTimeUtils.yearsBetween;
 
 public class DateTimeUtilsTest {
 

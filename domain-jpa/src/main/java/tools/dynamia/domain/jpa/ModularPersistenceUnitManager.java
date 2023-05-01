@@ -16,12 +16,12 @@
  */
 package tools.dynamia.domain.jpa;
 
+import jakarta.persistence.spi.PersistenceUnitInfo;
 import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager;
 import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 
-import jakarta.persistence.spi.PersistenceUnitInfo;
 import java.net.URL;
 
 

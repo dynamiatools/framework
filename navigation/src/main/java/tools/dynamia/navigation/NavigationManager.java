@@ -37,14 +37,12 @@ public interface NavigationManager {
     /**
      * Return the current active module
      *
-     * @return
      */
     Module getActiveModule();
 
     /**
      * return the current page from the active module
      *
-     * @return
      */
     Page getCurrentPage();
 
@@ -59,14 +57,12 @@ public interface NavigationManager {
     /**
      * return the current page gruop from the selected page
      *
-     * @return
      */
     PageGroup getCurrentPageGroup();
 
     /**
      * return all page groups from activeModule
      *
-     * @return
      */
     Collection<PageGroup> getPageGroups();
 
@@ -74,7 +70,6 @@ public interface NavigationManager {
      * set the current page navigation through the virtual path.
      * Module/pageGroup/page
      *
-     * @param path
      */
     void navigateTo(String path);
 
@@ -88,14 +83,12 @@ public interface NavigationManager {
     /**
      * set the active module
      *
-     * @param activeModule
      */
     void setActiveModule(Module activeModule);
 
     /**
      * set the current page
      *
-     * @param newPage
      */
     boolean setCurrentPage(Page newPage);
 
@@ -104,8 +97,6 @@ public interface NavigationManager {
     /**
      * Find a page object by its path
      *
-     * @param path
-     * @return
      */
     Page findPage(String path);
 

@@ -79,6 +79,7 @@ public class SimpleCrudView<T> extends Div implements DataSetView<List<T>>, Acti
 
         DefaultViewDescriptor descriptor = new DefaultViewDescriptor(beanClass, "table");
         descriptor.merge(viewDescriptor);
+        //noinspection unchecked
         tableView = (TableView<T>) Viewers.getView(viewDescriptor);
         if (tableView != null) {
             tableView.setVflex("1");

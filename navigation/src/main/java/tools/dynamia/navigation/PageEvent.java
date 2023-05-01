@@ -79,8 +79,6 @@ public class PageEvent implements Serializable {
     /**
      * Check if the page event name IS the same as parameter
      *
-     * @param name
-     * @return
      */
     public boolean is(String name) {
         return getName().equals(name);

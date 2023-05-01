@@ -18,7 +18,11 @@ package tools.dynamia.zk.crud.actions;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.*;
+import org.zkoss.zul.Borderlayout;
+import org.zkoss.zul.Caption;
+import org.zkoss.zul.Toolbarbutton;
+import org.zkoss.zul.West;
+import org.zkoss.zul.Window;
 import tools.dynamia.actions.ActionGroup;
 import tools.dynamia.actions.ActionRenderer;
 import tools.dynamia.actions.InstallAction;

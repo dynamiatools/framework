@@ -1,21 +1,16 @@
 package tools.dynamia.domain.util;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.util.BeanUtil;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.URLable;
 import tools.dynamia.domain.AbstractEntity;
 
 import java.io.IOException;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
+@SuppressWarnings("ALL")
 public class BasicEntityJsonDeserializer extends StdDeserializer<AbstractEntity> {
 
     public BasicEntityJsonDeserializer() {
@@ -26,6 +21,7 @@ public class BasicEntityJsonDeserializer extends StdDeserializer<AbstractEntity>
         super(vc);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public AbstractEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 
@@ -42,6 +38,7 @@ public class BasicEntityJsonDeserializer extends StdDeserializer<AbstractEntity>
 
         var result = BeanUtils.newInstance(className);
         if (result instanceof AbstractEntity entity) {
+            //noinspection unchecked
             entity.setId(id);
             entity.name(name);
             if (url != null && entity instanceof URLable) {

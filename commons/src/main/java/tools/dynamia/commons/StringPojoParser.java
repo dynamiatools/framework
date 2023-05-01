@@ -33,8 +33,6 @@ public class StringPojoParser {
     /**
      * Convert Map to JSON string using Jackson
      *
-     * @param map
-     * @return
      */
     public static String convertMapToJson(Map map) {
         try {
@@ -57,8 +55,6 @@ public class StringPojoParser {
     /**
      * Convert bean to JSON string using Jackson
      *
-     * @param pojo
-     * @return
      */
     public static String convertPojoToJson(Object pojo) {
         try {
@@ -72,8 +68,6 @@ public class StringPojoParser {
     /**
      * Parse JSON string to Map using Jackson
      *
-     * @param json
-     * @return
      */
     public static Map<String, Object> parseJsonToMap(String json) {
         try {
@@ -87,10 +81,6 @@ public class StringPojoParser {
     /**
      * Parse JSON string to java type (java bean)
      *
-     * @param json
-     * @param pojoType
-     * @param <T>
-     * @return
      */
     public static <T> T parseJsonToPojo(String json, Class<T> pojoType) {
         try {
@@ -104,8 +94,6 @@ public class StringPojoParser {
     /**
      * Convert any plain old java object to XML
      *
-     * @param pojo
-     * @return
      */
     public static String convertPojoToXml(Object pojo) {
         try {
@@ -126,10 +114,6 @@ public class StringPojoParser {
     /**
      * Parse XML text to plain old java object
      *
-     * @param xml
-     * @param pojoType
-     * @param <T>
-     * @return
      */
     public static <T> T parseXmlToPojo(String xml, Class<T> pojoType) {
         try {
@@ -143,10 +127,6 @@ public class StringPojoParser {
     /**
      * Parse json to a of Lis<Pojo>
      *
-     * @param json
-     * @param pojoType
-     * @param <T>
-     * @return
      */
     public static <T> List<T> parseJsonToList(String json, Class<T> pojoType) {
         try {
@@ -164,8 +144,6 @@ public class StringPojoParser {
     /**
      * Convert list of pojo to JSON string using Jackson
      *
-     * @param list
-     * @return
      */
     public static <T> String convertListToJson(List<T> list) {
         try {

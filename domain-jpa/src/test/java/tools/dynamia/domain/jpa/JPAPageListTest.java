@@ -29,7 +29,10 @@ import tools.dynamia.domain.services.CrudService;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = TestConfig.class)
@@ -65,22 +68,22 @@ public class JPAPageListTest {
         int count = 0;
         for (DummyEntity parameter : result) {
             switch (count) {
-                case 10:
+                case 10 -> {
                     showPage(paginator);
                     assertEquals(paginator.getPage(), 2);
-                    break;
-                case 20:
+                }
+                case 20 -> {
                     showPage(paginator);
                     assertEquals(paginator.getPage(), 3);
-                    break;
-                case 30:
+                }
+                case 30 -> {
                     showPage(paginator);
                     assertEquals(paginator.getPage(), 4);
-                    break;
-                case 40:
+                }
+                case 40 -> {
                     showPage(paginator);
                     assertEquals(paginator.getPage(), 5);
-                    break;
+                }
             }
             count++;
         }

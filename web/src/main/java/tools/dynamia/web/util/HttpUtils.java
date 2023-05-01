@@ -16,11 +16,11 @@
  */
 package tools.dynamia.web.util;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.http.client.fluent.Request;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -48,8 +48,6 @@ public class HttpUtils {
     /**
      * Execute a plain simple http get request
      *
-     * @param url
-     * @return
      */
     public static String executeHttpRequest(String url) throws IOException {
         return Request.Get(url).execute().returnContent().asString();
@@ -58,10 +56,6 @@ public class HttpUtils {
     /**
      * Execute a GET request with headers and params
      *
-     * @param url
-     * @param headers
-     * @param params
-     * @return
      */
     public static String executeHttpRequest(String url, Map<String, String> headers, Map<String, Object> params) throws IOException {
         Request request = Request.Get(url + "?" + formatRequestParams(params));
@@ -241,7 +235,6 @@ public class HttpUtils {
     /**
      * Detect if current request is from an iphone
      *
-     * @return
      */
     public static boolean isIphone() {
         try {
@@ -255,7 +248,6 @@ public class HttpUtils {
     /**
      * Detect if current request is from an iOS browser
      *
-     * @return
      */
     public static boolean isIOS() {
         try {
@@ -269,7 +261,6 @@ public class HttpUtils {
     /**
      * Detect if current request is from an Android browser
      *
-     * @return
      */
     public static boolean isAndroid() {
         try {
@@ -283,8 +274,6 @@ public class HttpUtils {
     /**
      * Return subdomain name or null if current server host has no subdomian
      *
-     * @param request
-     * @return
      */
     public static String getSubdomain(HttpServletRequest request) {
         String host = request.getServerName();

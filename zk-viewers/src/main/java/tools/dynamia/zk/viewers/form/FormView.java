@@ -211,7 +211,7 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        Field field = viewDescriptor.getField(evt.getPropertyName());
+        Field field = viewDescriptor.getField(evt.propertyName());
         if (field != null) {
             updateUI();
             saveBindings();
@@ -265,6 +265,7 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
     public void setSource(Object source) {
         this.source = source;
         if (onSourceChange != null) {
+            //noinspection unchecked
             onSourceChange.accept(source);
         }
     }

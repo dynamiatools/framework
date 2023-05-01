@@ -23,7 +23,7 @@ import tools.dynamia.zk.viewers.form.FormView;
 
 public class DummyViewCustomizer implements ViewCustomizer {
 
-    public static String LABEL_TT = "LABEL TT CUSTOMIZED";
+    public static final String LABEL_TT = "LABEL TT CUSTOMIZED";
 
     @Override
     public void customize(View view) {

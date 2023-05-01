@@ -46,7 +46,7 @@ public class Uploadlink extends Toolbarbutton {
         BindingComponentIndex.getInstance().put("uploadedFile", Uploadlink.class);
     }
 
-    public static String ON_FILE_UPLOADED = "onFileUploaded";
+    public static final String ON_FILE_UPLOADED = "onFileUploaded";
     private String uploadDirectory = System.getProperty("java.io.tmpdir") + "//" + System.currentTimeMillis();
     private int maxSize = 300;
     private String fixedFileName;

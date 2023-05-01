@@ -12,8 +12,7 @@ import java.util.List;
  */
 public class SpringSessionRedisSupport implements ExecutionCleanup {
 
-    public void cleanup(Execution exec, Execution parent, List<Throwable> errs)
-            throws Exception {
+    public void cleanup(Execution exec, Execution parent, List<Throwable> errs) {
         var session = exec.getSession();
         var value = session.getAttribute(Attributes.ZK_SESSION);
         session.removeAttribute(Attributes.ZK_SESSION);

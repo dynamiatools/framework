@@ -110,17 +110,17 @@ public class MessageCallbakTest {
     static
     class ResultMessageListener implements MessageListener<NumberMessage> {
 
-        Map<String, Message> messagesWithoutResult = new HashMap<>();
+        final Map<String, Message> messagesWithoutResult = new HashMap<>();
 
         @Override
         public void onMessage(MessageEvent<NumberMessage> evt) {
-            String correlationId = (String) evt.getMessage().getHeader(Message.HEADER_CORRELATION_ID);
+            String correlationId = (String) evt.message().getHeader(Message.HEADER_CORRELATION_ID);
             Message message = messagesWithoutResult.get(correlationId);
             if (message != null) {
                 int expectedResult = (int) message.getHeader(HEADER_EXPECTED_RESULT);
-                int result = (int) evt.getMessage().getContent();
+                int result = (int) evt.message().getContent();
 
-                String description = (String) evt.getMessage().getHeader(Message.HEADER_DESCRIPTION);
+                String description = (String) evt.message().getHeader(Message.HEADER_DESCRIPTION);
                 Assert.assertEquals(expectedResult, result);
                 messagesWithoutResult.remove(correlationId);
             }
@@ -140,7 +140,7 @@ public class MessageCallbakTest {
 
         @Override
         public void onMessage(MessageEvent<MapMessage> evt) {
-            Map<String, Object> content = evt.getMessage().getContent();
+            Map<String, Object> content = evt.message().getContent();
 
             try {
                 int numberA = (int) content.get("A");
@@ -168,9 +168,9 @@ public class MessageCallbakTest {
 
                 NumberMessage resultMessage = new NumberMessage(result);
                 resultMessage.addHeader(Message.HEADER_DESCRIPTION, description);
-                resultMessage.addHeader(Message.HEADER_CORRELATION_ID, (String) evt.getMessage().getHeader(Message.HEADER_CORRELATION_ID));
+                resultMessage.addHeader(Message.HEADER_CORRELATION_ID, (String) evt.message().getHeader(Message.HEADER_CORRELATION_ID));
 
-                service.publish(evt.getCallback(), resultMessage);
+                service.publish(evt.callback(), resultMessage);
 
             } catch (Exception e) {
                 // ignore

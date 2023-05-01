@@ -55,8 +55,7 @@ public class DefaultReportRepository extends CrudServiceListenerAdapter<Paramete
 	}
 
 	/**
-	 * @param name
-	 */
+     */
 	@Override
 	public FileInfo findReport(String name) {
 
@@ -70,9 +69,7 @@ public class DefaultReportRepository extends CrudServiceListenerAdapter<Paramete
 
 	/**
 	 *
-	 * @param subdirectory
-	 * @return
-	 */
+     */
 	@Override
 	public List<FileInfo> scan(String subdirectory) {
 		return explorer.scan(new File(getReportLocation() + "/" + subdirectory));

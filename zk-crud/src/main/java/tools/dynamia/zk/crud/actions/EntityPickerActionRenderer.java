@@ -18,14 +18,11 @@ package tools.dynamia.zk.crud.actions;
 
 import org.zkoss.zk.ui.event.Events;
 import tools.dynamia.actions.Action;
-import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionEventBuilder;
 import tools.dynamia.actions.Actions;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.zk.actions.ZKActionRenderer;
 import tools.dynamia.zk.crud.ui.EntityPickerBox;
-
-import java.util.Map;
 
 public class EntityPickerActionRenderer extends ZKActionRenderer<EntityPickerBox> {
 

@@ -1,5 +1,7 @@
 package tools.dynamia.app;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -14,8 +16,6 @@ import tools.dynamia.crud.CrudPage;
 import tools.dynamia.navigation.ModuleContainer;
 import tools.dynamia.navigation.Page;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.List;
 

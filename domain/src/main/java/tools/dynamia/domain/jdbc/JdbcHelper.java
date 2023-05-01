@@ -25,9 +25,17 @@ import tools.dynamia.commons.reflect.ReflectionException;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The Class JdbcHelper.
@@ -161,7 +169,7 @@ public class JdbcHelper {
 		} finally {
 			try {
 				stm.close();
-			} catch (Exception ex) {
+			} catch (Exception ignored) {
 			}
 		}
 	}
@@ -193,7 +201,7 @@ public class JdbcHelper {
 		} finally {
 			try {
 				pstm.close();
-			} catch (Exception ex) {
+			} catch (Exception ignored) {
 			}
 		}
 	}
@@ -488,9 +496,6 @@ public class JdbcHelper {
 	/**
 	 * Get column value by name, if column not found, return null.
 	 *
-	 * @param rs
-	 * @param name
-	 * @return
 	 */
 	public Object columnValue(ResultSet rs, String name) {
 
@@ -505,9 +510,6 @@ public class JdbcHelper {
 	/**
 	 * Get column value by index, if column not found, return null.
 	 *
-	 * @param rs
-	 * @param index
-	 * @return
 	 */
 	public Object columnValue(ResultSet rs, int index) {
 		try {
@@ -557,7 +559,6 @@ public class JdbcHelper {
 	 * Add new sql to current batch statement or executeUpdate if drive dont
 	 * support Batch updates
 	 *
-	 * @param sql
 	 */
 	public void addBatch(String sql) {
 		if (batch != null) {
@@ -582,7 +583,6 @@ public class JdbcHelper {
 	 * execute commit and return an empty array of int[]. Finally it clear batch
 	 * and set auto commit true.
 	 *
-	 * @return
 	 */
 	public int[] executeBatch() {
 		int[] result = new int[0];

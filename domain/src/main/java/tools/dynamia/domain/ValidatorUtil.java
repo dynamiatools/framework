@@ -45,6 +45,7 @@ public class ValidatorUtil {
         if (validators != null) {
             for (Validator validator : validators) {
                 try {
+                    //noinspection unchecked
                     validator.validate(object);
                 } catch (ClassCastException e) {
                     // ignore
@@ -56,8 +57,6 @@ public class ValidatorUtil {
     /**
      * If object is null throw a new {@link ValidationError} exception with message
      *
-     * @param object
-     * @param message
      */
     public static void validateNull(Object object, String message) {
         if (object == null) {
@@ -68,8 +67,6 @@ public class ValidatorUtil {
     /**
      * Validate if collection is null or empty and throw a {@link ValidationError} with message
      *
-     * @param collections
-     * @param message
      */
     public static void validateEmpty(Collection collections, String message) {
         if (collections == null || collections.isEmpty()) {
@@ -80,8 +77,6 @@ public class ValidatorUtil {
     /**
      * Validate if text is null or empty and throw a {@link ValidationError} with message
      *
-     * @param text
-     * @param message
      */
     public static void validateEmpty(String text, String message) {
         if (text == null || text.isBlank()) {
@@ -92,9 +87,6 @@ public class ValidatorUtil {
     /**
      * Validate if collection size is greather than maxSize and throw {@link ValidationError} with message
      *
-     * @param collection
-     * @param maxSize
-     * @param message
      */
     public static void validateMaxSize(Collection collection, int maxSize, String message) {
         if (collection != null && collection.size() > maxSize) {
@@ -105,9 +97,6 @@ public class ValidatorUtil {
     /**
      * Validate is text size is greather than maxSize and throw {@link ValidationError} with message
      *
-     * @param text
-     * @param maxSize
-     * @param message
      */
     public static void validateMaxSize(String text, int maxSize, String message) {
         if (text != null && text.length() > maxSize) {
@@ -118,9 +107,6 @@ public class ValidatorUtil {
     /**
      * Validate if collection size is less than minSize and throw {@link ValidationError} with message
      *
-     * @param collection
-     * @param minSize
-     * @param message
      */
     public static void validateMinSize(Collection collection, int minSize, String message) {
         if (collection != null && collection.size() < minSize) {
@@ -131,9 +117,6 @@ public class ValidatorUtil {
     /**
      * Validate is text size is less than minSize and throw {@link ValidationError} with message
      *
-     * @param text
-     * @param minSize
-     * @param message
      */
     public static void validateMinSize(String text, int minSize, String message) {
         if (text != null && text.length() < minSize) {
@@ -144,8 +127,6 @@ public class ValidatorUtil {
     /**
      * Validate if date is past and throw {@link ValidationError} with message
      *
-     * @param date
-     * @param message
      */
     public static void validatePastDate(Date date, String message) {
         if (date != null && DateTimeUtils.isPast(date)) {
@@ -156,8 +137,6 @@ public class ValidatorUtil {
     /**
      * Validate if date is future and throw {@link ValidationError} with message
      *
-     * @param date
-     * @param message
      */
     public static void validateFutureDate(Date date, String message) {
         if (date != null && DateTimeUtils.isFuture(date)) {
@@ -168,8 +147,6 @@ public class ValidatorUtil {
     /**
      * Validate if email is not a valid address and throw {@link ValidationError} message
      *
-     * @param email
-     * @param message
      */
     public static void validateEmail(String email, String message) {
 
@@ -181,8 +158,6 @@ public class ValidatorUtil {
     /**
      * Check if email is valid
      *
-     * @param email
-     * @return
      */
     public static boolean isValidEmail(String email) {
         return EMAIL_VALIDATOR.isValid(email);
@@ -191,8 +166,6 @@ public class ValidatorUtil {
     /**
      * Validate if the is not a number and throw {@link ValidationError} message
      *
-     * @param text
-     * @param message
      */
     public static void validateTextIsNumber(String text, String message) {
         if (text != null && !StringUtils.isNumber(text)) {
@@ -203,8 +176,6 @@ public class ValidatorUtil {
     /**
      * Validate if number is negative and throw {@link ValidationError} with message
      *
-     * @param number
-     * @param message
      */
     public static void validateNegative(Number number, String message) {
         if (number != null && number.doubleValue() < 0) {
@@ -215,8 +186,6 @@ public class ValidatorUtil {
     /**
      * Validate if the value is true. If not throw an exception
      *
-     * @param value
-     * @param message
      */
     public static void validateTrue(boolean value, String message) {
         if (!value) {
@@ -227,8 +196,6 @@ public class ValidatorUtil {
     /**
      * Validate if the value is false. If not throw an exception
      *
-     * @param value
-     * @param message
      */
     public static void validateFalse(boolean value, String message) {
         if (value) {

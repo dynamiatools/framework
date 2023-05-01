@@ -34,7 +34,7 @@ public class NoOpGlobalSearchProvider implements GlobalSearchProvider {
 
 	@Override
 	public List<GlobalSearchResult> search(String query) {
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 }

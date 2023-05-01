@@ -36,6 +36,7 @@ public class ExtendedFormMVListener extends AbstractExtendedMVListener {
 
             AbstractEntity ext = getExtention(parentEntity);
             subcontroller.setEntity(ext);
+            //noinspection unchecked
             subview.setValue(ext);
         }
 

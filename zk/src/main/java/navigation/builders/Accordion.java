@@ -20,12 +20,19 @@ package navigation.builders;
 
 import org.zkoss.zhtml.Div;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.*;
+import org.zkoss.zul.A;
+import org.zkoss.zul.Label;
+import org.zkoss.zul.Tab;
+import org.zkoss.zul.Tabbox;
+import org.zkoss.zul.Tabpanel;
+import org.zkoss.zul.Tabpanels;
+import org.zkoss.zul.Tabs;
+import org.zkoss.zul.Vbox;
+import tools.dynamia.navigation.Module;
 import tools.dynamia.navigation.NavigationManager;
 import tools.dynamia.navigation.NavigationViewBuilder;
 import tools.dynamia.navigation.Page;
 import tools.dynamia.navigation.PageGroup;
-import tools.dynamia.navigation.Module;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -19,7 +19,13 @@ package tools.dynamia.zk.ui;
 
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.*;
+import org.zkoss.zul.AbstractListModel;
+import org.zkoss.zul.Combobox;
+import org.zkoss.zul.Div;
+import org.zkoss.zul.Hlayout;
+import org.zkoss.zul.Intbox;
+import org.zkoss.zul.Layout;
+import org.zkoss.zul.Vlayout;
 import tools.dynamia.commons.ClassMessages;
 import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.web.util.HttpUtils;
@@ -107,12 +113,14 @@ public class DateSelector extends Div {
 
     private void loadValues() {
         if (selectedDay != null && selectedDay > 0 && selectedDay <= 31) {
+            //noinspection unchecked
             ((AbstractListModel) daycombo.getModel()).addToSelection(selectedDay);
         } else {
             daycombo.setSelectedItem(null);
         }
 
         if (selectedMonth != null && selectedMonth > 0 && selectedMonth <= 12) {
+            //noinspection unchecked
             ((AbstractListModel) monthcombo.getModel()).addToSelection(Month.of(selectedMonth));
         } else {
             monthcombo.setSelectedItem(null);

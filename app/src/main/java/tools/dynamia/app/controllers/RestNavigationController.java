@@ -170,7 +170,7 @@ public class RestNavigationController {
             return metadata;
         }
 
-        Object result = crudService.find(entityClass, id);
+        @SuppressWarnings("unchecked") Object result = crudService.find(entityClass, id);
         if (result == null) {
             return new ResponseEntity<>("Entity " + entityClass.getSimpleName() + " with id " + id + " not found\n", HttpStatus.NOT_FOUND);
         }
@@ -244,7 +244,7 @@ public class RestNavigationController {
         CrudPage page = findCrudPage(path);
         Class entityClass = page.getEntityClass();
 
-        final Object entity = crudService.find(entityClass, id);
+        @SuppressWarnings("unchecked") final Object entity = crudService.find(entityClass, id);
         if (entity == null) {
             return new ResponseEntity<>("Entity " + entityClass.getSimpleName() + " with id " + id + " not found", HttpStatus.NOT_FOUND);
         }
@@ -283,7 +283,7 @@ public class RestNavigationController {
 
         ViewDescriptor readDescriptor = Viewers.getViewDescriptor(entityClass, "form");
 
-        Object result = crudService.find(entityClass, id);
+        @SuppressWarnings("unchecked") Object result = crudService.find(entityClass, id);
         if (result == null) {
             return new ResponseEntity<>("Entity " + entityClass.getSimpleName() + " with id " + id + " not found\n", HttpStatus.NOT_FOUND);
         }
@@ -296,10 +296,10 @@ public class RestNavigationController {
     public static void parseConditions(QueryBuilder query, ViewDescriptor descriptor) {
         try {
             if (descriptor.getParams().containsKey("conditions")) {
-                Map<String, String> conditions = (Map<String, String>) descriptor.getParams().get("conditions");
+                @SuppressWarnings("unchecked") Map<String, String> conditions = (Map<String, String>) descriptor.getParams().get("conditions");
                 conditions.forEach((k, v) -> query.and(v));
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
     }
@@ -309,7 +309,7 @@ public class RestNavigationController {
         if (request.getParameter(name) != null) {
             try {
                 param = Integer.parseInt(request.getParameter(name));
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException ignored) {
 
             }
         }

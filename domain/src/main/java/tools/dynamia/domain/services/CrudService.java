@@ -87,10 +87,6 @@ public interface CrudService {
 
     /**
      * Load and entity and all its relationship graph
-     * @param type
-     * @param id
-     * @return
-     * @param <T>
      */
     <T> T load(Class<T> type, Serializable id);
 
@@ -98,10 +94,6 @@ public interface CrudService {
      * A shortcut method to find an entity by a field called remoteId. If this field dont exist an exception
      * will throw
      *
-     * @param type
-     * @param remoteId
-     * @param <T>
-     * @return
      */
     <T> T findByRemoteId(Class<T> type, Serializable remoteId);
 
@@ -133,7 +125,6 @@ public interface CrudService {
     /**
      * Delete all entities. Use it with caution.
      *
-     * @param type
      */
     void deleteAll(Class type);
 
@@ -215,17 +206,12 @@ public interface CrudService {
     /**
      * Execute plain query
      *
-     * @param queryText
-     * @return
      */
     <T> List<T> executeQuery(String queryText);
 
     /**
      * Execute plain query with parameters
      *
-     * @param queryText
-     * @param parameters
-     * @return
      */
     <T> List<T> executeQuery(String queryText, QueryParameters parameters);
 
@@ -241,8 +227,6 @@ public interface CrudService {
     /**
      * Execute a query builder and return affected rows or entries. Userfull for UPDATE or DELETE queries
      *
-     * @param query
-     * @return
      */
     default int execute(QueryBuilder query) {
         return execute(query.toString(), query.getQueryParameters());
@@ -440,7 +424,6 @@ public interface CrudService {
      *
      * @param entityClass the entity class
      * @param property    the property
-     * @param params
      * @return the property values
      */
     List getPropertyValues(Class entityClass, String property, QueryParameters params);
@@ -501,14 +484,12 @@ public interface CrudService {
     /**
      * Execute callback in a new transaction
      *
-     * @param callback
      */
     void executeWithinTransaction(Callback callback);
 
     /**
      * Execute save method in a new transaction
      *
-     * @param entity
      */
     default void saveWithinTransaction(Object entity) {
         executeWithinTransaction(() -> save(entity));
@@ -517,9 +498,6 @@ public interface CrudService {
     /**
      * Find the first result of given type
      *
-     * @param type
-     * @param <T>
-     * @return
      */
     default <T> T findFirst(Class<T> type) {
         return findSingle(type, new QueryParameters());
@@ -531,11 +509,6 @@ public interface CrudService {
     /**
      * Query entity field. It execute a query like this 'select e.field from Entity e where e.id = :id'
      *
-     * @param entity
-     * @param fieldName
-     * @param fieldClass
-     * @param <T>
-     * @return
      */
     <T> T getFieldValue(Object entity, String fieldName, Class<T> fieldClass);
 }

@@ -21,7 +21,6 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Textbox;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.math.MathFunction;
-import tools.dynamia.web.util.JavaScriptUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -93,18 +92,10 @@ public class Calculator extends Keypad {
     }
 
     private boolean isOperation(String delta) {
-        switch (delta) {
-            case "+":
-            case "-":
-            case "/":
-            case "*":
-            case "%":
-            case ")":
-            case "(":
-                return true;
-            default:
-                return false;
-        }
+        return switch (delta) {
+            case "+", "-", "/", "*", "%", ")", "(" -> true;
+            default -> false;
+        };
     }
 
     @Override

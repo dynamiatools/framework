@@ -101,7 +101,7 @@ public abstract class AbstractCrudAction extends AbstractClassAction implements 
 
     public Class getApplicableClass() {
         if (applicableClasses.length > 0) {
-            return applicableClasses[0].getTargetClass();
+            return applicableClasses[0].targetClass();
         } else {
             return null;
         }
@@ -110,9 +110,6 @@ public abstract class AbstractCrudAction extends AbstractClassAction implements 
     protected CrudService crudService() {
         if (crudService == null) {
             crudService = DomainUtils.lookupCrudService();
-        }
-        if (crudService == null) {
-            throw new NullPointerException("Cannot lookup instance of " + CrudService.class);
         }
         return crudService;
     }

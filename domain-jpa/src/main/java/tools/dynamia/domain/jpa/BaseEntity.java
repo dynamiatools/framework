@@ -17,11 +17,11 @@
 package tools.dynamia.domain.jpa;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import tools.dynamia.domain.Auditable;
-
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import tools.dynamia.domain.Auditable;
+
 import java.io.Serializable;
 import java.util.Date;
 

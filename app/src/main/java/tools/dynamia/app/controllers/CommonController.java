@@ -16,6 +16,9 @@
  */
 package tools.dynamia.app.controllers;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -24,9 +27,6 @@ import tools.dynamia.app.IndexInterceptor;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Controller;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.stream.Stream;
 
 @Controller

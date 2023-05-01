@@ -17,8 +17,6 @@
 
 package tools.dynamia.commons;
 
-import tools.dynamia.commons.StringPojoParser;
-
 /**
  * Allow POJO classes to be converted to json strings
  */

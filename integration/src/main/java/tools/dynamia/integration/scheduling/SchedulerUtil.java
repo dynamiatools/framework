@@ -84,12 +84,9 @@ public class SchedulerUtil {
     /**
      * Functional override of runWithResult({@link TaskWithResult }
      *
-     * @param task
-     * @param <T>
-     * @return
      */
     public static <T> Future<T> runWithResult(Supplier<T> task) {
-        return runWithResult(new TaskWithResult<T>() {
+        return runWithResult(new TaskWithResult<>() {
             @Override
             public T doWorkWithResult() {
                 return task.get();

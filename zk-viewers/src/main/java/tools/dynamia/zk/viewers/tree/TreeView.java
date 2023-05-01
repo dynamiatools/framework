@@ -19,7 +19,11 @@
 package tools.dynamia.zk.viewers.tree;
 
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.*;
+import org.zkoss.zul.Menupopup;
+import org.zkoss.zul.Tree;
+import org.zkoss.zul.TreeModel;
+import org.zkoss.zul.Treeitem;
+import org.zkoss.zul.TreeitemRenderer;
 import tools.dynamia.domain.query.DataSet;
 import tools.dynamia.viewers.DataSetView;
 import tools.dynamia.viewers.View;

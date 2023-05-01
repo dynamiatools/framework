@@ -71,6 +71,7 @@ public class TableViewFooter extends Listfooter implements FunctionProvider {
             String resultText = Converters.convert(value);
             if (functionConverter != null) {
                 Converter converter = BeanUtils.newInstance(functionConverter);
+                //noinspection unchecked
                 resultText = (String) converter.coerceToUi(value, footerValue, null);
             }
             footerValue.setValue(resultText);

@@ -59,6 +59,7 @@ public class EnumListbox<T extends Enum> extends Listbox {
 
     public final void setEnum(String enumClassName) {
         try {
+            //noinspection unchecked
             setEnum((Class<? extends Enum>) Class.forName(enumClassName));
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);

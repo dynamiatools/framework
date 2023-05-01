@@ -56,6 +56,7 @@ public class EntityPickerPanel<E> extends Div {
     private final QueryParameters defaultParameters = new QueryParameters();
 
     public EntityPickerPanel(Class entityClass) {
+        //noinspection unchecked
         setEntityClass(entityClass);
         setStyle("padding:0;margin:0");
     }
@@ -70,6 +71,7 @@ public class EntityPickerPanel<E> extends Div {
         DefaultViewDescriptor tableDescriptor = new DefaultViewDescriptor(entityClass, "table", false);
         tableDescriptor.merge(descriptor);
         tableDescriptor.getParams().put("showRowNumber", false);
+        //noinspection unchecked
         tableView = (TableView<E>) Viewers.getView(tableDescriptor);
         tableView.setHflex("1");
         tableView.setVflex("1");
@@ -83,8 +85,9 @@ public class EntityPickerPanel<E> extends Div {
         if (descriptor.getViewCustomizerClass() != null) {
             try {
                 ViewCustomizer customizer = BeanUtils.newInstance(descriptor.getViewCustomizerClass());
+                //noinspection unchecked
                 customizer.customize(new ZKWrapperView(this));
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
 

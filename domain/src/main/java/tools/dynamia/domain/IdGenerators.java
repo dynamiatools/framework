@@ -44,6 +44,7 @@ public class IdGenerators {
         Optional<IdGenerator> idGenerator = getAvailableGenerators()
                 .stream().filter(idg -> idg.getTargetType().equals(type))
                 .findFirst();
+        //noinspection unchecked
         return idGenerator.orElse(null);
     }
 

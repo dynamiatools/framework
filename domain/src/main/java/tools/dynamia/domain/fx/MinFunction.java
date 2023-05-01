@@ -72,12 +72,13 @@ public class MinFunction<T> implements Function<List<T>, Object> {
                     if (min == null) {
                         min = field;
                     } else if (field instanceof Comparable comparable) {
+                        //noinspection unchecked
                         if (comparable.compareTo(min) < 0) {
                             min = comparable;
                         }
                     }
                 }
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
         return min;

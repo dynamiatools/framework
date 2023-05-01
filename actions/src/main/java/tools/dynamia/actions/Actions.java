@@ -13,10 +13,6 @@ public class Actions {
     /**
      * Helper method to run actions
      *
-     * @param action
-     * @param eventBuilder
-     * @param source
-     * @param params
      */
     public static void run(Action action, ActionEventBuilder eventBuilder, Object source, Object data, Map<String, Object> params) {
         if (action != null) {
@@ -61,8 +57,6 @@ public class Actions {
     /**
      * Run action without source and params
      *
-     * @param action
-     * @param eventBuilder
      */
     public static void run(Action action, ActionEventBuilder eventBuilder) {
         run(action, eventBuilder, null, null);
@@ -75,7 +69,6 @@ public class Actions {
     /**
      * Run action without event builder
      *
-     * @param action
      */
     public static void run(Action action, Object data) {
         run(action, (source, params) -> new ActionEvent(data, source, params));

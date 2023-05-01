@@ -41,11 +41,13 @@ public class CollectionsUtils {
      * @param groupSize  the group size
      * @return the collection
      */
+    @SuppressWarnings("unchecked")
     public static Collection<CollectionWrapper> group(Collection collection, int groupSize) {
 
         Class<? extends Collection> collectionClass = collection.getClass();
         Collection<CollectionWrapper> groups = null;
         try {
+            //noinspection unchecked
             groups = BeanUtils.newInstance(collectionClass);
         } catch (ReflectionException e) {
             groups = new ArrayList<>();
@@ -59,10 +61,12 @@ public class CollectionsUtils {
             }
 
             if (i == 0) {
+                //noinspection unchecked
                 wrapper = new CollectionWrapper(BeanUtils.newInstance(collectionClass));
                 groups.add(wrapper);
             }
 
+            //noinspection unchecked
             wrapper.getCollection().add(object);
             i++;
         }
@@ -73,10 +77,6 @@ public class CollectionsUtils {
     /**
      * Group a collection using a field from elements class
      *
-     * @param collection
-     * @param elementClass
-     * @param fieldToGroup
-     * @return
      */
     public static Collection<CollectionWrapper> groupBy(Collection collection, Class elementClass, String fieldToGroup) {
         Class<? extends Collection> collectionClass = collection.getClass();
@@ -84,6 +84,7 @@ public class CollectionsUtils {
         Collection<CollectionWrapper> groups = null;
         PropertyInfo property = BeanUtils.getPropertyInfo(elementClass, fieldToGroup);
         try {
+            //noinspection unchecked
             groups = BeanUtils.newInstance(collectionClass);
         } catch (ReflectionException e) {
             groups = new ArrayList<>();
@@ -106,6 +107,7 @@ public class CollectionsUtils {
 
             if (grouper == null && grouperTarget != null) {
                 grouper = grouperTarget;
+                //noinspection unchecked
                 wrapper = new CollectionWrapper(BeanUtils.newInstance(collectionClass));
                 wrapper.setName(grouperTarget.toString());
                 wrapper.setValue(grouperTarget);
@@ -113,6 +115,7 @@ public class CollectionsUtils {
             }
 
             if (wrapper.getCollection() != null) {
+                //noinspection unchecked
                 wrapper.getCollection().add(object);
             }
 
@@ -123,9 +126,6 @@ public class CollectionsUtils {
     /**
      * Find first element from collection or null if is empty
      *
-     * @param <T>
-     * @param collection
-     * @return
      */
     public static <T> T findFirst(Collection<T> collection) {
         if (collection.isEmpty()) {

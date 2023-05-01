@@ -20,6 +20,7 @@ package tools.dynamia.domain.jpa;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

@@ -177,9 +177,6 @@ public class BigDecimalUtils {
      * Compute the percent and add to value, percent value should be in percent
      * form. Example 10 for 10%, NOT 0.1
      *
-     * @param value
-     * @param percent
-     * @return
      */
     public static BigDecimal addPercent(BigDecimal value, double percent) {
         return value.add(computePercent(value, percent, false));
@@ -191,10 +188,6 @@ public class BigDecimalUtils {
      * substracted from value. Include = true: value - (value / (1 + percent /
      * 100) ) Include = false value * (p / 100)
      *
-     * @param value
-     * @param percent
-     * @param included
-     * @return
      */
     public static BigDecimal computePercent(BigDecimal value, double percent, boolean included) {
         BigDecimal p100 = BigDecimal.valueOf(percent).divide(BigDecimal.valueOf(100), MathContext.DECIMAL64);
@@ -212,10 +205,6 @@ public class BigDecimalUtils {
      * the periodic interest rate, then multiply as required to derive the annual interest rate.
      * The RATE function calculates by iteration.
      *
-     * @param numberPeriods
-     * @param paymentByPeriod
-     * @param total
-     * @return
      */
     public static double rate(long numberPeriods, BigDecimal paymentByPeriod, BigDecimal total) {
         return rate((double) numberPeriods, paymentByPeriod.doubleValue(), total.doubleValue());
@@ -226,10 +215,6 @@ public class BigDecimalUtils {
      * the periodic interest rate, then multiply as required to derive the annual interest rate.
      * The RATE function calculates by iteration.
      *
-     * @param numberPeriods
-     * @param paymentByPeriod
-     * @param totalValue
-     * @return
      */
     public static double rate(double numberPeriods, double paymentByPeriod, double totalValue) {
 

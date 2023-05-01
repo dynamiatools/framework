@@ -31,7 +31,11 @@ import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.Callback;
 import tools.dynamia.commons.collect.CollectionsUtils;
 import tools.dynamia.commons.reflect.PropertyInfo;
-import tools.dynamia.domain.query.*;
+import tools.dynamia.domain.query.BooleanOp;
+import tools.dynamia.domain.query.DataPaginator;
+import tools.dynamia.domain.query.QueryCondition;
+import tools.dynamia.domain.query.QueryConditions;
+import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.GraphCrudService;
 import tools.dynamia.domain.services.ValidatorService;
 import tools.dynamia.domain.services.impl.AbstractCrudService;
@@ -42,7 +46,13 @@ import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.io.converters.Converters;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service("neo4jCrudService")
 public class Neo4jCrudService extends AbstractCrudService implements GraphCrudService {
@@ -72,7 +82,7 @@ public class Neo4jCrudService extends AbstractCrudService implements GraphCrudSe
 
     @Override
     public Serializable getId(Class entityClass, QueryParameters params) {
-        Object result = findSingle(entityClass, params);
+        @SuppressWarnings("unchecked") Object result = findSingle(entityClass, params);
         if (result != null) {
             return s().resolveGraphIdFor(result);
         }
@@ -107,8 +117,6 @@ public class Neo4jCrudService extends AbstractCrudService implements GraphCrudSe
     /**
      * Save entity with depth
      *
-     * @param t
-     * @param depth
      */
     @Transactional
     @Override
@@ -131,11 +139,13 @@ public class Neo4jCrudService extends AbstractCrudService implements GraphCrudSe
 
     @Override
     public void delete(Class type, Serializable id) {
+        //noinspection unchecked
         delete(s().load(type, id));
     }
 
     @Override
     public void deleteAll(Class type) {
+        //noinspection unchecked
         s().deleteAll(type);
 
     }
@@ -205,6 +215,7 @@ public class Neo4jCrudService extends AbstractCrudService implements GraphCrudSe
     @Override
     public <T> List<T> executeQuery(String queryText, QueryParameters parameters) {
         Result result = s().query(queryText, parameters);
+        //noinspection unchecked
         return CollectionsUtils.iteratorToList(result.iterator());
     }
 
@@ -288,7 +299,7 @@ public class Neo4jCrudService extends AbstractCrudService implements GraphCrudSe
                 params.addGroup(fieldsParams, BooleanOp.AND);
                 result = find(entityClass, params);
             } else {
-                result = Collections.EMPTY_LIST;
+                result = Collections.emptyList();
             }
 
         }
@@ -322,10 +333,10 @@ public class Neo4jCrudService extends AbstractCrudService implements GraphCrudSe
         if (pinfo != null) {
             if (pinfo.getType().isEnum()) {
                 try {
-                    Class<? extends Enum> enumType = (Class<? extends Enum>) pinfo.getType();
-                    Object obj = Enum.valueOf(enumType, value.toUpperCase());
+                    @SuppressWarnings("unchecked") Class<? extends Enum> enumType = (Class<? extends Enum>) pinfo.getType();
+                    @SuppressWarnings("unchecked") Object obj = Enum.valueOf(enumType, value.toUpperCase());
                     qc = QueryConditions.eq(obj, BooleanOp.OR);
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             } else if (pinfo.getType() == Boolean.class || pinfo.getType() == boolean.class) {
                 qc = null;
@@ -337,7 +348,7 @@ public class Neo4jCrudService extends AbstractCrudService implements GraphCrudSe
                     } else {
                         qc = QueryConditions.eq(realValue, BooleanOp.OR);
                     }
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             }
         }
@@ -347,6 +358,7 @@ public class Neo4jCrudService extends AbstractCrudService implements GraphCrudSe
 
     @Override
     public List findByNativeQuery(String sql, Class type) {
+        //noinspection unchecked
         return CollectionsUtils.iteratorToList(s().query(type, sql, new HashMap<>()).iterator());
     }
 
@@ -372,6 +384,7 @@ public class Neo4jCrudService extends AbstractCrudService implements GraphCrudSe
 
     @Override
     public <T> T reload(T entity) {
+        //noinspection unchecked
         return (T) s().load(entity.getClass(), s().resolveGraphIdFor(entity));
 
     }

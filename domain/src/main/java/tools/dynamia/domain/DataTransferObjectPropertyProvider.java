@@ -28,9 +28,6 @@ public interface DataTransferObjectPropertyProvider {
 
     /**
      * Find and transfer property in DTO class
-     * @param dto
-     * @param propertyValue
-     * @param propertyInfo
      * @return true if transfer is completed
      */
     boolean transferPropertyValue(Object dto, Object propertyValue, PropertyInfo propertyInfo);

@@ -62,8 +62,6 @@ public class Currency implements Converter<Object, Object, Component> {
     /**
      * Shortcut to new Currency().format(number);
      *
-     * @param number
-     * @return
      */
     public static String formatNumber(Number number) {
         return new Currency().format(number);

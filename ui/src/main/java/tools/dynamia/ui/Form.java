@@ -62,9 +62,6 @@ public class Form extends PropertyChangeSupport {
      * Notify PropertyChangeListeners change, this method automatically check if the
      * oldValue and newValue are different to fire the listeners.
      *
-     * @param propertyName
-     * @param oldValue
-     * @param newValue
      */
     protected void notifyChange(String propertyName, Object oldValue, Object newValue) {
         if (oldValue == null || oldValue != newValue) {

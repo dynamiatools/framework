@@ -19,8 +19,11 @@ package tools.dynamia.web.util;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionEvent;
 import jakarta.servlet.http.HttpSessionListener;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Very simple session tracker. Do not use it in cluster environment

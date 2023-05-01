@@ -19,7 +19,15 @@ package tools.dynamia.zk.crud.ui;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.*;
+import org.zkoss.zul.Div;
+import org.zkoss.zul.Listbox;
+import org.zkoss.zul.Listcell;
+import org.zkoss.zul.Listhead;
+import org.zkoss.zul.Listheader;
+import org.zkoss.zul.Listitem;
+import org.zkoss.zul.ListitemRenderer;
+import org.zkoss.zul.Toolbarbutton;
+import org.zkoss.zul.Vlayout;
 import tools.dynamia.domain.AbstractEntity;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.ui.icons.IconsTheme;
@@ -76,6 +84,7 @@ public class MultiEntityPicker extends Div {
         listbox.setItemRenderer((ListitemRenderer) (item, data, index) -> renderEntity(item, data));
     }
 
+    @SuppressWarnings("SuspiciousMethodCalls")
     private void addEntity(Object selected) {
         if (selectedEntities == null) {
             selectedEntities = new ArrayList<>();
@@ -152,6 +161,7 @@ public class MultiEntityPicker extends Div {
                 removeBtn.setImage(icon);
             }
 
+            //noinspection unchecked
             removeBtn.addEventListener(Events.ON_CLICK, (EventListener) event -> {
                 item.detach();
                 selectedEntities.remove(item.getValue());

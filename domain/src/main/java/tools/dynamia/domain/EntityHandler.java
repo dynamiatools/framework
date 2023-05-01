@@ -39,6 +39,7 @@ public class EntityHandler<T> {
     }
 
     public EntityHandler(Class clazz, CrudService crudService) {
+        //noinspection unchecked
         this.type = clazz;
         this.crudService = crudService;
 
@@ -50,8 +51,6 @@ public class EntityHandler<T> {
     /**
      * Find a single result
      *
-     * @param params
-     * @return
      */
     public T findSingle(QueryParameters params) {
         return crudService.findSingle(type, params);
@@ -61,8 +60,6 @@ public class EntityHandler<T> {
     /**
      * Execute query
      *
-     * @param params
-     * @return
      */
     public List<T> find(QueryParameters params) {
         return crudService.find(type, params);
@@ -73,7 +70,6 @@ public class EntityHandler<T> {
      * <p>
      * s
      *
-     * @return
      */
     public List<T> findAll() {
         return crudService.findAll(type);
@@ -82,7 +78,6 @@ public class EntityHandler<T> {
     /**
      * Count all
      *
-     * @return
      */
     public long count() {
         return crudService.count(type);
@@ -91,8 +86,6 @@ public class EntityHandler<T> {
     /**
      * Count all with parameters
      *
-     * @param params
-     * @return
      */
     public long count(QueryParameters params) {
         return crudService.count(type, params);
@@ -101,8 +94,6 @@ public class EntityHandler<T> {
     /**
      * Find all ordering by
      *
-     * @param orderBy
-     * @return
      */
     public List<T> findAll(String orderBy) {
         return crudService.findAll(type, orderBy);
@@ -111,8 +102,6 @@ public class EntityHandler<T> {
     /**
      * Find by ID
      *
-     * @param id
-     * @return
      */
     public T findById(Serializable id) {
         return crudService.find(type, id);
@@ -128,9 +117,6 @@ public class EntityHandler<T> {
     /**
      * Batch update
      *
-     * @param field
-     * @param value
-     * @param params
      * @return affected result
      */
     public int batchUpdate(String field, Object value, QueryParameters params) {
@@ -140,8 +126,6 @@ public class EntityHandler<T> {
     /**
      * Batch Update
      *
-     * @param fieldvalues
-     * @param params
      * @return affected result
      */
     public int batchUpdate(Map<String, Object> fieldvalues, QueryParameters params) {
@@ -152,7 +136,6 @@ public class EntityHandler<T> {
     /**
      * Find first
      *
-     * @return
      */
     public T findFirst() {
         return crudService.findFirst(type);
@@ -161,8 +144,6 @@ public class EntityHandler<T> {
     /**
      * Create or update the Entity
      *
-     * @param t
-     * @return
      */
     public T save(T t) {
         return crudService.save(t);
@@ -171,8 +152,6 @@ public class EntityHandler<T> {
     /**
      * Create a the entity
      *
-     * @param t
-     * @return
      */
     public T create(T t) {
         return crudService.create(t);
@@ -181,8 +160,6 @@ public class EntityHandler<T> {
     /**
      * Update the entity
      *
-     * @param t
-     * @return
      */
     public T update(T t) {
         return crudService.update(t);
@@ -191,7 +168,6 @@ public class EntityHandler<T> {
     /**
      * Delete the entity
      *
-     * @param t
      */
     public void delete(T t) {
         crudService.delete(t);
@@ -200,8 +176,6 @@ public class EntityHandler<T> {
     /**
      * Create a new {@link EntityHandler} for clazz using default CrudService
      *
-     * @param clazz
-     * @param <T>
      * @return EntityHandler
      */
     public static <T> EntityHandler<T> handle(Class<T> clazz) {
@@ -211,10 +185,6 @@ public class EntityHandler<T> {
     /**
      * Create a new {@link EntityHandler} for clazz
      *
-     * @param clazz
-     * @param crudService
-     * @param <T>
-     * @return
      */
     public static <T> EntityHandler<T> handle(Class<T> clazz, CrudService crudService) {
         return new EntityHandler<>(clazz, crudService);

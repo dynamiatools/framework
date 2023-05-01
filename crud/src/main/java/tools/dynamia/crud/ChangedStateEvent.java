@@ -16,29 +16,6 @@
  */
 package tools.dynamia.crud;
 
-public class ChangedStateEvent {
-
-    private final CrudState newState;
-    private final CrudState oldState;
-    private final GenericCrudView crudView;
-
-    public ChangedStateEvent(CrudState newState, CrudState oldState, GenericCrudView crudView) {
-        super();
-        this.newState = newState;
-        this.oldState = oldState;
-        this.crudView = crudView;
-    }
-
-    public CrudState getNewState() {
-        return newState;
-    }
-
-    public CrudState getOldState() {
-        return oldState;
-    }
-
-    public GenericCrudView getCrudView() {
-        return crudView;
-    }
+public record ChangedStateEvent(CrudState newState, CrudState oldState, GenericCrudView crudView) {
 
 }

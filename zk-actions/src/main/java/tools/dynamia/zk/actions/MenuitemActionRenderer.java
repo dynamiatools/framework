@@ -16,16 +16,14 @@
  */
 package tools.dynamia.zk.actions;
 
-import tools.dynamia.actions.Actions;
-import tools.dynamia.commons.Messages;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Menuitem;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionEventBuilder;
+import tools.dynamia.actions.Actions;
+import tools.dynamia.commons.Messages;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.zk.util.ZKUtil;
-
-import java.util.Map;
 
 public class MenuitemActionRenderer extends ZKActionRenderer<Menuitem> {
 

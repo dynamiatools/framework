@@ -89,6 +89,7 @@ public class TimeZoneCombobox extends Combobox {
             this.selected = selected;
             try {
                 ListModelList model = (ListModelList) getModel();
+                //noinspection unchecked
                 model.addToSelection(selected);
             } catch (Exception e) {
                 // ignore

@@ -53,7 +53,6 @@ public @interface MessageChannelExchange {
     /**
      * Specified is this Listener receive broadcast messages, default is true
      *
-     * @return
      */
     boolean broadcastReceive() default true;
 }

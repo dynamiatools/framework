@@ -22,13 +22,40 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.IdSpace;
 import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.*;
+import org.zkoss.zul.Borderlayout;
+import org.zkoss.zul.Box;
+import org.zkoss.zul.Center;
+import org.zkoss.zul.Div;
+import org.zkoss.zul.Menupopup;
+import org.zkoss.zul.Menuseparator;
+import org.zkoss.zul.North;
+import org.zkoss.zul.Window;
 import org.zkoss.zul.impl.XulElement;
-import tools.dynamia.actions.*;
-import tools.dynamia.commons.*;
+import tools.dynamia.actions.Action;
+import tools.dynamia.actions.ActionComparator;
+import tools.dynamia.actions.ActionEvent;
+import tools.dynamia.actions.ActionEventBuilder;
+import tools.dynamia.actions.ActionGroup;
+import tools.dynamia.actions.ActionLifecycleAware;
+import tools.dynamia.actions.ActionLoader;
+import tools.dynamia.actions.ActionRenderer;
+import tools.dynamia.actions.ReadableOnly;
+import tools.dynamia.commons.ApplicableClass;
+import tools.dynamia.commons.BeanMap;
+import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.Callback;
+import tools.dynamia.commons.LocalizedMessagesProvider;
+import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.collect.ArrayListMultiMap;
 import tools.dynamia.commons.collect.ListMultiMap;
-import tools.dynamia.crud.*;
+import tools.dynamia.crud.ChangedStateEvent;
+import tools.dynamia.crud.CrudAction;
+import tools.dynamia.crud.CrudActionEvent;
+import tools.dynamia.crud.CrudControllerAPI;
+import tools.dynamia.crud.CrudDataSetViewBuilder;
+import tools.dynamia.crud.CrudState;
+import tools.dynamia.crud.CrudStateChangedListener;
+import tools.dynamia.crud.GenericCrudView;
 import tools.dynamia.crud.actions.DeleteAction;
 import tools.dynamia.crud.actions.EditAction;
 import tools.dynamia.crud.actions.NewAction;
@@ -38,8 +65,11 @@ import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.ObjectMatcher;
 import tools.dynamia.navigation.NavigationManager;
 import tools.dynamia.navigation.Page;
-import tools.dynamia.commons.LocalizedMessagesProvider;
-import tools.dynamia.viewers.*;
+import tools.dynamia.viewers.DataSetView;
+import tools.dynamia.viewers.Field;
+import tools.dynamia.viewers.View;
+import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.ViewRendererException;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.web.util.HttpUtils;
 import tools.dynamia.zk.BindingComponentIndex;
@@ -58,8 +88,13 @@ import tools.dynamia.zk.viewers.ui.Viewer;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 
 /**
@@ -251,22 +286,21 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
         activeView = null;
         this.state = crudState;
         switch (crudState) {
-            case CREATE:
-            case UPDATE:
+            case CREATE, UPDATE -> {
                 activeView = getFormView();
                 if (activeViewParent instanceof Center) {
                     ((Center) activeViewParent).setAutoscroll(true);
                 }
                 setTitle(null);
-                break;
-            case READ:
+            }
+            case READ -> {
                 activeView = (Component) getDataSetView();
                 if (activeViewParent instanceof Center) {
                     ((Center) activeViewParent).setAutoscroll(false);
                 }
-                break;
-            default:
-                break;
+            }
+            default -> {
+            }
         }
 
         if (activeView != null) {
@@ -790,18 +824,10 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
 
     @Override
     public ActionEvent buildActionEvent(Object source, Map<String, Object> params) {
-        Object data = null;
-
-        switch (getState()) {
-            case CREATE:
-            case UPDATE:
-                data = getValue();
-                break;
-            case READ:
-            case DELETE:
-                data = getDataSetView().getSelected();
-                break;
-        }
+        Object data = switch (getState()) {
+            case CREATE, UPDATE -> getValue();
+            case READ, DELETE -> getDataSetView().getSelected();
+        };
 
         if (data instanceof BeanMap && ((BeanMap) data).getId() != null) {
             CrudService crudService = crudServiceName != null ? Containers.get().findObject(crudServiceName, CrudService.class) : Containers.get().findObject(CrudService.class);
@@ -862,7 +888,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
         crudView.setValue(value);
         crudView.getController().setEntity(value);
         crudView.addCrudStateChangedListener(evt -> {
-            if (evt.getNewState() != CrudState.UPDATE) {
+            if (evt.newState() != CrudState.UPDATE) {
                 window.detach();
                 if (callback != null) {
                     callback.doSomething();
@@ -882,7 +908,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
         crudView.setValue(value);
         crudView.getController().setEntity(value);
         crudView.addCrudStateChangedListener(evt -> {
-            if (evt.getNewState() != CrudState.UPDATE) {
+            if (evt.newState() != CrudState.UPDATE) {
                 NavigationManager.getCurrent().closeCurrentPage();
             }
 
@@ -901,7 +927,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
         crudView.setState(CrudState.CREATE);
         crudView.getController().newEntity();
         crudView.addCrudStateChangedListener(evt -> {
-            if (evt.getNewState() == CrudState.READ) {
+            if (evt.newState() == CrudState.READ) {
                 NavigationManager.getCurrent().closeCurrentPage();
             }
         });
@@ -923,7 +949,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
         crudView.setState(CrudState.CREATE);
         crudView.getController().newEntity();
         crudView.addCrudStateChangedListener(evt -> {
-            if (evt.getNewState() == CrudState.READ) {
+            if (evt.newState() == CrudState.READ) {
                 Window window = (Window) viewer.getParent();
                 window.detach();
                 if (callback != null) {

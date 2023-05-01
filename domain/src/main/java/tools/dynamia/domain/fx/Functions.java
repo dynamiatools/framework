@@ -57,6 +57,7 @@ public class Functions {
             throw new FunctionNotFoundException("Function with name '" + functionName + "' not found");
         }
 
+        //noinspection unchecked
         return fx.compute(value, args);
     }
 

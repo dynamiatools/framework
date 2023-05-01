@@ -19,7 +19,11 @@ package tools.dynamia.zk.app.bstemplate;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.HtmlBasedComponent;
-import org.zkoss.zul.*;
+import org.zkoss.zul.Borderlayout;
+import org.zkoss.zul.Button;
+import org.zkoss.zul.Div;
+import org.zkoss.zul.Menuitem;
+import org.zkoss.zul.Menupopup;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionGroup;
 import tools.dynamia.actions.ActionRenderer;
@@ -292,7 +296,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
     }
 
     private void controlChangedState(ChangedStateEvent evt) {
-        CrudState crudState = evt.getNewState();
+        CrudState crudState = evt.newState();
 
         if (crudState == CrudState.READ) {
             borderlayout.getNorth().setVisible(true);

@@ -77,7 +77,7 @@ public class ViewDescriptorDataSource extends JRAbstractBeanDataSource {
                 if (cacheValue == null) {
                     EntityReferenceRepository repo = DomainUtils.getEntityReferenceRepositoryByAlias(entityAlias);
                     if (repo != null) {
-                        EntityReference ref = repo.load((Serializable) value);
+                        @SuppressWarnings("unchecked") EntityReference ref = repo.load((Serializable) value);
                         if (ref != null) {
                             value = ref.toString();
                             cache.put(key, value);

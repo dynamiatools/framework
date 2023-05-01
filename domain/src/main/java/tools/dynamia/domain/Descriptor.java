@@ -21,7 +21,9 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({METHOD, FIELD, TYPE})
@@ -43,7 +45,6 @@ public @interface Descriptor {
      * Parameters arrays separated by ':' character
      * Example [param1: value1, param2: value2]
      *
-     * @return
      */
     String[] params() default {};
 
@@ -51,7 +52,6 @@ public @interface Descriptor {
      * View Parameters arrays separated by ':' character
      * Example [param1: value1, param2: value2]
      *
-     * @return
      */
     String[] viewParams() default {};
 }

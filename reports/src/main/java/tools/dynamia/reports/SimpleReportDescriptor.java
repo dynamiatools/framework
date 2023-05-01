@@ -40,35 +40,24 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     }
 
     /**
-     * @param reportTemplate
      */
     public SimpleReportDescriptor(Object reportTemplate) {
         this(reportTemplate, new JREmptyDataSource(), new HashMap<>());
     }
 
     /**
-     * @param reportTemplate
-     * @param dataSource
      */
     public SimpleReportDescriptor(Object reportTemplate, Object dataSource) {
         this(reportTemplate, dataSource, new HashMap<>());
     }
 
     /**
-     * @param reportTemplate
-     * @param dataSource
-     * @param parameters
      */
     public SimpleReportDescriptor(Object reportTemplate, Object dataSource, Map<String, Object> parameters) {
         this("SimpleReport", reportTemplate, dataSource, parameters, ReportOutputType.PDF);
     }
 
     /**
-     * @param name
-     * @param reportTemplate
-     * @param dataSource
-     * @param parameters
-     * @param defaultOutputType
      */
     public SimpleReportDescriptor(String name, Object reportTemplate, Object dataSource, Map<String, Object> parameters,
                                   ReportOutputType defaultOutputType) {
@@ -80,7 +69,6 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     }
 
     /**
-     * @return
      */
     @Override
     public Object getTemplate() {
@@ -92,7 +80,6 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     }
 
     /**
-     * @return
      */
     @Override
     public Map<String, Object> getParameters() {
@@ -100,7 +87,6 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     }
 
     /**
-     * @return
      */
     @Override
     public Object getDataSource() {
@@ -115,7 +101,6 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     }
 
     /**
-     * @return
      */
     @Override
     public String getName() {
@@ -127,7 +112,6 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     }
 
     /**
-     * @return
      */
     @Override
     public ReportOutputType getDefaultOutputType() {
@@ -148,6 +132,7 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     }
 
     public void addExporterParameter(Object name, Object value) {
+        //noinspection unchecked
         getExporterParameters().put(name, value);
     }
 
@@ -161,7 +146,7 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     public void loadParameterFromProviders(Object object) {
         Containers.get().findObjects(ReportParametersProvider.class).forEach(p -> {
             try {
-                Map<String, Object> params = p.getParams(object);
+                @SuppressWarnings("unchecked") Map<String, Object> params = p.getParams(object);
                 if (params != null) {
                     getParameters().putAll(params);
                 }

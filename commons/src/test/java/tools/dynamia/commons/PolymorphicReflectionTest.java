@@ -70,7 +70,7 @@ public class PolymorphicReflectionTest {
         Assert.assertTrue(true);
     }
 
-    class ParentBean {
+    static class ParentBean {
 
         private final String name = "mario";
 
@@ -96,8 +96,7 @@ public class PolymorphicReflectionTest {
         }
 
         public int getAge() {
-            int age = 11;
-            return age;
+            return 11;
         }
 
         public String getZorro() {

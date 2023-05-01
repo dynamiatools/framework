@@ -18,23 +18,6 @@ package tools.dynamia.zk.ui.model;
 
 import org.zkoss.zk.ui.Component;
 
-public class BindingInfo {
-
-    private final Component component;
-    private final String attribute;
-
-    public BindingInfo(Component component, String attribute) {
-        super();
-        this.component = component;
-        this.attribute = attribute;
-    }
-
-    public Component getComponent() {
-        return component;
-    }
-
-    public String getAttribute() {
-        return attribute;
-    }
+public record BindingInfo(Component component, String attribute) {
 
 }

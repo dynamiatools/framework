@@ -24,8 +24,11 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Menubar;
 import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Menupopup;
-import tools.dynamia.navigation.*;
 import tools.dynamia.navigation.Module;
+import tools.dynamia.navigation.NavigationManager;
+import tools.dynamia.navigation.NavigationViewBuilder;
+import tools.dynamia.navigation.Page;
+import tools.dynamia.navigation.PageGroup;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -17,7 +17,13 @@
 package tools.dynamia.zk.crud.ui;
 
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.*;
+import org.zkoss.zul.Hlayout;
+import org.zkoss.zul.Image;
+import org.zkoss.zul.Label;
+import org.zkoss.zul.Treecell;
+import org.zkoss.zul.Treeitem;
+import org.zkoss.zul.TreeitemRenderer;
+import org.zkoss.zul.Treerow;
 import tools.dynamia.ui.icons.Icon;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.ui.icons.IconsTheme;
@@ -48,9 +54,11 @@ public class EntityTreeItemRenderer implements TreeitemRenderer {
         cell.appendChild(hl);
 
         if (node.getOnRightClickListener() != null) {
+            //noinspection unchecked
             cell.addEventListener(Events.ON_RIGHT_CLICK, node.getOnRightClickListener());
         }
         if (node.getOnOpenListener() != null) {
+            //noinspection unchecked
             item.addEventListener(Events.ON_OPEN, node.getOnOpenListener());
         }
         cell.setParent(row);
@@ -61,9 +69,6 @@ public class EntityTreeItemRenderer implements TreeitemRenderer {
     /**
      * Overwrite this method is you wanna add new columns to tree
      *
-     * @param item
-     * @param row
-     * @param data
      */
     protected void addColumns(Treeitem item, Treerow row, EntityTreeNode node) {
         // for extension

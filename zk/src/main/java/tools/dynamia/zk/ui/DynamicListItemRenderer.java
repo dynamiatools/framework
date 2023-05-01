@@ -49,7 +49,7 @@ public class DynamicListItemRenderer implements ListitemRenderer<Object> {
                 Object value = "";
                 try {
                     value = BeanUtils.invokeGetMethod(data, field.trim());
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
                 String cellValue = null;
                 if (value != null) {

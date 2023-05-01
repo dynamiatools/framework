@@ -17,7 +17,6 @@
 package tools.dynamia.domain.jpa;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookupFailureException;
 import org.springframework.jndi.JndiTemplate;
@@ -29,11 +28,14 @@ import org.springframework.transaction.PlatformTransactionManager;
 import tools.dynamia.commons.PropertiesContainer;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
-import tools.dynamia.domain.services.CrudService;
 
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Mario A. Serrano Leones
@@ -198,7 +200,6 @@ public class JpaConfigurationAdapter {
     /**
      * Return by default "jdbc/datasource" override for custom jndiname
      *
-     * @return
      */
     protected String jndiName() {
         return properties.getProperty("jdniName");
@@ -235,7 +236,6 @@ public class JpaConfigurationAdapter {
     /**
      * Return a default package "com.dynamia"
      *
-     * @return
      */
     public String[] packagesToScan() {
         List<String> packages = new ArrayList<>();

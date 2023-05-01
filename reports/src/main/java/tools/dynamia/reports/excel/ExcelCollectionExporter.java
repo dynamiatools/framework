@@ -26,7 +26,6 @@ import tools.dynamia.reports.ExporterColumn;
 import tools.dynamia.reports.ExporterUtils;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**

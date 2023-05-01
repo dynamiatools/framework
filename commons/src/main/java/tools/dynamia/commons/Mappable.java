@@ -16,8 +16,6 @@
  */
 package tools.dynamia.commons;
 
-import tools.dynamia.commons.BeanUtils;
-
 import java.util.Map;
 
 /**

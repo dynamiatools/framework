@@ -30,7 +30,10 @@ import tools.dynamia.viewers.impl.YamlViewDescriptorReader;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static tools.dynamia.zk.viewers.table.TableViewDescriptorBuilder.*;
+import static tools.dynamia.zk.viewers.table.TableViewDescriptorBuilder.column;
+import static tools.dynamia.zk.viewers.table.TableViewDescriptorBuilder.f;
+import static tools.dynamia.zk.viewers.table.TableViewDescriptorBuilder.h;
+import static tools.dynamia.zk.viewers.table.TableViewDescriptorBuilder.tableViewDescriptor;
 
 /**
  * @author Mario Serrano Leones
@@ -80,14 +83,14 @@ public class TableViewDescriptorBuilderTest {
 
         assertEquals(lastNameExpected.getLabel(), lastName.getLabel());
 
-        Map<String, Object> headerExpected = (Map<String, Object>) lastNameExpected.getParams().get("header");
-        Map<String, Object> header = (Map<String, Object>) lastName.getParams().get("header");
+        @SuppressWarnings("unchecked") Map<String, Object> headerExpected = (Map<String, Object>) lastNameExpected.getParams().get("header");
+        @SuppressWarnings("unchecked") Map<String, Object> header = (Map<String, Object>) lastName.getParams().get("header");
 
         assertEquals(headerExpected.get("align"), header.get("align"));
         assertEquals(headerExpected.get("width"), header.get("width"));
 
-        Map<String, Object> footerExpected = (Map<String, Object>) lastNameExpected.getParams().get("footer");
-        Map<String, Object> footer = (Map<String, Object>) lastName.getParams().get("footer");
+        @SuppressWarnings("unchecked") Map<String, Object> footerExpected = (Map<String, Object>) lastNameExpected.getParams().get("footer");
+        @SuppressWarnings("unchecked") Map<String, Object> footer = (Map<String, Object>) lastName.getParams().get("footer");
 
         assertEquals(footerExpected.get("function"), footer.get("function"));
 

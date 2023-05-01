@@ -20,29 +20,19 @@ package tools.dynamia.domain.query;
 /**
  * The Class Group.
  *
+ * @param params    The params.
+ * @param booleanOp The boolean op.
  * @author Ing. Mario Serrano
  */
-public class Group {
-
-    /**
-     * The params.
-     */
-    private final QueryParameters params;
-
-    /**
-     * The boolean op.
-     */
-    private final BooleanOp booleanOp;
+public record Group(QueryParameters params, BooleanOp booleanOp) {
 
     /**
      * Instantiates a new group.
      *
-     * @param params the params
+     * @param params    the params
      * @param booleanOp the boolean op
      */
-    public Group(QueryParameters params, BooleanOp booleanOp) {
-        this.params = params;
-        this.booleanOp = booleanOp;
+    public Group {
     }
 
     /**
@@ -50,7 +40,8 @@ public class Group {
      *
      * @return the boolean op
      */
-    public BooleanOp getBooleanOp() {
+    @Override
+    public BooleanOp booleanOp() {
         return booleanOp;
     }
 
@@ -59,7 +50,8 @@ public class Group {
      *
      * @return the params
      */
-    public QueryParameters getParams() {
+    @Override
+    public QueryParameters params() {
         return params;
     }
 }

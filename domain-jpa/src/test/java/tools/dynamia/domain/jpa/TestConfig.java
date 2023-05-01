@@ -8,7 +8,6 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionManager;
 import tools.dynamia.domain.EntityUtilsProvider;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.integration.ObjectContainer;

@@ -72,12 +72,13 @@ public class MaxFunction<T> implements Function<List<T>, Object> {
                     if (max == null) {
                         max = field;
                     } else if (field instanceof Comparable comparable) {
+                        //noinspection unchecked
                         if (comparable.compareTo(max) > 0) {
                             max = comparable;
                         }
                     }
                 }
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
         return max;

@@ -18,10 +18,10 @@ package tools.dynamia.domain.util;
 
 import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.Identifiable;
 import tools.dynamia.domain.CurrencyExchangeProvider;
 import tools.dynamia.domain.EntityReferenceRepository;
 import tools.dynamia.domain.EntityUtilsProvider;
-import tools.dynamia.commons.Identifiable;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.query.Parameter;
 import tools.dynamia.domain.services.CrudService;
@@ -194,7 +194,7 @@ public abstract class DomainUtils {
      */
     public static String formatNumberWithZeroes(long number, long numberReference) {
         int numCeros = Long.toString(numberReference).length() - Long.toString(number).length();
-        return "0".repeat(Math.max(0, numCeros)) + Long.toString(number);
+        return "0".repeat(Math.max(0, numCeros)) + number;
     }
 
     /**
@@ -301,8 +301,6 @@ public abstract class DomainUtils {
     /**
      * Return {@link BigDecimal}.ZERO if number is null
      *
-     * @param number
-     * @return
      */
     public static BigDecimal getZeroIfNull(BigDecimal number) {
         return Objects.requireNonNullElse(number, BigDecimal.ZERO);
@@ -313,7 +311,6 @@ public abstract class DomainUtils {
      * Find first implementation of CrudService. Throw {@link NotImplementationFoundException} if not found.
      * Use this method if you want create small queries for your entity
      *
-     * @return
      */
     public static CrudService lookupCrudService() {
         CrudService crudService = Containers.get().findObject(CrudService.class);
@@ -327,9 +324,6 @@ public abstract class DomainUtils {
      * Find first implementation of CrudService. Throw {@link NotImplementationFoundException} if not found.
      * Use this method if you want create small queries for your entity
      *
-     * @param crudClass
-     * @param <T>
-     * @return
      */
     public static <T extends CrudService> T lookupCrudService(Class<T> crudClass) {
         T crudService = Containers.get().findObject(crudClass);
@@ -343,7 +337,6 @@ public abstract class DomainUtils {
      * Find first implementation of GraphCrudService.Throw {@link NotImplementationFoundException} if not found.
      * Use this method if you want create small queries for your entity
      *
-     * @return
      */
     public static GraphCrudService lookupGraphCrudService() {
         return lookupCrudService(GraphCrudService.class);
@@ -390,8 +383,6 @@ public abstract class DomainUtils {
     /**
      * By default return true
      *
-     * @param field
-     * @return
      */
     public static boolean isPersitable(Field field) {
         EntityUtilsProvider entityUtilsProvider = Containers.get().findObject(EntityUtilsProvider.class);
@@ -404,7 +395,6 @@ public abstract class DomainUtils {
     /**
      * Find current {@link EntityUtilsProvider} implementation and get the default {@link Parameter} class
      *
-     * @return
      */
     public static Class<? extends Parameter> getDefaultParameterClass() {
         EntityUtilsProvider entityUtilsProvider = Containers.get().findObject(EntityUtilsProvider.class);
@@ -460,7 +450,6 @@ public abstract class DomainUtils {
      * @param target   The data source object
      * @param dtoClass DTO class
      * @param <DTO>    instance of DTO class with all common properties set
-     * @return
      */
     public static <DTO> DTO autoDataTransferObject(Object target, Class<DTO> dtoClass) {
         return DataTransferObjectBuilder.buildDTO(target, dtoClass);
@@ -470,7 +459,6 @@ public abstract class DomainUtils {
     /**
      * Shortcut utility to invoke {@link tools.dynamia.domain.services.ValidatorService} validation method
      *
-     * @param obj
      */
     public static void validate(Object obj) {
         ValidatorService service = Containers.get().findObject(ValidatorService.class);
@@ -482,8 +470,6 @@ public abstract class DomainUtils {
     /**
      * Shortcut method to Find EntityReferenceRepository by alias and then find EntityReference value using id
      *
-     * @param alias
-     * @param id
      * @return name or null if nothing found
      */
     public static String getEntityReferenceName(String alias, Serializable id) {
@@ -502,9 +488,6 @@ public abstract class DomainUtils {
     /**
      * Increase counter and return de new value
      *
-     * @param entity
-     * @param counterName
-     * @return
      */
     public static long findNextCounterValue(Object entity, String counterName) {
         var crud = lookupCrudService();

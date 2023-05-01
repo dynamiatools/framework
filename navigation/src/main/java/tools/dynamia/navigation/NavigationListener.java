@@ -26,21 +26,18 @@ public interface NavigationListener {
     /**
      * Fired when some page in loaded
      *
-     * @param evt
      */
     void onPageLoad(PageEvent evt);
 
     /**
      * Fired when current page is unloaded
      *
-     * @param evt
      */
     void onPageUnload(PageEvent evt);
 
     /**
      * Fired some page is closed
      *
-     * @param evt
      */
     void onPageClose(PageEvent evt);
 }

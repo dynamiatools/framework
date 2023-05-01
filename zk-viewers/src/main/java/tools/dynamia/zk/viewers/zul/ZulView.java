@@ -22,7 +22,6 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.IdSpace;
 import org.zkoss.zul.Div;
-import org.zkoss.zul.Window;
 import tools.dynamia.viewers.View;
 import tools.dynamia.viewers.ViewDescriptor;
 

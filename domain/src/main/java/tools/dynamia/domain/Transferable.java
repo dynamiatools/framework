@@ -25,8 +25,9 @@ public interface Transferable<DTO> {
     default DTO toDTO() {
         DTO dto = null;
         try {
-            Class<DTO> dtoClass = BeanUtils.getGenericTypeClass(this);
+            @SuppressWarnings("unchecked") Class<DTO> dtoClass = BeanUtils.getGenericTypeClass(this);
             if (dtoClass == null) {
+                //noinspection unchecked
                 dtoClass = BeanUtils.getGenericTypeInterface(this, Transferable.class);
             }
             dto = DomainUtils.autoDataTransferObject(this, dtoClass);

@@ -22,7 +22,6 @@ import tools.dynamia.app.template.ApplicationTemplate;
 import tools.dynamia.app.template.ApplicationTemplates;
 import tools.dynamia.app.template.Skin;
 import tools.dynamia.integration.Containers;
-import tools.dynamia.web.util.HttpUtils;
 
 import java.io.Serializable;
 import java.util.List;

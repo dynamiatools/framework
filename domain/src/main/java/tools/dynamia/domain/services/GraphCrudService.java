@@ -26,29 +26,19 @@ public interface GraphCrudService extends CrudService {
 	/**
 	 * Save with depth
 	 *
-	 * @param t
-	 * @param depth
-	 */
+     */
     <T> void save(T t, int depth);
 
 	/**
 	 * Load entity and relationships with depth
 	 *
-	 * @param type
-	 * @param id
-	 * @param depth
-	 * @return
-	 */
+     */
 	<T> T find(Class<T> type, Serializable id, int depth);
 
 	/**
 	 * Query for Object
 	 *
-	 * @param type
-	 * @param query
-	 * @param params
-	 * @return
-	 */
+     */
 	<T> T queryObject(Class<T> type, String query, QueryParameters params);
 
 	<T> Iterable<T> query(Class<T> type, String query, QueryParameters params);

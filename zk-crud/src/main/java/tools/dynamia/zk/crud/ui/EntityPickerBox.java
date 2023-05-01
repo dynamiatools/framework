@@ -19,7 +19,15 @@ package tools.dynamia.zk.crud.ui;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.InputEvent;
 import org.zkoss.zk.ui.event.SelectEvent;
-import org.zkoss.zul.*;
+import org.zkoss.zul.A;
+import org.zkoss.zul.AbstractListModel;
+import org.zkoss.zul.Bandbox;
+import org.zkoss.zul.Bandpopup;
+import org.zkoss.zul.ListModel;
+import org.zkoss.zul.Listcell;
+import org.zkoss.zul.Listitem;
+import org.zkoss.zul.ListitemRenderer;
+import org.zkoss.zul.Span;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.StringUtils;
@@ -236,7 +244,9 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
                 setSelected(ce.getData());
                 viewer.getParent().detach();
                 Set selecteds = new HashSet();
+                //noinspection unchecked
                 selecteds.add(selected);
+                //noinspection unchecked
                 Events.postEvent(new SelectEvent(Events.ON_SELECT, this, selecteds));
             });
             selectAction.setColor("white");
@@ -263,12 +273,14 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
 
 
             defaultParameters.setMaxResults(maxResults);
+            //noinspection unchecked
             this.result = crudService.findByFields(entityClass, param, defaultParameters, getFields());
             if (result != null && !result.isEmpty()) {
                 autoboxed = false;
                 inputField.open();
             }
 
+            //noinspection unchecked
             result.add(0, null);
 
             ZKUtil.fillListbox(resultTable, result, true);
@@ -305,6 +317,7 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
 
         if (resultTable.getModel() instanceof AbstractListModel model) {
             if (object != null) {
+                //noinspection unchecked
                 model.addToSelection(object);
             } else {
                 model.clearSelection();
@@ -363,8 +376,9 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
         if (descriptor.getViewCustomizerClass() != null) {
             try {
                 ViewCustomizer customizer = BeanUtils.newInstance(descriptor.getViewCustomizerClass());
+                //noinspection unchecked
                 customizer.customize(new ZKWrapperView(this));
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
 

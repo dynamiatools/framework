@@ -76,6 +76,7 @@ public class SimpleCombobox extends Combobox {
     public void setSelected(SimpleItem selected) {
         this.selected = selected;
         if (getModel() instanceof AbstractListModel model) {
+            //noinspection unchecked
             model.addToSelection(selected);
         }
     }

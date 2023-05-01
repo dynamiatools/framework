@@ -19,7 +19,6 @@ package tools.dynamia.integration.scheduling;
 /**
  * The Class Task.
  *
- * @param <V> the value type
  */
 public abstract class Task implements Runnable {
 

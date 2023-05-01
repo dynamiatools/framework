@@ -33,9 +33,6 @@ public class Icon implements Serializable {
 
     /**
      *
-     * @param name
-     * @param directory
-     * @param extension
      */
     public Icon(String name, String directory, String extension) {
         this(name, name, directory, extension, IconType.IMAGE);
@@ -43,9 +40,6 @@ public class Icon implements Serializable {
 
     /**
      *
-     * @param name
-     * @param internalName
-     * @param type
      */
     public Icon(String name, String internalName, IconType type) {
         this(name, internalName, null, null, type);
@@ -53,11 +47,6 @@ public class Icon implements Serializable {
 
     /**
      *
-     * @param name
-     * @param internalName
-     * @param directory
-     * @param extension
-     * @param type
      */
     public Icon(String name, String internalName, String directory, String extension, IconType type) {
         this.name = name;

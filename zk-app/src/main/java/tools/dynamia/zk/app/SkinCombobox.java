@@ -68,6 +68,7 @@ public class SkinCombobox extends Combobox {
                         .findFirst();
                 if (skin.isPresent()) {
                     ListModelList model = (ListModelList) getModel();
+                    //noinspection unchecked
                     model.addToSelection(skin.get());
                 }
             } catch (Exception e) {

@@ -23,7 +23,11 @@ import tools.dynamia.integration.ObjectMatcher;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Load actions and control access using {@link ActionRestriction}
@@ -79,12 +83,14 @@ public class ActionLoader<T extends Action> {
 
     }
 
+    @SuppressWarnings("unchecked")
     private void configureAttributes(Action action) {
         if (actionAttributes != null) {
-            Map<String, Object> params = (Map<String, Object>) actionAttributes.get(action.getId());
+            @SuppressWarnings("unchecked") Map<String, Object> params = (Map<String, Object>) actionAttributes.get(action.getId());
             if (params != null) {
                 BeanUtils.setupBean(action, params);
                 if (params.get("attributes") != null && params.get("attributes") instanceof Map) {
+                    //noinspection unchecked
                     action.getAttributes().putAll((Map) params.get("attributes"));
                 }
             }
@@ -148,15 +154,10 @@ public class ActionLoader<T extends Action> {
         try {
             method.setAccessible(true);
             switch (method.getParameterCount()) {
-                case 0:
-                    method.invoke(object);
-                    break;
-                case 1:
-                    method.invoke(object, evt);
-                    break;
-                default:
-                    throw new ActionLoaderException(
-                            "Invalid ActionCommand " + method.getName() + " from " + object.getClass());
+                case 0 -> method.invoke(object);
+                case 1 -> method.invoke(object, evt);
+                default -> throw new ActionLoaderException(
+                        "Invalid ActionCommand " + method.getName() + " from " + object.getClass());
             }
 
         } catch (IllegalAccessException e) {

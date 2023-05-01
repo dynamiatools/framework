@@ -20,7 +20,11 @@ import org.zkoss.zk.ui.UiException;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.*;
+import org.zkoss.zul.Bandbox;
+import org.zkoss.zul.Bandpopup;
+import org.zkoss.zul.ListModelList;
+import org.zkoss.zul.Listbox;
+import org.zkoss.zul.Listitem;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.integration.Containers;
@@ -189,13 +193,14 @@ public class ProviderMultipickerBox extends Bandbox {
                                 .findFirst();
 
                         if (provider.isPresent()) {
+                            //noinspection unchecked
                             model.addToSelection(provider.get());
                         }
                     }
                 }
                 itemsList.renderAll();
                 updateLabel();
-            } catch (Exception e) {
+            } catch (Exception ignored) {
 
             }
         }

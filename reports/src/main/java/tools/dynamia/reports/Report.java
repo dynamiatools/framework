@@ -32,8 +32,6 @@ public class Report implements Serializable {
 
     /**
      *
-     * @param content
-     * @param name
      */
     public Report(Object content, String name, ReportOutputType defauOuputType) {
         this.content = content;
@@ -48,7 +46,6 @@ public class Report implements Serializable {
 
     /**
      *
-     * @return
      */
     public String getName() {
         return name;
@@ -56,7 +53,6 @@ public class Report implements Serializable {
 
     /**
      *
-     * @return
      */
     public Object getContent() {
         return content;
@@ -64,7 +60,6 @@ public class Report implements Serializable {
 
     /**
      *
-     * @return
      */
     public Date getDate() {
         return date;

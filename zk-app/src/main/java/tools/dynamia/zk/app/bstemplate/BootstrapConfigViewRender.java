@@ -43,6 +43,7 @@ public class BootstrapConfigViewRender extends ConfigViewRender {
     @SuppressWarnings("rawtypes")
     protected void delegateRender(ConfigView configView, ViewDescriptor descriptor, List<Parameter> value) {
         BootstrapFormViewRenderer delegate = new BootstrapFormViewRenderer<>();
+        //noinspection unchecked
         delegate.render(configView, descriptor, value);
     }
 

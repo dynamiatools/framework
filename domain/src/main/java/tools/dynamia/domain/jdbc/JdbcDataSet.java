@@ -22,7 +22,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The Class JdbcDataSet.
@@ -91,11 +95,11 @@ public class JdbcDataSet extends DataSet<ResultSet> implements Iterable<Row> {
     public void close() {
         try {
             getResultSet().close();
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
         }
         try {
             statement.close();
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
         }
     }
 

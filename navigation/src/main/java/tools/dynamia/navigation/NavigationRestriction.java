@@ -26,15 +26,12 @@ public interface NavigationRestriction {
     /**
      * Restriction order
      *
-     * @return
      */
     int getOrder();
 
     /**
      * Return true if access is granted, false is access is denied or null if access is unknow to let other {@link NavigationRestriction} check
      *
-     * @param element
-     * @return
      */
     Boolean allowAccess(NavigationElement element);
 

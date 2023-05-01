@@ -29,28 +29,23 @@ import java.net.URL;
 /**
  * The Class SpringResource.
  *
+ * @param internalResource The internal resource.
  * @author Mario A. Serrano Leones
  */
-public class SpringResource implements Resource {
-
-    /**
-     * The internal resource.
-     */
-    private final org.springframework.core.io.Resource internalResource;
+public record SpringResource(org.springframework.core.io.Resource internalResource) implements Resource {
 
     /**
      * Instantiates a new spring resource.
      *
      * @param internalResource the internal resource
      */
-    public SpringResource(org.springframework.core.io.Resource internalResource) {
-        this.internalResource = internalResource;
+    public SpringResource {
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see com.dynamia.tools.io.Resource#getInputStream()
+     * (non-Javadoc)
+     *
+     * @see com.dynamia.tools.io.Resource#getInputStream()
      */
     @Override
     public InputStream getInputStream() throws IOException {
@@ -58,9 +53,9 @@ public class SpringResource implements Resource {
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see com.dynamia.tools.io.Resource#getLastModified()
+     * (non-Javadoc)
+     *
+     * @see com.dynamia.tools.io.Resource#getLastModified()
      */
     @Override
     public long getLastModified() throws IOException {
@@ -68,9 +63,9 @@ public class SpringResource implements Resource {
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see com.dynamia.tools.io.Resource#isReadable()
+     * (non-Javadoc)
+     *
+     * @see com.dynamia.tools.io.Resource#isReadable()
      */
     @Override
     public boolean isReadable() {
@@ -78,9 +73,9 @@ public class SpringResource implements Resource {
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see com.dynamia.tools.io.Resource#isOpen()
+     * (non-Javadoc)
+     *
+     * @see com.dynamia.tools.io.Resource#isOpen()
      */
     @Override
     public boolean isOpen() {
@@ -88,9 +83,9 @@ public class SpringResource implements Resource {
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see com.dynamia.tools.io.Resource#getURL()
+     * (non-Javadoc)
+     *
+     * @see com.dynamia.tools.io.Resource#getURL()
      */
     @Override
     public URL getURL() throws IOException {
@@ -98,9 +93,9 @@ public class SpringResource implements Resource {
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see com.dynamia.tools.io.Resource#getURI()
+     * (non-Javadoc)
+     *
+     * @see com.dynamia.tools.io.Resource#getURI()
      */
     @Override
     public URI getURI() throws IOException {
@@ -108,9 +103,9 @@ public class SpringResource implements Resource {
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see com.dynamia.tools.io.Resource#getFilename()
+     * (non-Javadoc)
+     *
+     * @see com.dynamia.tools.io.Resource#getFilename()
      */
     @Override
     public String getFilename() {
@@ -118,9 +113,9 @@ public class SpringResource implements Resource {
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see com.dynamia.tools.io.Resource#getFile()
+     * (non-Javadoc)
+     *
+     * @see com.dynamia.tools.io.Resource#getFile()
      */
     @Override
     public File getFile() throws IOException {
@@ -128,9 +123,9 @@ public class SpringResource implements Resource {
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see com.dynamia.tools.io.Resource#exists()
+     * (non-Javadoc)
+     *
+     * @see com.dynamia.tools.io.Resource#exists()
      */
     @Override
     public boolean exists() {
@@ -138,9 +133,9 @@ public class SpringResource implements Resource {
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see com.dynamia.tools.io.Resource#getContentLength()
+     * (non-Javadoc)
+     *
+     * @see com.dynamia.tools.io.Resource#getContentLength()
      */
     @Override
     public long getContentLength() throws IOException {
@@ -148,16 +143,12 @@ public class SpringResource implements Resource {
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see com.dynamia.tools.io.Resource#getFileExtension()
+     * (non-Javadoc)
+     *
+     * @see com.dynamia.tools.io.Resource#getFileExtension()
      */
     @Override
     public String getFileExtension() {
         return StringUtils.getFilenameExtension(getFilename());
-    }
-
-    public org.springframework.core.io.Resource getInternalResource() {
-        return internalResource;
     }
 }

@@ -17,7 +17,14 @@
 package tools.dynamia.zk.ui;
 
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.*;
+import org.zkoss.zul.Button;
+import org.zkoss.zul.Caption;
+import org.zkoss.zul.Div;
+import org.zkoss.zul.Hlayout;
+import org.zkoss.zul.Label;
+import org.zkoss.zul.Progressmeter;
+import org.zkoss.zul.Vlayout;
+import org.zkoss.zul.Window;
 import tools.dynamia.commons.Callback;
 import tools.dynamia.commons.ClassMessages;
 import tools.dynamia.commons.Messages;
@@ -74,10 +81,6 @@ public class LongOperationMonitorWindow extends Window {
     /**
      * Run and show a progress window for a long-running operation
      *
-     * @param title
-     * @param operation
-     * @param onFinish
-     * @return
      */
     public static LongOperationMonitorWindow start(String title, Consumer<ProgressMonitor> operation, Callback onFinish) {
         var monitor = new ProgressMonitor();
@@ -93,10 +96,6 @@ public class LongOperationMonitorWindow extends Window {
     /**
      * Run and show a progress window for a long-running operation
      *
-     * @param title
-     * @param finishMessage
-     * @param operation
-     * @return
      */
     public static LongOperationMonitorWindow start(String title, String finishMessage, Consumer<ProgressMonitor> operation) {
         return start(title, operation, () -> UIMessages.showMessage(finishMessage));

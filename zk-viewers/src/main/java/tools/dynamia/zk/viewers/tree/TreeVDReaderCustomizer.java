@@ -49,7 +49,7 @@ public class TreeVDReaderCustomizer implements ViewDescriptorReaderCustomizer<Ma
             if (frozen != null) {
                 viewDescriptor.addParam("frozenColumns", frozen);
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 }

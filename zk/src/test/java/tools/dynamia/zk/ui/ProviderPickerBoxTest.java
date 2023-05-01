@@ -48,6 +48,7 @@ public class ProviderPickerBoxTest {
 
         ListModelList model = (ListModelList) box.getModel();
         Assert.assertFalse(model.getSelection().isEmpty());
+        //noinspection unchecked
         model.getSelection().forEach(p -> Assert.assertEquals(DefaultProvider.class, p.getClass()));
     }
 

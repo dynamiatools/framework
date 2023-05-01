@@ -440,8 +440,7 @@ public abstract class QueryConditions {
 	/**
 	 * Create an in condition using a subquery (JPAQL)
 	 *
-	 * @param subquery
-	 */
+     */
 	public static QueryCondition in(String subquery) {
 		return new Inlist(subquery);
 	}
@@ -449,8 +448,7 @@ public abstract class QueryConditions {
 	/**
 	 * Create an in condition using a subquery (JPAQL)
 	 *
-	 * @param subquery
-	 */
+     */
 	public static QueryCondition in(String subquery, BooleanOp booleanOp) {
 		Inlist in = new Inlist(subquery);
 		in.setBooleanOperator(booleanOp);
@@ -461,9 +459,7 @@ public abstract class QueryConditions {
 	 * Create an in condition using a subquery (JPAQL) and params are applied to
 	 * subquery
 	 *
-	 * @param subquery
-	 * @param params
-	 */
+     */
 	public static QueryCondition in(String subquery, Map<String, Object> params) {
 		return new Inlist(subquery, params);
 	}
@@ -472,9 +468,7 @@ public abstract class QueryConditions {
 	 * Create an in condition using a subquery (JPAQL) and params are applied to
 	 * subquery
 	 *
-	 * @param subquery
-	 * @param params
-	 */
+     */
 	public static QueryCondition in(String subquery, Map<String, Object> params, BooleanOp booleanOp) {
 		Inlist inlist = new Inlist(subquery, params);
 		inlist.setBooleanOperator(booleanOp);
@@ -596,8 +590,7 @@ public abstract class QueryConditions {
 	/**
 	 * Create a NOT in condition using a subquery (JPAQL)
 	 *
-	 * @param subquery
-	 */
+     */
 	public static QueryCondition notIn(String subquery) {
 		return new NotInList(subquery);
 	}
@@ -605,8 +598,7 @@ public abstract class QueryConditions {
 	/**
 	 * Create a NOT in condition using a subquery (JPAQL)
 	 *
-	 * @param subquery
-	 */
+     */
 	public static QueryCondition notIn(String subquery, BooleanOp booleanOp) {
 		NotInList notin = new NotInList(subquery);
 		notin.setBooleanOperator(booleanOp);
@@ -617,9 +609,7 @@ public abstract class QueryConditions {
 	 * Create a NOT in condition using a subquery (JPAQL) and params are applied
 	 * to subquery
 	 *
-	 * @param subquery
-	 * @param params
-	 */
+     */
 	public static QueryCondition notIn(String subquery, Map<String, Object> params) {
 		return new NotInList(subquery, params);
 	}
@@ -628,9 +618,7 @@ public abstract class QueryConditions {
 	 * Create a NOT in condition using a subquery (JPAQL) and params are applied
 	 * to subquery
 	 *
-	 * @param subquery
-	 * @param params
-	 */
+     */
 	public static QueryCondition notIn(String subquery, Map<String, Object> params, BooleanOp booleanOp) {
 		NotInList notin = new NotInList(subquery, params);
 		notin.setBooleanOperator(booleanOp);

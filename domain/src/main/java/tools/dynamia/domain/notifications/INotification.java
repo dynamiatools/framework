@@ -27,7 +27,6 @@ public interface INotification {
     /**
      * Non null uuid
      *
-     * @return
      */
     String getUuid();
 

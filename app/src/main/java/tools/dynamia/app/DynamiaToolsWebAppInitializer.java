@@ -16,6 +16,8 @@
  */
 package tools.dynamia.app;
 
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextListener;
@@ -24,8 +26,6 @@ import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatche
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
 import java.io.IOException;
 
 public class DynamiaToolsWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
@@ -50,14 +50,14 @@ public class DynamiaToolsWebAppInitializer extends AbstractAnnotationConfigDispa
 		if (!ObjectUtils.isEmpty(configClasses)) {
 			AnnotationConfigWebApplicationContext rootAppContext = new AnnotationConfigWebApplicationContext();
 			scanPackages(rootAppContext);
-			rootAppContext.register(configClasses);			
+			rootAppContext.register(configClasses);
 			return rootAppContext;
 		} else {
 			return null;
 		}
 	}
-	
-	
+
+
 
 	private void scanPackages(AnnotationConfigWebApplicationContext rootAppContext) {
 		try {

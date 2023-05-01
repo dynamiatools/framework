@@ -55,7 +55,6 @@ public class ActionEvent implements Serializable {
     /**
      * Data associated to the action
      *
-     * @return
      */
     public Object getData() {
         return data;
@@ -68,7 +67,6 @@ public class ActionEvent implements Serializable {
     /**
      * The action event source or origin.
      *
-     * @return
      */
     public Object getSource() {
         return source;

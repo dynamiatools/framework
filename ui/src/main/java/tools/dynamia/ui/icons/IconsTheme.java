@@ -45,8 +45,6 @@ public class IconsTheme {
     /**
      * Get the icon info using its logical name.
      *
-     * @param name
-     * @return
      */
     public Icon getIcon(String name) {
         if (name == null) {
@@ -76,9 +74,6 @@ public class IconsTheme {
      * Get the icon info using its logical name, if not found its find by
      * defaultName;
      *
-     * @param name
-     * @param defaultName
-     * @return
      */
     public Icon getIcon(String name, String defaultName) {
         Icon icon = getIcon(name);

@@ -29,7 +29,11 @@ import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.ui.icons.IconsTheme;
-import tools.dynamia.viewers.*;
+import tools.dynamia.viewers.Field;
+import tools.dynamia.viewers.FieldGroup;
+import tools.dynamia.viewers.IndexableComparator;
+import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.ViewLayout;
 import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.ui.DateRangebox;
@@ -42,7 +46,6 @@ import tools.dynamia.zk.viewers.form.FormView;
 import tools.dynamia.zk.viewers.form.FormViewRenderer;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static tools.dynamia.viewers.util.ViewersExpressionUtil.$s;
@@ -155,7 +158,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
             colspan = Integer.parseInt(field.getParams().get("span").toString());
             column.setAttribute(Viewers.ATTRIBUTE_COLSPAN, colspan);
 
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
         if (colspan == realCols) {
@@ -166,7 +169,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
             if (field.getParams().containsKey(Viewers.PARAM_SPAN + "-sm")) {
                 tabletColSpan = Integer.parseInt(field.getParams().get(Viewers.PARAM_SPAN + "-sm").toString());
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
 
@@ -237,7 +240,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
         int colspan = 1;
         try {
             colspan = Integer.parseInt(field.getParams().get(Viewers.PARAM_SPAN).toString());
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
         int empty = realCols - space;
@@ -346,7 +349,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
         if (layout != null) {
             try {
                 colNum = Integer.parseInt(layout.getParams().get(Viewers.LAYOUT_PARAM_COLUMNS).toString());
-            } catch (Exception e) {
+            } catch (Exception ignored) {
 
             }
         }

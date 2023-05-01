@@ -20,7 +20,14 @@ import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 /**
@@ -230,7 +237,6 @@ public class Module extends NavigationElement<Module> implements Serializable, C
     /**
      * Traverse all pages in all (NON dynamic) groups and subgroups
      *
-     * @param action
      */
     public void forEachPage(Consumer<Page> action) {
         var allGroups = new ArrayList<PageGroup>();

@@ -22,23 +22,7 @@ import java.io.Serializable;
 /**
  * Util class to hold values for ordering queries
  */
-public class OrderValue implements Serializable {
-    private final String label;
-    private final String value;
-
-    public OrderValue(String label, String value) {
-        super();
-        this.label = label;
-        this.value = value;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public String getValue() {
-        return value;
-    }
+public record OrderValue(String label, String value) implements Serializable {
 
     @Override
     public String toString() {

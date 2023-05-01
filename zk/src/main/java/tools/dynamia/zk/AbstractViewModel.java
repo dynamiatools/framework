@@ -52,8 +52,10 @@ public abstract class AbstractViewModel<T> extends AbstractService {
     }
 
 
+    @SuppressWarnings("unchecked")
     @Init
     public void initDefaults() {
+        //noinspection unchecked
         model = (T) ZKUtil.getExecutionEntity();
         parentWindow = ZKUtil.getExecutionParentWindow();
         afterInitDefaults();
@@ -71,13 +73,12 @@ public abstract class AbstractViewModel<T> extends AbstractService {
     /**
      * Enable if a question confirmation dialog when user close parent window. If parent window is null nothing happens
      *
-     * @param message
      */
     protected void enableOnCloseWindowConfirmation(String message) {
         if (parentWindow != null) {
             closeListener = new EventListener<>() {
                 @Override
-                public void onEvent(Event event) throws Exception {
+                public void onEvent(Event event) {
                     event.stopPropagation();
                     UIMessages.showQuestion(message, () -> {
                         parentWindow.removeEventListener(Events.ON_CLOSE, this);
@@ -140,8 +141,6 @@ public abstract class AbstractViewModel<T> extends AbstractService {
     /**
      * Return an execution argument
      *
-     * @param name
-     * @return
      */
     public Object getArg(String name) {
         return ZKUtil.getExecutionArg(name);
@@ -150,8 +149,6 @@ public abstract class AbstractViewModel<T> extends AbstractService {
     /**
      * Return a request parameter
      *
-     * @param name
-     * @return
      */
     public String getRequestParam(String name) {
         return Executions.getCurrent().getParameter(name);

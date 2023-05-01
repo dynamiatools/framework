@@ -17,11 +17,11 @@
 
 package tools.dynamia.domain.jpa;
 
+import jakarta.persistence.Transient;
 import tools.dynamia.domain.EntityUtilsProvider;
 import tools.dynamia.domain.query.Parameter;
 import tools.dynamia.integration.sterotypes.Provider;
 
-import jakarta.persistence.Transient;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 

@@ -22,7 +22,6 @@ import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -48,6 +47,7 @@ public class DesktopScope implements Scope {
             Object scopedObject = desktopScope.get(name);
             if (scopedObject == null) {
                 scopedObject = objectFactory.getObject();
+                //noinspection unchecked
                 desktopScope.put(name, scopedObject);
             }
             return scopedObject;
@@ -85,7 +85,7 @@ public class DesktopScope implements Scope {
 
     @Override
     public Object resolveContextualObject(String key) {
-        
+
         return null;
     }
 

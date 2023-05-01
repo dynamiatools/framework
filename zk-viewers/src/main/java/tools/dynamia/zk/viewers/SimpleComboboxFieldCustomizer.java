@@ -37,7 +37,7 @@ public class SimpleComboboxFieldCustomizer implements FieldCustomizer, Component
             Object items = field.getParams().get("items");
             if (items instanceof Map) {
                 field.setComponentCustomizer(SimpleComboboxFieldCustomizer.class.getName());
-                List<SimpleItem> itemsList = SimpleItem.parse((Map) items);
+                @SuppressWarnings("unchecked") List<SimpleItem> itemsList = SimpleItem.parse((Map) items);
                 field.getParams().put("simpleModel", itemsList);
             }
         }
@@ -45,7 +45,7 @@ public class SimpleComboboxFieldCustomizer implements FieldCustomizer, Component
 
     @Override
     public void cutomize(Field field, SimpleCombobox component) {
-        List<SimpleItem> itemList = (List<SimpleItem>) field.getParams().get("simpleModel");
+        @SuppressWarnings("unchecked") List<SimpleItem> itemList = (List<SimpleItem>) field.getParams().get("simpleModel");
         component.setSimpleModel(itemList);
     }
 }

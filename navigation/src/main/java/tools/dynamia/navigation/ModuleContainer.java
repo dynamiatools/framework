@@ -284,7 +284,7 @@ public final class ModuleContainer implements Serializable {
             try {
                 String[] p = path.split("/");
                 pathModule = getModuleById(p[0]);
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         } else {
             pathModule = getModuleById(path);

@@ -184,6 +184,7 @@ public class EntityReferencePickerBox extends Bandbox implements CanBeReadonly {
 
 
         if (resultTable.getModel() instanceof AbstractListModel model) {
+            //noinspection unchecked
             model.addToSelection(reference);
         }
     }
@@ -199,7 +200,7 @@ public class EntityReferencePickerBox extends Bandbox implements CanBeReadonly {
         }
 
         if (repository != null) {
-            EntityReference reference = repository.load(id);
+            @SuppressWarnings("unchecked") EntityReference reference = repository.load(id);
             setSelected(reference);
         }
     }
@@ -271,7 +272,7 @@ public class EntityReferencePickerBox extends Bandbox implements CanBeReadonly {
 
     @Override
     public boolean isReadonly() {
-        return isReadonly();
+        return super.isReadonly();
     }
 
     @Override

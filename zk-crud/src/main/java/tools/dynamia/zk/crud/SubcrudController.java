@@ -72,7 +72,7 @@ public class SubcrudController<E> extends CrudController<E> implements SubcrudCo
 
     private void inspectParentChildrens() {
         if (parent != null && DomainUtils.findEntityId(parent) == null && childrenName != null) {
-            Collection<E> children = (Collection<E>) BeanUtils.invokeGetMethod(parent, childrenName);
+            @SuppressWarnings("unchecked") Collection<E> children = (Collection<E>) BeanUtils.invokeGetMethod(parent, childrenName);
             if (children != null) {
                 for (E child : children) {
                     if (DomainUtils.findEntityId(child) == null) {
@@ -94,7 +94,8 @@ public class SubcrudController<E> extends CrudController<E> implements SubcrudCo
         if (DomainUtils.findEntityId(parent) != null) {
             super.query();
         } else {
-            setQueryResult(new ListDataSet(Collections.EMPTY_LIST));
+            //noinspection unchecked
+            setQueryResult(new ListDataSet(Collections.emptyList()));
         }
     }
 
@@ -161,14 +162,13 @@ public class SubcrudController<E> extends CrudController<E> implements SubcrudCo
     /**
      * This is like: parent.getChildren().add(child);
      *
-     * @param newChild
-     * @param parent
      */
     protected void relateParentChild(E newChild, Object parent) {
         try {
 
             Object object = BeanUtils.invokeGetMethod(parent, childrenName);
             if (object != null && object instanceof Collection children) {
+                //noinspection unchecked
                 children.add(newChild);
 
             }
@@ -184,8 +184,6 @@ public class SubcrudController<E> extends CrudController<E> implements SubcrudCo
     /**
      * This is like: child.setParent(value)
      *
-     * @param newChild
-     * @param parent
      */
     protected void relateChildParent(E newChild, Object parent) {
         try {
@@ -193,7 +191,7 @@ public class SubcrudController<E> extends CrudController<E> implements SubcrudCo
         } catch (ReflectionException e) {
             if (e.getCause().getClass() == NoSuchMethodException.class) {
                 if (parent instanceof ValueWrapper) {
-                    parent = ((ValueWrapper) parent).getValue();
+                    parent = ((ValueWrapper) parent).value();
                 }
 
                 if (parent.getClass().getSuperclass() != Object.class) {
@@ -218,6 +216,7 @@ public class SubcrudController<E> extends CrudController<E> implements SubcrudCo
             defaultValues.addAll(toBeCreatedEntities);
             defaultValues.addAll(toBeUpdatedEntities);
 
+            //noinspection unchecked
             tableView.setDefaultValue(defaultValues);
         }
 
@@ -281,8 +280,9 @@ public class SubcrudController<E> extends CrudController<E> implements SubcrudCo
     private void fireCrudListener() {
         for (CrudServiceListener listener : Containers.get().findObjects(CrudServiceListener.class)) {
             try {
+                //noinspection unchecked
                 listener.beforeCreate(getEntity());
-            } catch (ClassCastException e) {
+            } catch (ClassCastException ignored) {
             }
         }
     }

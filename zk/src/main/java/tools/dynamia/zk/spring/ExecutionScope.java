@@ -22,7 +22,6 @@ import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,6 +48,7 @@ public class ExecutionScope implements Scope {
             Object scopedObject = executionScope.get(name);
             if (scopedObject == null) {
                 scopedObject = objectFactory.getObject();
+                //noinspection unchecked
                 executionScope.put(name, scopedObject);
             }
             return scopedObject;

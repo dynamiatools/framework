@@ -60,7 +60,7 @@ public class GridExporter {
         } catch (Exception e) {
             try {
                 return BeanUtils.invokeGetMethod(rowcell, "label");
-            } catch (Exception e2) {
+            } catch (Exception ignored) {
             }
 
         }

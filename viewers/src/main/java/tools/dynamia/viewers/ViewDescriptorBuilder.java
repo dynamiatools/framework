@@ -27,6 +27,7 @@ import java.util.Map;
  *
  * @author Mario A. Serrano Leones
  */
+@SuppressWarnings("unchecked")
 public class ViewDescriptorBuilder {
 
     /**
@@ -145,6 +146,7 @@ public class ViewDescriptorBuilder {
      */
     public ViewDescriptorBuilder params(Object... keyValue) {
         Map params = MapBuilder.put(keyValue);
+        //noinspection unchecked
         descriptor.getParams().putAll(params);
         return this;
     }
@@ -155,8 +157,10 @@ public class ViewDescriptorBuilder {
      * @param keyValue the key value
      * @return the view descriptor builder
      */
+    @SuppressWarnings("unchecked")
     public ViewDescriptorBuilder layout(Object... keyValue) {
         Map params = MapBuilder.put(keyValue);
+        //noinspection unchecked
         descriptor.getLayout().getParams().putAll(params);
         return this;
     }

@@ -19,7 +19,6 @@ package tools.dynamia.zk;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.util.Composer;
-import org.zkoss.zk.ui.util.DesktopInit;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.Containers;
@@ -33,7 +32,7 @@ public class ComposerListenerDelegator implements Composer {
 
 
     @Override
-    public void doAfterCompose(Component comp) throws Exception {
+    public void doAfterCompose(Component comp) {
         Containers.get().findObjects(ComposerListener.class).forEach(l -> l.afterCompose(comp));
     }
 }

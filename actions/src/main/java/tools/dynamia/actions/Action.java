@@ -19,7 +19,6 @@ package tools.dynamia.actions;
 import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 

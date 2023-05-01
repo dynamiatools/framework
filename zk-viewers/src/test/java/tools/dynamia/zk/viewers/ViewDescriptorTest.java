@@ -31,7 +31,9 @@ import tools.dynamia.viewers.ViewDescriptorFactory;
 import tools.dynamia.viewers.impl.DefaultViewDescriptorFactory;
 import tools.dynamia.viewers.impl.YamlViewDescriptorReader;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  *

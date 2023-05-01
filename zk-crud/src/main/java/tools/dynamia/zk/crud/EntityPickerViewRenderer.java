@@ -35,7 +35,7 @@ public class EntityPickerViewRenderer implements ViewRenderer {
 
         try {
             BeanUtils.setupBean(entityPickerBox, descriptor.getParams());
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         customize(entityPickerBox);
         return new ZKWrapperView(entityPickerBox);

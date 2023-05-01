@@ -179,7 +179,7 @@ public class MathFunction {
                 if (hasNumber) {
                     final Double numb = Double.valueOf(number);
                     final String new_f_x = nextFunction(f_x.substring(i + 1));
-                    value = StrictMath.pow(numb.doubleValue(), eval(new_f_x, xi));
+                    value = StrictMath.pow(numb, eval(new_f_x, xi));
                     i += new_f_x.length();
                     hasNumber = false;
                     number = "";
@@ -211,67 +211,57 @@ public class MathFunction {
 
                 final String new_f_x = f_x.substring(i + 1, nextBracket(f_x));
                 if (hasFunction) {
-                    if (Math.SIN.equals(function)) {
-
-                        if (degree) {
-                            value = StrictMath.sin(StrictMath.toRadians(eval(new_f_x, xi)));
-                        } else {
-                            value = StrictMath.sin(eval(new_f_x, xi));
+                    switch (function) {
+                        case Math.SIN -> {
+                            if (degree) {
+                                value = StrictMath.sin(StrictMath.toRadians(eval(new_f_x, xi)));
+                            } else {
+                                value = StrictMath.sin(eval(new_f_x, xi));
+                            }
                         }
-
-                    } else if (Math.COS.equals(function)) {
-
-                        if (degree) {
-                            value = StrictMath.cos(StrictMath.toRadians(eval(new_f_x, xi)));
-                        } else {
-                            value = StrictMath.cos(eval(new_f_x, xi));
+                        case Math.COS -> {
+                            if (degree) {
+                                value = StrictMath.cos(StrictMath.toRadians(eval(new_f_x, xi)));
+                            } else {
+                                value = StrictMath.cos(eval(new_f_x, xi));
+                            }
                         }
-
-                    } else if (Math.TAN.equals(function)) {
-
-                        if (degree) {
-                            value = StrictMath.tan(StrictMath.toRadians(eval(new_f_x, xi)));
-                        } else {
-                            value = StrictMath.tan(eval(new_f_x, xi));
+                        case Math.TAN -> {
+                            if (degree) {
+                                value = StrictMath.tan(StrictMath.toRadians(eval(new_f_x, xi)));
+                            } else {
+                                value = StrictMath.tan(eval(new_f_x, xi));
+                            }
                         }
-
-                    } else if (Math.SINH.equals(function)) {
-                        value = StrictMath.sinh(eval(new_f_x, xi));
-
-                    } else if (Math.COSH.equals(function)) {
-                        value = StrictMath.cosh(eval(new_f_x, xi));
-
-                    } else if (Math.TANH.equals(function)) {
-                        value = StrictMath.tanh(eval(new_f_x, xi));
-
-                    } else if (Math.ASIN.equals(function)) {
-                        if (degree) {
-                            value = StrictMath.asin(eval(new_f_x, xi)) * (180 / StrictMath.PI);
-                        } else {
-                            value = StrictMath.asin(eval(new_f_x, xi));
+                        case Math.SINH -> value = StrictMath.sinh(eval(new_f_x, xi));
+                        case Math.COSH -> value = StrictMath.cosh(eval(new_f_x, xi));
+                        case Math.TANH -> value = StrictMath.tanh(eval(new_f_x, xi));
+                        case Math.ASIN -> {
+                            if (degree) {
+                                value = StrictMath.asin(eval(new_f_x, xi)) * (180 / StrictMath.PI);
+                            } else {
+                                value = StrictMath.asin(eval(new_f_x, xi));
+                            }
                         }
-                    } else if (Math.ACOS.equals(function)) {
-                        if (degree) {
-                            value = StrictMath.acos(eval(new_f_x, xi)) * (180 / StrictMath.PI);
-                        } else {
-                            value = StrictMath.acos(eval(new_f_x, xi));
+                        case Math.ACOS -> {
+                            if (degree) {
+                                value = StrictMath.acos(eval(new_f_x, xi)) * (180 / StrictMath.PI);
+                            } else {
+                                value = StrictMath.acos(eval(new_f_x, xi));
+                            }
                         }
-                    } else if (Math.ATAN.equals(function)) {
-                        if (degree) {
-                            value = StrictMath.atan(eval(new_f_x, xi)) * (180 / StrictMath.PI);
-                        } else {
-                            value = StrictMath.atan(eval(new_f_x, xi));
+                        case Math.ATAN -> {
+                            if (degree) {
+                                value = StrictMath.atan(eval(new_f_x, xi)) * (180 / StrictMath.PI);
+                            } else {
+                                value = StrictMath.atan(eval(new_f_x, xi));
+                            }
                         }
-                    } else if (Math.LN.equals(function)) {
-                        value = StrictMath.log(eval(new_f_x, xi));
-                    } else if (Math.LOG.equals(function)) {
-                        value = StrictMath.log10(eval(new_f_x, xi));
-                    } else if (Math.SQRT.equals(function)) {
-                        value = StrictMath.sqrt(eval(new_f_x, xi));
-                    } else if (Math.CBRT.equals(function)) {
-                        value = StrictMath.cbrt(eval(new_f_x, xi));
-                    } else {
-                        throw new MathCalculationException("The function is not well-formed");
+                        case Math.LN -> value = StrictMath.log(eval(new_f_x, xi));
+                        case Math.LOG -> value = StrictMath.log10(eval(new_f_x, xi));
+                        case Math.SQRT -> value = StrictMath.sqrt(eval(new_f_x, xi));
+                        case Math.CBRT -> value = StrictMath.cbrt(eval(new_f_x, xi));
+                        default -> throw new MathCalculationException("The function is not well-formed");
                     }
 
                     hasFunction = false;
@@ -384,8 +374,7 @@ public class MathFunction {
      * @return true, if is valid character
      */
     private boolean isValidCharacter(final char character) {
-        boolean result = character >= 'a' && character <= 'z';
-        return result;
+        return character >= 'a' && character <= 'z';
     }
 
     /**
@@ -395,8 +384,7 @@ public class MathFunction {
      * @return true, if is valid numeric and character
      */
     private boolean isValidNumericAndCharacter(final char character) {
-        boolean result = (character >= 'a' && character <= 'z') || (character >= '0' && character <= '9');
-        return result;
+        return (character >= 'a' && character <= 'z') || (character >= '0' && character <= '9');
     }
 
     /**

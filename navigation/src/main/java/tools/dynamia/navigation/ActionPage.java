@@ -35,12 +35,10 @@ public class ActionPage extends Page {
         String name = StringUtils.addSpaceBetweenWords(actionClass.getSimpleName());
         String id = actionClass.getSimpleName();
 
-        if (actionClass != null) {
-            Action action = Containers.get().findObject(actionClass);
-            if (action != null) {
-                name = action.getName();
-                id = action.getId();
-            }
+        Action action = Containers.get().findObject(actionClass);
+        if (action != null) {
+            name = action.getName();
+            id = action.getId();
         }
 
         setName(name);

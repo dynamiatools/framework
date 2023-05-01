@@ -63,7 +63,7 @@ public class EntityReferenceFieldCustomizer implements FieldCustomizer {
 				try {
 					java.lang.reflect.Field classField = BeanUtils.getField(beanClass, field.getName());
 					return classField.getAnnotation(Reference.class);
-				} catch (NoSuchFieldException e) {
+				} catch (NoSuchFieldException ignored) {
 
 				}
 			}

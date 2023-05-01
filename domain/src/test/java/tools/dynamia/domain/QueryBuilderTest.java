@@ -23,7 +23,6 @@ import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.util.QueryBuilder;
 
-import java.util.Map;
 import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;

@@ -16,6 +16,7 @@
  */
 package tools.dynamia.domain.jpa;
 
+import jakarta.persistence.*;
 import org.hibernate.Hibernate;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.Identifiable;
@@ -25,7 +26,6 @@ import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.io.converters.Converters;
 
-import jakarta.persistence.*;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.List;
@@ -176,10 +176,6 @@ public abstract class JpaUtils {
     /**
      * Create an entity graph that include all relationships
      *
-     * @param type
-     * @param em
-     * @param <T>
-     * @return
      */
     public static <T> EntityGraph<T> createEntityGraph(Class<T> type, EntityManager em) {
         var graph = em.createEntityGraph(type);
@@ -226,7 +222,6 @@ public abstract class JpaUtils {
     /**
      * Initialize all entity properties, incluing toOne and toMany asocciation. Should be called inside a Transaction
      *
-     * @param entity
      */
     public static void initializeEntity(Object entity) {
         if (entity == null) {

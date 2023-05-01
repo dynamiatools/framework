@@ -20,23 +20,36 @@ package tools.dynamia.zk.viewers.table;
 
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.SortEvent;
-import org.zkoss.zul.*;
+import org.zkoss.zul.Auxhead;
+import org.zkoss.zul.Auxheader;
+import org.zkoss.zul.FieldComparator;
+import org.zkoss.zul.Frozen;
+import org.zkoss.zul.Listfoot;
+import org.zkoss.zul.Listhead;
+import org.zkoss.zul.Listheader;
+import org.zkoss.zul.ListitemRenderer;
+import org.zkoss.zul.Style;
 import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.commons.BeanUtils;
-import tools.dynamia.commons.MapBuilder;
+import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.domain.fx.CrudServiceMultiFunctionProcessor;
-import tools.dynamia.domain.fx.Functions;
 import tools.dynamia.domain.fx.MultiFunctionProcessor;
-import tools.dynamia.commons.LocalizedMessagesProvider;
-import tools.dynamia.viewers.*;
+import tools.dynamia.viewers.Field;
+import tools.dynamia.viewers.FieldGroup;
+import tools.dynamia.viewers.View;
+import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.ViewRenderer;
+import tools.dynamia.viewers.ViewRendererException;
 import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
-import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
 import tools.dynamia.zk.viewers.ZKViewersUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Mario A. Serrano Leones
@@ -86,6 +99,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
                 Map cfg = (Map) descriptor.getParams().get(Viewers.PARAM_ENUM_COLORS);
                 Map colors = (Map) cfg.get(Viewers.PARAM_COLORS);
 
+                //noinspection unchecked
                 colors.forEach((name, color) -> {
                     Style style = new Style();
                     style.setId("tableViewEnumStyle" + name);
@@ -163,6 +177,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
                 try {
                     Map headerParams = (Map) field.getParams().get("header");
                     if (headerParams != null) {
+                        //noinspection unchecked
                         BeanUtils.setupBean(header, headerParams);
 
                         if (headerParams.containsKey(Viewers.PARAM_BINDINGS)) {
@@ -183,6 +198,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
                             BeanSorter sorter = new BeanSorter();
                             sorter.setAscending(sortEvent.isAscending());
                             sorter.setColumnName(field.getName());
+                            //noinspection unchecked
                             sorter.sort(data);
                             table.setValue(data);
                         }
@@ -211,6 +227,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
         header.setParent(head);
         Map actionsHeader = (Map) descriptor.getParams().get("actionsHeader");
         if (actionsHeader != null) {
+            //noinspection unchecked
             BeanUtils.setupBean(header, actionsHeader);
         }
 
@@ -248,6 +265,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
                     Map footerParams = (Map) field.getParams().get(Viewers.PARAM_FOOTER);
                     if (footerParams != null) {
                         footRequired = true;
+                        //noinspection unchecked
                         BeanUtils.setupBean(footer, footerParams);
                         if (footer.getFunctionConverter() == null && field.getParams().containsKey(Viewers.PARAM_CONVERTER)) {
                             footer.setFunctionConverter((String) field.getParams().get(Viewers.PARAM_CONVERTER));

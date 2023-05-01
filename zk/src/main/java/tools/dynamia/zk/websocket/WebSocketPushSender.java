@@ -41,8 +41,6 @@ public abstract class WebSocketPushSender {
      * Send a push command to client desktop. The command its returned to the server as a ZK Global Command. You should
      * have a ViemModel that receive this global command
      *
-     * @param desktop
-     * @param command
      * @return true if command is sended successfull. Check log for false response
      */
     public static boolean sendPushCommand(Desktop desktop, String command) {
@@ -70,7 +68,6 @@ public abstract class WebSocketPushSender {
      * Send a push command to current client desktop. The command its returned to the server as a ZK Global Command. You should
      * have a ViemModel that receive this global command
      *
-     * @param command
      * @return true if command is sended successfull. Check log for false response
      */
     public static boolean sendPushCommand(String command) {
@@ -80,8 +77,6 @@ public abstract class WebSocketPushSender {
     /**
      * Send a push command to all connected sessions
      *
-     * @param command
-     * @return
      */
     public static void broadcastCommand(String command) {
         WebSocketGlobalCommandHandler handler = Containers.get().findObject(WebSocketGlobalCommandHandler.class);

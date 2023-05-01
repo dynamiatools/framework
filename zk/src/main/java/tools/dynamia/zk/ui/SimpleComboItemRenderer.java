@@ -28,7 +28,7 @@ import tools.dynamia.commons.BeanUtils;
 public class SimpleComboItemRenderer implements ComboitemRenderer<Object> {
 
     @Override
-    public void render(Comboitem comboitem, Object o, int i) throws Exception {
+    public void render(Comboitem comboitem, Object o, int i) {
         comboitem.setLabel(BeanUtils.getInstanceName(o));
         comboitem.setValue(o);
 

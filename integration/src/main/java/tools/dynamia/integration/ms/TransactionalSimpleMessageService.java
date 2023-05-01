@@ -1,8 +1,6 @@
 package tools.dynamia.integration.ms;
 
 import org.springframework.transaction.annotation.Transactional;
-import tools.dynamia.integration.ms.Message;
-import tools.dynamia.integration.ms.SimpleMessageService;
 
 @Transactional
 public class TransactionalSimpleMessageService extends SimpleMessageService {

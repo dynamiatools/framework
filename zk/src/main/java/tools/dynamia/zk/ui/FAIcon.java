@@ -41,12 +41,8 @@ public class FAIcon extends Icon {
         String alt = "";
 
         switch (size) {
-            case LARGE:
-                fontSize = " fa-2x";
-                break;
-            case NORMAL:
-                fontSize = " fa-lg";
-                break;
+            case LARGE -> fontSize = " fa-2x";
+            case NORMAL -> fontSize = " fa-lg";
         }
 
         if (component instanceof Menuitem) {

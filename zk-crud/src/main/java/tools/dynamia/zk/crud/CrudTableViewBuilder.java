@@ -142,6 +142,7 @@ public class CrudTableViewBuilder implements CrudDataSetViewBuilder {
                 Object data = crudView.getController().getQueryResult().getData();
                 if (data instanceof List) {
                     BeanSorter sorter = crudView.getController().getSorter();
+                    //noinspection unchecked
                     sorter.sort((List) data);
                     crudView.getController().setQueryResult((List) data);
                 }

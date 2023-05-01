@@ -325,34 +325,22 @@ public abstract class AbstractCrudService implements CrudService {
             for (CrudServiceListener listener : listeners) {
                 try {
                     switch (type) {
-                        case BEFORE_CREATE:
-                            listener.beforeCreate(value);
-                            break;
-                        case AFTER_CREATE:
-                            listener.afterCreate(value);
-                            break;
-                        case BEFORE_UPDATE:
-                            listener.beforeUpdate(value);
-                            break;
-                        case AFTER_UPDATE:
-                            listener.afterUpdate(value);
-                            break;
-                        case BEFORE_DELETE:
-                            listener.beforeDelete(value);
-                            break;
-                        case AFTER_DELETE:
-                            listener.afterDelete(value);
-                            break;
-                        case BEFORE_QUERY:
+                        case BEFORE_CREATE -> listener.beforeCreate(value);
+                        case AFTER_CREATE -> listener.afterCreate(value);
+                        case BEFORE_UPDATE -> listener.beforeUpdate(value);
+                        case AFTER_UPDATE -> listener.afterUpdate(value);
+                        case BEFORE_DELETE -> listener.beforeDelete(value);
+                        case AFTER_DELETE -> listener.afterDelete(value);
+                        case BEFORE_QUERY -> {
                             if (value != null && value instanceof QueryParameters) {
                                 listener.beforeQuery((QueryParameters) value);
                             }
-                            break;
-                        case AFTER_QUERY:
+                        }
+                        case AFTER_QUERY -> {
                             if (value instanceof List) {
                                 listener.afterQuery((List) value);
                             }
-                            break;
+                        }
                     }
                 } catch (ClassCastException e) {
                     // Ignore, this error is because generics

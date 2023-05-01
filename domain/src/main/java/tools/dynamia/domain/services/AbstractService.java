@@ -17,13 +17,13 @@
 
 package tools.dynamia.domain.services;
 
+import jakarta.validation.ConstraintViolation;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.domain.query.Parameters;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.integration.Containers;
 
-import jakarta.validation.ConstraintViolation;
 import java.util.Collections;
 import java.util.Set;
 
@@ -40,19 +40,12 @@ public abstract class AbstractService {
             crudService = DomainUtils.lookupCrudService();
         }
 
-        if (crudService == null) {
-            throw new NullPointerException("Cannot lookup an instance of " + CrudService.class);
-        }
-
         return crudService;
     }
 
     protected GraphCrudService graphCrudService() {
         if (graphCrudService == null) {
             graphCrudService = DomainUtils.lookupGraphCrudService();
-        }
-        if (graphCrudService == null) {
-            throw new NullPointerException("Cannot lookup an instance of " + GraphCrudService.class);
         }
         return graphCrudService;
     }
@@ -81,7 +74,6 @@ public abstract class AbstractService {
 
     /**
      * Throw a {@link tools.dynamia.domain.ValidationError} if some invalid property is found
-     * @param object
      */
     protected void validate(Object object) {
         ValidatorService service = Containers.get().findObject(ValidatorService.class);
@@ -92,9 +84,6 @@ public abstract class AbstractService {
 
     /**
      * Validate all properties from object
-     * @param object
-     * @param <T>
-     * @return
      */
     protected <T> Set<ConstraintViolation<T>> validateAll(T object) {
         ValidatorService service = Containers.get().findObject(ValidatorService.class);

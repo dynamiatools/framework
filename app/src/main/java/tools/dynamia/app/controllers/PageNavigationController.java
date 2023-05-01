@@ -25,7 +25,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import tools.dynamia.app.PageNavigationInterceptor;
 import tools.dynamia.integration.Containers;
-import tools.dynamia.navigation.*;
+import tools.dynamia.navigation.NavigationManager;
+import tools.dynamia.navigation.NavigationNotAllowedException;
+import tools.dynamia.navigation.NavigationRestrictions;
+import tools.dynamia.navigation.Page;
+import tools.dynamia.navigation.PageNotFoundException;
 
 import java.io.File;
 import java.util.HashMap;

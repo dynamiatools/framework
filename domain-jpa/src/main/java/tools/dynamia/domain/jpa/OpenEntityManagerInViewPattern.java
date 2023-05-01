@@ -16,6 +16,9 @@
  */
 package tools.dynamia.domain.jpa;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.orm.jpa.EntityManagerHolder;
@@ -25,10 +28,6 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.domain.OpenPersistenceInViewProvider;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Provider;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.PersistenceException;
 
 
 /**
@@ -47,7 +46,7 @@ public class OpenEntityManagerInViewPattern implements OpenPersistenceInViewProv
     /**
      * The logger.
      */
-    protected LoggingService logger = new SLF4JLoggingService(OpenEntityManagerInViewPattern.class);
+    protected final LoggingService logger = new SLF4JLoggingService(OpenEntityManagerInViewPattern.class);
     private EntityManagerFactory emf;
 
     /**

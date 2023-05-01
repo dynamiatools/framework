@@ -16,9 +16,12 @@
  */
 package tools.dynamia.domain.jpa;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Version;
 import tools.dynamia.domain.AbstractEntity;
-
-import jakarta.persistence.*;
 
 /**
  * The Class SimpleEntity.

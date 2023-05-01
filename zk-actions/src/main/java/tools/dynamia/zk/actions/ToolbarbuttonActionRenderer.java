@@ -25,8 +25,6 @@ import tools.dynamia.commons.Messages;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.zk.util.ZKUtil;
 
-import java.util.Map;
-
 public class ToolbarbuttonActionRenderer extends ZKActionRenderer<Toolbarbutton> {
 
     private boolean showlabels;

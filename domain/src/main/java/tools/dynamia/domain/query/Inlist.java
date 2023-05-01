@@ -88,8 +88,7 @@ public class Inlist<T> extends AbstractQueryCondition<List<T>> {
 	/**
 	 * Create an inlist condition using a subquery (JPAQL)
 	 *
-	 * @param subquery
-	 */
+     */
 	public Inlist(String subquery) {
 		this.subquery = subquery;
 	}
@@ -98,9 +97,7 @@ public class Inlist<T> extends AbstractQueryCondition<List<T>> {
 	 * Create an inlist condition using a subquery (JPAQL) and params are
 	 * applied to subquery
 	 *
-	 * @param subquery
-	 * @param params
-	 */
+     */
 	public Inlist(String subquery, Map<String, Object> params) {
 		this.subquery = subquery;
 		this.subqueryParams = params;

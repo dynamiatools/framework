@@ -1,6 +1,5 @@
 package tools.dynamia.domain;
 
-import org.junit.Assert;
 import org.junit.Test;
 import tools.dynamia.domain.contraints.EmailValidator;
 
@@ -11,7 +10,7 @@ import static org.junit.Assert.assertTrue;
 
 public class EmailValidatorTest {
 
-    List<String> validEmails = List.of(
+    final List<String> validEmails = List.of(
             "email+address@domain.com.co",
             "email+address+long+ago@domain.com.co",
             "dynamia@mydomain.co",
@@ -23,7 +22,7 @@ public class EmailValidatorTest {
             "ThisIsAnEmail@DOMAIN.dot.com"
     );
 
-    List<String> invalidEmails = List.of(
+    final List<String> invalidEmails = List.of(
             "some@gmal.com.",
             "myemail.@.com",
             "somethis",

@@ -50,6 +50,7 @@ public class BeanMap extends HashMap<String, Object> implements Serializable {
     }
 
     public <T> T get(String key) {
+        //noinspection unchecked
         return (T) super.get(key);
     }
 

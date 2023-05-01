@@ -17,11 +17,11 @@
 
 package tools.dynamia.zk.crud;
 
-import tools.dynamia.zk.crud.constraints.Required;
 import org.zkoss.zul.Constraint;
 import tools.dynamia.integration.sterotypes.Provider;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.FieldCustomizer;
+import tools.dynamia.zk.crud.constraints.Required;
 
 @Provider
 public class RequiredFieldCustomizer implements FieldCustomizer {

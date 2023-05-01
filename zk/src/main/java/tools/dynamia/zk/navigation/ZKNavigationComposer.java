@@ -27,7 +27,11 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.impl.LabelElement;
 import org.zkoss.zul.impl.XulElement;
 import tools.dynamia.commons.BeanUtils;
-import tools.dynamia.navigation.*;
+import tools.dynamia.navigation.ActionPage;
+import tools.dynamia.navigation.NavigationElement;
+import tools.dynamia.navigation.Page;
+import tools.dynamia.navigation.PageEvent;
+import tools.dynamia.navigation.WorkspaceViewBuilder;
 import tools.dynamia.zk.util.ZKUtil;
 import workspace.builders.TabPanel;
 
@@ -69,20 +73,20 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
         if (evt != null && ZKUtil.isInEventListener()) {
             String name = evt.getName();
             switch (name) {
-                case ZKNavigationManager.ON_PAGE_CHANGED:
+                case ZKNavigationManager.ON_PAGE_CHANGED -> {
                     desktopCurrentPage = evt.getPage();
                     update(evt.getParams());
-                    break;
-                case ZKNavigationManager.ON_PAGE_CLOSED:
+                }
+                case ZKNavigationManager.ON_PAGE_CLOSED -> {
                     Page page = evt.getPage();
                     getWorkspaceViewBuilder().close(page);
                     ZKNavigationManager.getInstance().notifyPageClose(page);
                     if (page != null && page.equals(desktopCurrentPage)) {
                         desktopCurrentPage = null;
                     }
-                    break;
-                default:
-                    break;
+                }
+                default -> {
+                }
             }
         }
     }
@@ -202,6 +206,7 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
             } else {
                 builder = TabPanel.class;
             }
+            //noinspection unchecked
             workspaceViewBuilder = (WorkspaceViewBuilder) BeanUtils.newInstance(builder);
             workspaceViewBuilder.init(workspace);
             workspaceViewBuilder.build(desktopCurrentPage);

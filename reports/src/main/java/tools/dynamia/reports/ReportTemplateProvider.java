@@ -29,6 +29,7 @@ public interface ReportTemplateProvider<T> {
         for (ReportTemplateProvider tp : Containers.get().findObjects(ReportTemplateProvider.class)) {
 
             try {
+                //noinspection unchecked
                 template = tp.getTemplate(object);
                 if (template != null) {
                     break;

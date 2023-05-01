@@ -29,7 +29,9 @@ public abstract class AbstractExtendedMVListener implements MultiViewListener {
         this.beanProperty = property;
     }
 
+    @SuppressWarnings("unchecked")
     public void setBeanClass(String className) throws ClassNotFoundException {
+        //noinspection unchecked
         this.beanClass = (Class<AbstractEntity>) Class.forName(className);
     }
 

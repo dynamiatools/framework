@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Class cache for reflections process
  */
-public class ClassReflectionInfo {
+public record ClassReflectionInfo(Class<?> targetClass, List<PropertyInfo> properties) {
 
     private static final SimpleCache<Class<?>, ClassReflectionInfo> CACHE = new SimpleCache<>();
 
@@ -17,34 +17,23 @@ public class ClassReflectionInfo {
     }
 
     public static void addToCache(ClassReflectionInfo info) {
-        CACHE.add(info.getTargetClass(), info);
+        CACHE.add(info.targetClass(), info);
     }
 
-    public static void clearCache(Class<?> targetClass){
+    public static void clearCache(Class<?> targetClass) {
         CACHE.remove(targetClass);
     }
-
-    private final Class<?> targetClass;
-    private final List<PropertyInfo> properties;
 
     public ClassReflectionInfo(Class<?> targetClass, List<PropertyInfo> properties) {
         this.targetClass = targetClass;
         this.properties = Collections.unmodifiableList(properties);
     }
 
-    public List<PropertyInfo> getProperties() {
-        return properties;
-    }
-
-    public Class<?> getTargetClass() {
-        return targetClass;
-    }
-
     public String getName() {
-        return getTargetClass().getName();
+        return targetClass().getName();
     }
 
     public String getSimpleName() {
-        return getTargetClass().getSimpleName();
+        return targetClass().getSimpleName();
     }
 }

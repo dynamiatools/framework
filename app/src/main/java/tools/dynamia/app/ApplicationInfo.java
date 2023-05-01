@@ -60,7 +60,9 @@ public class ApplicationInfo implements Serializable, PropertiesContainer {
     private final Map<String, String> systemProperties;
     private final Map<String, String> systemEnvironment;
 
+    @SuppressWarnings("unchecked")
     private ApplicationInfo() {
+        //noinspection unchecked
         systemProperties = new HashMap(System.getProperties());
         systemEnvironment = System.getenv();
         properties = new HashMap<>();
@@ -193,7 +195,7 @@ public class ApplicationInfo implements Serializable, PropertiesContainer {
                     String value = prop.getProperty(key);
                     key = key.substring("prop.".length());
                     app.addProperty(key, value);
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             }
         });

@@ -43,20 +43,12 @@ public interface ViewDescriptorFactory {
     /**
      * Gets the descriptor. If descriptor is not found a new one may be created
      *
-     * @param beanClass
-     * @param device
-     * @param viewType
-     * @return
      */
     ViewDescriptor getDescriptor(Class beanClass, String device, String viewType);
 
     /**
      * find view descriptor, return null if not found.
      *
-     * @param beanClass
-     * @param device
-     * @param viewType
-     * @return
      */
     ViewDescriptor findDescriptor(Class beanClass, String device, String viewType);
 

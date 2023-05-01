@@ -16,6 +16,7 @@
  */
 package tools.dynamia.domain.jpa;
 
+import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +30,6 @@ import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.integration.Containers;
 
-import jakarta.persistence.EntityManager;
 import java.io.Serializable;
 import java.util.List;
 
@@ -42,6 +42,7 @@ public class JpaCrudServiceRepository<T, ID extends Serializable> extends Simple
 
     public JpaCrudServiceRepository(JpaEntityInformation entityInformation,
                                     EntityManager entityManager) {
+        //noinspection unchecked
         super(entityInformation, entityManager);
 
     }
@@ -62,6 +63,7 @@ public class JpaCrudServiceRepository<T, ID extends Serializable> extends Simple
         QueryParameters qp = new QueryParameters(paginator);
         PagedList<T> page = ((PagedList<T>) crudService.find(getDomainClass(), qp));
 
+        //noinspection unchecked
         return new PageImpl(page.getDataSource().getPageData(), pgbl, paginator.getTotalSize());
     }
 

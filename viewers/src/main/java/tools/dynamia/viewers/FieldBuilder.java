@@ -105,6 +105,7 @@ public class FieldBuilder {
      */
     public FieldBuilder params(Object... keyValue) {
         Map params = MapBuilder.put(keyValue);
+        //noinspection unchecked
         field.getParams().putAll(params);
 
         return this;

@@ -28,8 +28,6 @@ public interface ActionRestriction {
     /**
      * Return true if access to action is granted, false is access is denied or null if access is unknow to let other {@link ActionRestriction} check
      *
-     * @param action
-     * @return
      */
     Boolean actionAllowed(Action action);
 }

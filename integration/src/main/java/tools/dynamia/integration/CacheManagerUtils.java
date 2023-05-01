@@ -17,8 +17,6 @@ public abstract class CacheManagerUtils {
     /**
      * Clear Cache
      *
-     * @param cacheName
-     * @return
      */
     public static boolean clearCache(String cacheName) {
         var cache = getCache(cacheName);
@@ -32,7 +30,6 @@ public abstract class CacheManagerUtils {
     /**
      * Clear All cache instances
      *
-     * @return
      */
     public static boolean clearAllCaches() {
         var mgr = Containers.get().findObject(CacheManager.class);
@@ -48,9 +45,6 @@ public abstract class CacheManagerUtils {
     /**
      * Evict key from cache
      *
-     * @param cacheName
-     * @param key
-     * @return
      */
     public static boolean evict(String cacheName, Object key) {
         var cache = getCache(cacheName);
@@ -64,8 +58,6 @@ public abstract class CacheManagerUtils {
     /**
      * Find {@link Cache} by name
      *
-     * @param name
-     * @return
      */
     public static Cache getCache(String name) {
         if (name == null || name.isBlank()) {
@@ -89,11 +81,6 @@ public abstract class CacheManagerUtils {
     /**
      * Get Valye from cache
      *
-     * @param cacheName
-     * @param key
-     * @param type
-     * @param <T>
-     * @return
      */
     public static <T> T getValue(String cacheName, Object key, Class<T> type) {
         var cache = getCache(cacheName);
@@ -106,9 +93,6 @@ public abstract class CacheManagerUtils {
     /**
      * Get value from cache
      *
-     * @param cacheName
-     * @param key
-     * @return
      */
     public static Cache.ValueWrapper getValue(String cacheName, Object key) {
         var cache = getCache(cacheName);
@@ -121,11 +105,6 @@ public abstract class CacheManagerUtils {
     /**
      * Get value from cache. If not present call valueLoader
      *
-     * @param cacheName
-     * @param key
-     * @param valueLoader
-     * @param <T>
-     * @return
      */
     public static <T> T getValue(String cacheName, Object key, Callable<T> valueLoader) {
         var cache = getCache(cacheName);
@@ -138,10 +117,6 @@ public abstract class CacheManagerUtils {
     /**
      * Put a value in the cache
      *
-     * @param cacheName
-     * @param key
-     * @param value
-     * @return
      */
     public static boolean put(String cacheName, Object key, Object value) {
         var cache = getCache(cacheName);

@@ -19,7 +19,6 @@ package tools.dynamia.app.template;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Implement this interface if you need a new application template.

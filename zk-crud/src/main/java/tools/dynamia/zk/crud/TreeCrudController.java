@@ -26,7 +26,11 @@ import tools.dynamia.domain.query.DataSet;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.domain.util.TreeCrudUtil;
 import tools.dynamia.navigation.Page;
-import tools.dynamia.zk.crud.ui.*;
+import tools.dynamia.zk.crud.ui.ChildrenLoader;
+import tools.dynamia.zk.crud.ui.EntityTreeModel;
+import tools.dynamia.zk.crud.ui.EntityTreeNode;
+import tools.dynamia.zk.crud.ui.LazyEntityTreeNode;
+import tools.dynamia.zk.crud.ui.RootTreeNode;
 import tools.dynamia.zk.viewers.tree.TreeModelDataSet;
 
 import java.util.Collection;
@@ -60,6 +64,7 @@ public class TreeCrudController<E> extends CrudController<E> implements Children
     @Override
     public void query() {
         TreeModel model = createModel(loadRoots());
+        //noinspection unchecked
         setQueryResult(new TreeModelDataSet(model));
     }
 
@@ -77,6 +82,7 @@ public class TreeCrudController<E> extends CrudController<E> implements Children
         RootTreeNode root = new RootTreeNode("Root");
 
         RootTreeNode virtualRoot = createRootNode();
+        //noinspection unchecked
         root.addChild(virtualRoot);
 
         EntityTreeModel<E> model = new EntityTreeModel<>(root);
@@ -85,6 +91,7 @@ public class TreeCrudController<E> extends CrudController<E> implements Children
             for (E parent : roots) {
                 EntityTreeNode<E> node = newNode(parent);
                 node.setModel(model);
+                //noinspection unchecked
                 virtualRoot.addChild(node);
             }
         }
@@ -170,6 +177,7 @@ public class TreeCrudController<E> extends CrudController<E> implements Children
     @Override
     public void setQueryResult(DataSet queryResult) {
         if (queryResult.getData() instanceof Collection) {
+            //noinspection unchecked
             super.setQueryResult(new TreeModelDataSet(createModel((List<E>) queryResult.getData())));
         } else {
             super.setQueryResult(queryResult); // To change body of generated

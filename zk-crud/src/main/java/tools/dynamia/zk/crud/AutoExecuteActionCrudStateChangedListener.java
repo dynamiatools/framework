@@ -23,21 +23,20 @@ import tools.dynamia.crud.ChangedStateEvent;
 import tools.dynamia.crud.CrudAction;
 import tools.dynamia.crud.CrudStateChangedListener;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class AutoExecuteActionCrudStateChangedListener implements CrudStateChangedListener {
 
 
+    @SuppressWarnings("unchecked")
     @Override
     public void changedState(ChangedStateEvent evt) {
-        List<CrudAction> actions = evt.getCrudView().getActions();
+        @SuppressWarnings("unchecked") List<CrudAction> actions = evt.crudView().getActions();
         if (actions != null) {
             actions.stream().filter(a -> a.getAttribute("autoexecute") == Boolean.TRUE).forEach(a -> {
-                if (evt.getCrudView() instanceof ActionEventBuilder) {
-                    Actions.run(a, (ActionEventBuilder) evt.getCrudView(), evt.getCrudView());
+                if (evt.crudView() instanceof ActionEventBuilder) {
+                    Actions.run(a, (ActionEventBuilder) evt.crudView(), evt.crudView());
                 }
             });
         }

@@ -16,6 +16,7 @@
  */
 package tools.dynamia.app.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,8 +25,6 @@ import org.springframework.web.servlet.ModelAndView;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.navigation.NavigationNotAllowedException;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 public class GlobalExceptionController implements ErrorController {

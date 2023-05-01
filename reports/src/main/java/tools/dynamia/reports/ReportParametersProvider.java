@@ -29,7 +29,7 @@ public interface ReportParametersProvider<T> {
         Map<String, Object> params = new HashMap<>();
         Containers.get().findObjects(ReportParametersProvider.class).forEach(p -> {
             try {
-                Map<String, Object> providerParams = p.getParams(object);
+                @SuppressWarnings("unchecked") Map<String, Object> providerParams = p.getParams(object);
                 params.putAll(providerParams);
             } catch (ClassCastException e) {
                 // ignore

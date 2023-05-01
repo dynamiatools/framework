@@ -16,8 +16,6 @@
  */
 package tools.dynamia.domain;
 
-import java.io.Serializable;
-
 /**
  *
  * @author Ing. Mario Serrano

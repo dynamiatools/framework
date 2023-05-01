@@ -28,8 +28,8 @@ public class AutoQueryCrudStateChangedListener implements CrudStateChangedListen
 
     @Override
     public void changedState(ChangedStateEvent evt) {
-        GenericCrudView crudView = evt.getCrudView();
-        if (evt.getNewState() == CrudState.READ) {
+        GenericCrudView crudView = evt.crudView();
+        if (evt.newState() == CrudState.READ) {
             try {
 
                 if (crudView.getViewDescriptor().getParams().get(Viewers.PARAM_AUTOQUERY) != Boolean.FALSE

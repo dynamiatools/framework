@@ -56,6 +56,7 @@ public class EntityTreeNode<E> extends TreeViewNode<E> implements Serializable {
     public void addChild(TreeViewNode<E> child) {
         super.addChild(child);
         if (child instanceof EntityTreeNode etn) {
+            //noinspection unchecked
             etn.setModel(model);
 
             if (model != null) {

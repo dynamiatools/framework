@@ -85,6 +85,7 @@ public class FindAction extends AbstractCrudAction implements CrudControllerAwar
         }
 
         if (!crudController.isQueryResultEmpty()) {
+            //noinspection unchecked
             crudController.getAttributes().put(LAST_QUERY_TEXT, text);
         }
 
@@ -119,7 +120,7 @@ public class FindAction extends AbstractCrudAction implements CrudControllerAwar
 
     private String[] initFields(CrudActionEvent evt) {
         if (getAttribute("searchFields") != null && getAttribute("searchFields") instanceof List) {
-            List<String> searchFields = (List) getAttribute("searchFields");
+            @SuppressWarnings("unchecked") List<String> searchFields = (List) getAttribute("searchFields");
             return searchFields.toArray(new String[0]);
         } else {
             return loadFieldsFromDescriptor(evt);

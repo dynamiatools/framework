@@ -16,8 +16,6 @@
  */
 package tools.dynamia.zk.util;
 
-import org.zkoss.zk.ui.event.Event;
-import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zul.Paging;
 import tools.dynamia.commons.Callback;
 import tools.dynamia.domain.query.DataPaginator;
@@ -34,8 +32,6 @@ public class PaginationController {
 
     /**
      *
-     * @param paging
-     * @param callback
      */
     public PaginationController(Paging paging, Callback callback) {
         this.paginator = paging;

@@ -60,7 +60,7 @@ public class CrudVDReaderCustomizer implements ViewDescriptorReaderCustomizer<Ma
         try {
             Map actions = (Map) content.get(ACTIONS);
             viewDescriptor.addParam(ACTIONS, actions);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 

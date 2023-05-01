@@ -16,12 +16,12 @@
  */
 package tools.dynamia.domain.jpa;
 
-import tools.dynamia.domain.AbstractEntity;
-import tools.dynamia.domain.IdGenerators;
-
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Version;
+import tools.dynamia.domain.AbstractEntity;
+import tools.dynamia.domain.IdGenerators;
+
 import java.io.Serializable;
 
 @MappedSuperclass

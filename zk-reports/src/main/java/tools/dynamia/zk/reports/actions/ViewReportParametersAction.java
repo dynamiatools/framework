@@ -17,7 +17,11 @@
 package tools.dynamia.zk.reports.actions;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zkoss.zul.*;
+import org.zkoss.zul.Listbox;
+import org.zkoss.zul.Listcell;
+import org.zkoss.zul.Listhead;
+import org.zkoss.zul.Listheader;
+import org.zkoss.zul.Listitem;
 import tools.dynamia.actions.ActionGroup;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.commons.ClassMessages;

@@ -1,9 +1,8 @@
 package tools.dynamia.app;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 import tools.dynamia.navigation.Page;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 public interface PageNavigationInterceptor {
 

@@ -23,7 +23,6 @@ import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.sys.ExecutionCtrl;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,6 +48,7 @@ public class PageScope implements Scope {
             Object scopedObject = pageScope.get(name);
             if (scopedObject == null) {
                 scopedObject = objectFactory.getObject();
+                //noinspection unchecked
                 pageScope.put(name, scopedObject);
             }
             return scopedObject;

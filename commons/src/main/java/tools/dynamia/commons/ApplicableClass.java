@@ -19,27 +19,21 @@ package tools.dynamia.commons;
 /**
  * The Class ApplicableClass.
  *
+ * @param targetClass The target class.
  * @author Mario A. Serrano Leones
  */
-public class ApplicableClass {
+public record ApplicableClass(Class targetClass) {
 
 	/**
 	 * The Constant ALL.
 	 */
-	public static final ApplicableClass[] ALL = { new ApplicableClass(null) };
-
-	/**
-	 * The target class.
-	 */
-	private final Class targetClass;
+	public static final ApplicableClass[] ALL = {new ApplicableClass(null)};
 
 	/**
 	 * Checks if is applicable.
 	 *
-	 * @param objectClass
-	 *            the object class
-	 * @param applicableClasses
-	 *            the applicable classes
+	 * @param objectClass       the object class
+	 * @param applicableClasses the applicable classes
 	 * @return true, if is applicable
 	 */
 	public static boolean isApplicable(Class<?> objectClass, ApplicableClass[] applicableClasses) {
@@ -49,25 +43,22 @@ public class ApplicableClass {
 	/**
 	 * Checks if is applicable.
 	 *
-	 * @param objectClass
-	 *            the object class
-	 * @param applicableClasses
-	 *            the applicable classes
-	 * @param includeParents
-	 *            the include parents
+	 * @param objectClass       the object class
+	 * @param applicableClasses the applicable classes
+	 * @param includeParents    the include parents
 	 * @return true, if is applicable
 	 */
 	public static boolean isApplicable(Class<?> objectClass, ApplicableClass[] applicableClasses,
-			boolean includeParents) {
+									   boolean includeParents) {
 		if (applicableClasses == ALL || applicableClasses == null) {
 			return true;
 		}
 
 		for (ApplicableClass applicableClass : applicableClasses) {
-			if (applicableClass.getTargetClass().equals(objectClass)) {
+			if (applicableClass.targetClass().equals(objectClass)) {
 				return true;
 			} else if (includeParents) {
-				if (BeanUtils.isAssignable(objectClass, applicableClass.getTargetClass())) {
+				if (BeanUtils.isAssignable(objectClass, applicableClass.targetClass())) {
 					return true;
 				}
 			}
@@ -78,11 +69,9 @@ public class ApplicableClass {
 	/**
 	 * Instantiates a new applicable class.
 	 *
-	 * @param targetClass
-	 *            the target class
+	 * @param targetClass the target class
 	 */
-	public ApplicableClass(Class targetClass) {
-		this.targetClass = targetClass;
+	public ApplicableClass {
 	}
 
 	/**
@@ -90,15 +79,15 @@ public class ApplicableClass {
 	 *
 	 * @return the target class
 	 */
-	public Class getTargetClass() {
+	@Override
+	public Class targetClass() {
 		return targetClass;
 	}
 
 	/**
 	 * Gets the.
 	 *
-	 * @param classes
-	 *            the classes
+	 * @param classes the classes
 	 * @return the applicable class[]
 	 */
 	public static ApplicableClass[] get(Class... classes) {

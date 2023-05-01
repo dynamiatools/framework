@@ -108,6 +108,7 @@ public abstract class NavigationBuilder {
         if (viewBuilderClass != null && !viewBuilderClass.isEmpty()) {
             try {
                 Class clazz = Class.forName(viewBuilderClass);
+                //noinspection unchecked
                 this.viewBuilder = (NavigationViewBuilder) clazz.getDeclaredConstructor().newInstance();
             } catch (Exception e) {
                 throw new RuntimeException("Navigation view builder cannot be created: " + viewBuilderClass, e);
@@ -122,6 +123,7 @@ public abstract class NavigationBuilder {
 
     public Class<NavigationViewBuilder> getViewBuilderClass() {
         if (viewBuilderClass == null && viewBuilder != null) {
+            //noinspection unchecked
             viewBuilderClass = (Class<NavigationViewBuilder>) viewBuilder.getClass();
         }
         return viewBuilderClass;

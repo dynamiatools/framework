@@ -18,7 +18,6 @@
 package tools.dynamia.io;
 
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;

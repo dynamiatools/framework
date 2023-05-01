@@ -32,7 +32,6 @@ public abstract class ExcelPagedListDatasource<T> extends DataPaginatorPagedList
     /**
      * POI Excel Sheet, default page size is 100
      *
-     * @param sheet
      */
     public ExcelPagedListDatasource(Sheet sheet) {
         this(sheet, 100);
@@ -41,8 +40,6 @@ public abstract class ExcelPagedListDatasource<T> extends DataPaginatorPagedList
     /**
      * POI Excel sheet to paginate
      *
-     * @param sheet
-     * @param pageSize
      */
     public ExcelPagedListDatasource(Sheet sheet, int pageSize) {
         this(sheet, pageSize, true);
@@ -50,9 +47,6 @@ public abstract class ExcelPagedListDatasource<T> extends DataPaginatorPagedList
 
     /**
      *
-     * @param sheet
-     * @param pageSize
-     * @param containsHeaders
      */
     public ExcelPagedListDatasource(Sheet sheet, int pageSize, boolean containsHeaders) {
         super(new DataPaginator(pageSize));

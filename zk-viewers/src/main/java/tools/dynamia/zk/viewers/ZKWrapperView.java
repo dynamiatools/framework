@@ -44,6 +44,7 @@ public class ZKWrapperView<T> extends Div implements View<T> {
 
     public ZKWrapperView(Component component) {
         if (component instanceof View) {
+            //noinspection unchecked
             init((View<T>) component);
         } else {
             this.component = component;

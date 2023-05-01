@@ -22,9 +22,15 @@ import tools.dynamia.commons.reflect.PropertyInfo;
 
 import javax.swing.*;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -203,7 +209,7 @@ public class BeanUtilsTest {
         }
     }
 
-    class ChildClass extends DummyClass {
+    static class ChildClass extends DummyClass {
 
         /**
          *
@@ -225,7 +231,7 @@ public class BeanUtilsTest {
         }
     }
 
-    class SomeBean {
+    static class SomeBean {
 
         private Integer size;
         private boolean visible;

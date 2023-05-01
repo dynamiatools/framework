@@ -21,37 +21,14 @@ package tools.dynamia.integration.ms;
  *
  * @param <T>
  */
-public class MessageEvent<T extends Message> {
-
-    private final T message;
-    private final String topic;
-    private final String callback;
-
-    public MessageEvent(T message, String topic, String callback) {
-        this.message = message;
-        this.topic = topic;
-        this.callback = callback;
-    }
-
-    public T getMessage() {
-        return message;
-    }
-
-    public String getTopic() {
-        return topic;
-    }
-
-    public String getCallback() {
-        return callback;
-    }
+public record MessageEvent<T extends Message>(T message, String topic, String callback) {
 
     /**
      * Shortcut to getMessage().getContent()
      *
-     * @return
      */
     public Object getContent() {
-        return getMessage().getContent();
+        return message().getContent();
     }
 
     @Override

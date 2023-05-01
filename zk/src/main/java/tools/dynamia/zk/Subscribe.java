@@ -31,35 +31,30 @@ public @interface Subscribe {
     /**
      * EventQueue name
      *
-     * @return
      */
     String value() default BinderCtrl.DEFAULT_QUEUE_NAME;
 
     /**
      * Target eventName
      *
-     * @return
      */
     String eventName() default "";
 
     /**
      * EventQueue Scope
      *
-     * @return
      */
     String scope() default EventQueues.DESKTOP;
 
     /**
      * Autocreate EventQueue if not exists
      *
-     * @return
      */
     boolean autocreate() default true;
 
     /**
      * Async subscriber invocation
      *
-     * @return
      */
     boolean async() default false;
 

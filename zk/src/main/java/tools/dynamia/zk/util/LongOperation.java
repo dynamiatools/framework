@@ -17,12 +17,15 @@
 package tools.dynamia.zk.util;
 
 import org.springframework.core.task.TaskExecutor;
-import org.zkoss.zk.ui.*;
+import org.zkoss.zk.ui.Desktop;
+import org.zkoss.zk.ui.DesktopUnavailableException;
+import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Sessions;
+import org.zkoss.zk.ui.WebApps;
 import org.zkoss.zk.ui.sys.DesktopCache;
 import org.zkoss.zk.ui.sys.DesktopCtrl;
 import org.zkoss.zk.ui.sys.WebAppCtrl;
 import tools.dynamia.commons.Callback;
-import tools.dynamia.integration.Containers;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -85,7 +88,6 @@ public class LongOperation implements Runnable {
      * optional callback method when the task has completed with an uncaught
      * Excepion
      *
-     * @param onExceptionConsumer
      */
     public LongOperation onException(Consumer<Exception> onExceptionConsumer) {
         this.onExceptionConsumer = onExceptionConsumer;
@@ -113,7 +115,6 @@ public class LongOperation implements Runnable {
     /**
      * check the cancelled flag
      *
-     * @return
      */
     public final boolean isCancelled() {
         return cancelled.get();
@@ -123,7 +124,6 @@ public class LongOperation implements Runnable {
      * activate the thread (and cached desktop) for UI updates call
      * {@link #deactivate()} once done updating the UI
      *
-     * @throws InterruptedException
      */
     protected final void activate() throws InterruptedException {
         Executions.activate(getDesktop());

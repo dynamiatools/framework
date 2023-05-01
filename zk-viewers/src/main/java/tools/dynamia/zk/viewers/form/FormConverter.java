@@ -28,6 +28,7 @@ public abstract class FormConverter<UI, BEAN> implements Converter<Object, Objec
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {
         FormView formView = (FormView) comp.getAttribute("form-view");
         Object formValue = formView.getRawValue();
+        //noinspection unchecked
         return convertToUi((BEAN) val, formValue, comp);
     }
 
@@ -35,6 +36,7 @@ public abstract class FormConverter<UI, BEAN> implements Converter<Object, Objec
     public Object coerceToBean(Object val, Component comp, BindContext ctx) {
         FormView formView = (FormView) comp.getAttribute("form-view");
         Object formValue = formView.getRawValue();
+        //noinspection unchecked
         return convertToBean((UI) val, formValue, comp);
     }
 

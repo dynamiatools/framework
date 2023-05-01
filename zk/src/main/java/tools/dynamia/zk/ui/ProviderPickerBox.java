@@ -72,8 +72,9 @@ public class ProviderPickerBox extends Combobox {
             try {
                 Collection<?> implementations = Containers.get().findObjects(providerClass);
                 try {
-                    List sorted = new ArrayList(implementations);
+                    @SuppressWarnings("unchecked") List sorted = new ArrayList(implementations);
                     BeanSorter sorter = new BeanSorter(nameField);
+                    //noinspection unchecked
                     sorter.sort(sorted);
                     ZKUtil.fillCombobox(this, sorted, true);
                 } catch (Exception e) {
@@ -136,9 +137,10 @@ public class ProviderPickerBox extends Combobox {
                         .findFirst();
                 if (provider.isPresent()) {
                     ListModelList model = (ListModelList) getModel();
+                    //noinspection unchecked
                     model.addToSelection(provider.get());
                 }
-            } catch (Exception e) {
+            } catch (Exception ignored) {
 
             }
         }

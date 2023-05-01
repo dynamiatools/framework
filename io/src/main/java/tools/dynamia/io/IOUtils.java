@@ -17,7 +17,6 @@
 package tools.dynamia.io;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.util.Base64Utils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.Containers;
@@ -288,7 +287,7 @@ public abstract class IOUtils {
     public static String formatFileSize(long length) {
         DecimalFormat f = new DecimalFormat("###,###.#");
         if (length > 1024) {
-            double kb = length / 1024;
+            double kb = (double) length / 1024;
             if (kb > 1024) {
                 double mb = kb / 1024;
                 if (mb > 1024) {
@@ -351,9 +350,6 @@ public abstract class IOUtils {
     /**
      * Unzip specific file in outputfolder
      *
-     * @param zipFile
-     * @param outputfolder
-     * @throws IOException
      */
     public static void unzipFile(File zipFile, File outputfolder) throws IOException {
         byte[] buffer = new byte[1024];
@@ -429,8 +425,6 @@ public abstract class IOUtils {
     /**
      * Delete a directory recursively
      *
-     * @param directory
-     * @return
      */
     public static boolean deleteDirectory(File directory) {
         if (directory.exists()) {
@@ -451,10 +445,6 @@ public abstract class IOUtils {
     /**
      * Download file from URL to local folder. If file exist overwrite existing file.
      *
-     * @param baseURL
-     * @param fileURI
-     * @param localFolder
-     * @throws Exception
      */
     public static Path downloadFile(String baseURL, final String fileURI, final String localFolder) throws Exception {
 
@@ -493,20 +483,15 @@ public abstract class IOUtils {
     /**
      * Encode a file bytes to Base64 String
      *
-     * @param file
-     * @return
      */
     public static String encodeBase64(File file) throws IOException {
-        return Base64Utils.encodeToString(Files.readAllBytes(file.toPath()));
+        return Base64.getEncoder().encodeToString(Files.readAllBytes(file.toPath()));
     }
 
 
     /**
      * Decode Base64 string to file
      *
-     * @param base64
-     * @param outputFile
-     * @throws IOException
      */
     public static void decodeBase64(String base64, File outputFile) throws IOException {
         try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {

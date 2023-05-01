@@ -29,11 +29,18 @@ import org.zkoss.zul.*;
 import org.zkoss.zul.impl.InputElement;
 import org.zkoss.zul.impl.NumberInputElement;
 import tools.dynamia.commons.BeanUtils;
-import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.LocalizedMessagesProvider;
+import tools.dynamia.commons.Messages;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.ui.icons.IconsTheme;
-import tools.dynamia.viewers.*;
+import tools.dynamia.viewers.Field;
+import tools.dynamia.viewers.FieldGroup;
+import tools.dynamia.viewers.IndexableComparator;
+import tools.dynamia.viewers.View;
+import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.ViewLayout;
+import tools.dynamia.viewers.ViewRenderer;
+import tools.dynamia.viewers.ViewRendererCustomizer;
 import tools.dynamia.viewers.util.ComponentCustomizerUtil;
 import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
@@ -113,7 +120,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
             if (layout != null) {
                 colNum = Integer.parseInt(layout.getParams().get(Viewers.LAYOUT_PARAM_COLUMNS).toString());
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
         int realColNum = colNum;// * 2;
@@ -240,7 +247,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         int colspan = 1;
         try {
             colspan = Integer.parseInt(field.getParam(Viewers.PARAM_SPAN).toString());
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
         int compRealSpan = getRealColspan(colspan);
@@ -391,7 +398,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         int colspan = 1;
         try {
             colspan = Integer.parseInt(field.getParam(Viewers.PARAM_SPAN).toString());
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
         int empty = realCols - space;
@@ -412,6 +419,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         if (field.getParams().containsKey(Viewers.PARAMS_ATTRIBUTES)) {
             Map attributes = (Map) field.getParam(Viewers.PARAMS_ATTRIBUTES);
             if (attributes != null) {
+                //noinspection unchecked
                 attributes.forEach((k, v) -> comp.setAttribute(k.toString(), v));
             }
 
@@ -455,9 +463,6 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
     /**
      * Return only visible and renderable fields
      *
-     * @param descriptor
-     * @param group
-     * @return
      */
     protected List<Field> getGroupFields(ViewDescriptor descriptor, FieldGroup group) {
         ViewRendererCustomizer customizer = ViewRendererUtil.findViewRendererCustomizer(descriptor);

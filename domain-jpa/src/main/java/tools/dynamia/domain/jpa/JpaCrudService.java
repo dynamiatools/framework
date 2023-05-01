@@ -16,13 +16,22 @@
  */
 package tools.dynamia.domain.jpa;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
-import tools.dynamia.commons.*;
+import tools.dynamia.commons.BeanMap;
+import tools.dynamia.commons.BeanSorter;
+import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.Callback;
+import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.commons.collect.PagedList;
 import tools.dynamia.commons.collect.PagedListDataSource;
 import tools.dynamia.commons.logger.LoggingService;
@@ -31,7 +40,13 @@ import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.domain.AbstractEntity;
 import tools.dynamia.domain.OrderBy;
 import tools.dynamia.domain.jdbc.QueryInterruptedException;
-import tools.dynamia.domain.query.*;
+import tools.dynamia.domain.query.BooleanOp;
+import tools.dynamia.domain.query.DataPaginator;
+import tools.dynamia.domain.query.QueryCondition;
+import tools.dynamia.domain.query.QueryConditions;
+import tools.dynamia.domain.query.QueryExample;
+import tools.dynamia.domain.query.QueryMetadata;
+import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.ValidatorService;
 import tools.dynamia.domain.services.impl.AbstractCrudService;
 import tools.dynamia.domain.util.CrudServiceListener;
@@ -39,9 +54,6 @@ import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.io.converters.Converters;
-
-import jakarta.annotation.PostConstruct;
-import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.sql.SQLException;
@@ -244,7 +256,7 @@ public class JpaCrudService extends AbstractCrudService {
             if (!resultList.isEmpty()) {
                 result = resultList.get(0);
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
         fireListeners(resultList, EventType.AFTER_QUERY);
@@ -606,7 +618,7 @@ public class JpaCrudService extends AbstractCrudService {
                 params.addGroup(fieldsParams, BooleanOp.AND);
                 result = find(entityClass, params);
             } else {
-                result = Collections.EMPTY_LIST;
+                result = Collections.emptyList();
             }
 
         }
@@ -632,7 +644,7 @@ public class JpaCrudService extends AbstractCrudService {
                     Class<? extends Enum> enumType = (Class<? extends Enum>) pinfo.getType();
                     Object obj = Enum.valueOf(enumType, value.toUpperCase());
                     qc = eq(obj, BooleanOp.OR);
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             } else if (pinfo.getType() == Boolean.class || pinfo.getType() == boolean.class) {
                 qc = null;
@@ -644,7 +656,7 @@ public class JpaCrudService extends AbstractCrudService {
                     } else {
                         qc = eq(realValue, BooleanOp.OR);
                     }
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             }
         }
@@ -944,7 +956,7 @@ public class JpaCrudService extends AbstractCrudService {
                 if (id != null) {
                     entity = (T) load(entity.getClass(), id);
                 }
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
 

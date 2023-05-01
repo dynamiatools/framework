@@ -19,28 +19,19 @@ package tools.dynamia.commons;
 
 /**
  * The Class ValueWrapper.
+ *
+ * @param value      The value.
+ * @param valueClass The value class.
  */
-public class ValueWrapper {
-
-    /**
-     * The value.
-     */
-    private final Object value;
-
-    /**
-     * The value class.
-     */
-    private final Class<?> valueClass;
+public record ValueWrapper(Object value, Class<?> valueClass) {
 
     /**
      * Instantiates a new value wrapper.
      *
-     * @param value the value
+     * @param value      the value
      * @param valueClass the value class
      */
-    public ValueWrapper(Object value, Class<?> valueClass) {
-        this.value = value;
-        this.valueClass = valueClass;
+    public ValueWrapper {
     }
 
     /**
@@ -48,7 +39,8 @@ public class ValueWrapper {
      *
      * @return the value
      */
-    public Object getValue() {
+    @Override
+    public Object value() {
         return value;
     }
 
@@ -57,7 +49,8 @@ public class ValueWrapper {
      *
      * @return the value class
      */
-    public Class<?> getValueClass() {
+    @Override
+    public Class<?> valueClass() {
         return valueClass;
     }
 

@@ -79,7 +79,7 @@ public class EnumIconImage extends Span  implements LoadableOnly{
                 return iconsNames[value.ordinal()];
             }
 
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
         return null;

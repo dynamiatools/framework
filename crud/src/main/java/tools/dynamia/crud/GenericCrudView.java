@@ -32,35 +32,30 @@ public interface GenericCrudView<T> extends View<T> {
     /**
      * Retunr current {@link CrudAction}s
      *
-     * @return
      */
     List<CrudAction> getActions();
 
     /**
      * Update crud state
      *
-     * @param crudState
      */
     void setState(CrudState crudState);
 
     /**
      * Return current state
      *
-     * @return
      */
     CrudState getState();
 
     /**
      * Get controller
      *
-     * @return
      */
     CrudControllerAPI<T> getController();
 
     /**
      * Update crud controller
      *
-     * @param controller
      */
 
     void setController(CrudControllerAPI<T> controller);

@@ -16,9 +16,13 @@
  */
 package tools.dynamia.zk.ui;
 
-import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
-import org.zkoss.zul.*;
+import org.zkoss.zul.Div;
+import org.zkoss.zul.Hbox;
+import org.zkoss.zul.Label;
+import org.zkoss.zul.Timer;
+import org.zkoss.zul.Vbox;
+import org.zkoss.zul.Window;
 import tools.dynamia.ui.MessageType;
 import tools.dynamia.zk.util.ZKUtil;
 
@@ -45,7 +49,7 @@ public class MessagePopup extends MessageDialog {
         if (time != null) {
             try {
                 timeout = Integer.parseInt(String.valueOf(time));
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
     }
@@ -72,6 +76,7 @@ public class MessagePopup extends MessageDialog {
         window.setVisible(true);
         window.doPopup();
         timer.setParent(window);
+        //noinspection unchecked
         timer.addEventListener("onTimer", (EventListener) event -> window.detach());
 
         Vbox contenido = new Vbox();
@@ -95,6 +100,7 @@ public class MessagePopup extends MessageDialog {
                 Div close = new Div();
                 close.setParent(superior);
                 close.setSclass("msg-popup-close");
+                //noinspection unchecked
                 close.addEventListener("onClick", (EventListener) event -> window.detach());
             }
 

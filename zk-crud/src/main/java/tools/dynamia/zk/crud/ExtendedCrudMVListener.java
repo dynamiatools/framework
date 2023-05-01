@@ -25,6 +25,7 @@ public class ExtendedCrudMVListener extends AbstractExtendedMVListener {
     @Override
     public void subviewLoaded(final MultiView parentView, View subview) {
         if (subview instanceof CrudView crudView) {
+            //noinspection unchecked
             crudView.getController().getDefaultEntityValues().put(beanProperty, parentView.getValue());
         }
     }

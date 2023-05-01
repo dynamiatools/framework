@@ -24,7 +24,7 @@ public class WebSocketDesktopListener implements DesktopInit {
 
 
     @Override
-    public void init(Desktop desktop, Object request) throws Exception {
+    public void init(Desktop desktop, Object request) {
         desktop.addListener(new WebSocketAuService());
     }
 

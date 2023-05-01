@@ -24,43 +24,35 @@ public interface NotificationRepository {
     /**
      * Save user notification somewhere
      *
-     * @param notification
      */
     void save(INotification notification);
 
     /**
      * Retrive a single user notification by uuid
      *
-     * @param uuid
-     * @return
      */
     INotification getByUuid(String uuid);
 
     /**
      * Return all non-readed notifications
      *
-     * @return
      */
     List<INotification> getNotifications();
 
     /**
      * Return all non-readed notification by source
      *
-     * @param source
-     * @return
      */
     List<INotification> getNotifications(String source);
 
     /**
      * Return non-readed notification count
      *
-     * @return
      */
     long getNotificationCount();
 
     /**
      * Let you know if this repository has new notificactions.
-     * @return
      */
     boolean hasNew();
 }

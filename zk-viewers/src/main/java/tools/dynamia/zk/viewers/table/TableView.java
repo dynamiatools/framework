@@ -20,9 +20,15 @@ package tools.dynamia.zk.viewers.table;
 
 import org.zkoss.bind.Binder;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.*;
+import org.zkoss.zul.AbstractListModel;
+import org.zkoss.zul.ListModel;
+import org.zkoss.zul.Listbox;
+import org.zkoss.zul.Listfoot;
+import org.zkoss.zul.Listhead;
+import org.zkoss.zul.Listitem;
+import org.zkoss.zul.ListitemRenderer;
+import org.zkoss.zul.Menupopup;
 import tools.dynamia.commons.MapBuilder;
-import tools.dynamia.commons.PropertyChangeEvent;
 import tools.dynamia.commons.PropertyChangeListenerContainer;
 import tools.dynamia.commons.collect.PagedList;
 import tools.dynamia.domain.fx.Functions;
@@ -37,7 +43,12 @@ import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.ui.CanBeReadonly;
 import tools.dynamia.zk.util.ZKBindingUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
 /**

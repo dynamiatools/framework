@@ -34,7 +34,7 @@ public class EntityFiltersPanelViewRenderer implements ViewRenderer {
 
         try {
             BeanUtils.setupBean(filterPanel, descriptor.getParams());
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         filterPanel.setValue(value);
         customize(filterPanel);

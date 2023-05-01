@@ -16,10 +16,10 @@
  */
 package tools.dynamia.domain.jpa;
 
-import tools.dynamia.domain.query.QueryParameters;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import tools.dynamia.domain.query.QueryParameters;
+
 import java.util.List;
 
 import static tools.dynamia.domain.EntityHandler.handle;

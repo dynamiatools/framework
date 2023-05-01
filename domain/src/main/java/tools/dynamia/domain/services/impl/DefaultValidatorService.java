@@ -16,14 +16,14 @@
  */
 package tools.dynamia.domain.services.impl;
 
-import tools.dynamia.domain.ValidationError;
-import tools.dynamia.domain.services.ValidatorService;
-import tools.dynamia.integration.Containers;
-
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import tools.dynamia.domain.ValidationError;
+import tools.dynamia.domain.services.ValidatorService;
+import tools.dynamia.integration.Containers;
+
 import java.util.Collection;
 import java.util.Set;
 
@@ -85,6 +85,7 @@ public class DefaultValidatorService implements ValidatorService {
 
 			for (tools.dynamia.domain.Validator validator : validators) {
 				try {
+					//noinspection unchecked
 					validator.validate(obj);
 				} catch (ClassCastException e) {
 					// ignore

@@ -19,7 +19,13 @@ package tools.dynamia.commons;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.*;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
@@ -49,7 +55,6 @@ public final class DateTimeUtils {
     /**
      * Return the last day of month
      *
-     * @param month
      * @return last day
      */
     public static int getLastDayOfMonth(int month) {
@@ -59,7 +64,6 @@ public final class DateTimeUtils {
     /**
      * Return the last day of month
      *
-     * @param month
      * @return last day
      */
     public static int getLastDayOfMonth(Month month) {
@@ -95,7 +99,6 @@ public final class DateTimeUtils {
     /**
      * Check if passed date has the same year, month and day of current system date
      *
-     * @param date
      * @return if is today
      */
     public static boolean isToday(Date date) {
@@ -358,7 +361,6 @@ public final class DateTimeUtils {
      * Adds weeks.
      *
      * @param date  the date
-     * @param weeks
      * @return the date
      */
     public static Date addWeeks(Date date, int weeks) {
@@ -504,7 +506,6 @@ public final class DateTimeUtils {
     /**
      * Create a tomorrow date and add one day
      *
-     * @return
      */
     public static Date dayAfterTomorrow() {
         return addDays(tomorrow(), 1);
@@ -513,8 +514,6 @@ public final class DateTimeUtils {
     /**
      * Convert a Date to LocalDate
      *
-     * @param input
-     * @return
      */
     public static LocalDate toLocalDate(Date input) {
         if (input instanceof java.sql.Date) {
@@ -555,8 +554,6 @@ public final class DateTimeUtils {
     /**
      * Convert a LocalDate to Date
      *
-     * @param localDate
-     * @return
      */
     public static Date toDate(LocalDate localDate) {
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -588,8 +585,6 @@ public final class DateTimeUtils {
     /**
      * Parse string to {@link Date} using pattern
      *
-     * @param source
-     * @param pattern
      * @return date
      */
     public static Date parse(String source, String pattern) throws ParseException {
@@ -600,7 +595,6 @@ public final class DateTimeUtils {
     /**
      * The same as now()
      *
-     * @return
      */
     public static Date today() {
         return now();
@@ -609,10 +603,6 @@ public final class DateTimeUtils {
     /**
      * Create a new Date with specific time
      *
-     * @param hourOfDay
-     * @param minutes
-     * @param seconds
-     * @return
      */
     public static Date today(int hourOfDay, int minutes, int seconds) {
 
@@ -626,8 +616,6 @@ public final class DateTimeUtils {
 
     /**
      * Format start date and end date from {@link DateRange}
-     * @param dateRange
-     * @return
      */
     public static String formatDate(DateRange dateRange) {
         return formatDate(dateRange.getStartDate()) + " - " + formatDate(dateRange.getEndDate());
@@ -635,9 +623,6 @@ public final class DateTimeUtils {
 
     /**
      * Format start date and end date from {@link DateRange} using pattern
-     * @param dateRange
-     * @param pattern
-     * @return
      */
     public static String format(DateRange dateRange, String pattern) {
         return format(dateRange.getStartDate(), pattern) + " - " + format(dateRange.getEndDate(), pattern);

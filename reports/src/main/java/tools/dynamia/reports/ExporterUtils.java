@@ -42,7 +42,7 @@ public class ExporterUtils {
 					EntityReferenceRepository repo = DomainUtils
 							.getEntityReferenceRepositoryByAlias(col.getEntityAlias());
 					if (repo != null) {
-						EntityReference ref = repo.load((Serializable) value);
+						@SuppressWarnings("unchecked") EntityReference ref = repo.load((Serializable) value);
 						if (ref != null) {
 							value = ref.toString();
 							cache.put(key, value);

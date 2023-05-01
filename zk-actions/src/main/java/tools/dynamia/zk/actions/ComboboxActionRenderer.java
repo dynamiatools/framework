@@ -16,18 +16,16 @@
  */
 package tools.dynamia.zk.actions;
 
-import tools.dynamia.actions.Actions;
-import tools.dynamia.commons.Messages;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.ComboitemRenderer;
 import tools.dynamia.actions.Action;
-import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionEventBuilder;
+import tools.dynamia.actions.Actions;
+import tools.dynamia.commons.Messages;
 import tools.dynamia.zk.util.ZKUtil;
 
 import java.util.List;
-import java.util.Map;
 
 public class ComboboxActionRenderer extends ZKActionRenderer<Combobox> {
 

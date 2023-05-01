@@ -26,7 +26,6 @@ public interface CanBeReadonly {
     /**
      * Default method to avoid typos
      *
-     * @return
      */
     default boolean isReadOnly() {
         return isReadonly();
@@ -35,7 +34,6 @@ public interface CanBeReadonly {
     /**
      * Default method to avoid typos
      *
-     * @param readonly
      */
     default void setReadOnly(boolean readonly) {
         setReadonly(readonly);

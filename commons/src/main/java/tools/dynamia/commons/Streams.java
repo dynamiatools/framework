@@ -1,7 +1,11 @@
 package tools.dynamia.commons;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -15,10 +19,6 @@ public class Streams {
     /**
      * Filter and collect to {@link List} in collection
      *
-     * @param collection
-     * @param predicate
-     * @param <T>
-     * @return
      */
     public static <T> List<T> collectIf(Collection<T> collection, Predicate<T> predicate) {
         if (collection == null) {
@@ -33,10 +33,6 @@ public class Streams {
     /**
      * Filter and collect to {@link Set} in collection
      *
-     * @param collection
-     * @param predicate
-     * @param <T>
-     * @return
      */
     public static <T> Set<T> collectSetIf(Collection<T> collection, Predicate<T> predicate) {
         if (collection == null) {
@@ -50,11 +46,6 @@ public class Streams {
     /**
      * Map and collect result to {@link List}
      *
-     * @param collection
-     * @param mapper
-     * @param <T>
-     * @param <R>
-     * @return
      */
     public static <T, R> List<R> mapAndCollect(Collection<T> collection, Function<? super T, ? extends R> mapper) {
 
@@ -67,12 +58,6 @@ public class Streams {
     /**
      * Filter and the map result to {@link List}
      *
-     * @param collection
-     * @param predicate
-     * @param mapper
-     * @param <T>
-     * @param <R>
-     * @return
      */
     public static <T, R> List<R> mapAndCollectIf(Collection<T> collection, Predicate<T> predicate, Function<? super T, ? extends R> mapper) {
         if (collection == null) {
@@ -84,10 +69,6 @@ public class Streams {
     /**
      * Map collection to {@link BigDecimal} and collect to {@link List}
      *
-     * @param collection
-     * @param toBigDecimalFunction
-     * @param <T>
-     * @return
      */
     public static <T> List<BigDecimal> mapToBigDecimal(Collection<T> collection, Function<T, BigDecimal> toBigDecimalFunction) {
         if (collection == null) {
@@ -97,11 +78,6 @@ public class Streams {
     }
 
     /**
-     * @param collection
-     * @param predicate
-     * @param toBigDecimalFunction
-     * @param <T>
-     * @return
      */
     public static <T> List<BigDecimal> mapToBigDecimalIf(Collection<T> collection, Predicate<T> predicate, Function<T, BigDecimal> toBigDecimalFunction) {
         if (collection == null) {
@@ -115,8 +91,6 @@ public class Streams {
     /**
      * Sum a collections of bigdecimals
      *
-     * @param numbers
-     * @return
      */
     public BigDecimal sum(Collection<BigDecimal> numbers) {
         if (numbers == null) {
@@ -130,10 +104,6 @@ public class Streams {
     /**
      * Map collection to {@link BigDecimal} and reduce sum
      *
-     * @param collection
-     * @param toBigDecimalFunction
-     * @param <T>
-     * @return
      */
     public static <T> BigDecimal mapAndSum(Collection<T> collection, Function<T, BigDecimal> toBigDecimalFunction) {
         if (collection == null) {
@@ -146,10 +116,8 @@ public class Streams {
     /**
      * Helper to build arrays
      *
-     * @param values
-     * @param <T>
-     * @return
      */
+    @SafeVarargs
     public static <T> T[] toArray(T... values) {
         return values;
     }
@@ -161,10 +129,6 @@ public class Streams {
     /**
      * Filter collection and find the first element
      *
-     * @param collection
-     * @param predicate
-     * @param <T>
-     * @return
      */
     public static <T> Optional<T> findFirstIf(Collection<T> collection, Predicate<T> predicate) {
         if (collection == null) {
@@ -177,10 +141,6 @@ public class Streams {
     /**
      * Filter collection and find the first element or null
      *
-     * @param collection
-     * @param predicate
-     * @param <T>
-     * @return
      */
     public static <T> T findFirstElseNull(Collection<T> collection, Predicate<T> predicate) {
         if (collection == null) {

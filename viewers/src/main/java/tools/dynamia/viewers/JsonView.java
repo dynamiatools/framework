@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import java.io.IOException;
 
+@SuppressWarnings("unchecked")
 public class JsonView<T> implements View<T> {
 
 
@@ -86,11 +87,13 @@ public class JsonView<T> implements View<T> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void parse(String json) {
         if (viewDescriptor.getBeanClass() == null) {
             throw new ViewRendererException("Cannot parse json to object. Bean class is null in view descriptor");
         }
         try {
+            //noinspection unchecked
             value = (T) getObjectMapper().readValue(json, viewDescriptor.getBeanClass());
         } catch (IOException e) {
             throw new ViewRendererException("Error parsing json to object", e);
@@ -105,6 +108,7 @@ public class JsonView<T> implements View<T> {
             mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
             SimpleModule module = new SimpleModule();
             module.addSerializer(viewDescriptor.getBeanClass(), new JsonViewDescriptorSerializer(viewDescriptor));
+            //noinspection unchecked
             module.addDeserializer((Class) viewDescriptor.getBeanClass(), new JsonViewDescriptorDeserializer(viewDescriptor));
             mapper.registerModule(module);
         }

@@ -23,7 +23,6 @@ import tools.dynamia.commons.Messages;
 import tools.dynamia.domain.query.ApplicationParameters;
 import tools.dynamia.domain.query.Parameter;
 import tools.dynamia.navigation.NavigationManager;
-import tools.dynamia.navigation.Page;
 import tools.dynamia.ui.MessageType;
 import tools.dynamia.ui.UIMessages;
 import tools.dynamia.zk.actions.ToolbarbuttonActionRenderer;
@@ -43,7 +42,7 @@ public class SaveConfigAction extends AbstractConfigPageAction {
 
     @Override
     public void actionPerformed(ActionEvent evt) {
-        List<Parameter> parameters = (List<Parameter>) evt.getData();
+        @SuppressWarnings("unchecked") List<Parameter> parameters = (List<Parameter>) evt.getData();
         if (parameters != null) {
             try {
                 ApplicationParameters.get().save(parameters);

@@ -19,7 +19,11 @@ package tools.dynamia.domain.query;
 import tools.dynamia.commons.BeanSorter;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The Class QueryParameters.
@@ -227,8 +231,6 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
     /**
      * Order by a column name ascending order
      *
-     * @param column
-     * @return
      */
     public QueryParameters orderBy(String column) {
         return orderBy(column, true);
@@ -407,7 +409,7 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
             }
         }
         for (Group group : groups) {
-            group.getParams().applyTo(query);
+            group.params().applyTo(query);
         }
 
         if (!hints.isEmpty()) {
@@ -436,7 +438,6 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
     /**
      * Return the list of keys sorted the order of add or put method invocation
      *
-     * @return
      */
     public List<String> getSortedKeys() {
         return Collections.unmodifiableList(sortedKeys);

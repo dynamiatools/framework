@@ -34,7 +34,7 @@ public class ZKNavigationBuilder extends NavigationBuilder implements Composer<C
     private Component component;
 
     @AfterCompose
-    public void doAfterCompose(Component comp) throws Exception {
+    public void doAfterCompose(Component comp) {
         this.component = comp;
         setViewBuilderClass((String) comp.getAttribute("builderClass"));
         init();

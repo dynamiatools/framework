@@ -18,6 +18,7 @@ package tools.dynamia.viewers;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.NotNull;
 import tools.dynamia.commons.BeanMessages;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.StringUtils;
@@ -26,12 +27,10 @@ import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.domain.contraints.NotEmpty;
 import tools.dynamia.domain.util.DomainUtils;
 
-import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * The Class Field.

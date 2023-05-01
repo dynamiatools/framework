@@ -104,7 +104,6 @@ public abstract class AbstractExcelExporter<T, DATA> {
      * Start writing file using multiple data sources. Invoke appendData(data)
      * and the stop() to complete
      *
-     * @param outpufile
      */
     public void start(File outpufile) {
         if (outpufile != null) {
@@ -132,8 +131,6 @@ public abstract class AbstractExcelExporter<T, DATA> {
     /**
      * Append rows to current file. Invoke start(File outpufile) method first.
      *
-     * @param data
-     * @param monitor
      */
     public void appendData(DATA data, ProgressMonitor monitor) {
         if (excelWriter == null) {
@@ -147,7 +144,6 @@ public abstract class AbstractExcelExporter<T, DATA> {
     /**
      * Append rows to current file. Invoke start(File outpufile) method first
      *
-     * @param data
      */
     public void appendData(DATA data) {
         appendData(data, null);

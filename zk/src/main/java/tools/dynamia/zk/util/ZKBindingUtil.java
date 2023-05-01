@@ -20,20 +20,18 @@ import org.zkoss.bind.BindUtils;
 import org.zkoss.bind.Binder;
 import org.zkoss.bind.DefaultBinder;
 import org.zkoss.zk.ui.Component;
-import org.zkoss.zul.*;
+import org.zkoss.zul.A;
+import org.zkoss.zul.Image;
+import org.zkoss.zul.Label;
 import tools.dynamia.commons.PropertyChangeEvent;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
-import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
-import tools.dynamia.zk.ui.CoolLabel;
-import tools.dynamia.zk.ui.EnumIconImage;
 import tools.dynamia.zk.ui.LoadableOnly;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Stream;
 
 /**
  * Utily class for using zk bindings programatic easily
@@ -157,7 +155,6 @@ public class ZKBindingUtil {
     /**
      * Notify changes on all property of view model
      *
-     * @param bean
      */
     public static void postNotifyChange(Object bean) {
         postNotifyChange(bean, "*");
@@ -166,7 +163,6 @@ public class ZKBindingUtil {
     /**
      * Notify changes of all property of all elements in the collections
      *
-     * @param objects
      */
     public static void postNotifyChange(Collection<?> objects) {
         objects.forEach(ZKBindingUtil::postNotifyChange);
@@ -175,8 +171,6 @@ public class ZKBindingUtil {
     /**
      * Notify changes on property of view model
      *
-     * @param bean
-     * @param property
      */
     public static void postNotifyChange(Object bean, String property) {
         if (ZKUtil.isInEventListener()) {
@@ -187,8 +181,6 @@ public class ZKBindingUtil {
     /**
      * Notify changed on properties of view model
      *
-     * @param bean
-     * @param properties
      */
     public static void postNotifyChange(Object bean, String... properties) {
         if (ZKUtil.isInEventListener()) {
@@ -199,21 +191,16 @@ public class ZKBindingUtil {
     /**
      * Notify change of {@link PropertyChangeEvent} source and property
      *
-     * @param evt
      */
     public static void postNotifyChange(PropertyChangeEvent evt) {
-        if (evt != null && evt.getSource() != null && evt.getPropertyName() != null) {
-            postNotifyChange(evt.getSource(), evt.getPropertyName());
+        if (evt != null && evt.source() != null && evt.propertyName() != null) {
+            postNotifyChange(evt.source(), evt.propertyName());
         }
     }
 
     /**
      * Notifiy changes on property of view model
      *
-     * @param queue
-     * @param scope
-     * @param bean
-     * @param property
      */
     public static void postNotifyChange(String queue, String scope, Object bean, String property) {
         if (ZKUtil.isInEventListener()) {
@@ -225,7 +212,6 @@ public class ZKBindingUtil {
     /**
      * Post a global command without arguments
      *
-     * @param name
      */
     public static void postGlobalCommand(String name) {
         postGlobalCommand(name, null);
@@ -234,8 +220,6 @@ public class ZKBindingUtil {
     /**
      * Post a global command with arguments
      *
-     * @param name
-     * @param args
      */
     public static void postGlobalCommand(String name, Map<String, Object> args) {
         BindUtils.postGlobalCommand(null, null, name, args);

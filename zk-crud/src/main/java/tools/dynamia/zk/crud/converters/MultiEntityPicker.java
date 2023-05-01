@@ -40,6 +40,7 @@ public class MultiEntityPicker extends FormConverter<List, List> {
         List values = new ArrayList();
         for (Object object : beanValue) {
             Object child = findDep(object, beanValueClass, uiValueClass);
+            //noinspection unchecked
             values.add(child);
         }
 

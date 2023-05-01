@@ -98,87 +98,77 @@ public class FormFieldComponent implements Serializable {
     }
 
 
-    public static class Label {
-        private final Component delegated;
-
-        public Label(Component delegated) {
-            super();
-            this.delegated = delegated;
-        }
-
-        public Component getDelegated() {
-            return delegated;
-        }
+    public record Label(Component delegated) {
 
         public String getValue() {
-            try {
-                if (delegated instanceof org.zkoss.zul.Label) {
-                    return ((org.zkoss.zul.Label) delegated).getValue();
-                } else if (delegated instanceof org.zkoss.zhtml.Label) {
-                    Text text = (Text) delegated.getFirstChild();
-                    return text.getValue();
+                try {
+                    if (delegated instanceof org.zkoss.zul.Label) {
+                        return ((org.zkoss.zul.Label) delegated).getValue();
+                    } else if (delegated instanceof org.zkoss.zhtml.Label) {
+                        Text text = (Text) delegated.getFirstChild();
+                        return text.getValue();
+                    }
+                } catch (Exception ignored) {
+
                 }
-            } catch (Exception e) {
-
+                return "";
             }
-            return "";
-        }
 
-        public void setValue(String value) {
-            try {
-                if (delegated instanceof org.zkoss.zul.Label) {
-                    ((org.zkoss.zul.Label) delegated).setValue(value);
-                } else if (delegated instanceof org.zkoss.zhtml.Label) {
-                    Text text = (Text) delegated.getFirstChild();
-                    text.setValue(value);
+            public void setValue(String value) {
+                try {
+                    if (delegated instanceof org.zkoss.zul.Label) {
+                        ((org.zkoss.zul.Label) delegated).setValue(value);
+                    } else if (delegated instanceof org.zkoss.zhtml.Label) {
+                        Text text = (Text) delegated.getFirstChild();
+                        text.setValue(value);
+                    }
+                } catch (Exception ignored) {
+
                 }
-            } catch (Exception e) {
-
             }
-        }
 
-        public void setTooltiptext(String tooltiptext) {
-            if (delegated instanceof HtmlBasedComponent) {
-                ((HtmlBasedComponent) delegated).setTooltiptext(tooltiptext);
-            } else if (delegated instanceof org.zkoss.zhtml.Label) {
-                ((org.zkoss.zhtml.Label) delegated).setTitle(tooltiptext);
+            public void setTooltiptext(String tooltiptext) {
+                if (delegated instanceof HtmlBasedComponent) {
+                    ((HtmlBasedComponent) delegated).setTooltiptext(tooltiptext);
+                } else if (delegated instanceof org.zkoss.zhtml.Label) {
+                    ((org.zkoss.zhtml.Label) delegated).setTitle(tooltiptext);
+                }
             }
-        }
 
-        public String getTooltiptext() {
-            if (delegated instanceof HtmlBasedComponent) {
-                return ((HtmlBasedComponent) delegated).getTooltiptext();
-            } else if (delegated instanceof org.zkoss.zhtml.Label) {
-                return ((org.zkoss.zhtml.Label) delegated).getTitle();
+            public String getTooltiptext() {
+                if (delegated instanceof HtmlBasedComponent) {
+                    return ((HtmlBasedComponent) delegated).getTooltiptext();
+                } else if (delegated instanceof org.zkoss.zhtml.Label) {
+                    return ((org.zkoss.zhtml.Label) delegated).getTitle();
+                }
+                return null;
             }
-            return null;
-        }
 
-        public void setSclass(String sclass) {
-            if (delegated instanceof HtmlBasedComponent) {
-                ((HtmlBasedComponent) delegated).setSclass(sclass);
-            } else if (delegated instanceof org.zkoss.zhtml.Label) {
-                ((org.zkoss.zhtml.Label) delegated).setSclass(sclass);
+            public void setSclass(String sclass) {
+                if (delegated instanceof HtmlBasedComponent) {
+                    ((HtmlBasedComponent) delegated).setSclass(sclass);
+                } else if (delegated instanceof org.zkoss.zhtml.Label) {
+                    ((org.zkoss.zhtml.Label) delegated).setSclass(sclass);
+                }
             }
-        }
 
-        public String getSclass() {
-            if (delegated instanceof HtmlBasedComponent) {
-                return ((HtmlBasedComponent) delegated).getSclass();
-            } else if (delegated instanceof org.zkoss.zhtml.Label) {
-                return ((org.zkoss.zhtml.Label) delegated).getSclass();
+            public String getSclass() {
+                if (delegated instanceof HtmlBasedComponent) {
+                    return ((HtmlBasedComponent) delegated).getSclass();
+                } else if (delegated instanceof org.zkoss.zhtml.Label) {
+                    return ((org.zkoss.zhtml.Label) delegated).getSclass();
+                }
+                return null;
             }
-            return null;
-        }
 
-        public void setVisible(boolean visible) {
-            delegated.setVisible(visible);
-        }
+            public void setVisible(boolean visible) {
+                delegated.setVisible(visible);
+            }
 
-        public boolean isVisible() {
-            return delegated.isVisible();
-        }
+            public boolean isVisible() {
+                return delegated.isVisible();
+            }
 
-    }
+        }
 
 }

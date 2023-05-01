@@ -19,11 +19,19 @@
 
 package tools.dynamia.zk.viewers.tree;
 
-import tools.dynamia.commons.Messages;
-import org.zkoss.zul.*;
+import org.zkoss.zul.Frozen;
+import org.zkoss.zul.TreeModel;
+import org.zkoss.zul.Treecol;
+import org.zkoss.zul.Treecols;
+import org.zkoss.zul.TreeitemRenderer;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.LocalizedMessagesProvider;
-import tools.dynamia.viewers.*;
+import tools.dynamia.commons.Messages;
+import tools.dynamia.viewers.Field;
+import tools.dynamia.viewers.FieldGroup;
+import tools.dynamia.viewers.View;
+import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.ViewRenderer;
 import tools.dynamia.viewers.util.Viewers;
 
 import java.util.Map;
@@ -90,6 +98,7 @@ public class TreeViewRenderer<T> implements ViewRenderer<TreeModel<TreeViewNode<
                 try {
                     Map headerParams = (Map) field.getParams().get("header");
                     if (headerParams != null) {
+                        //noinspection unchecked
                         BeanUtils.setupBean(header, headerParams);
                     }
                 } catch (Exception e) {

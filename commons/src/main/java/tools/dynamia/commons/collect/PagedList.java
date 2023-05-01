@@ -85,12 +85,10 @@ public class PagedList<T> extends AbstractList<T> {
 
     /**
      * Create and return an array with CURRENT page data. NOT ALL DATA like a normal List
-     * @param a
-     * @param <U>
      * @return array
      */
     @Override
-    public <U extends Object> U[] toArray(U[] a) {
+    public <U> U[] toArray(U[] a) {
         return dataSource.getPageData().toArray(a);
     }
 

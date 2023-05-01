@@ -58,7 +58,7 @@ public class ViewDescriptorMessages {
      * Instantiates a new view descriptor messages.
      *
      * @param viewDescriptor the view descriptor
-     * @param locale the locale
+     * @param locale         the locale
      */
     public ViewDescriptorMessages(ViewDescriptor viewDescriptor, Locale locale) {
         this.viewDescriptor = viewDescriptor;
@@ -84,13 +84,13 @@ public class ViewDescriptorMessages {
      * @return the message
      */
     public final String getMessage(String key) {
-        return getMessage(key);
+        return getMessage(key, null);
     }
 
     /**
      * Gets the message.
      *
-     * @param key the key
+     * @param key    the key
      * @param params the params
      * @return the message
      */

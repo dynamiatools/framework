@@ -36,7 +36,7 @@ public class DesktopInitListenerDelegator implements DesktopInit {
     }
 
     @Override
-    public void init(Desktop desktop, Object request) throws Exception {
+    public void init(Desktop desktop, Object request) {
         Containers.get().findObjects(DesktopListener.class).forEach(l -> l.onDesktopInit(desktop, request));
     }
 }

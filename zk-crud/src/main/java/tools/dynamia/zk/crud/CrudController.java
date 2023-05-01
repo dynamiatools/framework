@@ -26,14 +26,22 @@ import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Window;
 import org.zkoss.zul.ext.Paginal;
-import tools.dynamia.commons.*;
+import tools.dynamia.commons.BeanMap;
+import tools.dynamia.commons.BeanSorter;
+import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.Callback;
+import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.crud.CrudControllerAPI;
 import tools.dynamia.domain.CrudServiceException;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.jdbc.QueryInterruptedException;
-import tools.dynamia.domain.query.*;
+import tools.dynamia.domain.query.DataPaginator;
+import tools.dynamia.domain.query.DataSet;
+import tools.dynamia.domain.query.ListDataSet;
+import tools.dynamia.domain.query.QueryExecuter;
+import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.domain.util.QueryBuilder;
@@ -47,7 +55,11 @@ import tools.dynamia.zk.util.ZKUtil;
 import tools.dynamia.zk.viewers.table.TableView;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -529,7 +541,6 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     /**
      * Set result list
      *
-     * @param queryResult
      */
     public final void setQueryResult(List queryResult) {
         setQueryResult(new ListDataSet(queryResult));

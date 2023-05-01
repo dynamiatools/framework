@@ -26,7 +26,11 @@ import tools.dynamia.domain.query.ApplicationParameters;
 import tools.dynamia.domain.query.Parameter;
 import tools.dynamia.domain.query.Parameters;
 import tools.dynamia.domain.util.DomainUtils;
-import tools.dynamia.viewers.*;
+import tools.dynamia.viewers.Field;
+import tools.dynamia.viewers.View;
+import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.ViewRenderer;
+import tools.dynamia.viewers.ViewRendererException;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.util.ZKBindingUtil;
@@ -159,6 +163,7 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
         String parameterClassName = (String) descriptor.getParams().get(PARAM_PARAMETER_CLASS);
         if (parameterClassName != null) {
             try {
+                //noinspection unchecked
                 parameterClass = (Class<? extends Parameter>) Class.forName(parameterClassName);
             } catch (ClassNotFoundException ex) {
                 throw new ViewRendererException("Parameter Class not found " + parameterClassName, ex);

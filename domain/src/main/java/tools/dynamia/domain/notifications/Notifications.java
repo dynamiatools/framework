@@ -31,7 +31,6 @@ public class Notifications {
     /**
      * Post a new Notification
      *
-     * @param notification
      */
     public static void post(INotification notification) {
         var repository = findDefaultRepository();
@@ -42,8 +41,6 @@ public class Notifications {
     /**
      * Post a new notification with user id and message. It use a instance of {@link Notification}
      *
-     * @param userId
-     * @param message
      */
     public static void post(String userId, String message) {
         post(Notification.build().userId(userId)
@@ -53,9 +50,6 @@ public class Notifications {
     /**
      * Post a new notification with user id, message and tenant id. It use a instance of {@link Notification}
      *
-     * @param userId
-     * @param message
-     * @param tenantId
      */
     public static void post(String userId, String message, String tenantId) {
         post(Notification.build().userId(userId)
@@ -66,10 +60,6 @@ public class Notifications {
     /**
      * Post a new notification with user id, message, tenant id and content. It use a instance of {@link Notification}
      *
-     * @param userId
-     * @param message
-     * @param tenantId
-     * @param content
      */
     public static void post(String userId, String message, String tenantId, Map<String, Object> content) {
         post(Notification.build().userId(userId)

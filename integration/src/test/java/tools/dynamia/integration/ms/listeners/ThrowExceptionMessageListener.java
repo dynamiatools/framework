@@ -16,7 +16,12 @@
  */
 package tools.dynamia.integration.ms.listeners;
 
-import tools.dynamia.integration.ms.*;
+import tools.dynamia.integration.ms.Message;
+import tools.dynamia.integration.ms.MessageChannelExchange;
+import tools.dynamia.integration.ms.MessageEvent;
+import tools.dynamia.integration.ms.MessageException;
+import tools.dynamia.integration.ms.MessageExceptionHandler;
+import tools.dynamia.integration.ms.MessageListener;
 
 @MessageChannelExchange(channel = "someChannel")
 public class ThrowExceptionMessageListener implements MessageListener<Message>, MessageExceptionHandler<Message> {

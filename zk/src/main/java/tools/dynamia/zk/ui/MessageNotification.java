@@ -43,7 +43,7 @@ public class MessageNotification extends MessageDialog {
         if (time != null) {
             try {
                 timeout = Integer.parseInt(String.valueOf(time));
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
     }

@@ -18,7 +18,11 @@ package tools.dynamia.app.template;
 
 import tools.dynamia.integration.Containers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
 /**
  *
@@ -64,9 +68,6 @@ public class ApplicationTemplates {
 	/**
 	 * Find the template skin using id, if not found null is returned
 	 *
-	 * @param template
-	 * @param skinId
-	 * @return
 	 */
 	public static Skin findSkin(ApplicationTemplate template, String skinId) {
 
@@ -82,8 +83,6 @@ public class ApplicationTemplates {
 	/**
 	 * Get all skin related to template. Include skin providers
 	 *
-	 * @param template
-	 * @return
 	 */
 	public static List<Skin> getAllSkins(ApplicationTemplate template) {
 		List<Skin> allSkins = new ArrayList<>(template.getSkins());

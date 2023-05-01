@@ -16,7 +16,6 @@
  */
 package tools.dynamia.zk.crud.ui;
 
-import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zul.Label;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.domain.EntityReference;
@@ -67,6 +66,7 @@ public class EntityReferenceLabel extends Label  implements LoadableOnly {
     private void initValue() {
         if (repository != null && referenceId != null) {
 
+            //noinspection unchecked
             reference = (EntityReference) SessionCache.getInstance()
                     .getOrLoad("entityRef" + repository.getAlias() + referenceId, s -> repository.load(referenceId));
 

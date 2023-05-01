@@ -22,14 +22,22 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.io.IOUtils;
 import tools.dynamia.io.Resource;
-import tools.dynamia.viewers.*;
+import tools.dynamia.viewers.MergeableViewDescriptor;
+import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.ViewDescriptorFactory;
+import tools.dynamia.viewers.ViewDescriptorNotFoundException;
+import tools.dynamia.viewers.ViewDescriptorReader;
+import tools.dynamia.viewers.ViewDescriptorReaderCustomizer;
+import tools.dynamia.viewers.ViewDescriptorsProvider;
 import tools.dynamia.viewers.util.ViewDescriptorInterceptorUtils;
 import tools.dynamia.viewers.util.ViewDescriptorReaderUtils;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A factory for creating AbstractViewDescriptor objects.
@@ -202,7 +210,6 @@ public abstract class AbstractViewDescriptorFactory implements ViewDescriptorFac
      *
      * @param id              View descriptor id
      * @param preferredDevice (screen, smartphone, tablet)
-     * @return
      */
     @Override
     public ViewDescriptor getDescriptor(String id, String preferredDevice) {

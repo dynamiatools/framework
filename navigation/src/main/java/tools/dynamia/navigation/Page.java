@@ -52,9 +52,6 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
     }
 
     /**
-     * @param id
-     * @param name
-     * @param path
      */
     public Page(String id, String name, String path) {
         this(id, name, path, true);
@@ -232,7 +229,6 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
     /**
      * Set this page as a featured page. See setFeatured
      *
-     * @return
      */
     public Page featured() {
         setFeatured(true);
@@ -242,8 +238,6 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
     /**
      * Set as featured with priority
      *
-     * @param priority
-     * @return
      */
     public Page featured(int priority) {
         setFeatured(true);
@@ -255,7 +249,6 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
     /**
      * Return the priority of this page. By default is 100.
      *
-     * @return
      */
     public int getPriority() {
         return priority;
@@ -264,7 +257,6 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
     /**
      * Set the priority of this page. By default is 100
      *
-     * @param priority
      */
     public void setPriority(int priority) {
         this.priority = priority;
@@ -277,7 +269,6 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
     /**
      * If always allowed is true, temporal is setting to true
      *
-     * @param alwaysAllowed
      */
     @Override
     public void setAlwaysAllowed(boolean alwaysAllowed) {

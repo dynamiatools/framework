@@ -17,7 +17,11 @@
 
 package tools.dynamia.zk.viewers.mv;
 
-import tools.dynamia.viewers.*;
+import tools.dynamia.viewers.Field;
+import tools.dynamia.viewers.View;
+import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.ViewRenderer;
+import tools.dynamia.viewers.ViewRendererException;
 import tools.dynamia.zk.viewers.ui.Viewer;
 
 public class MultiViewRenderer implements ViewRenderer {
@@ -25,6 +29,7 @@ public class MultiViewRenderer implements ViewRenderer {
     @Override
     public View render(ViewDescriptor descriptor, Object value) {
         MultiView view = newMultiView();
+        //noinspection unchecked
         view.setValue(value);
         view.setViewDescriptor(descriptor);
         boolean loadNow = true;

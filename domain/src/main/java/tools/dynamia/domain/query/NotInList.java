@@ -34,7 +34,8 @@ public class NotInList<T> extends Inlist<T> {
 	 * @param values
 	 *            the values
 	 */
-	public NotInList(T... values) {
+	@SafeVarargs
+    public NotInList(T... values) {
 		super(values);
 	}
 
@@ -56,7 +57,8 @@ public class NotInList<T> extends Inlist<T> {
 	 * @param values
 	 *            the values
 	 */
-	public NotInList(BooleanOp booleanOp, T... values) {
+	@SafeVarargs
+    public NotInList(BooleanOp booleanOp, T... values) {
 		super(booleanOp, values);
 	}
 

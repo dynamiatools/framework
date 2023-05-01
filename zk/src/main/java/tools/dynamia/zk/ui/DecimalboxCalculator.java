@@ -19,7 +19,11 @@ package tools.dynamia.zk.ui;
 
 import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.*;
+import org.zkoss.zul.A;
+import org.zkoss.zul.Constraint;
+import org.zkoss.zul.Decimalbox;
+import org.zkoss.zul.Popup;
+import org.zkoss.zul.Span;
 import tools.dynamia.zk.util.ZKUtil;
 
 import java.math.BigDecimal;

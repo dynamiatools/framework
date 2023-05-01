@@ -103,14 +103,12 @@ public interface MultiMap<K, V> {
 
     /**
      * Check is the multimpa is empty
-     * @return
      */
     boolean isEmpty();
 
     /**
      * Iterate over keys and collections
      *
-     * @param action
      */
     default void forEach(BiConsumer<? super K, ? super Collection<V>> action) {
         Objects.requireNonNull(action);

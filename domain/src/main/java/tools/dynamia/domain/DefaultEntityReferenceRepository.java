@@ -120,7 +120,7 @@ public class DefaultEntityReferenceRepository<ID extends Serializable> extends C
             return null;
         }
 
-        EntityReference<ID> reference = loadFromCache(id, EntityReference.class);
+        @SuppressWarnings("unchecked") EntityReference<ID> reference = loadFromCache(id, EntityReference.class);
 
         if (reference == null) {
             try {
@@ -224,11 +224,14 @@ public class DefaultEntityReferenceRepository<ID extends Serializable> extends C
             } else {
                 ref = new EntityReference<>(id, getEntityClassName(), entity.toString());
                 if (entity instanceof Mappable) {
+                    //noinspection unchecked
                     ref.getAttributes().putAll(((Mappable) entity).toMap());
                 } else {
+                    //noinspection unchecked
                     ref.getAttributes().putAll(BeanUtils.getValuesMaps(entity));
                 }
             }
+            //noinspection unchecked
             return ref;
         } else {
             return null;

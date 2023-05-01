@@ -22,9 +22,17 @@ import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.domain.Descriptor;
 import tools.dynamia.domain.Descriptors;
 import tools.dynamia.integration.Containers;
-import tools.dynamia.viewers.*;
+import tools.dynamia.viewers.Field;
+import tools.dynamia.viewers.FieldCustomizer;
+import tools.dynamia.viewers.View;
+import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.ViewDescriptorFactory;
+import tools.dynamia.viewers.ViewFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -230,12 +238,10 @@ public class Viewers {
     }
 
     /**
-     * @param descriptor
-     * @param value
-     * @return
      */
     public static View getView(ViewDescriptor descriptor, Object value) {
         View view = getView(descriptor);
+        //noinspection unchecked
         view.setValue(value);
         return view;
     }
@@ -330,8 +336,6 @@ public class Viewers {
     /**
      * Build a classifer name using {@link ViewDescriptor} type and beanClass simple name or viewDescriptorId
      *
-     * @param viewDescriptor
-     * @return
      */
     public static String buildMessageClasffier(ViewDescriptor viewDescriptor) {
         String classifier = "";

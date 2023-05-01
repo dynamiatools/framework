@@ -40,24 +40,12 @@ public class MessageDialog implements MessageDisplayer {
     @Override
     public void showMessage(String message, String title, MessageType type) {
 
-        String icon = Messagebox.NONE;
-
-        switch (type) {
-            case NORMAL:
-                icon = Messagebox.NONE;
-                break;
-            case ERROR:
-            case CRITICAL:
-                icon = Messagebox.ERROR;
-                break;
-            case INFO:
-            case SPECIAL:
-                icon = Messagebox.INFORMATION;
-                break;
-            case WARNING:
-                icon = Messagebox.EXCLAMATION;
-                break;
-        }
+        String icon = switch (type) {
+            case NORMAL -> Messagebox.NONE;
+            case ERROR, CRITICAL -> Messagebox.ERROR;
+            case INFO, SPECIAL -> Messagebox.INFORMATION;
+            case WARNING -> Messagebox.EXCLAMATION;
+        };
 
         Messagebox.show(message, title, Messagebox.OK, icon);
 
@@ -104,6 +92,7 @@ public class MessageDialog implements MessageDisplayer {
 
     @Override
     public <T> void showInput(String title, Class<T> valueClass, T defaultValue, Consumer<T> onValue) {
+        //noinspection unchecked
         ZKUtil.showInputDialog(title, valueClass, defaultValue, evt -> onValue.accept((T) evt.getData()));
     }
 

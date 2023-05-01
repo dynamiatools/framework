@@ -16,8 +16,15 @@
  */
 package tools.dynamia.domain;
 
-import tools.dynamia.commons.*;
 
+import tools.dynamia.commons.Identifiable;
+import tools.dynamia.commons.Jsonable;
+import tools.dynamia.commons.Mappable;
+import tools.dynamia.commons.Nameable;
+import tools.dynamia.commons.PropertyChangeListener;
+import tools.dynamia.commons.PropertyChangeListenerContainer;
+import tools.dynamia.commons.PropertyChangeSupport;
+import tools.dynamia.commons.Xmlable;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -101,7 +108,6 @@ public abstract class AbstractEntity<ID extends Serializable> implements Seriali
      * Add a PropertyChangeListener to get object change, subclasses must invoke
      * notifyChange to fire listeners
      *
-     * @param listener
      */
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -114,7 +120,6 @@ public abstract class AbstractEntity<ID extends Serializable> implements Seriali
     /**
      * Remove PropertyChangeListener
      *
-     * @param listener
      */
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
@@ -125,9 +130,6 @@ public abstract class AbstractEntity<ID extends Serializable> implements Seriali
      * Notify PropertyChangeListeners change, this method automatically check if the
      * oldValue and newValue are different to fire the listeners.
      *
-     * @param propertyName
-     * @param oldValue
-     * @param newValue
      */
     protected void notifyChange(String propertyName, Object oldValue, Object newValue) {
         if (oldValue == null || !Objects.equals(oldValue, newValue)) {

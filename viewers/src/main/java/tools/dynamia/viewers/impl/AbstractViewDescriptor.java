@@ -23,12 +23,23 @@ import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.domain.Descriptor;
-import tools.dynamia.viewers.*;
+import tools.dynamia.viewers.Field;
+import tools.dynamia.viewers.FieldGroup;
+import tools.dynamia.viewers.IndexableComparator;
+import tools.dynamia.viewers.InvalidViewDescriptorFieldException;
+import tools.dynamia.viewers.MergeableViewDescriptor;
+import tools.dynamia.viewers.ViewCustomizer;
+import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.ViewRenderer;
 import tools.dynamia.viewers.util.ViewDescriptorReaderUtils;
 import tools.dynamia.viewers.util.Viewers;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -639,6 +650,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
         addField(field);
     }
 
+    @SuppressWarnings("unchecked")
     private void parseSubparams(String name, Object value, Map<String, Object> params) {
         if (name.contains(".")) {
             String[] subname = name.split("\\.");
@@ -648,6 +660,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
                 subparams = new HashMap<>();
                 params.put(subname[0], subparams);
             } else if (params.get(subname[0]) instanceof Map) {
+                //noinspection unchecked
                 subparams = (Map<String, Object>) params.get(subname[0]);
             }
 
@@ -713,11 +726,10 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
      */
     @Override
     public String toString() {
-        String sb = "ViewDescriptor Info: " + getClass() + "   ==> " + getBeanClass() +
+        return "ViewDescriptor Info: " + getClass() + "   ==> " + getBeanClass() +
                 "\n -> ID:" + getId() +
                 "\n -> Fields Count:" + getFields().size() +
                 "\n -> Visible Fields Count:" + getVisibleFields();
-        return sb;
     }
 
     /**

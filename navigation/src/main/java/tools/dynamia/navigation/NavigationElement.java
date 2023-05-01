@@ -18,12 +18,15 @@ package tools.dynamia.navigation;
 
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.StringUtils;
-import tools.dynamia.integration.ms.Message;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.ui.icons.IconsTheme;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -287,37 +290,44 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
 
     public T id(String id) {
         setId(id);
+        //noinspection unchecked
         return (T) this;
     }
 
 
     public T longName(String longName) {
         setLongName(longName);
+        //noinspection unchecked
         return (T) this;
     }
 
     public T name(String name) {
         setName(name);
+        //noinspection unchecked
         return (T) this;
     }
 
     public T description(String description) {
         setDescription(description);
+        //noinspection unchecked
         return (T) this;
     }
 
     public T icon(String icon) {
         setIcon(icon);
+        //noinspection unchecked
         return (T) this;
     }
 
     public T iconSize(IconSize iconSize) {
         setIconSize(iconSize);
+        //noinspection unchecked
         return (T) this;
     }
 
     public T position(double position) {
         setPosition(position);
+        //noinspection unchecked
         return (T) this;
     }
 

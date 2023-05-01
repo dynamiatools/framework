@@ -32,7 +32,6 @@ public interface JdbcRow {
      *
      * @param rowIndex the row index
      * @param rs the rs
-     * @throws SQLException the SQL exception
      */
-    void process(int rowIndex, ResultSet rs) throws SQLException;
+    void process(int rowIndex, ResultSet rs);
 }

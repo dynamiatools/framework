@@ -103,6 +103,7 @@ public class DataPaginatorPagedListDataSource<T> implements PagedListDataSource<
 
     public List<T> loadActivePageData() {
         CrudService crudService = Containers.get().findObject(CrudService.class);
+        //noinspection unchecked
         return (List<T>) crudService.find(getQueryMetadata());
     }
 

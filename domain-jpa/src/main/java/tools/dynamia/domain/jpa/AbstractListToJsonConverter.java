@@ -17,26 +17,25 @@
 
 package tools.dynamia.domain.jpa;
 
+import jakarta.persistence.AttributeConverter;
 import tools.dynamia.commons.JsonParsingException;
 import tools.dynamia.commons.StringPojoParser;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 
-import jakarta.persistence.AttributeConverter;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Converter List to String with JSON format. You need extend this class with generic <T> object type. Example:
- *
+ * <p>
  * public class AddressToJsonConverter extends AbstractListToJsonConverter<Address> {
- *
+ * <p>
  *     public AddressToJsonConverter() {
  *         super(Address.class);
  *     }
  * }
- *
- * And then annotate entity field with {@link javax.persistence.Convert}
+ * <p>
+ * And then annotate entity field with {@link jakarta.persistence.Convert}
  *
  */
 public abstract class AbstractListToJsonConverter<T> implements AttributeConverter<List<T>, String> {

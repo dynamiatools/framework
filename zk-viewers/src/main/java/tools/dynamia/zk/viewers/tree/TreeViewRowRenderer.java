@@ -21,13 +21,17 @@ package tools.dynamia.zk.viewers.tree;
 import org.zkoss.bind.Binder;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.HtmlBasedComponent;
-import org.zkoss.zul.*;
+import org.zkoss.zul.Hlayout;
+import org.zkoss.zul.Label;
+import org.zkoss.zul.Treecell;
+import org.zkoss.zul.Treeitem;
+import org.zkoss.zul.TreeitemRenderer;
+import org.zkoss.zul.Treerow;
 import tools.dynamia.commons.BeanUtils;
-import tools.dynamia.commons.reflect.ReflectionException;
 import tools.dynamia.commons.PropertyChangeListenerContainer;
+import tools.dynamia.commons.reflect.ReflectionException;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.viewers.Field;
-import tools.dynamia.viewers.IndexableComparator;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.ComponentCustomizerUtil;
 import tools.dynamia.viewers.util.Viewers;
@@ -35,7 +39,9 @@ import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ui.IconImage;
 import tools.dynamia.zk.util.ZKBindingUtil;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Mario A. Serrano Leones
@@ -116,7 +122,7 @@ public class TreeViewRowRenderer<E> implements TreeitemRenderer<TreeViewNode<E>>
 
             if (data instanceof PropertyChangeListenerContainer) {
                 ((PropertyChangeListenerContainer) data).addPropertyChangeListener(evt -> {
-                    Field field = viewDescriptor.getField(evt.getPropertyName());
+                    Field field = viewDescriptor.getField(evt.propertyName());
                     if (field != null) {
                         binder.loadComponent(item, false);
                     }

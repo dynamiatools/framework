@@ -16,7 +16,6 @@
  */
 package tools.dynamia.zk.actions;
 
-import tools.dynamia.commons.Messages;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Combobox;
@@ -25,6 +24,7 @@ import org.zkoss.zul.Toolbarbutton;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionEventBuilder;
+import tools.dynamia.commons.Messages;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.zk.util.ZKUtil;
 

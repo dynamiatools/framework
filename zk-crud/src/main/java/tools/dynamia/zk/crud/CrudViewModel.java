@@ -25,8 +25,6 @@ import org.zkoss.zk.ui.Executions;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.query.QueryParameters;
-import tools.dynamia.domain.services.CrudService;
-import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.navigation.NavigationManager;
 import tools.dynamia.ui.MessageType;
 import tools.dynamia.ui.UIMessages;
@@ -83,6 +81,7 @@ public class CrudViewModel<T> extends AbstractViewModel<T> {
             }
 
             if (mc != null) {
+                //noinspection unchecked
                 this.modelClass = mc;
             }
         }

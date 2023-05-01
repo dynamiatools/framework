@@ -16,15 +16,19 @@
  */
 package tools.dynamia.zk.ui;
 
-import tools.dynamia.commons.Messages;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.ListModelList;
+import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.util.ZKUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 
 public class LocaleCombobox extends Combobox {
 
@@ -85,6 +89,7 @@ public class LocaleCombobox extends Combobox {
                     locale = new Locale(parts[0], parts[1]);
                 }
                 ListModelList model = (ListModelList) getModel();
+                //noinspection unchecked
                 model.addToSelection(locale);
             } catch (Exception e) {
                 // ignore

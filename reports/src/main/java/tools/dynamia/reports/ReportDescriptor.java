@@ -26,39 +26,33 @@ public interface ReportDescriptor {
 
     /**
      *
-     * @return
      */
     Object getTemplate();
 
     /**
      * Parameters passed to report
      *
-     * @return
      */
     Map<String, Object> getParameters();
 
     /**
      *
-     * @return
      */
     Object getDataSource();
 
     /**
      *
-     * @return
      */
     String getName();
 
     /**
      *
-     * @return
      */
     ReportOutputType getDefaultOutputType();
 
     /**
      * Paremeters passed to report exporter
      *
-     * @return
      */
     Map getExporterParameters();
 }

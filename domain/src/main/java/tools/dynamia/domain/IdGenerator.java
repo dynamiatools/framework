@@ -30,7 +30,6 @@ public interface IdGenerator<T extends Serializable> {
     /**
      * IdGenerator target id type, this is necesary because generics limitation
      *
-     * @return
      */
     Class<T> getTargetType();
 }

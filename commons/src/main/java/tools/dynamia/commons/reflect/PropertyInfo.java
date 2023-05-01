@@ -114,7 +114,6 @@ public class PropertyInfo implements Serializable {
     /**
      * Check if this property is primitive or belong to java.lang, java.util or java.math packages
      *
-     * @return
      */
     public boolean isStandardClass() {
         return BeanUtils.isStantardClass(getType());
@@ -223,7 +222,7 @@ public class PropertyInfo implements Serializable {
         if (ownerClass != null) {
             try {
                 return BeanUtils.getField(ownerClass, getName());
-            } catch (NoSuchFieldException e) {
+            } catch (NoSuchFieldException ignored) {
 
             }
         }

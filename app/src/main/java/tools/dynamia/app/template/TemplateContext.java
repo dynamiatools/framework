@@ -18,17 +18,6 @@ package tools.dynamia.app.template;
 
 import tools.dynamia.app.ApplicationInfo;
 
-public class TemplateContext {
-
-    private final ApplicationInfo applicationInfo;
-
-    public TemplateContext(ApplicationInfo applicationInfo) {
-        super();
-        this.applicationInfo = applicationInfo;
-    }
-
-    public ApplicationInfo getApplicationInfo() {
-        return applicationInfo;
-    }
+public record TemplateContext(ApplicationInfo applicationInfo) {
 
 }

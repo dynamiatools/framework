@@ -63,7 +63,7 @@ public class DefaultApplicationTemplate implements ApplicationTemplate {
 
     @Override
     public List<Skin> getSkins() {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     @Override

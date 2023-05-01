@@ -23,7 +23,6 @@ public interface ReportCompiler {
     /**
      * Compile the reportFile
      *
-     * @param reportFile
      * @return compiled report
      */
     File compile(File reportFile);

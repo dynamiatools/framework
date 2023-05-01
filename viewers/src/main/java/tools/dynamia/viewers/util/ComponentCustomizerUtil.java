@@ -54,7 +54,7 @@ public abstract class ComponentCustomizerUtil {
             for (ComponentCustomizer cc : Containers.get().findObjects(ComponentCustomizer.class)) {
                 try {
                     cc.cutomize(field, component);
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             }
         }

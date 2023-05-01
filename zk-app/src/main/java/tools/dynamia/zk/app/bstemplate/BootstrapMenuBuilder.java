@@ -17,13 +17,21 @@
 
 package tools.dynamia.zk.app.bstemplate;
 
-import tools.dynamia.commons.Messages;
-import org.zkoss.zhtml.*;
+import org.zkoss.zhtml.A;
+import org.zkoss.zhtml.I;
+import org.zkoss.zhtml.Li;
+import org.zkoss.zhtml.Span;
+import org.zkoss.zhtml.Text;
+import org.zkoss.zhtml.Ul;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Menupopup;
-import tools.dynamia.navigation.*;
+import tools.dynamia.commons.Messages;
 import tools.dynamia.navigation.Module;
+import tools.dynamia.navigation.NavigationManager;
+import tools.dynamia.navigation.NavigationViewBuilder;
+import tools.dynamia.navigation.Page;
+import tools.dynamia.navigation.PageGroup;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.ui.icons.IconType;
 import tools.dynamia.ui.icons.IconsTheme;

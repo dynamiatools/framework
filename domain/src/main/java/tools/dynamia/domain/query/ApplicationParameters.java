@@ -59,9 +59,11 @@ public class ApplicationParameters implements Parameters {
     /* (non-Javadoc)
      * @see com.dynamia.tools.domain.query.Parameters#getParameters(java.lang.Class, java.util.List)
      */
+    @SuppressWarnings("unchecked")
     @Override
     public List<Parameter> getParameters(Class<? extends Parameter> parameterClass, List<String> paramNames) {
         QueryParameters qp = QueryParameters.with("name", QueryConditions.in(paramNames));
+        //noinspection unchecked
         return (List<Parameter>) crudService.find(parameterClass, qp);
 
     }
@@ -71,6 +73,7 @@ public class ApplicationParameters implements Parameters {
      */
     @Override
     public List<Parameter> all() {
+        //noinspection unchecked
         return (List<Parameter>) crudService.findAll(DomainUtils.getDefaultParameterClass(), "name");
     }
 

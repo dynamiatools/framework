@@ -56,6 +56,7 @@ public class DayWeekbox extends Combobox {
         this.selected = selected;
 
         if (getModel() instanceof AbstractListModel model) {
+            //noinspection unchecked
             model.addToSelection(selected);
         }
     }

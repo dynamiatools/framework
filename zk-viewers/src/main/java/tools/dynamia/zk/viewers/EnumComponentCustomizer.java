@@ -30,7 +30,7 @@ public class EnumComponentCustomizer implements ComponentCustomizer<Combobox> {
     public void cutomize(Field field, Combobox component) {
 
         if (field.getFieldClass() != null && field.getFieldClass().isEnum()) {
-            ListModel model = new ListModelArray(field.getFieldClass().getEnumConstants(), true);
+            @SuppressWarnings("unchecked") ListModel model = new ListModelArray(field.getFieldClass().getEnumConstants(), true);
             component.setModel(model);
             component.setReadonly(true);
             component.setItemRenderer((item, data, index) -> {

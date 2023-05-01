@@ -23,13 +23,26 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.sys.ContentRenderer;
-import org.zkoss.zul.*;
-import tools.dynamia.actions.*;
+import org.zkoss.zul.Button;
+import org.zkoss.zul.Div;
+import org.zkoss.zul.Hlayout;
+import org.zkoss.zul.Listbox;
+import org.zkoss.zul.Toolbar;
+import org.zkoss.zul.Window;
+import tools.dynamia.actions.Action;
+import tools.dynamia.actions.ActionEvent;
+import tools.dynamia.actions.ActionEventBuilder;
+import tools.dynamia.actions.ActionLoader;
+import tools.dynamia.actions.ActionRenderer;
 import tools.dynamia.commons.collect.ArrayListMultiMap;
 import tools.dynamia.commons.collect.MultiMap;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.ui.Form;
-import tools.dynamia.viewers.*;
+import tools.dynamia.viewers.DataSetView;
+import tools.dynamia.viewers.View;
+import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.ViewFactory;
+import tools.dynamia.viewers.ViewRendererException;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.web.util.HttpUtils;
 import tools.dynamia.zk.BindingComponentIndex;
@@ -162,6 +175,7 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         }
 
         if (view instanceof Component viewComp) {
+            //noinspection unchecked
             events.forEach((name, values) -> values.forEach(listener -> viewComp.addEventListener(name, listener)));
             viewComp.setParent(contentRegion);
 
@@ -530,10 +544,6 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
 
     /**
      * Show this viewer as a modal window
-     * @param title
-     * @param autoscroll
-     * @param onClose
-     * @return
      */
     public Window showModal(String title, boolean autoscroll, EventListener<Event> onClose) {
         var win = ZKUtil.showDialog(title, this);
@@ -548,8 +558,6 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
 
     /**
      * Show this viewer as a modal Window
-     * @param title
-     * @return
      */
     public Window showModal(String title) {
         return showModal(title, true, null);

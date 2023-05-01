@@ -80,6 +80,7 @@ public class ExportCSVAction extends AbstractExportAction {
 			if (f.getParams().get("entityAlias") != null) {
 				column.setEntityAlias((String) f.getParams().get("entityAlias"));
 			}
+			//noinspection unchecked
 			exporter.addColumn(column);
 		});
 
@@ -87,7 +88,7 @@ public class ExportCSVAction extends AbstractExportAction {
 
 		ProgressMonitor monitor = new ProgressMonitor();
 
-		LongOperation operation = LongOperation.create().execute(() -> exporter.export(temp, data, monitor))
+		@SuppressWarnings("unchecked") LongOperation operation = LongOperation.create().execute(() -> exporter.export(temp, data, monitor))
 				.onFinish(() -> download(temp)).onException(Throwable::printStackTrace).start();
 
 		// Update ui each 4 secs

@@ -82,7 +82,7 @@ public class CronMaker {
     /**
      * Create a cron expresion for every day at specified hour and minutes
      * between Monday and Friday
-     *
+     * <p>
      * Example: dailyWeekDayAt("20","30") means every Monday to Friday at
      * "20:30".
      *

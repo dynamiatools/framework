@@ -53,8 +53,6 @@ public class ValidationError extends ValidationException {
     /**
      * Instantiates a new validation error using String.format arguments
      *
-     * @param messageFormat
-     * @param args
      */
     public ValidationError(String messageFormat, Object... args) {
         super(String.format(messageFormat, args));

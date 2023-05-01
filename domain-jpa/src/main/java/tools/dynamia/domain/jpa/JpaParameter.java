@@ -16,13 +16,12 @@
  */
 package tools.dynamia.domain.jpa;
 
-import tools.dynamia.domain.query.Parameter;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import tools.dynamia.domain.query.Parameter;
 
 /**
  * The Class Parameter.

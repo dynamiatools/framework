@@ -21,19 +21,24 @@ package tools.dynamia.zk.viewers.table;
 import org.zkoss.bind.Binder;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.HtmlBasedComponent;
-import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.*;
+import org.zkoss.zul.Hlayout;
+import org.zkoss.zul.Label;
+import org.zkoss.zul.Listcell;
+import org.zkoss.zul.Listitem;
+import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.impl.InputElement;
-import tools.dynamia.actions.*;
+import tools.dynamia.actions.Action;
+import tools.dynamia.actions.ActionEvent;
+import tools.dynamia.actions.ActionLoader;
+import tools.dynamia.actions.ActionRenderer;
 import tools.dynamia.commons.BeanMap;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.MapBuilder;
-import tools.dynamia.commons.reflect.ReflectionException;
 import tools.dynamia.commons.PropertyChangeListenerContainer;
+import tools.dynamia.commons.reflect.ReflectionException;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.viewers.Field;
-import tools.dynamia.viewers.IndexableComparator;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.ComponentCustomizerUtil;
 import tools.dynamia.viewers.util.Viewers;
@@ -42,18 +47,16 @@ import tools.dynamia.zk.ui.Import;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author Mario A. Serrano Leones
  */
 public class TableViewRowRenderer implements ListitemRenderer<Object> {
     private static final String VIEW_TYPE_NAME = "table";
-    public static String ROW_BINDER_NAME = "rowBinder";
+    public static final String ROW_BINDER_NAME = "rowBinder";
 
     private ViewDescriptor viewDescriptor;
     private TableView tableView;
@@ -117,7 +120,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
         if (viewDescriptor.getParams().get(Viewers.PARAM_WRITABLE) == Boolean.TRUE) {
             if (data instanceof PropertyChangeListenerContainer) {
                 ((PropertyChangeListenerContainer) data).addPropertyChangeListener(evt -> {
-                    Field field = viewDescriptor.getField(evt.getPropertyName());
+                    Field field = viewDescriptor.getField(evt.propertyName());
                     if (field != null) {
                         binder.loadComponent(item, false);
                         tableView.computeFooters();
@@ -144,6 +147,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
 
             Hlayout hlayout = new Hlayout();
             cell.appendChild(hlayout);
+            //noinspection unchecked
             actions.forEach((Object k, Object v) -> {
                 Map actionParams = null;
                 if (v != null && v instanceof Map) {

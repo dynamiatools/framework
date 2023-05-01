@@ -97,15 +97,17 @@ public class SimpleMessageChannel implements MessageChannel {
 
     private boolean fireListener(MessageEvent event, MessageListener messageListener) {
         try {
+            //noinspection unchecked
             messageListener.onMessage(event);
-            event.getMessage().addHeader(Message.HEADER_LISTENER_COUNT,
-                    (Integer) event.getMessage().getHeader(Message.HEADER_LISTENER_COUNT) + 1);
+            event.message().addHeader(Message.HEADER_LISTENER_COUNT,
+                    (Integer) event.message().getHeader(Message.HEADER_LISTENER_COUNT) + 1);
             return true;
         } catch (ClassCastException e) {
             // No generic type, nothing to do
         } catch (Throwable e) {
             var msg = "Exception firing " + event + " to listener " + messageListener + ": " + e.getMessage();
             if (messageListener instanceof MessageExceptionHandler) {
+                //noinspection unchecked
                 ((MessageExceptionHandler) messageListener).onMessageException(event, new MessageException(msg, e));
             } else {
                 throw new MessageException(msg, e);

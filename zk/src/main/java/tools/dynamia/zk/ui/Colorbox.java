@@ -111,7 +111,6 @@ public class Colorbox extends Combobox {
     /**
      * Set a string of comma separated colors
      *
-     * @param colors
      */
     public void setAvailableColors(String colors) {
         if (colors != null) {

@@ -32,7 +32,9 @@ import java.util.Date;
  */
 public class HtmlTableBuilder implements Serializable {
 
-    public static int LEFT = -1, CENTER = 0, RIGHT = 1;
+    public static final int LEFT = -1;
+    public static final int CENTER = 0;
+    public static final int RIGHT = 1;
     private final StringBuilder sb = new StringBuilder();
     private final NumberFormat numberFormat = NumberFormat.getInstance();
     private final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT);
@@ -190,7 +192,6 @@ public class HtmlTableBuilder implements Serializable {
     /**
      * Shortcut chained method to invoke addRow() and then addData(..) methods
      *
-     * @param data
      */
     public HtmlTableBuilder addRowAndData(Object... data) {
         addRow();

@@ -42,6 +42,7 @@ public class EntityRadioComponentCustomizer implements ComponentCustomizer<Radio
                 if (field.getParams().get("automodel") == Boolean.TRUE) {
                     CrudService crudService = Containers.get().findObject(CrudService.class);
                     List entities = crudService.findAll(field.getFieldClass());
+                    //noinspection unchecked
                     component.setModel(new ListModelList(entities, true));
                 }
             }

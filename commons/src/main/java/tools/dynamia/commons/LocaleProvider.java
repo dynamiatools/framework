@@ -26,7 +26,6 @@ public interface LocaleProvider {
     /**
      * Higher number, lower prority
      *
-     * @return
      */
     int getPriority();
 

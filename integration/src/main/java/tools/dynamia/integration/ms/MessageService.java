@@ -26,16 +26,11 @@ public interface MessageService {
 
     /**
      * Create a new message channel, implementation depends on MessageService
-     * @param name
-     * @return
      */
     MessageChannel createChannel(String name);
 
     /**
      * Create a new message channel, implementation depends on MessageService
-     * @param name
-     * @param properties
-     * @return
      */
     MessageChannel createChannel(String name, Properties properties);
 

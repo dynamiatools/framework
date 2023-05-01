@@ -51,7 +51,7 @@ public class TableVDReaderCustomizer implements ViewDescriptorReaderCustomizer<M
             if (frozen != null) {
                 viewDescriptor.addParam("frozenColumns", frozen);
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 
@@ -59,7 +59,7 @@ public class TableVDReaderCustomizer implements ViewDescriptorReaderCustomizer<M
         try {
             Map actions = (Map) content.get("actions");
             viewDescriptor.addParam("actions", actions);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 }

@@ -18,7 +18,6 @@
 package tools.dynamia.viewers;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -33,7 +32,11 @@ import tools.dynamia.viewers.util.Viewers;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class JsonViewDescriptorDeserializer extends StdDeserializer<Object> {
 
@@ -60,7 +63,7 @@ public class JsonViewDescriptorDeserializer extends StdDeserializer<Object> {
     }
 
     private Object parseNode(Class type, JsonNode node, ViewDescriptor viewDescriptor) {
-        Object object = BeanUtils.newInstance(type);
+        @SuppressWarnings("unchecked") Object object = BeanUtils.newInstance(type);
         for (Field field : Viewers.getFields(viewDescriptor)) {
             PropertyInfo fieldInfo = field.getPropertyInfo();
             String fieldName = field.getName();
@@ -93,6 +96,7 @@ public class JsonViewDescriptorDeserializer extends StdDeserializer<Object> {
                 for (JsonNode child : fieldNode) {
                     Object item = parseNode(fieldInfo.getGenericType(), child, collectionDescriptor);
                     BeanUtils.invokeSetMethod(item, parentName, object);
+                    //noinspection unchecked
                     collection.add(item);
                 }
 

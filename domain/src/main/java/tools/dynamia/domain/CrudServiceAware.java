@@ -10,7 +10,6 @@ public interface CrudServiceAware {
 
     /**
      * Lookup a {@link CrudService} instance
-     * @return
      */
     default CrudService crudService() {
         return DomainUtils.lookupCrudService();

@@ -31,7 +31,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -151,7 +156,7 @@ public final class BeanUtils {
         }
 
         try {
-            Class<T> clazz = (Class<T>) Class.forName(className);
+            @SuppressWarnings("unchecked") Class<T> clazz = (Class<T>) Class.forName(className);
             return newInstance(clazz);
         } catch (ClassNotFoundException e) {
             throw new ReflectionException(e);
@@ -200,7 +205,7 @@ public final class BeanUtils {
      * <code>person.getName();</code>
      * <p>
      * You also can navigate
-     *
+     * <p>
      * <code>BeanUtil.invokeGetMetho(person,"country.name");</code> invoke:
      * <code>person.getCountry().getName();</code>
      *
@@ -232,7 +237,7 @@ public final class BeanUtils {
      * <code>person.isActive();</code>
      * <p>
      * You also can navigate
-     *
+     * <p>
      * <code>BeanUtil.invokeBooleanGetMethod(person,"country.active");</code>
      * invoke: <code>person.getCountry().isActive();</code>
      *
@@ -312,8 +317,8 @@ public final class BeanUtils {
         Method method = null;
 
         if (value instanceof ValueWrapper valueWrapper) {
-            valueClass = valueWrapper.getValueClass();
-            realValue = valueWrapper.getValue();
+            valueClass = valueWrapper.valueClass();
+            realValue = valueWrapper.value();
         } else {
             valueClass = value.getClass();
             realValue = value;
@@ -338,13 +343,11 @@ public final class BeanUtils {
             }
         }
 
-        if (method != null) {
-            method.setAccessible(true);
-            try {
-                method.invoke(realBean, realValue);
-            } catch (Exception e) {
-                throw new ReflectionException(e);
-            }
+        method.setAccessible(true);
+        try {
+            method.invoke(realBean, realValue);
+        } catch (Exception e) {
+            throw new ReflectionException(e);
         }
     }
 
@@ -417,9 +420,6 @@ public final class BeanUtils {
     }
 
     /**
-     * @param classRef
-     * @param interfaceClass
-     * @return
      */
     public static Class getGenericTypeInterface(Object classRef, Class interfaceClass) {
         Class clazz = null;
@@ -594,7 +594,7 @@ public final class BeanUtils {
                 throw new ReflectionException(e1);
             }
         }
-        return cached.getProperties();
+        return cached.properties();
     }
 
     /**
@@ -734,6 +734,7 @@ public final class BeanUtils {
      * @return true, if is annotated
      */
     public static boolean isAnnotated(Class annotationClass, Class targetClass) {
+        //noinspection unchecked
         return targetClass.getAnnotation(annotationClass) != null;
     }
 
@@ -767,9 +768,6 @@ public final class BeanUtils {
     /**
      * Find and return the first field annotated with annotationClass
      *
-     * @param targetClass
-     * @param annotationClass
-     * @return
      */
     public static Field getFirstFieldWithAnnotation(Class<?> targetClass, Class<? extends Annotation> annotationClass) {
         return BeanUtils.getAllFields(targetClass).stream()
@@ -780,8 +778,6 @@ public final class BeanUtils {
     /**
      * Load all bean standard properties into map
      *
-     * @param bean
-     * @return
      */
     public static Map<String, Object> getValuesMaps(Object bean) {
         return getValuesMaps("", bean, null);
@@ -811,6 +807,7 @@ public final class BeanUtils {
         Map<String, Object> values = new HashMap<>();
         if (bean != null) {
             if (bean instanceof BeanMap) {
+                //noinspection unchecked
                 values.putAll((Map) bean);
             } else {
                 getPropertiesInfo(bean.getClass()).stream()
@@ -841,12 +838,9 @@ public final class BeanUtils {
      * types and primitive. Collections and arrays are excluded. Optional you can
      * specify additional excluded properties
      *
-     * @param source
-     * @param excludedProperties
-     * @return
      */
     public static <T> T clone(T source, String... excludedProperties) {
-        Class<T> sourceClass = (Class<T>) source.getClass();
+        @SuppressWarnings("unchecked") Class<T> sourceClass = (Class<T>) source.getClass();
         T clon = newInstance(sourceClass);
 
         Map<String, Object> values = getValuesMaps("", source);
@@ -866,11 +860,10 @@ public final class BeanUtils {
      * any type, this method extract source object properties values and names and
      * create a Map to setup bean.
      *
-     * @param bean
-     * @param source
      */
     public static void setupBean(Object bean, Object source) {
         if (source instanceof Map) {
+            //noinspection unchecked
             setupBean(bean, (Map) source);
         } else {
             Map<String, Object> values = getValuesMaps("", source);
@@ -881,8 +874,6 @@ public final class BeanUtils {
     /**
      * Create a new BeanMap for current bean
      *
-     * @param bean
-     * @return
      */
     public static BeanMap newBeanMap(Object bean) {
         BeanMap beanMap = new BeanMap();
@@ -893,9 +884,6 @@ public final class BeanUtils {
     /**
      * Find the name of property parent
      *
-     * @param parentClass
-     * @param subentityClass
-     * @return
      */
     public static String findParentPropertyName(Class<?> parentClass, Class subentityClass) {
         List<PropertyInfo> infos = BeanUtils.getPropertiesInfo(subentityClass);
@@ -911,8 +899,6 @@ public final class BeanUtils {
      * Return the value of the field or method annoted with {@link InstanceName} or invoke toString() method if
      * not InstanceName is found
      *
-     * @param object
-     * @return
      */
     public static String getInstanceName(Object object) {
         if (object == null) {
@@ -948,8 +934,6 @@ public final class BeanUtils {
     /**
      * Return if class type is primitive or from standard java packaage
      *
-     * @param type
-     * @return
      */
     public static boolean isStantardClass(Class<?> type) {
         if (type == null) {

@@ -17,11 +17,15 @@
 package tools.dynamia.zk.reports;
 
 import org.zkoss.zul.Filedownload;
-import tools.dynamia.reports.*;
+import tools.dynamia.reports.Report;
+import tools.dynamia.reports.ReportDescriptor;
+import tools.dynamia.reports.ReportExporter;
+import tools.dynamia.reports.ReportExporterException;
+import tools.dynamia.reports.ReportFiller;
+import tools.dynamia.reports.ReportOutputType;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

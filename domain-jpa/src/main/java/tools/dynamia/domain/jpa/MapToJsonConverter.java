@@ -17,12 +17,12 @@
 
 package tools.dynamia.domain.jpa;
 
+import jakarta.persistence.AttributeConverter;
 import tools.dynamia.commons.JsonParsingException;
 import tools.dynamia.commons.StringPojoParser;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 
-import jakarta.persistence.AttributeConverter;
 import java.util.Map;
 
 /**

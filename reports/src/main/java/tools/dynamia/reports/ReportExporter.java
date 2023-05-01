@@ -17,14 +17,34 @@
 package tools.dynamia.reports;
 
 import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.*;
+import net.sf.jasperreports.engine.export.HtmlExporter;
+import net.sf.jasperreports.engine.export.HtmlResourceHandler;
+import net.sf.jasperreports.engine.export.JRCsvExporter;
+import net.sf.jasperreports.engine.export.JRGraphics2DExporter;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.engine.export.JRPrintServiceExporter;
+import net.sf.jasperreports.engine.export.JRTextExporter;
 import net.sf.jasperreports.engine.export.oasis.JROdtExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
-import net.sf.jasperreports.export.*;
+import net.sf.jasperreports.export.Exporter;
+import net.sf.jasperreports.export.ExporterInputItem;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleExporterInputItem;
+import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import tools.dynamia.commons.StringUtils;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Mario A. Serrano Leones
@@ -36,57 +56,36 @@ public abstract class ReportExporter {
     }
 
     /**
-     * @param report
-     * @param outputFile
-     * @param outputType
      */
     public static void export(Report report, File outputFile, ReportOutputType outputType) {
         export(Collections.singletonList(report), outputFile, outputType, null);
     }
 
     /**
-     * @param report
-     * @param outputFile
-     * @param outputType
-     * @param exportParameters
      */
     public static void export(Report report, File outputFile, ReportOutputType outputType, Map exportParameters) {
         export(Collections.singletonList(report), outputFile, outputType, exportParameters);
     }
 
     /**
-     * @param report
-     * @param outputStream
-     * @param outputType
      */
     public static void export(Report report, OutputStream outputStream, ReportOutputType outputType) {
         export(Collections.singletonList(report), outputStream, outputType, null);
     }
 
     /**
-     * @param report
-     * @param outputStream
-     * @param outputType
-     * @param exportParameters
      */
     public static void export(Report report, OutputStream outputStream, ReportOutputType outputType, Map exportParameters) {
         export(Collections.singletonList(report), outputStream, outputType, exportParameters);
     }
 
     /**
-     * @param reports
-     * @param outputFile
-     * @param ouputType
      */
     public static void export(List<Report> reports, File outputFile, ReportOutputType ouputType) {
         export(reports, outputFile, ouputType, null);
     }
 
     /**
-     * @param reports
-     * @param outputFile
-     * @param outputType
-     * @param exportParameters
      */
     public static void export(List<Report> reports, File outputFile, ReportOutputType outputType, Map exportParameters) {
         try {
@@ -97,10 +96,6 @@ public abstract class ReportExporter {
     }
 
     /**
-     * @param reports
-     * @param outputStream
-     * @param outputType
-     * @param exportParameters
      */
     public static void export(List<Report> reports, OutputStream outputStream, ReportOutputType outputType, Map exportParameters) {
         try {
@@ -111,10 +106,12 @@ public abstract class ReportExporter {
             if (!list.isEmpty()) {
                 var items = new ArrayList<ExporterInputItem>();
                 list.forEach(jp -> items.add(new SimpleExporterInputItem(jp)));
+                //noinspection unchecked
                 exporter.setExporterInput(new SimpleExporterInput(items));
             } else if (reports.size() == 1) {
                 Report report = reports.get(0);
                 if (report.getContent() instanceof File reportFile) {
+                    //noinspection unchecked
                     exporter.setExporterInput(new SimpleExporterInput(reportFile));
                 }
             }
@@ -126,29 +123,18 @@ public abstract class ReportExporter {
     }
 
     /**
-     * @param report
-     * @param outputType
-     * @return
      */
     public static byte[] export(Report report, ReportOutputType outputType) {
         return export(Collections.singletonList(report), outputType, null);
     }
 
     /**
-     * @param report
-     * @param outputType
-     * @param exportParameters
-     * @return
      */
     public static byte[] export(Report report, ReportOutputType outputType, Map exportParameters) {
         return export(Collections.singletonList(report), outputType, exportParameters);
     }
 
     /**
-     * @param reports
-     * @param outputType
-     * @param exportParameters
-     * @return
      */
     public static byte[] export(List<Report> reports, ReportOutputType outputType, Map exportParameters) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -168,33 +154,20 @@ public abstract class ReportExporter {
         Exporter exporter = null;
         boolean ready = false;
         switch (reportOuputType) {
-            case CSV:
-                exporter = new JRCsvExporter();
-                break;
-            case HTML:
+            case CSV -> exporter = new JRCsvExporter();
+            case HTML -> {
                 exporter = buildHtmlExporter(outputStream);
                 ready = true;
-                break;
-            case JAVA2D:
-                exporter = new JRGraphics2DExporter();
-                break;
-            case OPENOFFICE:
-                exporter = new JROdtExporter();
-                break;
-            case PDF:
-                exporter = new JRPdfExporter();
-                break;
-            case PLAIN:
-                exporter = new JRTextExporter();
-                break;
-            case EXCEL:
-                exporter = new JRXlsxExporter();
-                break;
-            case PRINTER:
-                exporter = new JRPrintServiceExporter();
-                break;
+            }
+            case JAVA2D -> exporter = new JRGraphics2DExporter();
+            case OPENOFFICE -> exporter = new JROdtExporter();
+            case PDF -> exporter = new JRPdfExporter();
+            case PLAIN -> exporter = new JRTextExporter();
+            case EXCEL -> exporter = new JRXlsxExporter();
+            case PRINTER -> exporter = new JRPrintServiceExporter();
         }
         if (!ready) {
+            //noinspection unchecked
             exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
         }
 

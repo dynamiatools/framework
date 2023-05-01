@@ -44,15 +44,13 @@ public interface CrudControllerAPI<E> {
 	/**
 	 * Helper method to do a programatic delete
 	 *
-	 * @param entity
-	 */
+     */
     void delete(E entity);
 
 	/**
 	 * Helper method to do a programatic edit
 	 *
-	 * @param entity
-	 */
+     */
     void edit(E entity);
 
 	void newEntity();

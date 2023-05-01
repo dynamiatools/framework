@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
+@SuppressWarnings("unchecked")
 @Listener
 public class AutoEvictEntityCacheCrudListener extends CrudServiceListenerAdapter<AbstractEntity> {
 
@@ -19,8 +20,6 @@ public class AutoEvictEntityCacheCrudListener extends CrudServiceListenerAdapter
 
     /**
      * Register a new Entity target to auto clear cache when entity is updated or deleted
-     * @param cacheName
-     * @param entityClass
      */
     public static <T extends AbstractEntity> void  register(String cacheName, Class<T> entityClass) {
         register(cacheName, entityClass, null);
@@ -29,13 +28,10 @@ public class AutoEvictEntityCacheCrudListener extends CrudServiceListenerAdapter
 
     /**
      * Register a new Entity target to auto clear cache when entity is updated or deleted
-     * @param cacheName
-     * @param entityClass
-     * @param customKeysGenerator
      */
     public static <T extends AbstractEntity> void register(String cacheName, Class<T> entityClass, Function<T, List<String>> customKeysGenerator) {
         if (cacheName != null && !cacheName.isBlank() && entityClass != null) {
-            TARGETS.put(entityClass, new TargetEntity<T>(cacheName, customKeysGenerator));
+            TARGETS.put(entityClass, new TargetEntity<>(cacheName, customKeysGenerator));
         }
     }
 
@@ -49,17 +45,18 @@ public class AutoEvictEntityCacheCrudListener extends CrudServiceListenerAdapter
         clearEntityCache(entity);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends AbstractEntity> void clearEntityCache(T entity) {
         if (entity != null) {
             var target = TARGETS.get(entity.getClass());
             if (target != null) {
-                var cache = CacheManagerUtils.getCache(target.getCacheName());
+                var cache = CacheManagerUtils.getCache(target.cacheName());
                 if (cache != null && !(cache instanceof NoOpCache)) {
 
                     String defaultKey = entity.getClass().getSimpleName() + entity.getId();
                     cache.evictIfPresent(defaultKey);
 
-                    Function<AbstractEntity,List<String>> customKeys = target.getCustomKeysGenerator();
+                    @SuppressWarnings("unchecked") Function<AbstractEntity,List<String>> customKeys = target.customKeysGenerator();
                     if (customKeys != null) {
                         var keys = customKeys.apply(entity);
                         if (keys != null && !keys.isEmpty()) {
@@ -72,23 +69,7 @@ public class AutoEvictEntityCacheCrudListener extends CrudServiceListenerAdapter
     }
 
 
-    static class TargetEntity<T extends AbstractEntity> {
-        private final String cacheName;
-        private final Function<T, List<String>> customKeysGenerator;
-
-
-        public TargetEntity(String cacheName, Function<T, List<String>> customKeysGenerator) {
-            this.cacheName = cacheName;
-            this.customKeysGenerator = customKeysGenerator;
-        }
-
-        public Function<T, List<String>> getCustomKeysGenerator() {
-            return customKeysGenerator;
-        }
-
-        public String getCacheName() {
-            return cacheName;
-        }
+    record TargetEntity<T extends AbstractEntity>(String cacheName, Function<T, List<String>> customKeysGenerator) {
     }
 
 
