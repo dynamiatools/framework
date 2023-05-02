@@ -21,10 +21,10 @@
     <language-name>xul/html</language-name>
 
 
-    <stylesheet href="~./tools/css/dynamia-tools-4.0.0.Final.css" type="text/css"/>
-    <javascript src="~./tools/js/dynamia-tools-4.0.0.Final.js"/>
-    <javascript src="~./tools/js/sockjs.min-1.5.0.js"/>
-    <javascript src="~./tools/js/dynamia-tools-ws.4.0.0.Final.js"/>
+    <stylesheet href="~./tools/css/dynamia-tools-5.0.0.Final.css" type="text/css"/>
+    <javascript src="~./tools/js/dynamia-tools-5.0.0.Final.js"/>
+    <javascript src="~./tools/js/sockjs.min.js?v=1.6.1"/>
+    <javascript src="~./tools/js/dynamia-tools-ws.5.0.0.Final.js"/>
 
 
     <component>
