@@ -17,14 +17,21 @@
   -->
 
 <language-addon>
-    <addon-name>dynamiacomponents</addon-name>
+    <addon-name>dynamia-tools</addon-name>
     <language-name>xul/html</language-name>
 
 
     <stylesheet href="~./tools/css/dynamia-tools-5.0.0.Final.css" type="text/css"/>
+    <stylesheet href="~./templates/default/css/colors-4.0.css" type="text/css"/>
+    <stylesheet href="~./templates/default/css/animate.css" type="text/css"/>
+    <stylesheet href="~./tools/app/css/zkbootstrap-4.0.0.Final.css" type="text/css"/>
+
+
+
     <javascript src="~./tools/js/dynamia-tools-5.0.0.Final.js"/>
     <javascript src="~./tools/js/sockjs.min.js?v=1.6.1"/>
     <javascript src="~./tools/js/dynamia-tools-ws.5.0.0.Final.js"/>
+
 
 
     <component>
@@ -800,6 +807,338 @@
             <attribute>
                 <attribute-name>save-when</attribute-name>
                 <attribute-value>self.onSelect</attribute-value>
+            </attribute>
+        </annotation>
+        <annotation>
+            <annotation-name>ZKBIND</annotation-name>
+            <property-name>selected</property-name>
+            <attribute>
+                <attribute-name>ACCESS</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>SAVE_EVENT</attribute-name>
+                <attribute-value>onSelect</attribute-value>
+            </attribute>
+        </annotation>
+        <mold>
+            <mold-name>default</mold-name>
+            <mold-uri>mold/div.js</mold-uri>
+        </mold>
+    </component>
+
+    <component>
+        <component-name>actionpanel</component-name>
+        <component-class>tools.dynamia.zk.actions.ActionPanel</component-class>
+        <widget-class>zul.wgt.Div</widget-class>
+
+        <annotation>
+            <annotation-name>default-bind</annotation-name>
+            <property-name>actions</property-name>
+            <attribute>
+                <attribute-name>access</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>save-when</attribute-name>
+                <attribute-value>self.onChange</attribute-value>
+            </attribute>
+        </annotation>
+        <annotation>
+            <annotation-name>ZKBIND</annotation-name>
+            <property-name>actions</property-name>
+            <attribute>
+                <attribute-name>ACCESS</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>SAVE_EVENT</attribute-name>
+                <attribute-value>onChange</attribute-value>
+            </attribute>
+        </annotation>
+
+        <mold>
+            <mold-name>default</mold-name>
+            <mold-uri>mold/div.js</mold-uri>
+        </mold>
+    </component>
+
+    <component>
+        <component-name>actiontoolbar</component-name>
+        <component-class>tools.dynamia.zk.actions.ActionToolbar</component-class>
+        <widget-class>zul.wgt.Toolbar</widget-class>
+
+        <annotation>
+            <annotation-name>default-bind</annotation-name>
+            <property-name>actions</property-name>
+            <attribute>
+                <attribute-name>access</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>save-when</attribute-name>
+                <attribute-value>self.onChange</attribute-value>
+            </attribute>
+        </annotation>
+        <annotation>
+            <annotation-name>ZKBIND</annotation-name>
+            <property-name>actions</property-name>
+            <attribute>
+                <attribute-name>ACCESS</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>SAVE_EVENT</attribute-name>
+                <attribute-value>onChange</attribute-value>
+            </attribute>
+        </annotation>
+
+        <mold>
+            <mold-name>default</mold-name>
+            <mold-uri>mold/toolbar.js</mold-uri>
+            <css-uri>css/toolbar.css.dsp</css-uri>
+        </mold>
+        <mold>
+            <mold-name>panel</mold-name>
+            <mold-uri>mold/toolbarpanel.js</mold-uri>
+            <css-uri>css/toolbar.css.dsp</css-uri>
+        </mold>
+    </component>
+    <component>
+        <component-name>skincombobox</component-name>
+        <component-class>tools.dynamia.zk.app.SkinCombobox</component-class>
+        <widget-class>zul.inp.Combobox</widget-class>
+        <annotation>
+            <annotation-name>default-bind</annotation-name>
+            <property-name>selected</property-name>
+            <attribute>
+                <attribute-name>access</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>save-when</attribute-name>
+                <attribute-value>self.onSelect</attribute-value>
+            </attribute>
+        </annotation>
+        <annotation>
+            <annotation-name>ZKBIND</annotation-name>
+            <property-name>selected</property-name>
+            <attribute>
+                <attribute-name>ACCESS</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>SAVE_EVENT</attribute-name>
+                <attribute-value>onSelect</attribute-value>
+            </attribute>
+        </annotation>
+        <mold>
+            <mold-name>default</mold-name>
+            <mold-uri>mold/combobox.js</mold-uri>
+            <css-uri>css/combo.css.dsp</css-uri>
+        </mold>
+        <mold>
+            <mold-name>rounded</mold-name>
+            <mold-uri>mold/combobox.js</mold-uri>
+            <css-uri>css/combo.css.dsp</css-uri>
+        </mold>
+    </component>
+    <component>
+        <component-name>entitypicker</component-name>
+        <component-class>tools.dynamia.zk.crud.ui.EntityPickerBox</component-class>
+        <extends>span</extends>
+        <annotation>
+            <annotation-name>default-bind</annotation-name>
+            <property-name>selected</property-name>
+            <attribute>
+                <attribute-name>access</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>save-when</attribute-name>
+                <attribute-value>self.onSelect</attribute-value>
+            </attribute>
+        </annotation>
+        <annotation>
+            <annotation-name>ZKBIND</annotation-name>
+            <property-name>selected</property-name>
+            <attribute>
+                <attribute-name>ACCESS</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>SAVE_EVENT</attribute-name>
+                <attribute-value>onSelect</attribute-value>
+            </attribute>
+        </annotation>
+    </component>
+
+    <component>
+        <component-name>multientitypicker</component-name>
+        <component-class>tools.dynamia.zk.crud.ui.MultiEntityPicker</component-class>
+        <widget-class>zul.wgt.Div</widget-class>
+        <annotation>
+            <annotation-name>default-bind</annotation-name>
+            <property-name>selectedEntities</property-name>
+            <attribute>
+                <attribute-name>access</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>save-when</attribute-name>
+                <attribute-value>self.onSelect</attribute-value>
+            </attribute>
+        </annotation>
+        <annotation>
+            <annotation-name>ZKBIND</annotation-name>
+            <property-name>selectedEntities</property-name>
+            <attribute>
+                <attribute-name>ACCESS</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>SAVE_EVENT</attribute-name>
+                <attribute-value>onSelect</attribute-value>
+            </attribute>
+        </annotation>
+        <mold>
+            <mold-name>default</mold-name>
+            <mold-uri>mold/div.js</mold-uri>
+        </mold>
+    </component>
+
+
+    <component>
+        <component-name>entityrefpicker</component-name>
+        <component-class>tools.dynamia.zk.crud.ui.EntityReferencePickerBox</component-class>
+        <widget-class>zul.inp.Bandbox</widget-class>
+        <annotation>
+            <annotation-name>default-bind</annotation-name>
+            <property-name>selectedId</property-name>
+            <attribute>
+                <attribute-name>access</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>save-when</attribute-name>
+                <attribute-value>self.onSelect</attribute-value>
+            </attribute>
+        </annotation>
+        <annotation>
+            <annotation-name>ZKBIND</annotation-name>
+            <property-name>selectedId</property-name>
+            <attribute>
+                <attribute-name>ACCESS</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>SAVE_EVENT</attribute-name>
+                <attribute-value>onSelect</attribute-value>
+            </attribute>
+        </annotation>
+        <mold>
+            <mold-name>default</mold-name>
+            <mold-uri>mold/combobox.js</mold-uri>
+            <css-uri>css/combo.css.dsp</css-uri>
+        </mold>
+        <mold>
+            <mold-name>rounded</mold-name>
+            <mold-uri>mold/combobox.js</mold-uri>
+            <css-uri>css/combo.css.dsp</css-uri>
+        </mold>
+    </component>
+
+    <component>
+        <component-name>entityreflabel</component-name>
+        <component-class>tools.dynamia.zk.crud.ui.EntityReferenceLabel</component-class>
+        <widget-class>zul.wgt.Label</widget-class>
+        <text-as>value</text-as>
+        <annotation>
+            <annotation-name>default-bind</annotation-name>
+            <property-name>referenceId</property-name>
+            <attribute>
+                <attribute-name>access</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>save-when</attribute-name>
+                <attribute-value>self.onChange</attribute-value>
+            </attribute>
+        </annotation>
+        <annotation>
+            <annotation-name>ZKBIND</annotation-name>
+            <property-name>referenceId</property-name>
+            <attribute>
+                <attribute-name>ACCESS</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>SAVE_EVENT</attribute-name>
+                <attribute-value>onChange</attribute-value>
+            </attribute>
+        </annotation>
+        <mold>
+            <mold-name>default</mold-name>
+            <mold-uri>mold/label.js</mold-uri>
+        </mold>
+    </component>
+
+    <component>
+        <component-name>entitylink</component-name>
+        <component-class>tools.dynamia.zk.crud.ui.EntityLink</component-class>
+        <text-as>value</text-as>
+        <extends>a</extends>
+        <annotation>
+            <annotation-name>default-bind</annotation-name>
+            <property-name>entity</property-name>
+            <attribute>
+                <attribute-name>access</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>save-when</attribute-name>
+                <attribute-value>self.onChange</attribute-value>
+            </attribute>
+        </annotation>
+        <annotation>
+            <annotation-name>ZKBIND</annotation-name>
+            <property-name>entity</property-name>
+            <attribute>
+                <attribute-name>ACCESS</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>SAVE_EVENT</attribute-name>
+                <attribute-value>onChange</attribute-value>
+            </attribute>
+        </annotation>
+    </component>
+    <component>
+        <component-name>viewer</component-name>
+        <component-class>tools.dynamia.zk.viewers.ui.Viewer</component-class>
+        <widget-class>zul.wgt.Div</widget-class>
+        <annotation>
+            <annotation-name>default-bind</annotation-name>
+            <property-name>value</property-name>
+            <attribute>
+                <attribute-name>access</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>save-when</attribute-name>
+                <attribute-value>self.onValueChanged</attribute-value>
+            </attribute>
+        </annotation>
+        <annotation>
+            <annotation-name>ZKBIND</annotation-name>
+            <property-name>value</property-name>
+            <attribute>
+                <attribute-name>ACCESS</attribute-name>
+                <attribute-value>both</attribute-value>
+            </attribute>
+            <attribute>
+                <attribute-name>SAVE_EVENT</attribute-name>
+                <attribute-value>onValueChanged</attribute-value>
             </attribute>
         </annotation>
         <annotation>

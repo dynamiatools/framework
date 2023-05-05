@@ -75,15 +75,8 @@
         <module>web</module>
         <module>app</module>
 
-        <!-- ZK Backend -->
+        <!-- ZK Backend  https://www.zkoss.org -->
         <module>zk</module>
-        <module>zk-actions</module>
-        <module>zk-crud</module>
-        <module>zk-reports</module>
-        <module>zk-viewers</module>
-        <module>zk-app</module>
-
-
     </modules>
 
     <properties>
