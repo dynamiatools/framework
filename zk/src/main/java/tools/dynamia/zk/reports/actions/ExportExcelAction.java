@@ -34,6 +34,7 @@ import tools.dynamia.zk.ui.LongOperationMonitorWindow;
 import tools.dynamia.zk.util.LongOperation;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 
@@ -49,7 +50,6 @@ public class ExportExcelAction extends AbstractExportAction implements ReadableO
         setImage("export-xlsx");
         setGroup(ActionGroup.get("EXPORT"));
     }
-
 
 
     public void export(Collection data, ViewDescriptor descriptor) {
@@ -68,15 +68,22 @@ public class ExportExcelAction extends AbstractExportAction implements ReadableO
         export(data, temp, exporter);
     }
 
+
     @SuppressWarnings("unchecked")
-    protected void export(Collection data, File temp, ExcelCollectionExporter exporter) {
+    public static void export(Collection data, File temp, ExcelCollectionExporter exporter) {
 
 
         ProgressMonitor monitor = new ProgressMonitor();
 
         @SuppressWarnings("unchecked") LongOperation operation = LongOperation.create()
                 .execute(() -> exporter.export(temp, data, monitor))
-                .onFinish(() -> download(temp))
+                .onFinish(() -> {
+                    try {
+                        Filedownload.save(temp, ReportOutputType.EXCEL.getContentType());
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .onException(Throwable::printStackTrace)
                 .start();
 

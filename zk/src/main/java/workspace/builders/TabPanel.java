@@ -165,7 +165,6 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
             tab.setTooltiptext(page.getLocalizedDescription(locale));
 
             final Tabpanel panel = new Tabpanel();
-            panel.setRenderdefer(100);
             panel.setSclass(page.getId());
             tabbox.getTabs().appendChild(tab);
             tabbox.getTabpanels().appendChild(panel);

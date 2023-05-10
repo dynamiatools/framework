@@ -3,6 +3,7 @@ package tools.dynamia.zk.reports.actions;
 import tools.dynamia.actions.ActionLifecycleAware;
 import tools.dynamia.actions.ActionRenderer;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.ReadableOnly;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
@@ -12,7 +13,7 @@ import tools.dynamia.zk.crud.CrudController;
 import tools.dynamia.zk.crud.CrudControllerAware;
 
 @InstallAction
-public class ExportAction extends AbstractCrudAction implements ActionLifecycleAware, CrudControllerAware {
+public class ExportAction extends AbstractCrudAction implements ActionLifecycleAware, CrudControllerAware, ReadableOnly {
 
     private CrudController crudController;
 
