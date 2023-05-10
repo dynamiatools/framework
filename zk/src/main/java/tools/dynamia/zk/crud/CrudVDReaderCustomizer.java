@@ -30,7 +30,7 @@ import java.util.Map;
 @Provider
 public class CrudVDReaderCustomizer implements ViewDescriptorReaderCustomizer<Map> {
 
-    public static final String ACTIONS = "tools/dynamia/zk/actions";
+    public static final String ACTIONS = "actions";
     public static final String CONTROLLER = "controller";
     public static final String DATA_SET_VIEW_TYPE = "dataSetViewType";
     public static final String PARENT_NAME = "parentName";

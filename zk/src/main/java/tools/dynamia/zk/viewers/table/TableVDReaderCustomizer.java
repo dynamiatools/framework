@@ -57,8 +57,8 @@ public class TableVDReaderCustomizer implements ViewDescriptorReaderCustomizer<M
 
     private void parseActions(Map content, ViewDescriptor viewDescriptor) {
         try {
-            Map actions = (Map) content.get("tools/dynamia/zk/actions");
-            viewDescriptor.addParam("tools/dynamia/zk/actions", actions);
+            Map actions = (Map) content.get("actions");
+            viewDescriptor.addParam("actions", actions);
         } catch (Exception ignored) {
         }
     }
