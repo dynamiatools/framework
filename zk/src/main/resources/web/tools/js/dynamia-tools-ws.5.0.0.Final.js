@@ -19,22 +19,29 @@
 
 function initWebSocket(uri) {
 
-    var sock = new SockJS(uri);
-    var desktopId = zk.Desktop.$().id;
+    var desktop = zk.Desktop.$();
+    if (desktop) {
+        var desktopId = desktop.id;
 
-    sock.onopen = function () {
-        console.log('DynamiaTools WebSocket Connected - '+desktopId);
-        sock.send(desktopId);
-    };
+        var sock = new SockJS(uri);
+        sock.onopen = function () {
+            console.log('DynamiaTools WebSocket Connected - ' + desktopId);
+            sock.send(desktopId);
+        };
 
-    sock.onmessage = function (e) {
-        console.log('DynamiaTools command received: ', e.data);
-        zAu.send(new zk.Event(zk.Desktop.$(), 'fireGlobalCommand', {command: e.data}, {}));
-    };
+        sock.onmessage = function (e) {
+            console.log('DynamiaTools command received: ', e.data);
+            zAu.send(new zk.Event(zk.Desktop.$(), 'fireGlobalCommand', {command: e.data}, {}));
+        };
 
-    sock.onclose = function () {
-        console.log('DynamiaTools WebSocket connection closed');
-    };
+        sock.onclose = function () {
+            console.log('DynamiaTools WebSocket connection closed');
+        };
+    } else {
+        console.log("ZK desktop is not ready");
+    }
 }
 
-zk.afterMount(initWebSocket('/ws-commands'), 1000);
+zk.afterMount(function () {
+    initWebSocket('/ws-commands');
+});

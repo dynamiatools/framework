@@ -17,7 +17,6 @@
 package tools.dynamia.reports;
 
 /**
- *
  * @author Mario A. Serrano Leones
  */
 public enum ReportOutputType {
@@ -29,7 +28,8 @@ public enum ReportOutputType {
     CSV("csv", "text/plain"),
     JAVA2D("", ""),
     PLAIN("txt", "text/plain"),
-    PRINTER("printer", null);
+    PRINTER("printer", null),
+    JSON("json", "application/json");
 
     private final String extension;
     private final String contentType;

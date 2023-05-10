@@ -21,19 +21,15 @@ import tools.dynamia.actions.ActionGroup;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.actions.ReadableOnly;
 import tools.dynamia.commons.ClassMessages;
-import tools.dynamia.crud.CrudActionEvent;
-import tools.dynamia.crud.CrudState;
 import tools.dynamia.integration.ProgressMonitor;
 import tools.dynamia.reports.ExporterColumn;
 import tools.dynamia.reports.ReportOutputType;
 import tools.dynamia.reports.excel.ExcelCollectionExporter;
 import tools.dynamia.ui.MessageType;
 import tools.dynamia.ui.UIMessages;
-import tools.dynamia.viewers.DataSetView;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.Viewers;
-import tools.dynamia.zk.crud.CrudView;
 import tools.dynamia.zk.ui.LongOperationMonitorWindow;
 import tools.dynamia.zk.util.LongOperation;
 
@@ -54,27 +50,9 @@ public class ExportExcelAction extends AbstractExportAction implements ReadableO
         setGroup(ActionGroup.get("EXPORT"));
     }
 
-    @Override
-    public CrudState[] getApplicableStates() {
-        return CrudState.get(CrudState.READ);
-    }
 
-    @Override
-    public void actionPerformed(CrudActionEvent evt) {
-        CrudView crudView = (CrudView) evt.getCrudView();
-        DataSetView dataSetView = crudView.getDataSetView();
-        if (dataSetView.getValue() != null && dataSetView.getValue() instanceof Collection data) {
 
-            if (data.size() > LARGE) {
-                UIMessages.showQuestion(MESSAGES.get("confirm_large_export"),
-                        () -> export(data, getViewDescriptor(evt)));
-            } else {
-                export(data, getViewDescriptor(evt));
-            }
-        }
-    }
-
-    public static void export(Collection data, ViewDescriptor descriptor) {
+    public void export(Collection data, ViewDescriptor descriptor) {
         ExcelCollectionExporter exporter = new ExcelCollectionExporter();
 
         Viewers.getFields(descriptor).stream().filter(f -> f.isVisible() && !f.isCollection()).forEach(f -> {
@@ -91,7 +69,7 @@ public class ExportExcelAction extends AbstractExportAction implements ReadableO
     }
 
     @SuppressWarnings("unchecked")
-    public static void export(Collection data, File temp, ExcelCollectionExporter exporter) {
+    protected void export(Collection data, File temp, ExcelCollectionExporter exporter) {
 
 
         ProgressMonitor monitor = new ProgressMonitor();
@@ -123,24 +101,6 @@ public class ExportExcelAction extends AbstractExportAction implements ReadableO
         return formatPattern;
     }
 
-    private static File createTempFile() {
-        try {
-            return File.createTempFile("export_" + System.currentTimeMillis(), ".xlsx");
-        } catch (IOException e) {
-
-            e.printStackTrace();
-            UIMessages.showMessage("Error: " + e.getMessage(), MessageType.ERROR);
-            return null;
-        }
-    }
-
-    private static void download(File temp) {
-        try {
-            Filedownload.save(temp, null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     @Override
     public ReportOutputType getOuputType() {

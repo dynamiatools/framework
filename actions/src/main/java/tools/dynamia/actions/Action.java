@@ -131,6 +131,12 @@ public interface Action extends Comparable<Action> {
 
     String getMessageClassifier();
 
+    boolean isVisible();
+
+    void setParent(Action action);
+
+    Action getParent();
+
     /**
      * When action is performed.
      *

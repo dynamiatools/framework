@@ -133,7 +133,8 @@ public class FindAction extends AbstractCrudAction implements CrudControllerAwar
 
         List<String> fieldsNames = new ArrayList<>();
         for (Field field : descriptor.getFields()) {
-            if (field.isVisible() && !isBoolean(field) && field.getPropertyInfo().getAccessMode() == AccessMode.READ_WRITE) {
+            if (field.isVisible() && !isBoolean(field) && field.getPropertyInfo()!=null &&
+                    field.getPropertyInfo().getAccessMode() == AccessMode.READ_WRITE) {
                 fieldsNames.add(field.getName());
             }
         }

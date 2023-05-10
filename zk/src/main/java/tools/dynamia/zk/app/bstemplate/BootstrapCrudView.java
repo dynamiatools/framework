@@ -27,6 +27,7 @@ import org.zkoss.zul.Menupopup;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionGroup;
 import tools.dynamia.actions.ActionRenderer;
+import tools.dynamia.actions.Actions;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.crud.ChangedStateEvent;
 import tools.dynamia.crud.CrudState;
@@ -159,7 +160,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
         if (actionRenderer == null) {
             actionRenderer = getDefaultActionRenderer();
         }
-        Component component = (Component) actionRenderer.render(action, this);
+        Component component = (Component) Actions.render(actionRenderer, action, this);
 
         String actionId = action.getId();
         if (action.getAttribute("internalId") != null) {
@@ -185,7 +186,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
             MenuitemActionRenderer renderer = new MenuitemActionRenderer();
             for (Action action : actionGroup.getActions()) {
                 if (action.getRenderer() == null || action.getRenderer() instanceof ToolbarbuttonActionRenderer) {
-                    Menuitem menuitem = renderer.render(action, this);
+                    Menuitem menuitem = Actions.render(renderer, action, this);
                     actionsMenu.appendChild(menuitem);
                 } else {
                     showAction(actionGroup, action);
@@ -202,7 +203,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
         if ((getState() == CrudState.CREATE || getState() == CrudState.UPDATE)
                 && (action.getRenderer() == null || action.getRenderer() instanceof ToolbarbuttonActionRenderer)) {
             ButtonActionRenderer renderer = new ButtonActionRenderer();
-            Button button = renderer.render(action, this);
+            Button button = Actions.render(renderer, action, this);
             button.setAttribute(ACTION, action);
             applyButtonStyle(button, action);
             addButton(actionGroup, button);
@@ -254,7 +255,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
         for (Component component : actionComponents) {
             Action action = (Action) component.getAttribute(ACTION);
             if (action != null) {
-                Menuitem menuitem = menuRenderer.render(action, this);
+                Menuitem menuitem = Actions.render(menuRenderer, action, this);
                 actionsMenu.appendChild(menuitem);
             }
         }

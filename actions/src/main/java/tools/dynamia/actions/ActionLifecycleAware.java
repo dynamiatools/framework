@@ -24,8 +24,16 @@ package tools.dynamia.actions;
  */
 public interface ActionLifecycleAware {
 
-    void onCreate();
+    default void onCreate() {
+    }
 
-    void onDestroy();
+    default void onDestroy() {
+    }
+
+    default void beforeRenderer(ActionRenderer renderer) {
+    }
+
+    default void afterRenderer(ActionRenderer renderer, Object component) {
+    }
 
 }

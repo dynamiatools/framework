@@ -31,15 +31,7 @@ import org.zkoss.zul.Menuseparator;
 import org.zkoss.zul.North;
 import org.zkoss.zul.Window;
 import org.zkoss.zul.impl.XulElement;
-import tools.dynamia.actions.Action;
-import tools.dynamia.actions.ActionComparator;
-import tools.dynamia.actions.ActionEvent;
-import tools.dynamia.actions.ActionEventBuilder;
-import tools.dynamia.actions.ActionGroup;
-import tools.dynamia.actions.ActionLifecycleAware;
-import tools.dynamia.actions.ActionLoader;
-import tools.dynamia.actions.ActionRenderer;
-import tools.dynamia.actions.ReadableOnly;
+import tools.dynamia.actions.*;
 import tools.dynamia.commons.ApplicableClass;
 import tools.dynamia.commons.BeanMap;
 import tools.dynamia.commons.BeanUtils;
@@ -480,7 +472,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
         for (CrudAction crudAction : menuActions) {
 
             if (crudAction.isEnabled() && crudAction.isMenuSupported()) {
-                menuItems.put(crudAction.getGroup(), renderer.render(crudAction, this));
+                menuItems.put(crudAction.getGroup(), Actions.render(renderer, crudAction, this));
             }
         }
 

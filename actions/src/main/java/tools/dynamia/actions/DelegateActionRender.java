@@ -47,9 +47,10 @@ public class DelegateActionRender implements ActionRenderer<Object> {
 				.findObjects(ActionRenderProvider.class, object -> object.getName().equals(providerName)).stream().findFirst();
 
 		if (provider.isPresent()) {
-			return provider.get().getActionRenderer().render(action, actionEventBuilder);
+			return  Actions.render(provider.get().getActionRenderer(),action, actionEventBuilder);
+
 		} else if (defaultRenderer != null) {
-			return defaultRenderer.render(action, actionEventBuilder);
+			return Actions.render(defaultRenderer,action, actionEventBuilder);
 		} else {
 			throw new ActionRendererException("No delegate action renderer found with provider: " + providerName);
 		}

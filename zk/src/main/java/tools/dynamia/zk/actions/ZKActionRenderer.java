@@ -114,6 +114,10 @@ public abstract class ZKActionRenderer<T extends Component> implements ActionRen
             if (action != null) {
                 background = (String) action.getAttribute("background");
                 color = (String) action.getAttribute("color");
+
+                if (!action.isVisible()) {
+                    hc.setVisible(false);
+                }
             }
             StringBuilder styleBuilder = new StringBuilder();
             StringBuilder styleClassBuilder = new StringBuilder();
@@ -141,6 +145,8 @@ public abstract class ZKActionRenderer<T extends Component> implements ActionRen
             if (styleBuilder.length() > 0) {
                 hc.setStyle(styleBuilder.toString());
             }
+
+
         }
 
         if (component instanceof InputElement) {

@@ -26,6 +26,7 @@ import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionEventBuilder;
 import tools.dynamia.actions.ActionRenderer;
 import tools.dynamia.actions.ActionRendererException;
+import tools.dynamia.actions.Actions;
 import tools.dynamia.zk.ComponentAliasIndex;
 
 import java.util.ArrayList;
@@ -90,7 +91,7 @@ public class ActionToolbar extends Toolbar {
             currentActionRenderer = getActionRenderer();
         }
 
-        Component component = (Component) currentActionRenderer.render(action, eventBuilder);
+        Component component = (Component) Actions.render(currentActionRenderer, action, eventBuilder);
         component.setParent(this);
         String actionId = action.getId();
         if (action.getAttribute("internalId") != null) {

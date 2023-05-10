@@ -33,6 +33,7 @@ public class MenuitemActionRenderer extends ZKActionRenderer<Menuitem> {
         ZKUtil.configureComponentIcon(action.getImage(), menu, IconSize.SMALL);
         menu.setLabel(action.getLocalizedName(Messages.getDefaultLocale()));
         menu.setAttribute("ACTION", action);
+
         action.setAttribute("COMPONENT", menu);
         menu.addEventListener(Events.ON_CLICK, event ->
                 Actions.run(action, actionEventBuilder, event.getTarget()));

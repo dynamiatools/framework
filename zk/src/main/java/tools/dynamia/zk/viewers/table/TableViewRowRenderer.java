@@ -32,6 +32,7 @@ import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionLoader;
 import tools.dynamia.actions.ActionRenderer;
+import tools.dynamia.actions.Actions;
 import tools.dynamia.commons.BeanMap;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.MapBuilder;
@@ -158,7 +159,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                     ActionEvent evt = new ActionEvent(data, item);
                     evt.setSource(tableView.getSource() != null ? tableView.getSource() : item);
                     ActionRenderer actionRenderer = action.getRenderer() != null ? action.getRenderer() : defaultRenderer;
-                    Component actionComp = (Component) actionRenderer.render(action, (s, p) -> evt);
+                    Component actionComp = (Component) Actions.render(actionRenderer, action, (s, p) -> evt);
                     action.onRendered(data, item, actionComp);
 
                     if (action.isEnabled()) {

@@ -16,34 +16,25 @@
  */
 package tools.dynamia.zk.reports.actions;
 
-import org.zkoss.zul.Filedownload;
 import tools.dynamia.actions.InstallAction;
-import tools.dynamia.commons.ClassMessages;
 import tools.dynamia.commons.Messages;
-import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.integration.ProgressMonitor;
 import tools.dynamia.reports.ExporterColumn;
 import tools.dynamia.reports.PlainFileExporter;
 import tools.dynamia.reports.ReportOutputType;
-import tools.dynamia.ui.MessageType;
-import tools.dynamia.ui.UIMessages;
-import tools.dynamia.viewers.DataSetView;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.Viewers;
-import tools.dynamia.zk.crud.CrudView;
 import tools.dynamia.zk.ui.LongOperationMonitorWindow;
 import tools.dynamia.zk.util.LongOperation;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 
 @InstallAction
 public class ExportCSVAction extends AbstractExportAction {
 
-	private static final int LARGE = 5000;
-	private static final ClassMessages MESSAGES = ClassMessages.get(ExportExcelAction.class);
+
 
 	public ExportCSVAction() {
 		setName(Messages.get(getClass(), "export_csv"));
@@ -55,22 +46,8 @@ public class ExportCSVAction extends AbstractExportAction {
 		return ReportOutputType.CSV;
 	}
 
-	@Override
-	public void actionPerformed(CrudActionEvent evt) {
-		CrudView crudView = (CrudView) evt.getCrudView();
-		DataSetView dataSetView = crudView.getDataSetView();
-		if (dataSetView.getValue() != null && dataSetView.getValue() instanceof Collection data) {
 
-			if (data.size() > LARGE) {
-				UIMessages.showQuestion(MESSAGES.get("confirm_large_export"),
-						() -> export(data, getViewDescriptor(evt)));
-			} else {
-				export(data, getViewDescriptor(evt));
-			}
-		}
-	}
-
-	public static void export(Collection data, ViewDescriptor descriptor) {
+	public void export(Collection data, ViewDescriptor descriptor) {
 
 		PlainFileExporter exporter = new PlainFileExporter();
 
@@ -108,27 +85,7 @@ public class ExportCSVAction extends AbstractExportAction {
 				formatPattern = "h:mm a";
 			}
 		}
-
 		return formatPattern;
-	}
-
-	private static File createTempFile() {
-		try {
-			return File.createTempFile("export_" + System.currentTimeMillis(), ".xlsx");
-		} catch (IOException e) {
-
-			e.printStackTrace();
-			UIMessages.showMessage("Error: " + e.getMessage(), MessageType.ERROR);
-			return null;
-		}
-	}
-
-	private static void download(File temp) {
-		try {
-			Filedownload.save(temp, null);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 }

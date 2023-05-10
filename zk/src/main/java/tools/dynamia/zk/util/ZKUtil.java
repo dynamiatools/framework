@@ -51,6 +51,7 @@ import tools.dynamia.ui.icons.IconType;
 import tools.dynamia.ui.icons.IconsTheme;
 import tools.dynamia.web.util.HttpUtils;
 import tools.dynamia.zk.EventQueueSubscriber;
+import tools.dynamia.zk.crud.ui.EntityTreeNode;
 import tools.dynamia.zk.navigation.ZKNavigationManager;
 import tools.dynamia.zk.ui.CanBeReadonly;
 import tools.dynamia.zk.ui.InputPanel;
@@ -64,6 +65,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -499,7 +501,6 @@ public abstract class ZKUtil {
 
     /**
      * Show a simple InputPanel
-     *
      */
     public static <T> InputPanel showInputDialog(String label, Class<T> inputClass, Object value,
                                                  EventListener eventListener) {
@@ -900,7 +901,6 @@ public abstract class ZKUtil {
 
     /**
      * Make easy select a combobox item
-     *
      */
     public static void setSelected(Combobox combobox, Object value) {
         if (combobox != null) {
@@ -928,7 +928,6 @@ public abstract class ZKUtil {
 
     /**
      * Return and argument from current execution
-     *
      */
     public static Object getExecutionArg(String name) {
         return Executions.getCurrent().getArg().get(name);
@@ -936,7 +935,6 @@ public abstract class ZKUtil {
 
     /**
      * Return entity binding to current zk execution (or event)
-     *
      */
     public static Object getExecutionEntity() {
         return getExecutionArg(ENTITY);
@@ -944,7 +942,6 @@ public abstract class ZKUtil {
 
     /**
      * Return parent {@link Window} binding to current zk execution (or event)
-     *
      */
     public static Window getExecutionParentWindow() {
         return (Window) getExecutionArg(PARENT_WINDOW);
@@ -952,7 +949,6 @@ public abstract class ZKUtil {
 
     /**
      * Return current navigation {@link tools.dynamia.navigation.Page} binded to current execution or currentPage from {@link tools.dynamia.navigation.NavigationManager}
-     *
      */
     public static tools.dynamia.navigation.Page getExecutionNavigationPage() {
         var page = (tools.dynamia.navigation.Page) getExecutionArg(NAVIGATION_PAGE);
@@ -964,7 +960,6 @@ public abstract class ZKUtil {
 
     /**
      * Automatic change component to read only or disabled. Include children component
-     *
      */
     public static void changeReadOnly(Component comp, boolean readOnly) {
 
@@ -1001,7 +996,6 @@ public abstract class ZKUtil {
 
     /**
      * Show Dialog with custom properties
-     *
      */
     public static Window showDialog(String uri, String title, String icon, Object data, String width, String height,
                                     EventListener onCloseListener) {
@@ -1014,7 +1008,6 @@ public abstract class ZKUtil {
 
     /**
      * Invoke a Javascript util method to update browser uri and page title
-     *
      */
     public static void updateClientURI(String pagetitle, String uri) {
         Clients.evalJavaScript(String.format("changeURI('%s','%s');", pagetitle, uri));
@@ -1023,6 +1016,29 @@ public abstract class ZKUtil {
     public static void typeSearch(Textbox textbox) {
         if (textbox != null) {
             textbox.setClientAttribute("type", "search");
+        }
+    }
+
+    public static Collection flatTreeModel(TreeModel treeModel) {
+        var result = new ArrayList<>();
+
+        var parent = treeModel.getRoot();
+        flat(treeModel, result, parent);
+        result.removeIf(Objects::isNull);
+        return result;
+    }
+
+    private static void flat(TreeModel treeModel, ArrayList<Object> result, Object parent) {
+        for (int i = 0; i < treeModel.getChildCount(parent); i++) {
+            var child = treeModel.getChild(parent, i);
+            if (child != null) {
+                if (child instanceof EntityTreeNode node) {
+                    result.add(node.getEntity());
+                } else {
+                    result.add(child);
+                }
+                flat(treeModel, result, child); //nested children
+            }
         }
     }
 }

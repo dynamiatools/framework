@@ -28,27 +28,31 @@ import tools.dynamia.commons.Messages;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.zk.util.ZKUtil;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ComboboxToolbarbuttonActionRenderer extends ZKActionRenderer<Component> {
 
     private boolean showlabels;
     private boolean toggleMode;
-    private final List comboboxModel;
+    private List model = Collections.emptyList();
 
-    public ComboboxToolbarbuttonActionRenderer(List comboboxModel) {
-        this.comboboxModel = comboboxModel;
+    public ComboboxToolbarbuttonActionRenderer() {
     }
 
-    public ComboboxToolbarbuttonActionRenderer(boolean showlabels, List comboboxModel) {
+    public ComboboxToolbarbuttonActionRenderer(List model) {
+        this.model = model;
+    }
+
+    public ComboboxToolbarbuttonActionRenderer(boolean showlabels, List model) {
         this.showlabels = showlabels;
-        this.comboboxModel = comboboxModel;
+        this.model = model;
     }
 
-    public ComboboxToolbarbuttonActionRenderer(boolean showlabels, boolean toggleMode, List comboboxModel) {
+    public ComboboxToolbarbuttonActionRenderer(boolean showlabels, boolean toggleMode, List model) {
         this.showlabels = showlabels;
         this.toggleMode = toggleMode;
-        this.comboboxModel = comboboxModel;
+        this.model = model;
     }
 
     @Override
@@ -58,7 +62,7 @@ public class ComboboxToolbarbuttonActionRenderer extends ZKActionRenderer<Compon
         final Combobox combo = new Combobox();
         combo.setParent(htl);
         combo.setReadonly(true);
-        ZKUtil.fillCombobox(combo, comboboxModel);
+        ZKUtil.fillCombobox(combo, model);
 
         Toolbarbutton btn = new Toolbarbutton();
         btn.setParent(htl);
@@ -103,4 +107,11 @@ public class ComboboxToolbarbuttonActionRenderer extends ZKActionRenderer<Compon
         this.toggleMode = toggleMode;
     }
 
+    public List getModel() {
+        return model;
+    }
+
+    public void setModel(List model) {
+        this.model = model;
+    }
 }

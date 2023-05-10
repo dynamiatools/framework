@@ -25,14 +25,19 @@ import tools.dynamia.actions.Actions;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.zk.util.ZKUtil;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ComboboxActionRenderer extends ZKActionRenderer<Combobox> {
 
-    private final List model;
+    private List model = Collections.emptyList();
     private boolean readonly = true;
     private Object defaultValue;
     private ComboitemRenderer comboitemRenderer;
+
+    public ComboboxActionRenderer() {
+        super();
+    }
 
     public ComboboxActionRenderer(List model) {
         super();
@@ -82,5 +87,21 @@ public class ComboboxActionRenderer extends ZKActionRenderer<Combobox> {
 
     public void setComboitemRenderer(ComboitemRenderer comboitemRenderer) {
         this.comboitemRenderer = comboitemRenderer;
+    }
+
+    public List getModel() {
+        return model;
+    }
+
+    public void setModel(List model) {
+        this.model = model;
+    }
+
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(Object defaultValue) {
+        this.defaultValue = defaultValue;
     }
 }

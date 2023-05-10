@@ -26,6 +26,7 @@ import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionEventBuilder;
 import tools.dynamia.actions.ActionRenderer;
 import tools.dynamia.actions.ActionRendererException;
+import tools.dynamia.actions.Actions;
 import tools.dynamia.zk.ComponentAliasIndex;
 
 import java.util.ArrayList;
@@ -78,7 +79,7 @@ public class ActionPanel extends Div {
             currentActionRenderer = getActionRenderer();
         }
 
-        Component component = (Component) currentActionRenderer.render(action, eventBuilder);
+        Component component = (Component) Actions.render(currentActionRenderer, action, eventBuilder);
         component.setParent(this);
 
         if (component instanceof HtmlBasedComponent hcom) {

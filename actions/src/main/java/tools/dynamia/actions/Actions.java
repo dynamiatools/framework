@@ -9,10 +9,10 @@ import java.util.Map;
 public class Actions {
 
     private static final String ACTION_PARAM = "action";
+    private static final String ACTION_COMPONENT = "ACTION_COMPONENT";
 
     /**
      * Helper method to run actions
-     *
      */
     public static void run(Action action, ActionEventBuilder eventBuilder, Object source, Object data, Map<String, Object> params) {
         if (action != null) {
@@ -56,7 +56,6 @@ public class Actions {
 
     /**
      * Run action without source and params
-     *
      */
     public static void run(Action action, ActionEventBuilder eventBuilder) {
         run(action, eventBuilder, null, null);
@@ -68,9 +67,43 @@ public class Actions {
 
     /**
      * Run action without event builder
-     *
      */
     public static void run(Action action, Object data) {
         run(action, (source, params) -> new ActionEvent(data, source, params));
+    }
+
+    /**
+     * Render action using {@link ActionRenderer}.render() method and call {@link ActionLifecycleAware} before and after render
+     *
+     * @param renderer
+     * @param action
+     * @param eventBuilder
+     * @param <T>
+     * @return action component
+     */
+    public static <T> T render(ActionRenderer<T> renderer, Action action, ActionEventBuilder eventBuilder) {
+
+        if (action instanceof ActionLifecycleAware ala) {
+            ala.beforeRenderer(renderer);
+        }
+
+        T component = renderer.render(action, eventBuilder);
+
+        if (action instanceof ActionLifecycleAware ala) {
+            ala.afterRenderer(renderer,component);
+        }
+
+        action.setAttribute(ACTION_COMPONENT, component);
+
+        return component;
+    }
+
+    /**
+     * Call this method after action is rendered to get the last rendered action component
+     * @param action
+     * @return
+     */
+    public static Object getActionComponent(Action action){
+        return action.getAttribute(ACTION_COMPONENT);
     }
 }

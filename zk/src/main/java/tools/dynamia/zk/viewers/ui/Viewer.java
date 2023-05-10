@@ -34,6 +34,7 @@ import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionEventBuilder;
 import tools.dynamia.actions.ActionLoader;
 import tools.dynamia.actions.ActionRenderer;
+import tools.dynamia.actions.Actions;
 import tools.dynamia.commons.collect.ArrayListMultiMap;
 import tools.dynamia.commons.collect.MultiMap;
 import tools.dynamia.integration.Containers;
@@ -216,7 +217,7 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
                 actionRenderer = action.getRenderer();
             }
 
-            Component actionComponent = (Component) actionRenderer.render(action, this);
+            Component actionComponent = (Component) Actions.render(actionRenderer, action, this);
 
             if (actionComponent instanceof Button button) {
                 String type = "primary";

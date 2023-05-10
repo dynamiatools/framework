@@ -49,6 +49,9 @@ public abstract class AbstractAction implements Action {
     private final ClassMessages messages = ClassMessages.get(getClass());
     private LocalizedMessagesProvider localizedMessagesProvider;
     private String messageClassifier = CLASSIFIER;
+    private boolean visible = true;
+
+    private Action parent;
 
 
     @Override
@@ -274,5 +277,24 @@ public abstract class AbstractAction implements Action {
 
     public void setMessageClassifier(String messageClassifier) {
         this.messageClassifier = messageClassifier;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
+    @Override
+    public Action getParent() {
+        return parent;
+    }
+
+    @Override
+    public void setParent(Action parent) {
+        this.parent = parent;
     }
 }

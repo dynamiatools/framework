@@ -16,41 +16,74 @@
  */
 package tools.dynamia.zk.reports.actions;
 
+import org.zkoss.zul.Filedownload;
+import org.zkoss.zul.TreeModel;
+import tools.dynamia.actions.AbstractAction;
+import tools.dynamia.actions.AbstractClassAction;
+import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionGroup;
 import tools.dynamia.actions.ReadableOnly;
 import tools.dynamia.commons.ApplicableClass;
+import tools.dynamia.commons.ClassMessages;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.crud.CrudState;
+import tools.dynamia.domain.query.DataSet;
 import tools.dynamia.reports.ReportOutputType;
 import tools.dynamia.reports.SimpleReportDescriptor;
+import tools.dynamia.ui.MessageType;
+import tools.dynamia.ui.UIMessages;
+import tools.dynamia.viewers.DataSetView;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.Viewers;
+import tools.dynamia.zk.crud.CrudController;
+import tools.dynamia.zk.crud.CrudView;
+import tools.dynamia.zk.crud.ui.EntityTreeModel;
+import tools.dynamia.zk.util.ZKUtil;
 
-public abstract class AbstractExportAction extends AbstractCrudAction implements ReadableOnly {
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+
+public abstract class AbstractExportAction extends AbstractAction implements ReadableOnly {
+
+    protected CrudController crudController;
+    protected final int LARGE = 5000;
+    protected final ClassMessages MESSAGES = ClassMessages.get(AbstractExportAction.class);
 
     public AbstractExportAction() {
-        setName(Messages.get(getClass(), "export"));
+        setName(Messages.get(getClass(), "export_" + getOuputType().getExtension()));
         setImage("export-" + getOuputType().getExtension());
         setGroup(ActionGroup.get("EXPORT"));
+        setVisible(false);
     }
 
+    public void actionPerformed(ActionEvent evt) {
+        DataSet dataSet = crudController != null ? crudController.getQueryResult() : null;
+        Collection data = null;
+        if (dataSet != null && dataSet.getData() != null) {
+            if (dataSet.getData() instanceof Collection collection) {
+                data = collection;
+            } else if (dataSet.getData() instanceof TreeModel treeModel) {
+                data = ZKUtil.flatTreeModel(treeModel);
+            }
+        }
 
-    private boolean isBaseClass(Class type) {
-        String name = type.getName();
-        return name.startsWith("java.lang") || name.startsWith("java.math") || name.startsWith("java.sql") || name.startsWith("java.util");
+        if (data != null) {
+
+            if (data.size() > LARGE) {
+                Collection finalData = data;
+                UIMessages.showQuestion(MESSAGES.get("confirm_large_export"),
+                        () -> export(finalData, getViewDescriptor()));
+            } else {
+                export(data, getViewDescriptor());
+            }
+        }
     }
 
-    @Override
-    public CrudState[] getApplicableStates() {
-        return CrudState.get(CrudState.READ);
-    }
+    protected abstract void export(Collection data, ViewDescriptor descriptor);
 
-    @Override
-    public ApplicableClass[] getApplicableClasses() {
-        return ApplicableClass.ALL;
-    }
 
     public abstract ReportOutputType getOuputType();
 
@@ -58,9 +91,8 @@ public abstract class AbstractExportAction extends AbstractCrudAction implements
 
     }
 
-    protected ViewDescriptor getViewDescriptor(CrudActionEvent evt) {
-
-        Class entityClass = evt.getController().getEntityClass();
+    protected ViewDescriptor getViewDescriptor() {
+        var entityClass = crudController.getEntityClass();
         ViewDescriptor viewDescriptor = Viewers.findViewDescriptor(entityClass, "export");
         if (viewDescriptor == null) {
             viewDescriptor = Viewers.findViewDescriptor(entityClass, "tree");
@@ -71,7 +103,33 @@ public abstract class AbstractExportAction extends AbstractCrudAction implements
         }
 
         return viewDescriptor;
+    }
 
+    public CrudController getCrudController() {
+        return crudController;
+    }
+
+    public void setCrudController(CrudController crudController) {
+        this.crudController = crudController;
+    }
+
+    protected File createTempFile() {
+        try {
+            return File.createTempFile("export_" + System.currentTimeMillis(), "." + getOuputType().getExtension());
+        } catch (IOException e) {
+
+            e.printStackTrace();
+            UIMessages.showMessage("Error: " + e.getMessage(), MessageType.ERROR);
+            return null;
+        }
+    }
+
+    protected void download(File temp) {
+        try {
+            Filedownload.save(temp, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
