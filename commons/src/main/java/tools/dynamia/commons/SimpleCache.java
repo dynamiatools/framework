@@ -19,7 +19,9 @@ package tools.dynamia.commons;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
@@ -84,6 +86,18 @@ public class SimpleCache<K, V> implements Serializable {
      */
     public boolean isEmpty() {
         return data.isEmpty();
+    }
+
+    public Set<K> keySet() {
+        return data.keySet();
+    }
+
+    public Set<Map.Entry<K, V>> entrySet() {
+        return data.entrySet();
+    }
+
+    public void forEach(BiConsumer<? super K, ? super V> action) {
+        data.forEach(action);
     }
 
     @Override
