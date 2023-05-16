@@ -234,7 +234,7 @@ public class ApplicationParameters implements Parameters {
         if (paramClass == null) {
             throw new RuntimeException("No default parameter class found");
         }
-        var sql = "update " + paramClass.getName() + " p set p.value =  coalesce(p.value,0) + 1 where p.id = :id ";
+        var sql = "update " + paramClass.getName() + " p set p.value = concat(coalesce(p.value,0) + 1,'') where p.id = :id ";
         crudService.execute(sql, QueryParameters.with("id", counterParam.getId()));
     }
 
