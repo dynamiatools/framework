@@ -5,15 +5,17 @@ import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
 import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
+import org.springframework.cache.support.AbstractCacheManager;
+import org.springframework.util.Assert;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 
 /**
  * Very simple CacheManager for Ehcache 3. Delegate all cache creation to native {@link org.ehcache.CacheManager}
  * By default keys type are String and values type are Object.class
  */
-public class Ehcache3CacheManager implements CacheManager {
+public class Ehcache3CacheManager extends AbstractCacheManager {
 
     private org.ehcache.CacheManager nativeCacheManager;
     private boolean autocreate = true;
@@ -23,6 +25,7 @@ public class Ehcache3CacheManager implements CacheManager {
     private int defaultPoolHeapEntries = 100;
 
     public Ehcache3CacheManager() {
+        initDefaultConfiguration();
     }
 
     public Ehcache3CacheManager(org.ehcache.CacheManager nativeCacheManager) {
@@ -41,32 +44,30 @@ public class Ehcache3CacheManager implements CacheManager {
                 ResourcePoolsBuilder.heap(defaultPoolHeapEntries)).build();
     }
 
-    @Override
-    public Cache getCache(String name) {
-        var cache = getNativeCacheManager().getCache(name, defaultKeyType, defaultValueType);
-        if (cache == null && autocreate) {
-            cache = getNativeCacheManager().createCache(name, defaultConfiguration);
-        }
-        if (cache != null) {
-            return new Ehcache3Cache(cache, name);
-        } else {
-            return null;
-        }
-    }
 
     @Override
-    public Collection<String> getCacheNames() {
-        return getNativeCacheManager().getRuntimeConfiguration().getCacheConfigurations()
-                .keySet();
+    protected Cache getMissingCache(String name) {
+        var cache = getNativeCacheManager().createCache(name, getDefaultConfiguration());
+        return new Ehcache3Cache(cache, name);
     }
+
+    protected Collection<Cache> loadCaches() {
+        var cacheManager = getNativeCacheManager();
+        Assert.state(cacheManager != null, "No CacheManager set");
+
+        Collection<Cache> caches = new LinkedHashSet<>();
+        for (String cacheName : cacheManager.getRuntimeConfiguration().getCacheConfigurations().keySet()) {
+            var cache = cacheManager.getCache(cacheName, defaultKeyType, defaultValueType);
+            caches.add(new Ehcache3Cache(cache, cacheName));
+        }
+        return caches;
+    }
+
 
     public org.ehcache.CacheManager getNativeCacheManager() {
         if (nativeCacheManager == null) {
             nativeCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
-                    .withCache("defaultCache",
-                            CacheConfigurationBuilder.newCacheConfigurationBuilder(defaultKeyType, defaultValueType,
-                                            ResourcePoolsBuilder.heap(100))
-                                    .build())
+                    .withCache("defaultCache", getDefaultConfiguration())
                     .build(true);
         }
         return nativeCacheManager;
