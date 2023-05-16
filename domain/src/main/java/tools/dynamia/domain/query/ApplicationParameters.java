@@ -228,6 +228,10 @@ public class ApplicationParameters implements Parameters {
         return Containers.get().findObject(Parameters.class);
     }
 
+    /**
+     * Increase the count sequence
+     * @param counterParam
+     */
     @Override
     public void increaseCounter(Parameter counterParam) {
         var paramClass = DomainUtils.getDefaultParameterClass();
