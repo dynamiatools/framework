@@ -47,15 +47,15 @@ public class GlobalExceptionController implements ErrorController {
 
     @RequestMapping(value = {"/errors", "/error"})
     public ModelAndView error(HttpServletRequest request) {
-        var statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
-        var messageObj = request.getAttribute("javax.servlet.error.message");
-        var throwable = (Throwable) request.getAttribute("javax.servlet.error.exception");
-        var requestUri = (String) request.getAttribute("javax.servlet.error.request_uri");
+        var statusCode = (Integer) request.getAttribute("jakarta.servlet.error.status_code");
+        var messageObj = request.getAttribute("jakarta.servlet.error.message");
+        var throwable = (Throwable) request.getAttribute("jakarta.servlet.error.exception");
+        var requestUri = (String) request.getAttribute("jakarta.servlet.error.request_uri");
 
 
         if (statusCode == null && throwable == null) {
-            logger.warn("Unknow error redirecting to /");
-            return new ModelAndView("redirect:/");
+            logger.warn("Unknow request error");
+
         }
 
         if (messageObj == null) {
