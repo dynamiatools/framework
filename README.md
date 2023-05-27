@@ -1,4 +1,4 @@
-[![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia/tools.dynamia.zk.app)](https://search.maven.org/search?q=tools.dynamia)
+[![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia/tools.dynamia.app)](https://search.maven.org/search?q=tools.dynamia)
 ![Java Version Required](https://img.shields.io/badge/java-17-blue)
 [![Java CI with Maven](https://github.com/dynamiatools/framework/actions/workflows/maven.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/maven.yml)
 
@@ -60,13 +60,13 @@ class MyApplication {
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.zk</artifactId>
-        <version>5.0.1</version>
+        <version>5.0.2</version>
     </dependency>
 
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.domain.jpa</artifactId>
-        <version>5.0.1</version>
+        <version>5.0.2</version>
     </dependency>    
 </dependencies>
 ```
@@ -74,8 +74,8 @@ class MyApplication {
 **Gradle**
 
 ```groovy
-compile 'tools.dynamia:tools.dynamia.zk:5.0.1'
-compile 'tools.dynamia:tools.dynamia.domain.jpa:5.0.1'
+compile 'tools.dynamia:tools.dynamia.zk:5.0.2'
+compile 'tools.dynamia:tools.dynamia.domain.jpa:5.0.2'
 ```
 
 Artifacts are available in **Maven Central** repositories
