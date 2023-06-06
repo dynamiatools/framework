@@ -1392,7 +1392,6 @@ public abstract class StringUtils {
 
     /**
      * Null safe equals comparator
-     *
      */
     public static boolean equals(String value, String value2) {
         if ((value == null && value2 != null) || (value != null && value2 == null)) {
@@ -1417,7 +1416,6 @@ public abstract class StringUtils {
 
     /**
      * Format a long time data to duration text using format hh:mm:ss
-     *
      */
     public static String formatDuration(long time) {
         var duration = java.time.Duration.ofMillis(time);
@@ -1445,5 +1443,35 @@ public abstract class StringUtils {
 
     public static boolean isBlank(String value) {
         return value != null && value.isBlank();
+    }
+
+    /**
+     * Get a system property or environment variable o default value
+     *
+     * @param name
+     * @param defaultValue
+     * @return
+     */
+    public static String getSystemPropertyOrEnv(String name, String defaultValue) {
+        String value = null;
+
+        value = System.getProperty(name);
+        if (value == null || value.isBlank()) {
+            value = System.getenv(name);
+        }
+
+        if (value == null || value.isBlank()) {
+            value = defaultValue;
+        }
+        return value;
+    }
+
+    /**
+     * Get a system property or environment variable. Return null if nothing found
+     * @param name
+     * @return
+     */
+    public static String getSystemPropertyOrEnv(String name) {
+        return getSystemPropertyOrEnv(name,null);
     }
 }

@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.http.client.fluent.Request;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import tools.dynamia.commons.StringUtils;
 
 import java.io.IOException;
 import java.util.Map;
@@ -42,12 +43,12 @@ public class HttpUtils {
     /**
      * System property name to setup default server path. Useful when app is running in none servlet context
      */
-    public static final String DEFAULT_SERVER_PATH = "defaultServerPath";
+    public static final String DEFAULT_SERVER_PATH_PROP = "defaultServerPath";
+    public static final String DEFAULT_SERVER_PATH_ENV = "DEFAULT_SERVER_PATH";
 
 
     /**
      * Execute a plain simple http get request
-     *
      */
     public static String executeHttpRequest(String url) throws IOException {
         return Request.Get(url).execute().returnContent().asString();
@@ -55,7 +56,6 @@ public class HttpUtils {
 
     /**
      * Execute a GET request with headers and params
-     *
      */
     public static String executeHttpRequest(String url, Map<String, String> headers, Map<String, Object> params) throws IOException {
         Request request = Request.Get(url + "?" + formatRequestParams(params));
@@ -194,7 +194,9 @@ public class HttpUtils {
 
             resultPath = scheme + "://" + serverName + serverPortName + contextPath;
         } else {
-            String serverPath = System.getProperty(DEFAULT_SERVER_PATH);
+            String serverPath = StringUtils.getSystemPropertyOrEnv(DEFAULT_SERVER_PATH_PROP,
+                    StringUtils.getSystemPropertyOrEnv(DEFAULT_SERVER_PATH_ENV));
+
             if (serverPath != null && !serverPath.isBlank()) {
                 resultPath = serverPath;
             }
@@ -234,7 +236,6 @@ public class HttpUtils {
 
     /**
      * Detect if current request is from an iphone
-     *
      */
     public static boolean isIphone() {
         try {
@@ -247,7 +248,6 @@ public class HttpUtils {
 
     /**
      * Detect if current request is from an iOS browser
-     *
      */
     public static boolean isIOS() {
         try {
@@ -260,7 +260,6 @@ public class HttpUtils {
 
     /**
      * Detect if current request is from an Android browser
-     *
      */
     public static boolean isAndroid() {
         try {
@@ -273,7 +272,6 @@ public class HttpUtils {
 
     /**
      * Return subdomain name or null if current server host has no subdomian
-     *
      */
     public static String getSubdomain(HttpServletRequest request) {
         String host = request.getServerName();
