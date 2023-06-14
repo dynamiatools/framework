@@ -50,6 +50,9 @@ public class RootAppConfiguration {
     @Autowired
     private Environment environment;
 
+    @Autowired(required = false)
+    private ApplicationConfigurationProperties appCfgProps;
+
     private final LoggingService logger = new SLF4JLoggingService();
 
     public RootAppConfiguration() {
@@ -103,7 +106,14 @@ public class RootAppConfiguration {
     public ApplicationInfo applicationInfo() {
         try {
             logger.info("Initializing Application Info");
-            ApplicationInfo applicationInfo = loadApplicationInfo();
+            ApplicationInfo applicationInfo = null;
+
+            if (appCfgProps != null) {
+                applicationInfo = ApplicationInfo.load(appCfgProps);
+            } else {
+                applicationInfo = loadApplicationInfo();
+            }
+
             if (applicationInfo.getName() == null) {
                 applicationInfo.setName(environment.getProperty("spring.application.name"));
             }
@@ -115,6 +125,8 @@ public class RootAppConfiguration {
 
             TemplateContext context = new TemplateContext(applicationInfo);
             template.init(context);
+
+            logger.info("Application Info Loaded: " + applicationInfo);
 
             return applicationInfo;
         } catch (IOException e) {

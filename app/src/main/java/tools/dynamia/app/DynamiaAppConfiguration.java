@@ -16,17 +16,14 @@
  */
 package tools.dynamia.app;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
-import tools.dynamia.app.template.TemplateResourceHandler;
 
 /**
- *
  * @author Mario A. Serrano Leones
  */
-@ComponentScan(value = { "tools.dynamia", "com.dynamia", "com.dynamiasoluciones" })
+@ComponentScan(value = {"tools.dynamia", "com.dynamia", "com.dynamiasoluciones"})
+@EnableConfigurationProperties(ApplicationConfigurationProperties.class)
 public abstract class DynamiaAppConfiguration extends MvcConfiguration {
 
-    public DynamiaAppConfiguration(ApplicationInfo applicationInfo, TemplateResourceHandler handler) {
-        super(applicationInfo, handler);
-    }
 }

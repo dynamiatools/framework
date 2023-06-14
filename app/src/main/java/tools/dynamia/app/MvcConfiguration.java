@@ -51,22 +51,13 @@ import java.util.Map;
 @EnableWebMvc
 public abstract class MvcConfiguration implements WebMvcConfigurer {
 
-    private final ApplicationInfo applicationInfo;
-    private final TemplateResourceHandler handler;
 
     private final LoggingService logger = new SLF4JLoggingService(getClass());
 
-    public MvcConfiguration(ApplicationInfo applicationInfo, TemplateResourceHandler handler) {
-        this.applicationInfo = applicationInfo;
-        this.handler = handler;
-    }
 
     @Override
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
         registry.addResourceHandler("*.ico").addResourceLocations("/", "classpath:/static/");
-        registry.addResourceHandler("/static/**")
-                .addResourceLocations("/static/", "classpath:/static/", "file:static/")
-                .setCacheControl(CacheControl.maxAge(Duration.of(31536000, ChronoUnit.SECONDS)));
     }
 
     @Override
@@ -85,7 +76,14 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
-    public SimpleUrlHandlerMapping templateResourcesMapping() {
+    public TemplateResourceHandler templateResourceHandler(ApplicationInfo applicationInfo) {
+        var handler = new TemplateResourceHandler(applicationInfo);
+        handler.setCacheControl(CacheControl.maxAge(Duration.of(31536000, ChronoUnit.SECONDS)));
+        return handler;
+    }
+
+    @Bean
+    public SimpleUrlHandlerMapping templateResourcesMapping(TemplateResourceHandler handler) {
 
         Map<String, Object> map = new HashMap<>();
         map.put("root/**", handler);
@@ -100,27 +98,27 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
         map.put("plugins/**", handler);
         map.put("vendor/**", handler);
         map.put("vendors/**", handler);
+        map.put("static/**", handler);
 
         SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
-
         mapping.setUrlMap(map);
 
         return mapping;
     }
 
     @Bean
-    public ViewResolver webinfViewResolver() {
+    public ViewResolver webinfViewResolver(ApplicationInfo applicationInfo) {
         UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
-        vr.setOrder(getViewResolverOrder("defaultViewResolverOrder", 1));
+        vr.setOrder(getViewResolverOrder(applicationInfo, "defaultViewResolverOrder", 1));
         vr.setPrefix("/WEB-INF/views/");
         vr.setCache(applicationInfo.isWebCacheEnabled());
         return vr;
     }
 
     @Bean
-    public ViewResolver zkViewResolver() {
+    public ViewResolver zkViewResolver(ApplicationInfo applicationInfo) {
         UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
-        vr.setOrder(getViewResolverOrder("zkViewResolverOrder", 9));
+        vr.setOrder(getViewResolverOrder(applicationInfo, "zkViewResolverOrder", 9));
         vr.setPrefix("/zkau/web/views/");
         vr.setSuffix(".zul");
         vr.setCache(applicationInfo.isWebCacheEnabled());
@@ -128,9 +126,9 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
-    public ViewResolver themeZulViewResolver() {
+    public ViewResolver themeZulViewResolver(ApplicationInfo applicationInfo) {
         UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
-        vr.setOrder(getViewResolverOrder("themeZulViewResolverOrder", 100));
+        vr.setOrder(getViewResolverOrder(applicationInfo, "themeZulViewResolverOrder", 100));
         vr.setPrefix("/zkau/web/templates/" + applicationInfo.getTemplate().toLowerCase() + "/views/");
         vr.setSuffix(".zul");
         vr.setCache(applicationInfo.isWebCacheEnabled());
@@ -143,14 +141,14 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
      * @return ViewResolver
      */
     @Bean
-    public ViewResolver templateViewResolver() {
+    public ViewResolver templateViewResolver(ApplicationInfo applicationInfo) {
         TemplateViewResolver vr = new TemplateViewResolver(applicationInfo);
-        vr.setOrder(getViewResolverOrder("templateViewResolverOrder", Integer.MAX_VALUE));
+        vr.setOrder(getViewResolverOrder(applicationInfo, "templateViewResolverOrder", Integer.MAX_VALUE));
         vr.setCache(applicationInfo.isWebCacheEnabled());
         return vr;
     }
 
-    protected int getViewResolverOrder(String name, int defaultValue) {
+    protected int getViewResolverOrder(ApplicationInfo applicationInfo, String name, int defaultValue) {
         int order = defaultValue;
         try {
             if (name != null && applicationInfo != null && applicationInfo.getProperty(name) != null) {

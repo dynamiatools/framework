@@ -19,16 +19,21 @@ package tools.dynamia.app.template;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import tools.dynamia.app.ApplicationInfo;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+
 /**
  * Template resource handler find resources in current {@link ApplicationTemplate} directory
+ *
  * @author Mario A. Serrano Leones
  */
-@Component
+
 public class TemplateResourceHandler extends ResourceHttpRequestHandler {
 
 

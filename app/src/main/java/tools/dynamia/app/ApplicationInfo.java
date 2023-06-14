@@ -16,6 +16,7 @@
  */
 package tools.dynamia.app;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import tools.dynamia.actions.AbstractAction;
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionLoader;
@@ -68,6 +69,7 @@ public class ApplicationInfo implements Serializable, PropertiesContainer {
         properties = new HashMap<>();
         properties.put(TEMPLATE, "Default");
     }
+
 
     public String getDefaultSkin() {
         return properties.get(DEFAULT_SKIN);
@@ -235,6 +237,21 @@ public class ApplicationInfo implements Serializable, PropertiesContainer {
         if (action != null) {
             action.actionPerformed(new ActionEvent(this, this));
         }
+    }
+
+    public static ApplicationInfo load(ApplicationConfigurationProperties props) {
+        var info = new ApplicationInfo();
+        if (props != null) {
+            BeanUtils.getValuesMaps(props).forEach((key, value) -> {
+                if (value != null) {
+                    info.addProperty(key, String.valueOf(value));
+                }
+            });
+            if (props.getProperties() != null) {
+                props.getProperties().forEach(info::addProperty);
+            }
+        }
+        return info;
     }
 
 }

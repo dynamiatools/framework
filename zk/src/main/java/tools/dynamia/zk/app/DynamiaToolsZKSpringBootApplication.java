@@ -24,10 +24,8 @@ import org.springframework.web.context.request.RequestContextListener;
 import org.zkoss.zk.au.http.DHtmlUpdateServlet;
 import org.zkoss.zk.ui.http.DHtmlLayoutServlet;
 import org.zkoss.zk.ui.http.HttpSessionListener;
-import tools.dynamia.app.ApplicationInfo;
 import tools.dynamia.app.DynamiaAppConfiguration;
 import tools.dynamia.app.RootAppConfiguration;
-import tools.dynamia.app.template.TemplateResourceHandler;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.services.impl.NoOpCrudService;
 import tools.dynamia.integration.ms.MessageService;
@@ -43,9 +41,6 @@ import java.util.Map;
 @Import(RootAppConfiguration.class)
 public class DynamiaToolsZKSpringBootApplication extends DynamiaAppConfiguration {
 
-    public DynamiaToolsZKSpringBootApplication(ApplicationInfo applicationInfo, TemplateResourceHandler handler) {
-        super(applicationInfo, handler);
-    }
 
     @Bean
     @ConditionalOnMissingBean(MessageService.class)
