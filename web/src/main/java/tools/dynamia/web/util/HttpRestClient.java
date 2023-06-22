@@ -34,18 +34,22 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * {@link RestTemplate} wrapper with BASIC authentication support
+ * {@link RestTemplate} wrapper with BASIC and Bearer authentication support
  */
 public class HttpRestClient {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String APPLICATION_JSON = "application/json";
+    public static final String AUTHORIZATION_HEADER = "Authorization";
 
     private final String url;
-    private final String username;
-    private final String password;
+    private String username;
+    private String password;
+    private String bearerToken;
     private RestTemplate rest;
     private final Map<String, String> headers = new HashMap<>();
+
+    private MediaType contentType = MediaType.APPLICATION_JSON;
 
     public HttpRestClient(String url) {
         this(url, null, null, null);
@@ -74,12 +78,17 @@ public class HttpRestClient {
 
     HttpHeaders createHeaders() {
         return new HttpHeaders() {{
-            String auth = username + ":" + password;
-            byte[] encodedAuth = Base64.getEncoder().encode(
-                    auth.getBytes(StandardCharsets.US_ASCII));
-            String authHeader = "Basic " + new String(encodedAuth);
-            set("Authorization", authHeader);
-            setContentType(MediaType.APPLICATION_JSON);
+            if (username != null && password != null) {
+                String auth = username + ":" + password;
+                byte[] encodedAuth = Base64.getEncoder().encode(
+                        auth.getBytes(StandardCharsets.US_ASCII));
+                String authHeader = "Basic " + new String(encodedAuth);
+                set(AUTHORIZATION_HEADER, authHeader);
+            } else if (bearerToken != null) {
+                set(AUTHORIZATION_HEADER, "Bearer " + bearerToken);
+            }
+
+            setContentType(contentType);
             headers.forEach(this::set);
         }};
     }
@@ -99,13 +108,16 @@ public class HttpRestClient {
 
     /**
      * Perf
+     *
      * @param uri
      * @param type
-     * @return
      * @param <T>
+     * @return
      */
     public <T> List<T> getList(String uri, Class<T> type) {
-        return exchange(HttpMethod.GET, url, null, new ParameterizedTypeReference<>() {});
+
+        return exchange(HttpMethod.GET, uri, null, new ParameterizedTypeReference<>() {
+        });
     }
 
 
@@ -135,19 +147,37 @@ public class HttpRestClient {
         return exchange(HttpMethod.DELETE, uri, null, responseClass);
     }
 
-    protected <T> T exchange(HttpMethod method, String uri, Object body, Class<T> responseClass) {
+    public <T> T exchange(HttpMethod method, String uri, Object body, Class<T> responseClass) {
         HttpEntity entity = new HttpEntity<>(body, createHeaders());
 
         ResponseEntity<T> response = rest.exchange(url + uri, method, entity, responseClass);
         return response.getBody();
     }
 
-    protected <T> T exchange(HttpMethod method, String uri, Object body, ParameterizedTypeReference<T> type) {
+    public <T> T exchange(HttpMethod method, String uri, Object body, ParameterizedTypeReference<T> type) {
         HttpEntity entity = new HttpEntity<>(body, createHeaders());
 
         ResponseEntity<T> response = rest.exchange(url + uri, method, entity, type);
         return response.getBody();
     }
 
+    public RestTemplate getRestTemplate() {
+        return rest;
+    }
 
+    public String getBearerToken() {
+        return bearerToken;
+    }
+
+    public void setBearerToken(String bearerToken) {
+        this.bearerToken = bearerToken;
+    }
+
+    public MediaType getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(MediaType contentType) {
+        this.contentType = contentType;
+    }
 }
