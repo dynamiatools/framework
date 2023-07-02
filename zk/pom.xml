@@ -89,6 +89,11 @@
             <artifactId>tools.dynamia.viewers</artifactId>
             <version>5.0.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>${snakeyaml.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
@@ -133,6 +138,7 @@
             <artifactId>commons-fileupload</artifactId>
             <version>1.5</version>
         </dependency>
+
 
         <dependency>
             <groupId>jakarta.servlet</groupId>
