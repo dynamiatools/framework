@@ -194,6 +194,10 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
 
     protected void fireOnPageUnload(Page page) {
         if (isValidPage(page)) {
+            if (page.getOnUnloadCallback() != null) {
+                page.getOnUnloadCallback().doSomething();
+            }
+
             for (NavigationListener listener : Containers.get().findObjects(NavigationListener.class)) {
                 listener.onPageUnload(new PageEvent(ON_PAGE_UNLOAD, page, null));
             }

@@ -43,6 +43,8 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
     private final List<PageAction> actions = new ArrayList<>();
     private Callback onCloseCallback;
     private Callback onOpenCallback;
+
+    private Callback onUnloadCallback;
     private boolean featured;
     private int priority = 100;
     private boolean temporal;
@@ -52,6 +54,7 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
     }
 
     /**
+     *
      */
     public Page(String id, String name, String path) {
         this(id, name, path, true);
@@ -188,6 +191,10 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
         this.onOpenCallback = onOpenCallback;
     }
 
+    public void onUnload(Callback onUnloadCallback) {
+        this.onUnloadCallback = onUnloadCallback;
+    }
+
     Callback getOnCloseCallback() {
         return onCloseCallback;
     }
@@ -196,6 +203,9 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
         return onOpenCallback;
     }
 
+    Callback getOnUnloadCallback() {
+        return onUnloadCallback;
+    }
 
     @Override
     protected String getLocalizedText(Locale locale, String sufix, String defaultValue) {
@@ -228,7 +238,6 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
 
     /**
      * Set this page as a featured page. See setFeatured
-     *
      */
     public Page featured() {
         setFeatured(true);
@@ -237,7 +246,6 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
 
     /**
      * Set as featured with priority
-     *
      */
     public Page featured(int priority) {
         setFeatured(true);
@@ -248,7 +256,6 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
 
     /**
      * Return the priority of this page. By default is 100.
-     *
      */
     public int getPriority() {
         return priority;
@@ -256,7 +263,6 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
 
     /**
      * Set the priority of this page. By default is 100
-     *
      */
     public void setPriority(int priority) {
         this.priority = priority;
@@ -268,7 +274,6 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
 
     /**
      * If always allowed is true, temporal is setting to true
-     *
      */
     @Override
     public void setAlwaysAllowed(boolean alwaysAllowed) {

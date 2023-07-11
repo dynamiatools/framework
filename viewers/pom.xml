@@ -23,13 +23,13 @@
 
     <artifactId>tools.dynamia.viewers</artifactId>
     <packaging>jar</packaging>
-    <version>5.0.4</version>
+    <version>5.0.5</version>
 
 
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.0.4</version>
+        <version>5.0.5</version>
     </parent>
 
     <name>DynamiaTools - Viewers</name>
@@ -86,7 +86,8 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>${snakeyaml.version}</version>
+            <version>2.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

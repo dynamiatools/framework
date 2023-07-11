@@ -30,7 +30,7 @@ public class JavaMailConfigurationAdapter {
 
     protected String host;
     protected int port;
-    protected final String protocol = "stmp";
+    protected final String protocol = "smtp";
     protected String username;
     protected String password;
     protected final boolean tlsEnabled = false;

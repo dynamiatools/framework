@@ -21,19 +21,19 @@
     <parent>
         <artifactId>tools.dynamia.parent</artifactId>
         <groupId>tools.dynamia</groupId>
-        <version>5.0.4</version>
+        <version>5.0.5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>tools.dynamia.zk</artifactId>
-    <version>5.0.4</version>
+    <version>5.0.5</version>
     <packaging>jar</packaging>
     <name>DynamiaTools - ZK</name>
     <url>https://dynamia.tools/docs/zk</url>
     <description>Classes for ZK web application</description>
 
     <licenses>
-       <license>
+        <license>
             <name>APACHE LICENSE, VERSION 2.0</name>
             <url>https://www.apache.org/licenses/LICENSE-2.0</url>
             <distribution>repo</distribution>
@@ -63,31 +63,31 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.web</artifactId>
-            <version>5.0.4</version>
+            <version>5.0.5</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.navigation</artifactId>
-            <version>5.0.4</version>
+            <version>5.0.5</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.ui</artifactId>
-            <version>5.0.4</version>
+            <version>5.0.5</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.domain</artifactId>
-            <version>5.0.4</version>
+            <version>5.0.5</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.viewers</artifactId>
-            <version>5.0.4</version>
+            <version>5.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
@@ -98,13 +98,13 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.crud</artifactId>
-            <version>5.0.4</version>
+            <version>5.0.5</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.app</artifactId>
-            <version>5.0.4</version>
+            <version>5.0.5</version>
         </dependency>
 
         <dependency>
@@ -156,6 +156,14 @@
                     <groupId>com.lowagie</groupId>
                     <artifactId>itext</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>commons-beanutils</groupId>
+                    <artifactId>commons-beanutils</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -167,6 +175,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
         </dependency>
     </dependencies>
 

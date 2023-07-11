@@ -17,12 +17,15 @@
 package tools.dynamia.web.util;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.http.client.fluent.Request;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import tools.dynamia.commons.StringUtils;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringJoiner;
@@ -50,20 +53,37 @@ public class HttpUtils {
     /**
      * Execute a plain simple http get request
      */
-    public static String executeHttpRequest(String url) throws IOException {
-        return Request.Get(url).execute().returnContent().asString();
+    public static String executeHttpRequest(String url) {
+        try {
+            var request = HttpRequest.newBuilder().GET()
+                    .uri(new URI(url)).build();
+
+
+            return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString()).body();
+        } catch (Exception e) {
+            throw new HttpServiceException("Cannot perform http GET request: " + url, e);
+        }
+
     }
 
     /**
      * Execute a GET request with headers and params
      */
     public static String executeHttpRequest(String url, Map<String, String> headers, Map<String, Object> params) throws IOException {
-        Request request = Request.Get(url + "?" + formatRequestParams(params));
-        if (headers != null && !headers.isEmpty()) {
-            headers.forEach(request::addHeader);
+
+        try {
+
+            var request = HttpRequest.newBuilder().GET()
+                    .uri(new URI(url + "?" + formatRequestParams(params)));
+
+            headers.forEach(request::header);
+
+            return HttpClient.newHttpClient().send(request.build(), HttpResponse.BodyHandlers.ofString()).body();
+        } catch (Exception e) {
+            throw new HttpServiceException("Cannot perform http GET request: " + url, e);
         }
 
-        return request.execute().returnContent().asString();
+
     }
 
 
