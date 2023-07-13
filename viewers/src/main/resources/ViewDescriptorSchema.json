@@ -1,0 +1,275 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "view": {
+      "type": "string",
+      "description": "type of view",
+      "enum": [
+        "form",
+        "table",
+        "crud",
+        "tree",
+        "json",
+        "entityfilters",
+        "config",
+        "dashboard",
+        "entitypicker",
+        "json-form",
+        "filemanager"
+      ]
+    },
+    "beanClass": {
+      "type": "string",
+      "description": "class name"
+    },
+    "id": {
+      "type": "string"
+    },
+    "autofields": {
+      "type": "boolean"
+    },
+    "customizer": {
+      "type": "string",
+      "description": "class name"
+    },
+    "extends": {
+      "type": "string",
+      "description": "Another descriptor id"
+    },
+    "device": {
+      "type": "string",
+      "enum": [
+        "smartphone",
+        "tablet",
+        "screen"
+      ]
+    },
+    "fields": {
+      "additionalProperties": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "component": {
+                "type": "string"
+              },
+              "componentClass": {
+                "type": "string"
+              },
+              "required": {
+                "type": "boolean"
+              },
+              "class": {
+                "type": "string",
+                "description": "class name"
+              },
+              "visible": {
+                "type": "boolean"
+              },
+              "index": {
+                "type": "integer"
+              },
+              "icon": {
+                "type": "string"
+              },
+              "action": {
+                "type": "string",
+                "description": "Action Name"
+              },
+              "showIconOnly": {
+                "type": "boolean"
+              },
+              "description": {
+                "type": "string"
+              },
+              "componentCustomizer": {
+                "type": "string",
+                "description": "class name"
+              },
+              "value": {
+                "type": "string"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "span": {
+                    "type": "integer"
+                  },
+                  "converter": {
+                    "type": "string",
+                    "description": "class name"
+                  },
+                  "placeholder": {
+                    "type": "string"
+                  },
+                  "multiline": {
+                    "type": "string"
+                  },
+                  "sclass": {
+                    "type": "string"
+                  },
+                  "style": {
+                    "type": "string"
+                  },
+                  "ignoreBindings": {
+                    "type": "boolean"
+                  },
+                  "format": {
+                    "type": "string"
+                  },
+                  "constraints": {
+                    "type": "string"
+                  },
+                  "bindings:": {
+                    "type": "object"
+                  },
+                  "header": {
+                    "type": "object",
+                    "properties": {
+                      "width": {
+                        "type": "string"
+                      },
+                      "align": {
+                        "type": "string"
+                      },
+                      "sclass": {
+                        "type": "string"
+                      },
+                      "style": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "height": {
+                    "type": "string"
+                  },
+                  "width": {
+                    "type": "string"
+                  },
+                  "cell": {
+                    "type": "object",
+                    "properties": {
+                      "sclass": {
+                        "type": "string"
+                      },
+                      "style": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "footer": {
+                    "type": "object",
+                    "properties": {
+                      "sclass": {
+                        "type": "string"
+                      },
+                      "style": {
+                        "type": "string"
+                      },
+                      "functionConverter": {
+                        "type": "string",
+                        "description": "class name"
+                      },
+                      "function": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "writable": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "groups": {
+      "additionalProperties": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "collapse": {
+                "type": "boolean"
+              },
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "description": {
+                "type": "string"
+              },
+              "icon": {
+                "type": "string"
+              },
+              "index": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "fields"
+            ]
+          }
+        ]
+      }
+    },
+    "layout": {
+      "type": "object",
+      "properties": {
+        "columns": {
+          "type": "integer"
+        }
+      }
+    },
+    "params": {
+      "type": "object",
+      "properties": {
+        "sizedByContent": {
+          "type": "boolean"
+        },
+        "autopaging": {
+          "type": "boolean"
+        },
+        "orderBy": {
+          "type": "string"
+        },
+        "enumColors": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "colors": {
+              "anyOf": []
+            }
+          }
+        },
+        "showRowNumber": {
+          "type": "boolean"
+        },
+        "writable": {
+          "type": "boolean"
+        },
+        "sortable": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "required": [
+    "view"
+  ]
+}
