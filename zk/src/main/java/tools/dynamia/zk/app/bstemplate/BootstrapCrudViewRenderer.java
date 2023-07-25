@@ -20,7 +20,7 @@ package tools.dynamia.zk.app.bstemplate;
 import tools.dynamia.zk.crud.CrudView;
 import tools.dynamia.zk.crud.CrudViewRenderer;
 
-public class BoostrapCrudViewRenderer<T> extends CrudViewRenderer<T> {
+public class BootstrapCrudViewRenderer<T> extends CrudViewRenderer<T> {
 
 	@Override
 	protected CrudView<T> newCrudView() {

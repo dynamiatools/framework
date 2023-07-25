@@ -57,8 +57,6 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
     protected Component renderRows(FormView<T> view, ViewDescriptor viewDesc, int realCols, T value) {
 
         Div row = null;
-
-
         Div panel = new Div();
         panel.setZclass("panel");
 
@@ -73,7 +71,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
                     row = newRow();
                     row.setParent(panelBody);
                     if (panel.getParent() == null) {
-                        panel.setParent(view);
+                        panel.setParent(view.getContentArea());
                     }
                 }
                 renderField(row, field, view.getBinder(), view, value, realCols);
@@ -88,7 +86,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
 
                 panel = new Div();
                 panel.setZclass("panel panel-default  field-group");
-                panel.setParent(view);
+                panel.setParent(view.getContentArea());
 
                 FormFieldGroupComponent groupComponent = renderGroup(fieldGroup, realCols, panel);
                 view.getGroupsComponentsMap().put(fieldGroup.getName(), groupComponent);
@@ -367,7 +365,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
     @Override
     protected FormView<T> newFormView() {
         FormView<T> view = new FormView<>();
-        view.setZclass("content");
+
         return view;
     }
 

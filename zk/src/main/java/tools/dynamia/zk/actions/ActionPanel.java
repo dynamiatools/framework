@@ -83,7 +83,7 @@ public class ActionPanel extends Div {
         component.setParent(this);
 
         if (component instanceof HtmlBasedComponent hcom) {
-            hcom.setSclass(hcom.getSclass() + " actionpanel-a");
+            hcom.addSclass("actionpanel-a");
         }
     }
 

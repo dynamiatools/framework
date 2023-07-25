@@ -31,11 +31,7 @@ import tools.dynamia.actions.Actions;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.crud.ChangedStateEvent;
 import tools.dynamia.crud.CrudState;
-import tools.dynamia.crud.actions.CancelAction;
-import tools.dynamia.ui.icons.Icon;
 import tools.dynamia.ui.icons.IconSize;
-import tools.dynamia.ui.icons.IconType;
-import tools.dynamia.ui.icons.IconsTheme;
 import tools.dynamia.web.util.HttpUtils;
 import tools.dynamia.zk.actions.ActionToolbar;
 import tools.dynamia.zk.actions.ButtonActionRenderer;
@@ -45,7 +41,6 @@ import tools.dynamia.zk.crud.CrudView;
 import tools.dynamia.zk.crud.CrudViewRenderer;
 import tools.dynamia.zk.crud.actions.FindAction;
 import tools.dynamia.zk.util.ZKUtil;
-import tools.dynamia.zk.viewers.ZKWrapperView;
 
 import java.util.HashMap;
 import java.util.List;
@@ -57,9 +52,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
      *
      */
     private static final long serialVersionUID = 1773528227238113127L;
-    private Div formLeftActions;
-    private Div formRightActions;
-    private Div formActions;
+
     private Component leftActions;
     private Component rightActions;
     private Menupopup actionsMenu;
@@ -81,17 +74,6 @@ public class BootstrapCrudView<T> extends CrudView<T> {
         header.setParent(borderlayout.getNorth());
         toolbarContainer = header;
 
-        formActions = new Div();
-        formActions.setZclass("crudview-footer row");
-
-        formLeftActions = new Div();
-        formLeftActions.setZclass("col-xs-12 col-md-12");
-        formLeftActions.setParent(formActions);
-
-        formRightActions = new Div();
-        formRightActions.setZclass("col-xs-12 col-md-12");
-        formRightActions.setStyle("text-align: right");
-        formRightActions.setParent(formActions);
 
         String menuId = "actionMenu" + StringUtils.randomString().substring(0, 4);
         actionsMenu = new Menupopup();
@@ -193,23 +175,16 @@ public class BootstrapCrudView<T> extends CrudView<T> {
                 }
             }
         } else {
-
             actionGroup.getActions().forEach(a -> showAction(actionGroup, a));
         }
     }
 
     @Override
     protected void showAction(ActionGroup actionGroup, Action action) {
-        if ((getState() == CrudState.CREATE || getState() == CrudState.UPDATE)
-                && (action.getRenderer() == null || action.getRenderer() instanceof ToolbarbuttonActionRenderer)) {
-            ButtonActionRenderer renderer = new ButtonActionRenderer();
-            Button button = Actions.render(renderer, action, this);
-            button.setAttribute(ACTION, action);
-            applyButtonStyle(button, action);
-            addButton(actionGroup, button);
+        if (isFormActive()) {
+            formView.addAction(action);
         } else {
             fixFindAction(action);
-
             Component actionComp = renderAction(action);
             if (!HttpUtils.isSmartphone()) {
                 Component group = getActionGroupContainer(actionGroup);
@@ -223,6 +198,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
             }
         }
     }
+
 
     private Component getActionGroupContainer(ActionGroup actionGroup) {
         if (actionGroupContainers == null) {
@@ -262,39 +238,6 @@ public class BootstrapCrudView<T> extends CrudView<T> {
 
     }
 
-    private void addButton(ActionGroup group, Component btn) {
-
-        Div btnGroup = new Div();
-        if (HttpUtils.isSmartphone()) {
-            btnGroup.setZclass("btn-group col-md-3 col-sm-3 col-xs-12");
-        } else {
-            btnGroup.setZclass("btn-group");
-        }
-        btnGroup.appendChild(btn);
-
-        if ("right".equals(group.getAlign())) {
-            btnGroup.setSclass("pull-right");
-            formRightActions.appendChild(btnGroup);
-        } else {
-            formLeftActions.appendChild(btnGroup);
-        }
-
-    }
-
-    private void applyButtonStyle(Button button, Action action) {
-        if (action instanceof CancelAction) {
-            button.setZclass("btn btn-danger");
-        } else if (action.getPosition() <= 1) {
-            button.setZclass("btn btn-primary");
-        } else {
-            button.setZclass("btn btn-default");
-        }
-
-        Icon icon = IconsTheme.get().getIcon(action.getImage());
-        if (icon.getType() == IconType.IMAGE) {
-            button.setImage(null);
-        }
-    }
 
     private void controlChangedState(ChangedStateEvent evt) {
         CrudState crudState = evt.newState();
@@ -312,8 +255,9 @@ public class BootstrapCrudView<T> extends CrudView<T> {
     public void clearActions() {
         super.clearActions();
         actionsMenu.getChildren().clear();
-        formLeftActions.getChildren().clear();
-        formRightActions.getChildren().clear();
+        if (formView != null) {
+            formView.clearActions();
+        }
         if (leftActions != null && rightActions != null) {
             leftActions.getChildren().clear();
             rightActions.getChildren().clear();
@@ -324,17 +268,11 @@ public class BootstrapCrudView<T> extends CrudView<T> {
 
     }
 
-    @Override
-    protected void addFormViewToContainer(String formViewTitle) {
-        ZKWrapperView<Object> wrapperView = new ZKWrapperView<>(formView);
-        formActions.setParent(wrapperView);
-        formViewContainer.addView(formViewTitle, wrapperView);
-    }
 
     @SuppressWarnings("rawtypes")
     @Override
     protected CrudViewRenderer getCrudViewRenderer() {
-        return new BoostrapCrudViewRenderer<>();
+        return new BootstrapCrudViewRenderer<>();
     }
 
 }
