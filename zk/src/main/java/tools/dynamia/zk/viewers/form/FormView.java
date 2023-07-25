@@ -24,10 +24,17 @@ import org.zkoss.bind.Phase;
 import org.zkoss.bind.PhaseListener;
 import org.zkoss.zhtml.H3;
 import org.zkoss.zhtml.Text;
+import org.zkoss.zhtml.impl.AbstractTag;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.IdSpace;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zul.Borderlayout;
+import org.zkoss.zul.Center;
 import org.zkoss.zul.Div;
+import org.zkoss.zul.South;
+import org.zkoss.zul.impl.LabelElement;
+import tools.dynamia.actions.Action;
+import tools.dynamia.actions.ActionEventBuilder;
 import tools.dynamia.commons.Callback;
 import tools.dynamia.commons.PropertyChangeEvent;
 import tools.dynamia.commons.PropertyChangeListener;
@@ -39,6 +46,7 @@ import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
+import tools.dynamia.zk.actions.ActionPanel;
 import tools.dynamia.zk.ui.CanBeReadonly;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
@@ -65,6 +73,7 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
      */
     public static final String ON_VALUE_CHANGED = "onValueChanged";
     private static final long serialVersionUID = 1L;
+
     protected T value;
     private Binder binder;
     private boolean readOnly;
@@ -80,17 +89,75 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
     protected FormViewRenderer<T> _renderer;
     private boolean autosaveBindings = true;
     private String title;
-    private final H3 titleTag;
+
     private Object source;
     private Consumer onSourceChange;
     private String customView;
 
+    private Component layout;
+
+    private Component titleArea;
+    private Component contentArea;
+    private Component actionsArea;
+    private ActionPanel actionPanel;
+
+    private ActionEventBuilder actionEventBuilder;
+
+    private boolean autoheight;
+
 
     public FormView() {
-        titleTag = new H3();
+        this(true);
+    }
+
+    public FormView(boolean autoheight) {
+        this.autoheight = autoheight;
+        initLayout();
+    }
+
+    protected void initLayout() {
+        setSclass("form-view");
+
+        var bl = new Borderlayout();
+        bl.setParent(this);
+        bl.appendChild(new Center());
+        bl.getCenter().setAutoscroll(true);
+        bl.getCenter().setSclass("form-view-center");
+        layout = bl;
+
+
+        var div = new Div();
+        div.setSclass("form-view-content");
+        contentArea = div;
+        bl.getCenter().appendChild(contentArea);
+
+        var titleTag = new H3();
         titleTag.setSclass("form-view-title");
         titleTag.setStyle("display: none");
-        appendChild(titleTag);
+        titleArea = titleTag;
+        contentArea.appendChild(titleTag);
+
+        setupAutoheight();
+    }
+
+    private void setupAutoheight() {
+        if (autoheight) {
+            setVflex("1");
+            if (layout instanceof Borderlayout bl) {
+                bl.setVflex("1");
+                bl.setZclass("z-borderlayout");
+                bl.getCenter().setAutoscroll(true);
+                bl.getCenter().setZclass("z-center");
+            }
+        } else {
+            setVflex(null);
+            if (layout instanceof Borderlayout bl) {
+                bl.setVflex(null);
+                bl.setZclass("auto");
+                bl.getCenter().setAutoscroll(false);
+                bl.getCenter().setZclass("auto");
+            }
+        }
     }
 
     @Override
@@ -249,10 +316,18 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
 
     public void setTitle(String title) {
         this.title = title;
-        titleTag.getChildren().clear();
+        titleArea.getChildren().clear();
         if (title != null && !title.isEmpty()) {
-            titleTag.appendChild(new Text(title));
-            titleTag.setStyle("display: normal");
+            updateTitle();
+        }
+    }
+
+    private void updateTitle() {
+        if (titleArea instanceof AbstractTag tag) {
+            tag.appendChild(new Text(title));
+            tag.setStyle("display: normal");
+        } else if (titleArea instanceof LabelElement label) {
+            label.setLabel(title);
         }
     }
 
@@ -286,7 +361,70 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
         }
     }
 
+    public Component getContentArea() {
+        if (contentArea == null) {
+            return this;
+        }
+        return contentArea;
+    }
+
+    public Component getActionsArea() {
+        return actionsArea;
+    }
+
+    public Component getTitleArea() {
+        return titleArea;
+    }
+
+    public ActionPanel getActionPanel() {
+        return actionPanel;
+    }
+
     public void onSourceChanged(Consumer onSourceChange) {
         this.onSourceChange = onSourceChange;
+    }
+
+    public void clearActions() {
+        if (actionsArea != null) {
+            actionsArea.detach();
+            actionPanel = null;
+            actionsArea = null;
+        }
+    }
+
+    public void addAction(Action action) {
+        initActionsArea();
+        actionPanel.addAction(action);
+    }
+
+    private void initActionsArea() {
+        if (actionsArea == null) {
+            var south = new South();
+            south.setSclass("form-view-actions");
+            actionsArea = south;
+            layout.appendChild(actionsArea);
+            actionPanel = new ActionPanel(getActionEventBuilder());
+            actionsArea.appendChild(actionPanel);
+        }
+    }
+
+    public ActionEventBuilder getActionEventBuilder() {
+        return actionEventBuilder;
+    }
+
+    public void setActionEventBuilder(ActionEventBuilder actionEventBuilder) {
+        this.actionEventBuilder = actionEventBuilder;
+        if (actionEventBuilder != null && actionPanel != null) {
+            actionPanel.setEventBuilder(actionEventBuilder);
+        }
+    }
+
+    public boolean isAutoheight() {
+        return autoheight;
+    }
+
+    public void setAutoheight(boolean autoheight) {
+        this.autoheight = autoheight;
+        setupAutoheight();
     }
 }

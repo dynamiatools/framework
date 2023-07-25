@@ -422,7 +422,6 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
                 //noinspection unchecked
                 attributes.forEach((k, v) -> comp.setAttribute(k.toString(), v));
             }
-
         }
 
     }
@@ -455,7 +454,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         FormView<T> formView = new FormView<>();
         Grid grid = new Grid();
         grid.setOddRowSclass("none");
-        grid.setParent(formView);
+        grid.setParent(formView.getContentArea());
         grid.setStyle("border: 0");
         return formView;
     }
