@@ -47,7 +47,7 @@ public class IconsTheme {
      *
      */
     public Icon getIcon(String name) {
-        if (name == null) {
+        if (name == null || name.isBlank()) {
             return Icon.NONE;
         }
 
