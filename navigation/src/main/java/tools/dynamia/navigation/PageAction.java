@@ -16,10 +16,12 @@
  */
 package tools.dynamia.navigation;
 
+import tools.dynamia.actions.Action;
+
 import java.io.Serializable;
 
 /**
- * Objects of this class represent actions of a navigation page
+ * Action related to a {@link Page}
  */
 public class PageAction implements Serializable {
 
@@ -35,6 +37,8 @@ public class PageAction implements Serializable {
     private String actionClass;
     private double position;
 
+    private Action delegate;
+
     public PageAction() {
 
     }
@@ -49,6 +53,17 @@ public class PageAction implements Serializable {
         this.id = id;
         this.page = page;
         this.name = name;
+    }
+
+    public PageAction(Page page, Action delegate) {
+        this.page = page;
+        this.delegate = delegate;
+        this.id = delegate.getId();
+        this.name = delegate.getName();
+        this.image = delegate.getImage();
+        this.description = delegate.getDescription();
+        this.actionClass = description.getClass().getName();
+        this.position = delegate.getPosition();
     }
 
     public PageAction(Page page, String id, String name, String description) {
@@ -132,4 +147,9 @@ public class PageAction implements Serializable {
     public String getIcon() {
         return getImage();
     }
+
+    public Action getDelegate() {
+        return delegate;
+    }
+
 }

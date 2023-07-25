@@ -3,6 +3,9 @@ package tools.dynamia.navigation;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Navigation Builder base class
+ */
 public abstract class NavigationBuilder {
 
     private Class<NavigationViewBuilder> viewBuilderClass;
@@ -17,7 +20,7 @@ public abstract class NavigationBuilder {
 
 
     public void buildNavigation() {
-        if(viewBuilder==null){
+        if (viewBuilder == null) {
             this.viewBuilder = defaultViewVuilder();
         }
         List<Module> modules = new ArrayList<>(ModuleContainer.getInstance().getModules());

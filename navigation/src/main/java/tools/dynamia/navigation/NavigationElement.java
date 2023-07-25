@@ -18,8 +18,6 @@ package tools.dynamia.navigation;
 
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.StringUtils;
-import tools.dynamia.ui.icons.IconSize;
-import tools.dynamia.ui.icons.IconsTheme;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -30,6 +28,8 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 /**
+ * Define a Navigaion element in a {@link Module} like {@link Page},{@link PageGroup} or custom elements
+ *
  * @author Mario A. Serrano Leones
  */
 public class NavigationElement<T extends NavigationElement> implements Serializable, Comparable<NavigationElement>, Cloneable {
@@ -46,7 +46,7 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
     private boolean reference;
     private final Map<String, Object> attributes = new HashMap<>();
     private boolean alwaysAllowed = false;
-    private IconSize iconSize = IconSize.SMALL;
+    private String iconSize;
     private String badge;
     private Supplier<String> longNameSupplier;
     protected String virtualPath;
@@ -139,26 +139,26 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
     }
 
     public String getIcon() {
-        String realIcon = icon;
-        if (icon != null && icon.startsWith("icons:")) {
-            realIcon = IconsTheme.get().getIcon(icon).getRealPath(getIconSize());
-        }
-        return realIcon;
+        return icon;
     }
 
     public void setIcon(String icon) {
         this.icon = icon;
     }
 
-    public IconSize getIconSize() {
-        if (iconSize == null) {
-            iconSize = IconSize.SMALL;
+    public String getIconSize() {
+        if (iconSize == null || iconSize.isBlank()) {
+            iconSize = "SMALL";
         }
         return iconSize;
     }
 
-    public void setIconSize(IconSize iconSize) {
-
+    /**
+     * SMALL, NORMAL, LARGE
+     *
+     * @param iconSize
+     */
+    public void setIconSize(String iconSize) {
         this.iconSize = iconSize;
     }
 
@@ -319,7 +319,7 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
         return (T) this;
     }
 
-    public T iconSize(IconSize iconSize) {
+    public T iconSize(String iconSize) {
         setIconSize(iconSize);
         //noinspection unchecked
         return (T) this;
