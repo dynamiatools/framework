@@ -52,8 +52,13 @@ public class ButtonActionRenderer extends ZKActionRenderer<Button> {
         }
 
         String zclass = (String) action.getAttribute("zclass");
-        if (zclass != null) {
+        if (zclass != null && !zclass.isBlank()) {
             btn.setZclass(zclass);
+        }
+
+        String sclass = (String) action.getAttribute("sclass");
+        if (sclass != null && !sclass.isBlank()) {
+            btn.addSclass(sclass);
         }
 
         btn.addEventListener(Events.ON_CLICK, event -> Actions.run(action, actionEventBuilder, event.getTarget()));
