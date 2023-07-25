@@ -23,15 +23,17 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import tools.dynamia.app.CurrentTemplate;
-import tools.dynamia.app.IndexInterceptor;
+import tools.dynamia.web.navigation.NavigationIndexInterceptor;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Controller;
+import tools.dynamia.navigation.Page;
+import tools.dynamia.web.navigation.PageNavigationInterceptor;
 
 import java.util.stream.Stream;
 
 @Controller
 @Order(1)
-public class CommonController {
+public class CommonController implements PageNavigationInterceptor {
 
     @RequestMapping("/")
     public ModelAndView index(HttpServletRequest request, HttpServletResponse response) {
@@ -43,7 +45,7 @@ public class CommonController {
 
         setupSkin(request, response, mv);
 
-        Containers.get().findObjects(IndexInterceptor.class).forEach(indexInterceptor -> indexInterceptor.afterIndex(mv, request));
+        Containers.get().findObjects(NavigationIndexInterceptor.class).forEach(indexInterceptor -> indexInterceptor.afterIndex(mv, request));
 
         return mv;
     }
@@ -76,4 +78,9 @@ public class CommonController {
         }
     }
 
+    @Override
+    public void afterPage(Page page, ModelAndView modelAndView, HttpServletRequest request, HttpServletResponse response) {
+
+        setupSkin(request, response, modelAndView);
+    }
 }
