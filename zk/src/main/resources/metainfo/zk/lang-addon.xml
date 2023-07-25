@@ -21,17 +21,19 @@
     <language-name>xul/html</language-name>
 
 
-    <stylesheet href="~./tools/css/dynamia-tools-5.0.0.Final.css" type="text/css"/>
+    <stylesheet href="~./tools/css/dynamia-tools-5.0.5.css" type="text/css"/>
     <stylesheet href="~./templates/default/css/colors-4.0.css" type="text/css"/>
     <stylesheet href="~./templates/default/css/animate.css" type="text/css"/>
-    <stylesheet href="~./tools/app/css/zkbootstrap-5.0.0.css" type="text/css"/>
+    <stylesheet href="~./tools/app/css/zkbootstrap-5.0.5.css" type="text/css"/>
+    <stylesheet href="~./tools/app/css/viewers-5.0.5.css" type="text/css"/>
+    <stylesheet href="~./tools/app/css/form-view-5.0.5.css" type="text/css"/>
+    <stylesheet href="~./tools/app/css/multi-view-5.0.5.css" type="text/css"/>
+    <stylesheet href="~./tools/app/css/table-view-5.0.5.css" type="text/css"/>
 
 
-
-    <javascript src="~./tools/js/dynamia-tools-5.0.0.Final.js"/>
+    <javascript src="~./tools/js/dynamia-tools-5.0.5.js"/>
     <javascript src="~./tools/js/sockjs.min.js?v=1.6.1"/>
-    <javascript src="~./tools/js/dynamia-tools-ws.5.0.0.Final.js"/>
-
+    <javascript src="~./tools/js/dynamia-tools-ws.5.0.5.js"/>
 
 
     <component>

@@ -388,11 +388,7 @@
     font-size: 12px;
 }
 
-.form-view-lbl {
-    font-weight: 500;
-    margin-bottom: 3px;
-    display: block;
-}
+
 
 @media (max-width: 767px) {
     .hidden-xs {
