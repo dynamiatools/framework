@@ -160,7 +160,6 @@ public abstract class AbstractAction implements Action {
 
     /**
      * Shortcut to setAttribute("background","#back")
-     *
      */
     public void setBackground(String background) {
         setAttribute("background", background);
@@ -168,7 +167,6 @@ public abstract class AbstractAction implements Action {
 
     /**
      * Shortcut to getAttribute("background")
-     *
      */
     public String getBackground() {
         return (String) getAttribute("background");
@@ -176,7 +174,6 @@ public abstract class AbstractAction implements Action {
 
     /**
      * Shortcut to setAttribute("color","#back")
-     *
      */
     public void setColor(String color) {
         setAttribute("color", color);
@@ -184,7 +181,6 @@ public abstract class AbstractAction implements Action {
 
     /**
      * Shortcut to getAttribute("color")
-     *
      */
     public String getColor() {
         return (String) getAttribute("color");
@@ -247,7 +243,6 @@ public abstract class AbstractAction implements Action {
     /**
      * Get message based in current locale. It use {@link ClassMessages} to find messages Bundles. Messages.properties files should
      * be in the same package ot this action. One Message.properties by locale, ex. Message_es.properties, Messages_kr.properties
-     *
      */
     protected String msg(String key) {
         return messages.get(key);
@@ -256,7 +251,6 @@ public abstract class AbstractAction implements Action {
     /**
      * Get message based in current locale. It use {@link ClassMessages} to find messages Bundles. Messages.properties files should
      * be in the same package ot this action. One Message.properties by locale, ex. Message_es.properties, Messages_kr.properties
-     *
      */
     protected String msg(String key, Object... params) {
         return messages.get(key, params);
@@ -296,5 +290,34 @@ public abstract class AbstractAction implements Action {
     @Override
     public void setParent(Action parent) {
         this.parent = parent;
+    }
+
+    /**
+     * setAttribute("type",type) shortcut helper method
+     *
+     * @param type
+     */
+    public void setType(String type) {
+        setAttribute("type", type);
+    }
+
+    public String getType() {
+        return (String) getAttribute("type");
+    }
+
+    public void setShowLabel(boolean showLabel) {
+        setAttribute("showLabel", showLabel);
+    }
+
+    public boolean isShowLabel() {
+        return Boolean.TRUE.equals(getAttribute("showLabel"));
+    }
+
+    public void setSclass(String sclass) {
+        setAttribute("sclass", sclass);
+    }
+
+    public String getSclass() {
+        return (String) getAttribute("sclass");
     }
 }
