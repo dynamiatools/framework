@@ -103,10 +103,7 @@ public class CrudPage extends AbstractCrudPage<Object> {
 
         for (Action action : crudActions) {
             if (action.isEnabled()) {
-                PageAction pageAction = new PageAction(this, action.getId(), action.getName(), action.getDescription(),
-                        action.getImage());
-                pageAction.setActionClass(action.getClass().getName());
-                pageAction.setPosition(action.getPosition());
+                PageAction pageAction = new PageAction(this, action);
                 addAction(pageAction);
             }
         }
