@@ -221,6 +221,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
 
         if (formView == null) {
             formView = (FormView<T>) Viewers.getView(getViewDescriptor().getBeanClass(), "form", device, getValue());
+            formView.setActionEventBuilder(this);
         }
     }
 
@@ -524,7 +525,6 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
         if (formView != null && formView.getCustomView() != null) {
             clearActions();
 
-
             Binder binder = BinderUtil.getBinder(formView.getFirstChild());
             if (binder != null) {
                 Object viewModel = binder.getViewModel();
@@ -532,9 +532,7 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
                     ((FormCrudViewModel) viewModel).initForm(this, formView);
                 }
             }
-
         }
-
     }
 
     protected Component getActiveViewParent() {
@@ -768,22 +766,25 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
         for (Action action : actionGroup.getActions()) {
             showAction(actionGroup, action);
         }
-        if (actionGroup.getAlign().equals("right")) {
-            toolbarRight.addSeparator();
-        } else {
-            toolbarLeft.addSeparator();
-        }
+    }
+
+
+    protected boolean isFormActive() {
+        return formView != null && formView.equals(activeView) || getState() == CrudState.CREATE || getState() == CrudState.UPDATE;
     }
 
     protected void showAction(final ActionGroup actionGroup, Action action) {
         if (isReadonly() && isWritableAction(action)) {
             return;
         }
-
-        if ("right".equals(actionGroup.getAlign())) {
-            toolbarRight.addAction(action);
+        if (isFormActive()) {
+            formView.addAction(action);
         } else {
-            toolbarLeft.addAction(action);
+            if ("right".equals(actionGroup.getAlign())) {
+                toolbarRight.addAction(action);
+            } else {
+                toolbarLeft.addAction(action);
+            }
         }
     }
 

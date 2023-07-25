@@ -20,6 +20,7 @@ import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionRenderer;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.commons.Messages;
+import tools.dynamia.crud.cfg.AbstractConfigPageAction;
 import tools.dynamia.domain.query.ApplicationParameters;
 import tools.dynamia.domain.query.Parameter;
 import tools.dynamia.navigation.NavigationManager;
@@ -38,6 +39,7 @@ public class SaveConfigAction extends AbstractConfigPageAction {
     public SaveConfigAction() {
         setName(Messages.get(SaveConfigAction.class, "save"));
         setImage("save");
+        setType("primary");
     }
 
     @Override
@@ -55,11 +57,6 @@ public class SaveConfigAction extends AbstractConfigPageAction {
         } else {
             UIMessages.showMessage(Messages.get(getClass(), "error_save", "Parameters are null"), MessageType.ERROR);
         }
-    }
-
-    @Override
-    public ActionRenderer getRenderer() {
-        return new ToolbarbuttonActionRenderer(true);
     }
 
 }

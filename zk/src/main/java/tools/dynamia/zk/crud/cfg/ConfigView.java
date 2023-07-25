@@ -16,19 +16,24 @@
  */
 package tools.dynamia.zk.crud.cfg;
 
+import tools.dynamia.actions.Action;
+import tools.dynamia.actions.ActionEvent;
+import tools.dynamia.actions.ActionsContainer;
 import tools.dynamia.domain.query.Parameter;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
+import tools.dynamia.zk.actions.ActionPanel;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.viewers.form.FormView;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
- *
  * @author Mario A. Serrano Leones
  */
-public class ConfigView extends FormView<List<Parameter>> {
+public class ConfigView extends FormView<List<Parameter>> implements ActionsContainer {
 
     /**
      *
@@ -39,6 +44,9 @@ public class ConfigView extends FormView<List<Parameter>> {
         BindingComponentIndex.getInstance().put("value", ConfigView.class);
         ComponentAliasIndex.getInstance().add(ConfigView.class);
     }
+
+
+    private ActionPanel actionPanel;
 
     public ConfigView() {
 
@@ -55,4 +63,23 @@ public class ConfigView extends FormView<List<Parameter>> {
         }
     }
 
+    @Override
+    public void addAction(Action action) {
+        if (actionPanel == null) {
+            actionPanel = new ActionPanel((source, params) -> new ActionEvent(getValue(), this));
+
+            appendChild(actionPanel);
+        }
+        if (!actionPanel.getActions().contains(action)) {
+            actionPanel.addAction(action);
+        }
+    }
+
+    @Override
+    public List<Action> getActions() {
+        if (actionPanel == null) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(actionPanel.getActions());
+    }
 }

@@ -57,6 +57,7 @@ public class MultiView<T> extends Tabbox implements View<T>, EventListener<Event
     private Object source;
 
     public MultiView() {
+        setClass("multi-view");
         new Tabpanels().setParent(this);
         new Tabs().setParent(this);
         addEventListener(Events.ON_SELECT, this);
@@ -101,8 +102,8 @@ public class MultiView<T> extends Tabbox implements View<T>, EventListener<Event
 
     public void addView(String label, MultiViewListener listener, ViewLoader viewLoader, boolean loadInmediatly) {
         Tab tab = createTab(label);
-        tab.setAttribute("viewLoader", viewLoader);
-        tab.setAttribute("multiViewListener", listener);
+        tab.setAttribute(VIEW_LOADER, viewLoader);
+        tab.setAttribute(MULTI_VIEW_LISTENER, listener);
 
         if (loadInmediatly) {
             loadTab(tab);
@@ -118,12 +119,13 @@ public class MultiView<T> extends Tabbox implements View<T>, EventListener<Event
     protected Tab createTab(String label) {
         Tab tab = new Tab();
         tab.setLabel(label);
+        tab.setSclass("multi-view-tab");
         tab.addSclass(label.toLowerCase().replace(" ", "-") + "-tab");
         getTabs().appendChild(tab);
 
         Tabpanel panel = new Tabpanel();
         panel.setVflex("1");
-        panel.setSclass("multiview-panel");
+        panel.setSclass("multi-view-panel");
         getTabpanels().appendChild(panel);
         checkTabs();
         return tab;

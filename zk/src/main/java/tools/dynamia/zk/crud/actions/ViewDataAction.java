@@ -87,19 +87,20 @@ public class ViewDataAction extends AbstractCrudAction implements ReadableOnly {
 
             Div content = new Div();
             content.setStyle("overflow: auto");
+            content.setSclass("view-data-content");
+
             if (HttpUtils.isSmartphone()) {
                 content.setVflex("1");
             }
 
+            FormView formView = (FormView) Viewers.getView(entity.getClass(), "form", entity);
+            formView.setAutoheight(false);
+            formView.setReadonly(true);
+            content.appendChild(formView);
 
-            Viewer viewer = new Viewer("form", entity.getClass(), entity);
-            viewer.setVflex(null);
-            viewer.setContentVflex(null);
-            viewer.setReadonly(true);
-            content.appendChild(viewer);
+            ViewDescriptor viewDescriptor = formView.getViewDescriptor();
 
-            FormView formView = (FormView) viewer.getView();
-            formView.getViewDescriptor().getFields().stream()
+            viewDescriptor.getFields().stream()
                     .filter(f -> "crudview".equals(f.getComponent()))
                     .filter(f -> f.getParams().get(Viewers.PARAM_INPLACE) == Boolean.TRUE)
                     .forEach(f -> {
@@ -109,7 +110,7 @@ public class ViewDataAction extends AbstractCrudAction implements ReadableOnly {
                         }
                     });
 
-            ViewDescriptor viewDescriptor = viewer.getView().getViewDescriptor();
+
 
             Viewers.getFields(viewDescriptor).stream()
                     .filter(Field::isCollection)
