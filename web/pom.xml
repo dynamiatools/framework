@@ -76,10 +76,24 @@
             <version>5.0.5</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.navigation</artifactId>
+            <version>5.0.5</version>
         </dependency>
-
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.viewers</artifactId>
+            <version>5.0.5</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.crud</artifactId>
+            <version>5.0.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>jakarta.servlet</groupId>

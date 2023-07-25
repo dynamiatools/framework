@@ -1,4 +1,4 @@
-package tools.dynamia.app;
+package tools.dynamia.web.navigation;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPatternParser;
-import tools.dynamia.app.controllers.PageNavigationController;
-import tools.dynamia.app.controllers.RestNavigationController;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.crud.CrudPage;
@@ -20,15 +18,15 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 @Configuration
-public class NavigationModulesConfiguration {
+public class WebNavigationConfiguration {
 
     public static final String PAGE_URI = "/page/";
     public static final String API_URI = "/api/";
-    private final LoggingService logger = new SLF4JLoggingService(NavigationModulesConfiguration.class);
+    private final LoggingService logger = new SLF4JLoggingService(WebNavigationConfiguration.class);
 
     private final RequestMappingInfo.BuilderConfiguration options;
 
-    public NavigationModulesConfiguration() {
+    public WebNavigationConfiguration() {
         options = new RequestMappingInfo.BuilderConfiguration();
         options.setPatternParser(new PathPatternParser());
     }

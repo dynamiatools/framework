@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tools.dynamia.app.controllers;
+package tools.dynamia.web.navigation;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
-import tools.dynamia.app.PageNavigationInterceptor;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.navigation.NavigationManager;
 import tools.dynamia.navigation.NavigationNotAllowedException;
@@ -106,9 +105,7 @@ public class PageNavigationController {
             mv.addObject("navPage", page);
             mv.addObject("pageName", page.getName());
 
-            CommonController.setupSkin(request, response, mv);
-
-            Containers.get().findObjects(PageNavigationInterceptor.class).forEach(pageNavigationInterceptor -> pageNavigationInterceptor.afterPage(page, mv, request));
+            Containers.get().findObjects(PageNavigationInterceptor.class).forEach(pageNavigationInterceptor -> pageNavigationInterceptor.afterPage(page, mv, request,response));
 
         } catch (PageNotFoundException | NavigationNotAllowedException e) {
             mv.setViewName("error/404");

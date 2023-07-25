@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tools.dynamia.app.controllers;
+package tools.dynamia.web.navigation;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.StringPojoParser;
 import tools.dynamia.commons.collect.PagedList;
 import tools.dynamia.crud.CrudPage;
 import tools.dynamia.domain.query.DataPaginator;
@@ -58,6 +59,9 @@ public class RestNavigationController {
 
 
     private final static int DEFAULT_PAGINATION_SIZE = 50;
+    private static final String JSON_FORM = "json-form";
+    private static final String JSON = "json";
+    private static final String FORM = "form";
 
     @Autowired
     private CrudService crudService;
@@ -186,37 +190,55 @@ public class RestNavigationController {
     public static ResponseEntity<String> buildJsonResponse(ViewDescriptor readDescriptor, Object result, String message) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(new JsonView<>(new SimpleResult(result, message), readDescriptor).renderJson(), headers, HttpStatus.OK);
+
+        SimpleResult resultWrapper = new SimpleResult(result, message);
+
+        if (readDescriptor != null) {
+            return new ResponseEntity<>(new JsonView<>(resultWrapper, readDescriptor).renderJson(), headers, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(StringPojoParser.convertPojoToJson(result), headers, HttpStatus.OK);
+        }
     }
 
     public static ResponseEntity<String> buildJsonResponse(ViewDescriptor readDescriptor, ListResult result, String message) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(new JsonView<>(result, readDescriptor).renderJson(), headers, HttpStatus.OK);
+        if (readDescriptor != null) {
+            return new ResponseEntity<>(new JsonView<>(result, readDescriptor).renderJson(), headers, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(StringPojoParser.convertPojoToJson(result), headers, HttpStatus.OK);
+        }
     }
 
     public static ViewDescriptor getJsonFormDescriptor(Class entityClass) {
-        ViewDescriptor readDescriptor = Viewers.findViewDescriptor(entityClass, "json-form");
+        return getJsonFormDescriptor(entityClass, false);
+    }
+
+    public static ViewDescriptor getJsonFormDescriptor(Class entityClass, boolean autocreate) {
+        ViewDescriptor readDescriptor = Viewers.findViewDescriptor(entityClass, JSON_FORM);
 
         if (readDescriptor == null) {
-            readDescriptor = Viewers.getViewDescriptor(entityClass, "json");
+            readDescriptor = Viewers.findViewDescriptor(entityClass, JSON);
         }
 
         if (readDescriptor == null) {
-            readDescriptor = Viewers.getViewDescriptor(entityClass, "form");
+            readDescriptor = Viewers.findViewDescriptor(entityClass, FORM);
+        }
+
+        if (readDescriptor == null && autocreate) {
+            readDescriptor = Viewers.getViewDescriptor(entityClass, FORM);
         }
         return readDescriptor;
     }
 
     public static ViewDescriptor getJsonTableDescriptor(Class entityClass) {
-        ViewDescriptor readDescriptor = Viewers.findViewDescriptor(entityClass, "json");
+        ViewDescriptor readDescriptor = Viewers.findViewDescriptor(entityClass, JSON);
         if (readDescriptor == null) {
             readDescriptor = Viewers.findViewDescriptor(entityClass, "tree");
         }
 
         if (readDescriptor == null) {
-            readDescriptor = Viewers.getViewDescriptor(entityClass, "table");
-
+            readDescriptor = Viewers.findViewDescriptor(entityClass, "table");
         }
         return readDescriptor;
     }
@@ -228,12 +250,10 @@ public class RestNavigationController {
         Class entityClass = page.getEntityClass();
 
 
-        ViewDescriptor descriptor = getJsonFormDescriptor(entityClass);
-
+        ViewDescriptor descriptor = getJsonFormDescriptor(entityClass, true);
         JsonView jsonView = new JsonView(descriptor);
         jsonView.parse(jsonData);
         Object newEntity = jsonView.getValue();
-
         newEntity = crudService.create(newEntity);
 
         return buildJsonResponse(descriptor, newEntity, "Created Successfully");
@@ -248,12 +268,7 @@ public class RestNavigationController {
         if (entity == null) {
             return new ResponseEntity<>("Entity " + entityClass.getSimpleName() + " with id " + id + " not found", HttpStatus.NOT_FOUND);
         }
-
-
-        ViewDescriptor descriptor = Viewers.findViewDescriptor(entityClass, "json");
-        if (descriptor == null) {
-            descriptor = Viewers.getViewDescriptor(entityClass, "form");
-        }
+        ViewDescriptor descriptor = getJsonFormDescriptor(entityClass, true);
 
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -281,14 +296,13 @@ public class RestNavigationController {
         CrudPage page = findCrudPage(path);
         Class entityClass = page.getEntityClass();
 
-        ViewDescriptor readDescriptor = Viewers.getViewDescriptor(entityClass, "form");
-
-        @SuppressWarnings("unchecked") Object result = crudService.find(entityClass, id);
+        Object result = crudService.find(entityClass, id);
         if (result == null) {
             return new ResponseEntity<>("Entity " + entityClass.getSimpleName() + " with id " + id + " not found\n", HttpStatus.NOT_FOUND);
         }
         crudService.delete(entityClass, id);
 
+        ViewDescriptor readDescriptor = getJsonFormDescriptor(entityClass);
         return buildJsonResponse(readDescriptor, result, "Deleted Successfully");
     }
 
@@ -317,7 +331,7 @@ public class RestNavigationController {
     }
 
     public static ResponseEntity<String> getMetadata(HttpServletRequest request, ViewDescriptor viewDescriptor) {
-        if (request.getParameter("_metadata") != null) {
+        if (viewDescriptor != null && request.getParameter("_metadata") != null) {
             ObjectMapper mapper = new ObjectMapper();
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
