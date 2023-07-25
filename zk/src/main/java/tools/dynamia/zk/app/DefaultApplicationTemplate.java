@@ -25,7 +25,7 @@ import tools.dynamia.app.template.Skin;
 import tools.dynamia.app.template.TemplateContext;
 import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.viewers.ViewTypeFactory;
-import tools.dynamia.zk.app.bstemplate.BoostrapCrudViewRenderer;
+import tools.dynamia.zk.app.bstemplate.BootstrapCrudViewRenderer;
 import tools.dynamia.zk.app.bstemplate.BootstrapConfigViewRender;
 import tools.dynamia.zk.app.bstemplate.BootstrapFormViewRenderer;
 import tools.dynamia.zk.app.bstemplate.BootstrapTableViewRenderer;
@@ -73,7 +73,7 @@ public class DefaultApplicationTemplate implements ApplicationTemplate {
 
     @Override
     public void init(TemplateContext context) {
-        viewTypeFactory.setCustomViewRenderer("crud", BoostrapCrudViewRenderer.class);
+        viewTypeFactory.setCustomViewRenderer("crud", BootstrapCrudViewRenderer.class);
         viewTypeFactory.setCustomViewRenderer("table", BootstrapTableViewRenderer.class);
         viewTypeFactory.setCustomViewRenderer("form", BootstrapFormViewRenderer.class);
         viewTypeFactory.setCustomViewRenderer("config", BootstrapConfigViewRender.class);
