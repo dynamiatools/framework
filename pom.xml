@@ -81,21 +81,18 @@
 
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
-        <springboot.version>3.0.8</springboot.version>
-        <neo4jogm.version>4.0.5</neo4jogm.version>
+        <springboot.version>3.0.9</springboot.version>
+        <neo4jogm.version>4.0.6</neo4jogm.version>
         <mongodb.version>1</mongodb.version>
 
         <!-- Web -->
         <zk.version>9.6.0.2-jakarta</zk.version>
-        <jsonrpc.version>1.6</jsonrpc.version>
-        <httpcomponents.version>4.5.13</httpcomponents.version>
-        <dom4j.version>2.1.4</dom4j.version>
 
         <!--Reports -->
-        <jasperreports.version>6.20.3</jasperreports.version>
+        <jasperreports.version>6.20.5</jasperreports.version>
         <poi.version>5.2.3</poi.version>
         <snakeyaml.version>2.0</snakeyaml.version>
-        <zing.version>3.4.1</zing.version>
+        <zing.version>3.5.1</zing.version>
 
         <!--Logging -->
         <slf4j.version>2.0.7</slf4j.version>
@@ -139,8 +136,9 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -153,12 +151,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.2</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.2</version>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
