@@ -35,6 +35,9 @@ public class SaveAndEditAction extends SaveAction {
         setGroup(ActionGroup.get("CRUD"));
         setPosition(2);
         setAttribute("showLabel",true);
+        setType("default");
+        setSclass("hidden-xs");
+
     }
 
     @Override

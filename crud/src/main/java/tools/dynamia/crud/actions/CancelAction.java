@@ -22,7 +22,7 @@ import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.crud.CrudState;
-import tools.dynamia.ui.UIMessages;
+
 
 /**
  * @author Mario A. Serrano Leones
@@ -35,8 +35,9 @@ public class CancelAction extends AbstractCrudAction {
         setImage("cancel");
         setGroup(ActionGroup.get("CRUD"));
         setPosition(Double.MAX_VALUE);
-        setAttribute("background","rgb(239, 83, 80)");
-        setAttribute("color","white");
+        setAttribute("background", "rgb(239, 83, 80)");
+        setAttribute("color", "white");
+        setType("danger");
     }
 
     @Override
@@ -46,8 +47,7 @@ public class CancelAction extends AbstractCrudAction {
 
     @Override
     public void actionPerformed(final CrudActionEvent evt) {
-        UIMessages.showQuestion(Messages.get(getClass(), "confirm_cancel"), () -> evt.getCrudView().setState(CrudState.READ));
-
+        evt.getCrudView().setState(CrudState.READ);
     }
 
 }

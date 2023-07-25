@@ -23,7 +23,6 @@ import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.crud.GenericCrudView;
 
 /**
- *
  * @author Mario A. Serrano Leones
  */
 @InstallAction
@@ -34,7 +33,9 @@ public class SaveAndNewAction extends SaveAction {
         setImage("save-new");
         setGroup(ActionGroup.get("CRUD"));
         setPosition(3);
-        setAttribute("showLabel",true);
+        setShowLabel(true);
+        setType("default");
+        setSclass("hidden-xs");
     }
 
     @Override

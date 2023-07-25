@@ -27,52 +27,52 @@ import tools.dynamia.crud.GenericCrudView;
 import tools.dynamia.domain.ValidationError;
 
 /**
- *
  * @author Mario A. Serrano Leones
  */
 @InstallAction
 public class SaveAction extends AbstractCrudAction {
 
-	public SaveAction() {
-		setName(Messages.get(getClass(), "save"));
-		setImage("save");
-		setGroup(ActionGroup.get("CRUD"));
-		setPosition(1);
-		setAttribute("showLabel",true);
-	}
+    public SaveAction() {
+        setName(Messages.get(getClass(), "save"));
+        setImage("save");
+        setGroup(ActionGroup.get("CRUD"));
+        setPosition(1);
+        setShowLabel(true);
+        setType("primary");
+    }
 
-	@Override
-	public CrudState[] getApplicableStates() {
-		return CrudState.get(CrudState.CREATE, CrudState.UPDATE);
-	}
+    @Override
+    public CrudState[] getApplicableStates() {
+        return CrudState.get(CrudState.CREATE, CrudState.UPDATE);
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public void actionPerformed(CrudActionEvent evt) {
-		GenericCrudView crud = evt.getCrudView();
-		crud.getController().setEntity(evt.getData());
-		try {
-			crud.getController().doSave();
-		} catch (ValidationError e) {
-			crud.handleValidationError(e);
-		}
+    @SuppressWarnings("unchecked")
+    @Override
+    public void actionPerformed(CrudActionEvent evt) {
+        GenericCrudView crud = evt.getCrudView();
+        crud.getController().setEntity(evt.getData());
+        try {
+            crud.getController().doSave();
+        } catch (ValidationError e) {
+            crud.handleValidationError(e);
+        }
 
-		Callback afterSave = () -> {
-			if (crud.getController().isSaved()) {
-				crud.setState(CrudState.READ);
-				afterSave(evt.getData(), crud);
-			}
-		};
+        Callback afterSave = () -> {
+            if (crud.getController().isSaved()) {
+                crud.setState(CrudState.READ);
+                afterSave(evt.getData(), crud);
+            }
+        };
 
-		if (crud.getController().isConfirmBeforeSave()) {
-			crud.getController().onSave(afterSave);
-		} else {
-			afterSave.doSomething();
-		}
+        if (crud.getController().isConfirmBeforeSave()) {
+            crud.getController().onSave(afterSave);
+        } else {
+            afterSave.doSomething();
+        }
 
-	}
+    }
 
-	protected void afterSave(Object entity, GenericCrudView crud) {
+    protected void afterSave(Object entity, GenericCrudView crud) {
 
-	}
+    }
 }
