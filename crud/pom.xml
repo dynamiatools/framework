@@ -68,11 +68,7 @@
             <artifactId>tools.dynamia.viewers</artifactId>
             <version>5.0.5</version>
         </dependency>
-        <dependency>
-            <groupId>tools.dynamia</groupId>
-            <artifactId>tools.dynamia.ui</artifactId>
-            <version>5.0.5</version>
-        </dependency>
+
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.navigation</artifactId>
