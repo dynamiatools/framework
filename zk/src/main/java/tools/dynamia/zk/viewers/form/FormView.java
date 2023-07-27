@@ -107,7 +107,7 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
 
 
     public FormView() {
-        this(true);
+        this(false);
     }
 
     public FormView(boolean autoheight) {
