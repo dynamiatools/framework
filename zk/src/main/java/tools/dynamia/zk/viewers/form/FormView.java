@@ -392,9 +392,16 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
         }
     }
 
+    /**
+     * Add action to {@link FormView}. Form actions are not rendered in custom views
+     *
+     * @param action
+     */
     public void addAction(Action action) {
-        initActionsArea();
-        actionPanel.addAction(action);
+        if (customView == null || customView.isBlank()) {
+            initActionsArea();
+            actionPanel.addAction(action);
+        }
     }
 
     private void initActionsArea() {

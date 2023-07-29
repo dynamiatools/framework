@@ -221,9 +221,9 @@ public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventB
 
         if (formView == null) {
             formView = (FormView<T>) Viewers.getView(getViewDescriptor().getBeanClass(), "form", device, getValue());
-            formView.setActionEventBuilder(this);
         }
 
+        formView.setActionEventBuilder(this);
         formView.setAutoheight(true);
     }
 
