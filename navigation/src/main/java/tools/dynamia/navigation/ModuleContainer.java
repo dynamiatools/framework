@@ -30,24 +30,24 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * {@link Module} container. Load modules using {@link ModuleProvider}s
+ * {@link Module} container store modules instances loaded from  {@link ModuleProvider}s
  *
  * @author Ing. Mario Serrano Leones
  */
 @Component
 public final class ModuleContainer implements Serializable {
 
-    public static ModuleContainer getInstance(){
+    public static ModuleContainer getInstance() {
         return Containers.get().findObject(ModuleContainer.class);
     }
 
     private final transient LoggingService LOGGER = new SLF4JLoggingService(ModuleContainer.class);
 
-    private final Collection<Module> modules;
-    private final Collection<Page> featuredPages;
+    private final List<Module> modules;
+    private final List<Page> featuredPages;
 
     @Autowired
-    private transient Collection<ModuleProvider> _providers;
+    private transient List<ModuleProvider> _providers;
     private final SimpleCache<String, Page> INDEX = new SimpleCache<>();
 
 
@@ -55,7 +55,6 @@ public final class ModuleContainer implements Serializable {
         LOGGER.info("Creating " + getClass());
         modules = new ArrayList<>();
         featuredPages = new ArrayList<>();
-
     }
 
     @PostConstruct
@@ -85,8 +84,7 @@ public final class ModuleContainer implements Serializable {
         }
     }
 
-    public Collection<ModuleProvider> getModulesProviders() {
-
+    public List<ModuleProvider> getModulesProviders() {
         return _providers;
     }
 
@@ -101,42 +99,56 @@ public final class ModuleContainer implements Serializable {
         }
     }
 
-    private void install(Module newMod) {
+    private void install(Module newModule) {
 
-        Module oldModule = this.getModuleById(newMod.getId());
-        if (oldModule == null) {
-            modules.add(newMod);
+        Module existingModule = this.getModuleById(newModule.getId());
+        if (existingModule == null) {
+            modules.add(newModule);
         } else {
-            if (newMod.getBaseClass() != null) {
-                oldModule.addBaseClass(newMod.getBaseClass());
+            if (newModule.getBaseClass() != null) {
+                existingModule.addBaseClass(newModule.getBaseClass());
             }
 
-            newMod.getDefaultPageGroup().getPages().forEach(page -> {
-                oldModule.addPage(page);
+            newModule.getDefaultPageGroup().getPages().forEach(page -> {
+                existingModule.addPage(page);
                 index(page);
             });
 
-            for (PageGroup newGroup : newMod.getPageGroups()) {
-                PageGroup oldGroup = oldModule.getPageGroupById(newGroup.getId());
-                if (oldGroup == null) {
-                    oldModule.addPageGroup(newGroup);
+            List<PageGroup> groups = newModule.getPageGroups();
+            mergerPageGroups(groups, existingModule, null);
+
+        }
+    }
+
+    private void mergerPageGroups(List<PageGroup> groups, Module parentModule, PageGroup parentGroup) {
+        for (PageGroup newGroup : groups) {
+            PageGroup existingGroup = parentGroup != null ? parentGroup.getPageGroupById(newGroup.getId()) : parentModule.getPageGroupById(newGroup.getId());
+
+            if (existingGroup == null) {
+                if (parentGroup != null) {
+                    parentGroup.addPageGroup(newGroup);
                 } else {
-                    for (Page newPage : newGroup.getPages()) {
-                        index(newPage);
-                        Page oldPage = oldGroup.getPageById(newPage.getId());
-                        if (oldPage == null) {
-                            oldGroup.addPage(newPage);
-                        } else {
-                            LOGGER.warn("Page " + newPage.getVirtualPath()
-                                    + " already exists in the module container, another page has same ID. Cannot install  "
-                                    + newPage.getClass().getSimpleName());
-                        }
+                    parentModule.addPageGroup(newGroup);
+                }
+            } else {
+                for (Page newPage : newGroup.getPages()) {
+                    index(newPage);
+                    Page oldPage = existingGroup.getPageById(newPage.getId());
+                    if (oldPage == null) {
+                        existingGroup.addPage(newPage);
+                    } else {
+                        LOGGER.warn("Page " + newPage.getVirtualPath()
+                                + " already exists in the module container, another page has same ID. Cannot install  "
+                                + newPage.getClass().getSimpleName());
                     }
+                }
+                if (newGroup.getPageGroups() != null) {
+                    mergerPageGroups(newGroup.getPageGroups(), parentModule, existingGroup);
                 }
             }
         }
-
     }
+
 
     private void index(Page page) {
         INDEX.add(page.getVirtualPath(), page);
