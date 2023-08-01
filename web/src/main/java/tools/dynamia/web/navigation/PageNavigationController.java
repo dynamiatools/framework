@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import tools.dynamia.integration.Containers;
+import tools.dynamia.navigation.ModuleContainer;
 import tools.dynamia.navigation.NavigationManager;
 import tools.dynamia.navigation.NavigationNotAllowedException;
 import tools.dynamia.navigation.NavigationRestrictions;
@@ -96,16 +97,14 @@ public class PageNavigationController {
         }
 
         try {
-            Page page = NavigationManager.getCurrent().findPageByPrettyVirtualPath(path);
+            Page page = ModuleContainer.getInstance().findPageByPrettyVirtualPath(path);
             NavigationRestrictions.verifyAccess(page);
-            NavigationManager.getCurrent().reload();
-            NavigationManager.getCurrent().setCurrentPage(page, pageParams);
-
+            NavigationManager.setPageLater(page, pageParams);
 
             mv.addObject("navPage", page);
             mv.addObject("pageName", page.getName());
 
-            Containers.get().findObjects(PageNavigationInterceptor.class).forEach(pageNavigationInterceptor -> pageNavigationInterceptor.afterPage(page, mv, request,response));
+            Containers.get().findObjects(PageNavigationInterceptor.class).forEach(pageNavigationInterceptor -> pageNavigationInterceptor.afterPage(page, mv, request, response));
 
         } catch (PageNotFoundException | NavigationNotAllowedException e) {
             mv.setViewName("error/404");
