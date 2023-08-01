@@ -39,7 +39,7 @@ public interface NavigationManager {
     }
 
     /**
-     * Delegate set current {@link Page} using a {@link NavigationPageHolder} when NavigationManager is builded
+     * Delegate set current {@link Page} using a {@link NavigationManagerSession} when NavigationManager is builded
      *
      * @param page
      */
@@ -48,7 +48,7 @@ public interface NavigationManager {
     }
 
     /**
-     * Delegate set current {@link Page} using a {@link NavigationPageHolder} when NavigationManager is builded
+     * Delegate set current {@link Page} using a {@link NavigationManagerSession} when NavigationManager is builded
      *
      * @param page
      * @param params
@@ -57,6 +57,11 @@ public interface NavigationManager {
         NavigationManagerSession.getInstance().setPage(page, params);
     }
 
+    /**
+     * Delegate callback to run when {@link NavigationManager} are builded. Its store a Queue using {@link NavigationManagerSession}
+     *
+     * @param callback
+     */
     static void runLater(Callback callback) {
         NavigationManagerSession.getInstance().runLater(callback);
     }
