@@ -16,6 +16,7 @@
  */
 package tools.dynamia.navigation;
 
+import tools.dynamia.commons.Callback;
 import tools.dynamia.integration.Containers;
 
 import java.util.Collection;
@@ -53,10 +54,11 @@ public interface NavigationManager {
      * @param params
      */
     static void setPageLater(Page page, Map<String, Object> params) {
-        var holder = Containers.get().findObject(NavigationPageHolder.class);
-        if (holder != null) {
-            holder.setPage(page, params);
-        }
+        NavigationManagerSession.getInstance().setPage(page, params);
+    }
+
+    static void runLater(Callback callback) {
+        NavigationManagerSession.getInstance().runLater(callback);
     }
 
     /**
