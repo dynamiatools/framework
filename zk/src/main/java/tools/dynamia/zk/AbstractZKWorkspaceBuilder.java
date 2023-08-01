@@ -18,6 +18,8 @@ package tools.dynamia.zk;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zul.Html;
+import org.zkoss.zul.Iframe;
 import org.zkoss.zul.Window;
 import tools.dynamia.navigation.Page;
 import tools.dynamia.navigation.RendereablePage;
@@ -115,8 +117,14 @@ public abstract class AbstractZKWorkspaceBuilder implements WorkspaceViewBuilder
                 pageContent.setVflex("1");
 
             }
-
-            ZKUtil.createComponent(page.getPath(), pageContent, params);
+            if (page.isHtml()) {
+                Iframe iframe = new Iframe(page.getPath());
+                iframe.setParent(pageContent);
+                iframe.setHflex("1");
+                iframe.setVflex("1");
+            } else {
+                ZKUtil.createComponent(page.getPath(), pageContent, params);
+            }
             return pageContent;
         }
     }

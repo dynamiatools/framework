@@ -16,13 +16,18 @@
  */
 package tools.dynamia.zk.navigation;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.SessionScope;
 import org.zkoss.zk.ui.Desktop;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventQueues;
 import tools.dynamia.commons.Callback;
+import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.navigation.BaseNavigationManager;
 import tools.dynamia.navigation.ModuleContainer;
@@ -40,8 +45,10 @@ import java.util.function.Consumer;
  * @author Mario A. Serrano Leones
  */
 @Component("navManager")
-@SessionScope
+@Scope("zk-desktop")
 public class ZKNavigationManager extends BaseNavigationManager implements Serializable {
+
+    private static final LoggingService LOGGER = new SLF4JLoggingService(ZKNavigationManager.class);
 
     /**
      *
@@ -65,6 +72,21 @@ public class ZKNavigationManager extends BaseNavigationManager implements Serial
     @Autowired
     public ZKNavigationManager(ModuleContainer container) {
         super(container);
+    }
+
+    @PostConstruct
+    public void init() {
+        LOGGER.info("Initializing new " + getClass().getSimpleName() + " for desktop " + ZKUtil.getCurrentDesktop());
+        try {
+            var req = (HttpServletRequest) Executions.getCurrent().getNativeRequest();
+            var page = (Page) req.getAttribute(CURRENT_PAGE_ATTRIBUTE);
+            var params = (Map) req.getAttribute(CURRENT_PAGE_PARAMS_ATTRIBUTE);
+            if (page != null) {
+                setCurrentPage(page, params);
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Error setting current page from current request: "+e.getMessage());
+        }
     }
 
     @Override
@@ -152,7 +174,7 @@ public class ZKNavigationManager extends BaseNavigationManager implements Serial
     }
 
     public void runAfterCompose(Callback callback) {
-        if(runLaterQueue==null){
+        if (runLaterQueue == null) {
             runLaterQueue = new ArrayList<>();
         }
         runLaterQueue.add(callback);

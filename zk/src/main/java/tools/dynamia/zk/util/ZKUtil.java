@@ -825,8 +825,29 @@ public abstract class ZKUtil {
         eventQueuePublish(name, EventQueues.DESKTOP, true, evt);
     }
 
+    /**
+     * Return true if the current caller Execution is in a ZK Event Listener thread
+     *
+     * @return
+     */
     public static boolean isInEventListener() {
         return Executions.getCurrent() != null;
+    }
+
+    public static boolean isInDesktopScope() {
+        return isInEventListener() && Executions.getCurrent().getDesktop() != null;
+    }
+
+    /**
+     * Get current execution Desktop or null if is not in Desktop Scope
+     *
+     * @return
+     */
+    public static Desktop getCurrentDesktop() {
+        if (isInDesktopScope()) {
+            return Executions.getCurrent().getDesktop();
+        }
+        return null;
     }
 
     public static Window showListboxSelector(String title, List model, EventListener<SelectEvent> onSelect) {
