@@ -30,19 +30,42 @@ import java.util.function.Consumer;
  */
 public interface NavigationManager {
 
+    String CURRENT_PAGE_ATTRIBUTE = "NavCurrentPage";
+    String CURRENT_PAGE_PARAMS_ATTRIBUTE = "NavCurrentPageParams";
+
     static NavigationManager getCurrent() {
         return Containers.get().findObject(NavigationManager.class);
     }
 
     /**
-     * Return the current active module
+     * Delegate set current {@link Page} using a {@link NavigationPageHolder} when NavigationManager is builded
      *
+     * @param page
+     */
+    static void setPageLater(Page page) {
+        setPageLater(page, null);
+    }
+
+    /**
+     * Delegate set current {@link Page} using a {@link NavigationPageHolder} when NavigationManager is builded
+     *
+     * @param page
+     * @param params
+     */
+    static void setPageLater(Page page, Map<String, Object> params) {
+        var holder = Containers.get().findObject(NavigationPageHolder.class);
+        if (holder != null) {
+            holder.setPage(page, params);
+        }
+    }
+
+    /**
+     * Return the current active module
      */
     Module getActiveModule();
 
     /**
      * return the current page from the active module
-     *
      */
     Page getCurrentPage();
 
@@ -56,20 +79,17 @@ public interface NavigationManager {
 
     /**
      * return the current page gruop from the selected page
-     *
      */
     PageGroup getCurrentPageGroup();
 
     /**
      * return all page groups from activeModule
-     *
      */
     Collection<PageGroup> getPageGroups();
 
     /**
      * set the current page navigation through the virtual path.
      * Module/pageGroup/page
-     *
      */
     void navigateTo(String path);
 
@@ -82,13 +102,11 @@ public interface NavigationManager {
 
     /**
      * set the active module
-     *
      */
     void setActiveModule(Module activeModule);
 
     /**
      * set the current page
-     *
      */
     boolean setCurrentPage(Page newPage);
 
@@ -96,7 +114,6 @@ public interface NavigationManager {
 
     /**
      * Find a page object by its path
-     *
      */
     Page findPage(String path);
 
