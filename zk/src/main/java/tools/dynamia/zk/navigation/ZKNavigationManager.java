@@ -31,6 +31,7 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.navigation.BaseNavigationManager;
 import tools.dynamia.navigation.ModuleContainer;
+import tools.dynamia.navigation.NavigationManagerSession;
 import tools.dynamia.navigation.Page;
 import tools.dynamia.navigation.PageEvent;
 import tools.dynamia.zk.util.ZKUtil;
@@ -67,7 +68,7 @@ public class ZKNavigationManager extends BaseNavigationManager implements Serial
 
     private transient Desktop currentDesktop;
     private boolean autoSyncClientURL = true;
-    private List<Callback> runLaterQueue = new ArrayList<>();
+
 
     @Autowired
     public ZKNavigationManager(ModuleContainer container) {
@@ -77,16 +78,9 @@ public class ZKNavigationManager extends BaseNavigationManager implements Serial
     @PostConstruct
     public void init() {
         LOGGER.info("Initializing new " + getClass().getSimpleName() + " for desktop " + ZKUtil.getCurrentDesktop());
-        try {
-            var req = (HttpServletRequest) Executions.getCurrent().getNativeRequest();
-            var page = (Page) req.getAttribute(CURRENT_PAGE_ATTRIBUTE);
-            var params = (Map) req.getAttribute(CURRENT_PAGE_PARAMS_ATTRIBUTE);
-            if (page != null) {
-                setCurrentPage(page, params);
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Error setting current page from current request: "+e.getMessage());
-        }
+
+        NavigationManagerSession.getInstance().updateNavManager(this);
+
     }
 
     @Override
@@ -161,11 +155,8 @@ public class ZKNavigationManager extends BaseNavigationManager implements Serial
 
     public void setCurrentComposer(ZKNavigationComposer currentComposer) {
         this.currentComposer = currentComposer;
-        if (ZKUtil.isInEventListener() && runLaterQueue != null) {
-            for (Callback callback : runLaterQueue) {
-                callback.doSomething();
-            }
-            runLaterQueue.clear();
+        if (ZKUtil.isInEventListener()) {
+            NavigationManagerSession.getInstance().executeQueue();
         }
     }
 
@@ -173,11 +164,5 @@ public class ZKNavigationManager extends BaseNavigationManager implements Serial
         return currentComposer;
     }
 
-    public void runAfterCompose(Callback callback) {
-        if (runLaterQueue == null) {
-            runLaterQueue = new ArrayList<>();
-        }
-        runLaterQueue.add(callback);
-    }
 
 }
