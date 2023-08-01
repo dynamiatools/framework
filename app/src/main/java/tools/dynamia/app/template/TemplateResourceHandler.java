@@ -19,14 +19,13 @@ package tools.dynamia.app.template;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.CacheControl;
-import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import tools.dynamia.app.ApplicationInfo;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Template resource handler find resources in current {@link ApplicationTemplate} directory
@@ -36,6 +35,12 @@ import java.time.temporal.ChronoUnit;
 
 public class TemplateResourceHandler extends ResourceHttpRequestHandler {
 
+    public static final List<String> STATIC_PATHS = List.of(
+            "/*.jpg", "/*.jpeg", "/*.png", "*.gif", "*.mp4", "/*.html", "/*.css", "/*.js", "/*.ico", "/*.bmp", "/manifest.json", "/*.webmanifest", "/static/**"
+    );
+
+
+    private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
     private final ApplicationInfo appInfo;
     private String relativeContext;
@@ -59,10 +64,27 @@ public class TemplateResourceHandler extends ResourceHttpRequestHandler {
         if (resource.exists()) {
             return resource;
         } else {
+            try {
+                String templateResourcePath = "/web/templates/" + theme.getName().toLowerCase() + path;
+                resource = new ClassPathResource(templateResourcePath, theme.getClass());
+                resource.getURL(); //test URL
+            } catch (IOException e) {
+                if (isStaticResource(path)) {
+                    if (!path.startsWith("/static/")) {
+                        path = "/static/" + path;
+                    }
+                    resource = new ClassPathResource(path);
+                }
+            }
+            return resource;
+        }
+    }
 
-            String templateResourcePath = "/web/templates/" + theme.getName().toLowerCase() + path;
-
-            return new ClassPathResource(templateResourcePath, theme.getClass());
+    public static boolean isStaticResource(String path) {
+        try {
+            return STATIC_PATHS.stream().anyMatch(pattern -> ANT_PATH_MATCHER.match(pattern, path));
+        } catch (Exception e) {
+            return false;
         }
     }
 
