@@ -16,9 +16,11 @@
  */
 package tools.dynamia.integration.scheduling;
 
+import org.springframework.core.env.Environment;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor;
 import org.springframework.scheduling.support.CronTrigger;
 import tools.dynamia.integration.Containers;
 
@@ -33,6 +35,12 @@ import java.util.function.Supplier;
  * The Class SchedulerUtil.
  */
 public class SchedulerUtil {
+
+    /**
+     *
+     */
+    public static String schedulingEnabledProperty = "schedulingEnabled";
+    ;
 
     /**
      * Run the WorkerTask asynchronously using any Spring AsyncTaskExecutor
@@ -83,7 +91,6 @@ public class SchedulerUtil {
 
     /**
      * Functional override of runWithResult({@link TaskWithResult }
-     *
      */
     public static <T> Future<T> runWithResult(Supplier<T> task) {
         return runWithResult(new TaskWithResult<>() {
@@ -142,6 +149,19 @@ public class SchedulerUtil {
     }
 
     private SchedulerUtil() {
+    }
+
+    /**
+     * Find in spring {@link Environment} if schedulingEnabledProperty is true
+     *
+     * @return
+     */
+    public static boolean isSchedulingEnabled() {
+        Environment env = Containers.get().findObject(Environment.class);
+        if (env != null && schedulingEnabledProperty != null) {
+            return "true".equalsIgnoreCase(env.getProperty(schedulingEnabledProperty, "true"));
+        }
+        return Containers.get().findObject(ScheduledAnnotationBeanPostProcessor.class) != null;
     }
 
 }
