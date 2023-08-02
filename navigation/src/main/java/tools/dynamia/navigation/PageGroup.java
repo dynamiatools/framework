@@ -34,8 +34,8 @@ import java.util.stream.Collectors;
 public class PageGroup extends NavigationElement<PageGroup> implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -7191971531078734873L;
-    private final Collection<Page> pages = new ArrayList<>();
-    private final Collection<PageGroup> pageGroups = new ArrayList<>();
+    private final List<Page> pages = new ArrayList<>();
+    private final List<PageGroup> pageGroups = new ArrayList<>();
     private Module parentModule;
     private PageGroup parentGroup;
     private String listeners;
@@ -75,11 +75,11 @@ public class PageGroup extends NavigationElement<PageGroup> implements Serializa
         return this;
     }
 
-    public Collection<Page> getPages() {
+    public List<Page> getPages() {
         return pages;
     }
 
-    public Collection<PageGroup> getPageGroups() {
+    public List<PageGroup> getPageGroups() {
         return pageGroups;
     }
 

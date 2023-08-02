@@ -19,7 +19,6 @@
 <zk>
     <config-name>DynamiaToolsZK</config-name>
 
-
     <listener>
         <description>ThreadLocal Synchronization Listener</description>
         <listener-class>org.zkoss.zkplus.util.ThreadLocalListener</listener-class>
@@ -54,19 +53,6 @@
             org.springframework.security.core.context.ThreadLocalSecurityContextHolderStrategy=contextHolder;
         </value>
     </preference>
-
-
-    <system-config>
-        <ui-factory-class>tools.dynamia.zk.ui.ExtensibleSerializableUiFactory</ui-factory-class>
-        <id-generator-class>tools.dynamia.zk.UniqueDesktopIdGenerator</id-generator-class>
-    </system-config>
-
-    <session-config>
-        <device-type>ajax</device-type>
-        <automatic-timeout/> <!-- the same as <automatic-timeout>true</automatic-timeout> -->
-        <timeout-uri>/</timeout-uri>
-        <timer-keep-alive>true</timer-keep-alive>
-    </session-config>
 
     <library-property>
         <name>org.zkoss.zk.ui.invokeFirstRootForAfterKeyDown.enabled</name>

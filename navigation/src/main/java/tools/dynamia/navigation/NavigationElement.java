@@ -205,6 +205,9 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
 
     @Override
     public String toString() {
+        if (isReference()) {
+            return "REF: " + getId();
+        }
         return getName();
     }
 

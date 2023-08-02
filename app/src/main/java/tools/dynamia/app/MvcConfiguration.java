@@ -17,6 +17,7 @@
 package tools.dynamia.app;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -51,34 +52,15 @@ import java.util.Map;
 @EnableWebMvc
 public abstract class MvcConfiguration implements WebMvcConfigurer {
 
-
     private final LoggingService logger = new SLF4JLoggingService(getClass());
 
-
-    @Override
-    public void addResourceHandlers(final ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("*.ico").addResourceLocations("/", "classpath:/static/");
-    }
-
-    @Override
-    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-        configurer.defaultContentType(MediaType.APPLICATION_JSON);
-
-    }
-
-    @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(new ByteArrayHttpMessageConverter());
-        converters.add(new StringHttpMessageConverter());
-        converters.add(new ResourceHttpMessageConverter(false));
-        converters.add(new StringHttpMessageConverter());
-        converters.add(new MappingJackson2HttpMessageConverter());
-    }
 
     @Bean
     public TemplateResourceHandler templateResourceHandler(ApplicationInfo applicationInfo) {
         var handler = new TemplateResourceHandler(applicationInfo);
-        handler.setCacheControl(CacheControl.maxAge(Duration.of(31536000, ChronoUnit.SECONDS)));
+        if (applicationInfo.isWebCacheEnabled()) {
+            handler.setCacheControl(CacheControl.maxAge(Duration.of(31536000, ChronoUnit.SECONDS)));
+        }
         return handler;
     }
 
@@ -86,6 +68,7 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
     public SimpleUrlHandlerMapping templateResourcesMapping(TemplateResourceHandler handler) {
 
         Map<String, Object> map = new HashMap<>();
+        TemplateResourceHandler.STATIC_PATHS.forEach(pattern -> map.put(pattern, handler));
         map.put("root/**", handler);
         map.put("css/**", handler);
         map.put("styles/**", handler);
@@ -102,6 +85,7 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
 
         SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
         mapping.setUrlMap(map);
+        mapping.setOrder(1);
 
         return mapping;
     }
@@ -143,7 +127,7 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
     @Bean
     public ViewResolver templateViewResolver(ApplicationInfo applicationInfo) {
         TemplateViewResolver vr = new TemplateViewResolver(applicationInfo);
-        vr.setOrder(getViewResolverOrder(applicationInfo, "templateViewResolverOrder", Integer.MAX_VALUE));
+        vr.setOrder(getViewResolverOrder(applicationInfo, "templateViewResolverOrder", Ordered.LOWEST_PRECEDENCE));
         vr.setCache(applicationInfo.isWebCacheEnabled());
         return vr;
     }

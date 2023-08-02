@@ -27,7 +27,9 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.impl.LabelElement;
 import org.zkoss.zul.impl.XulElement;
 import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.integration.Containers;
 import tools.dynamia.navigation.ActionPage;
+import tools.dynamia.navigation.DefaultPageProvider;
 import tools.dynamia.navigation.NavigationElement;
 import tools.dynamia.navigation.Page;
 import tools.dynamia.navigation.PageEvent;
@@ -80,7 +82,7 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
                 case ZKNavigationManager.ON_PAGE_CLOSED -> {
                     Page page = evt.getPage();
                     getWorkspaceViewBuilder().close(page);
-                    ZKNavigationManager.getInstance().notifyPageClose(page);
+                    navManager().notifyPageClose(page);
                     if (page != null && page.equals(desktopCurrentPage)) {
                         desktopCurrentPage = null;
                     }
@@ -96,11 +98,14 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
         super.doAfterCompose(comp);
         this.self = comp;
 
-        ZKNavigationManager.getInstance().setCurrentDesktop(comp.getDesktop());
-        ZKNavigationManager.getInstance().setCurrentComposer(this);
+        navManager().setCurrentDesktop(comp.getDesktop());
+        navManager().setCurrentComposer(this);
         buildWorkspace();
 
-        desktopCurrentPage = ZKNavigationManager.getInstance().getCurrentPage();
+        desktopCurrentPage = navManager().getCurrentPage();
+        if (desktopCurrentPage == null) {
+            loadDefaultPage();
+        }
 
         this.self.addEventListener("onHash", evt -> processHash(evt.getData()));
         String function = "sendMeHash('" + self.getUuid() + "')";
@@ -112,14 +117,24 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
         }
     }
 
+    private void loadDefaultPage() {
+        var defaultPageProvider = Containers.get().findObject(DefaultPageProvider.class);
+        if (defaultPageProvider != null && defaultPageProvider.getPath() != null) {
+            desktopCurrentPage = navManager().findPage(defaultPageProvider.getPath());
+            navManager().setRawCurrentPage(desktopCurrentPage);
+        }
+    }
+
+    private static ZKNavigationManager navManager() {
+        return ZKNavigationManager.getInstance();
+    }
+
     private void processHash(Object data) {
 
         if (data != null) {
             try {
-                Page page = ZKNavigationManager.getInstance().findPageByPrettyVirtualPath(data.toString());
-
-                ZKNavigationManager.getInstance().setCurrentPage(page);
-
+                Page page = navManager().findPageByPrettyVirtualPath(data.toString());
+                navManager().setCurrentPage(page);
             } catch (Exception e) {
                 // ignore
             }
@@ -143,7 +158,7 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
         }
 
         if (desktopCurrentPage != null && !desktopCurrentPage.isShowAsPopup()) {
-            if (ZKNavigationManager.getInstance().isAutoSyncClientURL()) {
+            if (navManager().isAutoSyncClientURL()) {
                 updateClientURL();
             }
             updatePageTitle();

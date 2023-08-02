@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 public class Module extends NavigationElement<Module> implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -817147208762427863L;
-    private final Collection<PageGroup> pageGroups = new ArrayList<>();
+    private final List<PageGroup> pageGroups = new ArrayList<>();
     private Page mainPage;
     private PageGroup defaultGroup = new PageGroup();
     private final LoggingService logger = new SLF4JLoggingService();
@@ -90,7 +90,7 @@ public class Module extends NavigationElement<Module> implements Serializable, C
         return this;
     }
 
-    public Collection<PageGroup> getPageGroups() {
+    public List<PageGroup> getPageGroups() {
         return pageGroups;
     }
 
@@ -236,7 +236,6 @@ public class Module extends NavigationElement<Module> implements Serializable, C
 
     /**
      * Traverse all pages in all (NON dynamic) groups and subgroups
-     *
      */
     public void forEachPage(Consumer<Page> action) {
         var allGroups = new ArrayList<PageGroup>();

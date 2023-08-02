@@ -62,7 +62,7 @@ public class ApplicationUserInfo implements Serializable {
 
     public String getImage() {
         if (image == null) {
-            image = "/images/no-user-photo.jpg";
+            image = "/static/images/no-user-photo.jpg";
         }
         return image;
     }

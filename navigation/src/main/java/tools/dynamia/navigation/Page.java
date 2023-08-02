@@ -26,6 +26,7 @@ import java.util.Locale;
 
 /**
  * Basic {@link NavigationElement} for {@link Module}. Can be nested using {@link PageGroup}
+ *
  * @author Ing. Mario Serrano Leones
  */
 public class Page extends NavigationElement<Page> implements Serializable, Cloneable {
@@ -286,5 +287,9 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
 
     public void setTemporal(boolean temporal) {
         this.temporal = temporal;
+    }
+
+    public boolean isHtml() {
+        return path != null && (path.endsWith(".html") || path.contains(".html?"));
     }
 }

@@ -175,7 +175,7 @@ public class ApplicationInfo implements Serializable, PropertiesContainer {
         }
 
         if (!properties.containsKey(WEB_CACHE_ENABLED)) {
-            properties.put(WEB_CACHE_ENABLED, "true");
+            properties.put(WEB_CACHE_ENABLED, "false");
         }
 
         return "true".equalsIgnoreCase(properties.get(WEB_CACHE_ENABLED));
