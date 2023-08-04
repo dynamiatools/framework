@@ -313,7 +313,11 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
 
         Div header = new Div();
         header.setZclass("panel-heading");
-        box.appendChild(header);
+        if (box instanceof FormView<?> formView) {
+            formView.getContentArea().appendChild(header);
+        } else {
+            box.appendChild(header);
+        }
 
 
         H3 title = new H3();

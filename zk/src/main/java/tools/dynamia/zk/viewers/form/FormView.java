@@ -237,11 +237,11 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
 
 
     public void addSubview(String title, View subview) {
-        if (subview instanceof Component && !subviews.contains(subview)) {
+        if (subview instanceof Component subviewComp && !subviews.contains(subview)) {
             subviews.add(subview);
             FieldGroup group = new FieldGroup(title, title);
             _renderer.renderGroup(group, _realCols, _rows);
-            ((Component) subview).setParent(this);
+            subviewComp.setParent(getContentArea());
         }
 
     }
