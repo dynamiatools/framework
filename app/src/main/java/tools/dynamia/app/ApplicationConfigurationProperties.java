@@ -22,6 +22,8 @@ public class ApplicationConfigurationProperties {
     private String license;
     private boolean webCacheEnabled;
     private String description;
+
+    private String apiBasePath = "/api";
     private Map<String, String> properties;
 
     public String getName() {
@@ -158,5 +160,13 @@ public class ApplicationConfigurationProperties {
 
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
+    }
+
+    public String getApiBasePath() {
+        return apiBasePath;
+    }
+
+    public void setApiBasePath(String apiBasePath) {
+        this.apiBasePath = apiBasePath;
     }
 }
