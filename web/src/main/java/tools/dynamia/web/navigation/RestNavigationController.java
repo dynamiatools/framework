@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -39,7 +38,7 @@ import tools.dynamia.domain.query.DataPaginator;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.util.QueryBuilder;
-import tools.dynamia.navigation.NavigationManager;
+import tools.dynamia.navigation.ModuleContainer;
 import tools.dynamia.navigation.NavigationRestrictions;
 import tools.dynamia.navigation.Page;
 import tools.dynamia.navigation.PageNotFoundException;
@@ -63,9 +62,14 @@ public class RestNavigationController {
     private static final String JSON = "json";
     private static final String FORM = "form";
 
-    @Autowired
-    private CrudService crudService;
 
+    private final ModuleContainer moduleContainer;
+    private final CrudService crudService;
+
+    public RestNavigationController(ModuleContainer moduleContainer, CrudService crudService) {
+        this.moduleContainer = moduleContainer;
+        this.crudService = crudService;
+    }
 
     private String getPath(HttpServletRequest request) {
         var path = request.getRequestURI();
@@ -351,9 +355,9 @@ public class RestNavigationController {
 
         Page page = null;
         try {
-            page = NavigationManager.getCurrent().findPage(path);
+            page = moduleContainer.findPage(path);
         } catch (PageNotFoundException e) {
-            page = NavigationManager.getCurrent().findPageByPrettyVirtualPath(path);
+            page = moduleContainer.findPageByPrettyVirtualPath(path);
         }
         if (page instanceof CrudPage) {
             NavigationRestrictions.verifyAccess(page);
