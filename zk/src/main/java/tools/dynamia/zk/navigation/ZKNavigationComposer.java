@@ -158,7 +158,12 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
         }
 
         if (desktopCurrentPage != null && !desktopCurrentPage.isShowAsPopup()) {
-            if (navManager().isAutoSyncClientURL()) {
+            boolean updateURL = navManager().isAutoSyncClientURL();
+            if (params != null && params.get("autoSyncClientURL") == Boolean.FALSE) {
+                updateURL = false;
+            }
+
+            if (updateURL) {
                 updateClientURL();
             }
             updatePageTitle();
