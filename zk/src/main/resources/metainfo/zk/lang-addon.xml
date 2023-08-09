@@ -31,9 +31,8 @@
     <stylesheet href="~./tools/app/css/table-view-5.0.5.css" type="text/css"/>
 
 
-    <javascript src="~./tools/js/dynamia-tools-5.0.5.js"/>
-    <javascript src="~./tools/js/sockjs.min.js?v=1.6.1"/>
-    <javascript src="~./tools/js/dynamia-tools-ws.5.0.5.js"/>
+    <javascript src="~./tools/js/dynamia-tools-5.0.7.js"/>
+
 
 
     <component>
