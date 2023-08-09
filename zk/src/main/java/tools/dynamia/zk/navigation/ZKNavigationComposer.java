@@ -102,9 +102,12 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
         navManager().setCurrentComposer(this);
         buildWorkspace();
 
+
         desktopCurrentPage = navManager().getCurrentPage();
+        Map<String, Object> pageParams = navManager().getCurrentPageParams();
         if (desktopCurrentPage == null) {
             loadDefaultPage();
+            pageParams = null;
         }
 
         this.self.addEventListener("onHash", evt -> processHash(evt.getData()));
@@ -113,7 +116,10 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
 
 
         if (desktopCurrentPage != null && !(desktopCurrentPage instanceof ActionPage)) {
-            update(new HashMap<>());
+            if (pageParams == null) {
+                pageParams = new HashMap<>();
+            }
+            update(pageParams);
         }
     }
 

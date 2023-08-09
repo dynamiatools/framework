@@ -46,6 +46,7 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
     private List<Page> availablesPages = new ArrayList<>();
 
     private NavigationBuilder currentNavigationBuilder;
+    private Map<String, Object> currentPageParams;
 
     public BaseNavigationManager(ModuleContainer container) {
         this.logger = new SLF4JLoggingService(BaseNavigationManager.class);
@@ -85,6 +86,7 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
     public Page getCurrentPage() {
 
         if (currentPage == null) {
+            currentPageParams = null;
             logger.debug("Selected Page is null, default page returned");
         }
 
@@ -117,6 +119,7 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
             if (currentPageGroup != null) {
                 this.activeModule = currentPageGroup.getParentModule();
             }
+            this.currentPageParams = params;
             this.attributes.clear();
             fireOnPageLoad(newPage, params);
 
@@ -266,5 +269,9 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
     @Override
     public void setCurrentNavigationBuilder(NavigationBuilder currentNavigationBuilder) {
         this.currentNavigationBuilder = currentNavigationBuilder;
+    }
+
+    public Map<String, Object> getCurrentPageParams() {
+        return currentPageParams;
     }
 }
