@@ -62,7 +62,7 @@ public class PageAction implements Serializable {
         this.name = delegate.getName();
         this.image = delegate.getImage();
         this.description = delegate.getDescription();
-        this.actionClass = description.getClass().getName();
+        this.actionClass = delegate.getClass().getName();
         this.position = delegate.getPosition();
     }
 
