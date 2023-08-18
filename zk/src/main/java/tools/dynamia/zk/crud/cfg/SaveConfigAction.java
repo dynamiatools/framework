@@ -48,7 +48,11 @@ public class SaveConfigAction extends AbstractConfigPageAction {
         if (parameters != null) {
             try {
                 ApplicationParameters.get().save(parameters);
-                NavigationManager.getCurrent().refresh();
+                if (evt.getSource() instanceof ConfigView configView) {
+                    configView.reloadValue();
+                } else {
+                    NavigationManager.getCurrent().refresh();
+                }
                 UIMessages.showMessage(Messages.get(getClass(), "succesfull_save"));
             } catch (Exception e) {
                 e.printStackTrace();

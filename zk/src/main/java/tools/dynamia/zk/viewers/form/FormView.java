@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author Mario A. Serrano Leones
@@ -104,6 +105,8 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
     private ActionEventBuilder actionEventBuilder;
 
     private boolean autoheight;
+
+    private Supplier<T> valueSupplier;
 
 
     public FormView() {
@@ -433,5 +436,24 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
     public void setAutoheight(boolean autoheight) {
         this.autoheight = autoheight;
         setupAutoheight();
+    }
+
+    /**
+     * Reload form view value using a value {@link Supplier} or reset the same value
+     */
+    public void reloadValue() {
+        if (valueSupplier != null) {
+            setValue(valueSupplier.get());
+        } else {
+            setValue(getValue());
+        }
+    }
+
+    public Supplier<T> getValueSupplier() {
+        return valueSupplier;
+    }
+
+    public void setValueSupplier(Supplier<T> valueSupplier) {
+        this.valueSupplier = valueSupplier;
     }
 }

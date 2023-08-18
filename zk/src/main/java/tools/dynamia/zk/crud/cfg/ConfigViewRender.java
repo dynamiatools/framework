@@ -63,8 +63,19 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
 
     @Override
     public View<List<Parameter>> render(ViewDescriptor descriptor, List<Parameter> value) {
-        descriptor.addParam(Viewers.PARAM_IGNORE_BINDINGS, true);
+        value = loadConfigValue(descriptor);
+        ConfigView view = newConfigView();
+        view.setValueSupplier(() -> loadConfigValue(descriptor));
+        delegateRender(view, descriptor, value);
+        createBindings(view, descriptor, value);
+        view.updateUI();
+        return view;
+    }
+
+    private List<Parameter> loadConfigValue(ViewDescriptor descriptor) {
+        List<Parameter> value;
         value = new ArrayList<>();
+        descriptor.addParam(Viewers.PARAM_IGNORE_BINDINGS, true);
         List<String> paramNames = new ArrayList<>();
 
         for (Field field : descriptor.getFields()) {
@@ -87,11 +98,7 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ConfigView view = newConfigView();
-        delegateRender(view, descriptor, value);
-        createBindings(view, descriptor, value);
-        view.updateUI();
-        return view;
+        return value;
     }
 
     private void createBindings(ConfigView view, ViewDescriptor descriptor, List<Parameter> value) {
