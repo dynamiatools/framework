@@ -90,7 +90,7 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
         ConfigView view = newConfigView();
         delegateRender(view, descriptor, value);
         createBindings(view, descriptor, value);
-
+        view.updateUI();
         return view;
     }
 
