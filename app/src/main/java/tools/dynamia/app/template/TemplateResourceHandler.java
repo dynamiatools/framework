@@ -36,7 +36,7 @@ import java.util.List;
 public class TemplateResourceHandler extends ResourceHttpRequestHandler {
 
     public static final List<String> STATIC_PATHS = List.of(
-            "/*.jpg", "/*.jpeg", "/*.png", "*.gif", "*.mp4", "/*.html", "/*.css", "/*.js", "/*.ico", "/*.bmp", "/manifest.json", "/*.webmanifest", "/static/**"
+            "/*.jpg", "/*.jpeg", "/*.png", "*.gif", "*.mp4", "/*.html", "/*.css", "/*.js", "/*.webp", "/*.ico", "/*.bmp", "/manifest.json", "/*.webmanifest", "/static/**"
     );
 
 

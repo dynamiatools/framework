@@ -44,7 +44,24 @@
         <url>https://github.com/dynamia-projects/dynamiatools</url>
     </scm>
 
+
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/lang-addon.xml</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/lang-addon.xml</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -54,6 +71,24 @@
                     <source>${java.version}</source>
                     <target>${target.version}</target>
                     <encoding>${source.encoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>yuicompressor-maven-plugin</artifactId>
+                <version>1.5.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compress</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <nosuffix>true</nosuffix>
+                    <includes>
+                        <include>**/static/**/*.css</include>
+                    </includes>
                 </configuration>
             </plugin>
         </plugins>

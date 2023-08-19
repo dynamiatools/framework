@@ -21,19 +21,17 @@
     <language-name>xul/html</language-name>
 
 
-    <stylesheet href="~./tools/css/dynamia-tools-5.0.5.css" type="text/css"/>
-    <stylesheet href="~./templates/default/css/colors-4.0.css" type="text/css"/>
-    <stylesheet href="~./templates/default/css/animate.css" type="text/css"/>
-    <stylesheet href="~./tools/app/css/zkbootstrap-5.0.5.css" type="text/css"/>
-    <stylesheet href="~./tools/app/css/viewers-5.0.5.css" type="text/css"/>
-    <stylesheet href="~./tools/app/css/form-view-5.0.5.css" type="text/css"/>
-    <stylesheet href="~./tools/app/css/multi-view-5.0.5.css" type="text/css"/>
-    <stylesheet href="~./tools/app/css/table-view-5.0.5.css" type="text/css"/>
+    <stylesheet href="/static/dynamia-tools/css/dynamia-tools.css?v=${project.version}" type="text/css"/>
+    <stylesheet href="/static/dynamia-tools/css/colors.css?v=${project.version}" type="text/css"/>
+    <stylesheet href="/static/dynamia-tools/css/animate.css?v=${project.version}" type="text/css"/>
+    <stylesheet href="/static/dynamia-tools/css/zkbootstrap.css?v=${project.version}" type="text/css"/>
+    <stylesheet href="/static/dynamia-tools/css/viewers.css?v=${project.version}" type="text/css"/>
+    <stylesheet href="/static/dynamia-tools/css/form-view.css?v=${project.version}" type="text/css"/>
+    <stylesheet href="/static/dynamia-tools/css/multi-view.css?v=${project.version}" type="text/css"/>
+    <stylesheet href="/static/dynamia-tools/css/table-view.css?v=${project.version}" type="text/css"/>
+    <stylesheet href="/static/dynamia-tools/css/listbox-colors.css?v=${project.version}" type="text/css"/>
 
-
-    <javascript src="~./tools/js/dynamia-tools-5.0.7.js"/>
-
-
+    <javascript src="/static/dynamia-tools/js/dynamia-tools.js?v=${project.version}"/>
 
     <component>
         <component-name>enumlistbox</component-name>

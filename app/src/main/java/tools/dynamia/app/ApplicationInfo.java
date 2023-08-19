@@ -23,6 +23,7 @@ import tools.dynamia.actions.ActionLoader;
 import tools.dynamia.app.template.ApplicationGlobalAction;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.PropertiesContainer;
+import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.reflect.PropertyInfo;
 
 import java.io.Serializable;

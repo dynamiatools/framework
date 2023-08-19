@@ -1,0 +1,275 @@
+.dark-table .z-listbox {
+    background: #4c5667 !important;
+    border: 1px solid #4e4e4e;
+    overflow: hidden;
+    zoom: 1
+}
+
+.dark-table .z-listbox-header {
+    width: 100%;
+    background: #0093f9;
+    position: relative;
+    overflow: hidden
+}
+
+.dark-table .z-listbox-header-border {
+
+    margin-top: -1px;
+    position: relative
+}
+
+
+.dark-table .z-listbox-body, .dark-table .z-listbox-body .z-listbox-emptybody .z-listbox-emptybody-content {
+    background: #4c5667 !important;
+
+}
+
+.dark-table .z-listbox-footer {
+    background: #404040;
+    border-top: 1px solid #4e4e4e;
+    overflow: hidden;
+    white-space: nowrap
+}
+
+.dark-table .z-listbox-footer table {
+    border-spacing: 0
+}
+
+.dark-table .z-listbox-footer table th, .z-listbox-footer table td {
+    background-clip: padding-box;
+    padding: 0
+}
+
+.dark-table .z-listbox-footer table th {
+    text-align: inherit
+}
+
+.dark-table .z-listbox-footer .z-listfooter {
+    overflow: hidden;
+    background: #404040
+}
+
+.dark-table .z-listbox .z-listcell {
+    background: #4c5667
+}
+
+.dark-table .z-listbox-odd > .z-listcell, .dark-table .z-listcell {
+    background: #4c5667
+}
+
+
+.dark-table .z-listheader {
+    background: #3b4452;
+    border-left: none !important;
+    border-bottom: 1px solid #3b4452 !important;
+}
+
+
+.dark-table .z-listheader-sort .z-listheader-content:active {
+    background: #0064ed
+}
+
+.dark-table .z-listheader-sort .z-listheader-sorticon {
+    font-size: 18px;
+    color: #fff;
+    position: absolute;
+    top: -3px;
+    left: 50%;
+    transform: translateX(-50%)
+}
+
+.dark-table .z-listheader-sort .z-listheader-sorticon :active {
+    background: rgba(0, 0, 0, 0)
+}
+
+.dark-table .z-listheader-hover {
+    background: #4fb7ff
+}
+
+
+.dark-table .z-listheader-visited {
+    background: #0093f9
+}
+
+.dark-table .z-listheader-visited .z-listheader-button {
+    background: #0064ed
+}
+
+.dark-table .z-listheader-checkable {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    font-size: 18px;
+    color: #0093f9;
+    border: 1px solid #4e4e4e;
+    background: #fff;
+    vertical-align: text-top;
+    margin-right: 8px;
+    border-radius: 4px
+}
+
+
+.dark-table .z-listheader-button {
+    font-size: 18px;
+    color: #fff !important;
+    display: none;
+    width: 34px;
+    height: 48px;
+    line-height: 48px;
+    text-align: center;
+    position: absolute;
+    top: 0;
+    right: 0;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: inset 1px 0 #0064ed;
+    z-index: 15
+}
+
+.dark-table .z-listheader-content, .dark-table .z-listcell-content, .dark-table .z-listgroup-content,
+.dark-table .z-listgroupfoot-content, .dark-table .z-listfooter-content {
+    color: #fff !important;
+}
+
+
+.dark-table .z-listitem .z-listcell {
+    border-top: 1px solid #404040;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    z-index: 0
+}
+
+.dark-table .z-listitem:hover > .z-listcell {
+    background: #314758
+}
+
+.dark-table .z-listitem:hover > .z-listcell > .z-listcell-content {
+    color: rgba(255, 255, 255, 0.9) !important
+}
+
+.dark-table .z-listitem-checkable {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    font-size: 18px;
+    color: #0093f9;
+    border: 1px solid #4e4e4e;
+    background: #fff;
+    vertical-align: text-top;
+    margin-right: 8px;
+    border-radius: 4px
+}
+
+.dark-table .z-listitem .z-listcell {
+    border-left: none !important;
+    border-bottom: 1px solid #3b4452 !important;
+}
+
+.dark-table .z-listitem-checkable.z-listitem-radio:hover {
+    border-color: #0093f9
+}
+
+
+.dark-table .z-listitem.z-listitem-selected > .z-listcell {
+    background: #314758;
+    position: relative
+}
+
+.dark-table .z-listitem.z-listitem-selected > .z-listcell > .z-listcell-content {
+    color: rgba(255, 255, 255, 0.9) !important
+}
+
+.dark-table .z-listitem.z-listitem-selected > .z-listcell > .z-listcell-content > .z-listitem-checkable.z-listitem-radio {
+    border-color: #0093f9
+}
+
+.dark-table .z-listitem.z-listitem-selected:hover > .z-listcell {
+    background: #314758;
+    position: relative
+}
+
+.dark-table .z-listitem.z-listitem-selected:hover .z-listcell-content {
+    color: rgba(255, 255, 255, 0.9) !important
+}
+
+.dark-table .z-listitem.z-listitem-selected.z-listitem-focus > .z-listcell {
+    background: #314758;
+    position: relative
+}
+
+.dark-table .z-listitem.z-listitem-selected.z-listitem-focus > .z-listcell > .z-listcell-content {
+    color: rgba(255, 255, 255, 0.9) !important
+}
+
+.dark-table .z-listitem.z-listitem-selected.z-listitem-focus:hover > .z-listcell {
+    background: #314758;
+    position: relative
+}
+
+.dark-table .z-listitem.z-listitem-selected.z-listitem-focus:hover .z-listcell-content {
+    color: rgba(255, 255, 255, 0.9) !important
+}
+
+.dark-table .z-listitem-focus > .z-listcell {
+    background: #314758;
+    position: relative
+}
+
+.dark-table .z-listitem-focus .z-listcell-content {
+    color: rgba(255, 255, 255, 0.9) !important
+}
+
+
+.dark-table .z-listitem.z-listitem-disabled * {
+    color: rgba(255, 255, 255, 0.24) !important;
+    cursor: default !important
+}
+
+
+.text-lg-table .z-listheader-content, .text-lg-table .z-listcell-content, .text-lg-table .z-label, .text-lg-table .z-listgroup-content,
+.text-lg-table .z-listgroupfoot-content, .text-lg-table .z-listfooter-content {
+    font-size: 14px !important;
+}
+
+.light-table .z-listheader .z-listheader-content {
+    color: #3b4452;
+}
+
+.light-table .z-listheader {
+    background: white;
+    border-color: #f1f1f1;
+    border-bottom: 1px solid #0093f9;
+}
+
+.light-table.z-listbox {
+    border: none;
+}
+
+.light-table .z-listbox-footer {
+    background: white;
+}
+
+.light-table .z-listfooter-content, .light-table .z-listfooter-content span {
+    font-weight: bold;
+}
+
+.light-table .z-listbox-odd.z-listitem {
+    background: white;
+}
+
+.light-table .z-listhead-bar {
+    background: white;
+    border: none;
+}
+
+.z-listbox-compact .z-listitem .z-listcell {
+    border: 0 !important;
+
+}
+
+.z-listbox-compact .z-listcell-content {
+    padding: 1px 3px;
+    min-height: 22px;
+    line-height: 22px;
+}
