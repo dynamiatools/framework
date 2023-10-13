@@ -36,11 +36,17 @@ public class PageAction implements Serializable {
     private String image;
     private String actionClass;
     private double position;
+    private boolean featured;
 
     private Action delegate;
 
     public PageAction() {
 
+    }
+
+    public PageAction(String id, String name) {
+        this.id = id;
+        this.name = name;
     }
 
     public PageAction(Page page) {
@@ -118,6 +124,63 @@ public class PageAction implements Serializable {
     public void setImage(String image) {
         this.image = image;
     }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public boolean isFeatured() {
+        return featured;
+    }
+
+    public void setFeatured(boolean featured) {
+        this.featured = featured;
+    }
+
+    public void setDelegate(Action delegate) {
+        this.delegate = delegate;
+    }
+
+    public PageAction image(String image) {
+        setImage(image);
+        return this;
+    }
+
+    public PageAction icon(String icon) {
+        setIcon(icon);
+        return this;
+    }
+
+    public PageAction name(String name) {
+        setName(name);
+        return this;
+    }
+
+    public PageAction id(String id) {
+        setId(id);
+        return this;
+    }
+
+    public PageAction description(String description) {
+        setDescription(description);
+        return this;
+    }
+
+    public PageAction actionClass(String actionClass) {
+        setActionClass(actionClass);
+        return this;
+    }
+
+    public PageAction featured() {
+        setFeatured(true);
+        return this;
+    }
+
+    public PageAction position(double position) {
+        setPosition(position);
+        return this;
+    }
+
 
     @Override
     public String toString() {

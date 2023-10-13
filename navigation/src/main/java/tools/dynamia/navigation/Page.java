@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Stream;
 
 /**
  * Basic {@link NavigationElement} for {@link Module}. Can be nested using {@link PageGroup}
@@ -45,7 +46,6 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
     private final List<PageAction> actions = new ArrayList<>();
     private Callback onCloseCallback;
     private Callback onOpenCallback;
-
     private Callback onUnloadCallback;
     private boolean featured;
     private int priority = 100;
@@ -166,10 +166,29 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
         return page;
     }
 
+    /**
+     * Add new page action
+     * @param action
+     * @return
+     */
     public Page addAction(PageAction action) {
         if (!actions.contains(action)) {
             actions.add(action);
             action.setPage(this);
+        }
+        return this;
+    }
+
+    /**
+     * Add new page actions
+     * @param action
+     * @param others
+     * @return
+     */
+    public Page addActions(PageAction action, PageAction... others) {
+        addAction(action);
+        if(others!=null) {
+            Stream.of(others).forEach(this::addAction);
         }
         return this;
     }
