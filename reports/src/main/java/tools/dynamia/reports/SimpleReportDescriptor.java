@@ -16,7 +16,6 @@
  */
 package tools.dynamia.reports;
 
-import net.sf.jasperreports.engine.JREmptyDataSource;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.integration.Containers;
 
@@ -35,29 +34,35 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     private final Map exporterParameters = new HashMap();
     private ReportOutputType defaultOutputType;
 
+    private String preferedCompiler = "jasperreports";
+
     public SimpleReportDescriptor() {
 
     }
 
     /**
+     *
      */
     public SimpleReportDescriptor(Object reportTemplate) {
-        this(reportTemplate, new JREmptyDataSource(), new HashMap<>());
+        this(reportTemplate, null, new HashMap<>());
     }
 
     /**
+     *
      */
     public SimpleReportDescriptor(Object reportTemplate, Object dataSource) {
         this(reportTemplate, dataSource, new HashMap<>());
     }
 
     /**
+     *
      */
     public SimpleReportDescriptor(Object reportTemplate, Object dataSource, Map<String, Object> parameters) {
         this("SimpleReport", reportTemplate, dataSource, parameters, ReportOutputType.PDF);
     }
 
     /**
+     *
      */
     public SimpleReportDescriptor(String name, Object reportTemplate, Object dataSource, Map<String, Object> parameters,
                                   ReportOutputType defaultOutputType) {
@@ -69,6 +74,7 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     }
 
     /**
+     *
      */
     @Override
     public Object getTemplate() {
@@ -80,6 +86,7 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     }
 
     /**
+     *
      */
     @Override
     public Map<String, Object> getParameters() {
@@ -87,12 +94,10 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     }
 
     /**
+     *
      */
     @Override
     public Object getDataSource() {
-        if (dataSource == null) {
-            dataSource = new JREmptyDataSource();
-        }
         return dataSource;
     }
 
@@ -101,6 +106,7 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     }
 
     /**
+     *
      */
     @Override
     public String getName() {
@@ -112,6 +118,7 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     }
 
     /**
+     *
      */
     @Override
     public ReportOutputType getDefaultOutputType() {
@@ -156,4 +163,12 @@ public class SimpleReportDescriptor implements ReportDescriptor {
         });
     }
 
+    @Override
+    public String getPreferedCompiler() {
+        return preferedCompiler;
+    }
+
+    public void setPreferedCompiler(String preferedCompiler) {
+        this.preferedCompiler = preferedCompiler;
+    }
 }

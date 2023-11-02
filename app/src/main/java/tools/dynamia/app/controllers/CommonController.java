@@ -71,7 +71,7 @@ public class CommonController implements PageNavigationInterceptor {
                 response.addCookie(new Cookie("skin", skin));
             }
         }
-
+//3054288807
         var currentSkin = CurrentTemplate.get().getSkin();
         if (currentSkin != null && currentSkin.isCustomLayout() && currentSkin.getLayoutView() != null) {
             mv.setViewName(currentSkin.getLayoutView());

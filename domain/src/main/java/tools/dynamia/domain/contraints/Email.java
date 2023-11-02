@@ -45,7 +45,7 @@ public @interface Email {
      *
      * @return the string
      */
-    String message() default "{com.dynamia.tools.domain.contraints.Email}";
+    String message() default "Invalid email address";
 
     /**
      * Groups.

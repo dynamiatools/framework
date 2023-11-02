@@ -17,12 +17,10 @@
 
 package tools.dynamia.domain;
 
+import org.junit.Assert;
 import org.junit.Test;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.domain.query.Parameter;
-import tools.dynamia.domain.test.OtherEntity;
-import tools.dynamia.domain.test.SomeEntity;
-import tools.dynamia.domain.test.SomeEntityDTO;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
 
@@ -55,6 +53,7 @@ public class TransferableTest {
 
         SomeEntityDTO dto = entity.toDTO();
 
+        Assert.assertNotNull(dto);
         assertEquals(entity.getId(), dto.getId());
         assertEquals(entity.getAccountId(), dto.getAccountId());
         assertEquals(entity.getName(), dto.getName());

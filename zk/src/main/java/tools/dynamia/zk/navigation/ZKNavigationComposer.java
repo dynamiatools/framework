@@ -35,7 +35,7 @@ import tools.dynamia.navigation.Page;
 import tools.dynamia.navigation.PageEvent;
 import tools.dynamia.navigation.WorkspaceViewBuilder;
 import tools.dynamia.zk.util.ZKUtil;
-import workspace.builders.TabPanel;
+import tools.dynamia.zk.workspace.builders.TabPanel;
 
 import java.util.HashMap;
 import java.util.List;
@@ -226,6 +226,9 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
     private void buildWorkspace() throws ClassNotFoundException {
         if (workspace != null) {
             String builderClass = (String) workspace.getAttribute("builderClass");
+            if (builderClass != null && builderClass.startsWith("workspace.builders")) {
+                builderClass = "tools.dynamia.zk." + builderClass;
+            }
             Class builder = null;
             if (builderClass != null) {
                 builder = Class.forName(builderClass);

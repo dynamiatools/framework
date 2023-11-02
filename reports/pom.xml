@@ -26,11 +26,11 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.0.8</version>
+        <version>5.0.9</version>
     </parent>
 
     <name>DynamiaTools - Reports</name>
-    <version>5.0.8</version>
+    <version>5.0.9</version>
     <description>A set of classes and interfaces that help building Reports</description>
     <url>https://dynamia.tools/docs/reports</url>
 
@@ -69,19 +69,6 @@
             <version>${project.version}</version>
         </dependency>
 
-
-        <dependency>
-            <groupId>net.sf.jasperreports</groupId>
-            <artifactId>jasperreports</artifactId>
-            <version>${jasperreports.version}</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.lowagie</groupId>
-                    <artifactId>itext</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
 
         <dependency>

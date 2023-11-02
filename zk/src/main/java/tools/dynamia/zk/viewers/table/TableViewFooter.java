@@ -25,6 +25,7 @@ import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.domain.fx.FunctionProvider;
 import tools.dynamia.io.converters.Converters;
 import tools.dynamia.viewers.Field;
+import tools.dynamia.zk.converters.Util;
 
 /**
  * @author Mario A. Serrano Leones
@@ -84,7 +85,7 @@ public class TableViewFooter extends Listfooter implements FunctionProvider {
     }
 
     public void setFunctionConverter(String functionConverter) {
-        this.functionConverter = functionConverter;
+        this.functionConverter = Util.checkConverterClass(functionConverter);
     }
 
     public String getFunctionConverter() {

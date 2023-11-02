@@ -36,6 +36,7 @@ import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.ComponentCustomizerUtil;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
+import tools.dynamia.zk.converters.Util;
 import tools.dynamia.zk.ui.IconImage;
 import tools.dynamia.zk.util.ZKBindingUtil;
 
@@ -177,6 +178,7 @@ public class TreeViewRowRenderer<E> implements TreeitemRenderer<TreeViewNode<E>>
                         ZKBindingUtil.bindComponent(binder, comp, bindingMap, Viewers.BEAN);
                     } else {
                         String converterExpression = (String) field.getParam(Viewers.PARAM_CONVERTER);
+                        converterExpression = Util.checkConverterClass(converterExpression);
                         String attr = BindingComponentIndex.getInstance().getAttribute(comp.getClass());
                         String expression = Viewers.BEAN + "." + field.getName();
                         ZKBindingUtil.bindComponent(binder, comp, expression, converterExpression);

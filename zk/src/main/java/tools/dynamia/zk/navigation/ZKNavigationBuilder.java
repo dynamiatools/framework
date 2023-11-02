@@ -16,7 +16,7 @@
  */
 package tools.dynamia.zk.navigation;
 
-import navigation.builders.Menu;
+import tools.dynamia.zk.navigation.builders.Menu;
 import org.springframework.context.annotation.Scope;
 import org.zkoss.bind.annotation.AfterCompose;
 import org.zkoss.zk.ui.Component;

@@ -83,7 +83,7 @@
                     </n:ol>
 
                     <div id="workspace" sclass="workspace" style="height: 100%">
-                        <custom-attributes builderClass="workspace.builders.Basic"/>
+                        <custom-attributes builderClass="tools.dynamia.zk.workspace.builders.Basic"/>
                     </div>
 
                 </n:div>

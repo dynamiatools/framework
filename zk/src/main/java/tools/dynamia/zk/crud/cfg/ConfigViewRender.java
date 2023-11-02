@@ -33,6 +33,7 @@ import tools.dynamia.viewers.ViewRenderer;
 import tools.dynamia.viewers.ViewRendererException;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
+import tools.dynamia.zk.converters.Util;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.viewers.form.FormViewRenderer;
 
@@ -125,6 +126,7 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
         String typeConverter = null;
         if (field.getParams() != null) {
             typeConverter = (String) field.getParams().get(Viewers.PARAM_CONVERTER);
+            typeConverter = Util.checkConverterClass(typeConverter);
         }
 
         if (attr != null && !attr.isEmpty()) {

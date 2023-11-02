@@ -20,6 +20,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import tools.dynamia.commons.StringUtils;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.services.ValidatorService;
 import tools.dynamia.integration.Containers;
@@ -35,75 +36,79 @@ import java.util.Set;
 
 public class DefaultValidatorService implements ValidatorService {
 
-	/**
-	 * The validator.
-	 */
-	private final Validator validator;
+    /**
+     * The validator.
+     */
+    private final Validator validator;
 
-	/**
-	 * Instantiates a new validator service impl.
-	 */
-	public DefaultValidatorService() {
-		/**
-		 * The validator factory.
-		 */
-		ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-		validator = validatorFactory.getValidator();
-	}
+    /**
+     * Instantiates a new validator service impl.
+     */
+    public DefaultValidatorService() {
+        /**
+         * The validator factory.
+         */
+        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+        validator = validatorFactory.getValidator();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * com.dynamia.tools.domain.services.ValidatorService#validate(java.lang.
-	 * Object)
-	 */
-	@Override
-	public void validate(Object obj) {
-		fireExternalsValidators(obj);
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.dynamia.tools.domain.services.ValidatorService#validate(java.lang.
+     * Object)
+     */
+    @Override
+    public void validate(Object obj) {
+        fireExternalsValidators(obj);
 
-		Set<ConstraintViolation<Object>> violations = validator.validate(obj);
-		if (violations != null && !violations.isEmpty()) {
-			for (ConstraintViolation<Object> cv : violations) {
-				throw new ValidationError(cv.getPropertyPath().toString() + "  " + cv.getMessage(),
-						cv.getInvalidValue(), cv.getPropertyPath().toString(), obj.getClass());
-			}
-		}
+        Set<ConstraintViolation<Object>> violations = validator.validate(obj);
+        if (violations != null && !violations.isEmpty()) {
+            for (ConstraintViolation<Object> cv : violations) {
+                String property = "";
+                if (cv.getPropertyPath() != null) {
+                    property = " - " + StringUtils.capitalizeAllWords(StringUtils.addSpaceBetweenWords(cv.getPropertyPath().toString()));
+                }
 
-	}
+                throw new ValidationError(cv.getMessage() + property,
+                        cv.getInvalidValue(), cv.getPropertyPath().toString(), obj.getClass());
+            }
+        }
 
-	/**
-	 * Fire externals validators.
-	 *
-	 * @param obj
-	 *            the obj
-	 */
-	private void fireExternalsValidators(Object obj) {
-		Collection<tools.dynamia.domain.Validator> validators = Containers.get()
-				.findObjects(tools.dynamia.domain.Validator.class);
-		if (validators != null) {
+    }
 
-			for (tools.dynamia.domain.Validator validator : validators) {
-				try {
-					//noinspection unchecked
-					validator.validate(obj);
-				} catch (ClassCastException e) {
-					// ignore
-				}
-			}
-		}
-	}
+    /**
+     * Fire externals validators.
+     *
+     * @param obj the obj
+     */
+    private void fireExternalsValidators(Object obj) {
+        Collection<tools.dynamia.domain.Validator> validators = Containers.get()
+                .findObjects(tools.dynamia.domain.Validator.class);
+        if (validators != null) {
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * com.dynamia.tools.domain.services.ValidatorService#validateAll(java.lang.
-	 * Object)
-	 */
-	@Override
-	public <T> Set<ConstraintViolation<T>> validateAll(T obj) {
-		return validator.validate(obj);
+            for (tools.dynamia.domain.Validator validator : validators) {
+                try {
+                    //noinspection unchecked
+                    validator.validate(obj);
+                } catch (ClassCastException e) {
+                    // ignore
+                }
+            }
+        }
+    }
 
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.dynamia.tools.domain.services.ValidatorService#validateAll(java.lang.
+     * Object)
+     */
+    @Override
+    public <T> Set<ConstraintViolation<T>> validateAll(T obj) {
+        return validator.validate(obj);
+
+    }
 }

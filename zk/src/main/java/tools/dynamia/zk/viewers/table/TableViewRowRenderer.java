@@ -44,6 +44,7 @@ import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.ComponentCustomizerUtil;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.actions.BoostrapButtonActionRenderer;
+import tools.dynamia.zk.converters.Util;
 import tools.dynamia.zk.ui.Import;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
@@ -253,6 +254,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                             ZKBindingUtil.bindComponent(binder, comp, bindingMap, Viewers.BEAN);
                         } else {
                             String converterExpression = (String) field.getParam(Viewers.PARAM_CONVERTER);
+                            converterExpression = Util.checkConverterClass(converterExpression);
                             String attr = (String) field.getParam(Viewers.PARAM_BINDING_ATTRIBUTE);
                             String expression = data instanceof BeanMap ? Viewers.BEAN + "['" + field.getName() + "']" : Viewers.BEAN + "." + field.getName();
                             ZKBindingUtil.bindComponent(binder, comp, attr, expression, converterExpression);

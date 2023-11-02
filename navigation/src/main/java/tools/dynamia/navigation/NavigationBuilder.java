@@ -109,6 +109,10 @@ public abstract class NavigationBuilder {
 
     private void instanceNavigationBuilder(String viewBuilderClass) {
         if (viewBuilderClass != null && !viewBuilderClass.isEmpty()) {
+            if (viewBuilderClass.startsWith("navigation.builders")) {
+                viewBuilderClass = "tools.dynamia.zk." + viewBuilderClass;
+            }
+
             try {
                 Class clazz = Class.forName(viewBuilderClass);
                 //noinspection unchecked
