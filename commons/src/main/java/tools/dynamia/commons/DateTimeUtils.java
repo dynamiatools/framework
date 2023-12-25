@@ -26,7 +26,9 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAccessor;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -360,7 +362,7 @@ public final class DateTimeUtils {
     /**
      * Adds weeks.
      *
-     * @param date  the date
+     * @param date the date
      * @return the date
      */
     public static Date addWeeks(Date date, int weeks) {
@@ -397,8 +399,19 @@ public final class DateTimeUtils {
      * @return the string
      */
     public static String format(Date date, String pattern) {
-        DateFormat df = new SimpleDateFormat(pattern);
+        DateFormat df = new SimpleDateFormat(pattern, Messages.getDefaultLocale());
         return df.format(date);
+    }
+
+    /**
+     * Format LocalDate, LocalTime, LocalDateTime and other {@link TemporalAccessor}
+     * @param temporalAccessor date, time, instant
+     * @param pattern date patter
+     * @return
+     */
+    public static String format(TemporalAccessor temporalAccessor, String pattern) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern, Messages.getDefaultLocale());
+        return formatter.format(temporalAccessor);
     }
 
     /**
@@ -505,7 +518,6 @@ public final class DateTimeUtils {
 
     /**
      * Create a tomorrow date and add one day
-     *
      */
     public static Date dayAfterTomorrow() {
         return addDays(tomorrow(), 1);
@@ -513,7 +525,6 @@ public final class DateTimeUtils {
 
     /**
      * Convert a Date to LocalDate
-     *
      */
     public static LocalDate toLocalDate(Date input) {
         if (input instanceof java.sql.Date) {
@@ -553,7 +564,6 @@ public final class DateTimeUtils {
 
     /**
      * Convert a LocalDate to Date
-     *
      */
     public static Date toDate(LocalDate localDate) {
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -594,7 +604,6 @@ public final class DateTimeUtils {
 
     /**
      * The same as now()
-     *
      */
     public static Date today() {
         return now();
@@ -602,7 +611,6 @@ public final class DateTimeUtils {
 
     /**
      * Create a new Date with specific time
-     *
      */
     public static Date today(int hourOfDay, int minutes, int seconds) {
 

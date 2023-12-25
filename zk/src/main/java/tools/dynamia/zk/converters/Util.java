@@ -23,6 +23,8 @@ import tools.dynamia.commons.DateTimeUtils;
 
 import java.text.Format;
 import java.text.ParseException;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * @author Mario A. Serrano Leones
@@ -78,6 +80,18 @@ public class Util {
             try {
                 return format.parseObject(val.toString());
             } catch (ParseException e) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public static Object coerceToBean(Object val, DateTimeFormatter format) {
+        if (val != null) {
+            try {
+                return format.parse(val.toString());
+            } catch (DateTimeParseException e) {
                 return null;
             }
         } else {

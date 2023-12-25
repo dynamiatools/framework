@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tools.dynamia.zk.reports;
+package tools.dynamia.app.reports;
 
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.data.JRAbstractBeanDataSource;
@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class ViewDescriptorDataSource extends JRAbstractBeanDataSource {
+public class JasperReportViewDescriptorDataSource extends JRAbstractBeanDataSource {
 
     private final ViewDescriptor viewDescriptor;
     private Object currentBean;
@@ -39,7 +39,7 @@ public class ViewDescriptorDataSource extends JRAbstractBeanDataSource {
     private final Collection data;
     private final Map<String, Object> cache = new HashMap<>();
 
-    public ViewDescriptorDataSource(ViewDescriptor viewDescriptor, Collection beanCollection) {
+    public JasperReportViewDescriptorDataSource(ViewDescriptor viewDescriptor, Collection beanCollection) {
         super(false);
         this.data = beanCollection;
         this.viewDescriptor = viewDescriptor;

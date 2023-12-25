@@ -14,17 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tools.dynamia.app;
+package tools.dynamia.zk.converters;
 
-import tools.dynamia.reports.ReportExplorerFilter;
+/**
+ * @author Mario A. Serrano Leones
+ */
 
-import java.io.File;
+public class LocalDateTime extends AbstractTemporalConverter {
 
-public class JasperReportExplorerFilter implements ReportExplorerFilter {
 
     @Override
-    public boolean match(File file) {
-        return (file != null && file.isFile() && file.getName().endsWith(".jrxml"));
+    public String getPattern() {
+        return "yyyy-MM-dd HH:mm:ss";
     }
-
 }

@@ -113,26 +113,23 @@ public class Containers {
      * @return the t
      */
     public <T> T findObject(Class<T> type) {
-        return findObject(type, null);
-    }
-
-    public <T> T findObject(Class<T> type, ObjectMatcher<T> matcher) {
         if (objectContainers == null) {
             return null;
         }
         for (ObjectContainer oc : objectContainers) {
             T object = oc.getObject(type);
             if (object != null) {
-                if (matcher != null) {
-                    if (matcher.match(object)) {
-                        return object;
-                    }
-                } else {
-                    return object;
-                }
+                return object;
             }
         }
         return null;
+    }
+
+    public <T> T findObject(Class<T> type, ObjectMatcher<T> matcher) {
+        if (objectContainers == null) {
+            return null;
+        }
+        return findObjects(type).stream().filter(matcher::match).findFirst().orElse(null);
     }
 
     /**
@@ -159,33 +156,17 @@ public class Containers {
         if (objectContainers != null && !objectContainers.isEmpty()) {
             for (ObjectContainer oc : objectContainers) {
                 List<T> result = oc.getObjects(type);
-                filterResults(result, matcher, objects);
+                if (!result.isEmpty()) {
+                    objects.addAll(result);
+                }
             }
+        }
+        if (matcher != null) {
+            objects = objects.stream().filter(matcher::match).toList();
         }
         return objects;
     }
 
-    /**
-     * Filter results.
-     *
-     * @param <T>     the generic type
-     * @param result  the result
-     * @param matcher the matcher
-     * @param objects the objects
-     */
-    private <T> void filterResults(List<T> result, ObjectMatcher<T> matcher, List<T> objects) {
-        if (result != null) {
-            for (T t : result) {
-                if (matcher != null) {
-                    if (matcher.match(t)) {
-                        objects.add(t);
-                    }
-                } else {
-                    objects.add(t);
-                }
-            }
-        }
-    }
 
     /**
      * Manually install a new ObjectContainer.

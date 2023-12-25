@@ -26,10 +26,12 @@ import org.zkoss.zk.ui.http.DHtmlLayoutServlet;
 import org.zkoss.zk.ui.http.HttpSessionListener;
 import tools.dynamia.app.DynamiaAppConfiguration;
 import tools.dynamia.app.RootAppConfiguration;
+import tools.dynamia.app.VelocityTemplateEngine;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.services.impl.NoOpCrudService;
 import tools.dynamia.integration.ms.MessageService;
 import tools.dynamia.integration.ms.SimpleMessageService;
+import tools.dynamia.templates.TemplateEngine;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,6 +54,12 @@ public class DynamiaToolsZKSpringBootApplication extends DynamiaAppConfiguration
     @ConditionalOnMissingBean(CrudService.class)
     public CrudService noOpCrudService() {
         return new NoOpCrudService();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(TemplateEngine.class)
+    public TemplateEngine defaultTemplateEngine() {
+        return new VelocityTemplateEngine();
     }
 
     /*

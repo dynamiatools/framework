@@ -19,29 +19,41 @@ package tools.dynamia.zk.converters;
 import org.zkoss.bind.BindContext;
 import org.zkoss.bind.Converter;
 import org.zkoss.zk.ui.Component;
-import tools.dynamia.commons.StringUtils;
+import tools.dynamia.commons.Messages;
+
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 
 /**
  * @author Mario A. Serrano Leones
  */
 
-public class Duration implements Converter<Object, Object, Component> {
+public abstract class AbstractTemporalConverter implements Converter<Object, Object, Component> {
 
     @Override
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {
 
-        if (val instanceof Long) {
-            return StringUtils.formatDuration((Long) val);
-        } else if (val instanceof java.time.Duration duration) {
-            return StringUtils.formatDuration(duration);
+        if (val instanceof TemporalAccessor date) {
+            return buildFormatter().format(date);
         }
         return null;
     }
 
     @Override
     public Object coerceToBean(Object val, Component comp, BindContext ctx) {
-        return null;
+        var formatter = buildFormatter();
+        return Util.coerceToBean(val, formatter);
     }
 
+    private DateTimeFormatter buildFormatter() {
+        return DateTimeFormatter.ofPattern(getPattern(), Messages.getDefaultLocale());
+    }
+
+    public String format(TemporalAccessor temporalAccessor) {
+        return buildFormatter().format(temporalAccessor);
+    }
+
+
+    public abstract String getPattern();
 
 }

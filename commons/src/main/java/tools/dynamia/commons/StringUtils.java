@@ -21,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1419,6 +1420,10 @@ public abstract class StringUtils {
      */
     public static String formatDuration(long time) {
         var duration = java.time.Duration.ofMillis(time);
+        return formatDuration(duration);
+    }
+
+    public static String formatDuration(Duration duration) {
         long seconds = duration.getSeconds();
         long absSeconds = Math.abs(seconds);
         String positive = String.format(
@@ -1428,6 +1433,7 @@ public abstract class StringUtils {
                 absSeconds % 60);
         return seconds < 0 ? "-" + positive : positive;
     }
+
 
     /**
      * Concat all object in to a string
@@ -1468,10 +1474,11 @@ public abstract class StringUtils {
 
     /**
      * Get a system property or environment variable. Return null if nothing found
+     *
      * @param name
      * @return
      */
     public static String getSystemPropertyOrEnv(String name) {
-        return getSystemPropertyOrEnv(name,null);
+        return getSystemPropertyOrEnv(name, null);
     }
 }

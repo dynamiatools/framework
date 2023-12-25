@@ -41,6 +41,7 @@ public class BindingComponentIndex extends HashSetMultiMap<String, String> {
         instance.put("checked", Checkbox.class);
         instance.put("src", Image.class);
         instance.put("model", Chart.class);
+        instance.put("content", Html.class);
 
     }
 

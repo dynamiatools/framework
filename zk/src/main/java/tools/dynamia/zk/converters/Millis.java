@@ -19,21 +19,20 @@ package tools.dynamia.zk.converters;
 import org.zkoss.bind.BindContext;
 import org.zkoss.bind.Converter;
 import org.zkoss.zk.ui.Component;
-import tools.dynamia.commons.StringUtils;
 
 /**
  * @author Mario A. Serrano Leones
  */
 
-public class Duration implements Converter<Object, Object, Component> {
+public class Millis implements Converter<Object, Object, Component> {
 
     @Override
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {
 
         if (val instanceof Long) {
-            return StringUtils.formatDuration((Long) val);
+            return val + "ms";
         } else if (val instanceof java.time.Duration duration) {
-            return StringUtils.formatDuration(duration);
+            return duration.toMillis() + "ms";
         }
         return null;
     }

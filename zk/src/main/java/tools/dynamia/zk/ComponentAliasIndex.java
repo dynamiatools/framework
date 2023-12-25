@@ -78,6 +78,8 @@ public class ComponentAliasIndex extends HashMap<String, Class<? extends Compone
         getInstance().add(Rating.class);
         getInstance().add(DateRangebox.class);
         getInstance().add(Combobutton.class);
+        getInstance().add(Html.class);
+
 
         LoggingService logger = new SLF4JLoggingService(ComponentAliasIndex.class);
         try {

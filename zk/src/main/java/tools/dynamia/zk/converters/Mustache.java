@@ -19,23 +19,23 @@ package tools.dynamia.zk.converters;
 import org.zkoss.bind.BindContext;
 import org.zkoss.bind.Converter;
 import org.zkoss.zk.ui.Component;
-import tools.dynamia.commons.StringUtils;
+import org.zkoss.zul.Html;
+import org.zkoss.zul.Label;
 
 /**
  * @author Mario A. Serrano Leones
  */
 
-public class Duration implements Converter<Object, Object, Component> {
+public class Mustache implements Converter<Object, Object, Component> {
 
     @Override
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {
 
-        if (val instanceof Long) {
-            return StringUtils.formatDuration((Long) val);
-        } else if (val instanceof java.time.Duration duration) {
-            return StringUtils.formatDuration(duration);
+        if (val instanceof String text) {
+            return  ((String) val).replace("{{", "<b>{{").replace("}}", "}}</b>");
+
         }
-        return null;
+        return val != null ? val.toString() : null;
     }
 
     @Override
