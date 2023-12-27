@@ -21,54 +21,64 @@ import java.util.function.Supplier;
 
 public class LazyEntityTreeNode<E> extends EntityTreeNode<E> {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-	private ChildrenLoader<E> loader;
+    private ChildrenLoader<E> loader;
 
-	public LazyEntityTreeNode(E entity) {
-		super(entity);
-	}
+    public LazyEntityTreeNode(String label, String icon) {
+        super(null, label, icon);
+    }
 
-	public LazyEntityTreeNode(E entity, ChildrenLoader<E> loader) {
-		super(entity);
-		this.loader = loader;
-	}
+    public LazyEntityTreeNode(String label, String icon, ChildrenLoader<E> loader) {
+        super(null, label, icon);
+        setLoader(loader);
+    }
 
-	public LazyEntityTreeNode(E entity, String label, ChildrenLoader<E> loader) {
-		super(entity, label);
-		this.loader = loader;
-	}
+    public LazyEntityTreeNode(E entity) {
+        super(entity);
+    }
 
-	public LazyEntityTreeNode(E entity, String icon, String label, ChildrenLoader<E> loader) {
-		super(entity, icon, label);
-		this.loader = loader;
-	}
+    public LazyEntityTreeNode(E entity, ChildrenLoader<E> loader) {
+        super(entity);
+        setLoader(loader);
+    }
 
-	public void load() {
-		if (loader != null && getChildren().isEmpty()) {
-			loader.loadChildren(this);
-		}
-	}
+    public LazyEntityTreeNode(E entity, String label, ChildrenLoader<E> loader) {
+        super(entity, label);
+        setLoader(loader);
+    }
 
-	public LazyEntityTreeNode(E entity, Supplier<List<E>> supplier) {
-		super(entity);
-		this.loader = (node) -> supplier.get().forEach(node::addChild);
-	}
+    public LazyEntityTreeNode(E entity, String label, String icon, ChildrenLoader<E> loader) {
+        super(entity, label, icon);
+        setLoader(loader);
+    }
 
-	public ChildrenLoader<E> getLoader() {
-		return loader;
-	}
+    public void load() {
+        if (loader != null && getChildren().isEmpty()) {
+            loader.loadChildren(this);
+        }
+    }
 
-	public void setLoader(ChildrenLoader<E> loader) {
-		this.loader = loader;
-	}
+    public LazyEntityTreeNode(E entity, Supplier<List<E>> supplier) {
+        super(entity);
+        setLoader((node) -> supplier.get().forEach(node::addChild));
+    }
 
-	@Override
-	public boolean isLeaf() {
-		return loader == null;
-	}
+    public ChildrenLoader<E> getLoader() {
+        return loader;
+    }
+
+    public void setLoader(ChildrenLoader<E> loader) {
+        this.loader = loader;
+        setOnOpenListener(event -> load());
+    }
+
+    @Override
+    public boolean isLeaf() {
+        return loader == null;
+    }
 
 }

@@ -52,6 +52,7 @@ import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -185,6 +186,11 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
 
     @Override
     public void setValue(T value) {
+        if(value instanceof Collection){
+            //ignore
+            return;
+        }
+
         if (value != this.value) {
             this.value = value;
             if (value instanceof PropertyChangeListenerContainer) {

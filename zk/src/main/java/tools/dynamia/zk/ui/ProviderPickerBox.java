@@ -48,6 +48,8 @@ public class ProviderPickerBox extends Combobox {
     private String className;
     private String idField = "id";
     private String nameField = "name";
+
+    private String iconField = "icon";
     private Class<?> providerClass;
 
     public ProviderPickerBox() {
@@ -57,10 +59,18 @@ public class ProviderPickerBox extends Combobox {
 
             try {
                 String id = BeanUtils.invokeGetMethod(data, idField).toString();
-                String name = BeanUtils.invokeGetMethod(data, nameField).toString();
+                Object name = BeanUtils.invokeGetMethod(data, nameField);
+                Object icon = BeanUtils.invokeGetMethod(data, iconField);
 
-                item.setLabel(StringUtils.capitalize(name));
+                if (name == null) {
+                    name = id;
+                }
+
+                item.setLabel(StringUtils.capitalize(name.toString()));
                 item.setValue(id);
+                if (icon != null) {
+                    item.setIconSclass(icon.toString());
+                }
             } catch (Exception e) {
                 throw new UiException("Error rendering item for " + this, e);
             }
@@ -116,6 +126,15 @@ public class ProviderPickerBox extends Combobox {
 
     public void setNameField(String nameField) {
         this.nameField = nameField;
+        initModel();
+    }
+
+    public String getIconField() {
+        return iconField;
+    }
+
+    public void setIconField(String iconField) {
+        this.iconField = iconField;
         initModel();
     }
 

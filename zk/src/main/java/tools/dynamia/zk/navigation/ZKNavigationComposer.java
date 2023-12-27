@@ -30,6 +30,7 @@ import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.navigation.ActionPage;
 import tools.dynamia.navigation.DefaultPageProvider;
+import tools.dynamia.navigation.ModuleContainer;
 import tools.dynamia.navigation.NavigationElement;
 import tools.dynamia.navigation.Page;
 import tools.dynamia.navigation.PageEvent;
@@ -128,6 +129,11 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
         if (defaultPageProvider != null && defaultPageProvider.getPath() != null) {
             desktopCurrentPage = navManager().findPage(defaultPageProvider.getPath());
             navManager().setRawCurrentPage(desktopCurrentPage);
+        } else {
+            String defaultPagePath = ModuleContainer.getInstance().getDefaultPagePath();
+            if (defaultPagePath != null) {
+                desktopCurrentPage = navManager().findPage(defaultPagePath);
+            }
         }
     }
 

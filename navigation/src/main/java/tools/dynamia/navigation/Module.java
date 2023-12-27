@@ -16,12 +16,12 @@
  */
 package tools.dynamia.navigation;
 
+import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -87,6 +87,9 @@ public class Module extends NavigationElement<Module> implements Serializable, C
 
     public Module addPage(Page page) {
         defaultGroup.addPage(page);
+        if (page.isMain()) {
+            setMainPage(page);
+        }
         return this;
     }
 
@@ -159,6 +162,7 @@ public class Module extends NavigationElement<Module> implements Serializable, C
     public static Module getRef(String id) {
         Module module = new Module();
         module.setId(id);
+        module.setName(StringUtils.capitalize(id));
         module.setReference(true);
         return module;
     }

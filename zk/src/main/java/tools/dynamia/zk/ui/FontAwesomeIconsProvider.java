@@ -28,33 +28,46 @@ import java.util.Properties;
 @InstallIcons
 public class FontAwesomeIconsProvider extends AbstractFontIconsProvider {
 
-    private static final String FA_PREFIX = "fa-";
 
     @Override
     public Properties getNamesMapping() {
         try {
             Properties properties = new Properties();
-            properties.load(getClass().getResourceAsStream("/META-INF/dynamia/fa-icons.properties"));
+            properties.load(getClass().getResourceAsStream(getIconsPath()));
             return properties;
         } catch (IOException e) {
-            throw new IconException("Unable to load dynamical theme icons", e);
+            throw new IconException("Unable to load icons", e);
         }
+    }
+
+    protected String getIconsPath() {
+        return "/META-INF/dynamia/fa-icons.properties";
     }
 
     @Override
     public Icon getIcon(String name) {
         Icon icon = super.getIcon(name);
 
-        if (icon == null && name.startsWith(FA_PREFIX)) {
-            String internalName = name.substring(FA_PREFIX.length());
-            icon = newIcon(name, internalName);
+        if (icon == null) {
+            if (name.startsWith(getIconsPrefix())) {
+                String internalName = name.substring(getIconsPrefix().length());
+                icon = newIcon(name, internalName);
+                addIcon(name, icon);
+            } else if (name.startsWith("fa ") || name.startsWith("fab ")){
+                icon = new FAIcon(name, name);
+                addIcon(name, icon);
+            }
         }
 
         return icon;
     }
 
+    protected String getIconsPrefix() {
+        return "fa-";
+    }
+
     @Override
     protected Icon newIcon(String name, String internalName) {
-        return new FAIcon(name, "fa " + FA_PREFIX + internalName);
+        return new FAIcon(name, "fa " + getIconsPrefix() + internalName);
     }
 }

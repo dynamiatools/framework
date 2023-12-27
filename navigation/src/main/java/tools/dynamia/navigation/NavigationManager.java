@@ -57,6 +57,14 @@ public interface NavigationManager {
         NavigationManagerSession.getInstance().setPage(page, params);
     }
 
+    static void setPageLater(String path) {
+        setPageLater(path, null);
+    }
+
+    static void setPageLater(String path, Map<String, Object> params) {
+        setPageLater(ModuleContainer.getInstance().findPage(path), params);
+    }
+
     /**
      * Delegate callback to run when {@link NavigationManager} are builded. Its store a Queue using {@link NavigationManagerSession}
      *

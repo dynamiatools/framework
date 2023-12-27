@@ -37,19 +37,24 @@ public class EntityTreeNode<E> extends TreeViewNode<E> implements Serializable {
     private EventListener onOpenListener;
     private EntityTreeModel<E> model;
 
+
+    public EntityTreeNode(String label, String icon) {
+        this(null, label, icon);
+    }
+
     public EntityTreeNode(E entity) {
         this(entity, entity != null ? entity.toString() : null);
     }
 
     public EntityTreeNode(E entity, String label) {
-        this(entity, null, label);
+        this(entity, label, null);
 
     }
 
-    public EntityTreeNode(E entity, String icon, String label) {
+    public EntityTreeNode(E entity, String label, String icon) {
         super(entity);
-        setIcon(icon);
         setLabel(label);
+        setIcon(icon);
     }
 
     @Override
@@ -98,9 +103,30 @@ public class EntityTreeNode<E> extends TreeViewNode<E> implements Serializable {
         return node;
     }
 
+
+    /**
+     * Add children using a entity list
+     *
+     * @param entities
+     * @return children nodes
+     */
     public List<EntityTreeNode<E>> addChildren(List<? extends E> entities) {
+        return addChildren(entities, null);
+    }
+
+    /**
+     * Add children using an entity list with default icon
+     * @param entities
+     * @param defaultIcon
+     * @return chidlren nodes
+     */
+    public List<EntityTreeNode<E>> addChildren(List<? extends E> entities, String defaultIcon) {
         List<EntityTreeNode<E>> newChildren = new ArrayList<>();
-        entities.forEach(e -> newChildren.add(addChild(e)));
+        entities.forEach(e -> {
+            var childNode = addChild(e);
+            childNode.setIcon(defaultIcon);
+            newChildren.add(childNode);
+        });
 
         return newChildren;
     }
@@ -171,6 +197,8 @@ public class EntityTreeNode<E> extends TreeViewNode<E> implements Serializable {
     public String toString() {
         if (getEntity() != null) {
             return getEntity().toString();
+        } else if (getLabel() != null) {
+            return getLabel();
         } else {
             return super.toString();
         }
@@ -184,7 +212,7 @@ public class EntityTreeNode<E> extends TreeViewNode<E> implements Serializable {
         }
     }
 
-    public void reload(){
+    public void reload() {
         int index = getParent().indexOf(this);
         int[] path = getModel().getPath(this);
 

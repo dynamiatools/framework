@@ -31,7 +31,7 @@ public class EntityTreeModel<E> extends AbstractTreeModel<EntityTreeNode<E>> {
     private static final long serialVersionUID = 817662050637827509L;
 
     @SuppressWarnings("unchecked")
-    public EntityTreeModel(EntityTreeNode root) {
+    public EntityTreeModel(EntityTreeNode<E> root) {
         //noinspection unchecked
         super(root);
         //noinspection unchecked
