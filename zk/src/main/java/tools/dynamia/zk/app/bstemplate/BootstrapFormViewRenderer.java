@@ -38,6 +38,7 @@ import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.ui.DateRangebox;
 import tools.dynamia.zk.ui.DateSelector;
+import tools.dynamia.zk.ui.DurationSelector;
 import tools.dynamia.zk.util.ZKUtil;
 import tools.dynamia.zk.viewers.ZKViewersUtil;
 import tools.dynamia.zk.viewers.form.FormFieldComponent;
@@ -300,6 +301,12 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
             dateSelector.getMonthcombo().setSclass("form-zcontrol");
             dateSelector.getYearbox().setZclass("form-control");
         }
+
+        if (component instanceof DurationSelector durationSelector) {
+            durationSelector.getUnitsbox().setSclass("form-zcontrol");
+            durationSelector.getValuebox().setSclass("form-control");
+        }
+
 
         if (component instanceof HtmlBasedComponent) {
             var fieldSclass = field.getName().replace(".", "-") + "-field";
