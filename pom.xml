@@ -65,8 +65,6 @@
 
         <module>domain</module>
         <module>domain-jpa</module>
-        <module>domain-neo4j</module>
-        <!--module>domain-mongodb</module-->
 
         <module>crud</module>
         <module>ui</module>
@@ -75,14 +73,13 @@
         <module>web</module>
         <module>app</module>
 
-        <!-- ZK Backend  https://www.zkoss.org -->
+        <!-- ZK UI Backend  https://www.zkoss.org -->
         <module>zk</module>
     </modules>
 
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
         <springboot.version>3.2.1</springboot.version>
-        <neo4jogm.version>4.0.8</neo4jogm.version>
         <mongodb.version>1</mongodb.version>
 
         <!-- Web -->
