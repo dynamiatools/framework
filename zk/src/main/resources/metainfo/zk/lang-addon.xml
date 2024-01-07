@@ -25,6 +25,7 @@
     <stylesheet href="/static/dynamia-tools/css/colors.css?v=${project.version}" type="text/css"/>
     <stylesheet href="/static/dynamia-tools/css/animate.css?v=${project.version}" type="text/css"/>
     <stylesheet href="/static/dynamia-tools/css/zkbootstrap.css?v=${project.version}" type="text/css"/>
+    <stylesheet href="/static/dynamia-tools/css/components.css?v=${project.version}" type="text/css"/>
     <stylesheet href="/static/dynamia-tools/css/viewers.css?v=${project.version}" type="text/css"/>
     <stylesheet href="/static/dynamia-tools/css/form-view.css?v=${project.version}" type="text/css"/>
     <stylesheet href="/static/dynamia-tools/css/multi-view.css?v=${project.version}" type="text/css"/>
@@ -1162,7 +1163,6 @@
         <component-name>durationselector</component-name>
         <component-class>tools.dynamia.zk.ui.DurationSelector</component-class>
         <extends>div</extends>
-
         <annotation>
             <annotation-name>default-bind</annotation-name>
             <property-name>selected</property-name>
@@ -1187,6 +1187,28 @@
                 <attribute-value>onSelect</attribute-value>
             </attribute>
         </annotation>
+        <mold>
+            <mold-name>default</mold-name>
+            <mold-uri>mold/div.js</mold-uri>
+        </mold>
+    </component>
+
+    <component>
+        <component-name>card</component-name>
+        <component-class>tools.dynamia.zk.ui.Card</component-class>
+        <extends>div</extends>
+        <preserve-blank/>
+        <mold>
+            <mold-name>default</mold-name>
+            <mold-uri>mold/div.js</mold-uri>
+        </mold>
+    </component>
+
+    <component>
+        <component-name>alert</component-name>
+        <component-class>tools.dynamia.zk.ui.Alert</component-class>
+        <extends>div</extends>
+        <preserve-blank/>
         <mold>
             <mold-name>default</mold-name>
             <mold-uri>mold/div.js</mold-uri>

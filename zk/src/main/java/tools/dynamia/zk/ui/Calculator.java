@@ -17,6 +17,7 @@
 
 package tools.dynamia.zk.ui;
 
+import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Textbox;
 import tools.dynamia.commons.StringUtils;
@@ -33,6 +34,8 @@ public class Calculator extends Keypad {
 
     public Calculator() {
         super(new Textbox());
+
+
         List<Key> calculatorKeys = Arrays.asList(
                 new Key("%"), new Key("/"), new Key("x", "*"), new Key("-"), NEW_ROW,
                 new Key("7"), new Key("8"), new Key("9"), new Key("+", 1, 2), NEW_ROW,
@@ -107,4 +110,6 @@ public class Calculator extends Keypad {
     public Number getResult() {
         return result;
     }
+
+
 }

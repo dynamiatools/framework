@@ -28,7 +28,7 @@ import tools.dynamia.zk.ComponentAliasIndex;
 
 import java.util.Objects;
 
-public class Infobox extends Div  implements LoadableOnly{
+public class Infobox extends Div implements LoadableOnly {
 
     static {
         ComponentAliasIndex.getInstance().put("infobox", Infobox.class);
@@ -51,6 +51,7 @@ public class Infobox extends Div  implements LoadableOnly{
     private final Span uiIcon;
     private final Label uiText;
     private final Label uiNumber;
+    private String iconColor;
 
 
     public Infobox() {
@@ -119,6 +120,18 @@ public class Infobox extends Div  implements LoadableOnly{
             i.setSclass(icon);
             uiIcon.appendChild(i);
         }
+    }
+
+    public void setIconColor(String color) {
+        if (this.iconColor != null) {
+            uiIcon.removeSclass(iconColor);
+        }
+        this.iconColor = color;
+        uiIcon.addSclass(color);
+    }
+
+    public String getIconColor() {
+        return iconColor;
     }
 
     public String getText() {

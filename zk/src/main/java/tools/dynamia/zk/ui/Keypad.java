@@ -92,6 +92,7 @@ public class Keypad extends Div {
         displayRegion = new Div();
         displayRegion.setSclass("kp-display");
         appendChild(displayRegion);
+
         Grid container = new Grid();
         container.setParent(this);
         container.appendChild(new Rows());
@@ -214,6 +215,10 @@ public class Keypad extends Div {
         if (component instanceof InputElement) {
             displayBox = (InputElement) component;
         }
+    }
+
+    public void setDisplayBox(InputElement displaybox) {
+        this.displayBox = displaybox;
     }
 
     private void syncDisplay() {
