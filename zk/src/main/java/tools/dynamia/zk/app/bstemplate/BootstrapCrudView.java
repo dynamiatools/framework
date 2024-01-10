@@ -19,28 +19,20 @@ package tools.dynamia.zk.app.bstemplate;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.HtmlBasedComponent;
-import org.zkoss.zul.Borderlayout;
-import org.zkoss.zul.Button;
-import org.zkoss.zul.Div;
-import org.zkoss.zul.Menuitem;
-import org.zkoss.zul.Menupopup;
-import tools.dynamia.actions.Action;
-import tools.dynamia.actions.ActionGroup;
-import tools.dynamia.actions.ActionRenderer;
-import tools.dynamia.actions.Actions;
+import org.zkoss.zul.*;
+import tools.dynamia.actions.*;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.crud.ChangedStateEvent;
 import tools.dynamia.crud.CrudState;
+import tools.dynamia.ui.UIMessages;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.web.util.HttpUtils;
-import tools.dynamia.zk.actions.ActionToolbar;
-import tools.dynamia.zk.actions.ButtonActionRenderer;
-import tools.dynamia.zk.actions.MenuitemActionRenderer;
-import tools.dynamia.zk.actions.ToolbarbuttonActionRenderer;
+import tools.dynamia.zk.actions.*;
 import tools.dynamia.zk.crud.CrudView;
 import tools.dynamia.zk.crud.CrudViewRenderer;
 import tools.dynamia.zk.crud.actions.FindAction;
 import tools.dynamia.zk.util.ZKUtil;
+import tools.dynamia.zk.viewers.table.TableView;
 
 import java.util.HashMap;
 import java.util.List;
@@ -79,10 +71,11 @@ public class BootstrapCrudView<T> extends CrudView<T> {
         actionsMenu = new Menupopup();
         actionsMenu.setId(menuId);
         actionsMenu.setParent(this);
+
         actionsButton = new Button();
-        actionsButton.setZclass("btn btn-primary actions");
+        actionsButton.setZclass("btn btn-primary actions actiontb-a");
         actionsButton.setPopup(menuId + ", after_start");
-        ZKUtil.configureComponentIcon("process", actionsButton, IconSize.NORMAL);
+        ZKUtil.configureComponentIcon("fa-ellipsis-v", actionsButton, IconSize.SMALL);
 
         addCrudStateChangedListener(this::controlChangedState);
     }
@@ -127,11 +120,13 @@ public class BootstrapCrudView<T> extends CrudView<T> {
     protected void loadActions(CrudState state) {
         actionsMenu.getChildren().clear();
 
-        if (HttpUtils.isSmartphone() && state == CrudState.READ) {
-
+        if (HttpUtils.isSmartphone()) {
             toolbarContainer.getChildren().clear();
-
-            toolbarContainer.appendChild(actionsButton);
+            if (state == CrudState.READ) {
+                toolbarContainer.appendChild(actionsButton);
+            } else {
+                borderlayout.getNorth().setVisible(false);
+            }
         }
 
         super.loadActions(state);
@@ -149,8 +144,18 @@ public class BootstrapCrudView<T> extends CrudView<T> {
             actionId = action.getAttribute("internalId").toString();
         }
         if (component instanceof HtmlBasedComponent hcom) {
-            hcom.setSclass("actiontb-a " + actionId + " " + hcom.getSclass());
+            String background = (String) action.getAttribute("background");
+            String color = (String) action.getAttribute("color");
+            hcom.setSclass("actiontb-a " + actionId);
 
+            if (background != null && background.startsWith(".")) {
+                hcom.setSclass(hcom.getSclass() + " " + background.substring(1));
+            }
+            if (color != null && color.startsWith(".")) {
+                hcom.setSclass(hcom.getSclass() + " " + color.substring(1));
+            }
+            var tooltip = action.getLocalizedName();
+            hcom.setTooltiptext(tooltip);
             if (HttpUtils.isSmartphone()) {
                 if (!(component instanceof Button)) {
                     hcom.setSclass(hcom.getSclass() + " flexit");
@@ -165,17 +170,30 @@ public class BootstrapCrudView<T> extends CrudView<T> {
     @Override
     protected void showActionGroup(ActionGroup actionGroup) {
         if (HttpUtils.isSmartphone() && getState() == CrudState.READ) {
-            MenuitemActionRenderer renderer = new MenuitemActionRenderer();
-            for (Action action : actionGroup.getActions()) {
-                if (action.getRenderer() == null || action.getRenderer() instanceof ToolbarbuttonActionRenderer) {
-                    Menuitem menuitem = Actions.render(renderer, action, this);
-                    actionsMenu.appendChild(menuitem);
-                } else {
-                    showAction(actionGroup, action);
-                }
-            }
+            renderSmartphoneReadActions(actionGroup);
         } else {
             actionGroup.getActions().forEach(a -> showAction(actionGroup, a));
+        }
+    }
+
+    protected void renderSmartphoneReadActions(ActionGroup actionGroup) {
+        MenuitemActionRenderer renderer = new MenuitemActionRenderer();
+        for (Action action : actionGroup.getActions()) {
+            ActionRenderer actionRenderer = action.getRenderer();
+
+            if (action.getClass().isAnnotationPresent(PrimaryAction.class)) {
+                showAction(actionGroup, action);
+            } else if (actionRenderer == null || actionRenderer instanceof ToolbarbuttonActionRenderer
+                    || actionRenderer instanceof ButtonActionRenderer) {
+                actionsMenu.appendChild(Actions.render(renderer, action, this));
+            } else if (actionRenderer instanceof MenuitemActionRenderer mir) {
+                actionsMenu.appendChild(Actions.render(mir, action, this));
+            } else if (actionRenderer instanceof MenuActionRenderer mar) {
+                Menubar menubar = Actions.render(mar, action, this);
+                actionsMenu.appendChild(menubar.getFirstChild());
+            } else {
+                showAction(actionGroup, action);
+            }
         }
     }
 
@@ -185,6 +203,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
             formView.addAction(action);
         } else {
             fixFindAction(action);
+
             Component actionComp = renderAction(action);
             if (!HttpUtils.isSmartphone()) {
                 Component group = getActionGroupContainer(actionGroup);
@@ -195,10 +214,14 @@ public class BootstrapCrudView<T> extends CrudView<T> {
 
             } else {
                 toolbarContainer.appendChild(actionComp);
+
+                if (actionComp instanceof Button) {
+                    ((Button) actionComp).setLabel(null);
+                    ((Button) actionComp).setSclass(((Button) actionComp).getSclass() + " actions");
+                }
             }
         }
     }
-
 
     private Component getActionGroupContainer(ActionGroup actionGroup) {
         if (actionGroupContainers == null) {
@@ -229,9 +252,10 @@ public class BootstrapCrudView<T> extends CrudView<T> {
         toolbarContainer.appendChild(actionsButton);
         MenuitemActionRenderer menuRenderer = new MenuitemActionRenderer();
         for (Component component : actionComponents) {
+
             Action action = (Action) component.getAttribute(ACTION);
             if (action != null) {
-                Menuitem menuitem = Actions.render(menuRenderer, action, this);
+                Menuitem menuitem = menuRenderer.render(action, this);
                 actionsMenu.appendChild(menuitem);
             }
         }
@@ -240,13 +264,16 @@ public class BootstrapCrudView<T> extends CrudView<T> {
 
 
     private void controlChangedState(ChangedStateEvent evt) {
-        CrudState crudState = evt.newState();
+        CrudState crudState = evt.getNewState();
 
-        if (crudState == CrudState.READ) {
-            borderlayout.getNorth().setVisible(true);
-        } else {
-            if (leftActions != null && leftActions.getChildren().isEmpty() && rightActions != null && rightActions.getChildren().isEmpty()) {
-                borderlayout.getNorth().setVisible(false);
+        switch (crudState) {
+            case READ -> borderlayout.getNorth().setVisible(true);
+            default -> {
+                if (leftActions != null && rightActions != null) {
+                    if (leftActions.getChildren().isEmpty() && rightActions.getChildren().isEmpty()) {
+                        borderlayout.getNorth().setVisible(false);
+                    }
+                }
             }
         }
     }
@@ -272,7 +299,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
     @SuppressWarnings("rawtypes")
     @Override
     protected CrudViewRenderer getCrudViewRenderer() {
-        return new BootstrapCrudViewRenderer<>();
+        return new BootstrapCrudViewRenderer();
     }
 
 }
