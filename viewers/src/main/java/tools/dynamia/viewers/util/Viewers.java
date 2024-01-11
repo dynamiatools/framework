@@ -110,6 +110,7 @@ public class Viewers {
     public static final String PARAM_MULTI_FUNCTION_PROCESSOR = "multiFunctionProcessor";
     public static final String PARAM_PAGINATION = "pagination";
     public static final String PARAM_MULTIVIEW = "multiview";
+    public static final String PARAM_VISIBLE = "visible";
 
     /**
      * Find view descriptor.
@@ -238,6 +239,7 @@ public class Viewers {
     }
 
     /**
+     *
      */
     public static View getView(ViewDescriptor descriptor, Object value) {
         View view = getView(descriptor);
@@ -253,7 +255,7 @@ public class Viewers {
      * @return the fields
      */
     public static List<Field> getFields(ViewDescriptor viewDescriptor) {
-       return viewDescriptor.sortFields();
+        return viewDescriptor.sortFields();
     }
 
     /**
@@ -335,7 +337,6 @@ public class Viewers {
 
     /**
      * Build a classifer name using {@link ViewDescriptor} type and beanClass simple name or viewDescriptorId
-     *
      */
     public static String buildMessageClasffier(ViewDescriptor viewDescriptor) {
         String classifier = "";

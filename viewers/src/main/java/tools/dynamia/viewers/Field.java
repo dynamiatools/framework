@@ -66,7 +66,7 @@ public class Field implements Serializable, Indexable, Cloneable {
     @JsonIgnore
     private String value;
     private boolean required;
-    private String action;
+    private ActionRef action;
     private String icon;
     private boolean showIconOnly;
 
@@ -579,12 +579,16 @@ public class Field implements Serializable, Indexable, Cloneable {
         }
     }
 
-    public String getAction() {
+    public ActionRef getAction() {
         return action;
     }
 
-    public void setAction(String action) {
+    public void setAction(ActionRef action) {
         this.action = action;
+    }
+
+    public void setAction(String actionId) {
+        this.action = new ActionRef(actionId);
     }
 
     public boolean isReadWrite() {

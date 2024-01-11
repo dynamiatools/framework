@@ -23,12 +23,8 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.sterotypes.Provider;
 import tools.dynamia.io.Resource;
 import tools.dynamia.io.converters.Converters;
-import tools.dynamia.viewers.Field;
-import tools.dynamia.viewers.FieldGroup;
-import tools.dynamia.viewers.ViewDescriptor;
-import tools.dynamia.viewers.ViewDescriptorReader;
-import tools.dynamia.viewers.ViewDescriptorReaderCustomizer;
-import tools.dynamia.viewers.ViewDescriptorReaderException;
+import tools.dynamia.viewers.*;
+import tools.dynamia.viewers.util.Viewers;
 
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -81,6 +77,8 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
     private static final String VD_VIEW = "view";
     private static final String GROUPS = "groups";
     private static final String EQUAL_SYMBOL = "=";
+
+    private static final String VD_ACTIONS = "actions";
 
 
     /**
@@ -200,6 +198,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
         parseGroups(map, descriptor);
         parseSortFields(map, descriptor);
         parseSortGroups(map, descriptor);
+        parseActions(map, descriptor);
         return descriptor;
     }
 
@@ -209,7 +208,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      * @param value the value
      * @return true, if successful
      */
-    private boolean parseBoolean(Object value) {
+    protected boolean parseBoolean(Object value) {
         return Boolean.parseBoolean(value.toString());
     }
 
@@ -236,7 +235,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      * @param descriptor the descriptor
      */
     @SuppressWarnings("unchecked")
-    private void parseSortGroups(Map<?, ?> map, DefaultViewDescriptor descriptor) {
+    protected void parseSortGroups(Map<?, ?> map, DefaultViewDescriptor descriptor) {
         if (get(map, "sortGroups") != null && get(map, "sortGroups") instanceof List) {
             descriptor.sortFieldGroups((List<String>) get(map, "sortGroups"));
         }
@@ -249,7 +248,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      * @param descriptor the descriptor
      */
     @SuppressWarnings("unchecked")
-    private void parseSortFields(Map<?, ?> map, DefaultViewDescriptor descriptor) {
+    protected void parseSortFields(Map<?, ?> map, DefaultViewDescriptor descriptor) {
         if (get(map, SORT_FIELDS) != null && get(map, SORT_FIELDS) instanceof List) {
             descriptor.sortFields((List<String>) map.get(SORT_FIELDS));
         }
@@ -261,7 +260,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      * @param map        the map
      * @param descriptor the descriptor
      */
-    private void parseGroups(Map<?, ?> map, DefaultViewDescriptor descriptor) {
+    protected void parseGroups(Map<?, ?> map, DefaultViewDescriptor descriptor) {
         // GROUPS
         if (map.containsKey(GROUPS) && map.get(GROUPS) instanceof Map<?, ?> groups) {
             for (Object object : groups.entrySet()) {
@@ -308,7 +307,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      * @param map        the map
      * @param descriptor the descriptor
      */
-    private void parseLayout(Map<?, ?> map, DefaultViewDescriptor descriptor) {
+    protected void parseLayout(Map<?, ?> map, DefaultViewDescriptor descriptor) {
         // LAYOUT
         if (map.containsKey(VD_LAYOUT) && map.get(VD_LAYOUT) instanceof Map<?, ?> layout) {
             for (Object object : layout.entrySet()) {
@@ -324,7 +323,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      * @param map        the map
      * @param descriptor the descriptor
      */
-    private void parseParameters(Map<?, ?> map, DefaultViewDescriptor descriptor) {
+    protected void parseParameters(Map<?, ?> map, DefaultViewDescriptor descriptor) {
         // PARAMETERS
         if (map.containsKey(FIELD_PARAMS) && map.get(FIELD_PARAMS) instanceof Map<?, ?> params) {
             for (Object object : params.entrySet()) {
@@ -342,7 +341,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      * @param descriptor the descriptor
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private void parseFields(Map<?, ?> map, DefaultViewDescriptor descriptor) {
+    protected void parseFields(Map<?, ?> map, DefaultViewDescriptor descriptor) {
         // FIELDS
         if (map.containsKey(VD_FIELDS) && map.get(VD_FIELDS) instanceof Map<?, ?> fields) {
             for (Object obj : fields.entrySet()) {
@@ -397,7 +396,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      * @param fieldProps the field props
      * @param field      the field
      */
-    private void parseFieldClassAlias(Map<?, ?> fieldProps, Field field) {
+    protected void parseFieldClassAlias(Map<?, ?> fieldProps, Field field) {
         if (fieldProps != null && fieldProps.get(FIELD_CLASS) != null
                 && fieldProps.get(FIELD_CLASS) instanceof String) {
             try {
@@ -425,7 +424,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      * @param map        the map
      * @param descriptor the descriptor
      */
-    private void parseHiddenFields(Map<?, ?> map, DefaultViewDescriptor descriptor) {
+    protected void parseHiddenFields(Map<?, ?> map, DefaultViewDescriptor descriptor) {
         // HIDDEN FIELDS
         Collection<?> hidden = (Collection<?>) map.get(VD_HIDDEN);
         if (hidden != null) {
@@ -494,7 +493,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      *
      * @param map the map
      */
-    private void parseExpressions(Map map) {
+    protected void parseExpressions(Map map) {
         try {
             for (Object object : map.entrySet()) {
                 Map.Entry entry = (Map.Entry) object;
@@ -524,5 +523,33 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
             value = map.get(key.toLowerCase());
         }
         return value;
+    }
+
+    protected void parseActions(Map<?, ?> map, DefaultViewDescriptor descriptor) {
+        if (map.containsKey(VD_ACTIONS) && map.get(VD_ACTIONS) instanceof Map<?, ?> fields) {
+            for (Object obj : fields.entrySet()) {
+                Entry<String, Map> entry = (Entry<String, Map>) obj;
+                ActionRef action = new ActionRef();
+                action.setId(entry.getKey());
+
+                Map<?, ?> actionsProps = entry.getValue();
+
+                setValue(action, Viewers.PARAM_WIDTH, String.class, actionsProps);
+                setValue(action, Viewers.PARAM_VISIBLE, Boolean.class, actionsProps);
+                setValue(action, Viewers.PARAM_WIDTH, String.class, actionsProps);
+                setValue(action, FIELD_LABEL, String.class, actionsProps);
+                setValue(action, FIELD_DESCRIPTION, String.class, actionsProps);
+                setValue(action, FIELD_ICON, String.class, actionsProps);
+
+                if (actionsProps.containsKey(FIELD_PARAMS) && actionsProps.get(FIELD_PARAMS) instanceof Map<?, ?> actionParams) {
+                    for (Object object : actionParams.entrySet()) {
+                        Entry<?, ?> entry2 = (Entry<?, ?>) object;
+                        Object value = getEntryValue(entry2);
+                        action.addParam(entry2.getKey().toString(), value);
+                    }
+                }
+                descriptor.addAction(action);
+            }
+        }
     }
 }

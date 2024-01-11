@@ -37,6 +37,8 @@ import tools.dynamia.commons.BeanMap;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.commons.PropertyChangeListenerContainer;
+import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.ReflectionException;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.viewers.Field;
@@ -57,6 +59,7 @@ import java.util.Map;
  * @author Mario A. Serrano Leones
  */
 public class TableViewRowRenderer implements ListitemRenderer<Object> {
+    private LoggingService logger = new SLF4JLoggingService(TableViewRowRenderer.class);
     private static final String VIEW_TYPE_NAME = "table";
     public static final String ROW_BINDER_NAME = "rowBinder";
 
@@ -137,25 +140,24 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
 
     private void renderActions(Listitem item, Object data, Binder binder) {
         try {
+
+
+            if (viewDescriptor.getActions() == null || viewDescriptor.getActions().isEmpty()) {
+                return;
+            }
+
             BoostrapButtonActionRenderer defaultRenderer = new BoostrapButtonActionRenderer();
             defaultRenderer.setSmall(true);
 
-            Map actions = (Map) viewDescriptor.getParams().get(Viewers.PARAM_ACTIONS);
-            if (actions == null) {
-                return;
-            }
-            Listcell cell = new Listcell();
-            item.appendChild(cell);
 
-            Hlayout hlayout = new Hlayout();
-            cell.appendChild(hlayout);
             //noinspection unchecked
-            actions.forEach((Object k, Object v) -> {
-                Map actionParams = null;
-                if (v != null && v instanceof Map) {
-                    actionParams = (Map) v;
-                }
-                TableViewRowAction action = Containers.get().findObjects(TableViewRowAction.class, a -> a.getId().equals(k)).stream().findFirst().orElse(null);
+            viewDescriptor.getActions().forEach(actionRef -> {
+                Listcell actionCell = new Listcell();
+                item.appendChild(actionCell);
+
+                TableViewRowAction action = Containers.get().findObjects(TableViewRowAction.class, a -> a.getId().equals(actionRef.getId()))
+                        .stream().findFirst().orElse(null);
+
                 if (action != null) {
                     ActionEvent evt = new ActionEvent(data, item);
                     evt.setSource(tableView.getSource() != null ? tableView.getSource() : item);
@@ -164,17 +166,17 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                     action.onRendered(data, item, actionComp);
 
                     if (action.isEnabled()) {
-                        hlayout.appendChild(actionComp);
+                        actionCell.appendChild(actionComp);
                     }
-                    if (actionParams != null && actionParams.containsKey(Viewers.PARAM_BINDINGS)) {
-                        Map bindingMap = (Map) actionParams.get(Viewers.PARAM_BINDINGS);
+                    if (actionRef.getParams() != null && actionRef.getParams().containsKey(Viewers.PARAM_BINDINGS)) {
+                        Map bindingMap = (Map) actionRef.getParams().get(Viewers.PARAM_BINDINGS);
                         ZKBindingUtil.bindComponent(binder, actionComp, bindingMap, Viewers.BEAN);
                     }
                 }
 
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error rendering table view actions: " + tableView + " - " + viewDescriptor);
         }
     }
 
@@ -263,7 +265,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                 }
 
                 if (field.getAction() != null) {
-                    String actionId = field.getAction();
+                    String actionId = field.getAction().getId();
                     Action action = ActionLoader.findActionById(Action.class, actionId);
                     if (action != null) {
                         if (comp instanceof HtmlBasedComponent hcomp) {

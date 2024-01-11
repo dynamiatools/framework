@@ -214,26 +214,27 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
             frozen.setParent(table);
         }
 
-        if (descriptor.getParams().get(Viewers.PARAM_ACTIONS) != null) {
+        if (descriptor.getActions() != null && !descriptor.getActions().isEmpty()) {
             renderActionsHeader(table, head, descriptor);
         }
 
-
     }
 
-    private void renderActionsHeader(TableView<T> table, Listhead head, ViewDescriptor descriptor) {
-        Listheader header = new Listheader();
-        header.setAlign("center");
-        header.setParent(head);
-        Map actionsHeader = (Map) descriptor.getParams().get("actionsHeader");
-        if (actionsHeader != null) {
-            //noinspection unchecked
-            BeanUtils.setupBean(header, actionsHeader);
-        }
+    protected void renderActionsHeader(TableView<T> table, Listhead head, ViewDescriptor descriptor) {
+        descriptor.getActions().forEach(actionRef -> {
+            Listheader header = new Listheader();
+            header.setAlign("center");
+            header.setParent(head);
+            header.setLabel(actionRef.getLabel());
+            header.setWidth(actionRef.getWidth());
+            if (actionRef.getParams() != null) {
+                BeanUtils.setupBean(header, actionRef.getParams());
+            }
 
+        });
     }
 
-    private void renderFooters(TableView<T> table, ViewDescriptor descriptor) {
+    protected void renderFooters(TableView<T> table, ViewDescriptor descriptor) {
         Listfoot foot = new Listfoot();
 
         boolean footRequired = false;
