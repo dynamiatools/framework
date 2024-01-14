@@ -36,7 +36,7 @@ descriptors for automatic UI generation, actions, services and modules. Powered 
 ```java
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import tools.dynamia.zk.app.EnableDynamiaTools;
+import tools.dynamia.app.EnableDynamiaTools;
 
 @SpringBootApplication
 @EnableDynamiaTools // <- this is all you need

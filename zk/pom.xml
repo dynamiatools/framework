@@ -138,8 +138,15 @@
 
         <dependency>
             <groupId>tools.dynamia</groupId>
-            <artifactId>tools.dynamia.app</artifactId>
+            <artifactId>tools.dynamia.reports</artifactId>
             <version>5.1.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.templates</artifactId>
+            <version>5.1.0</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -201,6 +208,7 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-websocket</artifactId>
         </dependency>
+
     </dependencies>
 
 

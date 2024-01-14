@@ -19,29 +19,18 @@ package tools.dynamia.app;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.http.CacheControl;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.ResourceHttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
-import tools.dynamia.app.template.ChainableUrlBasedViewResolver;
-import tools.dynamia.app.template.TemplateResourceHandler;
-import tools.dynamia.app.template.TemplateViewResolver;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
+import tools.dynamia.web.ChainableUrlBasedViewResolver;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,14 +39,13 @@ import java.util.Map;
  * @author Mario A. Serrano Leones
  */
 @EnableWebMvc
-public abstract class MvcConfiguration implements WebMvcConfigurer {
+public class MvcConfiguration implements WebMvcConfigurer {
 
     private final LoggingService logger = new SLF4JLoggingService(getClass());
 
-
     @Bean
-    public TemplateResourceHandler templateResourceHandler(ApplicationInfo applicationInfo) {
-        var handler = new TemplateResourceHandler(applicationInfo);
+    public ApplicationTemplateResourceHandler templateResourceHandler(ApplicationInfo applicationInfo) {
+        var handler = new ApplicationTemplateResourceHandler(applicationInfo);
         if (applicationInfo.isWebCacheEnabled()) {
             handler.setCacheControl(CacheControl.maxAge(Duration.of(31536000, ChronoUnit.SECONDS)));
         }
@@ -65,10 +53,10 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
-    public SimpleUrlHandlerMapping templateResourcesMapping(TemplateResourceHandler handler) {
+    public SimpleUrlHandlerMapping templateResourcesMapping(ApplicationTemplateResourceHandler handler) {
 
         Map<String, Object> map = new HashMap<>();
-        TemplateResourceHandler.STATIC_PATHS.forEach(pattern -> map.put(pattern, handler));
+        ApplicationTemplateResourceHandler.STATIC_PATHS.forEach(pattern -> map.put(pattern, handler));
         map.put("root/**", handler);
         map.put("css/**", handler);
         map.put("styles/**", handler);
@@ -126,7 +114,7 @@ public abstract class MvcConfiguration implements WebMvcConfigurer {
      */
     @Bean
     public ViewResolver templateViewResolver(ApplicationInfo applicationInfo) {
-        TemplateViewResolver vr = new TemplateViewResolver(applicationInfo);
+        ApplicationTemplateViewResolver vr = new ApplicationTemplateViewResolver(applicationInfo);
         vr.setOrder(getViewResolverOrder(applicationInfo, "templateViewResolverOrder", Ordered.LOWEST_PRECEDENCE));
         vr.setCache(applicationInfo.isWebCacheEnabled());
         return vr;

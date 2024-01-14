@@ -19,7 +19,6 @@ package tools.dynamia.app;
 import tools.dynamia.actions.AbstractAction;
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionLoader;
-import tools.dynamia.app.template.ApplicationGlobalAction;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.PropertiesContainer;
 import tools.dynamia.commons.reflect.PropertyInfo;
@@ -66,7 +65,7 @@ public class ApplicationInfo implements Serializable, PropertiesContainer {
         systemProperties = new HashMap(System.getProperties());
         systemEnvironment = System.getenv();
         properties = new HashMap<>();
-        properties.put(TEMPLATE, "Default");
+        properties.put(TEMPLATE, "Dynamical");
     }
 
 

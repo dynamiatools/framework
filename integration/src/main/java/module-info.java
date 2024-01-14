@@ -9,4 +9,5 @@ open module tools.dynamia.integration {
     exports tools.dynamia.integration.ms;
     exports tools.dynamia.integration.scheduling;
     exports tools.dynamia.integration.sterotypes;
+    exports tools.dynamia.integration.search;
 }

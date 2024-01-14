@@ -58,7 +58,7 @@
                 <n:div class="sb-sidenav-menu">
                     <nodom apply="${navBuilder}">
                         <custom-attributes
-                                builderClass="tools.dynamia.zk.app.bstemplate.BootstrapMenuBuilder"/>
+                                builderClass="tools.dynamia.zk.viewers.BootstrapMenuBuilder"/>
                     </nodom>
                 </n:div>
             </n:nav>

@@ -602,7 +602,7 @@
     </component>
     <component>
         <component-name>skincombobox</component-name>
-        <component-class>tools.dynamia.zk.app.SkinCombobox</component-class>
+        <component-class>tools.dynamia.zk.ui.SkinCombobox</component-class>
         <widget-class>zul.inp.Combobox</widget-class>
         <annotation>
             <annotation-name>default-bind</annotation-name>

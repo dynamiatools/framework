@@ -22,7 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
-import tools.dynamia.app.CurrentTemplate;
+import tools.dynamia.app.SessionApplicationTemplate;
 import tools.dynamia.web.navigation.NavigationIndexInterceptor;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Controller;
@@ -66,13 +66,13 @@ public class CommonController implements PageNavigationInterceptor {
         }
 
         if (skin != null) {
-            CurrentTemplate.get().setSkin(skin);
+            SessionApplicationTemplate.get().setSkin(skin);
             if (updateCookie) {
                 response.addCookie(new Cookie("skin", skin));
             }
         }
 //3054288807
-        var currentSkin = CurrentTemplate.get().getSkin();
+        var currentSkin = SessionApplicationTemplate.get().getSkin();
         if (currentSkin != null && currentSkin.isCustomLayout() && currentSkin.getLayoutView() != null) {
             mv.setViewName(currentSkin.getLayoutView());
         }

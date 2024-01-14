@@ -16,14 +16,58 @@
  */
 package tools.dynamia.app;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
+import tools.dynamia.domain.services.CrudService;
+import tools.dynamia.domain.services.impl.NoOpCrudService;
+import tools.dynamia.integration.ms.MessageService;
+import tools.dynamia.integration.ms.SimpleMessageService;
+import tools.dynamia.integration.search.DefaultSearchService;
+import tools.dynamia.integration.search.NoOpSearchProvider;
+import tools.dynamia.integration.search.SearchResultProvider;
+import tools.dynamia.integration.search.SearchService;
+import tools.dynamia.templates.TemplateEngine;
 
 /**
  * @author Mario A. Serrano Leones
  */
 @ComponentScan(value = {"tools.dynamia", "com.dynamia", "com.dynamiasoluciones"})
 @EnableConfigurationProperties(ApplicationConfigurationProperties.class)
-public abstract class DynamiaAppConfiguration extends MvcConfiguration {
+@Import({RootAppConfiguration.class, MvcConfiguration.class})
+public class DynamiaAppConfiguration {
+
+
+    @Bean
+    @ConditionalOnMissingBean(MessageService.class)
+    public MessageService messageService() {
+        return new SimpleMessageService();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(CrudService.class)
+    public CrudService noOpCrudService() {
+        return new NoOpCrudService();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(TemplateEngine.class)
+    public TemplateEngine defaultTemplateEngine() {
+        return new VelocityTemplateEngine();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(SearchService.class)
+    public SearchService defaultSearchService() {
+        return new DefaultSearchService();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(SearchResultProvider.class)
+    public SearchResultProvider defaultSearchProvider() {
+        return new NoOpSearchProvider();
+    }
 
 }
