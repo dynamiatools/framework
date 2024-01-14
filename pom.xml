@@ -84,6 +84,7 @@
 
         <!-- Web -->
         <zk.version>9.6.0.2-jakarta</zk.version>
+        <dynamia.zk.version>1.0.0</dynamia.zk.version>
 
         <!--Reports -->
         <jasperreports.version>6.21.0</jasperreports.version>

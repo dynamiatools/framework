@@ -45,10 +45,6 @@ public class CoolLabel extends Div implements LoadableOnly {
      */
     private static final long serialVersionUID = 8628833708100482613L;
 
-    static {
-        BindingComponentIndex.getInstance().put("title", CoolLabel.class);
-        ComponentAliasIndex.getInstance().add(CoolLabel.class);
-    }
 
     private final Label titleLabel;
     private final Label subtitleLabel;
