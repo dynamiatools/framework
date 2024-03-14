@@ -55,8 +55,10 @@ public class ConfigView extends FormView<List<Parameter>> implements ActionsCont
     @Override
     public void updateUI() {
         if (getBinder() != null) {
-            for (Parameter parameter : value) {
-                ZKBindingUtil.bindBean(this, parameter.getName(), parameter);
+            if (value != null) {
+                for (Parameter parameter : value) {
+                    ZKBindingUtil.bindBean(this, parameter.getName(), parameter);
+                }
             }
 
             getBinder().loadComponent(this, false);

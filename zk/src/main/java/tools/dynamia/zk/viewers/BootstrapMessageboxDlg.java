@@ -53,13 +53,12 @@ public class BootstrapMessageboxDlg extends MessageboxDlg {
     }
 
     private String getType(org.zkoss.zul.Messagebox.Button button) {
-        String type = "btn-default";
+        String type;
 
         switch (button) {
             case OK, YES -> type = "btn-primary";
             case CANCEL, NO -> type = "btn-danger";
-            default -> {
-            }
+            default -> type = "btn-default";
         }
 
         return type;

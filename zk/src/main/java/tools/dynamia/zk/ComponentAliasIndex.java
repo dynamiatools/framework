@@ -59,9 +59,7 @@ public class ComponentAliasIndex extends HashMap<String, Class<? extends Compone
         getInstance().add(Radiogroup.class);
         getInstance().add(Timebox.class);
         getInstance().add(Audio.class);
-        getInstance().add(Applet.class);
         getInstance().add(Area.class);
-        getInstance().add(Flash.class);
         getInstance().add(Chart.class);
         getInstance().add(Captcha.class);
         getInstance().add(Doublebox.class);

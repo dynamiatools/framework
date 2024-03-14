@@ -54,8 +54,7 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
 
     public TabPanel() {
         tabbox = new Tabbox();
-        tabbox.setHeight("100%");
-        tabbox.setWidth("100%");
+        tabbox.setVflex("1");
 
         new Tabs().setParent(tabbox);
         new Tabpanels().setParent(tabbox);
