@@ -43,6 +43,8 @@ public class ApplicationUserInfo implements Serializable {
     private Date date;
     private String profilePath;
     private String location;
+    private boolean logged;
+
 
     public Date getDate() {
         return date;
@@ -117,5 +119,17 @@ public class ApplicationUserInfo implements Serializable {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public boolean isLogged() {
+        return logged;
+    }
+
+    public void setLogged(boolean logged) {
+        this.logged = logged;
+    }
+
+    public boolean isEnabled() {
+        return username != null;
     }
 }

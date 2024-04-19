@@ -17,6 +17,8 @@
 
 package tools.dynamia.zk.ui;
 
+import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.ui.icons.AbstractFontIconsProvider;
 import tools.dynamia.ui.icons.Icon;
 import tools.dynamia.ui.icons.IconException;
@@ -28,16 +30,19 @@ import java.util.Properties;
 @InstallIcons
 public class FontAwesomeIconsProvider extends AbstractFontIconsProvider {
 
+    private static final LoggingService logger = new SLF4JLoggingService(FontAwesomeIconsProvider.class);
+
 
     @Override
     public Properties getNamesMapping() {
+        Properties properties = new Properties();
         try {
-            Properties properties = new Properties();
-            properties.load(getClass().getResourceAsStream(getIconsPath()));
-            return properties;
-        } catch (IOException e) {
-            throw new IconException("Unable to load icons", e);
+            properties.load(FontAwesomeIconsProvider.class.getResourceAsStream(getIconsPath()));
+        } catch (IOException | NullPointerException e) {
+            logger.error("Unable to load icons from file "+getIconsPath(), e);
         }
+
+        return properties;
     }
 
     protected String getIconsPath() {
@@ -53,7 +58,7 @@ public class FontAwesomeIconsProvider extends AbstractFontIconsProvider {
                 String internalName = name.substring(getIconsPrefix().length());
                 icon = newIcon(name, internalName);
                 addIcon(name, icon);
-            } else if (name.startsWith("fa ") || name.startsWith("fab ")){
+            } else if (name.startsWith("fa ") || name.startsWith("fab ")) {
                 icon = new FAIcon(name, name);
                 addIcon(name, icon);
             }

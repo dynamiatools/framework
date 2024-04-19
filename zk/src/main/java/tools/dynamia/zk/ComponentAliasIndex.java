@@ -89,6 +89,7 @@ public class ComponentAliasIndex extends HashMap<String, Class<? extends Compone
         getInstance().add("simplecombobox", SimpleCombobox.class);
 
 
+
         LoggingService logger = new SLF4JLoggingService(ComponentAliasIndex.class);
         try {
 
