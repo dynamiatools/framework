@@ -14,25 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tools.dynamia.app;
-
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.SessionScope;
-import tools.dynamia.integration.Containers;
+package tools.dynamia.commons;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * @author Mario Serrano Leones
+/***
+ * Helper class to store user information
  */
-@Component("userInfo")
-@SessionScope
-public class ApplicationUserInfo implements Serializable {
-
-    public static ApplicationUserInfo get() {
-        return Containers.get().findObject(ApplicationUserInfo.class);
-    }
+public class UserInfo implements Serializable {
 
     private String username;
     private String fullName;
@@ -44,6 +37,7 @@ public class ApplicationUserInfo implements Serializable {
     private String profilePath;
     private String location;
     private boolean logged;
+    private final Map<String,Object> attributes = new ConcurrentHashMap<>();
 
 
     public Date getDate() {
@@ -131,5 +125,17 @@ public class ApplicationUserInfo implements Serializable {
 
     public boolean isEnabled() {
         return username != null;
+    }
+
+    public void addAttribute(String name, Object value){
+        attributes.put(name,value);
+    }
+
+    public Object getAttribute(String name){
+        return attributes.get(name);
+    }
+
+    public Set<String> getAttributesKeys() {
+        return attributes.keySet();
     }
 }

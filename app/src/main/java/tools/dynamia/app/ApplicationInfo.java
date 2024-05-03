@@ -19,6 +19,7 @@ package tools.dynamia.app;
 import tools.dynamia.actions.AbstractAction;
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionLoader;
+import tools.dynamia.actions.ApplicationGlobalAction;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.PropertiesContainer;
 import tools.dynamia.commons.reflect.PropertyInfo;

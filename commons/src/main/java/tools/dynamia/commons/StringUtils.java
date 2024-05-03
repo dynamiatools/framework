@@ -1481,4 +1481,18 @@ public abstract class StringUtils {
     public static String getSystemPropertyOrEnv(String name) {
         return getSystemPropertyOrEnv(name, null);
     }
+
+    /**
+     * Truncate string to max lenght
+     * @param text
+     * @param maxlength
+     * @return
+     */
+    public static String truncate(String text, int maxlength) {
+        if (text != null && !text.isBlank() && text.length() > maxlength) {
+            return text.substring(0, maxlength);
+        } else {
+            return text;
+        }
+    }
 }

@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 
-package tools.dynamia.app;
-
-import tools.dynamia.actions.AbstractAction;
+package tools.dynamia.actions;
 
 public abstract class ApplicationGlobalAction extends AbstractAction {
 

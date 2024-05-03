@@ -5,8 +5,13 @@ public class DefaultApplicationTemplateHolder implements ApplicationTemplateHold
     private final ApplicationTemplateSkin skin;
 
     public DefaultApplicationTemplateHolder(ApplicationTemplate template, ApplicationTemplateSkin skin) {
-        this.template= template;
+        this.template = template;
         this.skin = skin;
+    }
+
+    @Override
+    public String getLogoURL() {
+        return null;
     }
 
     @Override
@@ -18,4 +23,6 @@ public class DefaultApplicationTemplateHolder implements ApplicationTemplateHold
     public ApplicationTemplateSkin getSkin() {
         return skin;
     }
+
+
 }

@@ -22,9 +22,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
+import org.springframework.web.context.annotation.SessionScope;
 import tools.dynamia.commons.LocaleProvider;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.SystemLocaleProvider;
+import tools.dynamia.commons.UserInfo;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.domain.services.ValidatorService;
@@ -133,6 +135,13 @@ public class RootAppConfiguration {
     @Primary
     public LocaleProvider systemLocaleProvider() {
         return new SystemLocaleProvider();
+    }
+
+    @Bean("userInfo")
+    @SessionScope
+    @ConditionalOnMissingBean(UserInfo.class)
+    public UserInfo userInfo() {
+        return new UserInfo();
     }
 
 }

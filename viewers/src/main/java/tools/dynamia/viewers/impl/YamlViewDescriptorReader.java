@@ -529,26 +529,27 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
         if (map.containsKey(VD_ACTIONS) && map.get(VD_ACTIONS) instanceof Map<?, ?> fields) {
             for (Object obj : fields.entrySet()) {
                 Entry<String, Map> entry = (Entry<String, Map>) obj;
-                ActionRef action = new ActionRef();
-                action.setId(entry.getKey());
-
                 Map<?, ?> actionsProps = entry.getValue();
 
-                setValue(action, Viewers.PARAM_WIDTH, String.class, actionsProps);
-                setValue(action, Viewers.PARAM_VISIBLE, Boolean.class, actionsProps);
-                setValue(action, Viewers.PARAM_WIDTH, String.class, actionsProps);
-                setValue(action, FIELD_LABEL, String.class, actionsProps);
-                setValue(action, FIELD_DESCRIPTION, String.class, actionsProps);
-                setValue(action, FIELD_ICON, String.class, actionsProps);
+                if (actionsProps != null) {
+                    ActionRef action = new ActionRef();
+                    action.setId(entry.getKey());
+                    setValue(action, Viewers.PARAM_WIDTH, String.class, actionsProps);
+                    setValue(action, Viewers.PARAM_VISIBLE, Boolean.class, actionsProps);
+                    setValue(action, Viewers.PARAM_WIDTH, String.class, actionsProps);
+                    setValue(action, FIELD_LABEL, String.class, actionsProps);
+                    setValue(action, FIELD_DESCRIPTION, String.class, actionsProps);
+                    setValue(action, FIELD_ICON, String.class, actionsProps);
 
-                if (actionsProps.containsKey(FIELD_PARAMS) && actionsProps.get(FIELD_PARAMS) instanceof Map<?, ?> actionParams) {
-                    for (Object object : actionParams.entrySet()) {
-                        Entry<?, ?> entry2 = (Entry<?, ?>) object;
-                        Object value = getEntryValue(entry2);
-                        action.addParam(entry2.getKey().toString(), value);
+                    if (actionsProps.containsKey(FIELD_PARAMS) && actionsProps.get(FIELD_PARAMS) instanceof Map<?, ?> actionParams) {
+                        for (Object object : actionParams.entrySet()) {
+                            Entry<?, ?> entry2 = (Entry<?, ?>) object;
+                            Object value = getEntryValue(entry2);
+                            action.addParam(entry2.getKey().toString(), value);
+                        }
                     }
+                    descriptor.addAction(action);
                 }
-                descriptor.addAction(action);
             }
         }
     }

@@ -64,6 +64,8 @@ public class SessionApplicationTemplate implements ApplicationTemplateHolder, Se
         }
     }
 
+
+    @Override
     public String getLogoURL() {
         if (logoURL == null) {
             loadDefaultLogo();
@@ -126,4 +128,6 @@ public class SessionApplicationTemplate implements ApplicationTemplateHolder, Se
     public void setIconURL(String iconURL) {
         this.iconURL = iconURL;
     }
+
+
 }
