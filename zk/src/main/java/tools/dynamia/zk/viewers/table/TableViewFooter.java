@@ -103,7 +103,11 @@ public class TableViewFooter extends Listfooter implements FunctionProvider {
 
     public void clear() {
         this.value = null;
-        getChildren().clear();
+        try {
+            getChildren().clear();
+        } catch (Exception e) {
+            //ignore
+        }
     }
 
     @Override
