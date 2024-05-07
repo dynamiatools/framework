@@ -79,7 +79,7 @@
 
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
-        <springboot.version>3.2.4</springboot.version>
+        <springboot.version>3.2.5</springboot.version>
         <mongodb.version>1</mongodb.version>
 
         <!-- Web -->
@@ -90,10 +90,10 @@
         <jasperreports.version>6.21.0</jasperreports.version>
         <poi.version>5.2.5</poi.version>
         <snakeyaml.version>2.2</snakeyaml.version>
-        <zxing.version>3.5.2</zxing.version>
+        <zxing.version>3.5.3</zxing.version>
 
         <!--Logging -->
-        <slf4j.version>2.0.12</slf4j.version>
+        <slf4j.version>2.0.13</slf4j.version>
 
 
         <java.version>17</java.version>
