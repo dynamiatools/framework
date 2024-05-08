@@ -21,10 +21,9 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zul.Grid;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Textbox;
+import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.commons.BeanUtils;
-import tools.dynamia.domain.query.ApplicationParameters;
 import tools.dynamia.domain.query.Parameter;
-import tools.dynamia.domain.query.Parameters;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.View;
@@ -55,10 +54,7 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
 
     protected ConfigView newConfigView() {
         ConfigView formView = new ConfigView();
-        Grid grid = new Grid();
-        grid.setOddRowSclass("none");
-        grid.setParent(formView);
-        grid.setStyle("border: 0");
+
         return formView;
     }
 
@@ -66,22 +62,25 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
     public View<List<Parameter>> render(ViewDescriptor descriptor, List<Parameter> value) {
         value = loadConfigValue(descriptor);
         ConfigView view = newConfigView();
+
         view.setValueSupplier(() -> loadConfigValue(descriptor));
         delegateRender(view, descriptor, value);
         createBindings(view, descriptor, value);
+        view.setAutosaveBindings(true);
+        view.setActionEventBuilder((source, params) -> new ActionEvent(view.getValue(), view));
+        view.setValue(value);
         view.updateUI();
         return view;
     }
 
     private List<Parameter> loadConfigValue(ViewDescriptor descriptor) {
-        List<Parameter> value;
-        value = new ArrayList<>();
+        List<Parameter> value = new ArrayList<>();
         descriptor.addParam(Viewers.PARAM_IGNORE_BINDINGS, true);
-        List<String> paramNames = new ArrayList<>();
+
 
         for (Field field : descriptor.getFields()) {
             if (field.isVisible()) {
-                paramNames.add(getParamName(field));
+                loadParam(field, value);
 
                 if (field.getComponent() == null || field.getComponent().equals("label")) {
                     field.setComponent("textbox");
@@ -92,13 +91,7 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
                 }
             }
         }
-        try {
-            Parameters params = ApplicationParameters.get();
-            Class<? extends Parameter> parameterClass = getParameterClass(descriptor);
-            value.addAll(params.getParameters(parameterClass, paramNames));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
         return value;
     }
 
@@ -116,23 +109,26 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
     }
 
     protected void createBinding(Component comp, Field field, Binder binder, ConfigView view, List<Parameter> value) {
-        Parameter param = find(field, value);
+        String name = getParamName(field);
+        Parameter param = value.stream().filter(p -> p.getName().equals(name)).findFirst().orElse(null);
 
-        String attr = BindingComponentIndex.getInstance().getAttribute(comp.getClass());
-        if (field.getParams().get(Viewers.PARAM_BINDING_ATTRIBUTE) instanceof String) {
-            attr = field.getParams().get(Viewers.PARAM_BINDING_ATTRIBUTE).toString();
-        }
+        if (param != null) {
+            String attr = BindingComponentIndex.getInstance().getAttribute(comp.getClass());
+            if (field.getParams().get(Viewers.PARAM_BINDING_ATTRIBUTE) instanceof String) {
+                attr = field.getParams().get(Viewers.PARAM_BINDING_ATTRIBUTE).toString();
+            }
 
-        String typeConverter = null;
-        if (field.getParams() != null) {
-            typeConverter = (String) field.getParams().get(Viewers.PARAM_CONVERTER);
-            typeConverter = Util.checkConverterClass(typeConverter);
-        }
+            String typeConverter = null;
+            if (field.getParams() != null) {
+                typeConverter = (String) field.getParams().get(Viewers.PARAM_CONVERTER);
+                typeConverter = Util.checkConverterClass(typeConverter);
+            }
 
-        if (attr != null && !attr.isEmpty()) {
-            String expression = param.getName() + ".value";
-            ZKBindingUtil.bindComponent(binder, comp, attr, expression, typeConverter);
+            if (attr != null && !attr.isEmpty()) {
+                String expression = param.getName() + ".value";
+                ZKBindingUtil.bindComponent(binder, comp, attr, expression, typeConverter);
 
+            }
         }
     }
 
@@ -145,9 +141,10 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
         return paramName;
     }
 
-    private Parameter find(Field field, List<Parameter> params) {
+    private Parameter loadParam(Field field, List<Parameter> params) {
         Class<? extends Parameter> parameterClass = getParameterClass(field.getViewDescriptor());
         String name = getParamName(field);
+
         Parameter par = BeanUtils.newInstance(parameterClass);
         par.setName(name);
         par.setValue(field.getParams().get(PARAM_DEFAULT_VALUE) != null ? field.getParams().get(PARAM_DEFAULT_VALUE).toString() : "");

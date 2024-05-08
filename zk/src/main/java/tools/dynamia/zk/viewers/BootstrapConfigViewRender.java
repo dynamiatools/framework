@@ -35,7 +35,6 @@ public class BootstrapConfigViewRender extends ConfigViewRender {
     @Override
     protected ConfigView newConfigView() {
         ConfigView formView = new ConfigView();
-        formView.setZclass("content");
         return formView;
     }
 

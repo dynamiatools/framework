@@ -72,10 +72,4 @@ public class DynamiaAppConfiguration {
         return new NoOpSearchProvider();
     }
 
-    @Bean
-    @ConditionalOnMissingBean(ReportCompiler.class)
-    public ReportCompiler defaultReportCompiler() {
-        return new JasperReportCompiler();
-    }
-
 }

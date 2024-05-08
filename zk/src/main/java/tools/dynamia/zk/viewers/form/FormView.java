@@ -35,6 +35,7 @@ import org.zkoss.zul.South;
 import org.zkoss.zul.impl.LabelElement;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionEventBuilder;
+import tools.dynamia.actions.ActionsContainer;
 import tools.dynamia.commons.Callback;
 import tools.dynamia.commons.PropertyChangeEvent;
 import tools.dynamia.commons.PropertyChangeListener;
@@ -51,11 +52,7 @@ import tools.dynamia.zk.ui.CanBeReadonly;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -63,7 +60,7 @@ import java.util.function.Supplier;
  * @author Mario A. Serrano Leones
  */
 @SuppressWarnings("rawtypes")
-public class FormView<T> extends Div implements View<T>, PropertyChangeListener, CanBeReadonly, IdSpace {
+public class FormView<T> extends Div implements View<T>, PropertyChangeListener, CanBeReadonly, IdSpace, ActionsContainer {
 
     static {
         BindingComponentIndex.getInstance().put("value", FormView.class);
@@ -186,7 +183,7 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
 
     @Override
     public void setValue(T value) {
-        if(value instanceof Collection){
+        if (value instanceof Collection) {
             //ignore
             return;
         }
@@ -406,6 +403,7 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
      *
      * @param action
      */
+    @Override
     public void addAction(Action action) {
         if (customView == null || customView.isBlank()) {
             initActionsArea();
@@ -413,14 +411,30 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
         }
     }
 
+    @Override
+    public List<Action> getActions() {
+        if (actionPanel != null) {
+            return actionPanel.getActions();
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
     private void initActionsArea() {
         if (actionsArea == null) {
-            var south = new South();
-            south.setSclass("form-view-actions");
-            actionsArea = south;
-            layout.appendChild(actionsArea);
             actionPanel = new ActionPanel(getActionEventBuilder());
-            actionsArea.appendChild(actionPanel);
+            if(layout instanceof Borderlayout) {
+                var south = new South();
+                south.setSclass("form-view-actions");
+                actionsArea = south;
+                layout.appendChild(actionsArea);
+                actionsArea.appendChild(actionPanel);
+            }else{
+                actionsArea = actionPanel;
+                actionsArea.appendChild(this);
+            }
+
+
         }
     }
 
