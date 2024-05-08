@@ -22,6 +22,7 @@ import org.zkoss.zul.ListModelList;
 import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.StringUtils;
+import tools.dynamia.commons.reflect.ReflectionException;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
@@ -57,23 +58,37 @@ public class ProviderPickerBox extends Combobox {
 
         setItemRenderer((item, data, index) -> {
 
+            String id, name, icon;
+
             try {
-                String id = BeanUtils.invokeGetMethod(data, idField).toString();
-                Object name = BeanUtils.invokeGetMethod(data, nameField);
-                Object icon = BeanUtils.invokeGetMethod(data, iconField);
-
-                if (name == null) {
-                    name = id;
-                }
-
-                item.setLabel(StringUtils.capitalize(name.toString()));
-                item.setValue(id);
-                if (icon != null) {
-                    item.setIconSclass(icon.toString());
-                }
-            } catch (Exception e) {
-                throw new UiException("Error rendering item for " + this, e);
+                id = BeanUtils.invokeGetMethod(data, idField).toString();
+            } catch (ReflectionException | NullPointerException e) {
+                throw new UiException("Error loading ID field for " + data, e);
             }
+
+            try {
+                name = BeanUtils.invokeGetMethod(data, nameField).toString();
+            } catch (ReflectionException | NullPointerException e) {
+                name = id;
+            }
+
+            try {
+                icon = BeanUtils.invokeGetMethod(data, iconField).toString();
+            } catch (ReflectionException | NullPointerException e) {
+                icon = null;
+            }
+
+
+            if (name == null) {
+                name = id;
+            }
+
+            item.setLabel(StringUtils.capitalize(name));
+            item.setValue(id);
+            if (icon != null) {
+                item.setIconSclass(icon);
+            }
+
         });
     }
 

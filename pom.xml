@@ -24,7 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>tools.dynamia</groupId>
     <artifactId>tools.dynamia.parent</artifactId>
-    <version>5.1.0</version>
+    <version>5.1.1</version>
     <packaging>pom</packaging>
     <organization>
         <name>Dynamia Soluciones IT SAS</name>
@@ -98,7 +98,7 @@
 
         <java.version>17</java.version>
         <target.version>17</target.version>
-        <maven.compiler>3.12.1</maven.compiler>
+        <maven.compiler>3.13.0</maven.compiler>
         <source.encoding>UTF-8</source.encoding>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -114,6 +114,7 @@
                     <source>${java.version}</source>
                     <target>${target.version}</target>
                     <encoding>${source.encoding}</encoding>
+                    <parameters>true</parameters>
                 </configuration>
             </plugin>
             <plugin>

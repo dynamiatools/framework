@@ -21,13 +21,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>tools.dynamia.domain</artifactId>
-    <version>5.1.0</version>
+    <version>5.1.1</version>
     <packaging>jar</packaging>
 
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.1.0</version>
+        <version>5.1.1</version>
     </parent>
     <name>DynamiaTools - Domain</name>
     <url>https://dynamia.tools/docs/domain</url>
@@ -53,7 +53,8 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${target.version}</target>
-                    <encoding>${source.encoding}</encoding>
+                     <encoding>${source.encoding}</encoding>
+                    <parameters>true</parameters>
                 </configuration>
             </plugin>
         </plugins>
