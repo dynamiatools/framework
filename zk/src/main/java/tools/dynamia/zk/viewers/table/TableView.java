@@ -396,27 +396,31 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
      * Update all footer with functions
      */
     public void computeFooters() {
-        if (footersWithFunctions != null) {
-            footersWithFunctions.forEach(TableViewFooter::clear);
+        try {
+            if (footersWithFunctions != null) {
+                footersWithFunctions.forEach(TableViewFooter::clear);
 
-            if (value != null) {
-                if (multiFunctionProcesor != null) {
-                    var result = multiFunctionProcesor.compute(value, new HashMap<>(), footersWithFunctions);
-                    result.forEach((f, v) -> footersWithFunctions.stream()
-                            .filter(ft -> ft.equals(f)).findFirst()
-                            .ifPresent(tableViewFooter -> tableViewFooter.setValue(v)));
-                } else {
-                    footersWithFunctions.forEach(footer -> {
-                        if (value instanceof Collection) {
-                            if (!((Collection) value).isEmpty()) {
-                                Map args = MapBuilder.put("property", footer.getField().getName());
-                                Object result = Functions.compute(footer.getFunction(), value, args);
-                                footer.setValue(result);
+                if (value != null) {
+                    if (multiFunctionProcesor != null) {
+                        var result = multiFunctionProcesor.compute(value, new HashMap<>(), footersWithFunctions);
+                        result.forEach((f, v) -> footersWithFunctions.stream()
+                                .filter(ft -> ft.equals(f)).findFirst()
+                                .ifPresent(tableViewFooter -> tableViewFooter.setValue(v)));
+                    } else {
+                        footersWithFunctions.forEach(footer -> {
+                            if (value instanceof Collection) {
+                                if (!((Collection) value).isEmpty()) {
+                                    Map args = MapBuilder.put("property", footer.getField().getName());
+                                    Object result = Functions.compute(footer.getFunction(), value, args);
+                                    footer.setValue(result);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
             }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 

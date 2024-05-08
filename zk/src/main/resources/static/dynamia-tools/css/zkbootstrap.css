@@ -133,7 +133,7 @@
 }
 
 .form-zcontrol .z-spinner-icon .z-spinner-down,
-.form-zcontrol .z-spinner-icon .z-spinner-up{
+.form-zcontrol .z-spinner-icon .z-spinner-up {
     height: 16px !important;
     line-height: normal !important;
 }
@@ -389,7 +389,6 @@
 }
 
 
-
 @media (max-width: 767px) {
     .hidden-xs {
         display: none !important;
@@ -416,4 +415,12 @@
 
 .noscroll {
     overflow: hidden;
+}
+
+.pull-right {
+    float: right;
+}
+
+.pull-left {
+    float: left;
 }

@@ -21,6 +21,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
+import tools.dynamia.app.reports.JasperReportCompiler;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.services.impl.NoOpCrudService;
 import tools.dynamia.integration.ms.MessageService;
@@ -29,6 +30,7 @@ import tools.dynamia.integration.search.DefaultSearchService;
 import tools.dynamia.integration.search.NoOpSearchProvider;
 import tools.dynamia.integration.search.SearchResultProvider;
 import tools.dynamia.integration.search.SearchService;
+import tools.dynamia.reports.ReportCompiler;
 import tools.dynamia.templates.TemplateEngine;
 
 /**
@@ -68,6 +70,12 @@ public class DynamiaAppConfiguration {
     @ConditionalOnMissingBean(SearchResultProvider.class)
     public SearchResultProvider defaultSearchProvider() {
         return new NoOpSearchProvider();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ReportCompiler.class)
+    public ReportCompiler defaultReportCompiler() {
+        return new JasperReportCompiler();
     }
 
 }
