@@ -42,6 +42,7 @@ public class ConfigView extends FormView<List<Parameter>> {
 
     public ConfigView() {
         setAutoheight(true);
+        setAutosaveBindings(false);
     }
 
     @Override
@@ -62,4 +63,9 @@ public class ConfigView extends FormView<List<Parameter>> {
         this.value = value;
     }
 
+    @Override
+    protected void saveBindings() {
+        super.saveBindings();
+
+    }
 }
