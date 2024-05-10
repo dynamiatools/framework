@@ -7,6 +7,7 @@ open module tools.dynamia.domain {
     requires java.sql;
     requires spring.jdbc;
     requires java.net.http;
+    requires spring.tx;
     exports tools.dynamia.domain;
     exports tools.dynamia.domain.query;
     exports tools.dynamia.domain.util;
