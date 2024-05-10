@@ -36,6 +36,7 @@ public class TableViewFooter extends Listfooter implements FunctionProvider {
     private String functionConverter;
     private String function;
     private Object value;
+    private Label valueLabel;
 
     public TableViewFooter() {
     }
@@ -64,18 +65,19 @@ public class TableViewFooter extends Listfooter implements FunctionProvider {
     }
 
     public void setValue(Object value) {
-        clear();
         this.value = value;
         if (value != null) {
-            Label footerValue = new Label();
+            if (valueLabel == null) {
+                valueLabel = new Label();
+                appendChild(valueLabel);
+            }
             String resultText = Converters.convert(value);
             if (functionConverter != null) {
                 Converter converter = BeanUtils.newInstance(functionConverter);
                 //noinspection unchecked
-                resultText = (String) converter.coerceToUi(value, footerValue, null);
+                resultText = (String) converter.coerceToUi(value, valueLabel, null);
             }
-            footerValue.setValue(resultText);
-            appendChild(footerValue);
+            valueLabel.setValue(resultText);
         }
     }
 
@@ -102,10 +104,8 @@ public class TableViewFooter extends Listfooter implements FunctionProvider {
 
     public void clear() {
         this.value = null;
-        try {
-            getChildren().clear();
-        }catch (Exception e){
-            //ignore
+        if (valueLabel != null) {
+            valueLabel.setValue("");
         }
     }
 
