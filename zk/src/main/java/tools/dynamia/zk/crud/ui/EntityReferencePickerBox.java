@@ -224,9 +224,11 @@ public class EntityReferencePickerBox extends Bandbox implements CanBeReadonly {
     }
 
     private void initRepository() {
-        this.repository = DomainUtils.getEntityReferenceRepository(entityClassName);
+        if (entityClassName != null && !entityClassName.isBlank()) {
+            this.repository = DomainUtils.getEntityReferenceRepository(entityClassName);
+        }
 
-        if (repository == null) {
+        if (repository == null && entityAlias != null && !entityAlias.isBlank()) {
             repository = DomainUtils.getEntityReferenceRepositoryByAlias(entityAlias);
         }
 
