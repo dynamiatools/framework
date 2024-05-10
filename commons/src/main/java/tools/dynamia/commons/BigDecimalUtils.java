@@ -118,22 +118,32 @@ public class BigDecimalUtils {
     /**
      * Checks if is negative.
      *
-     * @param a the a
+     * @param value the value
      * @return true, if is negative
      */
-    public static boolean isNegative(BigDecimal a) {
-        return lt(a, BigDecimal.ZERO);
+    public static boolean isNegative(BigDecimal value) {
+        return lt(value, BigDecimal.ZERO);
     }
 
     /**
      * Checks if is positive.
      *
-     * @param a the a
+     * @param value the value
      * @return true, if is positive
      */
-    public static boolean isPositive(BigDecimal a) {
+    public static boolean isPositive(BigDecimal value) {
 
-        return gt(a, BigDecimal.ZERO);
+        return gt(value, BigDecimal.ZERO);
+    }
+
+    /**
+     * Check if value is zero
+     *
+     * @param value
+     * @return
+     */
+    public static boolean isZero(BigDecimal value) {
+        return BigDecimal.ZERO.equals(value);
     }
 
     /**
@@ -176,7 +186,6 @@ public class BigDecimalUtils {
     /**
      * Compute the percent and add to value, percent value should be in percent
      * form. Example 10 for 10%, NOT 0.1
-     *
      */
     public static BigDecimal addPercent(BigDecimal value, double percent) {
         return value.add(computePercent(value, percent, false));
@@ -187,7 +196,6 @@ public class BigDecimalUtils {
      * for 10%, NOT 0.1. Included equals true means that percent value should be
      * substracted from value. Include = true: value - (value / (1 + percent /
      * 100) ) Include = false value * (p / 100)
-     *
      */
     public static BigDecimal computePercent(BigDecimal value, double percent, boolean included) {
         BigDecimal p100 = BigDecimal.valueOf(percent).divide(BigDecimal.valueOf(100), MathContext.DECIMAL64);
@@ -204,7 +212,6 @@ public class BigDecimalUtils {
      * Financial function that returns the interest rate per period of an annuity. You can use RATE to calculate
      * the periodic interest rate, then multiply as required to derive the annual interest rate.
      * The RATE function calculates by iteration.
-     *
      */
     public static double rate(long numberPeriods, BigDecimal paymentByPeriod, BigDecimal total) {
         return rate((double) numberPeriods, paymentByPeriod.doubleValue(), total.doubleValue());
@@ -214,7 +221,6 @@ public class BigDecimalUtils {
      * Financial function that returns the interest rate per period of an annuity. You can use RATE to calculate
      * the periodic interest rate, then multiply as required to derive the annual interest rate.
      * The RATE function calculates by iteration.
-     *
      */
     public static double rate(double numberPeriods, double paymentByPeriod, double totalValue) {
 
