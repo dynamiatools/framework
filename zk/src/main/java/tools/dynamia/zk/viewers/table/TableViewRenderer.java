@@ -92,7 +92,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
         return table;
     }
 
-    private void renderEnumStyles(TableView<T> table, ViewDescriptor descriptor) {
+    protected void renderEnumStyles(TableView<T> table, ViewDescriptor descriptor) {
 
         if (descriptor.getParams().containsKey(Viewers.PARAM_ENUM_COLORS)) {
             try {
@@ -116,7 +116,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
 
     }
 
-    private void renderGroups(TableView<T> table, ViewDescriptor descriptor) {
+    protected void renderGroups(TableView<T> table, ViewDescriptor descriptor) {
         if (descriptor.getFieldGroups() != null && !descriptor.getFieldGroups().isEmpty()) {
 
             Auxhead auxhead = new Auxhead();
@@ -135,7 +135,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
         }
     }
 
-    private void renderHeaders(TableView<T> table, ViewDescriptor descriptor) {
+    protected void renderHeaders(TableView<T> table, ViewDescriptor descriptor) {
         Listhead head = new Listhead();
 
         // head.setSizable(true);
@@ -289,7 +289,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
         setupFootersFunctions(table, footersWithFunctions);
     }
 
-    private void setupFootersFunctions(TableView<T> table, List<TableViewFooter> footersWithFunctions) {
+    protected void setupFootersFunctions(TableView<T> table, List<TableViewFooter> footersWithFunctions) {
         if (footersWithFunctions != null && !footersWithFunctions.isEmpty()) {
             table.setFootersWithFunctions(footersWithFunctions);
 
