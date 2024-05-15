@@ -45,6 +45,7 @@ import tools.dynamia.viewers.util.ComponentCustomizerUtil;
 import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
+import tools.dynamia.zk.converters.Util;
 import tools.dynamia.zk.ui.Import;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
@@ -344,7 +345,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
         Object bmapObject = field.getParam(Viewers.PARAM_BINDINGS);
         if (bmapObject != null && bmapObject instanceof Map bindingMap) {
-            ZKBindingUtil.bindComponent(binder, comp, bindingMap,Viewers.BEAN);
+            ZKBindingUtil.bindComponent(binder, comp, bindingMap, Viewers.BEAN);
         } else {
             String attr = BindingComponentIndex.getInstance().getAttribute(comp.getClass());
             if (field.getParam(Viewers.PARAM_BINDING_ATTRIBUTE) instanceof String) {
@@ -354,6 +355,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
             String converterExpression = null;
 
             converterExpression = (String) field.getParam(Viewers.PARAM_CONVERTER);
+            converterExpression = Util.checkConverterClass(converterExpression);
 
             if (attr != null && !attr.isEmpty()) {
                 String bindName = (String) field.getParam(Viewers.PARAM_BIND);
@@ -461,7 +463,6 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
     /**
      * Return only visible and renderable fields
-     *
      */
     protected List<Field> getGroupFields(ViewDescriptor descriptor, FieldGroup group) {
         ViewRendererCustomizer customizer = ViewRendererUtil.findViewRendererCustomizer(descriptor);

@@ -29,11 +29,15 @@ import tools.dynamia.ui.icons.IconType;
 public class IconboxItemRenderer implements ComboitemRenderer<Icon> {
 
     @Override
-    public void render(Comboitem item, Icon t, int i) {
-        item.setValue(t.getName());
-        if (t.getType() == IconType.IMAGE) {
-            item.setImage(t.getRealPath(IconSize.SMALL));
+    public void render(Comboitem item, Icon icon, int i) {
+        String  iconPath = icon.getRealPath(IconSize.SMALL);
+        item.setLabel(icon.getName());
+        item.setValue(icon.getName());
+        if (icon.getType() == IconType.IMAGE) {
+            item.setImage(iconPath);
+        }else{
+            item.setIconSclass(iconPath);
+            item.setDescription(iconPath);
         }
-        item.setLabel(t.getName());
     }
 }

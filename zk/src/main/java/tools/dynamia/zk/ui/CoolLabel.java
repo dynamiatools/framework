@@ -45,10 +45,6 @@ public class CoolLabel extends Div implements LoadableOnly {
      */
     private static final long serialVersionUID = 8628833708100482613L;
 
-    static {
-        BindingComponentIndex.getInstance().put("title", CoolLabel.class);
-        ComponentAliasIndex.getInstance().add(CoolLabel.class);
-    }
 
     private final Label titleLabel;
     private final Label subtitleLabel;
@@ -56,7 +52,7 @@ public class CoolLabel extends Div implements LoadableOnly {
     private Image image;
     private File imageFile;
     private String imageURL;
-    private String noImagePath = "/zkau/web/tools/images/no-photo.jpg";
+    private String noImagePath = "/static/dynamia-tools/images/no-photo.jpg";
     private Image noImage;
     private int progress;
     private final Progressmeter progressmeter;

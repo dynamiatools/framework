@@ -42,6 +42,7 @@ public class TreeViewNode<E> implements Serializable {
     private boolean open;
     private String style;
     private String styleClass;
+    private String badge;
 
     public String getStyle() {
         return style;
@@ -174,5 +175,13 @@ public class TreeViewNode<E> implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(data);
+    }
+
+    public String getBadge() {
+        return badge;
+    }
+
+    public void setBadge(String badge) {
+        this.badge = badge;
     }
 }

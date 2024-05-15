@@ -25,17 +25,17 @@ import tools.dynamia.integration.ProgressMonitor;
 import tools.dynamia.reports.ExporterColumn;
 import tools.dynamia.reports.ReportOutputType;
 import tools.dynamia.reports.excel.ExcelCollectionExporter;
-import tools.dynamia.ui.MessageType;
-import tools.dynamia.ui.UIMessages;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.Viewers;
+import tools.dynamia.zk.converters.Date;
+import tools.dynamia.zk.converters.Time;
+import tools.dynamia.zk.converters.Util;
 import tools.dynamia.zk.ui.LongOperationMonitorWindow;
 import tools.dynamia.zk.util.LongOperation;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Collection;
 
 @SuppressWarnings("unchecked")
@@ -98,9 +98,10 @@ public class ExportExcelAction extends AbstractExportAction implements ReadableO
         String formatPattern = (String) f.getParams().get(Viewers.PARAM_FORMAT_PATTERN);
         if (formatPattern == null || formatPattern.isEmpty()) {
             String converter = (String) f.getParams().get(Viewers.PARAM_CONVERTER);
-            if (converters.Date.class.getName().equals(converter)) {
+            converter = Util.checkConverterClass(converter);
+            if (Date.class.getName().equals(converter)) {
                 formatPattern = "dd/MM/yyyy";
-            } else if (converters.Time.class.getName().equals(converter)) {
+            } else if (Time.class.getName().equals(converter)) {
                 formatPattern = "h:mm a";
             }
         }

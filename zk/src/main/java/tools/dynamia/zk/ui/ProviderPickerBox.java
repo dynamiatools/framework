@@ -22,6 +22,7 @@ import org.zkoss.zul.ListModelList;
 import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.StringUtils;
+import tools.dynamia.commons.reflect.ReflectionException;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
@@ -48,6 +49,8 @@ public class ProviderPickerBox extends Combobox {
     private String className;
     private String idField = "id";
     private String nameField = "name";
+
+    private String iconField = "icon";
     private Class<?> providerClass;
 
     public ProviderPickerBox() {
@@ -55,15 +58,37 @@ public class ProviderPickerBox extends Combobox {
 
         setItemRenderer((item, data, index) -> {
 
-            try {
-                String id = BeanUtils.invokeGetMethod(data, idField).toString();
-                String name = BeanUtils.invokeGetMethod(data, nameField).toString();
+            String id, name, icon;
 
-                item.setLabel(StringUtils.capitalize(name));
-                item.setValue(id);
-            } catch (Exception e) {
-                throw new UiException("Error rendering item for " + this, e);
+            try {
+                id = BeanUtils.invokeGetMethod(data, idField).toString();
+            } catch (ReflectionException | NullPointerException e) {
+                throw new UiException("Error loading ID field for " + data, e);
             }
+
+            try {
+                name = BeanUtils.invokeGetMethod(data, nameField).toString();
+            } catch (ReflectionException | NullPointerException e) {
+                name = id;
+            }
+
+            try {
+                icon = BeanUtils.invokeGetMethod(data, iconField).toString();
+            } catch (ReflectionException | NullPointerException e) {
+                icon = null;
+            }
+
+
+            if (name == null) {
+                name = id;
+            }
+
+            item.setLabel(StringUtils.capitalize(name));
+            item.setValue(id);
+            if (icon != null) {
+                item.setIconSclass(icon);
+            }
+
         });
     }
 
@@ -116,6 +141,15 @@ public class ProviderPickerBox extends Combobox {
 
     public void setNameField(String nameField) {
         this.nameField = nameField;
+        initModel();
+    }
+
+    public String getIconField() {
+        return iconField;
+    }
+
+    public void setIconField(String iconField) {
+        this.iconField = iconField;
         initModel();
     }
 

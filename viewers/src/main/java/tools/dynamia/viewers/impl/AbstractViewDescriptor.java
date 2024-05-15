@@ -23,14 +23,7 @@ import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.domain.Descriptor;
-import tools.dynamia.viewers.Field;
-import tools.dynamia.viewers.FieldGroup;
-import tools.dynamia.viewers.IndexableComparator;
-import tools.dynamia.viewers.InvalidViewDescriptorFieldException;
-import tools.dynamia.viewers.MergeableViewDescriptor;
-import tools.dynamia.viewers.ViewCustomizer;
-import tools.dynamia.viewers.ViewDescriptor;
-import tools.dynamia.viewers.ViewRenderer;
+import tools.dynamia.viewers.*;
 import tools.dynamia.viewers.util.ViewDescriptorReaderUtils;
 import tools.dynamia.viewers.util.Viewers;
 
@@ -112,6 +105,8 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
     private Class<? extends ViewRenderer> customViewRenderer;
 
     private String device = "screen";
+
+    private List<ActionRef> actions = new ArrayList<>();
 
     /**
      * Instantiates a new abstract view descriptor.
@@ -765,5 +760,28 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
     @Override
     public List<Field> sortFields() {
         return getFields().stream().sorted(new IndexableComparator()).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ActionRef> getActions() {
+        return actions;
+    }
+
+    public void setActions(List<ActionRef> actions) {
+        this.actions = actions;
+    }
+
+    /**
+     * Add new action reference
+     * @param actionRef
+     */
+    public void addAction(ActionRef actionRef) {
+        if (actions == null) {
+            actions = new ArrayList<>();
+        }
+
+        if (actions.stream().noneMatch(a -> a.getId().equals(actionRef.getId()))) {
+            actions.add(actionRef);
+        }
     }
 }

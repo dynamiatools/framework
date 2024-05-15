@@ -16,30 +16,22 @@
  */
 package tools.dynamia.commons;
 
+import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 
 /**
- * The Class Formatters.
+ * Basic formatters
  *
  * @author Mario A. Serrano Leones
  */
 public class Formatters {
 
-    /**
-     * The integer.
-     */
-    private static final NumberFormat integer = NumberFormat.getIntegerInstance();
-
-    /**
-     * The decimal.
-     */
-    private static final NumberFormat decimal = NumberFormat.getNumberInstance();
-
-    /**
-     * The currency.
-     */
-    private static final NumberFormat currency = NumberFormat.getCurrencyInstance();
 
     /**
      * Format integer.
@@ -48,7 +40,7 @@ public class Formatters {
      * @return the string
      */
     public static String formatInteger(Number number) {
-        return integer.format(number);
+        return NumberFormat.getIntegerInstance(Messages.getDefaultLocale()).format(number);
     }
 
     /**
@@ -57,8 +49,8 @@ public class Formatters {
      * @param number the number
      * @return the string
      */
-    public static String format(Number number) {
-        return decimal.format(number);
+    public static String formatDecimal(Number number) {
+        return DecimalFormat.getInstance(Messages.getDefaultLocale()).format(number);
     }
 
     /**
@@ -68,7 +60,54 @@ public class Formatters {
      * @return the string
      */
     public static String formatCurrency(Number number) {
-        return currency.format(number);
+        return DecimalFormat.getCurrencyInstance(Messages.getDefaultLocale()).format(number);
+    }
+
+    /**
+     * Format currency without decimals.
+     *
+     * @param number the number
+     * @return the string
+     */
+    public static String formatCurrencySimple(Number number) {
+        var locale = Messages.getDefaultLocale();
+        var formatter = NumberFormat.getCurrencyInstance(locale);
+        formatter.setMaximumFractionDigits(0);
+        return formatter.format(number);
+    }
+
+    /**
+     * Format a percent
+     *
+     * @param number
+     * @return
+     */
+    public static String formatPercent(Number number) {
+        return DecimalFormat.getPercentInstance(Messages.getDefaultLocale()).format(number);
+    }
+
+    /**
+     * @param date
+     * @return
+     */
+    public static String formatDate(Date date) {
+        return DateFormat.getDateInstance(DateFormat.DEFAULT, Messages.getDefaultLocale()).format(date);
+    }
+
+    /**
+     * @param date
+     * @return
+     */
+    public static String formatDate(LocalDate date) {
+        return date.format(DateTimeFormatter.ISO_DATE);
+    }
+
+    /**
+     * @param date
+     * @return
+     */
+    public static String formatTime(LocalTime date) {
+        return date.format(DateTimeFormatter.ISO_DATE);
     }
 
     private Formatters() {

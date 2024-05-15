@@ -26,7 +26,10 @@ import org.zkoss.zul.Label;
 import tools.dynamia.commons.PropertyChangeEvent;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
+import tools.dynamia.io.converters.Converters;
+import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
+import tools.dynamia.zk.converters.Util;
 import tools.dynamia.zk.ui.LoadableOnly;
 
 import java.util.Collection;
@@ -126,6 +129,7 @@ public class ZKBindingUtil {
 
         if (converterExpression != null) {
             try {
+                converterExpression = Util.checkConverterClass(converterExpression);
                 Class.forName(converterExpression);
                 converterExpression = "'" + converterExpression + "'";
 
@@ -154,7 +158,6 @@ public class ZKBindingUtil {
 
     /**
      * Notify changes on all property of view model
-     *
      */
     public static void postNotifyChange(Object bean) {
         postNotifyChange(bean, "*");
@@ -162,7 +165,6 @@ public class ZKBindingUtil {
 
     /**
      * Notify changes of all property of all elements in the collections
-     *
      */
     public static void postNotifyChange(Collection<?> objects) {
         objects.forEach(ZKBindingUtil::postNotifyChange);
@@ -170,7 +172,6 @@ public class ZKBindingUtil {
 
     /**
      * Notify changes on property of view model
-     *
      */
     public static void postNotifyChange(Object bean, String property) {
         if (ZKUtil.isInEventListener()) {
@@ -180,7 +181,6 @@ public class ZKBindingUtil {
 
     /**
      * Notify changed on properties of view model
-     *
      */
     public static void postNotifyChange(Object bean, String... properties) {
         if (ZKUtil.isInEventListener()) {
@@ -190,7 +190,6 @@ public class ZKBindingUtil {
 
     /**
      * Notify change of {@link PropertyChangeEvent} source and property
-     *
      */
     public static void postNotifyChange(PropertyChangeEvent evt) {
         if (evt != null && evt.source() != null && evt.propertyName() != null) {
@@ -200,7 +199,6 @@ public class ZKBindingUtil {
 
     /**
      * Notifiy changes on property of view model
-     *
      */
     public static void postNotifyChange(String queue, String scope, Object bean, String property) {
         if (ZKUtil.isInEventListener()) {
@@ -211,7 +209,6 @@ public class ZKBindingUtil {
 
     /**
      * Post a global command without arguments
-     *
      */
     public static void postGlobalCommand(String name) {
         postGlobalCommand(name, null);
@@ -219,7 +216,6 @@ public class ZKBindingUtil {
 
     /**
      * Post a global command with arguments
-     *
      */
     public static void postGlobalCommand(String name, Map<String, Object> args) {
         BindUtils.postGlobalCommand(null, null, name, args);

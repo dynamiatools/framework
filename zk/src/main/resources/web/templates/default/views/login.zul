@@ -94,7 +94,7 @@
     <script src="${contextPath}/vendor/jquery-easing/jquery.easing.min.js"/>
     <!-- Custom scripts for all pages-->
     <script src="${contextPath}/js/sb-admin.js"/>
-    <script type="javascript">
+    <script>
         zk.afterMount(function () {
             initTemplate(jQuery);
         });

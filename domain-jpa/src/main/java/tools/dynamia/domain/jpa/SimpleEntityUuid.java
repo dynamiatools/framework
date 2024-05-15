@@ -35,11 +35,7 @@ public abstract class SimpleEntityUuid extends AbstractEntity<String> implements
     @Id
     private String id = IdGenerators.createId(String.class);
 
-    /**
-     * The version.
-     */
-    @Version
-    private int version;
+
 
     /**
      * The creation date.

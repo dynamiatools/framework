@@ -1,5 +1,0 @@
-language: java
-jdk:
-  - openjdk11
-script:  
-  - mvn -Dmaven.javadoc.skip=true -B -V clean install

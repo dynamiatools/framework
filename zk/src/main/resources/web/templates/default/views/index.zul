@@ -58,7 +58,7 @@
                 <n:div class="sb-sidenav-menu">
                     <nodom apply="${navBuilder}">
                         <custom-attributes
-                                builderClass="tools.dynamia.zk.app.bstemplate.BootstrapMenuBuilder"/>
+                                builderClass="tools.dynamia.zk.viewers.BootstrapMenuBuilder"/>
                     </nodom>
                 </n:div>
             </n:nav>
@@ -83,7 +83,7 @@
                     </n:ol>
 
                     <div id="workspace" sclass="workspace" style="height: 100%">
-                        <custom-attributes builderClass="workspace.builders.Basic"/>
+                        <custom-attributes builderClass="tools.dynamia.zk.workspace.builders.Basic"/>
                     </div>
 
                 </n:div>
@@ -113,7 +113,7 @@
 
     <!-- Custom scripts for all pages-->
     <script src="${contextPath}/js/scripts.js"/>
-    <script type="javascript">
+    <script>
         zk.afterMount(function () {
 
         });

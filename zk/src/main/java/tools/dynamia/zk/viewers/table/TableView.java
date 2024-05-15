@@ -396,11 +396,11 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
      * Update all footer with functions
      */
     public void computeFooters() {
-        if (footersWithFunctions != null) {
-            footersWithFunctions.forEach(TableViewFooter::clear);
+        try {
+            if (footersWithFunctions != null) {
+                footersWithFunctions.forEach(TableViewFooter::clear);
 
-            if (value != null) {
-                try {
+                if (value != null) {
                     if (multiFunctionProcesor != null) {
                         var result = multiFunctionProcesor.compute(value, new HashMap<>(), footersWithFunctions);
                         result.forEach((f, v) -> footersWithFunctions.stream()
@@ -417,10 +417,10 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
                             }
                         });
                     }
-                }catch (Exception e){
-                    //
                 }
             }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 

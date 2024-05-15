@@ -28,15 +28,15 @@ public class RootTreeNode<E> extends EntityTreeNode<E> {
 	private static final long serialVersionUID = -1401576873934370681L;
 	private final boolean visible;
 
-	public RootTreeNode(Object entity) {
-		this(entity, null);
+	public RootTreeNode(E entity) {
+		this(entity, entity!=null?entity.toString():null);
 	}
 
-	public RootTreeNode(Object entity, String label) {
+	public RootTreeNode(E entity, String label) {
 		this(entity, null, label);
 	}
 
-	public RootTreeNode(Object entity, String icon, String label) {
+	public RootTreeNode(E entity, String icon, String label) {
 		this(icon, label, false);
 	}
 

@@ -22,7 +22,7 @@ import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.io.IOUtils;
 import tools.dynamia.io.Resource;
-import tools.dynamia.zk.ui.DateRangebox;
+import tools.dynamia.zk.ui.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -59,9 +59,7 @@ public class ComponentAliasIndex extends HashMap<String, Class<? extends Compone
         getInstance().add(Radiogroup.class);
         getInstance().add(Timebox.class);
         getInstance().add(Audio.class);
-        getInstance().add(Applet.class);
         getInstance().add(Area.class);
-        getInstance().add(Flash.class);
         getInstance().add(Chart.class);
         getInstance().add(Captcha.class);
         getInstance().add(Doublebox.class);
@@ -78,6 +76,19 @@ public class ComponentAliasIndex extends HashMap<String, Class<? extends Compone
         getInstance().add(Rating.class);
         getInstance().add(DateRangebox.class);
         getInstance().add(Combobutton.class);
+        getInstance().add(Html.class);
+        getInstance().add(Booleanbox.class);
+        getInstance().add(Colorbox.class);
+        getInstance().add(CoolLabel.class);
+        getInstance().add("enumlabel", EnumLabel.class);
+        getInstance().add(EnumListbox.class);
+        getInstance().add(Import.class);
+        getInstance().add(Infobox.class);
+        getInstance().add("localebox", LocaleCombobox.class);
+        getInstance().add("timezonebox", TimeZoneCombobox.class);
+        getInstance().add("simplecombobox", SimpleCombobox.class);
+
+
 
         LoggingService logger = new SLF4JLoggingService(ComponentAliasIndex.class);
         try {

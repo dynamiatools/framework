@@ -23,8 +23,10 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.Listfooter;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.domain.fx.FunctionProvider;
+import tools.dynamia.domain.util.LabelValue;
 import tools.dynamia.io.converters.Converters;
 import tools.dynamia.viewers.Field;
+import tools.dynamia.zk.converters.Util;
 
 /**
  * @author Mario A. Serrano Leones
@@ -36,28 +38,27 @@ public class TableViewFooter extends Listfooter implements FunctionProvider {
     private String functionConverter;
     private String function;
     private Object value;
-    private Label valueLabel;
+    private Label label;
 
     public TableViewFooter() {
+        init();
     }
 
     public TableViewFooter(TableView tableView) {
         this.tableView = tableView;
+        init();
     }
 
     public TableViewFooter(TableView tableView, Field field) {
         this.tableView = tableView;
         this.field = field;
+        init();
     }
 
-    public TableViewFooter(TableView tableView, String label) {
-        super(label);
-        this.tableView = tableView;
-    }
 
-    public TableViewFooter(TableView tableView, String label, String src) {
-        super(label, src);
-        this.tableView = tableView;
+    protected void init() {
+        label = new Label("");
+        appendChild(label);
     }
 
     public void setFunction(final String function) {
@@ -65,19 +66,16 @@ public class TableViewFooter extends Listfooter implements FunctionProvider {
     }
 
     public void setValue(Object value) {
+        clear();
         this.value = value;
         if (value != null) {
-            if (valueLabel == null) {
-                valueLabel = new Label();
-                appendChild(valueLabel);
-            }
             String resultText = Converters.convert(value);
             if (functionConverter != null) {
                 Converter converter = BeanUtils.newInstance(functionConverter);
                 //noinspection unchecked
-                resultText = (String) converter.coerceToUi(value, valueLabel, null);
+                resultText = (String) converter.coerceToUi(value, label, null);
             }
-            valueLabel.setValue(resultText);
+            label.setValue(resultText);
         }
     }
 
@@ -86,7 +84,7 @@ public class TableViewFooter extends Listfooter implements FunctionProvider {
     }
 
     public void setFunctionConverter(String functionConverter) {
-        this.functionConverter = functionConverter;
+        this.functionConverter = Util.checkConverterClass(functionConverter);
     }
 
     public String getFunctionConverter() {
@@ -104,9 +102,7 @@ public class TableViewFooter extends Listfooter implements FunctionProvider {
 
     public void clear() {
         this.value = null;
-        if (valueLabel != null) {
-            valueLabel.setValue("");
-        }
+        this.label.setValue("");
     }
 
     @Override

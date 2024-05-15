@@ -50,6 +50,8 @@ public final class ModuleContainer implements Serializable {
     private transient List<ModuleProvider> _providers;
     private final SimpleCache<String, Page> INDEX = new SimpleCache<>();
 
+    private String defaultPagePath;
+
 
     public ModuleContainer() {
         LOGGER.info("Creating " + getClass());
@@ -155,6 +157,10 @@ public final class ModuleContainer implements Serializable {
         INDEX.add(page.getPrettyVirtualPath(), page);
         if (page.isFeatured()) {
             featuredPages.add(page);
+        }
+
+        if (page.isMain()) {
+
         }
     }
 
@@ -347,5 +353,18 @@ public final class ModuleContainer implements Serializable {
             }
         }
         return null;
+    }
+
+    public String getDefaultPagePath() {
+        return defaultPagePath;
+    }
+
+    /**
+     * Set default page path. It will used when no page is active
+     *
+     * @param defaultPagePath
+     */
+    public void setDefaultPagePath(String defaultPagePath) {
+        this.defaultPagePath = defaultPagePath;
     }
 }

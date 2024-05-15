@@ -6,7 +6,7 @@
 # Overview
 
 DynamiaTools is a framework for building Java 17+ web applications fast and easy using standard design patterns, views
-descriptors for automatic UI generation, actions, services and modules. Powered by **Spring Boot** v3 (https://spring.io), ZK
+descriptors for automatic UI generation, actions, services and modules. Powered by **Spring Boot** v3.2 (https://spring.io), ZK
 9 (https://www.zkoss.org) for frontend and JPA 3+ with Hibernate 6.
 
 ## With DynamiaTools you can
@@ -36,7 +36,7 @@ descriptors for automatic UI generation, actions, services and modules. Powered 
 ```java
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import tools.dynamia.zk.app.EnableDynamiaTools;
+import tools.dynamia.app.EnableDynamiaTools;
 
 @SpringBootApplication
 @EnableDynamiaTools // <- this is all you need
@@ -60,13 +60,13 @@ class MyApplication {
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.zk</artifactId>
-        <version>5.0.9</version>
+        <version>5.1.1</version>
     </dependency>
 
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.domain.jpa</artifactId>
-        <version>5.0.9</version>
+        <version>5.1.1</version>
     </dependency>    
 </dependencies>
 ```
@@ -74,8 +74,8 @@ class MyApplication {
 **Gradle**
 
 ```groovy
-compile 'tools.dynamia:tools.dynamia.zk:5.0.9'
-compile 'tools.dynamia:tools.dynamia.domain.jpa:5.0.9'
+compile 'tools.dynamia:tools.dynamia.zk:5.1.1'
+compile 'tools.dynamia:tools.dynamia.domain.jpa:5.1.1'
 ```
 
 Artifacts are available in **Maven Central** repositories

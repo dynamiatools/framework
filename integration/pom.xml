@@ -27,12 +27,12 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.0.9</version>
+        <version>5.1.1</version>
     </parent>
 
     <name>DynamiaTools - Integration</name>
     <description>A set of classes and interfaces that help integrate modules</description>
-    <version>5.0.9</version>
+    <version>5.1.1</version>
     <url>https://dynamia.tools/docs/integration</url>
 
     <licenses>
@@ -56,7 +56,8 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${target.version}</target>
-                    <encoding>${source.encoding}</encoding>
+                     <encoding>${source.encoding}</encoding>
+                    <parameters>true</parameters>
                 </configuration>
             </plugin>
         </plugins>
@@ -85,13 +86,7 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.ehcache/ehcache -->
-        <dependency>
-            <groupId>org.ehcache</groupId>
-            <artifactId>ehcache</artifactId>
-            <classifier>jakarta</classifier>
-            <scope>provided</scope>
-        </dependency>
+
 
     </dependencies>
 

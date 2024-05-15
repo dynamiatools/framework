@@ -17,6 +17,7 @@
 package tools.dynamia.domain.query;
 
 
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.SimpleCache;
@@ -124,6 +125,7 @@ public class ApplicationParameters implements Parameters {
      * @see com.dynamia.tools.domain.query.Parameters#save(java.util.Collection)
      */
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void save(Collection<Parameter> params) {
         if (params == null) {
             throw new NullPointerException("Cannot save null list of parameters");
@@ -230,6 +232,7 @@ public class ApplicationParameters implements Parameters {
 
     /**
      * Increase the count sequence
+     *
      * @param counterParam
      */
     @Override

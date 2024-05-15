@@ -50,6 +50,7 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
     private boolean featured;
     private int priority = 100;
     private boolean temporal;
+    private boolean main;
 
 
     public Page() {
@@ -276,6 +277,16 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
 
 
     /**
+     * Set this page as main page. But could be override by other main page in other modules if has higher priority
+     * @return
+     */
+    public Page main(){
+        setMain(true);
+        return this;
+    }
+
+
+    /**
      * Return the priority of this page. By default is 100.
      */
     public int getPriority() {
@@ -310,5 +321,14 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
 
     public boolean isHtml() {
         return path != null && (path.endsWith(".html") || path.contains(".html?"));
+    }
+
+    public boolean isMain() {
+        return main;
+    }
+
+
+    public void setMain(boolean main) {
+        this.main = main;
     }
 }

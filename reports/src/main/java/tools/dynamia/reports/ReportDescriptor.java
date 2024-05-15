@@ -55,4 +55,6 @@ public interface ReportDescriptor {
      *
      */
     Map getExporterParameters();
+
+    String getPreferedCompiler();
 }

@@ -22,7 +22,7 @@ import tools.dynamia.viewers.ComponentCustomizer;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.FieldCustomizer;
 import tools.dynamia.zk.ui.SimpleCombobox;
-import tools.dynamia.zk.ui.model.SimpleItem;
+import tools.dynamia.zk.ui.SimpleItem;
 
 import java.util.List;
 import java.util.Map;

@@ -332,10 +332,8 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     }
 
     protected void exceptionCaught(Exception e) {
-        e.printStackTrace();
         if (e instanceof ValidationError) {
             UIMessages.showMessage(e.getMessage(), MessageType.ERROR);
-
             throw (ValidationError) e;
 
         } else {
@@ -540,7 +538,6 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
 
     /**
      * Set result list
-     *
      */
     public final void setQueryResult(List queryResult) {
         setQueryResult(new ListDataSet(queryResult));

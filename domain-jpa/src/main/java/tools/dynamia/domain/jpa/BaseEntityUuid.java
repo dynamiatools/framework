@@ -22,6 +22,9 @@ import jakarta.persistence.TemporalType;
 import tools.dynamia.domain.Auditable;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 
 @MappedSuperclass

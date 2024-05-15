@@ -34,7 +34,6 @@ public class PropertyChangeSupport implements PropertyChangeListenerContainer {
 
     /**
      * Add listener to all containers
-     *
      */
     public static void onPropertyChange(List<? extends PropertyChangeListenerContainer> containers, PropertyChangeListener listener) {
         containers.forEach(i -> i.addPropertyChangeListener(listener));
@@ -42,5 +41,13 @@ public class PropertyChangeSupport implements PropertyChangeListenerContainer {
 
     public static void onPropertyChange(PropertyChangeListenerContainer container, PropertyChangeListener listener) {
         container.addPropertyChangeListener(listener);
+    }
+
+    public void clearListeners() {
+        try {
+            listeners.clear();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

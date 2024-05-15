@@ -22,9 +22,7 @@ import org.zkoss.zul.impl.HeaderElement;
 import org.zkoss.zul.impl.InputElement;
 import org.zkoss.zul.impl.LabelElement;
 import tools.dynamia.commons.collect.HashSetMultiMap;
-import tools.dynamia.zk.ui.Calculator;
-import tools.dynamia.zk.ui.DateRangebox;
-import tools.dynamia.zk.ui.DecimalboxCalculator;
+import tools.dynamia.zk.ui.*;
 
 /**
  * @author Mario A. Serrano Leones
@@ -36,12 +34,29 @@ public class BindingComponentIndex extends HashSetMultiMap<String, String> {
 
     static {
         instance.put("label", Listcell.class, Column.class, HeaderElement.class, LabelElement.class);
-        instance.put("value", Label.class, Textbox.class, InputElement.class, Progressmeter.class, DateRangebox.class, DecimalboxCalculator.class, Calculator.class);
+        instance.put("value",
+                Label.class,
+                Textbox.class,
+                InputElement.class,
+                Progressmeter.class,
+                DateRangebox.class,
+                DecimalboxCalculator.class,
+                Calculator.class,
+                Colorbox.class);
+
         instance.put("selectedItem", Combobox.class, Listbox.class, Radiogroup.class);
         instance.put("checked", Checkbox.class);
-        instance.put("src", Image.class);
+        instance.put("src", Image.class, Import.class);
         instance.put("model", Chart.class);
-
+        instance.put("content", Html.class);
+        instance.put("selected", Booleanbox.class,
+                EnumListbox.class,
+                LocaleCombobox.class,
+                TimeZoneCombobox.class,
+                SimpleCombobox.class);
+        instance.put("title", CoolLabel.class);
+        instance.put("enum", EnumLabel.class);
+        instance.put("number", Infobox.class);
     }
 
     public static BindingComponentIndex getInstance() {

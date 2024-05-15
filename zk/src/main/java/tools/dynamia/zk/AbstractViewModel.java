@@ -29,6 +29,7 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Window;
 import tools.dynamia.domain.services.AbstractService;
 import tools.dynamia.ui.UIMessages;
+import tools.dynamia.zk.converters.*;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
 
@@ -72,7 +73,6 @@ public abstract class AbstractViewModel<T> extends AbstractService {
 
     /**
      * Enable if a question confirmation dialog when user close parent window. If parent window is null nothing happens
-     *
      */
     protected void enableOnCloseWindowConfirmation(String message) {
         if (parentWindow != null) {
@@ -140,7 +140,6 @@ public abstract class AbstractViewModel<T> extends AbstractService {
 
     /**
      * Return an execution argument
-     *
      */
     public Object getArg(String name) {
         return ZKUtil.getExecutionArg(name);
@@ -148,11 +147,30 @@ public abstract class AbstractViewModel<T> extends AbstractService {
 
     /**
      * Return a request parameter
-     *
      */
     public String getRequestParam(String name) {
         return Executions.getCurrent().getParameter(name);
     }
 
+
+    public Currency getCurrencyConverter() {
+        return new Currency();
+    }
+
+    public CurrencySimple getCurrencySimpleConverter() {
+        return new CurrencySimple();
+    }
+
+    public Date getDateConverter() {
+        return new Date();
+    }
+
+    public DateTime getDateTimeConverter() {
+        return new DateTime();
+    }
+
+    public LocalDate getLocalDateConverter() {
+        return new LocalDate();
+    }
 
 }

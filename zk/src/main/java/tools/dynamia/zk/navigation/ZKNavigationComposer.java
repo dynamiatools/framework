@@ -30,12 +30,13 @@ import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.navigation.ActionPage;
 import tools.dynamia.navigation.DefaultPageProvider;
+import tools.dynamia.navigation.ModuleContainer;
 import tools.dynamia.navigation.NavigationElement;
 import tools.dynamia.navigation.Page;
 import tools.dynamia.navigation.PageEvent;
 import tools.dynamia.navigation.WorkspaceViewBuilder;
 import tools.dynamia.zk.util.ZKUtil;
-import workspace.builders.TabPanel;
+import tools.dynamia.zk.workspace.builders.TabPanel;
 
 import java.util.HashMap;
 import java.util.List;
@@ -128,6 +129,11 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
         if (defaultPageProvider != null && defaultPageProvider.getPath() != null) {
             desktopCurrentPage = navManager().findPage(defaultPageProvider.getPath());
             navManager().setRawCurrentPage(desktopCurrentPage);
+        } else {
+            String defaultPagePath = ModuleContainer.getInstance().getDefaultPagePath();
+            if (defaultPagePath != null) {
+                desktopCurrentPage = navManager().findPage(defaultPagePath);
+            }
         }
     }
 
@@ -226,6 +232,9 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
     private void buildWorkspace() throws ClassNotFoundException {
         if (workspace != null) {
             String builderClass = (String) workspace.getAttribute("builderClass");
+            if (builderClass != null && builderClass.startsWith("workspace.builders")) {
+                builderClass = "tools.dynamia.zk." + builderClass;
+            }
             Class builder = null;
             if (builderClass != null) {
                 builder = Class.forName(builderClass);

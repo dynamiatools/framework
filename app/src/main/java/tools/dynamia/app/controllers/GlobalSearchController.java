@@ -21,13 +21,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-import tools.dynamia.app.services.GlobalSearchService;
+import tools.dynamia.integration.search.SearchService;
 
 @Component("/search")
 public class GlobalSearchController {
 
     @Autowired
-    private GlobalSearchService service;
+    private SearchService service;
 
     @RequestMapping("/")
     public ModelAndView query(@RequestParam("q") String q) {

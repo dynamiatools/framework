@@ -23,13 +23,13 @@
 
     <artifactId>tools.dynamia.viewers</artifactId>
     <packaging>jar</packaging>
-    <version>5.0.9</version>
+    <version>5.1.1</version>
 
 
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.0.9</version>
+        <version>5.1.1</version>
     </parent>
 
     <name>DynamiaTools - Viewers</name>
@@ -56,7 +56,8 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${target.version}</target>
-                    <encoding>${source.encoding}</encoding>
+                     <encoding>${source.encoding}</encoding>
+                    <parameters>true</parameters>
                 </configuration>
             </plugin>
         </plugins>

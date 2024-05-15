@@ -636,7 +636,7 @@ public abstract class ZKUtil {
         div.appendChild(box);
 
         if (imagePath == null) {
-            imagePath = "/zkau/web/tools/images/ajax-loader.gif";
+            imagePath = "/static/dynamia-tools/images/ajax-loader.gif";
         }
 
         Image img = new Image(imagePath);

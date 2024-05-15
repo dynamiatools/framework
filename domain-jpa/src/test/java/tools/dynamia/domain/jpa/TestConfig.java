@@ -18,7 +18,6 @@ import javax.sql.DataSource;
 @Configuration
 public class TestConfig {
 
-
     @Bean
     public DataSource dataSource() {
         var ds = new DriverManagerDataSource();

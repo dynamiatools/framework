@@ -259,8 +259,12 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         render();
     }
 
-    public void setBeanClass(String beanClass) throws ClassNotFoundException {
-        setBeanClass(Class.forName(beanClass));
+    public void setBeanClass(String beanClass) {
+        try {
+            setBeanClass(Class.forName(beanClass));
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Object getValue() {

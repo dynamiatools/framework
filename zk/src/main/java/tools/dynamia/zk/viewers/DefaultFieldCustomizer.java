@@ -19,15 +19,7 @@
 package tools.dynamia.zk.viewers;
 
 import org.zkoss.zk.ui.Component;
-import org.zkoss.zul.Checkbox;
-import org.zkoss.zul.Combobox;
-import org.zkoss.zul.Datebox;
-import org.zkoss.zul.Doublebox;
-import org.zkoss.zul.Intbox;
-import org.zkoss.zul.Label;
-import org.zkoss.zul.Longbox;
-import org.zkoss.zul.Textbox;
-import org.zkoss.zul.Timebox;
+import org.zkoss.zul.*;
 import tools.dynamia.commons.DateRange;
 import tools.dynamia.commons.DayOfWeek;
 import tools.dynamia.commons.StringUtils;
@@ -38,13 +30,10 @@ import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.FieldCustomizer;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.ComponentAliasIndex;
-import tools.dynamia.zk.ui.Colorbox;
-import tools.dynamia.zk.ui.DateRangebox;
-import tools.dynamia.zk.ui.DayWeekbox;
-import tools.dynamia.zk.ui.DecimalboxCalculator;
-import tools.dynamia.zk.ui.LocaleCombobox;
+import tools.dynamia.zk.ui.*;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -73,6 +62,7 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
         INDEX.put(DateRangebox.class, DateRange.class);
         INDEX.put(Timebox.class, LocalTime.class);
         INDEX.put(LocaleCombobox.class, Locale.class);
+        INDEX.put(DurationSelector.class, Duration.class);
     }
 
     @Override

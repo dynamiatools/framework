@@ -30,7 +30,6 @@ import java.util.Properties;
  * IconsProvider for Fonts Icons
  *
  * @author Mario
- *
  */
 public abstract class AbstractFontIconsProvider implements IconsProvider {
 
@@ -75,6 +74,10 @@ public abstract class AbstractFontIconsProvider implements IconsProvider {
     @Override
     public List<Icon> getAll() {
         return new ArrayList<>(icons.values());
+    }
+
+    public void addIcon(String name, Icon icon) {
+        icons.put(name, icon);
     }
 
 }

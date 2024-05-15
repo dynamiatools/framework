@@ -34,12 +34,7 @@ public class Import extends Div implements DynamicPropertied, AfterCompose, IdSp
 
     private static final String VALUE = "value";
 
-    static {
-        BindingComponentIndex.getInstance().put("src", Import.class);
-        ComponentAliasIndex.getInstance().add(Import.class);
-    }
-
-    /**
+      /**
      *
      */
     private static final long serialVersionUID = -8236823411921386808L;

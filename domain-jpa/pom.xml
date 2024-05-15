@@ -23,13 +23,13 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.0.9</version>
+        <version>5.1.1</version>
     </parent>
 
     <name>DynamiaTools - Domain JPA</name>
     <url>https://dynamia.tools/docs/domain</url>
     <artifactId>tools.dynamia.domain.jpa</artifactId>
-    <version>5.0.9</version>
+    <version>5.1.1</version>
     <packaging>jar</packaging>
 
     <licenses>
@@ -53,7 +53,8 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${target.version}</target>
-                    <encoding>${source.encoding}</encoding>
+                     <encoding>${source.encoding}</encoding>
+                    <parameters>true</parameters>
                 </configuration>
             </plugin>
         </plugins>
@@ -101,6 +102,7 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
@@ -111,6 +113,13 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.expressly</groupId>
+            <artifactId>expressly</artifactId>
+            <version>5.0.0</version>
             <scope>test</scope>
         </dependency>
 

@@ -17,8 +17,13 @@
 package tools.dynamia.reports;
 
 import java.io.File;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
 
 public interface ReportCompiler {
+
+    String getId();
 
     /**
      * Compile the reportFile
@@ -26,4 +31,10 @@ public interface ReportCompiler {
      * @return compiled report
      */
     File compile(File reportFile);
+
+    Report fill(ReportDescriptor reportDescriptor);
+
+    Report fill(ReportDescriptor reportDescriptor, boolean inMemory);
+
+    void export(List<Report> reports, OutputStream outputStream, ReportOutputType outputType, Map exportParameters);
 }

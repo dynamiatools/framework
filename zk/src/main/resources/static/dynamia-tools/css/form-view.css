@@ -9,6 +9,11 @@
     border: none;
 }
 
+.form-view .form-group{
+    margin-bottom: 1rem;
+}
+
+
 .form-view-lbl {
     font-weight: 500;
     margin-bottom: 3px;

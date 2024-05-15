@@ -22,12 +22,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
-import tools.dynamia.app.template.ApplicationTemplate;
-import tools.dynamia.app.template.ApplicationTemplates;
-import tools.dynamia.app.template.TemplateContext;
+import org.springframework.web.context.annotation.SessionScope;
 import tools.dynamia.commons.LocaleProvider;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.SystemLocaleProvider;
+import tools.dynamia.commons.UserInfo;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.domain.services.ValidatorService;
@@ -36,6 +35,8 @@ import tools.dynamia.io.IOUtils;
 import tools.dynamia.io.Resource;
 import tools.dynamia.navigation.Module;
 import tools.dynamia.navigation.ModuleProvider;
+import tools.dynamia.templates.ApplicationTemplate;
+import tools.dynamia.templates.ApplicationTemplates;
 
 import java.io.IOException;
 import java.util.List;
@@ -88,19 +89,11 @@ public class RootAppConfiguration {
     }
 
     @Bean
-    @Primary
+    @ConditionalOnMissingBean(ValidatorService.class)
     public ValidatorService defaultValidatorService() {
         return new DefaultValidatorService();
     }
 
-    @Bean
-    public GlobalSearchProvider pageGlobalSearchProvider() {
-        try {
-            return new PageGlobalSearchProvider();
-        } catch (Throwable e) {
-            return new NoOpGlobalSearchProvider();
-        }
-    }
 
     @Bean
     public ApplicationInfo applicationInfo() {
@@ -122,12 +115,9 @@ public class RootAppConfiguration {
             }
 
             ApplicationTemplate template = ApplicationTemplates.findTemplate(applicationInfo.getTemplate(), templates);
-
-            TemplateContext context = new TemplateContext(applicationInfo);
-            template.init(context);
+            template.init();
 
             logger.info("Application Info Loaded: " + applicationInfo);
-
             return applicationInfo;
         } catch (IOException e) {
             logger.error("Error loading applicationInfo using Dummy: " + e.getLocalizedMessage(), e);
@@ -142,8 +132,16 @@ public class RootAppConfiguration {
     }
 
     @Bean
+    @Primary
     public LocaleProvider systemLocaleProvider() {
         return new SystemLocaleProvider();
+    }
+
+    @Bean("userInfo")
+    @SessionScope
+    @ConditionalOnMissingBean(UserInfo.class)
+    public UserInfo userInfo() {
+        return new UserInfo();
     }
 
 }

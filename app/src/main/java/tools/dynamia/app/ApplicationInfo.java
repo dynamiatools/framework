@@ -16,14 +16,12 @@
  */
 package tools.dynamia.app;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import tools.dynamia.actions.AbstractAction;
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionLoader;
-import tools.dynamia.app.template.ApplicationGlobalAction;
+import tools.dynamia.actions.ApplicationGlobalAction;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.PropertiesContainer;
-import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.reflect.PropertyInfo;
 
 import java.io.Serializable;
@@ -68,7 +66,7 @@ public class ApplicationInfo implements Serializable, PropertiesContainer {
         systemProperties = new HashMap(System.getProperties());
         systemEnvironment = System.getenv();
         properties = new HashMap<>();
-        properties.put(TEMPLATE, "Default");
+        properties.put(TEMPLATE, "Dynamical");
     }
 
 

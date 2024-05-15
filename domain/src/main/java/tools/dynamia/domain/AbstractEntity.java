@@ -107,7 +107,6 @@ public abstract class AbstractEntity<ID extends Serializable> implements Seriali
     /**
      * Add a PropertyChangeListener to get object change, subclasses must invoke
      * notifyChange to fire listeners
-     *
      */
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -119,7 +118,6 @@ public abstract class AbstractEntity<ID extends Serializable> implements Seriali
 
     /**
      * Remove PropertyChangeListener
-     *
      */
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
@@ -127,9 +125,16 @@ public abstract class AbstractEntity<ID extends Serializable> implements Seriali
     }
 
     /**
+     * Remove all property change listeners
+     */
+    public void removePropertyChangeListeners() {
+        propertyChangeSupport.clearListeners();
+    }
+
+
+    /**
      * Notify PropertyChangeListeners change, this method automatically check if the
      * oldValue and newValue are different to fire the listeners.
-     *
      */
     protected void notifyChange(String propertyName, Object oldValue, Object newValue) {
         if (oldValue == null || !Objects.equals(oldValue, newValue)) {

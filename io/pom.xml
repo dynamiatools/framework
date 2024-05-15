@@ -28,11 +28,11 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.0.9</version>
+        <version>5.1.1</version>
     </parent>
 
     <name>DynamiaTools - IO</name>
-    <version>5.0.9</version>
+    <version>5.1.1</version>
     <description>A set of classes and interfaces that help in any kind io task</description>
     <url>https://dynamia.tools/docs/io</url>
 
@@ -79,14 +79,14 @@
         <dependency>
             <groupId>com.google.zxing</groupId>
             <artifactId>core</artifactId>
-            <version>${zing.version}</version>
+            <version>${zxing.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.google.zxing/javase -->
         <dependency>
             <groupId>com.google.zxing</groupId>
             <artifactId>javase</artifactId>
-            <version>${zing.version}</version>
+            <version>${zxing.version}</version>
         </dependency>
 
 
@@ -101,7 +101,8 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${target.version}</target>
-                    <encoding>${source.encoding}</encoding>
+                     <encoding>${source.encoding}</encoding>
+                    <parameters>true</parameters>
                 </configuration>
             </plugin>
         </plugins>
