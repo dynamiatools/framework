@@ -23,17 +23,14 @@ import java.io.Serializable;
 /**
  * Action related to a {@link Page}
  */
-public class PageAction implements Serializable {
+public class PageAction extends NavigationElement<PageAction> implements Serializable {
 
     /**
      *
      */
     private static final long serialVersionUID = 4096406460140799114L;
     private Page page;
-    private String id;
-    private String name;
-    private String description;
-    private String image;
+
     private String actionClass;
     private double position;
     private boolean featured;
@@ -45,8 +42,7 @@ public class PageAction implements Serializable {
     }
 
     public PageAction(String id, String name) {
-        this.id = id;
-        this.name = name;
+        super(id, name);
     }
 
     public PageAction(Page page) {
@@ -55,43 +51,31 @@ public class PageAction implements Serializable {
     }
 
     public PageAction(Page page, String id, String name) {
-        super();
-        this.id = id;
+        super(id, name);
         this.page = page;
-        this.name = name;
     }
 
     public PageAction(Page page, Action delegate) {
+        this(delegate.getId(), delegate.getName());
+        setIcon(delegate.getImage());
+        setDescription(delegate.getDescription());
         this.page = page;
         this.delegate = delegate;
-        this.id = delegate.getId();
-        this.name = delegate.getName();
-        this.image = delegate.getImage();
-        this.description = delegate.getDescription();
         this.actionClass = delegate.getClass().getName();
         this.position = delegate.getPosition();
     }
 
     public PageAction(Page page, String id, String name, String description) {
-        super();
-        this.id = id;
+        this(id, name);
         this.page = page;
-        this.name = name;
-        this.description = description;
+        setDescription(description);
     }
 
     public PageAction(Page page, String id, String name, String description, String image) {
-        super();
-        this.id = id;
-        this.page = page;
-        this.name = name;
-        this.description = description;
-        this.image = image;
+        this(page,id,name,description);
+        setIcon(image);
     }
 
-    public String getId() {
-        return id;
-    }
 
     public Page getPage() {
         return page;
@@ -101,33 +85,6 @@ public class PageAction implements Serializable {
         this.page = page;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public boolean isFeatured() {
         return featured;
@@ -142,7 +99,7 @@ public class PageAction implements Serializable {
     }
 
     public PageAction image(String image) {
-        setImage(image);
+        setIcon(image);
         return this;
     }
 
@@ -182,10 +139,6 @@ public class PageAction implements Serializable {
     }
 
 
-    @Override
-    public String toString() {
-        return name;
-    }
 
     public String getActionClass() {
         return actionClass;
@@ -203,13 +156,7 @@ public class PageAction implements Serializable {
         this.position = position;
     }
 
-    public void setIcon(String icon) {
-        setImage(icon);
-    }
 
-    public String getIcon() {
-        return getImage();
-    }
 
     public Action getDelegate() {
         return delegate;

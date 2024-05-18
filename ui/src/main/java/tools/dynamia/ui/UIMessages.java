@@ -34,7 +34,6 @@ public class UIMessages {
 
     /**
      * Show a normal user message
-     *
      */
     public static void showMessage(String text) {
         showMessage(text, MessageType.NORMAL);
@@ -42,7 +41,6 @@ public class UIMessages {
 
     /**
      * Show a user message with specific {@link MessageType}
-     *
      */
     public static void showMessage(String text, MessageType type) {
         showMessage(text, null, type);
@@ -50,7 +48,6 @@ public class UIMessages {
 
     /**
      * Show a user message with custom title and {@link MessageType}
-     *
      */
     public static void showMessage(String text, String title, MessageType type) {
         showMessage(text, title, type, null);
@@ -58,7 +55,6 @@ public class UIMessages {
 
     /**
      * Show Message with source object
-     *
      */
     public static void showMessage(String text, String title, MessageType type, Object source) {
         MessageDisplayer displayer = getDisplayer();
@@ -68,7 +64,6 @@ public class UIMessages {
 
     /**
      * Show a localized message using default {@link LocalizedMessagesProvider}
-     *
      */
     public static void showLocalizedMessage(String template, MessageType messageType, Object... vars) {
         String localizedMessage = getLocalizedMessage(template, "* UI Messages");
@@ -88,7 +83,6 @@ public class UIMessages {
     /**
      * Show question or confirmation dialog. When user click [Yes] the onYesResponse
      * callback is called
-     *
      */
     public static void showQuestion(String text, Callback onYesResponse) {
         showQuestion(text, (String) null, onYesResponse);
@@ -97,7 +91,6 @@ public class UIMessages {
     /**
      * Show question or confirmation dialog with custom title. When user click [Yes] the onYesResponse
      * callback is called.
-     *
      */
     public static void showQuestion(String text, String title, Callback onYesResponse) {
         getDisplayer().showQuestion(text, title, onYesResponse);
@@ -106,7 +99,6 @@ public class UIMessages {
     /**
      * Show question or confirmation dialog. When user click [Yes] the onYesResponse
      * callback is called and when [NO] onNoResponse callback is called.
-     *
      */
     public static void showQuestion(String text, Callback onYesResponse, Callback onNoResponse) {
         showQuestion(text, null, onYesResponse, onNoResponse);
@@ -115,7 +107,6 @@ public class UIMessages {
     /**
      * Show question or confirmation dialog with custom title. When user click [Yes] the onYesResponse
      * callback is called and when [NO] onNoResponse callback is called.
-     *
      */
     public static void showQuestion(String text, String title, Callback onYesResponse, Callback onNoResponse) {
         getDisplayer().showQuestion(text, title, onYesResponse, onNoResponse);
@@ -123,7 +114,6 @@ public class UIMessages {
 
     /**
      * Show Questing with localized message
-     *
      */
     public static void showLocalizedQuestion(String template, Object[] vars, Callback onYesResponse) {
         String localizedMessage = getLocalizedMessage(template, "* UI Messages");
@@ -132,6 +122,7 @@ public class UIMessages {
     }
 
     /**
+     *
      */
     public static void showLocalizedQuestion(String template, List<Object> vars, Callback onYesResponse) {
         showLocalizedQuestion(template, vars.toArray(), onYesResponse);
@@ -139,6 +130,7 @@ public class UIMessages {
     }
 
     /**
+     *
      */
     public static void showLocalizedQuestion(String template, Callback onYesResponse) {
         showLocalizedQuestion(template, new Object[0], onYesResponse);
@@ -148,7 +140,6 @@ public class UIMessages {
     /**
      * Show basic input dialog with custom title. Value class is used to create a proper ui component. For example a {@link java.util.Date}
      * will show a Datebox o date picker component. Consumer is called when some value (null include) is selected.
-     *
      */
     public static <T> void showInput(String title, Class<T> valueClass, Consumer<T> onValue) {
         getDisplayer().showInput(title, valueClass, onValue);
@@ -157,7 +148,6 @@ public class UIMessages {
     /**
      * Show basic input dialog with custom title and default value. Value class is used to create a proper ui component. For example a {@link java.util.Date}
      * will show a Datebox o date picker component. Consumer is called when some value (null include) is selected.
-     *
      */
     public static <T> void showInput(String title, Class<T> valueClass, T defaultValue, Consumer<T> onValue) {
         getDisplayer().showInput(title, valueClass, defaultValue, onValue);
@@ -165,7 +155,6 @@ public class UIMessages {
 
     /**
      * Return a localized message using the first non-null value from {@link LocalizedMessagesProvider} providers
-     *
      */
     public static String getLocalizedMessage(String key, String classfier, Locale locale, String defaultValue) {
         var providers = new ArrayList<>(Containers.get().findObjects(LocalizedMessagesProvider.class));
@@ -185,7 +174,6 @@ public class UIMessages {
 
     /**
      * Localize message using key and default locale
-     *
      */
     public static String getLocalizedMessage(String key) {
         return getLocalizedMessage(key, null, Messages.getDefaultLocale(), key);
@@ -194,7 +182,6 @@ public class UIMessages {
 
     /**
      * Localize message using key, classifer and default locale
-     *
      */
     public static String getLocalizedMessage(String key, String classier) {
         return getLocalizedMessage(key, classier, Messages.getDefaultLocale(), key);
@@ -202,7 +189,6 @@ public class UIMessages {
 
     /**
      * Localize message using a key with custom classifer or group and default locale
-     *
      */
     public static String getLocalizedMessage(String key, String classifier, String defaultValue) {
         return getLocalizedMessage(key, classifier, Messages.getDefaultLocale(), defaultValue);
@@ -229,6 +215,15 @@ public class UIMessages {
         String localizedMessage = getLocalizedMessage(template, "* UI Messages");
         String message = String.format(localizedMessage, vars);
         showException(message, e);
+    }
+
+    /**
+     * Show {@link Throwable} message as {@link MessageType}.WARNING type
+     *
+     * @param e
+     */
+    public static void showMessage(Throwable e) {
+        showMessage(e.getMessage(), MessageType.WARNING);
     }
 
 }
