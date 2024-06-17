@@ -16,6 +16,10 @@
  */
 package tools.dynamia.domain.query;
 
+import tools.dynamia.commons.DateTimeUtils;
+
+import java.util.Date;
+
 /**
  * The Class Between.
  *
@@ -59,8 +63,8 @@ public class Between implements QueryCondition {
     /**
      * Instantiates a new between.
      *
-     * @param valueLo the value lo
-     * @param valueHi the value hi
+     * @param valueLo   the value lo
+     * @param valueHi   the value hi
      * @param booleanOp the boolean op
      */
     public Between(Object valueLo, Object valueHi, BooleanOp booleanOp) {
@@ -82,7 +86,7 @@ public class Between implements QueryCondition {
      * Format.
      *
      * @param property the property
-     * @param i the i
+     * @param i        the i
      * @return the string
      */
     private String format(String property, int i) {
@@ -165,4 +169,13 @@ public class Between implements QueryCondition {
         }
     }
 
+    @Override
+    public boolean match(Object otherValue) {
+        if (getValueLo() instanceof Number lo && getValueHi() instanceof Number hi && otherValue instanceof Number other) {
+            return other.doubleValue() >= lo.doubleValue() && other.doubleValue() <= hi.doubleValue();
+        } else if (getValueLo() instanceof Date lo && getValueHi() instanceof Date hi && otherValue instanceof Date other) {
+            return (other.after(lo) || other.equals(lo)) && (other.before(hi) || other.equals(hi));
+        }
+        return false;
+    }
 }

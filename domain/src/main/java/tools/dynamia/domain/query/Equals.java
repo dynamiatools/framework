@@ -34,7 +34,7 @@ public class Equals extends AbstractQueryCondition<Object> {
     /**
      * Instantiates a new equals.
      *
-     * @param value the value
+     * @param value     the value
      * @param booleanOp the boolean op
      */
     public Equals(Object value, BooleanOp booleanOp) {
@@ -56,5 +56,10 @@ public class Equals extends AbstractQueryCondition<Object> {
     @Override
     protected String getOperator() {
         return "=";
+    }
+
+    @Override
+    public boolean match(Object otherValue) {
+        return getValue() != null && getValue().equals(otherValue);
     }
 }
