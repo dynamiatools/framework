@@ -53,6 +53,11 @@ public class SpringObjectContainer implements ObjectContainer, ApplicationContex
         Containers.get().installObjectContainer(this);
     }
 
+    @Override
+    public String getName() {
+        return "spring";
+    }
+
     /*
      * (non-Javadoc)
      *

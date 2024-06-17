@@ -16,10 +16,9 @@
  */
 package tools.dynamia.integration;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import tools.dynamia.commons.StringUtils;
+
+import java.util.*;
 
 
 /**
@@ -32,26 +31,27 @@ public class SimpleObjectContainer implements ObjectContainer {
      */
     private final Map<Object, String> objects = new HashMap<>();
 
-    private String name = getClass().getSimpleName();
+    private final String name;
 
     public SimpleObjectContainer() {
+        name = StringUtils.randomString();
     }
 
     public SimpleObjectContainer(String name) {
-        super();
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
     /*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * tools.dynamia.integration.ObjectContainer#getObject(java.lang.String,
-	 * java.lang.Class)
+     * (non-Javadoc)
+     *
+     * @see
+     * tools.dynamia.integration.ObjectContainer#getObject(java.lang.String,
+     * java.lang.Class)
      */
     @Override
     public <T> T getObject(String name, Class<T> type) {
@@ -66,9 +66,9 @@ public class SimpleObjectContainer implements ObjectContainer {
     }
 
     /*
-	 * (non-Javadoc)
-	 * 
-	 * @see tools.dynamia.integration.ObjectContainer#getObject(java.lang.Class)
+     * (non-Javadoc)
+     *
+     * @see tools.dynamia.integration.ObjectContainer#getObject(java.lang.Class)
      */
     @Override
     public <T> T getObject(Class<T> type) {
@@ -81,10 +81,10 @@ public class SimpleObjectContainer implements ObjectContainer {
     }
 
     /*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * tools.dynamia.integration.ObjectContainer#getObjects(java.lang.Class)
+     * (non-Javadoc)
+     *
+     * @see
+     * tools.dynamia.integration.ObjectContainer#getObjects(java.lang.Class)
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -101,10 +101,10 @@ public class SimpleObjectContainer implements ObjectContainer {
     }
 
     /*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * tools.dynamia.integration.ObjectContainer#getObject(java.lang.String)
+     * (non-Javadoc)
+     *
+     * @see
+     * tools.dynamia.integration.ObjectContainer#getObject(java.lang.String)
      */
     @Override
     public Object getObject(String name) {
@@ -114,7 +114,7 @@ public class SimpleObjectContainer implements ObjectContainer {
     /**
      * Adds the object.
      *
-     * @param name the name
+     * @param name   the name
      * @param object the object
      */
     public void addObject(String name, Object object) {
