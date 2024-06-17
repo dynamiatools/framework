@@ -22,11 +22,11 @@
 
     <artifactId>tools.dynamia.commons</artifactId>
     <packaging>jar</packaging>
-    <version>5.1.2</version>
+    <version>5.1.3</version>
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.1.2</version>
+        <version>5.1.3</version>
     </parent>
     <name>DynamiaTools - Commons</name>
     <url>https://dynamia.tools/docs/common</url>
