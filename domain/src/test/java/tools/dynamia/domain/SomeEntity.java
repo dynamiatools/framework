@@ -63,4 +63,9 @@ public class SomeEntity extends SuperEntity implements Transferable<SomeEntityDT
     public void setActive(boolean active) {
         this.active = active;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
