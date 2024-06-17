@@ -35,8 +35,6 @@ public class InMemoryCrudService extends AbstractCrudService {
     }
 
     protected List<?> filter(QueryParameters parameters, List<?> objects) {
-        //TODO: filter objects  using parameters
-
         if (parameters == null || parameters.isEmpty()) {
             return objects;
         } else {

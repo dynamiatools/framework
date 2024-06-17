@@ -87,8 +87,15 @@ public class InMemoryCrudServiceTest {
         var result = crudService.update(entity);
 
         Assert.assertEquals(result.getAge(), 100);
+    }
 
-
+    @Test
+    public void shoudListEntityProperties() {
+        CrudService crudService = new InMemoryCrudService();
+        createSamples(crudService);
+        List<String> names = crudService.getPropertyValues(SomeEntity.class, "name");
+        System.out.println(names);
+        Assert.assertEquals(names.size(), 10);
     }
 
     private static void createSamples(CrudService crudService) {
