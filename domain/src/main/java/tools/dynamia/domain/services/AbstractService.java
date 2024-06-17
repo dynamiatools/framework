@@ -35,6 +35,19 @@ public abstract class AbstractService {
     private GraphCrudService graphCrudService;
     private Parameters appParams;
 
+    public AbstractService() {
+    }
+
+    public AbstractService(CrudService crudService) {
+        this.crudService = crudService;
+    }
+
+
+    public AbstractService(CrudService crudService, Parameters appParams) {
+        this.crudService = crudService;
+        this.appParams = appParams;
+    }
+
     protected CrudService crudService() {
         if (crudService == null) {
             crudService = DomainUtils.lookupCrudService();
