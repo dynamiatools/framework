@@ -163,6 +163,38 @@ public class InMemoryCrudServiceTest {
 
     }
 
+    @Test
+    public void shouldUpdateCounters() {
+        CrudService crudService = new InMemoryCrudService();
+
+        OtherEntity entity = new OtherEntity();
+        crudService.increaseCounter(entity, "counter");
+        crudService.increaseCounter(entity, "counter");
+        crudService.increaseCounter(entity, "counter");
+        Assert.assertEquals(entity.getCounter(), 3);
+
+        crudService.deacreaseCounter(entity, "counter");
+        Assert.assertEquals(entity.getCounter(), 2);
+
+        crudService.increaseCounter(entity, "otherCounter");
+        crudService.increaseCounter(entity, "otherCounter");
+        crudService.increaseCounter(entity, "otherCounter");
+        Assert.assertEquals(entity.getOtherCounter(), 3);
+
+        crudService.deacreaseCounter(entity, "otherCounter");
+        Assert.assertEquals(entity.getOtherCounter(), 2);
+
+
+        crudService.increaseCounter(entity, "anotherCounter");
+        crudService.increaseCounter(entity, "anotherCounter");
+        crudService.increaseCounter(entity, "anotherCounter");
+        Assert.assertEquals(entity.getAnotherCounter().longValue(), 3L);
+
+        crudService.deacreaseCounter(entity, "anotherCounter");
+        Assert.assertEquals(entity.getAnotherCounter().longValue(), 2L);
+
+    }
+
     private static void createSamples(CrudService crudService) {
         for (int i = 0; i < 10; i++) {
             var entity = new SomeEntity();

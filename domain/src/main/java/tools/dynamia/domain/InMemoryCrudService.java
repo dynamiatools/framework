@@ -310,6 +310,30 @@ public class InMemoryCrudService extends AbstractCrudService {
     }
 
     @Override
+    public void increaseCounter(Object entity, String counterName) {
+        Object counterValue = BeanUtils.getFieldValue(counterName, entity);
+        if (counterValue instanceof Long number) {
+            number = number + 1;
+            BeanUtils.setFieldValue(counterName, entity, number);
+        } else if (counterValue instanceof Integer number) {
+            number = number + 1;
+            BeanUtils.setFieldValue(counterName, entity, number);
+        }
+    }
+
+    @Override
+    public void deacreaseCounter(Object entity, String counterName) {
+        Object counterValue = BeanUtils.getFieldValue(counterName, entity);
+        if (counterValue instanceof Long number) {
+            number = number - 1;
+            BeanUtils.setFieldValue(counterName, entity, number);
+        } else if (counterValue instanceof Integer number) {
+            number = number - 1;
+            BeanUtils.setFieldValue(counterName, entity, number);
+        }
+    }
+
+    @Override
     public Object getDelgate() {
         return this;
     }
@@ -328,4 +352,5 @@ public class InMemoryCrudService extends AbstractCrudService {
             validator.validate(obj);
         }
     }
+
 }
