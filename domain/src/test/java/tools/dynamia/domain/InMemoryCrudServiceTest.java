@@ -63,11 +63,32 @@ public class InMemoryCrudServiceTest {
 
 
         Assert.assertEquals(filtered.size(), 5);
-
         filtered = crudService.find(SomeEntity.class, QueryParameters.with("age", 41));
-
-
         Assert.assertEquals(filtered.size(), 1);
+    }
+
+    @Test
+    public void shouldFilterByParamtersWithPathProperties() {
+        CrudService crudService = new InMemoryCrudService();
+
+
+        SomeEntity entity = new SomeEntity();
+        entity.setName("Entity");
+        entity.setActive(true);
+
+        OtherEntity other = new OtherEntity();
+        other.setName("Other");
+        other.setActive(true);
+        entity.setOtherEntity(other);
+
+        crudService.create(entity);
+
+
+        var result = crudService.find(SomeEntity.class, QueryParameters.with("active", true)
+                .add("otherEntity.name", "Other")
+                .add("otherEntity.active", true));
+
+        Assert.assertEquals(result.size(), 1);
     }
 
     @Test

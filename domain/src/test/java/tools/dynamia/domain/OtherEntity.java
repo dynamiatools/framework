@@ -21,6 +21,7 @@ public class OtherEntity {
 
     private Long id;
     private String name;
+    private boolean active;
 
     public Long getId() {
         return id;
@@ -41,5 +42,13 @@ public class OtherEntity {
     @Override
     public String toString() {
         return name;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }
