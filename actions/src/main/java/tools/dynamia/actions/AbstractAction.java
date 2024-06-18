@@ -320,4 +320,12 @@ public abstract class AbstractAction implements Action {
     public String getSclass() {
         return (String) getAttribute("sclass");
     }
+
+    public void setAlwaysVisible(boolean visible) {
+        setAttribute("alwaysVisible", visible);
+    }
+
+    public boolean isAlwaysVisible() {
+        return Boolean.TRUE.equals(getAttribute("alwaysVisible"));
+    }
 }
