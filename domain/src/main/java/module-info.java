@@ -1,7 +1,8 @@
 open module tools.dynamia.domain {
     requires tools.dynamia.commons;
-    requires jakarta.validation;
     requires tools.dynamia.integration;
+    requires jakarta.validation;
+
     requires com.fasterxml.jackson.databind;
     requires spring.context;
     requires java.sql;
