@@ -333,6 +333,12 @@ public class InMemoryCrudService extends AbstractCrudService {
         }
     }
 
+
+    @Override
+    public <T> T getFieldValue(Object entity, String fieldName, Class<T> fieldClass) {
+        return (T) BeanUtils.getFieldValue(fieldName, entity);
+    }
+
     @Override
     public Object getDelgate() {
         return this;
