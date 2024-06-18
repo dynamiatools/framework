@@ -252,7 +252,7 @@ public final class BeanUtils {
             final String subProperty = propertyName.substring(0, dotIndex);
             final Object subBean = invokeMethod(bean, formatGetMethod(subProperty));
             final String rest = propertyName.substring(dotIndex + 1);
-            result = invokeGetMethod(subBean, rest);
+            result = invokeBooleanGetMethod(subBean, rest);
         } else {
             result = invokeMethod(bean, formatBooleanGetMethod(propertyName));
         }
