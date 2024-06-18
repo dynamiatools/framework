@@ -7,14 +7,15 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.ReflectionException;
 import tools.dynamia.domain.query.QueryCondition;
 import tools.dynamia.domain.query.QueryParameters;
+import tools.dynamia.domain.services.ValidatorService;
 import tools.dynamia.domain.services.impl.AbstractCrudService;
+import tools.dynamia.domain.services.impl.DefaultValidatorService;
 import tools.dynamia.domain.util.CrudServiceListener;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.domain.util.QueryBuilder;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,13 +29,26 @@ public class InMemoryCrudService extends AbstractCrudService {
     private static LoggingService LOGGER = new SLF4JLoggingService(InMemoryCrudService.class);
     private List<CrudServiceListener> listeners;
     private Map<Class<?>, List<Object>> database = new ConcurrentHashMap<>();
+    private ValidatorService validator;
 
+    public InMemoryCrudService() {
+    }
+
+    public InMemoryCrudService(List<CrudServiceListener> listeners) {
+        this.listeners = listeners;
+    }
+
+    public InMemoryCrudService(List<CrudServiceListener> listeners, ValidatorService validator) {
+        this.listeners = listeners;
+        this.validator = validator;
+    }
 
     public List<Object> getEntities(Class<?> entityClass) {
         return database.computeIfAbsent(entityClass, k -> new ArrayList<>());
     }
 
     protected List<?> filter(QueryParameters parameters, List<?> objects) {
+        fireListeners(parameters, EventType.BEFORE_QUERY);
         if (parameters == null || parameters.isEmpty()) {
             return objects;
         } else {
@@ -48,6 +62,7 @@ public class InMemoryCrudService extends AbstractCrudService {
             }
             objects = filtered;
         }
+        fireListeners(parameters, EventType.AFTER_QUERY);
         return objects;
     }
 
@@ -122,6 +137,8 @@ public class InMemoryCrudService extends AbstractCrudService {
     @Override
     public <T> T create(T t) {
         if (t != null) {
+            fireListeners(t, EventType.BEFORE_CREATE);
+            validate(t);
             var entities = getEntities(t.getClass());
             entities.add(t);
             try {
@@ -129,27 +146,37 @@ public class InMemoryCrudService extends AbstractCrudService {
             } catch (Exception e) {
                 //ignore
             }
+            fireListeners(t, EventType.AFTER_CREATE);
         }
         return t;
     }
 
     @Override
     public <T> T update(T t) {
+        fireListeners(t, EventType.BEFORE_UPDATE);
+        validate(t);
+        fireListeners(t, EventType.AFTER_UPDATE);
         return t;
     }
 
     @Override
     public <T> void delete(T t) {
         if (t != null) {
+            fireListeners(t, EventType.BEFORE_DELETE);
             getEntities(t.getClass()).remove(t);
+            fireListeners(t, EventType.AFTER_DELETE);
         }
     }
 
     @Override
     public void delete(Class type, Serializable id) {
-        List entities = getEntities(type);
+
         try {
-            entities.removeIf(o -> id.equals(findId(o)));
+            List entities = getEntities(type);
+            Object entity = entities.stream().filter(o -> id.equals(findId(o))).findFirst().orElse(null);
+            if (entity != null) {
+                delete(entity);
+            }
         } catch (Exception e) {
             LOGGER.error("Error deleting by class and id", e);
         }
@@ -172,9 +199,7 @@ public class InMemoryCrudService extends AbstractCrudService {
 
     @Override
     public <T> List<T> findAll(Class<T> type) {
-        List entities = getEntities(type);
-        List<T> result = (List<T>) Collections.unmodifiableList(entities);
-        return result;
+        return (List<T>) filter(new QueryParameters(), getEntities(type));
     }
 
     @Override
@@ -287,5 +312,20 @@ public class InMemoryCrudService extends AbstractCrudService {
     @Override
     public Object getDelgate() {
         return this;
+    }
+
+    protected void validate(Object obj) {
+
+        if (validator == null) {
+            try {
+                validator = new DefaultValidatorService();
+            } catch (Exception e) {
+                LOGGER.warn("Cannot create default validator service: " + e.getMessage());
+            }
+        }
+
+        if (validator != null) {
+            validator.validate(obj);
+        }
     }
 }

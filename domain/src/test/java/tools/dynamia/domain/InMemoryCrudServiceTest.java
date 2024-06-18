@@ -5,8 +5,10 @@ import org.junit.Test;
 import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
+import tools.dynamia.domain.util.CrudServiceListener;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class InMemoryCrudServiceTest {
 
@@ -96,6 +98,48 @@ public class InMemoryCrudServiceTest {
         List<String> names = crudService.getPropertyValues(SomeEntity.class, "name");
         System.out.println(names);
         Assert.assertEquals(names.size(), 10);
+    }
+
+    @Test(expected = ValidationError.class)
+    public void shouldValidatePersonName() {
+        CrudService crudService = new InMemoryCrudService();
+        crudService.create(new Person(null, 19));
+    }
+
+    @Test(expected = ValidationError.class)
+    public void shouldValidatePersonAge() {
+        CrudService crudService = new InMemoryCrudService();
+        crudService.create(new Person("Jhon", 15));
+    }
+
+    @Test
+    public void shouldFireListeners() {
+        AtomicBoolean beforeCreateFired = new AtomicBoolean(false);
+        AtomicBoolean afterCreateFired = new AtomicBoolean(false);
+
+        var fixAgeListener = new CrudServiceListener<Person>() {
+            @Override
+            public void beforeCreate(Person entity) {
+                beforeCreateFired.set(true);
+                if (entity.getAge() < 18) {
+                    System.out.println("Fixing Age");
+                    entity.setAge(20);
+                }
+            }
+
+            @Override
+            public void afterCreate(Person entity) {
+                afterCreateFired.set(true);
+            }
+        };
+
+        CrudService crudService = new InMemoryCrudService(List.of(fixAgeListener));
+        Person young = new Person("Mario", 15);
+        crudService.create(young);
+        Assert.assertEquals(young.getAge(), 20);
+        Assert.assertTrue(beforeCreateFired.get());
+        Assert.assertTrue(afterCreateFired.get());
+
     }
 
     private static void createSamples(CrudService crudService) {
