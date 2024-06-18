@@ -16,6 +16,8 @@
  */
 package tools.dynamia.integration.sterotypes;
 
+import org.springframework.core.annotation.AliasFor;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -39,5 +41,6 @@ public @interface Repository {
      *
      * @return the suggested component name, if any
      */
+    @AliasFor(annotation = org.springframework.stereotype.Repository.class)
     String value() default "";
 }
