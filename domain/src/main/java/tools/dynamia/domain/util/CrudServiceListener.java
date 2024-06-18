@@ -29,8 +29,8 @@ import java.util.List;
  * the crudService event occurs, that object's appropriate
  * method is invoked.
  *
- * @author Mario A. Serrano Leones
  * @param <T> the generic type
+ * @author Mario A. Serrano Leones
  */
 public interface CrudServiceListener<T> {
 
@@ -39,54 +39,62 @@ public interface CrudServiceListener<T> {
      *
      * @param entity the entity
      */
-    void beforeCreate(T entity);
+    default void beforeCreate(T entity) {
+    }
 
     /**
      * After create.
      *
      * @param entity the entity
      */
-    void afterCreate(T entity);
+    default void afterCreate(T entity) {
+    }
 
     /**
      * Before update.
      *
      * @param entity the entity
      */
-    void beforeUpdate(T entity);
+    default void beforeUpdate(T entity) {
+    }
 
     /**
      * After update.
      *
      * @param entity the entity
      */
-    void afterUpdate(T entity);
+    default void afterUpdate(T entity) {
+    }
 
     /**
      * Before delete.
      *
      * @param entity the entity
      */
-    void beforeDelete(T entity);
+    default void beforeDelete(T entity) {
+    }
 
     /**
      * After delete.
      *
      * @param entity the entity
      */
-    void afterDelete(T entity);
+    default void afterDelete(T entity) {
+    }
 
     /**
      * Before query.
      *
      * @param params the params
      */
-    void beforeQuery(QueryParameters params);
+    default void beforeQuery(QueryParameters params) {
+    }
 
     /**
      * After query.
      *
      * @param result the result
      */
-    void afterQuery(List<T> result);
+    default void afterQuery(List<T> result) {
+    }
 }
