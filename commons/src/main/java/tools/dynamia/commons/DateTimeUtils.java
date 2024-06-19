@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.chrono.ChronoLocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAccessor;
@@ -99,7 +100,7 @@ public final class DateTimeUtils {
     }
 
     /**
-     * Check if passed date has the same year, month and day of current system date
+     * Null safe check if passed date has the same year, month and day of current system date
      *
      * @return if is today
      */
@@ -405,8 +406,9 @@ public final class DateTimeUtils {
 
     /**
      * Format LocalDate, LocalTime, LocalDateTime and other {@link TemporalAccessor}
+     *
      * @param temporalAccessor date, time, instant
-     * @param pattern date patter
+     * @param pattern          date patter
      * @return
      */
     public static String format(TemporalAccessor temporalAccessor, String pattern) {
@@ -635,4 +637,301 @@ public final class DateTimeUtils {
     public static String format(DateRange dateRange, String pattern) {
         return format(dateRange.getStartDate(), pattern) + " - " + format(dateRange.getEndDate(), pattern);
     }
+
+    /**
+     * Null safe check if date is between start and end date
+     *
+     * @param date
+     * @param start
+     * @param end
+     * @return
+     */
+    public static boolean isBetween(Date date, Date start, Date end) {
+        if (date == null || start == null || end == null) {
+            return false;
+        }
+        return (date.after(start) || date.equals(start)) && (date.before(end) || date.equals(end));
+    }
+
+    /**
+     * Null safe check if date is between start and end date
+     *
+     * @param date
+     * @param start
+     * @param end
+     * @return
+     */
+    public static boolean isBetween(ChronoLocalDate date, ChronoLocalDate start, ChronoLocalDate end) {
+        if (date == null || start == null || end == null) {
+            return false;
+        }
+        return (date.isAfter(start) || date.equals(start)) && (date.isBefore(end) || date.equals(end));
+    }
+
+    /**
+     * Null safe check if datetime is between start and end date
+     *
+     * @param date
+     * @param start
+     * @param end
+     * @return
+     */
+    public static boolean isBetween(LocalDateTime date, LocalDateTime start, LocalDateTime end) {
+        if (date == null || start == null || end == null) {
+            return false;
+        }
+        return (date.isAfter(start) || date.equals(start)) && (date.isBefore(end) || date.equals(end));
+    }
+
+    /**
+     * Null safe check if instant is between start and end instant
+     *
+     * @param date
+     * @param start
+     * @param end
+     * @return
+     */
+    public static boolean isBetween(Instant date, Instant start, Instant end) {
+        if (date == null || start == null || end == null) {
+            return false;
+        }
+        return (date.isAfter(start) || date.equals(start)) && (date.isBefore(end) || date.equals(end));
+    }
+
+    /**
+     * Null safe check if date1 is after or equals to date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isAfterOrEquals(ChronoLocalDate date1, ChronoLocalDate date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+        return date1.isAfter(date2) || date1.equals(date2);
+    }
+
+    /**
+     * Null safe check if date1 is before or equals to date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isBeforeOrEquals(ChronoLocalDate date1, ChronoLocalDate date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+        return date1.isBefore(date2) || date1.equals(date2);
+    }
+
+    /**
+     * Null safe check if date1 is after or equals to date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isAfterOrEquals(Date date1, Date date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+        return date1.after(date2) || date1.equals(date2);
+    }
+
+    /**
+     * Null safe check if date1 is before or equals to date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isBeforeOrEquals(Date date1, Date date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+        return date1.before(date2) || date1.equals(date2);
+    }
+
+
+    /**
+     * Null safe check if date1 is after or equals to date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isAfterOrEquals(LocalDateTime date1, LocalDateTime date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+        return date1.isAfter(date2) || date1.equals(date2);
+    }
+
+    /**
+     * Null safe check if date1 is before or equals to date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isBeforeOrEquals(LocalDateTime date1, LocalDateTime date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+        return date1.isBefore(date2) || date1.equals(date2);
+    }
+
+    /**
+     * Null safe check if date1 is after or equals to date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isAfterOrEquals(Instant date1, Instant date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+        return date1.isAfter(date2) || date1.equals(date2);
+    }
+
+    /**
+     * Null safe check if date1 is before or equals to date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isBeforeOrEquals(Instant date1, Instant date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+        return date1.isBefore(date2) || date1.equals(date2);
+    }
+
+
+    /**
+     * Null safe check if date1 is before date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isBefore(Date date1, Date date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+
+        return date1.before(date2);
+    }
+
+    /**
+     * Null safe check if date1 is before date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isBefore(ChronoLocalDate date1, ChronoLocalDate date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+
+        return date1.isBefore(date2);
+    }
+
+    /**
+     * Null safe check if date1 is before date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isBefore(LocalDateTime date1, LocalDateTime date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+
+        return date1.isBefore(date2);
+    }
+
+    /**
+     * Null safe check if date1 is before date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isBefore(Instant date1, Instant date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+
+        return date1.isBefore(date2);
+    }
+
+
+    /**
+     * Null safe check if date1 is after date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isAfter(Date date1, Date date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+
+        return date1.after(date2);
+    }
+
+    /**
+     * Null safe check if date1 is after date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isAfter(ChronoLocalDate date1, ChronoLocalDate date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+
+        return date1.isAfter(date2);
+    }
+
+    /**
+     * Null safe check if date1 is after date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isAfter(LocalDateTime date1, LocalDateTime date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+
+        return date1.isAfter(date2);
+    }
+
+    /**
+     * Null safe check if date1 is after date 2
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean isAfter(Instant date1, Instant date2) {
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+
+        return date1.isAfter(date2);
+    }
+
+
 }

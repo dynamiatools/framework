@@ -47,9 +47,14 @@ public class InMemoryCrudService extends AbstractCrudService {
         return database.computeIfAbsent(entityClass, k -> new ArrayList<>());
     }
 
-    protected List<?> filter(QueryParameters parameters, List<?> objects) {
+    protected List<?> filter(QueryParameters parameters, List<?> objects, Class<?> type) {
+        LOGGER.info("Filtering entities of type " + type + " using parameters " + parameters);
+        if (parameters == null) {
+            parameters = new QueryParameters();
+        }
+        parameters.setType(type);
         fireListeners(parameters, EventType.BEFORE_QUERY);
-        if (parameters == null || parameters.isEmpty()) {
+        if (parameters.isEmpty()) {
             return objects;
         } else {
             List<?> filtered = objects;
@@ -112,6 +117,22 @@ public class InMemoryCrudService extends AbstractCrudService {
         this.listeners = listeners;
     }
 
+    public void addListener(CrudServiceListener listener) {
+        if (listeners == null) {
+            listeners = new ArrayList<>();
+        }
+
+        listeners.add(listener);
+    }
+
+    public void setValidator(ValidatorService validator) {
+        this.validator = validator;
+    }
+
+    public ValidatorService getValidator() {
+        return validator;
+    }
+
     @Override
     public Serializable getId(Class entityClass, QueryParameters params) {
         Serializable id = null;
@@ -139,6 +160,7 @@ public class InMemoryCrudService extends AbstractCrudService {
         if (t != null) {
             fireListeners(t, EventType.BEFORE_CREATE);
             validate(t);
+            LOGGER.info("Creating entity: " + t);
             var entities = getEntities(t.getClass());
             entities.add(t);
             try {
@@ -155,6 +177,7 @@ public class InMemoryCrudService extends AbstractCrudService {
     public <T> T update(T t) {
         fireListeners(t, EventType.BEFORE_UPDATE);
         validate(t);
+        LOGGER.info("Updating entity: " + t);
         fireListeners(t, EventType.AFTER_UPDATE);
         return t;
     }
@@ -163,6 +186,7 @@ public class InMemoryCrudService extends AbstractCrudService {
     public <T> void delete(T t) {
         if (t != null) {
             fireListeners(t, EventType.BEFORE_DELETE);
+            LOGGER.info("Deleting entity: " + t);
             getEntities(t.getClass()).remove(t);
             fireListeners(t, EventType.AFTER_DELETE);
         }
@@ -184,12 +208,14 @@ public class InMemoryCrudService extends AbstractCrudService {
 
     @Override
     public void deleteAll(Class type) {
+        LOGGER.info("Deleting all entities ");
         getEntities(type).clear();
     }
 
     @Override
     public void updateField(Object entity, String field, Object value) {
         try {
+            LOGGER.info("Updating entity: " + entity + " field: " + field + " value: " + value);
             BeanUtils.setFieldValue(field, entity, value);
         } catch (Exception e) {
             LOGGER.error("Error updating field  [" + field + "] of entity " + entity + " with value [" + value + "]");
@@ -199,7 +225,7 @@ public class InMemoryCrudService extends AbstractCrudService {
 
     @Override
     public <T> List<T> findAll(Class<T> type) {
-        return (List<T>) filter(new QueryParameters(), getEntities(type));
+        return (List<T>) filter(new QueryParameters(), getEntities(type), type);
     }
 
     @Override
@@ -209,7 +235,7 @@ public class InMemoryCrudService extends AbstractCrudService {
 
     @Override
     public <T> List<T> find(Class<T> type, QueryParameters parameters) {
-        return (List<T>) filter(parameters, getEntities(type));
+        return (List<T>) filter(parameters, getEntities(type), type);
     }
 
     @Override
@@ -239,13 +265,13 @@ public class InMemoryCrudService extends AbstractCrudService {
 
     @Override
     public <T> T findSingle(Class<T> type, String property, Object value) {
-        var result = filter(QueryParameters.with(property, value), getEntities(type));
+        var result = filter(QueryParameters.with(property, value), getEntities(type), type);
         return (T) result.stream().findFirst().orElse(null);
     }
 
     @Override
     public <T> T findSingle(Class<T> entityClass, QueryParameters params) {
-        var result = filter(params, getEntities(entityClass));
+        var result = filter(params, getEntities(entityClass), entityClass);
         return (T) result.stream().findFirst().orElse(null);
     }
 
@@ -274,7 +300,7 @@ public class InMemoryCrudService extends AbstractCrudService {
     @Override
     public List getPropertyValues(Class entityClass, String property, QueryParameters params) {
         try {
-            return filter(params, getEntities(entityClass))
+            return filter(params, getEntities(entityClass), entityClass)
                     .stream()
                     .map(o -> BeanUtils.getFieldValue(property, o))
                     .toList();
@@ -286,12 +312,16 @@ public class InMemoryCrudService extends AbstractCrudService {
 
     @Override
     public int batchUpdate(Class type, String field, Object value, QueryParameters params) {
-        return 0;
+        var filtered = filter(params, getEntities(type), type);
+        filtered.forEach(o -> updateField(o, field, value));
+        return filtered.size();
     }
 
     @Override
     public int batchUpdate(Class type, Map<String, Object> fieldvalues, QueryParameters params) {
-        return 0;
+        var filtered = filter(params, getEntities(type), type);
+        filtered.forEach(o -> fieldvalues.forEach((field, value) -> updateField(o, field, value)));
+        return filtered.size();
     }
 
     @Override
@@ -306,7 +336,7 @@ public class InMemoryCrudService extends AbstractCrudService {
 
     @Override
     public void executeWithinTransaction(Callback callback) {
-
+        callback.doSomething();
     }
 
     @Override

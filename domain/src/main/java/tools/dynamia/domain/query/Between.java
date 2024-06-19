@@ -18,6 +18,9 @@ package tools.dynamia.domain.query;
 
 import tools.dynamia.commons.DateTimeUtils;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -174,7 +177,13 @@ public class Between implements QueryCondition {
         if (getValueLo() instanceof Number lo && getValueHi() instanceof Number hi && otherValue instanceof Number other) {
             return other.doubleValue() >= lo.doubleValue() && other.doubleValue() <= hi.doubleValue();
         } else if (getValueLo() instanceof Date lo && getValueHi() instanceof Date hi && otherValue instanceof Date other) {
-            return (other.after(lo) || other.equals(lo)) && (other.before(hi) || other.equals(hi));
+            return DateTimeUtils.isBetween(other, lo, hi);
+        } else if (getValueLo() instanceof LocalDate lo && getValueHi() instanceof LocalDate hi && otherValue instanceof LocalDate other) {
+            return DateTimeUtils.isBetween(other, lo, hi);
+        } else if (getValueLo() instanceof LocalDateTime lo && getValueHi() instanceof LocalDateTime hi && otherValue instanceof LocalDateTime other) {
+            return DateTimeUtils.isBetween(other, lo, hi);
+        } else if (getValueLo() instanceof Instant lo && getValueHi() instanceof Instant hi && otherValue instanceof Instant other) {
+            return DateTimeUtils.isBetween(other, lo, hi);
         }
         return false;
     }
