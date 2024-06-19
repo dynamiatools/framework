@@ -18,17 +18,27 @@
 package tools.dynamia.zk.viewers.table;
 
 import org.zkoss.zk.ui.Component;
+import tools.dynamia.viewers.GenericTableFieldComponent;
 
 import java.io.Serializable;
 
-public record TableFieldComponent(String fieldName, Component component) implements Serializable {
+/**
+ * Record for table field component
+ *
+ * @param fieldName
+ * @param component
+ */
+public record TableFieldComponent(String fieldName,
+                                  Component component) implements GenericTableFieldComponent<Component>, Serializable {
 
 
+    @Override
     public String getFieldName() {
         return fieldName;
     }
 
 
+    @Override
     public Component getComponent() {
         return component;
     }

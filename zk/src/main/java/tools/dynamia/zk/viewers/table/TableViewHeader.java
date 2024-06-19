@@ -20,12 +20,12 @@ package tools.dynamia.zk.viewers.table;
 
 import org.zkoss.zul.Listheader;
 import tools.dynamia.viewers.Field;
+import tools.dynamia.viewers.GenericTableViewHeader;
 
 /**
- *
  * @author Mario A. Serrano Leones
  */
-public class TableViewHeader extends Listheader {
+public class TableViewHeader extends Listheader implements GenericTableViewHeader {
 
     private TableView tableView;
     private Field field;
@@ -64,4 +64,13 @@ public class TableViewHeader extends Listheader {
         return tableView;
     }
 
+    @Override
+    public String getLabel() {
+        return super.getLabel();
+    }
+
+    @Override
+    public void setLabel(String label) {
+        super.setLabel(label);
+    }
 }
