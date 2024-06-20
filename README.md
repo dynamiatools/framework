@@ -56,7 +56,13 @@ class MyApplication {
 
 ```xml
 
-<dependencies>   
+<dependencies>
+    <dependency>
+        <groupId>tools.dynamia</groupId>
+        <artifactId>tools.dynamia.app</artifactId>
+        <version>5.1.3</version>
+    </dependency>
+
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.zk</artifactId>
@@ -67,13 +73,14 @@ class MyApplication {
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.domain.jpa</artifactId>
         <version>5.1.3</version>
-    </dependency>    
+    </dependency>
 </dependencies>
 ```
 
 **Gradle**
 
 ```groovy
+compile 'tools.dynamia:tools.dynamia.app:5.1.3'
 compile 'tools.dynamia:tools.dynamia.zk:5.1.3'
 compile 'tools.dynamia:tools.dynamia.domain.jpa:5.1.3'
 ```
