@@ -27,7 +27,7 @@ public class NotEquals extends AbstractQueryCondition<Object> {
     /**
      * Instantiates a new not equals.
      *
-     * @param value the value
+     * @param value     the value
      * @param booleanOp the boolean op
      */
     public NotEquals(Object value, BooleanOp booleanOp) {
@@ -49,5 +49,10 @@ public class NotEquals extends AbstractQueryCondition<Object> {
     @Override
     protected String getOperator() {
         return "<>";
+    }
+
+    @Override
+    public boolean match(Object otherValue) {
+        return getValue() != null && !getValue().equals(otherValue);
     }
 }

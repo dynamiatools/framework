@@ -50,7 +50,7 @@ public class LikeEquals extends AbstractQueryCondition<Object> {
     /**
      * Instantiates a new like equals.
      *
-     * @param value the value
+     * @param value                the value
      * @param autoSearchableString the auto searchable string
      */
     public LikeEquals(Object value, boolean autoSearchableString) {
@@ -60,9 +60,9 @@ public class LikeEquals extends AbstractQueryCondition<Object> {
     /**
      * Instantiates a new like equals.
      *
-     * @param value the value
+     * @param value                the value
      * @param autoSearchableString the auto searchable string
-     * @param booleanOp the boolean op
+     * @param booleanOp            the boolean op
      */
     public LikeEquals(Object value, boolean autoSearchableString, BooleanOp booleanOp) {
         super(value, booleanOp);
@@ -74,7 +74,7 @@ public class LikeEquals extends AbstractQueryCondition<Object> {
      */
     @Override
     public String render(String property) {
-        String operator = getValue() instanceof String && autoSearchableString? " like " : " = ";
+        String operator = getValue() instanceof String && autoSearchableString ? " like " : " = ";
         return property + operator + ":" + format(property);
 
     }
@@ -84,7 +84,7 @@ public class LikeEquals extends AbstractQueryCondition<Object> {
      */
     @Override
     public void apply(String property, AbstractQuery query) {
-    	String paramName = format(property);
+        String paramName = format(property);
         if (query != null) {
             if (getValue() instanceof String) {
                 query.setParameter(paramName, autoSearchableString ? DomainUtils.buildSearcheableString(getValue().toString()) : getValue());
@@ -109,6 +109,11 @@ public class LikeEquals extends AbstractQueryCondition<Object> {
      */
     @Override
     protected String getOperator() {
-        return "=";
+        return "like";
+    }
+
+    @Override
+    public boolean match(Object otherValue) {
+        return String.valueOf(otherValue).contains(String.valueOf(getValue()));
     }
 }

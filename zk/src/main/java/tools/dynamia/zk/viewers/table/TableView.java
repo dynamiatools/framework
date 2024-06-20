@@ -19,6 +19,7 @@
 package tools.dynamia.zk.viewers.table;
 
 import org.zkoss.bind.Binder;
+import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.AbstractListModel;
 import org.zkoss.zul.ListModel;
@@ -35,6 +36,7 @@ import tools.dynamia.domain.fx.Functions;
 import tools.dynamia.domain.fx.MultiFunctionProcessor;
 import tools.dynamia.domain.query.DataSet;
 import tools.dynamia.viewers.DataSetView;
+import tools.dynamia.viewers.GenericTableView;
 import tools.dynamia.viewers.View;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.Viewers;
@@ -55,7 +57,7 @@ import java.util.function.Consumer;
  * @author Mario A. Serrano Leones
  */
 @SuppressWarnings("unchecked")
-public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBeReadonly {
+public class TableView<T> extends Listbox implements GenericTableView<T>, CanBeReadonly {
 
     static {
         BindingComponentIndex.getInstance().put("value", TableView.class);
@@ -182,6 +184,7 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
         this.defaultValue = defaultValue;
     }
 
+    @Override
     public TableFieldComponent getTableFieldComponent(String fieldName, int rowIndex) {
         try {
             Listitem item = getItemAtIndex(rowIndex);
@@ -193,17 +196,21 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
         }
     }
 
-    public TableFieldComponent getTableFieldComponent(String fieldName, Listitem item) {
+    @Override
+    public TableFieldComponent getTableFieldComponent(String fieldName, Object item) {
         try {
-
-            Map<String, TableFieldComponent> tfcMap = (Map<String, TableFieldComponent>) item
-                    .getAttribute("TABLE_FIELD_COMPONENTS");
-            return tfcMap.get(fieldName);
+            if (item instanceof Component component) {
+                Map<String, TableFieldComponent> tfcMap = (Map<String, TableFieldComponent>) component
+                        .getAttribute("TABLE_FIELD_COMPONENTS");
+                return tfcMap.get(fieldName);
+            }
         } catch (Exception e) {
             return null;
         }
+        return null;
     }
 
+    @Override
     public void clear() {
         setValue((List) null);
     }
@@ -239,14 +246,17 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
         }
     }
 
+    @Override
     public void setShowRowNumber(boolean showRowNumber) {
         this.showRowNumber = showRowNumber;
     }
 
+    @Override
     public boolean isShowRowNumber() {
         return showRowNumber;
     }
 
+    @Override
     public boolean isListitemSelected() {
         return getSelectedItem() != null;
     }
@@ -277,6 +287,7 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
         this.contextMenu = contextMenu;
     }
 
+    @Override
     public TableViewFooter getFooter(String fieldName) {
         Listfoot foot = getListfoot();
         if (foot != null) {
@@ -291,6 +302,7 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
         return null;
     }
 
+    @Override
     public TableViewHeader getHeader(String fieldName) {
         Listhead head = getListhead();
         if (head != null) {
@@ -419,7 +431,7 @@ public class TableView<T> extends Listbox implements DataSetView<List<T>>, CanBe
                     }
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

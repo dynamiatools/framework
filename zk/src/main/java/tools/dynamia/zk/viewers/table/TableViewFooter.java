@@ -26,12 +26,13 @@ import tools.dynamia.domain.fx.FunctionProvider;
 import tools.dynamia.domain.util.LabelValue;
 import tools.dynamia.io.converters.Converters;
 import tools.dynamia.viewers.Field;
+import tools.dynamia.viewers.GenericTableViewFooter;
 import tools.dynamia.zk.converters.Util;
 
 /**
  * @author Mario A. Serrano Leones
  */
-public class TableViewFooter extends Listfooter implements FunctionProvider {
+public class TableViewFooter extends Listfooter implements GenericTableViewFooter, FunctionProvider {
 
     private TableView tableView;
     private Field field;
@@ -93,6 +94,11 @@ public class TableViewFooter extends Listfooter implements FunctionProvider {
 
     public Field getField() {
         return field;
+    }
+
+    @Override
+    public void setField(Field field) {
+        this.field = field;
     }
 
     @Override

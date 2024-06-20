@@ -74,4 +74,8 @@ public class IsNotNull implements QueryCondition {
         return null;
     }
 
+    @Override
+    public boolean match(Object otherValue) {
+        return otherValue != null ;
+    }
 }

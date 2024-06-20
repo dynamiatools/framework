@@ -22,75 +22,73 @@ import java.util.Map;
 /**
  * The Class NotInList.
  *
+ * @param <T> the generic type
  * @author Mario A. Serrano Leones
- * @param <T>
- *            the generic type
  */
 public class NotInList<T> extends Inlist<T> {
 
-	/**
-	 * Instantiates a new not in list.
-	 *
-	 * @param values
-	 *            the values
-	 */
-	@SafeVarargs
+    /**
+     * Instantiates a new not in list.
+     *
+     * @param values the values
+     */
+    @SafeVarargs
     public NotInList(T... values) {
-		super(values);
-	}
+        super(values);
+    }
 
-	/**
-	 * Instantiates a new not in list.
-	 *
-	 * @param values
-	 *            the values
-	 */
-	public NotInList(List<T> values) {
-		super(values);
-	}
+    /**
+     * Instantiates a new not in list.
+     *
+     * @param values the values
+     */
+    public NotInList(List<T> values) {
+        super(values);
+    }
 
-	/**
-	 * Instantiates a new not in list.
-	 *
-	 * @param booleanOp
-	 *            the boolean op
-	 * @param values
-	 *            the values
-	 */
-	@SafeVarargs
+    /**
+     * Instantiates a new not in list.
+     *
+     * @param booleanOp the boolean op
+     * @param values    the values
+     */
+    @SafeVarargs
     public NotInList(BooleanOp booleanOp, T... values) {
-		super(booleanOp, values);
-	}
+        super(booleanOp, values);
+    }
 
-	/**
-	 * Instantiates a new not in list.
-	 *
-	 * @param values
-	 *            the values
-	 * @param booleanOp
-	 *            the boolean op
-	 */
-	public NotInList(List<T> values, BooleanOp booleanOp) {
-		super(values, booleanOp);
-	}
+    /**
+     * Instantiates a new not in list.
+     *
+     * @param values    the values
+     * @param booleanOp the boolean op
+     */
+    public NotInList(List<T> values, BooleanOp booleanOp) {
+        super(values, booleanOp);
+    }
 
-	public NotInList(String subquery, Map<String, Object> params) {
-		super(subquery, params);
+    public NotInList(String subquery, Map<String, Object> params) {
+        super(subquery, params);
 
-	}
+    }
 
-	public NotInList(String subquery) {
-		super(subquery);
+    public NotInList(String subquery) {
+        super(subquery);
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see Inlist#getOperator()
-	 */
-	@Override
-	protected String getOperator() {
-		return "not in";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see Inlist#getOperator()
+     */
+    @Override
+    protected String getOperator() {
+        return "not in";
+    }
+
+    @Override
+    public boolean match(Object otherValue) {
+        return !getValue().contains(otherValue);
+    }
 }

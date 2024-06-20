@@ -21,6 +21,10 @@ public class OtherEntity {
 
     private Long id;
     private String name;
+    private boolean active;
+    private long counter;
+    private int otherCounter;
+    private Long anotherCounter = 0L;
 
     public Long getId() {
         return id;
@@ -38,8 +42,40 @@ public class OtherEntity {
         this.name = name;
     }
 
+    public long getCounter() {
+        return counter;
+    }
+
+    public void setCounter(long counter) {
+        this.counter = counter;
+    }
+
+    public int getOtherCounter() {
+        return otherCounter;
+    }
+
+    public void setOtherCounter(int otherCounter) {
+        this.otherCounter = otherCounter;
+    }
+
+    public Long getAnotherCounter() {
+        return anotherCounter;
+    }
+
+    public void setAnotherCounter(Long anotherCounter) {
+        this.anotherCounter = anotherCounter;
+    }
+
     @Override
     public String toString() {
         return name;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

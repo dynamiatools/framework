@@ -21,9 +21,9 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -37,7 +37,7 @@ public class Containers {
     /**
      * The object containers.
      */
-    private Set<ObjectContainer> objectContainers;
+    private Map<String, ObjectContainer> objectContainers = new ConcurrentHashMap<>();
 
     /**
      * The instance.
@@ -77,7 +77,7 @@ public class Containers {
         if (objectContainers == null) {
             return null;
         }
-        for (ObjectContainer oc : objectContainers) {
+        for (ObjectContainer oc : objectContainers.values()) {
             T object = oc.getObject(name, type);
             if (object != null) {
                 return object;
@@ -96,7 +96,7 @@ public class Containers {
         if (objectContainers == null) {
             return null;
         }
-        for (ObjectContainer oc : objectContainers) {
+        for (ObjectContainer oc : objectContainers.values()) {
             Object object = oc.getObject(name);
             if (object != null) {
                 return object;
@@ -116,7 +116,7 @@ public class Containers {
         if (objectContainers == null) {
             return null;
         }
-        for (ObjectContainer oc : objectContainers) {
+        for (ObjectContainer oc : objectContainers.values()) {
             T object = oc.getObject(type);
             if (object != null) {
                 return object;
@@ -154,7 +154,7 @@ public class Containers {
     public <T> Collection<T> findObjects(Class<T> type, ObjectMatcher<T> matcher) {
         List<T> objects = new ArrayList<>();
         if (objectContainers != null && !objectContainers.isEmpty()) {
-            for (ObjectContainer oc : objectContainers) {
+            for (ObjectContainer oc : objectContainers.values()) {
                 List<T> result = oc.getObjects(type);
                 if (!result.isEmpty()) {
                     objects.addAll(result);
@@ -174,11 +174,8 @@ public class Containers {
      * @param obj the obj
      */
     public void installObjectContainer(ObjectContainer obj) {
-        logger.info("Installing Object Container: " + obj + "  " + obj.getClass().toString());
-        if (objectContainers == null) {
-            objectContainers = new HashSet<>();
-        }
-        objectContainers.add(obj);
+        logger.info("Installing Object Container: " + obj.getName() + "  = " + obj.getClass());
+        objectContainers.put(obj.getName(), obj);
     }
 
     /**
@@ -186,18 +183,35 @@ public class Containers {
      *
      * @return the installed containers
      */
-    public Set<ObjectContainer> getInstalledContainers() {
-        return objectContainers;
+    public Collection<ObjectContainer> getInstalledContainers() {
+        return objectContainers.values();
     }
 
     /**
      * Removes the all containers.
      */
     public void removeAllContainers() {
-        if (objectContainers != null) {
-            objectContainers.clear();
-            objectContainers = null;
-        }
+        objectContainers.clear();
+    }
+
+    /**
+     * Remove an {@link ObjectContainer} by his name
+     *
+     * @param name
+     * @return
+     */
+    public ObjectContainer removeContainer(String name) {
+        return objectContainers.remove(name);
+    }
+
+    /**
+     * Get object container by name
+     *
+     * @param name
+     * @return
+     */
+    public ObjectContainer getContainer(String name) {
+        return objectContainers.get(name);
     }
 
 }

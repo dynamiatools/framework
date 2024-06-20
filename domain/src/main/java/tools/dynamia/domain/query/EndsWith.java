@@ -42,7 +42,7 @@ public class EndsWith extends AbstractQueryCondition<String> {
      * Instantiates a new ends with.
      *
      * @param value the value
-     * @param op the op
+     * @param op    the op
      */
     public EndsWith(String value, BooleanOp op) {
         super("%" + value, op);
@@ -65,5 +65,13 @@ public class EndsWith extends AbstractQueryCondition<String> {
     @Override
     protected String getOperator() {
         return "like";
+    }
+
+    @Override
+    public boolean match(Object otherValue) {
+        if (otherValue != null) {
+            return otherValue.toString().endsWith(getValue());
+        }
+        return false;
     }
 }

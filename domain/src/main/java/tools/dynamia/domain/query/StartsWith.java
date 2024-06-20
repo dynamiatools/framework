@@ -42,7 +42,7 @@ public class StartsWith extends AbstractQueryCondition<String> {
      * Instantiates a new starts with.
      *
      * @param value the value
-     * @param op the op
+     * @param op    the op
      */
     public StartsWith(String value, BooleanOp op) {
         super(value + "%", op);
@@ -65,5 +65,13 @@ public class StartsWith extends AbstractQueryCondition<String> {
     @Override
     protected String getOperator() {
         return "like";
+    }
+
+    @Override
+    public boolean match(Object otherValue) {
+        if (otherValue != null) {
+            return otherValue.toString().startsWith(getValue());
+        }
+        return false;
     }
 }

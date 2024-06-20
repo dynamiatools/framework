@@ -19,42 +19,48 @@ package tools.dynamia.domain.query;
 /**
  * The Interface QueryCondition.
  *
+ * @param <T> the generic type
  * @author Mario A. Serrano Leones
- * @param <T>
- *            the generic type
  */
 public interface QueryCondition<T> {
 
-	/**
-	 * Render.
-	 *
-	 * @param property
-	 *            the property
-	 * @return the string
-	 */
+    /**
+     * Render.
+     *
+     * @param property the property
+     * @return the string
+     */
     String render(String property);
 
-	/**
-	 * Apply.
-	 *
-	 * @param property
-	 *            the property
-	 * @param query
-	 *            the query
-	 */
+    /**
+     * Apply.
+     *
+     * @param property the property
+     * @param query    the query
+     */
     void apply(String property, AbstractQuery query);
 
-	/**
-	 * Gets the boolean operator.
-	 *
-	 * @return the boolean operator
-	 */
+    /**
+     * Gets the boolean operator.
+     *
+     * @return the boolean operator
+     */
     BooleanOp getBooleanOperator();
 
-	/**
-	 * Gets the value.
-	 *
-	 * @return the value
-	 */
+    /**
+     * Gets the value.
+     *
+     * @return the value
+     */
     T getValue();
+
+    /**
+     * Evaluate in memory if other value match condition value
+     *
+     * @param otherValue
+     * @return
+     */
+    default boolean match(Object otherValue) {
+        throw new UnsupportedOperationException("In memory evaluation not supported for value " + otherValue);
+    }
 }

@@ -27,6 +27,12 @@ import java.util.List;
 public interface ObjectContainer {
 
     /**
+     * Object container name
+     * @return
+     */
+    String getName();
+
+    /**
      * Gets the object.
      *
      * @param <T> the generic type

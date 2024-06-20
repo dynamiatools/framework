@@ -16,6 +16,11 @@
  */
 package tools.dynamia.domain.query;
 
+import tools.dynamia.commons.DateTimeUtils;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 
@@ -36,7 +41,7 @@ public class LessEqualsThan extends AbstractQueryCondition<Object> {
     /**
      * Instantiates a new less equals than.
      *
-     * @param value the value
+     * @param value     the value
      * @param booleanOp the boolean op
      */
     public LessEqualsThan(Number value, BooleanOp booleanOp) {
@@ -55,7 +60,7 @@ public class LessEqualsThan extends AbstractQueryCondition<Object> {
     /**
      * Instantiates a new less equals than.
      *
-     * @param value the value
+     * @param value     the value
      * @param booleanOp the boolean op
      */
     public LessEqualsThan(Date value, BooleanOp booleanOp) {
@@ -77,5 +82,20 @@ public class LessEqualsThan extends AbstractQueryCondition<Object> {
     @Override
     protected String getOperator() {
         return "<=";
+    }
+
+    public boolean match(Object otherValue) {
+        if (getValue() instanceof Number num && otherValue instanceof Number other) {
+            return num.doubleValue() <= other.doubleValue();
+        }else if (getValue() instanceof Date date && otherValue instanceof Date other) {
+            return DateTimeUtils.isBeforeOrEquals(date, other);
+        } else if (getValue() instanceof LocalDate date && otherValue instanceof LocalDate other) {
+            return DateTimeUtils.isBeforeOrEquals(date, other);
+        } else if (getValue() instanceof LocalDateTime date && otherValue instanceof LocalDateTime other) {
+            return DateTimeUtils.isBeforeOrEquals(date, other);
+        } else if (getValue() instanceof Instant date && otherValue instanceof Instant other) {
+            return DateTimeUtils.isBeforeOrEquals(date, other);
+        }
+        return false;
     }
 }

@@ -18,11 +18,12 @@
 package tools.dynamia.zk.viewers.form;
 
 import org.zkoss.zk.ui.Component;
+import tools.dynamia.viewers.GenericFormFieldGroupComponent;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FormFieldGroupComponent {
+public class FormFieldGroupComponent implements GenericFormFieldGroupComponent<Component> {
 
     private final String groupName;
     private final Component groupComponent;
@@ -52,6 +53,7 @@ public class FormFieldGroupComponent {
         return fieldsComponents;
     }
 
+    @Override
     public void hide() {
 
 
@@ -61,6 +63,7 @@ public class FormFieldGroupComponent {
 
     }
 
+    @Override
     public void show() {
 
 
@@ -70,6 +73,7 @@ public class FormFieldGroupComponent {
 
     }
 
+    @Override
     public void remove() {
         if (groupComponent != null) {
             groupComponent.detach();

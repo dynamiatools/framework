@@ -14,32 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package tools.dynamia.actions;
 
-package tools.dynamia.zk.viewers.table;
-
-import org.zkoss.zk.ui.Component;
-import tools.dynamia.viewers.GenericTableFieldComponent;
-
-import java.io.Serializable;
+import java.lang.annotation.*;
 
 /**
- * Record for table field component
+ * Mark an Action as Primary
  *
- * @param fieldName
- * @param component
+ * @author Mario A. Serrano Leones
  */
-public record TableFieldComponent(String fieldName,
-                                  Component component) implements GenericTableFieldComponent<Component>, Serializable {
-
-
-    @Override
-    public String getFieldName() {
-        return fieldName;
-    }
-
-
-    @Override
-    public Component getComponent() {
-        return component;
-    }
+@Target(ElementType.TYPE)
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+public @interface OptionalAction {
 }

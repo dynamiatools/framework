@@ -23,129 +23,125 @@ import java.util.Map;
 /**
  * The Class Inlist.
  *
+ * @param <T> the generic type
  * @author Mario A. Serrano Leones
- * @param <T>
- *            the generic type
  */
 public class Inlist<T> extends AbstractQueryCondition<List<T>> {
 
-	private String subquery;
-	private Map<String, Object> subqueryParams;
+    private String subquery;
+    private Map<String, Object> subqueryParams;
 
-	/**
-	 * Instantiates a new inlist.
-	 */
-	public Inlist() {
-
-	}
-
-	/**
-	 * Instantiates a new inlist.
-	 *
-	 * @param values
-	 *            the values
-	 */
-	public Inlist(List<T> values) {
-		super(values);
-	}
-
-	/**
-	 * Instantiates a new inlist.
-	 *
-	 * @param values
-	 *            the values
-	 * @param booleanOp
-	 *            the boolean op
-	 */
-	public Inlist(List<T> values, BooleanOp booleanOp) {
-		super(values, booleanOp);
-	}
-
-	/**
-	 * Instantiates a new inlist.
-	 *
-	 * @param values
-	 *            the values
-	 */
-	@SafeVarargs
-	public Inlist(T... values) {
-		super(Arrays.asList(values));
-	}
-
-	/**
-	 * Instantiates a new inlist.
-	 *
-	 * @param booleanOp
-	 *            the boolean op
-	 * @param values
-	 *            the values
-	 */
-	@SafeVarargs
-	public Inlist(BooleanOp booleanOp, T... values) {
-		super(Arrays.asList(values), booleanOp);
-	}
-
-	/**
-	 * Create an inlist condition using a subquery (JPAQL)
-	 *
+    /**
+     * Instantiates a new inlist.
      */
-	public Inlist(String subquery) {
-		this.subquery = subquery;
-	}
+    public Inlist() {
 
-	/**
-	 * Create an inlist condition using a subquery (JPAQL) and params are
-	 * applied to subquery
-	 *
+    }
+
+    /**
+     * Instantiates a new inlist.
+     *
+     * @param values the values
      */
-	public Inlist(String subquery, Map<String, Object> params) {
-		this.subquery = subquery;
-		this.subqueryParams = params;
-	}
+    public Inlist(List<T> values) {
+        super(values);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * com.dynamia.tools.domain.query.AbstractQueryCondition#render(java.lang.
-	 * String)
-	 */
-	@Override
-	public String render(String property) {
-		String operator = getOperator();
-		String content = ":" + QueryConditionUtils.cleanProperty(property);
-		if (subquery != null) {
-			content = subquery;
-		}
+    /**
+     * Instantiates a new inlist.
+     *
+     * @param values    the values
+     * @param booleanOp the boolean op
+     */
+    public Inlist(List<T> values, BooleanOp booleanOp) {
+        super(values, booleanOp);
+    }
 
-		return property + " " + operator + " (" + content + ")";
-	}
+    /**
+     * Instantiates a new inlist.
+     *
+     * @param values the values
+     */
+    @SafeVarargs
+    public Inlist(T... values) {
+        super(Arrays.asList(values));
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * com.dynamia.tools.domain.query.AbstractQueryCondition#apply(java.lang.
-	 * String, javax.persistence.Query)
-	 */
-	@Override
-	public void apply(String property, AbstractQuery query) {
-		if (query != null) {
-			if (subquery != null && subqueryParams != null) {
-				subqueryParams.forEach(query::setParameter);
-			} else {
-				query.setParameter(QueryConditionUtils.cleanProperty(property), getValue());
-			}
-		}
-	}
+    /**
+     * Instantiates a new inlist.
+     *
+     * @param booleanOp the boolean op
+     * @param values    the values
+     */
+    @SafeVarargs
+    public Inlist(BooleanOp booleanOp, T... values) {
+        super(Arrays.asList(values), booleanOp);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.dynamia.tools.domain.query.AbstractQueryCondition#getOperator()
-	 */
-	@Override
-	protected String getOperator() {
-		return "in";
-	}
+    /**
+     * Create an inlist condition using a subquery (JPAQL)
+     */
+    public Inlist(String subquery) {
+        this.subquery = subquery;
+    }
+
+    /**
+     * Create an inlist condition using a subquery (JPAQL) and params are
+     * applied to subquery
+     */
+    public Inlist(String subquery, Map<String, Object> params) {
+        this.subquery = subquery;
+        this.subqueryParams = params;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.dynamia.tools.domain.query.AbstractQueryCondition#render(java.lang.
+     * String)
+     */
+    @Override
+    public String render(String property) {
+        String operator = getOperator();
+        String content = ":" + QueryConditionUtils.cleanProperty(property);
+        if (subquery != null) {
+            content = subquery;
+        }
+
+        return property + " " + operator + " (" + content + ")";
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.dynamia.tools.domain.query.AbstractQueryCondition#apply(java.lang.
+     * String, javax.persistence.Query)
+     */
+    @Override
+    public void apply(String property, AbstractQuery query) {
+        if (query != null) {
+            if (subquery != null && subqueryParams != null) {
+                subqueryParams.forEach(query::setParameter);
+            } else {
+                query.setParameter(QueryConditionUtils.cleanProperty(property), getValue());
+            }
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.dynamia.tools.domain.query.AbstractQueryCondition#getOperator()
+     */
+    @Override
+    protected String getOperator() {
+        return "in";
+    }
+
+    @Override
+    public boolean match(Object otherValue) {
+        return getValue().contains(otherValue);
+    }
 }

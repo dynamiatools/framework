@@ -23,64 +23,68 @@ package tools.dynamia.domain.query;
  */
 public class IsNull implements QueryCondition {
 
-	/**
-	 * The op.
-	 */
-	private BooleanOp op = BooleanOp.AND;
+    /**
+     * The op.
+     */
+    private BooleanOp op = BooleanOp.AND;
 
-	/**
-	 * Instantiates a new checks if is null.
-	 */
-	public IsNull() {
-	}
+    /**
+     * Instantiates a new checks if is null.
+     */
+    public IsNull() {
+    }
 
-	/**
-	 * Instantiates a new checks if is null.
-	 *
-	 * @param op
-	 *            the op
-	 */
-	public IsNull(BooleanOp op) {
-		this.op = op;
-	}
+    /**
+     * Instantiates a new checks if is null.
+     *
+     * @param op the op
+     */
+    public IsNull(BooleanOp op) {
+        this.op = op;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see QueryCondition#render(java.lang.String)
-	 */
-	@Override
-	public String render(String property) {
-		return property + " is null";
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see QueryCondition#render(java.lang.String)
+     */
+    @Override
+    public String render(String property) {
+        return property + " is null";
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see QueryCondition#apply(java.lang.String,
-	 * javax.persistence.Query)
-	 */
-	@Override
-	public void apply(String property, AbstractQuery query) {
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see QueryCondition#apply(java.lang.String,
+     * javax.persistence.Query)
+     */
+    @Override
+    public void apply(String property, AbstractQuery query) {
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see QueryCondition#getBooleanOperator()
-	 */
-	@Override
-	public BooleanOp getBooleanOperator() {
-		return op;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see QueryCondition#getBooleanOperator()
+     */
+    @Override
+    public BooleanOp getBooleanOperator() {
+        return op;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see QueryCondition#getValue()
-	 */
-	@Override
-	public Object getValue() {
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see QueryCondition#getValue()
+     */
+    @Override
+    public Object getValue() {
+        return null;
+    }
+
+    @Override
+    public boolean match(Object otherValue) {
+        return otherValue == null;
+    }
 }
