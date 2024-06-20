@@ -64,7 +64,7 @@ public class ConfigView extends FormView<List<Parameter>> {
     }
 
     @Override
-    protected void saveBindings() {
+    public void saveBindings() {
         super.saveBindings();
 
     }

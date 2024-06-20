@@ -40,10 +40,7 @@ import tools.dynamia.commons.Callback;
 import tools.dynamia.commons.PropertyChangeEvent;
 import tools.dynamia.commons.PropertyChangeListener;
 import tools.dynamia.commons.PropertyChangeListenerContainer;
-import tools.dynamia.viewers.Field;
-import tools.dynamia.viewers.FieldGroup;
-import tools.dynamia.viewers.View;
-import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.*;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
@@ -60,7 +57,7 @@ import java.util.function.Supplier;
  * @author Mario A. Serrano Leones
  */
 @SuppressWarnings("rawtypes")
-public class FormView<T> extends Div implements View<T>, PropertyChangeListener, CanBeReadonly, IdSpace, ActionsContainer {
+public class FormView<T> extends Div implements GenericFormView<T, Component>, PropertyChangeListener, CanBeReadonly, IdSpace, ActionsContainer {
 
     static {
         BindingComponentIndex.getInstance().put("value", FormView.class);
@@ -169,15 +166,18 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
         return value;
     }
 
+    @Override
     public boolean isAutosaveBindings() {
         return autosaveBindings;
     }
 
+    @Override
     public void setAutosaveBindings(boolean autosaveBindings) {
         this.autosaveBindings = autosaveBindings;
     }
 
-    protected void saveBindings() {
+    @Override
+    public void saveBindings() {
         ZKBindingUtil.postNotifyChange(this, "*");
     }
 
@@ -209,14 +209,17 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
         return viewDescriptor;
     }
 
+    @Override
     public FormFieldComponent getFieldComponent(String fieldName) {
         return componentsFieldsMap.get(fieldName);
     }
 
+    @Override
     public FormFieldGroupComponent getFieldGroupComponent(String groupName) {
         return groupsComponentsMap.get(groupName);
     }
 
+    @Override
     public void updateUI() {
         if (binder != null) {
             ZKBindingUtil.bindBean(this, Viewers.BEAN, value);
@@ -242,6 +245,7 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
     }
 
 
+    @Override
     public void addSubview(String title, View subview) {
         if (subview instanceof Component subviewComp && !subviews.contains(subview)) {
             subviews.add(subview);
@@ -252,14 +256,17 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
 
     }
 
+    @Override
     public List<View> getSubviews() {
         return subviews;
     }
 
+    @Override
     public Map<String, FormFieldComponent> getComponentsFieldsMap() {
         return componentsFieldsMap;
     }
 
+    @Override
     public Map<String, FormFieldGroupComponent> getGroupsComponentsMap() {
         return groupsComponentsMap;
     }
@@ -278,6 +285,7 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
         this.parentView = parentView;
     }
 
+    @Override
     public T getRawValue() {
         return value;
     }
@@ -316,10 +324,12 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
         return componentsFieldsMap.containsKey(fieldName);
     }
 
+    @Override
     public String getTitle() {
         return title;
     }
 
+    @Override
     public void setTitle(String title) {
         this.title = title;
         titleArea.getChildren().clear();
@@ -351,10 +361,12 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
         }
     }
 
+    @Override
     public String getCustomView() {
         return customView;
     }
 
+    @Override
     public void setCustomView(String customView) {
         this.customView = customView;
     }
@@ -390,6 +402,7 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
         this.onSourceChange = onSourceChange;
     }
 
+    @Override
     public void clearActions() {
         if (actionsArea != null) {
             actionsArea.detach();
@@ -423,13 +436,13 @@ public class FormView<T> extends Div implements View<T>, PropertyChangeListener,
     private void initActionsArea() {
         if (actionsArea == null) {
             actionPanel = new ActionPanel(getActionEventBuilder());
-            if(layout instanceof Borderlayout) {
+            if (layout instanceof Borderlayout) {
                 var south = new South();
                 south.setSclass("form-view-actions");
                 actionsArea = south;
                 layout.appendChild(actionsArea);
                 actionsArea.appendChild(actionPanel);
-            }else{
+            } else {
                 actionsArea = actionPanel;
                 actionsArea.appendChild(this);
             }
