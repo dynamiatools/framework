@@ -77,7 +77,7 @@ public class EntityTreeNode<E> extends TreeViewNode<E> implements Serializable {
     @Override
     public void removeChild(TreeViewNode<E> child) {
 
-        if (child instanceof EntityTreeNode) {
+        if (child instanceof EntityTreeNode && getModel() != null) {
 
             int[] childPath = getModel().getPath((EntityTreeNode<E>) child);
             model.removeSelectionPath(childPath);
@@ -116,6 +116,7 @@ public class EntityTreeNode<E> extends TreeViewNode<E> implements Serializable {
 
     /**
      * Add children using an entity list with default icon
+     *
      * @param entities
      * @param defaultIcon
      * @return chidlren nodes
