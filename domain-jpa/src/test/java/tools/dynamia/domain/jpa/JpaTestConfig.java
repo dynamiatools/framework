@@ -16,7 +16,7 @@ import tools.dynamia.integration.SpringObjectContainer;
 import javax.sql.DataSource;
 
 @Configuration
-public class TestConfig {
+public class JpaTestConfig {
 
     @Bean
     public DataSource dataSource() {
@@ -47,7 +47,6 @@ public class TestConfig {
         hb.setDatabasePlatform("org.hibernate.dialect.H2Dialect");
 
 
-
         emf.setJpaVendorAdapter(hb);
         emf.afterPropertiesSet();
         return emf.getObject();
@@ -55,16 +54,16 @@ public class TestConfig {
 
     @Bean
     public CrudService crudService() {
-       return new JpaCrudService(transactionManager(), null);
+        return new JpaCrudService(null);
     }
 
     @Bean
-    public EntityUtilsProvider entityUtilsProvider(){
+    public EntityUtilsProvider entityUtilsProvider() {
         return new JpaEntityUtilsProvider();
     }
 
     @Bean
-    public ObjectContainer objectContainer(){
+    public ObjectContainer objectContainer() {
         return new SpringObjectContainer();
     }
 
