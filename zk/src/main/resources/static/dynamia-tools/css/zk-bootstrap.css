@@ -19,7 +19,7 @@
 
 .form-zcontrol {
     display: block;
-    line-height: 1.42857143;
+    line-height: 1.5;
 }
 
 .form-zcontrol .z-combobox-readonly, .entitypickerbox .z-combobox-readonly {
@@ -27,9 +27,11 @@
 }
 
 .form-zcontrol input {
-    padding: 6px 12px;
+    padding: .375rem .75rem;
     height: 34px;
-    font-size: 14px;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
     -webkit-border-radius: 0px !important;
     -moz-border-radius: 0px !important;
     border-radius: 0px !important;
