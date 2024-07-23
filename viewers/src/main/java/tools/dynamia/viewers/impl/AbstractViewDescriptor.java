@@ -87,7 +87,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
     /**
      * The autofields.
      */
-    private boolean autofields = true;
+    private boolean autofields;
 
     /**
      * The messages.
@@ -773,6 +773,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
 
     /**
      * Add new action reference
+     *
      * @param actionRef
      */
     public void addAction(ActionRef actionRef) {
