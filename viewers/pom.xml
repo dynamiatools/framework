@@ -23,13 +23,13 @@
 
     <artifactId>tools.dynamia.viewers</artifactId>
     <packaging>jar</packaging>
-    <version>5.2.0</version>
+    <version>5.2.0-beta</version>
 
 
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.2.0</version>
+        <version>5.2.0-beta</version>
     </parent>
 
     <name>DynamiaTools - Viewers</name>
