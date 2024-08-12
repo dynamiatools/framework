@@ -1,0 +1,53 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>tools.dynamia</groupId>
+        <artifactId>tools.dynamia.parent</artifactId>
+        <version>5.2.0-beta</version>
+    </parent>
+    <artifactId>dynamia-tools-starter</artifactId>
+    <name>DynamiaTools - Starter</name>
+    <url>https://www.dynamia.tools</url>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.app</artifactId>
+            <version>5.2.0-beta</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.zk</artifactId>
+            <version>5.2.0-beta</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.domain.jpa</artifactId>
+            <version>5.2.0-beta</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia.themes</groupId>
+            <artifactId>tools.dynamia.themes.dynamical</artifactId>
+            <version>5.2.0-beta</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+
+    </dependencies>
+
+</project>
