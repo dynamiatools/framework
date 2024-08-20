@@ -130,7 +130,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
      * @param viewTypeName the view type name
      */
     public AbstractViewDescriptor(Class<?> beanClass, String viewTypeName) {
-        this(beanClass, viewTypeName, true);
+        this(beanClass, viewTypeName, false);
     }
 
     /**

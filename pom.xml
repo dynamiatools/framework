@@ -75,11 +75,12 @@
 
         <!-- ZK UI Backend  https://www.zkoss.org -->
         <module>zk</module>
+        <module>starter</module>
     </modules>
 
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
-        <springboot.version>3.3.1</springboot.version>
+        <springboot.version>3.3.2</springboot.version>
         <mongodb.version>1</mongodb.version>
 
         <!-- Web -->
@@ -100,7 +101,8 @@
         <target.version>17</target.version>
         <maven.compiler>3.13.0</maven.compiler>
         <source.encoding>UTF-8</source.encoding>
-
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyyMMddhhmm</maven.build.timestamp.format>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 

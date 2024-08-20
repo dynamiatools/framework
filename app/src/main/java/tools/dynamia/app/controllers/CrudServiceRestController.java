@@ -25,8 +25,7 @@ public class CrudServiceRestController {
     }
 
 
-    @PostMapping
-    @PutMapping
+    @RequestMapping(method = {RequestMethod.POST, RequestMethod.PUT})
     public ResponseEntity<Object> createOrSave(@PathVariable String className, @RequestBody String json) {
         Object entity = parseJson(className, json);
         Object result = crudService.save(entity);
