@@ -785,4 +785,12 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
             actions.add(actionRef);
         }
     }
+
+    public void setAutofields(boolean autofields) {
+        this.autofields = autofields;
+        if (getFields().isEmpty() && isAutofields()) {
+            createFieldsFromClass();
+        }
+    }
+
 }

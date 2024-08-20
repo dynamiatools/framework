@@ -31,11 +31,17 @@ public class ViewDescriptorBuilderTest {
     @Test
     public void testViewDescriptorBuilder() {
         ViewDescriptor vd = viewDescriptor("form", SomeBean.class)
+                .autofields(true)
                 .sortFields("name", "age", "url", "email", "date", "number")
                 .customizer(SomeViewCustomizer.class)
                 .fields(
-                        field("name").label("Nombre").component("label"),
-                        field("age").fieldClass(int.class).label("Edad").component("intbox").params("converter", "converters.Number"))
+                        field("name")
+                                .label("Nombre")
+                                .component("label"),
+                        field("age").fieldClass(int.class)
+                                .label("Edad")
+                                .component("intbox")
+                                .params("converter", "converters.Number"))
                 .build();
 
         assertEquals(6, vd.getFields().size());
