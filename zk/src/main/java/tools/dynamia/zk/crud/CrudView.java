@@ -47,7 +47,7 @@ import tools.dynamia.crud.CrudControllerAPI;
 import tools.dynamia.crud.CrudDataSetViewBuilder;
 import tools.dynamia.crud.CrudState;
 import tools.dynamia.crud.CrudStateChangedListener;
-import tools.dynamia.crud.GenericCrudView;
+import tools.dynamia.crud.CrudViewComponent;
 import tools.dynamia.crud.actions.DeleteAction;
 import tools.dynamia.crud.actions.EditAction;
 import tools.dynamia.crud.actions.NewAction;
@@ -93,7 +93,7 @@ import java.util.function.Consumer;
  * @author Mario A. Serrano Leones
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class CrudView<T> extends Div implements GenericCrudView<T>, ActionEventBuilder, IdSpace, CanBeReadonly {
+public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEventBuilder, IdSpace, CanBeReadonly {
 
     private static final String DEFAULT_FORM_VIEW_TITLE = "defaultFormViewTitle";
 

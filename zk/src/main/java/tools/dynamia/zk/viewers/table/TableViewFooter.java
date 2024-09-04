@@ -23,16 +23,15 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.Listfooter;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.domain.fx.FunctionProvider;
-import tools.dynamia.domain.util.LabelValue;
 import tools.dynamia.io.converters.Converters;
 import tools.dynamia.viewers.Field;
-import tools.dynamia.viewers.GenericTableViewFooter;
+import tools.dynamia.viewers.TableViewFooterComponent;
 import tools.dynamia.zk.converters.Util;
 
 /**
  * @author Mario A. Serrano Leones
  */
-public class TableViewFooter extends Listfooter implements GenericTableViewFooter, FunctionProvider {
+public class TableViewFooter extends Listfooter implements TableViewFooterComponent, FunctionProvider {
 
     private TableView tableView;
     private Field field;

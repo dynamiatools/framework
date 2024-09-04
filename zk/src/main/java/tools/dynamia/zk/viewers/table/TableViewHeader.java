@@ -20,12 +20,12 @@ package tools.dynamia.zk.viewers.table;
 
 import org.zkoss.zul.Listheader;
 import tools.dynamia.viewers.Field;
-import tools.dynamia.viewers.GenericTableViewHeader;
+import tools.dynamia.viewers.TableViewHeaderComponent;
 
 /**
  * @author Mario A. Serrano Leones
  */
-public class TableViewHeader extends Listheader implements GenericTableViewHeader {
+public class TableViewHeader extends Listheader implements TableViewHeaderComponent {
 
     private TableView tableView;
     private Field field;

@@ -25,7 +25,7 @@ import tools.dynamia.commons.reflect.AccessMode;
 import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.crud.CrudDataSetViewBuilder;
-import tools.dynamia.crud.GenericCrudView;
+import tools.dynamia.crud.CrudViewComponent;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Provider;
 import tools.dynamia.viewers.DataSetView;
@@ -62,7 +62,7 @@ public class CrudTableViewBuilder implements CrudDataSetViewBuilder {
 
     @Override
     @SuppressWarnings({"rawtypes"})
-    public DataSetView build(GenericCrudView view) {
+    public DataSetView build(CrudViewComponent view) {
         CrudView crudView;
         if (view instanceof CrudView) {
             crudView = (CrudView) view;

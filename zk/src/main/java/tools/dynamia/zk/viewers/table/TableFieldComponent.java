@@ -18,7 +18,7 @@
 package tools.dynamia.zk.viewers.table;
 
 import org.zkoss.zk.ui.Component;
-import tools.dynamia.viewers.GenericTableFieldComponent;
+import tools.dynamia.viewers.ITableFieldComponent;
 
 import java.io.Serializable;
 
@@ -29,7 +29,7 @@ import java.io.Serializable;
  * @param component
  */
 public record TableFieldComponent(String fieldName,
-                                  Component component) implements GenericTableFieldComponent<Component>, Serializable {
+                                  Component component) implements ITableFieldComponent<Component>, Serializable {
 
 
     @Override

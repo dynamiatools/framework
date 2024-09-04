@@ -18,12 +18,12 @@
 package tools.dynamia.zk.viewers.form;
 
 import org.zkoss.zk.ui.Component;
-import tools.dynamia.viewers.GenericFormFieldGroupComponent;
+import tools.dynamia.viewers.IFormFieldGroupComponent;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FormFieldGroupComponent implements GenericFormFieldGroupComponent<Component> {
+public class FormFieldGroupComponent implements IFormFieldGroupComponent<Component> {
 
     private final String groupName;
     private final Component groupComponent;

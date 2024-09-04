@@ -17,7 +17,7 @@
 package tools.dynamia.zk.crud;
 
 import tools.dynamia.crud.CrudDataSetViewBuilder;
-import tools.dynamia.crud.GenericCrudView;
+import tools.dynamia.crud.CrudViewComponent;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Provider;
 import tools.dynamia.viewers.DataSetView;
@@ -51,7 +51,7 @@ public class CrudTreeViewBuilder implements CrudDataSetViewBuilder {
 
     @SuppressWarnings({"rawtypes"})
     @Override
-    public DataSetView build(GenericCrudView view) {
+    public DataSetView build(CrudViewComponent view) {
         CrudView crudView;
         if (view instanceof CrudView) {
             crudView = (CrudView) view;

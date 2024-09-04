@@ -35,8 +35,7 @@ import tools.dynamia.commons.collect.PagedList;
 import tools.dynamia.domain.fx.Functions;
 import tools.dynamia.domain.fx.MultiFunctionProcessor;
 import tools.dynamia.domain.query.DataSet;
-import tools.dynamia.viewers.DataSetView;
-import tools.dynamia.viewers.GenericTableView;
+import tools.dynamia.viewers.TableViewComponent;
 import tools.dynamia.viewers.View;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.Viewers;
@@ -57,7 +56,7 @@ import java.util.function.Consumer;
  * @author Mario A. Serrano Leones
  */
 @SuppressWarnings("unchecked")
-public class TableView<T> extends Listbox implements GenericTableView<T>, CanBeReadonly {
+public class TableView<T> extends Listbox implements TableViewComponent<T>, CanBeReadonly {
 
     static {
         BindingComponentIndex.getInstance().put("value", TableView.class);
