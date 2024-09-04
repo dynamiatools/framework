@@ -1,12 +1,14 @@
 package tools.dynamia.viewers;
 
-public interface GenericFormFieldComponent<C> {
+import java.io.Serializable;
+
+public interface IFormFieldComponent<C>  extends Serializable {
 
     String getFieldName();
 
     C getInputComponent();
 
-    GenericLabel getLabel();
+    LabelComponent getLabel();
 
     C getInputComponentAlt();
 

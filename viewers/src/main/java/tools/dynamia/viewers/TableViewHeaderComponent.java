@@ -1,9 +1,11 @@
 package tools.dynamia.viewers;
 
+import java.io.Serializable;
+
 /**
  * Generic interface for table view header
  */
-public interface GenericTableViewHeader {
+public interface TableViewHeaderComponent extends Serializable {
 
     Field getField();
 

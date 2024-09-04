@@ -9,16 +9,16 @@ import java.util.Map;
  * @param <T>
  * @param <C>
  */
-public interface GenericFormView<T, C> extends View<T> {
+public interface FormViewComponent<T, C> extends View<T> {
     boolean isAutosaveBindings();
 
     void setAutosaveBindings(boolean autosaveBindings);
 
     void saveBindings();
 
-    GenericFormFieldComponent<C> getFieldComponent(String fieldName);
+    IFormFieldComponent<C> getFieldComponent(String fieldName);
 
-    GenericFormFieldGroupComponent<C> getFieldGroupComponent(String groupName);
+    IFormFieldGroupComponent<C> getFieldGroupComponent(String groupName);
 
     void updateUI();
 
@@ -26,9 +26,9 @@ public interface GenericFormView<T, C> extends View<T> {
 
     List<View> getSubviews();
 
-    Map<String, ? extends GenericFormFieldComponent<C>> getComponentsFieldsMap();
+    Map<String, ? extends IFormFieldComponent<C>> getComponentsFieldsMap();
 
-    Map<String, ? extends GenericFormFieldGroupComponent<C>> getGroupsComponentsMap();
+    Map<String, ? extends IFormFieldGroupComponent<C>> getGroupsComponentsMap();
 
     T getRawValue();
 

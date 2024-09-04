@@ -8,7 +8,7 @@ import java.util.List;
  *
  * @param <T>
  */
-public interface GenericTableView<T> extends DataSetView<List<T>> {
+public interface TableViewComponent<T> extends DataSetView<List<T>> {
 
     /**
      * Find and get a table field using filed name and row index
@@ -18,7 +18,7 @@ public interface GenericTableView<T> extends DataSetView<List<T>> {
      * @param <C>
      * @return
      */
-    <C> GenericTableFieldComponent<C> getTableFieldComponent(String fieldName, int rowIndex);
+    <C> ITableFieldComponent<C> getTableFieldComponent(String fieldName, int rowIndex);
 
     /**
      * Find and get a table field using filed name and item component
@@ -28,7 +28,7 @@ public interface GenericTableView<T> extends DataSetView<List<T>> {
      * @param <C>
      * @return
      */
-    <C> GenericTableFieldComponent<C> getTableFieldComponent(String fieldName, Object item);
+    <C> ITableFieldComponent<C> getTableFieldComponent(String fieldName, Object item);
 
     /**
      * Clear table
@@ -76,7 +76,7 @@ public interface GenericTableView<T> extends DataSetView<List<T>> {
      * @param fieldName
      * @return
      */
-    GenericTableViewFooter getFooter(String fieldName);
+    TableViewFooterComponent getFooter(String fieldName);
 
     /**
      * Find a header by field name
@@ -84,7 +84,7 @@ public interface GenericTableView<T> extends DataSetView<List<T>> {
      * @param fieldName
      * @return
      */
-    GenericTableViewHeader getHeader(String fieldName);
+    TableViewHeaderComponent getHeader(String fieldName);
 
 
     /**

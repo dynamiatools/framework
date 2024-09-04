@@ -1,9 +1,11 @@
 package tools.dynamia.viewers;
 
+import java.io.Serializable;
+
 /**
  * Generic Interface for Table View Footer
  */
-public interface GenericTableViewFooter {
+public interface TableViewFooterComponent extends Serializable {
 
     Object getValue();
 

@@ -1,9 +1,11 @@
 package tools.dynamia.viewers;
 
+import java.io.Serializable;
+
 /**
  * Interface that represent a generic label
  */
-public interface GenericLabel {
+public interface LabelComponent extends Serializable {
 
     String getValue();
 

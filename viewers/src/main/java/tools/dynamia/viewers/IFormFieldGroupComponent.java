@@ -1,5 +1,6 @@
 package tools.dynamia.viewers;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -7,13 +8,13 @@ import java.util.List;
  *
  * @param <C>
  */
-public interface GenericFormFieldGroupComponent<C> {
+public interface IFormFieldGroupComponent<C>  extends Serializable {
 
     String getGroupName();
 
     C getGroupComponent();
 
-    List<? extends GenericFormFieldComponent<C>> getFieldsComponents();
+    List<? extends IFormFieldComponent<C>> getFieldsComponents();
 
     void hide();
 
