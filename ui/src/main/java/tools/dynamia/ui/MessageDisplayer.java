@@ -21,37 +21,128 @@ import tools.dynamia.commons.Callback;
 import java.util.function.Consumer;
 
 /**
+ * The MessageDisplayer interface defines a contract for displaying messages
+ * and prompting questions in a user interface.
+ *
  * @author Mario Serrano Leones
  */
 public interface MessageDisplayer {
 
+    /**
+     * Show a message
+     *
+     * @param message the message
+     */
     void showMessage(String message);
 
+    /**
+     * Show a message with a specific type
+     *
+     * @param message the message
+     * @param type    the message type
+     */
     void showMessage(String message, MessageType type);
 
+    /**
+     * Show a message with a specific type and title
+     *
+     * @param message the message
+     * @param title   the message title
+     * @param type    the message type
+     */
     void showMessage(String message, String title, MessageType type);
 
+    /**
+     * Show a message with a specific type, title, and source object
+     *
+     * @param message the message
+     * @param title   the message title
+     * @param type    the message type
+     * @param source  the source object
+     */
     default void showMessage(String message, String title, MessageType type, Object source) {
         showMessage(message, title, type);
     }
 
+    /**
+     * Show a question with yes/no response
+     *
+     * @param message       the question message
+     * @param title         the question title
+     * @param onYesResponse the callback to execute if the user responds yes
+     */
     void showQuestion(String message, String title, Callback onYesResponse);
 
+    /**
+     * Show a question with yes/no response
+     *
+     * @param message       the question message
+     * @param title         the question title
+     * @param onYesResponse the callback to execute if the user responds yes
+     * @param onNoResponse  the callback to execute if the user responds no
+     */
     void showQuestion(String message, String title, Callback onYesResponse, Callback onNoResponse);
 
+    /**
+     * Show an input dialog
+     *
+     * @param title      the input title
+     * @param valueClass the input value class
+     * @param onValue    the callback to execute with the input value
+     * @param <T>        the input value type
+     */
     <T> void showInput(String title, Class<T> valueClass, Consumer<T> onValue);
 
+    /**
+     * Show an input dialog with a default value
+     *
+     * @param title        the input title
+     * @param valueClass   the input value class
+     * @param defaultValue the default value
+     * @param onValue      the callback to execute with the input value
+     * @param <T>          the input value type
+     */
     <T> void showInput(String title, Class<T> valueClass, T defaultValue, Consumer<T> onValue);
 
+    /**
+     * Show an exception message
+     *
+     * @param message   the exception message
+     * @param title     the exception title
+     * @param type      the message type
+     * @param exception the exception
+     */
     default void showException(String message, String title, MessageType type, Exception exception) {
         showMessage(message, title, type);
     }
 
+    /**
+     * Show an exception message
+     *
+     * @param message   the exception message
+     * @param title     the exception title
+     * @param exception the exception
+     */
     default void showException(String message, String title, Exception exception) {
         showMessage(message, title, MessageType.ERROR, exception);
     }
 
+    /**
+     * Show an exception message
+     *
+     * @param message   the exception message
+     * @param exception the exception
+     */
     default void showException(String message, Exception exception) {
         showMessage(message, null, MessageType.ERROR, exception);
     }
+
+    /**
+     * Show a message dialog with a specific type, title, and message type
+     *
+     * @param message     the message
+     * @param title       the title
+     * @param messageType the message type
+     */
+    void showMessageDialog(String message, String title, MessageType messageType);
 }

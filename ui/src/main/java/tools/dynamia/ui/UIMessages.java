@@ -27,7 +27,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+/**
+ * Show messages and prompts to user  *
+ */
 public class UIMessages {
+
+    private static MessageDisplayer currentMessageDisplayer;
 
     private UIMessages() {
     }
@@ -76,9 +81,18 @@ public class UIMessages {
     }
 
     private static MessageDisplayer getDisplayer() {
-        return Containers.get().findObject(MessageDisplayer.class);
+        if (currentMessageDisplayer == null) {
+            currentMessageDisplayer = Containers.get().findObject(MessageDisplayer.class);
+            if (currentMessageDisplayer == null) {
+                throw new IllegalStateException("MessageDisplayer not found");
+            }
+        }
+        return currentMessageDisplayer;
     }
 
+    public static void setCurrentMessageDisplayer(MessageDisplayer currentMessageDisplayer) {
+        UIMessages.currentMessageDisplayer = currentMessageDisplayer;
+    }
 
     /**
      * Show question or confirmation dialog. When user click [Yes] the onYesResponse
@@ -224,6 +238,26 @@ public class UIMessages {
      */
     public static void showMessage(Throwable e) {
         showMessage(e.getMessage(), MessageType.WARNING);
+    }
+
+    /**
+     * Show {@link String} message as {@link MessageType}.NORMAL type
+     *
+     * @param message
+     */
+    public static void showMessageDialog(String message) {
+        showMessage(message, null, MessageType.NORMAL);
+    }
+
+    /**
+     * Show {@link String} message with custom title and {@link MessageType}
+     *
+     * @param message
+     * @param title
+     * @param messageType
+     */
+    public static void showMessageDialog(String message, String title, MessageType messageType) {
+        getDisplayer().showMessageDialog(message, title, messageType);
     }
 
 }
