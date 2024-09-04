@@ -2,6 +2,8 @@ package tools.dynamia.ui;
 
 import tools.dynamia.integration.Containers;
 
+import java.util.List;
+
 public class UITools {
 
     private static UIToolsProvider currentProvider;
@@ -37,8 +39,23 @@ public class UITools {
      * @param title the title
      * @return the dialog
      */
-    public DialogComponent createDialog(String title) {
+    public static DialogComponent dialog(String title) {
         return getProvider().createDialog(title);
+    }
+
+    /**
+     * Create a dialog
+     *
+     * @param title    the title
+     * @param chidlren the children
+     * @return the dialog
+     */
+    public static DialogComponent dialog(String title, List<UIComponent> chidlren) {
+        var dialog = dialog(title);
+        if (chidlren != null) {
+            chidlren.forEach(dialog::add);
+        }
+        return dialog;
     }
 
     /**
@@ -90,6 +107,104 @@ public class UITools {
      */
     public static DialogComponent showDialog(String title, Object content, Object data, String width, String height, EventCallback onClose) {
         return getProvider().showDialog(title, content, data, width, height, onClose);
+    }
+
+    /**
+     * Create a listbox
+     *
+     * @param items the items
+     * @param <T>   the type
+     * @return the listbox
+     */
+    public static <T> ListboxComponent<T> listbox(List<T> items) {
+        return getProvider().createListbox(items);
+    }
+
+    /**
+     * Create a combobox
+     *
+     * @param items the items
+     * @param <T>   the type
+     * @return the combobox
+     */
+    public static <T> ComboboxComponent<T> combobox(List<T> items) {
+        return getProvider().createCombobox(items);
+    }
+
+    /**
+     * Show a listbox selector
+     *
+     * @param title    the title
+     * @param data     the data
+     * @param onSelect the on select callback
+     * @param <T>      the type
+     * @return the dialog
+     */
+    public static <T> DialogComponent showListboxSelector(String title, List<T> data, SelectEventCallback<T> onSelect) {
+        return getProvider().showListboxSelector(title, data, onSelect);
+    }
+
+    /**
+     * Show a listbox selector
+     *
+     * @param title            the title
+     * @param data             the data
+     * @param defaultSelection the default selection
+     * @param onSelect         the on select callback
+     * @param <T>              the type
+     * @return the dialog
+     */
+    public static <T> DialogComponent showListboxSelector(String title, List<T> data, T defaultSelection, SelectEventCallback<T> onSelect) {
+        return getProvider().showListboxSelector(title, data, defaultSelection, onSelect);
+    }
+
+
+    /**
+     * Show a listbox multi selector
+     *
+     * @param title    the title
+     * @param data     the data
+     * @param onSelect the on select callback
+     * @param <T>      the type
+     * @return the dialog
+     */
+    public static <T> DialogComponent showListboxMultiSelector(String title, String label, List<T> data, SelectionEventCallback<T> onSelect) {
+        return getProvider().showListboxMultiSelector(title, label, data, onSelect);
+    }
+
+    /**
+     * Show a listbox multi selector
+     *
+     * @param title            the title
+     * @param data             the data
+     * @param defaultSelection the default selection
+     * @param onSelect         the on select callback
+     * @param <T>              the type
+     * @return the dialog
+     */
+    public static <T> DialogComponent showListboxMultiSelector(String title, String label, List<T> data, List<T> defaultSelection, SelectionEventCallback<T> onSelect) {
+        return getProvider().showListboxMultiSelector(title, label, data, defaultSelection, onSelect);
+    }
+
+    /**
+     * Create a button
+     *
+     * @param label the label
+     * @return the button
+     */
+    public static ButtonComponent button(String label) {
+        return getProvider().createButton(label);
+    }
+
+    /**
+     * Create a button
+     *
+     * @param label   the label
+     * @param onClick the on click callback
+     * @return the button
+     */
+    public static ButtonComponent button(String label, EventCallback onClick) {
+        return getProvider().createButton(label, onClick);
     }
 
 

@@ -100,7 +100,7 @@ public interface UIToolsProvider {
      * @param <T>      the type
      * @return the dialog
      */
-    default <T> DialogComponent showListboxSelector(String title, String label, List<T> data, SelectEventCallback<T> onSelect) {
+    default <T> DialogComponent showListboxSelector(String title, List<T> data, SelectEventCallback<T> onSelect) {
         return showListboxSelector(title, data, null, onSelect);
     }
 
