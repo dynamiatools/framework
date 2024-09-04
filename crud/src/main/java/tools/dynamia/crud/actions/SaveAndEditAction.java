@@ -20,7 +20,7 @@ import tools.dynamia.actions.ActionGroup;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.CrudActionEvent;
-import tools.dynamia.crud.GenericCrudView;
+import tools.dynamia.crud.CrudViewComponent;
 
 /**
  *
@@ -41,7 +41,7 @@ public class SaveAndEditAction extends SaveAction {
     }
 
     @Override
-    protected void afterSave(Object entity, GenericCrudView crud) {
+    protected void afterSave(Object entity, CrudViewComponent crud) {
         EditAction edit = new EditAction();
         edit.actionPerformed(new CrudActionEvent(entity, null, crud, crud.getController()));
     }

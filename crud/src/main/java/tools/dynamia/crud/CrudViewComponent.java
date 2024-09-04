@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @param <T>
  */
-public interface GenericCrudView<T> extends View<T> {
+public interface CrudViewComponent<T> extends View<T> {
 
     /**
      * Retunr current {@link CrudAction}s

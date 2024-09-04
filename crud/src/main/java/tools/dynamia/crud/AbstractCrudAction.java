@@ -41,7 +41,7 @@ public abstract class AbstractCrudAction extends AbstractClassAction implements 
         } else {
             crudEvt = new CrudActionEvent(evt.getData(),
                     evt.getSource(),
-                    (GenericCrudView) evt.getParam("crudview"),
+                    (CrudViewComponent) evt.getParam("crudview"),
                     (CrudControllerAPI) evt.getParam("controllers"));
 
             crudEvt.getParams().putAll(evt.getParams());

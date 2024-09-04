@@ -23,7 +23,7 @@ import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.crud.CrudState;
-import tools.dynamia.crud.GenericCrudView;
+import tools.dynamia.crud.CrudViewComponent;
 import tools.dynamia.domain.ValidationError;
 
 /**
@@ -49,7 +49,7 @@ public class SaveAction extends AbstractCrudAction {
     @SuppressWarnings("unchecked")
     @Override
     public void actionPerformed(CrudActionEvent evt) {
-        GenericCrudView crud = evt.getCrudView();
+        CrudViewComponent crud = evt.getCrudView();
         crud.getController().setEntity(evt.getData());
         try {
             crud.getController().doSave();
@@ -72,7 +72,7 @@ public class SaveAction extends AbstractCrudAction {
 
     }
 
-    protected void afterSave(Object entity, GenericCrudView crud) {
+    protected void afterSave(Object entity, CrudViewComponent crud) {
 
     }
 }

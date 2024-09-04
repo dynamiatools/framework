@@ -28,6 +28,6 @@ public interface CrudDataSetViewBuilder {
 
     Class getPreferredController();
 
-    DataSetView build(GenericCrudView crudView);
+    DataSetView build(CrudViewComponent crudView);
 
 }
