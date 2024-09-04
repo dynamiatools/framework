@@ -18,6 +18,7 @@ package tools.dynamia.zk.ui;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.util.Clients;
+import org.zkoss.zul.Messagebox;
 import tools.dynamia.ui.MessageType;
 
 import java.util.Map;
@@ -76,6 +77,16 @@ public class MessageNotification extends MessageDialog {
         }
         Clients.showNotification(message, type.toString().toLowerCase(), ref, pos, timeout, true);
 
+    }
+
+    @Override
+    public void showMessageDialog(String message, String title, MessageType messageType) {
+        String icon = switch (messageType) {
+            case ERROR, CRITICAL -> Messagebox.ERROR;
+            case WARNING -> Messagebox.EXCLAMATION;
+            default -> Messagebox.INFORMATION;
+        };
+        Messagebox.show(message, title, Messagebox.OK, icon);
     }
 
     public String getPosition() {
