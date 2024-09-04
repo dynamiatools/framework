@@ -19,6 +19,7 @@ package tools.dynamia.navigation;
 import tools.dynamia.commons.Callback;
 import tools.dynamia.integration.Containers;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,7 @@ public interface NavigationManager {
      * @param page
      * @param params
      */
-    static void setPageLater(Page page, Map<String, Object> params) {
+    static void setPageLater(Page page, Map<String, Serializable> params) {
         NavigationManagerSession.getInstance().setPage(page, params);
     }
 
@@ -61,7 +62,7 @@ public interface NavigationManager {
         setPageLater(path, null);
     }
 
-    static void setPageLater(String path, Map<String, Object> params) {
+    static void setPageLater(String path, Map<String, Serializable> params) {
         setPageLater(ModuleContainer.getInstance().findPage(path), params);
     }
 
@@ -125,7 +126,7 @@ public interface NavigationManager {
      */
     boolean setCurrentPage(Page newPage);
 
-    boolean setCurrentPage(Page newPage, Map<String, Object> params);
+    boolean setCurrentPage(Page newPage, Map<String, Serializable> params);
 
     /**
      * Find a page object by its path
