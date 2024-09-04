@@ -16,12 +16,14 @@
  */
 package tools.dynamia.viewers;
 
+import java.io.Serializable;
+
 /**
  * A factory for creating ViewDescriptor objects.
  *
  * @author Mario A. Serrano Leones
  */
-public interface ViewDescriptorFactory {
+public interface ViewDescriptorFactory extends Serializable {
 
     /**
      * Gets the descriptor.
@@ -35,20 +37,18 @@ public interface ViewDescriptorFactory {
      * Gets the descriptor. If descriptor is not found a new one may be created
      *
      * @param targetClass the target class
-     * @param viewType the view type
+     * @param viewType    the view type
      * @return the descriptor
      */
     ViewDescriptor getDescriptor(Class<?> targetClass, String viewType);
 
     /**
      * Gets the descriptor. If descriptor is not found a new one may be created
-     *
      */
     ViewDescriptor getDescriptor(Class beanClass, String device, String viewType);
 
     /**
      * find view descriptor, return null if not found.
-     *
      */
     ViewDescriptor findDescriptor(Class beanClass, String device, String viewType);
 
@@ -58,10 +58,10 @@ public interface ViewDescriptorFactory {
      * find view descriptor, return null if not found.
      *
      * @param targetClass the target class
-     * @param viewType the view type
+     * @param viewType    the view type
      * @return the descriptor
      */
     ViewDescriptor findDescriptor(Class beanClass, String viewType);
 
-	ViewDescriptor getDescriptor(String id, String device);
+    ViewDescriptor getDescriptor(String id, String device);
 }

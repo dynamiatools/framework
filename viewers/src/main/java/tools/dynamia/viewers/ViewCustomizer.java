@@ -17,13 +17,15 @@
 package tools.dynamia.viewers;
 
 
+import java.io.Serializable;
+
 /**
  * Implementation of this interface allow you customize a View after be created.
  *
  * @author Mario A. Serrano Leones
  * @param <T> the generic type
  */
-public interface ViewCustomizer<T extends View> {
+public interface ViewCustomizer<T extends View> extends Serializable {
 
     /**
      * Customize.

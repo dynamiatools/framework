@@ -17,13 +17,15 @@
 package tools.dynamia.viewers;
 
 
+import java.io.Serializable;
+
 /**
  * The Interface View.
  *
- * @author Mario A. Serrano Leones
  * @param <T> the generic type
+ * @author Mario A. Serrano Leones
  */
-public interface View<T> {
+public interface View<T> extends Serializable {
 
     /**
      * Gets the value.
@@ -67,11 +69,11 @@ public interface View<T> {
      */
     void setParentView(View view);
 
-    default void setSource(Object source){
+    default void setSource(Object source) {
 
     }
 
-    default Object getSource(){
+    default Object getSource() {
         return null;
     }
 }

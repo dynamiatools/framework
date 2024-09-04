@@ -17,12 +17,14 @@
 package tools.dynamia.viewers;
 
 
+import java.io.Serializable;
+
 /**
  * The Interface ComponentCustomizer.
  *
  * @param <T> the generic type
  */
-public interface ComponentCustomizer<T> {
+public interface ComponentCustomizer<T>  extends Serializable {
 
     /**
      * Cutomize.

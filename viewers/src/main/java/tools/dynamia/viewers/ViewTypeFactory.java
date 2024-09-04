@@ -17,12 +17,14 @@
 package tools.dynamia.viewers;
 
 
+import java.io.Serializable;
+
 /**
  * A factory for creating ViewType objects.
  *
  * @author Mario A. Serrano Leones
  */
-public interface ViewTypeFactory {
+public interface ViewTypeFactory  extends Serializable {
 
     /**
      * Gets the view type.
