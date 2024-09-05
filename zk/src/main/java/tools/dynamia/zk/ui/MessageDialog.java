@@ -96,4 +96,9 @@ public class MessageDialog implements MessageDisplayer {
         ZKUtil.showInputDialog(title, valueClass, defaultValue, evt -> onValue.accept((T) evt.getData()));
     }
 
+    @Override
+    public void showMessageDialog(String message, String title, MessageType messageType) {
+        showMessage(message, title, messageType);
+    }
+
 }
