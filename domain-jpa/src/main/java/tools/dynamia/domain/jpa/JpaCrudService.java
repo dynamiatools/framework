@@ -70,7 +70,6 @@ public class JpaCrudService extends AbstractCrudService {
 
     public static final String HINT_FETCH_GRAPH = "javax.persistence.fetchgraph";
     public static final String HINT_LOAD_GRAPH = "javax.persistence.loadgraph";
-
     /**
      * The em.
      */
@@ -966,14 +965,19 @@ public class JpaCrudService extends AbstractCrudService {
     @Override
     public void executeWithinTransaction(Callback callback) {
         PlatformTransactionManager txManager = Containers.get().findObject(PlatformTransactionManager.class);
-        TransactionTemplate tx = new TransactionTemplate(txManager);
-        tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        tx.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                callback.doSomething();
-            }
-        });
+        if (txManager!=null) {
+            TransactionTemplate tx = new TransactionTemplate(txManager);
+            tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+            tx.execute(new TransactionCallbackWithoutResult() {
+                @Override
+                protected void doInTransactionWithoutResult(TransactionStatus status) {
+                    callback.doSomething();
+                }
+            });
+        }else {
+            logger.warn("No TransactionManager found. Callback will be executed without transaction");
+            callback.doSomething();
+        }
 
     }
 

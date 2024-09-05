@@ -21,6 +21,7 @@ import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
@@ -45,7 +46,7 @@ public class GlobalExceptionController implements ErrorController {
         return mv;
     }
 
-    @RequestMapping(value = {"/errors", "/error"})
+    @RequestMapping(value = {"/errors", "/error"}, method = {RequestMethod.GET, RequestMethod.POST})
     public ModelAndView error(HttpServletRequest request) {
         var statusCode = (Integer) request.getAttribute("jakarta.servlet.error.status_code");
         var messageObj = request.getAttribute("jakarta.servlet.error.message");
@@ -76,7 +77,7 @@ public class GlobalExceptionController implements ErrorController {
         mv.addObject("message", messageObj + " " + (throwable != null ? throwable.getMessage() : ""));
         mv.addObject("exception", throwable);
 
-        if (statusCode!=null && statusCode == 404) {
+        if (statusCode != null && statusCode == 404) {
             mv.setViewName("error/404");
             mv.addObject("pageAlias", requestUri);
         }
