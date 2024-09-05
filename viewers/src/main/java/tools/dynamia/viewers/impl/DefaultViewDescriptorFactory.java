@@ -65,7 +65,7 @@ public class DefaultViewDescriptorFactory extends AbstractViewDescriptorFactory 
         }
         ViewDescriptor vd = subcache.get(beanClass);
         if (vd == null) {
-            vd = new DefaultViewDescriptor(beanClass, viewType);
+            vd = new DefaultViewDescriptor(beanClass, viewType, true);
             subcache.add(beanClass, vd);
         }
 

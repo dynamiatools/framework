@@ -16,9 +16,7 @@
  */
 package tools.dynamia.domain.jpa;
 
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 import tools.dynamia.domain.AbstractEntity;
 import tools.dynamia.domain.IdGenerators;
 
@@ -33,8 +31,11 @@ public abstract class SimpleEntityUuid extends AbstractEntity<String> implements
     private static final long serialVersionUID = 1047814464634611550L;
 
     @Id
-    private String id = IdGenerators.createId(String.class);
-
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+    private String remoteId;
+    @Version
+    private int version;
 
 
     /**
@@ -51,4 +52,11 @@ public abstract class SimpleEntityUuid extends AbstractEntity<String> implements
         this.id = id;
     }
 
+    public String getRemoteId() {
+        return remoteId;
+    }
+
+    public void setRemoteId(String remoteId) {
+        this.remoteId = remoteId;
+    }
 }

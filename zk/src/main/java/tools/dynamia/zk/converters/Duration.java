@@ -33,7 +33,12 @@ public class Duration implements Converter<Object, Object, Component> {
         if (val instanceof Long) {
             return StringUtils.formatDuration((Long) val);
         } else if (val instanceof java.time.Duration duration) {
-            return StringUtils.formatDuration(duration);
+
+            var string = StringUtils.formatDuration(duration);
+            if ("0:00:00".equals(string)) {
+                string = duration.toMillis() + " ms";
+            }
+            return string;
         }
         return null;
     }

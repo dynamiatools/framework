@@ -16,6 +16,7 @@
  */
 package tools.dynamia.viewers;
 
+import java.io.Serializable;
 import java.util.Map;
 
 
@@ -24,7 +25,7 @@ import java.util.Map;
  *
  * @author Mario A. Serrano Leones
  */
-public interface ViewLayout {
+public interface ViewLayout extends Serializable {
 
     /**
      * Gets the params.
@@ -36,7 +37,7 @@ public interface ViewLayout {
     /**
      * Adds the param.
      *
-     * @param name the name
+     * @param name  the name
      * @param value the value
      */
     void addParam(String name, Object value);

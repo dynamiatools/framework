@@ -27,7 +27,7 @@ public class PageEvent implements Serializable {
     private final String name;
     private Page page;
     private Object data;
-    private Map<String, Object> params;
+    private Map<String, Serializable> params;
     private Object source;
 
     public PageEvent(String name) {
@@ -45,7 +45,7 @@ public class PageEvent implements Serializable {
         this.data = data;
     }
 
-    public PageEvent(String name, Page page, Object data, Map<String, Object> params) {
+    public PageEvent(String name, Page page, Object data, Map<String, Serializable> params) {
         this.name = name;
         this.page = page;
         this.data = data;
@@ -72,7 +72,7 @@ public class PageEvent implements Serializable {
         }
     }
 
-    public Map<String, Object> getParams() {
+    public Map<String, Serializable> getParams() {
         return params;
     }
 

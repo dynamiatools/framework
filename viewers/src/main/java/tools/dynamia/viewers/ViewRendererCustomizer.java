@@ -17,13 +17,15 @@
 
 package tools.dynamia.viewers;
 
+import java.io.Serializable;
+
 /**
  * This class allow customize ViewRenderer process. Only the first customizers found that match target bean class
  * and target view type is use it.
  *
  * @param <V>
  */
-public interface ViewRendererCustomizer<V extends View> {
+public interface ViewRendererCustomizer<V extends View>   extends Serializable {
 
     Class<?> getTargetBeanClass();
 

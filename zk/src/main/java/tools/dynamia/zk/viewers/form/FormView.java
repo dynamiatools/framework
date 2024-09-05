@@ -57,7 +57,7 @@ import java.util.function.Supplier;
  * @author Mario A. Serrano Leones
  */
 @SuppressWarnings("rawtypes")
-public class FormView<T> extends Div implements GenericFormView<T, Component>, PropertyChangeListener, CanBeReadonly, IdSpace, ActionsContainer {
+public class FormView<T> extends Div implements FormViewComponent<T, Component>, PropertyChangeListener, CanBeReadonly, IdSpace, ActionsContainer {
 
     static {
         BindingComponentIndex.getInstance().put("value", FormView.class);

@@ -116,7 +116,7 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
     }
 
     @Override
-    public void update(Page page, Map<String, Object> params) {
+    public void update(Page page, Map<String, Serializable> params) {
         if (page != null && page.isShowAsPopup()) {
             super.update(page, params);
         } else if (tabbox != null) {
@@ -177,7 +177,7 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
     }
 
     @Override
-    protected void postUpdate(Component pageComponent, Page page, Map<String, Object> params) {
+    protected void postUpdate(Component pageComponent, Page page, Map<String, Serializable> params) {
         if (pageComponent.getParent() instanceof Tabpanel tabpanel) {
             if (tabpanel == null) {
                 return;

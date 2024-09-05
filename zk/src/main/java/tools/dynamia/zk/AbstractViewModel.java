@@ -33,13 +33,14 @@ import tools.dynamia.zk.converters.*;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * Helper class to build ViewModels
  */
 
-public abstract class AbstractViewModel<T> extends AbstractService {
+public abstract class AbstractViewModel<T> extends AbstractService implements Serializable {
 
     protected T model;
     protected Window parentWindow;

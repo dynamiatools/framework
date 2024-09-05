@@ -2,6 +2,7 @@ beanClass: tools.dynamia.zk.viewers.DummyBean
 view : form
 hidden: [age]
 customizer: tools.dynamia.zk.viewers.DummyViewCustomizer
+autofields: true
 
 #The fields
 fields:

@@ -18,6 +18,8 @@ package tools.dynamia.web.util;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.io.Serializable;
+
 /**
  * The DetectSmartPhone class encapsulates information about a browser's
  * connection to your web site. You can use it to find out whether the browser
@@ -26,7 +28,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * enquiring whether it's as specific as an iPod Touch or as general as a
  * smartphone class device. The object's methods return true, or false.
  */
-public class UserAgentInfo {
+public class UserAgentInfo implements Serializable {
     // User-Agent and Accept HTTP request headers
 
     private String userAgent = "";

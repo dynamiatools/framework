@@ -18,9 +18,18 @@
 package tools.dynamia.zk.viewers.tree;
 
 import org.zkoss.zk.ui.Component;
+import tools.dynamia.viewers.ITreeFieldComponent;
 
-import java.io.Serializable;
+public record TreeFieldComponent(String fieldName,
+                                 Component component) implements ITreeFieldComponent<Component> {
 
-public record TreeFieldComponent(String fieldName, Component component) implements Serializable {
+    @Override
+    public String getFieldName() {
+        return fieldName();
+    }
 
+    @Override
+    public Component getComponent() {
+        return component();
+    }
 }

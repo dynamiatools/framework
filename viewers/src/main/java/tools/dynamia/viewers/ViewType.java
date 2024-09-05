@@ -17,12 +17,14 @@
 package tools.dynamia.viewers;
 
 
+import java.io.Serializable;
+
 /**
  * The Interface ViewType.
  *
  * @author Mario A. Serrano Leones
  */
-public interface ViewType {
+public interface ViewType  extends Serializable {
 
     /**
      * Gets the name.

@@ -29,6 +29,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -171,27 +172,43 @@ public abstract class IOUtils {
             in = new FileInputStream(path);
         }
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        StringBuilder content = new StringBuilder();
-        String line = null;
-        while ((line = br.readLine()) != null) {
-            content.append(line);
-        }
-
-        return content.toString();
+        return readContent(in, Charset.defaultCharset());
     }
 
+    /**
+     * Read the file content from the classpath or file system if is not found
+     * in classpath.
+     *
+     * @param path    the path
+     * @param charset the charset
+     * @return the string
+     * @throws FileNotFoundException the file not found exception
+     * @throws IOException           Signals that an I/O exception has occurred.
+     */
     public static String readContent(String path, String charset) throws IOException {
         InputStream in = IOUtils.class.getResourceAsStream(path);
         if (in == null) {
             in = new FileInputStream(path);
         }
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(in, charset));
+        return readContent(in, Charset.forName(charset));
+    }
+
+    /**
+     * Read the file content from the input stream.
+     *
+     * @param inputStream the input stream
+     * @param charset     the charset
+     * @return the string
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public static String readContent(InputStream inputStream, Charset charset) throws IOException {
         StringBuilder content = new StringBuilder();
-        String line = null;
-        while ((line = br.readLine()) != null) {
-            content.append(line);
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, charset))) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                content.append(line);
+            }
         }
 
         return content.toString();
@@ -349,7 +366,6 @@ public abstract class IOUtils {
 
     /**
      * Unzip specific file in outputfolder
-     *
      */
     public static void unzipFile(File zipFile, File outputfolder) throws IOException {
         byte[] buffer = new byte[1024];
@@ -424,7 +440,6 @@ public abstract class IOUtils {
 
     /**
      * Delete a directory recursively
-     *
      */
     public static boolean deleteDirectory(File directory) {
         if (directory.exists()) {
@@ -444,7 +459,6 @@ public abstract class IOUtils {
 
     /**
      * Download file from URL to local folder. If file exist overwrite existing file.
-     *
      */
     public static Path downloadFile(String baseURL, final String fileURI, final String localFolder) throws Exception {
 
@@ -482,7 +496,6 @@ public abstract class IOUtils {
 
     /**
      * Encode a file bytes to Base64 String
-     *
      */
     public static String encodeBase64(File file) throws IOException {
         return Base64.getEncoder().encodeToString(Files.readAllBytes(file.toPath()));
@@ -491,7 +504,6 @@ public abstract class IOUtils {
 
     /**
      * Decode Base64 string to file
-     *
      */
     public static void decodeBase64(String base64, File outputFile) throws IOException {
         try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {

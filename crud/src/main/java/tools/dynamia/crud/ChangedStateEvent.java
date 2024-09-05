@@ -16,7 +16,7 @@
  */
 package tools.dynamia.crud;
 
-public record ChangedStateEvent(CrudState newState, CrudState oldState, GenericCrudView crudView) {
+public record ChangedStateEvent(CrudState newState, CrudState oldState, CrudViewComponent crudView) {
 
 
     public CrudState getNewState() {
@@ -29,7 +29,7 @@ public record ChangedStateEvent(CrudState newState, CrudState oldState, GenericC
     }
 
 
-    public GenericCrudView getCrudView() {
+    public CrudViewComponent getCrudView() {
         return crudView;
     }
 }

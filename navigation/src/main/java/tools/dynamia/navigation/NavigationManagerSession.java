@@ -5,16 +5,17 @@ import tools.dynamia.commons.Callback;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Component;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
 @Component
 @Scope("session")
-public class NavigationManagerSession {
+public class NavigationManagerSession implements Serializable {
 
     private Page page;
-    private Map<String, Object> pageParams;
+    private Map<String, Serializable> pageParams;
 
     private Queue<Callback> runLaterQueue = new LinkedList<>();
 
@@ -22,7 +23,7 @@ public class NavigationManagerSession {
         return Containers.get().findObject(NavigationManagerSession.class);
     }
 
-    public void setPage(Page page, Map<String, Object> params) {
+    public void setPage(Page page, Map<String, Serializable> params) {
         this.page = page;
         this.pageParams = params;
     }
@@ -36,6 +37,9 @@ public class NavigationManagerSession {
     }
 
     public void runLater(Callback callback) {
+        if (runLaterQueue == null) {
+            runLaterQueue = new LinkedList<>();
+        }
         runLaterQueue.add(callback);
     }
 
@@ -52,7 +56,7 @@ public class NavigationManagerSession {
         return page;
     }
 
-    public Map<String, Object> getPageParams() {
+    public Map<String, Serializable> getPageParams() {
         return pageParams;
     }
 

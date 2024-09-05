@@ -23,7 +23,7 @@ import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.crud.CrudState;
-import tools.dynamia.crud.GenericCrudView;
+import tools.dynamia.crud.CrudViewComponent;
 
 /**
  * @author Mario A. Serrano Leones
@@ -47,7 +47,7 @@ public class EditAction extends AbstractCrudAction {
     @SuppressWarnings("unchecked")
     @Override
     public void actionPerformed(CrudActionEvent evt) {
-        GenericCrudView view = evt.getCrudView();
+        CrudViewComponent view = evt.getCrudView();
         evt.getController().edit(evt.getData());
         if (evt.getData() != null) {
             BeanMessages messages = new BeanMessages(view.getController().getEntityClass());

@@ -19,6 +19,7 @@ package tools.dynamia.actions;
 import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 
+import java.io.Serializable;
 import java.util.Locale;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ import java.util.Map;
  *
  * @author Mario A. Serrano Leones
  */
-public interface Action extends Comparable<Action> {
+public interface Action extends Comparable<Action>, Serializable {
 
     /**
      * Unique action id.

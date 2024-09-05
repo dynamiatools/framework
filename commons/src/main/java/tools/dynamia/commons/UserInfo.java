@@ -37,7 +37,7 @@ public class UserInfo implements Serializable {
     private String profilePath;
     private String location;
     private boolean logged;
-    private final Map<String,Object> attributes = new ConcurrentHashMap<>();
+    private final Map<String, Serializable> attributes = new ConcurrentHashMap<>();
 
 
     public Date getDate() {
@@ -127,11 +127,11 @@ public class UserInfo implements Serializable {
         return username != null;
     }
 
-    public void addAttribute(String name, Object value){
-        attributes.put(name,value);
+    public void addAttribute(String name, Serializable value) {
+        attributes.put(name, value);
     }
 
-    public Object getAttribute(String name){
+    public Serializable getAttribute(String name) {
         return attributes.get(name);
     }
 

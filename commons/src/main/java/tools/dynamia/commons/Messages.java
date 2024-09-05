@@ -196,17 +196,6 @@ public class Messages {
         localeProviders = supplier;
     }
 
-    static {
-        try {
-            Files.readAllLines(Paths.get(Messages.class.getResource("/dynamia/banner.txt").toURI())).forEach(System.out::println);
-        } catch (Exception e) {
-            System.out.println("----------------------------------------------------");
-            System.out.println("DynamiaTools is Powered By: Dynamia Soluciones IT");
-            System.out.println("https://dynamia.tools");
-            System.out.println("https://www.dynamiasoluciones.com");
-            System.out.println("----------------------------------------------------");
-        }
-    }
 
 }
 

@@ -26,7 +26,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import tools.dynamia.domain.services.CrudService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = TestConfig.class)
+@ContextConfiguration(classes = JpaTestConfig.class)
 public class JpaConvertersTest {
 
     @Autowired

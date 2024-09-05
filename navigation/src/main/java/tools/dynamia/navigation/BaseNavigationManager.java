@@ -41,12 +41,12 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
     private PageGroup currentPageGroup;
     private Page lastPage;
     private Page currentPage;
-    private final Map<String, Object> attributes;
+    private final Map<String, Serializable> attributes;
     private final ModuleContainer container;
     private List<Page> availablesPages = new ArrayList<>();
 
     private NavigationBuilder currentNavigationBuilder;
-    private Map<String, Object> currentPageParams;
+    private Map<String, Serializable> currentPageParams;
 
     public BaseNavigationManager(ModuleContainer container) {
         this.logger = new SLF4JLoggingService(BaseNavigationManager.class);
@@ -94,7 +94,7 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
     }
 
     @Override
-    public Map<String, Object> getCurrentPageAttributes() {
+    public Map<String, Serializable> getCurrentPageAttributes() {
         return attributes;
     }
 
@@ -104,7 +104,7 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
     }
 
     @Override
-    public boolean setCurrentPage(Page newPage, Map<String, Object> params) {
+    public boolean setCurrentPage(Page newPage, Map<String, Serializable> params) {
         if (lastPage != null && lastPage.equals(newPage)) {
             //already in that page
             return false;
@@ -144,7 +144,7 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
     }
 
     @Override
-    public void navigateTo(String path, Map<String, Object> params) {
+    public void navigateTo(String path, Map<String, Serializable> params) {
         if (!path.contains("/")) {
             setActiveModule(container.getModuleById(path));
         } else {
@@ -183,7 +183,7 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
     }
 
 
-    protected void fireOnPageLoad(Page page, Map<String, Object> params) {
+    protected void fireOnPageLoad(Page page, Map<String, Serializable> params) {
         if (isValidPage(page)) {
             if (page.getOnOpenCallback() != null) {
                 page.getOnOpenCallback().doSomething();
@@ -271,7 +271,7 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
         this.currentNavigationBuilder = currentNavigationBuilder;
     }
 
-    public Map<String, Object> getCurrentPageParams() {
+    public Map<String, Serializable> getCurrentPageParams() {
         return currentPageParams;
     }
 }

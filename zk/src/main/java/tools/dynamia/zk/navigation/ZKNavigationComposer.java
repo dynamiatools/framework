@@ -38,6 +38,7 @@ import tools.dynamia.navigation.WorkspaceViewBuilder;
 import tools.dynamia.zk.util.ZKUtil;
 import tools.dynamia.zk.workspace.builders.TabPanel;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,7 +106,7 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
 
 
         desktopCurrentPage = navManager().getCurrentPage();
-        Map<String, Object> pageParams = navManager().getCurrentPageParams();
+        Map<String, Serializable> pageParams = navManager().getCurrentPageParams();
         if (desktopCurrentPage == null) {
             loadDefaultPage();
             pageParams = null;
@@ -159,7 +160,7 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
         return self;
     }
 
-    void update(Map<String, Object> params) {
+    void update(Map<String, Serializable> params) {
         if (desktopCurrentPage instanceof ActionPage) {
             ((ActionPage) desktopCurrentPage).execute();
             return;

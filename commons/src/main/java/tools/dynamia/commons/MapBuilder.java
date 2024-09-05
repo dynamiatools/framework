@@ -16,6 +16,7 @@
  */
 package tools.dynamia.commons;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,9 +24,9 @@ import java.util.Map;
 /**
  * The Class MapBuilder.
  *
- * @author Mario A. Serrano Leones
  * @param <K> key
  * @param <V> value
+ * @author Mario A. Serrano Leones
  */
 public class MapBuilder<K, V> {
 
@@ -37,7 +38,7 @@ public class MapBuilder<K, V> {
     /**
      * Put.
      *
-     * @param key the key
+     * @param key   the key
      * @param value the value
      * @return the map builder
      */
@@ -58,12 +59,25 @@ public class MapBuilder<K, V> {
     /**
      * Put.
      *
-     * @param key the key
+     * @param key   the key
      * @param value the value
      * @return the map
      */
     public static Map<String, Object> put(String key, Object value) {
         Map<String, Object> map = new HashMap<>();
+        map.put(key, value);
+        return map;
+    }
+
+    /**
+     * Serializable Map.
+     *
+     * @param key   the key
+     * @param value the value
+     * @return the map
+     */
+    public static Map<String, Serializable> serializable(String key, Serializable value) {
+        Map<String, Serializable> map = new HashMap<>();
         map.put(key, value);
         return map;
     }
@@ -80,6 +94,24 @@ public class MapBuilder<K, V> {
         }
 
         Map<String, Object> map = new HashMap<>();
+        for (int i = 0; i < keyvalue.length; i = i + 2) {
+            map.put(keyvalue[i].toString(), keyvalue[i + 1]);
+        }
+        return map;
+    }
+
+    /**
+     * Serializable map.
+     *
+     * @param keyvalue
+     * @return
+     */
+    public static Map<String, Serializable> serializable(Serializable... keyvalue) {
+        if (keyvalue.length % 2 != 0) {
+            throw new RuntimeException("Invalid number of key values pair");
+        }
+
+        Map<String, Serializable> map = new HashMap<>();
         for (int i = 0; i < keyvalue.length; i = i + 2) {
             map.put(keyvalue[i].toString(), keyvalue[i + 1]);
         }

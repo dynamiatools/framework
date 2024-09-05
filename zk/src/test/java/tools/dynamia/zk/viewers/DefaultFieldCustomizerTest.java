@@ -35,7 +35,6 @@ import java.util.Date;
 import static org.junit.Assert.assertEquals;
 
 /**
- *
  * @author Mario A. Serrano Leones
  */
 public class DefaultFieldCustomizerTest {
@@ -59,7 +58,7 @@ public class DefaultFieldCustomizerTest {
 
     @Test
     public void testFieldEnums() {
-        ViewDescriptor vd = new DefaultViewDescriptor(DummyBean.class, "form");
+        ViewDescriptor vd = new DefaultViewDescriptor(DummyBean.class, "form",true);
         Field type = vd.getField("type");
         assertEquals(Combobox.class, type.getComponentClass());
         assertEquals(EnumComponentCustomizer.class.getName(), type.getComponentCustomizer());
@@ -78,9 +77,9 @@ public class DefaultFieldCustomizerTest {
     @Test
     public void testCustomize() {
         var container = new SimpleObjectContainer();
-        container.addObject("customizer",new DefaultFieldCustomizer());
+        container.addObject("customizer", new DefaultFieldCustomizer());
         Containers.get().installObjectContainer(container);
-        DefaultViewDescriptor vd = new DefaultViewDescriptor(DummyBean.class, "form");
+        DefaultViewDescriptor vd = new DefaultViewDescriptor(DummyBean.class, "form", true);
 
         {
             Field field = vd.getField("name");

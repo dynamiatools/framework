@@ -178,7 +178,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
 
         String view = (String) map.get(VD_VIEW);
 
-        boolean autofields = true;
+        boolean autofields = false;
         if (isBoolean(get(map, VD_AUTOFIELDS))) {
             autofields = parseBoolean(get(map, VD_AUTOFIELDS));
         }

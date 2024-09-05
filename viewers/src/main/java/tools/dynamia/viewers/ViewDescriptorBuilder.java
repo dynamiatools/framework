@@ -41,8 +41,8 @@ public class ViewDescriptorBuilder {
     /**
      * View descriptor.
      *
-     * @param type the type
-     * @param beanClass the bean class
+     * @param type       the type
+     * @param beanClass  the bean class
      * @param autofields the autofields
      * @return the view descriptor builder
      */
@@ -55,7 +55,7 @@ public class ViewDescriptorBuilder {
     /**
      * View descriptor.
      *
-     * @param type the type
+     * @param type      the type
      * @param beanClass the bean class
      * @return the view descriptor builder
      */
@@ -178,7 +178,7 @@ public class ViewDescriptorBuilder {
     /**
      * Field.
      *
-     * @param name the name
+     * @param name  the name
      * @param label the label
      * @return the field builder
      */
@@ -189,8 +189,8 @@ public class ViewDescriptorBuilder {
     /**
      * Field.
      *
-     * @param name the name
-     * @param label the label
+     * @param name      the name
+     * @param label     the label
      * @param component the component
      * @return the field builder
      */
@@ -213,7 +213,7 @@ public class ViewDescriptorBuilder {
     /**
      * Group.
      *
-     * @param name the name
+     * @param name  the name
      * @param label the label
      * @return the field group builder
      */
@@ -224,9 +224,9 @@ public class ViewDescriptorBuilder {
     /**
      * Group.
      *
-     * @param name the name
+     * @param name  the name
      * @param label the label
-     * @param icon the icon
+     * @param icon  the icon
      * @return the field group builder
      */
     public static FieldGroupBuilder group(String name, String label, String icon) {
@@ -240,5 +240,10 @@ public class ViewDescriptorBuilder {
      */
     public ViewDescriptor build() {
         return descriptor;
+    }
+
+    public ViewDescriptorBuilder autofields(boolean autofields) {
+        descriptor.setAutofields(autofields);
+        return this;
     }
 }

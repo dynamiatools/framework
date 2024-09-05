@@ -87,7 +87,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
     /**
      * The autofields.
      */
-    private boolean autofields = true;
+    private boolean autofields;
 
     /**
      * The messages.
@@ -130,7 +130,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
      * @param viewTypeName the view type name
      */
     public AbstractViewDescriptor(Class<?> beanClass, String viewTypeName) {
-        this(beanClass, viewTypeName, true);
+        this(beanClass, viewTypeName, false);
     }
 
     /**
@@ -773,6 +773,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
 
     /**
      * Add new action reference
+     *
      * @param actionRef
      */
     public void addAction(ActionRef actionRef) {
@@ -784,4 +785,12 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
             actions.add(actionRef);
         }
     }
+
+    public void setAutofields(boolean autofields) {
+        this.autofields = autofields;
+        if (getFields().isEmpty() && isAutofields()) {
+            createFieldsFromClass();
+        }
+    }
+
 }

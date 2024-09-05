@@ -12,6 +12,7 @@ open module tools.dynamia.commons {
     requires org.slf4j;
     requires java.desktop;
     requires java.sql;
+    requires com.fasterxml.jackson.datatype.jsr310;
 
 
 }

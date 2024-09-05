@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import tools.dynamia.crud.ChangedStateEvent;
 import tools.dynamia.crud.CrudState;
 import tools.dynamia.crud.CrudStateChangedListener;
-import tools.dynamia.crud.GenericCrudView;
+import tools.dynamia.crud.CrudViewComponent;
 import tools.dynamia.viewers.util.Viewers;
 
 @Component
@@ -28,7 +28,7 @@ public class AutoQueryCrudStateChangedListener implements CrudStateChangedListen
 
     @Override
     public void changedState(ChangedStateEvent evt) {
-        GenericCrudView crudView = evt.crudView();
+        CrudViewComponent crudView = evt.crudView();
         if (evt.newState() == CrudState.READ) {
             try {
 

@@ -23,12 +23,12 @@
     <parent>
         <artifactId>tools.dynamia.parent</artifactId>
         <groupId>tools.dynamia</groupId>
-        <version>5.1.3</version>
+        <version>5.2.0</version>
     </parent>
 
 
     <artifactId>tools.dynamia.templates</artifactId>
-    <version>5.1.3</version>
+    <version>5.2.0</version>
     <name>DynamiaTools - Templates</name>
     <url>https://dynamia.tools/docs/templates</url>
 
@@ -64,12 +64,12 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.integration</artifactId>
-            <version>5.1.3</version>
+            <version>5.2.0</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.commons</artifactId>
-            <version>5.1.3</version>
+            <version>5.2.0</version>
         </dependency>
     </dependencies>
 

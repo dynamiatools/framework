@@ -70,7 +70,7 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
         if (id != null) {
             writeField(gen, "id", id);
         }
-        writeField(gen, "name", value.toString());
+       // writeField(gen, "name", value.toString());
 
         for (Field field : Viewers.getFields(viewDescriptor)) {
             PropertyInfo fieldInfo = field.getPropertyInfo();

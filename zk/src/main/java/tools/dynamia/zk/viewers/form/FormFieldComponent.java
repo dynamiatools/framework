@@ -20,12 +20,12 @@ package tools.dynamia.zk.viewers.form;
 import org.zkoss.zhtml.Text;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.HtmlBasedComponent;
-import tools.dynamia.viewers.GenericFormFieldComponent;
-import tools.dynamia.viewers.GenericLabel;
+import tools.dynamia.viewers.IFormFieldComponent;
+import tools.dynamia.viewers.LabelComponent;
 
 import java.io.Serializable;
 
-public class FormFieldComponent implements GenericFormFieldComponent<Component>, Serializable {
+public class FormFieldComponent implements IFormFieldComponent<Component>, Serializable {
 
     private final String fieldName;
     private final Label label;
@@ -109,7 +109,7 @@ public class FormFieldComponent implements GenericFormFieldComponent<Component>,
     }
 
 
-    public record Label(Component delegated) implements GenericLabel {
+    public record Label(Component delegated) implements LabelComponent {
 
         @Override
         public String getValue() {

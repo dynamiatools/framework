@@ -16,6 +16,7 @@
  */
 package tools.dynamia.navigation;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -23,13 +24,13 @@ import java.util.Map;
  *
  * @author Mario A. Serrano Leones
  */
-public interface WorkspaceViewBuilder<T> {
+public interface WorkspaceViewBuilder<T> extends Serializable {
 
     void init(T container);
 
     void build(Page page);
 
-    void update(Page page, Map<String, Object> params);
+    void update(Page page, Map<String, Serializable> params);
 
     void close(Page page);
 }

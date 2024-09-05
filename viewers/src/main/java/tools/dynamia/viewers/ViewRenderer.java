@@ -17,13 +17,15 @@
 package tools.dynamia.viewers;
 
 
+import java.io.Serializable;
+
 /**
  * Implementation of this class will renderer views for {@link ViewDescriptor}. see {@link ViewType}.
  *
  * @author Mario A. Serrano Leones
  * @param <T> the generic type
  */
-public interface ViewRenderer<T> {
+public interface ViewRenderer<T> extends Serializable {
 
     /**
      * Render.

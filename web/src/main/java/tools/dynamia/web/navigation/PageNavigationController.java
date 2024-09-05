@@ -24,14 +24,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import tools.dynamia.integration.Containers;
-import tools.dynamia.navigation.ModuleContainer;
-import tools.dynamia.navigation.NavigationManager;
-import tools.dynamia.navigation.NavigationNotAllowedException;
-import tools.dynamia.navigation.NavigationRestrictions;
-import tools.dynamia.navigation.Page;
-import tools.dynamia.navigation.PageNotFoundException;
+import tools.dynamia.navigation.*;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -84,11 +80,13 @@ public class PageNavigationController {
             return null;
         }
 
-        Map<String, Object> pageParams = new HashMap<>();
-        if (request != null && request.getParameterMap() != null) {
+        Map<String, Serializable> pageParams = new HashMap<>();
+        if (request.getParameterMap() != null) {
             for (Object object : request.getParameterMap().entrySet()) {
                 Entry httpParam = (Entry) object;
-                pageParams.put(httpParam.getKey().toString(), httpParam.getValue());
+                if (httpParam.getValue() instanceof Serializable paramValue) {
+                    pageParams.put(httpParam.getKey().toString(), paramValue);
+                }
             }
         }
         ModelAndView mv = new ModelAndView("index");

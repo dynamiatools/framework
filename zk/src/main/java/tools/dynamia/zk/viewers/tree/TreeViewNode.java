@@ -43,6 +43,9 @@ public class TreeViewNode<E> implements Serializable {
     private String style;
     private String styleClass;
     private String badge;
+    private String badgePosition = "right";
+    private Object role;
+    private Object source;
 
     public String getStyle() {
         return style;
@@ -183,5 +186,29 @@ public class TreeViewNode<E> implements Serializable {
 
     public void setBadge(String badge) {
         this.badge = badge;
+    }
+
+    public Object getRole() {
+        return role;
+    }
+
+    public void setRole(Object role) {
+        this.role = role;
+    }
+
+    public Object getSource() {
+        return source;
+    }
+
+    public void setSource(Object source) {
+        this.source = source;
+    }
+
+    public String getBadgePosition() {
+        return badgePosition;
+    }
+
+    public void setBadgePosition(String badgePosition) {
+        this.badgePosition = badgePosition;
     }
 }

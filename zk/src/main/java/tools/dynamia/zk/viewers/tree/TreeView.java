@@ -18,6 +18,7 @@
 
 package tools.dynamia.zk.viewers.tree;
 
+import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Menupopup;
 import org.zkoss.zul.Tree;
@@ -25,7 +26,7 @@ import org.zkoss.zul.TreeModel;
 import org.zkoss.zul.Treeitem;
 import org.zkoss.zul.TreeitemRenderer;
 import tools.dynamia.domain.query.DataSet;
-import tools.dynamia.viewers.DataSetView;
+import tools.dynamia.viewers.TreeViewComponent;
 import tools.dynamia.viewers.View;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.zk.BindingComponentIndex;
@@ -38,7 +39,7 @@ import java.util.function.Consumer;
  * @author Mario A. Serrano Leones
  */
 @SuppressWarnings("unchecked")
-public class TreeView<T> extends Tree implements DataSetView<TreeModel<TreeViewNode<T>>> {
+public class TreeView<T> extends Tree implements TreeViewComponent<TreeModel<TreeViewNode<T>>> {
 
     static {
         BindingComponentIndex.getInstance().put("value", TreeView.class);
@@ -109,15 +110,20 @@ public class TreeView<T> extends Tree implements DataSetView<TreeModel<TreeViewN
 
     }
 
-    public TreeFieldComponent getTreeFieldComponent(String fieldName, Treeitem item) {
-        try {
 
-            Map<String, TreeFieldComponent> tfcMap = (Map<String, TreeFieldComponent>) item
-                    .getAttribute("TREE_FIELD_COMPONENTS");
-            return tfcMap.get(fieldName);
+
+    @Override
+    public TreeFieldComponent getTreeFieldComponent(String fieldName, Object item) {
+        try {
+            if (item instanceof Component treeItem) {
+                Map<String, TreeFieldComponent> tfcMap = (Map<String, TreeFieldComponent>) treeItem
+                        .getAttribute("TREE_FIELD_COMPONENTS");
+                return tfcMap.get(fieldName);
+            }
         } catch (Exception e) {
-            return null;
+            //ignore
         }
+        return null;
     }
 
     public Treeitem getTreeItemByValue(T value) {
@@ -151,10 +157,12 @@ public class TreeView<T> extends Tree implements DataSetView<TreeModel<TreeViewN
         }
     }
 
+    @Override
     public void setShowRowNumber(boolean showRowNumber) {
         this.showRowNumber = showRowNumber;
     }
 
+    @Override
     public boolean isShowRowNumber() {
         return showRowNumber;
     }

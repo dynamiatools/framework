@@ -24,14 +24,11 @@ import jakarta.persistence.Tuple;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
-import tools.dynamia.commons.BeanMap;
-import tools.dynamia.commons.BeanSorter;
-import tools.dynamia.commons.BeanUtils;
-import tools.dynamia.commons.Callback;
-import tools.dynamia.commons.MapBuilder;
+import tools.dynamia.commons.*;
 import tools.dynamia.commons.collect.PagedList;
 import tools.dynamia.commons.collect.PagedListDataSource;
 import tools.dynamia.commons.logger.LoggingService;
@@ -40,13 +37,7 @@ import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.domain.AbstractEntity;
 import tools.dynamia.domain.OrderBy;
 import tools.dynamia.domain.jdbc.QueryInterruptedException;
-import tools.dynamia.domain.query.BooleanOp;
-import tools.dynamia.domain.query.DataPaginator;
-import tools.dynamia.domain.query.QueryCondition;
-import tools.dynamia.domain.query.QueryConditions;
-import tools.dynamia.domain.query.QueryExample;
-import tools.dynamia.domain.query.QueryMetadata;
-import tools.dynamia.domain.query.QueryParameters;
+import tools.dynamia.domain.query.*;
 import tools.dynamia.domain.services.ValidatorService;
 import tools.dynamia.domain.services.impl.AbstractCrudService;
 import tools.dynamia.domain.util.CrudServiceListener;
@@ -79,21 +70,17 @@ public class JpaCrudService extends AbstractCrudService {
 
     public static final String HINT_FETCH_GRAPH = "javax.persistence.fetchgraph";
     public static final String HINT_LOAD_GRAPH = "javax.persistence.loadgraph";
-
     /**
      * The em.
      */
     @PersistenceContext
     private EntityManager em;
 
-
-    private final PlatformTransactionManager txManager;
     private final ValidatorService validatorService;
 
     private boolean fullyLoadEntities = false;
 
-    public JpaCrudService(PlatformTransactionManager txManager, ValidatorService validatorService) {
-        this.txManager = txManager;
+    public JpaCrudService(ValidatorService validatorService) {
         this.validatorService = validatorService;
     }
 
@@ -977,14 +964,20 @@ public class JpaCrudService extends AbstractCrudService {
 
     @Override
     public void executeWithinTransaction(Callback callback) {
-        TransactionTemplate tx = new TransactionTemplate(txManager);
-        tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        tx.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                callback.doSomething();
-            }
-        });
+        PlatformTransactionManager txManager = Containers.get().findObject(PlatformTransactionManager.class);
+        if (txManager!=null) {
+            TransactionTemplate tx = new TransactionTemplate(txManager);
+            tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+            tx.execute(new TransactionCallbackWithoutResult() {
+                @Override
+                protected void doInTransactionWithoutResult(TransactionStatus status) {
+                    callback.doSomething();
+                }
+            });
+        }else {
+            logger.warn("No TransactionManager found. Callback will be executed without transaction");
+            callback.doSomething();
+        }
 
     }
 

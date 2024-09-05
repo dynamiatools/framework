@@ -67,11 +67,16 @@ public class EntityTreeItemRenderer implements TreeitemRenderer {
                 text.appendChild(iconComp);
                 text.appendChild(new Label(" "));
             }
-            text.appendChild(label);
 
-            if (node.getBadge() != null && !node.getBadge().isBlank()) {
+
+            if ("left".equals(node.getBadgePosition())) {
+                addBadge(node, text);
                 text.appendChild(new Text());
-                text.appendChild(new Badge(node.getBadge()));
+                text.appendChild(label);
+            } else {
+                text.appendChild(label);
+                text.appendChild(new Text());
+                addBadge(node, text);
             }
 
             cell.appendChild(text);
@@ -88,6 +93,12 @@ public class EntityTreeItemRenderer implements TreeitemRenderer {
             row.setParent(item);
         } else {
             item.setLabel(String.valueOf(data));
+        }
+    }
+
+    private static void addBadge(EntityTreeNode<?> node, Span text) {
+        if (node.getBadge() != null && !node.getBadge().isBlank()) {
+            text.appendChild(new Badge(node.getBadge()));
         }
     }
 

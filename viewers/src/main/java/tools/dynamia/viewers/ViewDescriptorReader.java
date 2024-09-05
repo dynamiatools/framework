@@ -19,6 +19,7 @@ package tools.dynamia.viewers;
 import tools.dynamia.io.Resource;
 
 import java.io.Reader;
+import java.io.Serializable;
 import java.util.List;
 
 
@@ -27,14 +28,14 @@ import java.util.List;
  *
  * @author Mario A. Serrano Leones
  */
-public interface ViewDescriptorReader {
+public interface ViewDescriptorReader extends Serializable {
 
     /**
      * Read.
      *
      * @param descriptorResource the descriptor resource
-     * @param reader the reader
-     * @param customizers the customizers
+     * @param reader             the reader
+     * @param customizers        the customizers
      * @return the view descriptor
      */
     ViewDescriptor read(Resource descriptorResource, Reader reader, List<ViewDescriptorReaderCustomizer> customizers);
