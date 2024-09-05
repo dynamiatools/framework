@@ -91,7 +91,7 @@ public interface NavigationManager {
      *
      * @return map
      */
-    Map<String, Object> getCurrentPageAttributes();
+    Map<String, Serializable> getCurrentPageAttributes();
 
     /**
      * return the current page gruop from the selected page
@@ -109,7 +109,7 @@ public interface NavigationManager {
      */
     void navigateTo(String path);
 
-    void navigateTo(String path, Map<String, Object> params);
+    void navigateTo(String path, Map<String, Serializable> params);
 
     /**
      * Refresh or reload the current selected page

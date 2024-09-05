@@ -27,6 +27,7 @@ import tools.dynamia.navigation.WorkspaceViewBuilder;
 import tools.dynamia.zk.ui.DivContainer;
 import tools.dynamia.zk.util.ZKUtil;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +42,7 @@ public abstract class AbstractZKWorkspaceBuilder implements WorkspaceViewBuilder
     }
 
     @Override
-    public void update(Page page, Map<String, Object> params) {
+    public void update(Page page, Map<String, Serializable> params) {
         if (page != null) {
             Component pageContainer = getPageContainer(page);
             if (pageContainer == null) {
@@ -90,11 +91,11 @@ public abstract class AbstractZKWorkspaceBuilder implements WorkspaceViewBuilder
 
     public abstract void clearPageContainer(Component pageContainer);
 
-    protected void postUpdate(Component pageComponent, Page page, Map<String, Object> params) {
+    protected void postUpdate(Component pageComponent, Page page, Map<String, Serializable> params) {
 
     }
 
-    protected Component renderPage(Component pageContainer, Page page, Map<String, Object> params) {
+    protected Component renderPage(Component pageContainer, Page page, Map<String, Serializable> params) {
         if (params == null) {
             params = new HashMap<>();
         }

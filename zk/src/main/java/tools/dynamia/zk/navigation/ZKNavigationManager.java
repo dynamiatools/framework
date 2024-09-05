@@ -79,7 +79,7 @@ public class ZKNavigationManager extends BaseNavigationManager implements Serial
     }
 
     @Override
-    public boolean setCurrentPage(Page newPage, Map<String, Object> params) {
+    public boolean setCurrentPage(Page newPage, Map<String, Serializable> params) {
         boolean ok = super.setCurrentPage(newPage, params);
         if (ok) {
             notityComposer(new PageEvent(ON_PAGE_CHANGED, newPage, newPage, params));

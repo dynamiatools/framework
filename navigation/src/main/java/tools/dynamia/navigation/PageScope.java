@@ -22,6 +22,8 @@ import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.Containers;
 
+import java.io.Serializable;
+
 /**
  * @author Mario A. Serrano Leones
  */
@@ -36,7 +38,9 @@ public class PageScope implements Scope {
         Object object = navManager.getCurrentPageAttributes().get(name);
         if (object == null) {
             object = objectFactory.getObject();
-            navManager.getCurrentPageAttributes().put(name, object);
+            if(object instanceof Serializable) {
+                navManager.getCurrentPageAttributes().put(name, (Serializable) object);
+            }
         }
         return object;
     }
