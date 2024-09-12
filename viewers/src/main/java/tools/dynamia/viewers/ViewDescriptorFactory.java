@@ -17,6 +17,8 @@
 package tools.dynamia.viewers;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A factory for creating ViewDescriptor objects.
@@ -63,5 +65,20 @@ public interface ViewDescriptorFactory extends Serializable {
      */
     ViewDescriptor findDescriptor(Class beanClass, String viewType);
 
+    /**
+     * Gets the descriptor.
+     *
+     * @param id     the id
+     * @param device the device
+     * @return the descriptor
+     */
     ViewDescriptor getDescriptor(String id, String device);
+
+    /**
+     * Find descriptors by  view type.
+     *
+     * @param viewType the view type
+     * @return the list
+     */
+    Set<Map.Entry<Class, ViewDescriptor>> findDescriptorsByType(String viewType);
 }

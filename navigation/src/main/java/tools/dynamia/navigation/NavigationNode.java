@@ -3,11 +3,12 @@ package tools.dynamia.navigation;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class NavigationNode {
+public class NavigationNode implements Serializable {
 
 
     private String id;

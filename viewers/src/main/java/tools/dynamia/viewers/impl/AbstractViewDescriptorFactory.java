@@ -34,10 +34,7 @@ import tools.dynamia.viewers.util.ViewDescriptorReaderUtils;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A factory for creating AbstractViewDescriptor objects.
@@ -587,5 +584,11 @@ public abstract class AbstractViewDescriptorFactory implements ViewDescriptorFac
                 logger.error(ex);
             }
         }
+    }
+
+    @Override
+    public Set<Map.Entry<Class, ViewDescriptor>> findDescriptorsByType(String viewType) {
+        return descriptors.get(DEFAULT_DEVICE).get(viewType).entrySet();
+
     }
 }
