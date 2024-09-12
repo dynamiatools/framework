@@ -3,7 +3,9 @@ package tools.dynamia.zk.ui;
 import tools.dynamia.ui.icons.Icon;
 import tools.dynamia.ui.icons.InstallIcons;
 
-@InstallIcons
+/**
+ * Should be enabled using @{@link org.springframework.context.annotation.Bean} annotation in a Configuration class
+ */
 public class ZIconsProvider extends FontAwesomeIconsProvider {
 
     @Override
