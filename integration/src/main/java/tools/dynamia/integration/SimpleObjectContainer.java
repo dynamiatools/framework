@@ -33,10 +33,18 @@ public class SimpleObjectContainer implements ObjectContainer {
 
     private final String name;
 
+    /**
+     * Instantiates a new simple object container with a random name.
+     */
     public SimpleObjectContainer() {
         name = StringUtils.randomString();
     }
 
+    /**
+     * Instantiates a new simple object container.
+     *
+     * @param name the name
+     */
     public SimpleObjectContainer(String name) {
         this.name = name;
     }
@@ -122,6 +130,15 @@ public class SimpleObjectContainer implements ObjectContainer {
     }
 
     /**
+     * Adds the object.
+     *
+     * @param object the object
+     */
+    public void addObject(Object object) {
+        addObject(object.getClass().getSimpleName(), object);
+    }
+
+    /**
      * Gets the objects count.
      *
      * @return the objects count
@@ -129,6 +146,23 @@ public class SimpleObjectContainer implements ObjectContainer {
     public int getObjectsCount() {
         return objects.size();
     }
+
+    /**
+     * is empty
+     *
+     * @return true if no objects
+     */
+    public boolean isEmpty() {
+        return objects.isEmpty();
+    }
+
+    /**
+     * clear the container
+     */
+    public void clear() {
+        objects.clear();
+    }
+
 
     @Override
     public String toString() {

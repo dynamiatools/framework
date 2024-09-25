@@ -26,18 +26,18 @@ import tools.dynamia.zk.crud.constraints.Required;
 @Provider
 public class RequiredFieldCustomizer implements FieldCustomizer {
 
-	private static final String CONSTRAINT = "constraint";
-	private static final Constraint REQUIRED = new Required();
+    private static final String CONSTRAINT = "constraint";
+    private static final Constraint REQUIRED = new Required();
 
-	@Override
-	public void customize(String viewTypeName, Field field) {
+    @Override
+    public void customize(String viewTypeName, Field field) {
 
-		if ("form".equals(viewTypeName)) {
-			if (field.isRequired() && !field.getParams().containsKey(CONSTRAINT)) {
+        if ("form".equals(viewTypeName)) {
+            if (field.isRequired() && !field.getParams().containsKey(CONSTRAINT)) {
 
-				field.addParam(CONSTRAINT, REQUIRED);
-			}
-		}
-	}
+                field.addParam(CONSTRAINT, Required.class.getName());
+            }
+        }
+    }
 
 }

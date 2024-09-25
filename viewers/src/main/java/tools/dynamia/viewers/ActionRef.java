@@ -1,11 +1,14 @@
 package tools.dynamia.viewers;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Represent an action reference
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ActionRef {
     private String id;
     private String width;

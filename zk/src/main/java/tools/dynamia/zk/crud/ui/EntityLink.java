@@ -40,7 +40,7 @@ public class EntityLink extends A  implements LoadableOnly {
     private Callback onClickCallback = () -> {
         ViewDataAction viewDataAction = Containers.get().findObject(ViewDataAction.class);
         if (viewDataAction != null) {
-            viewDataAction.view(entity);
+            viewDataAction.reloadAndView(entity);
         }
     };
 

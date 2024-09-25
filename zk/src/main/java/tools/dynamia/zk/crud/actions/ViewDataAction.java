@@ -65,16 +65,25 @@ public class ViewDataAction extends AbstractCrudAction implements ReadableOnly {
 
     @Override
     public void actionPerformed(CrudActionEvent evt) {
-
-        Object data = evt.getData();
-        Serializable id = DomainUtils.findEntityId(data);
-        if (id != null) {
-            data = crudService.find(data.getClass(), id);
+        if (evt.getData() != null) {
+            reloadAndView(evt.getData());
         }
+    }
 
-        view(data);
+    /**
+     * Reload entity data within transaction a show the data
+     * @param data
+     */
+    public void reloadAndView(final Object data) {
+        crudService.executeWithinTransaction(() -> {
+            Object entity = data;
+            Serializable id = DomainUtils.findEntityId(entity);
+            if (id != null) {
+                entity = crudService.find(entity.getClass(), id);
+            }
 
-
+            view(entity);
+        });
     }
 
     public void view(Object data) {
@@ -109,7 +118,6 @@ public class ViewDataAction extends AbstractCrudAction implements ReadableOnly {
                             formField.hide();
                         }
                     });
-
 
 
             Viewers.getFields(viewDescriptor).stream()

@@ -246,7 +246,7 @@ public class UIMessages {
      * @param message
      */
     public static void showMessageDialog(String message) {
-        showMessage(message, null, MessageType.NORMAL);
+        showMessageDialog(message, null, MessageType.NORMAL);
     }
 
     /**

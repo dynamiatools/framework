@@ -3,7 +3,10 @@ package tools.dynamia.zk.ui;
 import tools.dynamia.ui.icons.Icon;
 import tools.dynamia.ui.icons.InstallIcons;
 
-@InstallIcons
+/**
+ * Disabled by default. To enable, instance this in a Spring configuration class using @{@link org.springframework.context.annotation.Bean}
+ * </pre>
+ */
 public class ZIconsProvider extends FontAwesomeIconsProvider {
 
     @Override

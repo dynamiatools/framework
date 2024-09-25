@@ -17,6 +17,7 @@
 package tools.dynamia.viewers;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -81,4 +82,12 @@ public interface ViewDescriptorFactory extends Serializable {
      * @return the list
      */
     Set<Map.Entry<Class, ViewDescriptor>> findDescriptorsByType(String viewType);
+
+    /**
+     * Find descriptor by class.
+     *
+     * @param entityClass the entity class
+     * @return the object
+     */
+    Set<ViewDescriptor> findDescriptorByClass(Class entityClass);
 }

@@ -33,14 +33,7 @@ import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.ui.icons.IconsTheme;
-import tools.dynamia.viewers.Field;
-import tools.dynamia.viewers.FieldGroup;
-import tools.dynamia.viewers.IndexableComparator;
-import tools.dynamia.viewers.View;
-import tools.dynamia.viewers.ViewDescriptor;
-import tools.dynamia.viewers.ViewLayout;
-import tools.dynamia.viewers.ViewRenderer;
-import tools.dynamia.viewers.ViewRendererCustomizer;
+import tools.dynamia.viewers.*;
 import tools.dynamia.viewers.util.ComponentCustomizerUtil;
 import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
@@ -322,16 +315,23 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
         BeanUtils.setupBean(component, params);
 
+
         return component;
     }
 
     protected void applyFieldConstraints(Component comp, Field field) {
 
-        if (comp instanceof InputElement inputElement && field.getParam(Viewers.PARAM_CONSTRAINT) instanceof Constraint) {
-            inputElement.setConstraint((Constraint) field.getParam(Viewers.PARAM_CONSTRAINT));
+        if (comp instanceof InputElement inputElement && field.getParam(Viewers.PARAM_CONSTRAINT) instanceof String className) {
+            try {
+                Object object = BeanUtils.newInstance(Class.forName(className));
+                if (object instanceof Constraint constraint) {
+                    inputElement.setConstraint(constraint);
+                }
+            } catch (Exception e) {
+                throw new ViewRendererException("Unabled to create instance of constraint " + className + " for field " + field, e);
 
+            }
         }
-
     }
 
     protected void createBinding(Component comp, Field field, Binder binder, T value) {

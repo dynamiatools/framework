@@ -74,7 +74,7 @@ public class Containers {
      * @return the t
      */
     public <T> T findObject(String name, Class<T> type) {
-        if (objectContainers == null) {
+        if (objectContainers == null || objectContainers.isEmpty()) {
             return null;
         }
         for (ObjectContainer oc : objectContainers.values()) {

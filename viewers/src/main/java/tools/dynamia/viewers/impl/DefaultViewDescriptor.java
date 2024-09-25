@@ -16,6 +16,7 @@
  */
 package tools.dynamia.viewers.impl;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import tools.dynamia.viewers.ViewLayout;
 
 
@@ -24,6 +25,7 @@ import tools.dynamia.viewers.ViewLayout;
  *
  * @author Mario A. Serrano Leones
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @SuppressWarnings({"rawtypes"})
 public class DefaultViewDescriptor extends AbstractViewDescriptor{
 
