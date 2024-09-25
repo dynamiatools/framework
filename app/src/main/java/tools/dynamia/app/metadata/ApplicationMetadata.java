@@ -1,9 +1,11 @@
 package tools.dynamia.app.metadata;
 
 import tools.dynamia.app.ApplicationInfo;
+import tools.dynamia.navigation.NavigationNode;
 import tools.dynamia.navigation.NavigationTree;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ApplicationMetadata extends BasicMetadata {
 
@@ -12,7 +14,7 @@ public class ApplicationMetadata extends BasicMetadata {
     private String logo;
     private String template;
     private List<EntityMetadata> entities;
-    private NavigationTree navigation;
+    private List<NavigationNode> navigation;
     private List<ActionMetadata> globalActions;
 
     public ApplicationMetadata() {
@@ -25,7 +27,7 @@ public class ApplicationMetadata extends BasicMetadata {
         setIcon(info.getDefaultIcon());
         setLogo(info.getDefaultLogo());
         setTemplate(info.getTemplate());
-        setNavigation(NavigationTree.buildDefault());
+        setNavigation(NavigationTree.buildDefault().getNavigation());
     }
 
     public String getTitle() {
@@ -52,11 +54,11 @@ public class ApplicationMetadata extends BasicMetadata {
         this.entities = entities;
     }
 
-    public NavigationTree getNavigation() {
+    public List<NavigationNode> getNavigation() {
         return navigation;
     }
 
-    public void setNavigation(NavigationTree navigation) {
+    public void setNavigation(List<NavigationNode> navigation) {
         this.navigation = navigation;
     }
 
@@ -82,5 +84,10 @@ public class ApplicationMetadata extends BasicMetadata {
 
     public void setTemplate(String template) {
         this.template = template;
+    }
+
+    public EntityMetadata getEntityMetadata(String className) {
+        return entities != null ? entities.stream().filter(e -> e.getClassName().equals(className))
+                .findFirst().orElse(null) : null;
     }
 }

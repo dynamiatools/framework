@@ -27,15 +27,24 @@ public class ApplicationMetadataLoader {
 
     public void loadEntities(ApplicationMetadata metadata) {
         metadata.setEntities(new ArrayList<>());
-        viewDescriptorFactory.findDescriptorsByType("crud")
+        viewDescriptorFactory.findDescriptorsByType("form")
                 .forEach(d -> {
-                    var entity = new EntityMetadata(d.getKey());
-
+                    var entityClass = d.getKey();
+                    var entity = new EntityMetadata(entityClass);
                     loadEnpoint(entity);
-                   metadata.getEntities().add(entity);
+                    metadata.getEntities().add(entity);
                 });
     }
 
+    public EntityMetadata loadFullEntityMetadata(Class entityClass) {
+        var entity = new EntityMetadata(entityClass);
+        var descriptors = viewDescriptorFactory.findDescriptorByClass(entityClass);
+        entity.setDescriptors(descriptors.stream().toList());
+        loadEnpoint(entity);
+        return entity;
+    }
+
     private void loadEnpoint(EntityMetadata entity) {
+        entity.setEndpoint("/api/app/metadata/entity/" + entity.getClassName());
     }
 }

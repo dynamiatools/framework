@@ -15,6 +15,7 @@ public class EntityMetadata extends BasicMetadata {
 
     public EntityMetadata(Class entityClass) {
         setClassName(entityClass.getName());
+        setName(entityClass.getSimpleName());
 
     }
 
