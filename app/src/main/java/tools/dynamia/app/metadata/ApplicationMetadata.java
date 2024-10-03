@@ -5,7 +5,6 @@ import tools.dynamia.navigation.NavigationNode;
 import tools.dynamia.navigation.NavigationTree;
 
 import java.util.List;
-import java.util.Optional;
 
 public class ApplicationMetadata extends BasicMetadata {
 
