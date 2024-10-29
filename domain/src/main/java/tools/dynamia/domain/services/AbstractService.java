@@ -24,10 +24,11 @@ import tools.dynamia.domain.query.Parameters;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.integration.Containers;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 
-public abstract class AbstractService {
+public abstract class AbstractService implements Serializable {
 
 
     private final LoggingService logger = new SLF4JLoggingService(getClass());

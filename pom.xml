@@ -80,7 +80,7 @@
 
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
-        <springboot.version>3.3.4</springboot.version>
+        <springboot.version>3.3.5</springboot.version>
         <mongodb.version>1</mongodb.version>
 
         <!-- Web -->

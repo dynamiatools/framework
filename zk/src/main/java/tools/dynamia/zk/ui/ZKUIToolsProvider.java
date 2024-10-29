@@ -36,7 +36,10 @@ public class ZKUIToolsProvider implements UIToolsProvider {
         dialog.setContent(content);
         dialog.setData(data);
         dialog.onClose(onClose);
+        dialog.setWidth(width);
+        dialog.setHeight(height);
         dialog.show();
+
 
         if (HttpUtils.isSmartphone()) {
             dialog.setWidth("99%");
