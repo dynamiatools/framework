@@ -41,7 +41,15 @@ import java.util.stream.Stream;
  *
  * @author Mario A. Serrano Leones
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class AbstractViewDescriptor implements MergeableViewDescriptor, Serializable {
+
+    /**
+     * The view type name.
+     */
+    private String viewTypeName;
+
+    private Class<?> beanClass;
 
     /**
      * The id.
@@ -51,7 +59,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
     /**
      * The bean class.
      */
-    private Class<?> beanClass;
+
 
     /**
      * The view customizers class.
@@ -69,10 +77,6 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private final List<FieldGroup> fieldGroups = new ArrayList<>();
 
-    /**
-     * The view type name.
-     */
-    private String viewTypeName;
 
     /**
      * The params.

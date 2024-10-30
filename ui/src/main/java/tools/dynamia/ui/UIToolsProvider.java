@@ -196,4 +196,27 @@ public interface UIToolsProvider {
      */
     ButtonComponent createButton(String label, EventCallback onClick);
 
+    /**
+     * Show a table selector
+     *
+     * @param title    dialog title
+     * @param columns  table field name columns
+     * @param data     selection date
+     * @param onSelect selected items
+     * @param <T>      data type
+     * @return dialog
+     */
+    <T> DialogComponent showTableSelector(String title, String label, List<String> columns, List<T> data, SelectEventCallback<T> onSelect);
+
+    /**
+     * Show a table selector
+     *
+     * @param title    dialog title
+     * @param columns  table field name columns
+     * @param data     selection date
+     * @param onSelect selected items
+     * @param <T>      data type
+     * @return dialog
+     */
+    <T> DialogComponent showTableMultiSelector(String title, String label, List<String> columns, List<T> data, SelectionEventCallback<T> onSelect);
 }

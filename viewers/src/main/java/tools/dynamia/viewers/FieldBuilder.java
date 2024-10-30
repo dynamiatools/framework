@@ -111,11 +111,34 @@ public class FieldBuilder {
         return this;
     }
 
+    /**
+     * Add field param
+     *
+     * @param key   name
+     * @param value value
+     * @return
+     */
+    public FieldBuilder param(String key, Object value) {
+        field.getParams().put(key, value);
+        return this;
+    }
+
+    /**
+     * Ignore bindings.
+     *
+     * @return the field builder
+     */
     public FieldBuilder ignoreBindings() {
         params(Viewers.PARAM_IGNORE_BINDINGS, true);
         return this;
     }
 
+    /**
+     * Span.
+     *
+     * @param columns the columns
+     * @return the field builder
+     */
     public FieldBuilder span(int columns) {
         params(Viewers.PARAM_SPAN, columns);
         return this;

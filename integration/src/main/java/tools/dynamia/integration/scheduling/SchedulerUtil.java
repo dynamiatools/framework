@@ -23,9 +23,12 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor;
 import org.springframework.scheduling.support.CronTrigger;
 import tools.dynamia.integration.Containers;
+import tools.dynamia.integration.ObjectContainerContextHolder;
+import tools.dynamia.integration.SimpleObjectContainer;
 
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.function.Supplier;
@@ -61,13 +64,36 @@ public class SchedulerUtil {
      * @param runnable the task to run
      */
     public static void run(Runnable runnable) {
+
+
+        Runnable runnableWithContext = getWithContext(runnable);
+
         AsyncTaskExecutor executor = Containers.get().findObject(AsyncTaskExecutor.class);
         if (executor != null) {
             // use spring executor
-            executor.execute(runnable);
+            executor.execute(runnableWithContext);
         } else {
-            new Thread(runnable).start();
+            CompletableFuture.runAsync(runnableWithContext);
         }
+    }
+
+    private static Runnable getWithContext(Runnable runnable) {
+        var asyncContextAwares = Containers.get().findObjects(AsyncContextAware.class);
+        var context = new SimpleObjectContainer();
+        if (asyncContextAwares != null && !asyncContextAwares.isEmpty()) {
+            asyncContextAwares.forEach(context::addObject);
+        }
+
+        ObjectContainerContextHolder.set(context);
+        Containers.get().installObjectContainer(context);
+        return () -> {
+            try {
+                runnable.run();
+            } finally {
+                ObjectContainerContextHolder.clear();
+                Containers.get().removeContainer(context.getName());
+            }
+        };
     }
 
 
@@ -85,7 +111,7 @@ public class SchedulerUtil {
             // use spring executor
             return executor.submit(task::doWorkWithResult);
         } else {
-            throw new TaskException("No AsyncTaskExecutor found to run task " + task);
+            return CompletableFuture.supplyAsync(task::doWorkWithResult);
         }
     }
 

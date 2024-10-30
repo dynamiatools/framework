@@ -36,7 +36,10 @@ public class ZKUIToolsProvider implements UIToolsProvider {
         dialog.setContent(content);
         dialog.setData(data);
         dialog.onClose(onClose);
+        dialog.setWidth(width);
+        dialog.setHeight(height);
         dialog.show();
+
 
         if (HttpUtils.isSmartphone()) {
             dialog.setWidth("99%");
@@ -70,5 +73,19 @@ public class ZKUIToolsProvider implements UIToolsProvider {
             button.onClick(onClick);
         }
         return button;
+    }
+
+    @Override
+    public <T> DialogComponent showTableSelector(String title, String label, List<String> columns, List<T> data, SelectEventCallback<T> onSelect) {
+        ZKTableSelector<T> selector = new ZKTableSelector<>(label, columns, data);
+        selector.onSelect(onSelect);
+        return showDialog(title, selector, null, "90%", "90%", null);
+    }
+
+    @Override
+    public <T> DialogComponent showTableMultiSelector(String title, String label, List<String> columns, List<T> data, SelectionEventCallback<T> onSelect) {
+        ZKTableSelector<T> selector = new ZKTableSelector<>(label, columns, data, true);
+        selector.onSelection(onSelect);
+        return showDialog(title, selector, null, "90%", "90%", null);
     }
 }

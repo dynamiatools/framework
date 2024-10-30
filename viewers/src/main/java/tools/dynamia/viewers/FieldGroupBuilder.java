@@ -17,6 +17,8 @@
 package tools.dynamia.viewers;
 
 
+import java.util.List;
+
 /**
  * The Class FieldGroupBuilder.
  *
@@ -84,6 +86,11 @@ public class FieldGroupBuilder {
      */
     public FieldGroupBuilder fields(String... fields) {
         this.fields = fields;
+        return this;
+    }
+
+    public FieldGroupBuilder fields(List<String> fields) {
+        this.fields = fields.toArray(String[]::new);
         return this;
     }
 

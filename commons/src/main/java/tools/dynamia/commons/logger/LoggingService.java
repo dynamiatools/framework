@@ -39,11 +39,29 @@ public interface LoggingService {
     void info(String message);
 
     /**
+     * Info with params.
+     *
+     * @param format the format
+     * @param params the params
+     */
+    void info(String format, Object... params);
+
+
+    /**
      * Warn.
      *
      * @param message the message
      */
     void warn(String message);
+
+    /**
+     * Warn with params.
+     *
+     * @param format the format
+     * @param params the params
+     */
+    void warn(String format, Object... params);
+
 
     /**
      * Error.
@@ -53,12 +71,29 @@ public interface LoggingService {
     void error(String message);
 
     /**
+     * Error with params.
+     *
+     * @param format the format
+     * @param params the params
+     */
+    void error(String format, Object... params);
+
+    /**
      * Error.
      *
      * @param message the message
-     * @param t the t
+     * @param t       the t
      */
     void error(String message, Throwable t);
+
+    /**
+     * Error with params.
+     *
+     * @param format the format
+     * @param t      the t
+     * @param params the params
+     */
+    void error(String format, Throwable t, Object... params);
 
     /**
      * Error.

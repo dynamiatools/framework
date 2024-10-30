@@ -17,12 +17,18 @@
 package tools.dynamia.viewers;
 
 
+import tools.dynamia.integration.Containers;
+
 /**
  * A factory for creating View objects.
  *
  * @author Mario A. Serrano Leones
  */
 public interface ViewFactory {
+
+    static ViewFactory getInstance() {
+        return Containers.get().findObject(ViewFactory.class);
+    }
 
     /**
      * Gets the view.

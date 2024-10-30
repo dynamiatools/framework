@@ -65,9 +65,9 @@ public class SLF4JLoggingService implements LoggingService, Serializable {
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see tools.dynamia.commons.logger.LoggingService#debug(java.lang.String)
+     * (non-Javadoc)
+     *
+     * @see tools.dynamia.commons.logger.LoggingService#debug(java.lang.String)
      */
     @Override
     public void debug(String message) {
@@ -77,40 +77,61 @@ public class SLF4JLoggingService implements LoggingService, Serializable {
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see tools.dynamia.commons.logger.LoggingService#info(java.lang.String)
+     * (non-Javadoc)
+     *
+     * @see tools.dynamia.commons.logger.LoggingService#info(java.lang.String)
      */
     @Override
     public void info(String message) {
-        logger.info(prefix + message);
+        logger.info("{}{}", prefix, message);
+    }
+
+    @Override
+    public void info(String format, Object... params) {
+        logger.info(prefix + format, params);
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see tools.dynamia.commons.logger.LoggingService#warn(java.lang.String)
+     * (non-Javadoc)
+     *
+     * @see tools.dynamia.commons.logger.LoggingService#warn(java.lang.String)
      */
     @Override
     public void warn(String message) {
-        logger.warn(prefix + message);
+        logger.warn("{}{}", prefix, message);
+    }
+
+
+    @Override
+    public void warn(String format, Object... params) {
+        logger.warn(prefix + format, params);
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see tools.dynamia.commons.logger.LoggingService#error(java.lang.String)
+     * (non-Javadoc)
+     *
+     * @see tools.dynamia.commons.logger.LoggingService#error(java.lang.String)
      */
     @Override
     public void error(String message) {
-        logger.error(prefix + message);
+        logger.error("{}{}", prefix, message);
+    }
+
+    @Override
+    public void error(String format, Object... params) {
+        logger.error(prefix + format, params);
+    }
+
+    @Override
+    public void error(String format, Throwable t, Object... params) {
+        logger.atError().setCause(t).log(prefix + format, params);
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see tools.dynamia.commons.logger.LoggingService#error(java.lang.String,
-	 * java.lang.Throwable)
+     * (non-Javadoc)
+     *
+     * @see tools.dynamia.commons.logger.LoggingService#error(java.lang.String,
+     * java.lang.Throwable)
      */
     @Override
     public void error(String message, Throwable t) {
@@ -118,10 +139,10 @@ public class SLF4JLoggingService implements LoggingService, Serializable {
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * tools.dynamia.commons.logger.LoggingService#error(java.lang.Throwable)
+     * (non-Javadoc)
+     *
+     * @see
+     * tools.dynamia.commons.logger.LoggingService#error(java.lang.Throwable)
      */
     @Override
     public void error(Throwable t) {
@@ -129,9 +150,9 @@ public class SLF4JLoggingService implements LoggingService, Serializable {
     }
 
     /*
-	 * (non-Javadoc)
-	 *
-	 * @see tools.dynamia.commons.logger.LoggingService#isDebugEnabled()
+     * (non-Javadoc)
+     *
+     * @see tools.dynamia.commons.logger.LoggingService#isDebugEnabled()
      */
     @Override
     public boolean isDebugEnabled() {

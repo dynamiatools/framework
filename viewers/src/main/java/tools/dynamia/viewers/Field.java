@@ -27,6 +27,7 @@ import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.domain.contraints.NotEmpty;
 import tools.dynamia.domain.util.DomainUtils;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Locale;
@@ -37,11 +38,13 @@ import java.util.Map;
  *
  * @author Mario A. Serrano Leones
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Field implements Serializable, Indexable, Cloneable {
 
     /**
      * The Constant serialVersionUID.
      */
+    @Serial
     private static final long serialVersionUID = -1782240844872423004L;
 
     private String name;
@@ -479,7 +482,8 @@ public class Field implements Serializable, Indexable, Cloneable {
     public void setPropertyInfo(PropertyInfo propertyInfo) {
         this.propertyInfo = propertyInfo;
         if (propertyInfo != null) {
-            if (propertyInfo.isAnnotationPresent(NotNull.class) || propertyInfo.isAnnotationPresent(NotEmpty.class)) {
+            if (propertyInfo.isAnnotationPresent(NotNull.class) || propertyInfo.isAnnotationPresent(NotEmpty.class)
+                    || propertyInfo.isAnnotationPresent(jakarta.validation.constraints.NotEmpty.class)) {
                 setRequired(true);
             }
         }
