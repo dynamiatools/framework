@@ -17,17 +17,15 @@
 
 package tools.dynamia.zk.crud;
 
-import org.zkoss.zul.Constraint;
 import tools.dynamia.integration.sterotypes.Provider;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.FieldCustomizer;
-import tools.dynamia.zk.crud.constraints.Required;
+import tools.dynamia.zk.constraints.ZKExtraConstraints;
 
 @Provider
 public class RequiredFieldCustomizer implements FieldCustomizer {
 
     private static final String CONSTRAINT = "constraint";
-    private static final Constraint REQUIRED = new Required();
 
     @Override
     public void customize(String viewTypeName, Field field) {
@@ -35,7 +33,7 @@ public class RequiredFieldCustomizer implements FieldCustomizer {
         if ("form".equals(viewTypeName)) {
             if (field.isRequired() && !field.getParams().containsKey(CONSTRAINT)) {
 
-                field.addParam(CONSTRAINT, Required.class.getName());
+                field.addParam(CONSTRAINT, ZKExtraConstraints.REQUIRED);
             }
         }
     }
