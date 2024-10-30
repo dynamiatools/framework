@@ -62,7 +62,9 @@ public class ZKDialog extends Window implements DialogComponent {
 
     @Override
     public void onClose(EventCallback callback) {
-        addEventListener(Events.ON_CLOSE, event -> callback.onEvent());
+        if (callback != null) {
+            addEventListener(Events.ON_CLOSE, event -> callback.onEvent());
+        }
     }
 
     @Override
