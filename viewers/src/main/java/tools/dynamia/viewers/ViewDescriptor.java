@@ -186,5 +186,16 @@ public interface ViewDescriptor extends Serializable {
      */
     List<ActionRef> getActions();
 
+    /**
+     * Return first field in field list
+     *
+     * @return field or null
+     */
+    default Field getFirstField() {
+        if (!getFields().isEmpty()) {
+            return getFields().get(0);
+        }
+        return null;
+    }
 
 }

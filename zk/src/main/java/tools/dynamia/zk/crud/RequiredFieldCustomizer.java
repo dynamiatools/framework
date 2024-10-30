@@ -26,14 +26,18 @@ import tools.dynamia.zk.constraints.ZKExtraConstraints;
 public class RequiredFieldCustomizer implements FieldCustomizer {
 
     private static final String CONSTRAINT = "constraint";
+    public static final String INPUT_ATTRIBUTES = "inputAttributes";
 
     @Override
     public void customize(String viewTypeName, Field field) {
 
         if ("form".equals(viewTypeName)) {
             if (field.isRequired() && !field.getParams().containsKey(CONSTRAINT)) {
-
                 field.addParam(CONSTRAINT, ZKExtraConstraints.REQUIRED);
+
+                field.addParam(INPUT_ATTRIBUTES, "required=true");
+
+
             }
         }
     }
