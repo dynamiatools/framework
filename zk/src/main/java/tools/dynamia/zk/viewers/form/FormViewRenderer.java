@@ -38,6 +38,7 @@ import tools.dynamia.viewers.util.ComponentCustomizerUtil;
 import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
+import tools.dynamia.zk.constraints.ZKExtraConstraints;
 import tools.dynamia.zk.converters.Util;
 import tools.dynamia.zk.ui.Import;
 import tools.dynamia.zk.util.ZKBindingUtil;
@@ -307,31 +308,55 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         ComponentCustomizerUtil.customizeComponent(field, component, field.getComponentCustomizer());
         component.setAttribute(Viewers.ATTRIBUTE_FORM_VIEW, view);
         applyFieldParams(component, field);
-        applyFieldConstraints(component, field);
         if (component instanceof Import importComp) {
             importComp.setValue(value);
             importComp.addArgs(field.getParams());
         }
-
         BeanUtils.setupBean(component, params);
-
+        applyFieldConstraints(component, field);
 
         return component;
     }
 
     protected void applyFieldConstraints(Component comp, Field field) {
 
-        if (comp instanceof InputElement inputElement && field.getParam(Viewers.PARAM_CONSTRAINT) instanceof String className) {
-            try {
-                Object object = BeanUtils.newInstance(Class.forName(className));
-                if (object instanceof Constraint constraint) {
-                    inputElement.setConstraint(constraint);
-                }
-            } catch (Exception e) {
-                throw new ViewRendererException("Unabled to create instance of constraint " + className + " for field " + field, e);
+        try {
+            if (comp instanceof InputElement inputElement) {
+                Constraint fieldConstraint = null;
+                var constValue = field.getParam(Viewers.PARAM_CONSTRAINT);
 
+                if (constValue instanceof String value) {
+                    if (fieldConstraint == null) {
+                        fieldConstraint = ZKExtraConstraints.getInstance(value);
+                    }
+
+                    if (fieldConstraint == null) {
+                        fieldConstraint = tryToCreateConstraint(value, fieldConstraint);
+                    }
+                    if (fieldConstraint == null) {
+                        inputElement.setConstraint(value);
+                    }
+                } else if (constValue instanceof Constraint constraint) {
+                    fieldConstraint = constraint;
+                }
+                if (fieldConstraint != null) {
+                    inputElement.setConstraint(fieldConstraint);
+                }
             }
+        } catch (Exception e) {
+            //ignore constraints
         }
+    }
+
+    private static Constraint tryToCreateConstraint(String name, Constraint fieldConstraint) {
+        try {
+            Object object = BeanUtils.newInstance(Class.forName(name));
+            if (object instanceof Constraint constraint) {
+                fieldConstraint = constraint;
+            }
+        } catch (Exception e) {
+        }
+        return fieldConstraint;
     }
 
     protected void createBinding(Component comp, Field field, Binder binder, T value) {
