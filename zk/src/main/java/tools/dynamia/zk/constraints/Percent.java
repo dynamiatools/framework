@@ -15,23 +15,26 @@
  * limitations under the License.
  */
 
-package tools.dynamia.zk.crud.constraints;
+package tools.dynamia.zk.constraints;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zul.Constraint;
 import tools.dynamia.commons.Messages;
 
-public class Required implements Constraint {
+public class Percent implements Constraint {
 
-	@Override
-	public void validate(Component comp, Object value) throws WrongValueException {
+    @Override
+    public void validate(Component comp, Object value) throws WrongValueException {
 
-		if (comp != null && comp.getId() != null && !comp.getId().isEmpty() && comp.getParent() != null) {
-			if (value == null || value.toString().isEmpty()) {
-				throw new WrongValueException(comp, Messages.get(Required.class, "required"));
-			}
-		}
-	}
+
+        if (comp != null && value instanceof Number number) {
+            if (number.doubleValue() < 0.0 || number.doubleValue() > 100.0) {
+                throw new WrongValueException(comp, Messages.get(Percent.class, "percent"));
+            }
+
+        }
+
+    }
 
 }
