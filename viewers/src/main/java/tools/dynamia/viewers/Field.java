@@ -482,7 +482,8 @@ public class Field implements Serializable, Indexable, Cloneable {
     public void setPropertyInfo(PropertyInfo propertyInfo) {
         this.propertyInfo = propertyInfo;
         if (propertyInfo != null) {
-            if (propertyInfo.isAnnotationPresent(NotNull.class) || propertyInfo.isAnnotationPresent(NotEmpty.class)) {
+            if (propertyInfo.isAnnotationPresent(NotNull.class) || propertyInfo.isAnnotationPresent(NotEmpty.class)
+                    || propertyInfo.isAnnotationPresent(jakarta.validation.constraints.NotEmpty.class)) {
                 setRequired(true);
             }
         }

@@ -20,7 +20,9 @@ import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.viewers.impl.DefaultViewDescriptor;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * The Class ViewDescriptorBuilder.
@@ -123,6 +125,17 @@ public class ViewDescriptorBuilder {
     }
 
     /**
+     * Add fields usind a {@link Supplier}
+     *
+     * @param fieldsSupplier should return a list of field
+     * @return builder
+     */
+    public ViewDescriptorBuilder fields(Supplier<List<Field>> fieldsSupplier) {
+        fieldsSupplier.get().forEach(descriptor::addField);
+        return this;
+    }
+
+    /**
      * Groups.
      *
      * @param groups the groups
@@ -152,6 +165,17 @@ public class ViewDescriptorBuilder {
     }
 
     /**
+     * Add global parameter to descriptor
+     *
+     * @param key   param
+     * @param value value
+     */
+    public ViewDescriptorBuilder addParam(String key, Object value) {
+        descriptor.getParams().put(key, value);
+        return this;
+    }
+
+    /**
      * Layout.
      *
      * @param keyValue the key value
@@ -162,6 +186,18 @@ public class ViewDescriptorBuilder {
         Map params = MapBuilder.put(keyValue);
         //noinspection unchecked
         descriptor.getLayout().getParams().putAll(params);
+        return this;
+    }
+
+    /**
+     * Add param to layout
+     *
+     * @param key
+     * @param value
+     * @return
+     */
+    public ViewDescriptorBuilder addLayoutParam(String key, Object value) {
+        descriptor.getLayout().getParams().put(key, value);
         return this;
     }
 
