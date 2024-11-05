@@ -154,4 +154,11 @@ public class ProgressMonitor {
         return (int) (result * 100.0);
     }
 
+    public void reset() {
+        setCurrent(0);
+    }
+
+    public void increment() {
+        setCurrent(current + 1);
+    }
 }
