@@ -19,6 +19,7 @@ package tools.dynamia.navigation;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
+import tools.dynamia.integration.ProgressMonitor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -85,10 +87,46 @@ public class Module extends NavigationElement<Module> implements Serializable, C
         return this;
     }
 
+    /**
+     * Add multiple inner groups
+     *
+     * @param groups
+     * @return
+     */
+    public Module addPageGroup(PageGroup... groups) {
+        if (groups != null) {
+            for (PageGroup group : groups) {
+                addPageGroup(group);
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Add page
+     *
+     * @param page
+     * @return
+     */
     public Module addPage(Page page) {
         defaultGroup.addPage(page);
         if (page.isMain()) {
             setMainPage(page);
+        }
+        return this;
+    }
+
+    /**
+     * Add multiple pages
+     *
+     * @param pages list
+     * @return this
+     */
+    public Module addPage(Page... pages) {
+        if (pages != null) {
+            for (Page page : pages) {
+                addPage(page);
+            }
         }
         return this;
     }
@@ -132,8 +170,9 @@ public class Module extends NavigationElement<Module> implements Serializable, C
     }
 
     public Page getFirstPage() {
-        if (getFirstPageGroup() != null)
-            return getFirstPageGroup().getFirstPage();
+        var firstGroup = getFirstPageGroup();
+        if (firstGroup != null)
+            return firstGroup.getFirstPage();
         else
             return null;
 
@@ -241,23 +280,87 @@ public class Module extends NavigationElement<Module> implements Serializable, C
     /**
      * Traverse all pages in all (NON dynamic) groups and subgroups
      */
-    public void forEachPage(Consumer<Page> action) {
+    public void forEachPage(Consumer<Page> action, ProgressMonitor monitor) {
         var allGroups = new ArrayList<PageGroup>();
         allGroups.add(defaultGroup);
         allGroups.addAll(pageGroups);
 
-        allGroups.forEach(grp -> forEachPageGroup(action, grp));
+        allGroups.forEach(grp -> forEachPageGroup(action, grp, monitor));
     }
 
-    private void forEachPageGroup(Consumer<Page> action, PageGroup grp) {
-        if (!grp.isDynamic()) {
-            var pages = grp.getPages();
-            if (pages != null && !pages.isEmpty()) {
-                pages.forEach(action);
-            }
-            if (grp.getPageGroups() != null && !grp.getPageGroups().isEmpty()) {
-                grp.getPageGroups().forEach(subgrp -> forEachPageGroup(action, subgrp));
+    public void forEachPage(Consumer<Page> action) {
+        forEachPage(action, new ProgressMonitor());
+    }
+
+    private void forEachPageGroup(Consumer<Page> action, PageGroup grp, ProgressMonitor monitor) {
+
+        List<Page> pages = null;
+        try {
+            pages = grp.getPages();
+        } catch (Exception e) {
+            logger.error("Error getting pages from group: " + grp.getVirtualPath() + " - " + e.getMessage(), e);
+        }
+
+        if (pages != null && !pages.isEmpty()) {
+            monitor.reset();
+            monitor.setMax(pages.size());
+            for (Page page : pages) {
+                action.accept(page);
+                monitor.increment();
+                if (monitor.isStopped()) {
+                    break;
+                }
             }
         }
+        if (grp.getPageGroups() != null && !grp.getPageGroups().isEmpty()) {
+            grp.getPageGroups().forEach(subgrp -> forEachPageGroup(action, subgrp, monitor));
+        }
+
+    }
+
+    /**
+     * Find a page by its virtual path
+     *
+     * @param virtualPath
+     * @return
+     */
+    public Page findPage(String virtualPath) {
+
+        AtomicReference<Page> reference = new AtomicReference<>();
+        try {
+            var monitor = new ProgressMonitor();
+            forEachPage(page -> {
+                if (virtualPath.equals(page.getVirtualPath())) {
+                    reference.set(page);
+                    monitor.stop();
+                }
+            }, monitor);
+        } catch (Exception e) {
+
+        }
+        return reference.get();
+    }
+
+    /**
+     * Find a page by its virtual path
+     *
+     * @param prettyPath
+     * @return
+     */
+    public Page findPageByPrettyPath(String prettyPath) {
+
+        AtomicReference<Page> reference = new AtomicReference<>();
+        try {
+            var monitor = new ProgressMonitor();
+            forEachPage(page -> {
+                if (prettyPath.equals(page.getPrettyVirtualPath())) {
+                    reference.set(page);
+                    monitor.stop();
+                }
+            }, monitor);
+        } catch (Exception e) {
+
+        }
+        return reference.get();
     }
 }

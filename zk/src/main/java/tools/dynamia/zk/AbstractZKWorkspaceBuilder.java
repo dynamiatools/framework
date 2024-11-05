@@ -21,6 +21,7 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Html;
 import org.zkoss.zul.Iframe;
 import org.zkoss.zul.Window;
+import tools.dynamia.navigation.ExternalPage;
 import tools.dynamia.navigation.Page;
 import tools.dynamia.navigation.RendereablePage;
 import tools.dynamia.navigation.WorkspaceViewBuilder;
@@ -120,7 +121,11 @@ public abstract class AbstractZKWorkspaceBuilder implements WorkspaceViewBuilder
             }
             if (page.isHtml()) {
                 Iframe iframe = new Iframe(page.getPath());
+                iframe.setName(page.getLocalizedName());
+                iframe.setClientAttribute("title", page.getLocalizedName());
                 iframe.setParent(pageContent);
+                iframe.addSclass("external-page");
+                iframe.addSclass("page-" + page.getId());
                 iframe.setHflex("1");
                 iframe.setVflex("1");
             } else {

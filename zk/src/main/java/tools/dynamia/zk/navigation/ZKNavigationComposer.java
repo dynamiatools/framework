@@ -184,7 +184,7 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
     }
 
     public void updateClientURL() {
-        if (desktopCurrentPage.getPageGroup() != null && desktopCurrentPage.getPageGroup().getParentModule() != null) {
+        if (desktopCurrentPage != null) {
             Clients.evalJavaScript("changeHash('" + desktopCurrentPage.getPrettyVirtualPath() + "');");
         }
     }

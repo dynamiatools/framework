@@ -51,6 +51,8 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
     private int priority = 100;
     private boolean temporal;
     private boolean main;
+    private String prettyVirtualPath;
+    private String virtualPath;
 
 
     public Page() {
@@ -84,9 +86,9 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
             if (virtualPath == null) {
                 if (getPageGroup() != null) {
                     if (getPageGroup().getParentModule() != null && getPageGroup() == getPageGroup().getParentModule().getDefaultPageGroup()) {
-                        virtualPath = getPageGroup().getParentModule().getId() + "/" + getId();
+                        virtualPath = getPageGroup().getParentModule().getVirtualPath() + PATH_SEPARATOR + getId();
                     } else {
-                        virtualPath = getPageGroup().getVirtualPath() + "/" + getId();
+                        virtualPath = getPageGroup().getVirtualPath() + PATH_SEPARATOR + getId();
                     }
                 } else {
                     virtualPath = getId();
@@ -102,15 +104,20 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
     @Override
     public String getPrettyVirtualPath() {
         try {
-            if (getPageGroup() != null) {
-                if (getPageGroup().getParentModule() != null && getPageGroup() == getPageGroup().getParentModule().getDefaultPageGroup()) {
-                    return getPageGroup().getParentModule().getPrettyVirtualPath() + "/" + StringUtils.simplifiedString(getName());
+            String simplifiedName = StringUtils.simplifiedString(getName());
+            if (prettyVirtualPath == null) {
+                if (getPageGroup() != null) {
+                    if (getPageGroup().getParentModule() != null && getPageGroup() == getPageGroup().getParentModule().getDefaultPageGroup()) {
+                        prettyVirtualPath = getPageGroup().getParentModule().getPrettyVirtualPath() + PATH_SEPARATOR + simplifiedName;
+                    } else {
+                        prettyVirtualPath = getPageGroup().getPrettyVirtualPath() + PATH_SEPARATOR + simplifiedName;
+                    }
                 } else {
-                    return getPageGroup().getPrettyVirtualPath() + "/" + StringUtils.simplifiedString(getName());
+                    prettyVirtualPath = simplifiedName;
                 }
-            } else {
-                return getName();
             }
+            return prettyVirtualPath;
+
         } catch (Exception e) {
             throw new PageException("Error building pretty virtual path for page with [" + getId() + "]", e);
         }
@@ -169,6 +176,7 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
 
     /**
      * Add new page action
+     *
      * @param action
      * @return
      */
@@ -182,13 +190,14 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
 
     /**
      * Add new page actions
+     *
      * @param action
      * @param others
      * @return
      */
     public Page addActions(PageAction action, PageAction... others) {
         addAction(action);
-        if(others!=null) {
+        if (others != null) {
             Stream.of(others).forEach(this::addAction);
         }
         return this;
@@ -278,9 +287,10 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
 
     /**
      * Set this page as main page. But could be override by other main page in other modules if has higher priority
+     *
      * @return
      */
-    public Page main(){
+    public Page main() {
         setMain(true);
         return this;
     }

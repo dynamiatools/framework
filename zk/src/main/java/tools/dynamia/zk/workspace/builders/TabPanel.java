@@ -152,7 +152,7 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
                 label = page.getLongNameSupplier().get();
             }
 
-            label = filterPageLabel(page,locale, label);
+            label = filterPageLabel(page, locale, label);
 
             Tab tab = new Tab(label);
             tab.getAttributes().put(TAB_PAGE, page);
@@ -160,11 +160,12 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
             ZKUtil.configureComponentIcon(page.getIcon(), tab, IconSize.SMALL);
 
             tab.setSclass("tabpage");
-            tab.addSclass(page.getId());
+            tab.addSclass("page-" + page.getId());
             tab.setTooltiptext(page.getLocalizedDescription(locale));
 
             final Tabpanel panel = new Tabpanel();
-            panel.setSclass(page.getId());
+            panel.setSclass("tabpanel");
+            panel.addSclass("page-" + page.getId());
             tabbox.getTabs().appendChild(tab);
             tabbox.getTabpanels().appendChild(panel);
 
@@ -172,7 +173,7 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
         }
     }
 
-    protected String filterPageLabel(Page page,Locale locale, String label) {
+    protected String filterPageLabel(Page page, Locale locale, String label) {
         return label;
     }
 
