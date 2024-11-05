@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import static tools.dynamia.navigation.NavigationElement.PATH_SEPARATOR;
+
 @Controller("pageNavigationController")
 @RequestMapping("/page")
 public class PageNavigationController {
@@ -39,6 +41,7 @@ public class PageNavigationController {
 
     @RequestMapping()
     public ModelAndView route(HttpServletRequest request, HttpServletResponse response) {
+
         var pagePath = request.getRequestURI();
         if (pagePath.startsWith("/page/")) {
             pagePath = pagePath.replaceFirst("/page/", "");
@@ -50,7 +53,7 @@ public class PageNavigationController {
     public ModelAndView defaultPages(@PathVariable String module, @PathVariable String group, @PathVariable String page,
                                      HttpServletRequest request, HttpServletResponse response) {
 
-        String path = module + "/" + group + "/" + page;
+        String path = module + NavigationElement.PATH_SEPARATOR + group + NavigationElement.PATH_SEPARATOR + page;
 
         return navigate(path, request, response);
 
@@ -60,19 +63,37 @@ public class PageNavigationController {
     public ModelAndView directPages(@PathVariable String module, @PathVariable String page,
                                     HttpServletRequest request, HttpServletResponse response) {
 
-        String path = module + "/" + page;
+        String path = module + NavigationElement.PATH_SEPARATOR + page;
         return navigate(path, request, response);
 
     }
 
     @RequestMapping(value = "/{module}/{group}/{subgroup}/{page}", method = RequestMethod.GET)
     public ModelAndView twoGroupsPages(@PathVariable String module, @PathVariable String group,
-                                       @PathVariable String subgroup, @PathVariable String page, HttpServletRequest request
+                                       @PathVariable String subgroup, @PathVariable String page,
+                                       HttpServletRequest request, HttpServletResponse response) {
+
+        String path = module + NavigationElement.PATH_SEPARATOR + group + NavigationElement.PATH_SEPARATOR + subgroup + NavigationElement.PATH_SEPARATOR + page;
+        return navigate(path, request, response);
+    }
+
+    @RequestMapping(value = "/{module}/{group}/{subgroup}/{subgroup2}/{page}", method = RequestMethod.GET)
+    public ModelAndView threeGroupsPages(@PathVariable String module, @PathVariable String group,
+                                         @PathVariable String subgroup, @PathVariable String subgroup2, @PathVariable String page, HttpServletRequest request
             , HttpServletResponse response) {
 
-        String path = module + "/" + group + "/" + subgroup + "/" + page;
+        String path = module + NavigationElement.PATH_SEPARATOR + group + PATH_SEPARATOR + subgroup + PATH_SEPARATOR + subgroup2 + PATH_SEPARATOR + page;
         return navigate(path, request, response);
+    }
 
+    @RequestMapping(value = "/{module}/{group}/{subgroup}/{subgroup2}/{subgroup3}/{page}", method = RequestMethod.GET)
+    public ModelAndView fourGroupsPages(@PathVariable String module, @PathVariable String group,
+                                        @PathVariable String subgroup, @PathVariable String subgroup2, @PathVariable String subgroup3,
+                                        @PathVariable String page, HttpServletRequest request
+            , HttpServletResponse response) {
+
+        String path = module + NavigationElement.PATH_SEPARATOR + group + PATH_SEPARATOR + subgroup + PATH_SEPARATOR + subgroup2 + PATH_SEPARATOR + subgroup3 + PATH_SEPARATOR + page;
+        return navigate(path, request, response);
     }
 
     public static ModelAndView navigate(String path, HttpServletRequest request, HttpServletResponse response) {
