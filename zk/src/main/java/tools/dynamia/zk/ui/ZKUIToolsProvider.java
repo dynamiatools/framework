@@ -77,15 +77,33 @@ public class ZKUIToolsProvider implements UIToolsProvider {
 
     @Override
     public <T> DialogComponent showTableSelector(String title, String label, List<String> columns, List<T> data, SelectEventCallback<T> onSelect) {
-        ZKTableSelector<T> selector = new ZKTableSelector<>(label, columns, data);
-        selector.onSelect(onSelect);
-        return showDialog(title, selector, null, "90%", "90%", null);
+        ZKTableSelector<T> selector = new ZKTableSelector<>(label, columns, data, false);
+
+        var dialog = showDialog(title, selector, null, "90%", "90%", null);
+
+        selector.onSelect(selected -> {
+            if (onSelect != null) {
+                onSelect.onSelect(selected);
+            }
+            dialog.close();
+        });
+
+        return dialog;
     }
 
     @Override
-    public <T> DialogComponent showTableMultiSelector(String title, String label, List<String> columns, List<T> data, SelectionEventCallback<T> onSelect) {
+    public <T> DialogComponent showTableMultiSelector(String title, String label, List<String> columns, List<T> data, SelectionEventCallback<T> onSelection) {
         ZKTableSelector<T> selector = new ZKTableSelector<>(label, columns, data, true);
-        selector.onSelection(onSelect);
-        return showDialog(title, selector, null, "90%", "90%", null);
+
+        var dialog = showDialog(title, selector, null, "90%", "90%", null);
+
+        selector.onSelection(selection -> {
+            if (onSelection != null) {
+                onSelection.onSelect(selection);
+            }
+            dialog.close();
+        });
+
+        return dialog;
     }
 }
