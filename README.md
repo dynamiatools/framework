@@ -1,13 +1,18 @@
+
 [![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia/tools.dynamia.app)](https://search.maven.org/search?q=tools.dynamia)
 ![Java Version Required](https://img.shields.io/badge/java-17-blue)
 [![Java CI with Maven](https://github.com/dynamiatools/framework/actions/workflows/maven.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/maven.yml)
+[![DynamiaTools Documentation](https://img.shields.io/badge/DynamiaTools-Documentation-orange)](https://dynamia.tools/getting-started/)
 
 
-# Overview
 
-DynamiaTools is a framework for building Java 17+ web applications fast and easy using standard design patterns, views
-descriptors for automatic UI generation, actions, services and modules. Powered by **Spring Boot** v3.2 (https://spring.io), ZK
-10 Jakarta (https://www.zkoss.org) for frontend and JPA 3+ with Hibernate 6.
+<p align="center">
+  <img src="https://dynamia.tools/_astro/dynamia-tools-splash.B183ReOk_Z1w9UUh.webp" alt="Dynamia Tools Logo" width="100"/>
+</p>
+
+<h1 align="center">DynamiaTools</h1>
+DynamiaTools is a cutting-edge full-stack Java 17+ framework designed for building powerful enterprise web applications, harnessing the strength of Spring Boot 3 and the elegance of ZK 10. 
+
 
 ## With DynamiaTools you can
 
@@ -60,19 +65,19 @@ class MyApplication {
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.app</artifactId>
-        <version>5.1.3</version>
+        <version>5.3.0</version>
     </dependency>
 
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.zk</artifactId>
-        <version>5.1.3</version>
+        <version>5.3.0</version>
     </dependency>
 
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.domain.jpa</artifactId>
-        <version>5.1.3</version>
+        <version>5.3.0</version>
     </dependency>
 </dependencies>
 ```
@@ -80,9 +85,9 @@ class MyApplication {
 **Gradle**
 
 ```groovy
-compile 'tools.dynamia:tools.dynamia.app:5.1.3'
-compile 'tools.dynamia:tools.dynamia.zk:5.1.3'
-compile 'tools.dynamia:tools.dynamia.domain.jpa:5.1.3'
+compile 'tools.dynamia:tools.dynamia.app:5.3.0'
+compile 'tools.dynamia:tools.dynamia.zk:5.3.0'
+compile 'tools.dynamia:tools.dynamia.domain.jpa:5.3.0'
 ```
 
 Artifacts are available in **Maven Central** repositories
@@ -149,3 +154,10 @@ The main goal of 5.x version is to upgrade to latest version of Java 17, spring 
 ## Want contribute?
 
 Please read [Contributing Guidelines](https://github.com/dynamiatools/framework/blob/master/CONTRIBUTING.md)
+
+## ☕ Support DynamiaTools
+
+Hey there! DynamiaTools is built with a lot of dedication to help developers speed up their projects and make development more enjoyable. If DynamiaTools has been useful to you or your projects, consider supporting its development. Your support helps keep the project alive and evolving with new features and improvements. Every coffee counts! 😊
+
+<a href="https://www.buymeacoffee.com/marioserrano" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
