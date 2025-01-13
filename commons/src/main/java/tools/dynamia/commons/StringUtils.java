@@ -20,6 +20,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.Normalizer;
 import java.text.ParseException;
 import java.time.Duration;
 import java.util.*;
@@ -1494,5 +1495,23 @@ public abstract class StringUtils {
         } else {
             return text;
         }
+    }
+
+    /**
+     * Remove special characters from string
+     * @param input
+     * @return
+     */
+    public static String replaceSpecialCharacters(String input) {
+        if (input == null) {
+            return null;
+        }
+
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        String withoutAccents = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        withoutAccents = withoutAccents.replace("ñ", "n").replace("Ñ", "N");
+        withoutAccents = withoutAccents.replaceAll("\\p{So}|\\p{Cn}", "");
+
+        return withoutAccents;
     }
 }
