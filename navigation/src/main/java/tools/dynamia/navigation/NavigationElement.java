@@ -193,7 +193,7 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
     }
 
     public void setId(String id) {
-        this.id = StringUtils.simplifiedString(id);
+        this.id = id;
     }
 
     public String getVirtualPath() {

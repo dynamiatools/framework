@@ -59,7 +59,7 @@ public class PageGroup extends NavigationElement<PageGroup> implements Serializa
 
     public PageGroup addPage(Page page) {
         if (getPageById(page.getId()) != null) {
-            logger.warn("There is a page with the same ID added in:" + getVirtualPath());
+            throw new PageAlreadyExistsException("There is a page with the same ID " + page.getId() + " added in page group: " + getVirtualPath());
         } else {
             page.setPageGroup(this);
             page.setIndex(pages.size());
@@ -91,7 +91,7 @@ public class PageGroup extends NavigationElement<PageGroup> implements Serializa
      */
     public PageGroup addPageGroup(PageGroup group) {
         if (getPageGroupById(group.getId()) != null) {
-            logger.warn("There is a page group with the same ID added in:" + getVirtualPath());
+            throw new PageAlreadyExistsException("There is a page group with the same ID " + group.getId() + "added in :" + getVirtualPath());
         } else {
             group.setParentModule(null);
             group.setParentGroup(this);

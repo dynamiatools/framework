@@ -285,7 +285,11 @@ public class Module extends NavigationElement<Module> implements Serializable, C
         allGroups.add(defaultGroup);
         allGroups.addAll(pageGroups);
 
-        allGroups.forEach(grp -> forEachPageGroup(action, grp, monitor));
+        allGroups.forEach(grp -> {
+            if (!grp.isDynamic()) {
+                forEachPageGroup(action, grp, monitor);
+            }
+        });
     }
 
     public void forEachPage(Consumer<Page> action) {

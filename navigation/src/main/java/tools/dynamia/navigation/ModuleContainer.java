@@ -48,7 +48,8 @@ public final class ModuleContainer implements Serializable {
 
     @Autowired
     private transient List<ModuleProvider> _providers;
-    private final SimpleCache<String, Page> INDEX = new SimpleCache<>();
+    private final SimpleCache<String, Page> PAGE_PATH_INDEX = new SimpleCache<>();
+    private final SimpleCache<String, Page> PAGE_PRETTY_PATH_INDEX = new SimpleCache<>();
 
     private String defaultPagePath;
 
@@ -120,7 +121,7 @@ public final class ModuleContainer implements Serializable {
             });
 
             List<PageGroup> groups = newModule.getPageGroups();
-            mergerPageGroups(groups, existingModule, null);
+            mergePageGroups(groups, existingModule, null);
 
         }
     }
@@ -132,18 +133,20 @@ public final class ModuleContainer implements Serializable {
         }
     }
 
-    private void mergerPageGroups(List<PageGroup> newModuleGroups, Module parentModule, PageGroup parentGroup) {
+    private void mergePageGroups(List<PageGroup> newModuleGroups, Module parentModule, PageGroup parentGroup) {
         for (PageGroup newGroup : newModuleGroups) {
             PageGroup existingGroup = parentGroup != null ? parentGroup.getPageGroupById(newGroup.getId()) : parentModule.getPageGroupById(newGroup.getId());
 
             if (existingGroup == null) {
                 if (parentGroup != null) {
                     parentGroup.addPageGroup(newGroup);
-                    newGroup.getPages().forEach(this::index);
+                    if (!newGroup.isDynamic()) {
+                        newGroup.getPages().forEach(this::index);
+                    }
                 } else {
                     parentModule.addPageGroup(newGroup);
                 }
-            } else {
+            } else if (!newGroup.isDynamic()) {
                 for (Page newPage : newGroup.getPages()) {
                     index(newPage);
                     Page oldPage = existingGroup.getPageById(newPage.getId());
@@ -155,8 +158,8 @@ public final class ModuleContainer implements Serializable {
                                 + newPage.getClass().getSimpleName());
                     }
                 }
-                if (newGroup.getPageGroups() != null) {
-                    mergerPageGroups(newGroup.getPageGroups(), parentModule, existingGroup);
+                if (!newGroup.isDynamic() && newGroup.getPageGroups() != null) {
+                    mergePageGroups(newGroup.getPageGroups(), parentModule, existingGroup);
                 }
             }
         }
@@ -170,8 +173,8 @@ public final class ModuleContainer implements Serializable {
     }
 
     protected void index(Page page) {
-        INDEX.add(page.getVirtualPath(), page);
-        INDEX.add(page.getPrettyVirtualPath(), page);
+        PAGE_PATH_INDEX.add(page.getVirtualPath(), page);
+        PAGE_PRETTY_PATH_INDEX.add(page.getPrettyVirtualPath(), page);
         if (page.isFeatured()) {
             featuredPages.add(page);
         }
@@ -217,7 +220,7 @@ public final class ModuleContainer implements Serializable {
     }
 
     public Page findPage(String path) {
-        Page page = INDEX.get(path);
+        Page page = PAGE_PATH_INDEX.get(path);
 
         try {
             if (page == null) {
@@ -241,7 +244,7 @@ public final class ModuleContainer implements Serializable {
     }
 
     public Page findPageByPrettyVirtualPath(String prettyPath) {
-        Page page = INDEX.get(prettyPath);
+        Page page = PAGE_PRETTY_PATH_INDEX.get(prettyPath);
 
         try {
             if (page == null) {
@@ -302,7 +305,7 @@ public final class ModuleContainer implements Serializable {
     }
 
     public NavigationElement findElement(String path) {
-        NavigationElement elem = INDEX.get(path);
+        NavigationElement elem = PAGE_PATH_INDEX.get(path);
         if (elem != null) {
             return elem;
         }
