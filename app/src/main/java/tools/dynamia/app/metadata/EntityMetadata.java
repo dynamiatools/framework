@@ -8,7 +8,7 @@ public class EntityMetadata extends BasicMetadata {
 
     private String className;
     private List<ActionMetadata> actions;
-    private List<ViewDescriptor> descriptors;
+    private List<ApplicationMetadataViewDescriptor> descriptors;
 
     public EntityMetadata() {
     }
@@ -16,7 +16,6 @@ public class EntityMetadata extends BasicMetadata {
     public EntityMetadata(Class entityClass) {
         setClassName(entityClass.getName());
         setName(entityClass.getSimpleName());
-
     }
 
     public String getClassName() {
@@ -35,11 +34,11 @@ public class EntityMetadata extends BasicMetadata {
         this.actions = actions;
     }
 
-    public List<ViewDescriptor> getDescriptors() {
+    public List<ApplicationMetadataViewDescriptor> getDescriptors() {
         return descriptors;
     }
 
-    public void setDescriptors(List<ViewDescriptor> descriptors) {
+    public void setDescriptors(List<ApplicationMetadataViewDescriptor> descriptors) {
         this.descriptors = descriptors;
     }
 }
