@@ -144,6 +144,26 @@ public final class BeanUtils {
     }
 
     /**
+     * Create a new instance using a constructor that match passed arguments
+     *
+     * @param <T>   the generic type
+     * @param clazz the clazz
+     * @return the t
+     */
+    public static <T> T newInstance(final Class<T> clazz, Object... args) {
+        try {
+            Class[] argClass = new Class[args.length];
+            for (int i = 0; i < args.length; i++) {
+                argClass[i] = args[i].getClass();
+            }
+            return clazz.getDeclaredConstructor(argClass).newInstance(args);
+        } catch (Exception e) {
+            throw new ReflectionException(e);
+        }
+    }
+
+
+    /**
      * New instance.
      *
      * @param <T>       the generic type
@@ -151,8 +171,8 @@ public final class BeanUtils {
      * @return the t
      */
     public static <T> T newInstance(String className) {
-        if (className == null || className.isEmpty()) {
-            return null;
+        if (!isValidClassName(className)) {
+            throw new ReflectionException("Invalid class name or is null or empty: " + className);
         }
 
         try {
@@ -420,6 +440,7 @@ public final class BeanUtils {
     }
 
     /**
+     *
      */
     public static Class getGenericTypeInterface(Object classRef, Class interfaceClass) {
         Class clazz = null;
@@ -767,7 +788,6 @@ public final class BeanUtils {
 
     /**
      * Find and return the first field annotated with annotationClass
-     *
      */
     public static Field getFirstFieldWithAnnotation(Class<?> targetClass, Class<? extends Annotation> annotationClass) {
         return BeanUtils.getAllFields(targetClass).stream()
@@ -777,7 +797,6 @@ public final class BeanUtils {
 
     /**
      * Load all bean standard properties into map
-     *
      */
     public static Map<String, Object> getValuesMaps(Object bean) {
         return getValuesMaps("", bean, null);
@@ -837,7 +856,6 @@ public final class BeanUtils {
      * Create a simple clone from source object, its only include standard java
      * types and primitive. Collections and arrays are excluded. Optional you can
      * specify additional excluded properties
-     *
      */
     public static <T> T clone(T source, String... excludedProperties) {
         @SuppressWarnings("unchecked") Class<T> sourceClass = (Class<T>) source.getClass();
@@ -859,7 +877,6 @@ public final class BeanUtils {
      * Setup bean properties using another bean properties. Source object can be of
      * any type, this method extract source object properties values and names and
      * create a Map to setup bean.
-     *
      */
     public static void setupBean(Object bean, Object source) {
         if (source instanceof Map) {
@@ -873,7 +890,6 @@ public final class BeanUtils {
 
     /**
      * Create a new BeanMap for current bean
-     *
      */
     public static BeanMap newBeanMap(Object bean) {
         BeanMap beanMap = new BeanMap();
@@ -883,7 +899,6 @@ public final class BeanUtils {
 
     /**
      * Find the name of property parent
-     *
      */
     public static String findParentPropertyName(Class<?> parentClass, Class subentityClass) {
         List<PropertyInfo> infos = BeanUtils.getPropertiesInfo(subentityClass);
@@ -898,7 +913,6 @@ public final class BeanUtils {
     /**
      * Return the value of the field or method annoted with {@link InstanceName} or invoke toString() method if
      * not InstanceName is found
-     *
      */
     public static String getInstanceName(Object object) {
         if (object == null) {
@@ -933,7 +947,6 @@ public final class BeanUtils {
 
     /**
      * Return if class type is primitive or from standard java packaage
-     *
      */
     public static boolean isStantardClass(Class<?> type) {
         if (type == null) {
@@ -947,5 +960,30 @@ public final class BeanUtils {
         String name = type.getName();
         return name.startsWith("java.lang") || name.startsWith("java.util") || name.startsWith("java.math") || name.startsWith("java.sql");
 
+    }
+
+    /**
+     * Check if class name is valid. It must be not null, not empty and match with
+     * regex [a-zA-Z0-9.]+
+     *
+     * @param className
+     * @return
+     */
+    public static boolean isValidClassName(String className) {
+        return className != null && !className.isBlank() && className.matches("[a-zA-Z0-9\\\\.]+");
+    }
+
+    /**
+     * Find class by name. If class is not found or is invalid return null
+     */
+    public static Class<?> findClass(String className) {
+        try {
+            if (isValidClassName(className)) {
+                return Class.forName(className);
+            }
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+        return null;
     }
 }
