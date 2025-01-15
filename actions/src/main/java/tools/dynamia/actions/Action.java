@@ -111,13 +111,25 @@ public interface Action extends Comparable<Action>, Serializable {
      */
     boolean isEnabled();
 
-
+    /**
+     * Get the localized name of this action
+     * @return
+     */
     default String getLocalizedName() {
         return getLocalizedName(Messages.getDefaultLocale());
     }
 
+    /**
+     * Get the localized name of this action using a custom locale
+     * @param locale
+     * @return
+     */
     String getLocalizedName(Locale locale);
 
+    /**
+     *
+     * @return
+     */
     default String getLocalizedDescription() {
         return getLocalizedDescription(Messages.getDefaultLocale());
     }
@@ -144,5 +156,16 @@ public interface Action extends Comparable<Action>, Serializable {
      * @param evt the evt
      */
     void actionPerformed(ActionEvent evt);
+
+
+    /**
+     * Execute this action using an {@link ActionExecutionRequest} instead of an {@link ActionEvent}. Implement this when
+     * you need process the action result without worry about other stuff
+     * @param request received
+     * @return response
+     */
+    default ActionExecutionResponse execute(ActionExecutionRequest request) {
+        return new ActionExecutionResponse(false);
+    }
 
 }

@@ -90,7 +90,7 @@ public class Actions {
         T component = renderer.render(action, eventBuilder);
 
         if (action instanceof ActionLifecycleAware ala) {
-            ala.afterRenderer(renderer,component);
+            ala.afterRenderer(renderer, component);
         }
 
         action.setAttribute(ACTION_COMPONENT, component);
@@ -100,10 +100,33 @@ public class Actions {
 
     /**
      * Call this method after action is rendered to get the last rendered action component
+     *
      * @param action
      * @return
      */
-    public static Object getActionComponent(Action action){
+    public static Object getActionComponent(Action action) {
         return action.getAttribute(ACTION_COMPONENT);
+    }
+
+    /**
+     * Execute an action using {@link ActionExecutionRequest} instead of {@link ActionEvent}
+     *
+     * @param action
+     * @param request
+     * @return
+     */
+    public static ActionExecutionResponse execute(Action action, ActionExecutionRequest request) {
+
+        if (action instanceof ActionFilter filter) {
+            filter.beforeActionExecution(request);
+        }
+
+        var response = action.execute(request);
+
+        if (action instanceof ActionFilter filter) {
+            filter.afterActionExecution(request, response);
+        }
+
+        return response;
     }
 }
