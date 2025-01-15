@@ -65,7 +65,9 @@ public class FindAction extends AbstractCrudAction implements CrudControllerAwar
     @Override
     public ActionRenderer getRenderer() {
         FindActionRenderer renderer = new FindActionRenderer();
-        renderer.setStartValue((String) crudController.getAttributes().get(LAST_QUERY_TEXT));
+        if(crudController!=null) {
+            renderer.setStartValue((String) crudController.getAttributes().get(LAST_QUERY_TEXT));
+        }
         return renderer;
     }
 
