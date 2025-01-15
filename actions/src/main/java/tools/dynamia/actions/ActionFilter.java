@@ -5,15 +5,15 @@ package tools.dynamia.actions;
  */
 public interface ActionFilter {
 
-    default void beforeActionPerformed(ActionEvent evt) {
+    default void beforeActionPerformed(Action action, ActionEvent evt) {
     }
 
-    default void afterActionPerformed(ActionEvent evt) {
+    default void afterActionPerformed(Action action, ActionEvent evt) {
     }
 
-    default void beforeActionExecution(ActionExecutionRequest request) {
+    default void beforeActionExecution(Action action, ActionExecutionRequest request) {
     }
 
-    default void afterActionExecution(ActionExecutionRequest request, ActionExecutionResponse response) {
+    default void afterActionExecution(Action action, ActionExecutionRequest request, ActionExecutionResponse response) {
     }
 }

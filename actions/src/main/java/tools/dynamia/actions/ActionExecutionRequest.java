@@ -1,18 +1,28 @@
 package tools.dynamia.actions;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ActionExecutionRequest {
 
+    @JsonAlias({"data", "value", "payload", "content"})
     private Object data;
+    @JsonAlias({"params", "parameters"})
     private Map<String, Object> params;
     private String source;
 
+    @JsonAlias({"dataType", "type", "data-type", "className", "class"})
     private String dataType;
+
+    @JsonAlias({"dataId", "id", "data-id"})
     private String dataId;
+
+    @JsonAlias({"dataName", "name", "data-name"})
     private String dataName;
 
     public ActionExecutionRequest() {
