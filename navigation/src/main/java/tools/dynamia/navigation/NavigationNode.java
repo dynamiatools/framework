@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NavigationNode implements Serializable {
@@ -27,6 +29,9 @@ public class NavigationNode implements Serializable {
     @JsonIgnore
     private NavigationNode parent;
     private List<NavigationNode> children;
+
+    private Map<String, Object> attributes;
+    private String file;
 
 
     @JsonIgnore
@@ -53,7 +58,11 @@ public class NavigationNode implements Serializable {
 
         this.position = element.getPosition() != 0.0 ? element.getPosition() : null;
         this.type = element.getClass().getSimpleName();
-        this.featured = element instanceof Page ? ((Page) element).isFeatured() : null;
+        this.featured = element instanceof Page p ? p.isFeatured() : null;
+        this.file = element instanceof Page p ? p.getPath() : null;
+        if (element.getAttributes() != null && !element.getAttributes().isEmpty()) {
+            this.attributes = new HashMap<>(element.getAttributes());
+        }
     }
 
     public void addChild(NavigationNode node) {
@@ -183,11 +192,27 @@ public class NavigationNode implements Serializable {
         return internalPath;
     }
 
-    public Boolean isFeatured() {
+    public Boolean getFeatured() {
         return featured;
     }
 
     public void setFeatured(Boolean featured) {
         this.featured = featured;
+    }
+
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
+    }
+
+    public String getFile() {
+        return file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
     }
 }

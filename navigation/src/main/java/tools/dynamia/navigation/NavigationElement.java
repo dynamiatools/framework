@@ -99,6 +99,10 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
         return attributes.keySet();
     }
 
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
     public boolean isAlwaysAllowed() {
         return alwaysAllowed;
     }
