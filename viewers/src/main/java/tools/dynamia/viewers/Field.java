@@ -626,4 +626,12 @@ public class Field implements Serializable, Indexable, Cloneable {
     public void setShowIconOnly(boolean showIconOnly) {
         this.showIconOnly = showIconOnly;
     }
+
+    public Class<?> getGenericType(){
+        if(propertyInfo != null){
+            return propertyInfo.getGenericType();
+        }else{
+            return fieldClass;
+        }
+    }
 }

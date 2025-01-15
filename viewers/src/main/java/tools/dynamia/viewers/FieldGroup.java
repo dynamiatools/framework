@@ -16,31 +16,32 @@
  */
 package tools.dynamia.viewers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import tools.dynamia.commons.BeanMessages;
 import tools.dynamia.commons.StringUtils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * The Class FieldGroup.
  *
  * @author Mario A. Serrano Leones
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class FieldGroup implements Serializable, Indexable, Cloneable {
 
 
     private static final long serialVersionUID = -4318151472388145403L;
+    @JsonIgnore
     private ViewDescriptor viewDescriptor;
     private String name;
     private String label;
     private String description;
     private String icon;
+    @JsonIgnore
     private final List<Field> fields = new ArrayList<>();
     private int index;
     private boolean collapse;
@@ -303,5 +304,10 @@ public class FieldGroup implements Serializable, Indexable, Cloneable {
 
     public void setCollapse(boolean collapse) {
         this.collapse = collapse;
+    }
+
+    @JsonProperty("fields")
+    public List<String> getFieldsNames() {
+        return fields.stream().map(Field::getName).toList();
     }
 }

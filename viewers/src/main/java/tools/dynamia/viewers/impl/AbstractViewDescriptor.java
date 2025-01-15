@@ -17,6 +17,7 @@
 package tools.dynamia.viewers.impl;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.logger.LoggingService;
@@ -47,6 +48,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
     /**
      * The view type name.
      */
+    @JsonProperty("view")
     private String viewTypeName;
 
     private Class<?> beanClass;
