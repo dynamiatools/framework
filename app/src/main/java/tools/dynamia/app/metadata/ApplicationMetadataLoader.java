@@ -1,12 +1,10 @@
 package tools.dynamia.app.metadata;
 
-import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionLoader;
 import tools.dynamia.actions.ApplicationGlobalAction;
 import tools.dynamia.app.ApplicationInfo;
 import tools.dynamia.commons.ApplicableClass;
 import tools.dynamia.crud.CrudAction;
-import tools.dynamia.crud.CrudState;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.viewers.ViewDescriptorFactory;
 
@@ -35,7 +33,7 @@ public class ApplicationMetadataLoader {
         viewDescriptorFactory.findDescriptorsByType("form")
                 .forEach(d -> {
                     var entityClass = d.getKey();
-                    var entity = loadEntityMetadata(entityClass);
+                    var entity = new EntityMetadata(entityClass);
                     metadata.getEntities().add(entity);
                 });
         return metadata;
@@ -58,7 +56,7 @@ public class ApplicationMetadataLoader {
         var entity = new EntityMetadata(entityClass);
 
         var descriptors = viewDescriptorFactory.findDescriptorByClass(entityClass);
-        entity.setDescriptors(descriptors.stream().map(ApplicationMetadataViewDescriptor::new).toList());
+        entity.setDescriptors(descriptors.stream().map(ViewDescriptorMetadata::new).toList());
 
         ActionLoader<CrudAction> loader = new ActionLoader<>(CrudAction.class);
         entity.setActions(loader

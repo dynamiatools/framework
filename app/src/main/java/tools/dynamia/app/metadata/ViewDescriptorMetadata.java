@@ -2,12 +2,12 @@ package tools.dynamia.app.metadata;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import tools.dynamia.app.controllers.ApplicationMetadataController;
 import tools.dynamia.viewers.ViewDescriptor;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ApplicationMetadataViewDescriptor {
+public class ViewDescriptorMetadata extends BasicMetadata {
 
-    private String id;
     private String view;
     private String device;
     private String beanClass;
@@ -16,16 +16,20 @@ public class ApplicationMetadataViewDescriptor {
     private ViewDescriptor descriptor;
 
 
-
-    public ApplicationMetadataViewDescriptor(ViewDescriptor descriptor) {
+    public ViewDescriptorMetadata(ViewDescriptor descriptor) {
+        setId(descriptor.getId());
         this.descriptor = descriptor;
-        this.id = descriptor.getId();
         this.view = descriptor.getViewTypeName();
         this.device = descriptor.getDevice();
         this.beanClass = descriptor.getBeanClass() != null ? descriptor.getBeanClass().getName() : null;
+        if (beanClass != null) {
+            setEndpoint(ApplicationMetadataController.PATH + "/entities/" + beanClass + "/views/" + view);
+        }
+
+
     }
 
-    public ApplicationMetadataViewDescriptor() {
+    public ViewDescriptorMetadata() {
     }
 
     public ViewDescriptor getDescriptor() {
@@ -36,13 +40,6 @@ public class ApplicationMetadataViewDescriptor {
         this.descriptor = descriptor;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getView() {
         return view;
