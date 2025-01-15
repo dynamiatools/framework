@@ -121,6 +121,9 @@ public class StringPojoParser {
     /**
      * Parse JSON string to java type (java bean)
      *
+     * @param json
+     * @param pojoType
+     *
      * @return object of type or null if json is null or empty
      */
     public static <T> T parseJsonToPojo(String json, Class<T> pojoType) {
@@ -132,6 +135,26 @@ public class StringPojoParser {
             ObjectMapper jsonMapper = createJsonMapper();
             return jsonMapper.readerFor(pojoType).readValue(json);
         } catch (IOException e) {
+            throw new JsonParsingException(e);
+        }
+    }
+
+
+    /**
+     * Parse JSON map to java type (java bean)
+     * @param map
+     * @param pojoType
+     * @return object of type or null if json is null or empty
+     */
+    public static <T> T parseJsonToPojo(Map map, Class<T> pojoType) {
+        try {
+            if (map == null || map.isEmpty()) {
+                return null;
+            }
+
+            ObjectMapper jsonMapper = createJsonMapper();
+            return jsonMapper.convertValue(map, pojoType);
+        } catch (IllegalArgumentException e) {
             throw new JsonParsingException(e);
         }
     }

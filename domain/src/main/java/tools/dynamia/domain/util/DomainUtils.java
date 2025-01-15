@@ -503,4 +503,41 @@ public abstract class DomainUtils {
     public static CurrencyExchangeProvider getCurrencyExchangeProvider() {
         return Containers.get().findObject(CurrencyExchangeProvider.class);
     }
+
+    /**
+     * Verifies if the provided value can be interpreted as a Long number.
+     *
+     * @param value the value to verify.
+     * @return true if the value is a valid Long number; otherwise, false.
+     */
+    public static boolean isLong(String value) {
+        if (value == null || value.isEmpty()) {
+            return false;
+        }
+        try {
+            Long.parseLong(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+
+    /**
+     * Verifies if the provided value can be interpreted as a Integer number.
+     *
+     * @param value the value to verify.
+     * @return true if the value is a valid Integer number; otherwise, false.
+     */
+    public static boolean isInteger(String value) {
+        if (value == null || value.isEmpty()) {
+            return false;
+        }
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 }
