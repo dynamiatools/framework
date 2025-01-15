@@ -3,6 +3,7 @@ package tools.dynamia.app.metadata;
 import tools.dynamia.actions.ActionLoader;
 import tools.dynamia.actions.ApplicationGlobalAction;
 import tools.dynamia.app.ApplicationInfo;
+import tools.dynamia.app.controllers.ApplicationMetadataController;
 import tools.dynamia.commons.ApplicableClass;
 import tools.dynamia.crud.CrudAction;
 import tools.dynamia.integration.sterotypes.Service;
@@ -61,7 +62,11 @@ public class ApplicationMetadataLoader {
         ActionLoader<CrudAction> loader = new ActionLoader<>(CrudAction.class);
         entity.setActions(loader
                 .load(action -> isApplicable(entityClass, action))
-                .stream().map(ActionMetadata::new)
+                .stream().map(a -> {
+                    var md = new ActionMetadata(a);
+                    md.setEndpoint(ApplicationMetadataController.PATH + "/entities/" + entityClass.getName() + "/actions/" + a.getId());
+                    return md;
+                })
                 .toList());
 
         loadEnpoint(entity);

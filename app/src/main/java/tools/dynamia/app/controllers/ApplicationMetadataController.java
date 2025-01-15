@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import tools.dynamia.actions.ActionExecutionRequest;
 import tools.dynamia.actions.ActionExecutionResponse;
 import tools.dynamia.actions.ActionRestrictions;
+import tools.dynamia.actions.Actions;
 import tools.dynamia.app.metadata.*;
 import tools.dynamia.commons.SimpleCache;
 import tools.dynamia.domain.ValidationError;
@@ -61,7 +62,7 @@ public class ApplicationMetadataController {
             try {
                 var actionInstance = actionMetadata.getAction();
                 if (ActionRestrictions.allowAccess(actionInstance)) {
-                    return actionInstance.execute(request);
+                    return Actions.execute(actionInstance, request);
                 } else {
                     return new ActionExecutionResponse("Action " + action + " not allowed", HttpStatus.FORBIDDEN.getReasonPhrase(), 403);
                 }
@@ -101,7 +102,7 @@ public class ApplicationMetadataController {
     }
 
     @GetMapping(value = "/entities/{className}/views", produces = "application/json")
-    public List<ViewDescriptor> getEntityViewDescriptors(@PathVariable String className) {
+    public List<ViewDescriptor> executeEntityAction(@PathVariable String className) {
         var entityMetadata = getEntities().getEntityMetadata(className);
         if (entityMetadata != null) {
             return entityMetadata.getDescriptors().stream().map(ViewDescriptorMetadata::getDescriptor).toList();
@@ -121,8 +122,8 @@ public class ApplicationMetadataController {
         return null;
     }
 
-    @PostMapping(value = "/entities/{className}/action/{action}", produces = "application/json")
-    public ActionExecutionResponse getEntityViewDescriptors(@PathVariable String className, @PathVariable String action, ActionExecutionRequest request) {
+    @PostMapping(value = "/entities/{className}/action/{action}", produces = "application/json", consumes = "application/json")
+    public ActionExecutionResponse executeEntityAction(@PathVariable String className, @PathVariable String action, @RequestBody ActionExecutionRequest request) {
         var entityMetadata = getEntities().getEntityMetadata(className);
         if (entityMetadata != null) {
             var actionMetadata = entityMetadata.getActions().stream().filter(a -> a.getId().equals(action)).findFirst().orElse(null);
