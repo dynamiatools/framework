@@ -27,14 +27,10 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.impl.LabelElement;
 import org.zkoss.zul.impl.XulElement;
 import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.Containers;
-import tools.dynamia.navigation.ActionPage;
-import tools.dynamia.navigation.DefaultPageProvider;
-import tools.dynamia.navigation.ModuleContainer;
-import tools.dynamia.navigation.NavigationElement;
-import tools.dynamia.navigation.Page;
-import tools.dynamia.navigation.PageEvent;
-import tools.dynamia.navigation.WorkspaceViewBuilder;
+import tools.dynamia.navigation.*;
 import tools.dynamia.zk.util.ZKUtil;
 import tools.dynamia.zk.workspace.builders.TabPanel;
 
@@ -56,6 +52,7 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
     private static final long serialVersionUID = -6459772159875108265L;
 
     private static final NavigationElement EMPTY = new NavigationElement("", "");
+    private LoggingService logger = new SLF4JLoggingService(ZKNavigationComposer.class);
 
     @Wire("#workspace")
     private XulElement workspace;
@@ -128,9 +125,15 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
     private void loadDefaultPage() {
         var defaultPageProvider = Containers.get().findObject(DefaultPageProvider.class);
         if (defaultPageProvider != null && defaultPageProvider.getPath() != null) {
-            desktopCurrentPage = navManager().findPage(defaultPageProvider.getPath());
-            navManager().setRawCurrentPage(desktopCurrentPage);
-        } else {
+            try {
+                desktopCurrentPage = navManager().findPage(defaultPageProvider.getPath());
+                navManager().setRawCurrentPage(desktopCurrentPage);
+            } catch (PageNotFoundException e) {
+                logger.warn("Default page not found: " + defaultPageProvider.getPath());
+            }
+        }
+
+        if (desktopCurrentPage == null) {
             String defaultPagePath = ModuleContainer.getInstance().getDefaultPagePath();
             if (defaultPagePath != null) {
                 desktopCurrentPage = navManager().findPage(defaultPagePath);
@@ -184,7 +187,7 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
     }
 
     public void updateClientURL() {
-        if (desktopCurrentPage.getPageGroup() != null && desktopCurrentPage.getPageGroup().getParentModule() != null) {
+        if (desktopCurrentPage != null) {
             Clients.evalJavaScript("changeHash('" + desktopCurrentPage.getPrettyVirtualPath() + "');");
         }
     }

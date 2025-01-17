@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Streams utility class
@@ -18,7 +19,6 @@ public class Streams {
 
     /**
      * Filter and collect to {@link List} in collection
-     *
      */
     public static <T> List<T> collectIf(Collection<T> collection, Predicate<T> predicate) {
         if (collection == null) {
@@ -32,7 +32,6 @@ public class Streams {
 
     /**
      * Filter and collect to {@link Set} in collection
-     *
      */
     public static <T> Set<T> collectSetIf(Collection<T> collection, Predicate<T> predicate) {
         if (collection == null) {
@@ -45,7 +44,6 @@ public class Streams {
 
     /**
      * Map and collect result to {@link List}
-     *
      */
     public static <T, R> List<R> mapAndCollect(Collection<T> collection, Function<? super T, ? extends R> mapper) {
 
@@ -57,7 +55,6 @@ public class Streams {
 
     /**
      * Filter and the map result to {@link List}
-     *
      */
     public static <T, R> List<R> mapAndCollectIf(Collection<T> collection, Predicate<T> predicate, Function<? super T, ? extends R> mapper) {
         if (collection == null) {
@@ -68,7 +65,6 @@ public class Streams {
 
     /**
      * Map collection to {@link BigDecimal} and collect to {@link List}
-     *
      */
     public static <T> List<BigDecimal> mapToBigDecimal(Collection<T> collection, Function<T, BigDecimal> toBigDecimalFunction) {
         if (collection == null) {
@@ -78,6 +74,7 @@ public class Streams {
     }
 
     /**
+     *
      */
     public static <T> List<BigDecimal> mapToBigDecimalIf(Collection<T> collection, Predicate<T> predicate, Function<T, BigDecimal> toBigDecimalFunction) {
         if (collection == null) {
@@ -87,10 +84,22 @@ public class Streams {
                 .map(toBigDecimalFunction).collect(Collectors.toList());
     }
 
+    /**
+     * Map and collect result to {@link List}
+     *
+     * @param elements
+     * @param mapper
+     * @param <T>
+     * @param <R>
+     * @return
+     */
+    public static <T, R> List<R> mapAndCollect(T[] elements, Function<T, R> mapper) {
+        return Stream.of(elements).map(mapper).toList();
+    }
+
 
     /**
      * Sum a collections of bigdecimals
-     *
      */
     public BigDecimal sum(Collection<BigDecimal> numbers) {
         if (numbers == null) {
@@ -103,7 +112,6 @@ public class Streams {
 
     /**
      * Map collection to {@link BigDecimal} and reduce sum
-     *
      */
     public static <T> BigDecimal mapAndSum(Collection<T> collection, Function<T, BigDecimal> toBigDecimalFunction) {
         if (collection == null) {
@@ -115,7 +123,6 @@ public class Streams {
 
     /**
      * Helper to build arrays
-     *
      */
     @SafeVarargs
     public static <T> T[] toArray(T... values) {
@@ -128,7 +135,6 @@ public class Streams {
 
     /**
      * Filter collection and find the first element
-     *
      */
     public static <T> Optional<T> findFirstIf(Collection<T> collection, Predicate<T> predicate) {
         if (collection == null) {
@@ -140,7 +146,6 @@ public class Streams {
 
     /**
      * Filter collection and find the first element or null
-     *
      */
     public static <T> T findFirstElseNull(Collection<T> collection, Predicate<T> predicate) {
         if (collection == null) {

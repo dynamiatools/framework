@@ -16,6 +16,8 @@
  */
 package tools.dynamia.viewers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -191,6 +193,7 @@ public interface ViewDescriptor extends Serializable {
      *
      * @return field or null
      */
+    @JsonIgnore
     default Field getFirstField() {
         if (!getFields().isEmpty()) {
             return getFields().get(0);

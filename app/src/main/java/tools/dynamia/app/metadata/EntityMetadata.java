@@ -1,6 +1,7 @@
 package tools.dynamia.app.metadata;
 
-import tools.dynamia.viewers.ViewDescriptor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import tools.dynamia.app.controllers.ApplicationMetadataController;
 
 import java.util.List;
 
@@ -8,15 +9,24 @@ public class EntityMetadata extends BasicMetadata {
 
     private String className;
     private List<ActionMetadata> actions;
-    private List<ViewDescriptor> descriptors;
+    private List<ViewDescriptorMetadata> descriptors;
+
+    private String actionsEndpoint;
+    private String viewsEndpoint;
+
+    @JsonIgnore
+    private Class entityClass;
 
     public EntityMetadata() {
     }
 
     public EntityMetadata(Class entityClass) {
+        setEntityClass(entityClass);
         setClassName(entityClass.getName());
         setName(entityClass.getSimpleName());
-
+        setEndpoint(ApplicationMetadataController.PATH + "/entities/" + getClassName());
+        setActionsEndpoint(ApplicationMetadataController.PATH + "/entities/" + getClassName() + "/actions");
+        setViewsEndpoint(ApplicationMetadataController.PATH + "/entities/" + getClassName() + "/views");
     }
 
     public String getClassName() {
@@ -35,11 +45,36 @@ public class EntityMetadata extends BasicMetadata {
         this.actions = actions;
     }
 
-    public List<ViewDescriptor> getDescriptors() {
+    public List<ViewDescriptorMetadata> getDescriptors() {
         return descriptors;
     }
 
-    public void setDescriptors(List<ViewDescriptor> descriptors) {
+    public void setDescriptors(List<ViewDescriptorMetadata> descriptors) {
         this.descriptors = descriptors;
+    }
+
+
+    public Class getEntityClass() {
+        return entityClass;
+    }
+
+    public void setEntityClass(Class entityClass) {
+        this.entityClass = entityClass;
+    }
+
+    public String getActionsEndpoint() {
+        return actionsEndpoint;
+    }
+
+    public void setActionsEndpoint(String actionsEndpoint) {
+        this.actionsEndpoint = actionsEndpoint;
+    }
+
+    public String getViewsEndpoint() {
+        return viewsEndpoint;
+    }
+
+    public void setViewsEndpoint(String viewsEndpoint) {
+        this.viewsEndpoint = viewsEndpoint;
     }
 }

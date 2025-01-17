@@ -48,7 +48,8 @@ public final class ModuleContainer implements Serializable {
 
     @Autowired
     private transient List<ModuleProvider> _providers;
-    private final SimpleCache<String, Page> INDEX = new SimpleCache<>();
+    private final SimpleCache<String, Page> PAGE_PATH_INDEX = new SimpleCache<>();
+    private final SimpleCache<String, Page> PAGE_PRETTY_PATH_INDEX = new SimpleCache<>();
 
     private String defaultPagePath;
 
@@ -102,10 +103,13 @@ public final class ModuleContainer implements Serializable {
     }
 
     private void install(Module newModule) {
+        if (newModule == null) {
+            throw new NavigationException("Cannot install null module");
+        }
 
         Module existingModule = this.getModuleById(newModule.getId());
         if (existingModule == null) {
-            modules.add(newModule);
+            add(newModule);
         } else {
             if (newModule.getBaseClass() != null) {
                 existingModule.addBaseClass(newModule.getBaseClass());
@@ -117,22 +121,32 @@ public final class ModuleContainer implements Serializable {
             });
 
             List<PageGroup> groups = newModule.getPageGroups();
-            mergerPageGroups(groups, existingModule, null);
+            mergePageGroups(groups, existingModule, null);
 
         }
     }
 
-    private void mergerPageGroups(List<PageGroup> groups, Module parentModule, PageGroup parentGroup) {
-        for (PageGroup newGroup : groups) {
+    protected void add(Module newModule) {
+        if (newModule != null) {
+            modules.add(newModule);
+            index(newModule);
+        }
+    }
+
+    private void mergePageGroups(List<PageGroup> newModuleGroups, Module parentModule, PageGroup parentGroup) {
+        for (PageGroup newGroup : newModuleGroups) {
             PageGroup existingGroup = parentGroup != null ? parentGroup.getPageGroupById(newGroup.getId()) : parentModule.getPageGroupById(newGroup.getId());
 
             if (existingGroup == null) {
                 if (parentGroup != null) {
                     parentGroup.addPageGroup(newGroup);
+                    if (!newGroup.isDynamic()) {
+                        newGroup.getPages().forEach(this::index);
+                    }
                 } else {
                     parentModule.addPageGroup(newGroup);
                 }
-            } else {
+            } else if (!newGroup.isDynamic()) {
                 for (Page newPage : newGroup.getPages()) {
                     index(newPage);
                     Page oldPage = existingGroup.getPageById(newPage.getId());
@@ -144,17 +158,23 @@ public final class ModuleContainer implements Serializable {
                                 + newPage.getClass().getSimpleName());
                     }
                 }
-                if (newGroup.getPageGroups() != null) {
-                    mergerPageGroups(newGroup.getPageGroups(), parentModule, existingGroup);
+                if (!newGroup.isDynamic() && newGroup.getPageGroups() != null) {
+                    mergePageGroups(newGroup.getPageGroups(), parentModule, existingGroup);
                 }
             }
         }
     }
 
 
-    private void index(Page page) {
-        INDEX.add(page.getVirtualPath(), page);
-        INDEX.add(page.getPrettyVirtualPath(), page);
+    protected void index(Module module) {
+        if (module != null) {
+            module.forEachPage(this::index);
+        }
+    }
+
+    protected void index(Page page) {
+        PAGE_PATH_INDEX.add(page.getVirtualPath(), page);
+        PAGE_PRETTY_PATH_INDEX.add(page.getPrettyVirtualPath(), page);
         if (page.isFeatured()) {
             featuredPages.add(page);
         }
@@ -200,17 +220,15 @@ public final class ModuleContainer implements Serializable {
     }
 
     public Page findPage(String path) {
-        Page page = INDEX.get(path);
+        Page page = PAGE_PATH_INDEX.get(path);
 
         try {
             if (page == null) {
-                String[] p = path.split("/");
-                Module pathModule = getModuleById(p[0]);
-                if (pathModule != null) {
-                    if (p.length == 2) {
-                        page = pathModule.getDefaultPageGroup().getPageById(p[1]);
-                    } else if (p.length == 3) {
-                        page = pathModule.getPageGroupById(p[1]).getPageById(p[2]);
+                for (Module module : modules) {
+                    page = module.findPage(path);
+                    if (page != null) {
+                        index(page);
+                        break;
                     }
                 }
             }
@@ -226,25 +244,22 @@ public final class ModuleContainer implements Serializable {
     }
 
     public Page findPageByPrettyVirtualPath(String prettyPath) {
-        Page page = INDEX.get(prettyPath);
-        if (page == null) {
-            for (Module module : modules) {
+        Page page = PAGE_PRETTY_PATH_INDEX.get(prettyPath);
 
-                List<PageGroup> modulePageGroups = new ArrayList<>();
-                modulePageGroups.add(module.getDefaultPageGroup());
-                modulePageGroups.addAll(module.getPageGroups());
-
-                for (PageGroup pageGroup : modulePageGroups) {
-                    for (Page p : pageGroup.getPages()) {
-                        if (p.getPrettyVirtualPath().equals(prettyPath)) {
-                            page = p;
-                            index(page);
-                            break;
-                        }
+        try {
+            if (page == null) {
+                for (Module module : modules) {
+                    page = module.findPageByPrettyPath(prettyPath);
+                    if (page != null) {
+                        index(page);
+                        break;
                     }
                 }
             }
+        } catch (Exception e) {
+            // ignore
         }
+
         if (page != null) {
             return page;
         } else {
@@ -290,7 +305,7 @@ public final class ModuleContainer implements Serializable {
     }
 
     public NavigationElement findElement(String path) {
-        NavigationElement elem = INDEX.get(path);
+        NavigationElement elem = PAGE_PATH_INDEX.get(path);
         if (elem != null) {
             return elem;
         }
@@ -367,4 +382,6 @@ public final class ModuleContainer implements Serializable {
     public void setDefaultPagePath(String defaultPagePath) {
         this.defaultPagePath = defaultPagePath;
     }
+
+
 }

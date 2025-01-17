@@ -16,6 +16,8 @@
  */
 package tools.dynamia.crud.actions;
 
+import tools.dynamia.actions.ActionExecutionRequest;
+import tools.dynamia.actions.ActionExecutionResponse;
 import tools.dynamia.actions.ActionGroup;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.commons.Callback;
@@ -25,6 +27,7 @@ import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.crud.CrudState;
 import tools.dynamia.crud.CrudViewComponent;
 import tools.dynamia.domain.ValidationError;
+import tools.dynamia.domain.util.DomainUtils;
 
 /**
  * @author Mario A. Serrano Leones
@@ -74,5 +77,14 @@ public class SaveAction extends AbstractCrudAction {
 
     protected void afterSave(Object entity, CrudViewComponent crud) {
 
+    }
+
+    @Override
+    public ActionExecutionResponse execute(ActionExecutionRequest request) {
+        Object result = null;
+        if (DomainUtils.isEntity(request.getData())) {
+            result = crudService().save(request.getData());
+        }
+        return new ActionExecutionResponse(result, "OK", 200);
     }
 }

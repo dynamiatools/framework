@@ -16,10 +16,7 @@
  */
 package tools.dynamia.zk.crud.actions;
 
-import tools.dynamia.actions.ActionGroup;
-import tools.dynamia.actions.ActionRenderer;
-import tools.dynamia.actions.InstallAction;
-import tools.dynamia.actions.ReadableOnly;
+import tools.dynamia.actions.*;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.reflect.AccessMode;
@@ -29,12 +26,13 @@ import tools.dynamia.crud.CrudState;
 import tools.dynamia.domain.query.ListDataSet;
 import tools.dynamia.domain.query.QueryExecuter;
 import tools.dynamia.domain.query.QueryParameters;
+import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.actions.FindActionRenderer;
 import tools.dynamia.zk.crud.CrudController;
 import tools.dynamia.zk.crud.CrudControllerAware;
-import tools.dynamia.zk.crud.CrudView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +63,9 @@ public class FindAction extends AbstractCrudAction implements CrudControllerAwar
     @Override
     public ActionRenderer getRenderer() {
         FindActionRenderer renderer = new FindActionRenderer();
-        renderer.setStartValue((String) crudController.getAttributes().get(LAST_QUERY_TEXT));
+        if (crudController != null) {
+            renderer.setStartValue((String) crudController.getAttributes().get(LAST_QUERY_TEXT));
+        }
         return renderer;
     }
 
@@ -76,12 +76,19 @@ public class FindAction extends AbstractCrudAction implements CrudControllerAwar
 
     @Override
     public void actionPerformed(CrudActionEvent evt) {
-
+        CrudController controller = (CrudController) evt.getController();
         String text = evt.getData().toString();
         if (text != null && !text.isEmpty()) {
-            search(text, evt);
+
+            if (controller.getDataPaginator() != null) {
+                controller.getDataPaginator().reset();
+            }
+
+            String[] fields = loadFields(evt.getCrudView().getDataSetView().getViewDescriptor());
+            var result = search(text, controller.getParams(), controller.getEntityClass(), controller.getCrudService(), fields);
+            controller.setQueryResult(new ListDataSet(result));
         } else {
-            evt.getController().doQuery();
+            controller.doQuery();
         }
 
         if (!crudController.isQueryResultEmpty()) {
@@ -92,25 +99,19 @@ public class FindAction extends AbstractCrudAction implements CrudControllerAwar
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private void search(String txt, CrudActionEvent evt) {
-        CrudController controller = (CrudController) evt.getController();
-        if (controller.getDataPaginator() != null) {
-            controller.getDataPaginator().reset();
-        }
+    private List search(String txt, QueryParameters defaultParams, Class entityClass, CrudService crudService, String[] fields) {
 
-        String[] fields = initFields(evt);
 
         List result = null;
-        if (BeanUtils.isAssignable(controller.getEntityClass(), QueryExecuter.class)) {
-            QueryExecuter queryExecuter = (QueryExecuter) BeanUtils.newInstance(controller.getEntityClass());
+        if (BeanUtils.isAssignable(entityClass, QueryExecuter.class)) {
+            QueryExecuter queryExecuter = (QueryExecuter) BeanUtils.newInstance(entityClass);
             QueryParameters params = new QueryParameters();
             params.setHint(QueryParameters.HINT_TEXT_SEARCH, txt);
-            result = queryExecuter.executeQuery(controller.getCrudService(), params);
+            result = queryExecuter.executeQuery(crudService, params);
         } else {
-            result = controller.getCrudService().findByFields(controller.getEntityClass(), txt, controller.getParams(), fields);
+            result = crudService.findByFields(entityClass, txt, defaultParams, fields);
         }
-        controller.setQueryResult(new ListDataSet(result));
-
+        return result;
     }
 
     private boolean isBoolean(Field field) {
@@ -118,27 +119,35 @@ public class FindAction extends AbstractCrudAction implements CrudControllerAwar
 //
     }
 
-    private String[] initFields(CrudActionEvent evt) {
+    private String[] loadFields(ViewDescriptor viewDescriptor) {
         if (getAttribute("searchFields") != null && getAttribute("searchFields") instanceof List) {
             @SuppressWarnings("unchecked") List<String> searchFields = (List) getAttribute("searchFields");
             return searchFields.toArray(new String[0]);
         } else {
-            return loadFieldsFromDescriptor(evt);
+            return loadFieldsFromDescriptor(viewDescriptor);
         }
     }
 
-    private String[] loadFieldsFromDescriptor(CrudActionEvent evt) {
-        CrudView view = (CrudView) evt.getCrudView();
-        ViewDescriptor descriptor = view.getDataSetView().getViewDescriptor();
-
+    private String[] loadFieldsFromDescriptor(ViewDescriptor descriptor) {
         List<String> fieldsNames = new ArrayList<>();
         for (Field field : descriptor.getFields()) {
-            if (field.isVisible() && !isBoolean(field) && field.getPropertyInfo()!=null &&
+            if (field.isVisible() && !isBoolean(field) && field.getPropertyInfo() != null &&
                     field.getPropertyInfo().getAccessMode() == AccessMode.READ_WRITE) {
                 fieldsNames.add(field.getName());
             }
         }
         return fieldsNames.toArray(new String[0]);
 
+    }
+
+    @Override
+    public ActionExecutionResponse execute(ActionExecutionRequest request) {
+        List result = null;
+        if (request.getData() instanceof String text && request.getDataType() != null) {
+            Class entityClass = BeanUtils.findClass(request.getDataType());
+            ViewDescriptor descriptor = Viewers.getViewDescriptor(entityClass, "table");
+            result = search(text, new QueryParameters(), entityClass, crudService(), loadFields(descriptor));
+        }
+        return new ActionExecutionResponse(result);
     }
 }

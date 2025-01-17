@@ -5,6 +5,7 @@ import tools.dynamia.integration.Containers;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class Actions {
 
@@ -28,9 +29,11 @@ public class Actions {
                 event.setData(data);
             }
 
-            if (action instanceof ActionFilter) {
-                ((ActionFilter) action).beforeActionPerformed(event);
+            if (action instanceof ActionSelfFilter filter) {
+                filter.beforeActionPerformed(event);
             }
+
+            fireBeforeActionFilter(action, event);
 
             if (event.isPropagatable()) {
                 var actionRunner = Containers.get().findObject(ActionRunner.class);
@@ -40,9 +43,14 @@ public class Actions {
                 actionRunner.run(action, event);
             }
 
-            if (event.isPropagatable() && action instanceof ActionFilter) {
-                ((ActionFilter) action).afterActionPerformed(event);
+            if (event.isPropagatable()) {
+                if (action instanceof ActionSelfFilter filter) {
+                    filter.afterActionPerformed(event);
+                }
+
+                fireAfterActionFilter(action, event);
             }
+
         }
     }
 
@@ -90,7 +98,7 @@ public class Actions {
         T component = renderer.render(action, eventBuilder);
 
         if (action instanceof ActionLifecycleAware ala) {
-            ala.afterRenderer(renderer,component);
+            ala.afterRenderer(renderer, component);
         }
 
         action.setAttribute(ACTION_COMPONENT, component);
@@ -100,10 +108,95 @@ public class Actions {
 
     /**
      * Call this method after action is rendered to get the last rendered action component
+     *
      * @param action
      * @return
      */
-    public static Object getActionComponent(Action action){
+    public static Object getActionComponent(Action action) {
         return action.getAttribute(ACTION_COMPONENT);
+    }
+
+    /**
+     * Execute an action using {@link ActionExecutionRequest} instead of {@link ActionEvent}
+     *
+     * @param action
+     * @param request
+     * @return
+     */
+    public static ActionExecutionResponse execute(Action action, ActionExecutionRequest request) {
+
+        if (action instanceof ActionSelfFilter filter) {
+            filter.beforeActionExecution(request);
+        }
+
+        fireBeforeActionFilter(action, request);
+
+        var response = action.execute(request);
+
+        if (action instanceof ActionSelfFilter filter) {
+            filter.afterActionExecution(request, response);
+        }
+
+        fireAfterActionFilter(action, request, response);
+
+        return response;
+    }
+
+    /**
+     * Execute filters
+     *
+     * @param filterConsumer
+     */
+    public static void forEachActionFilter(Consumer<ActionFilter> filterConsumer) {
+        Containers.get().findObjects(ActionFilter.class).forEach(filterConsumer);
+    }
+
+    /**
+     * Execute filters
+     *
+     * @param action
+     * @param request
+     */
+    public static void fireBeforeActionFilter(Action action, ActionExecutionRequest request) {
+        if (action != null && request != null) {
+            forEachActionFilter(f -> f.beforeActionExecution(action, request));
+        }
+    }
+
+    /**
+     * Execute filters
+     *
+     * @param action
+     * @param evt
+     */
+    public static void fireBeforeActionFilter(Action action, ActionEvent evt) {
+        if (action != null && evt != null) {
+            forEachActionFilter(f -> f.beforeActionPerformed(action, evt));
+        }
+    }
+
+    /**
+     * Execute filters
+     *
+     * @param action
+     * @param request
+     * @param response
+     */
+    public static void fireAfterActionFilter(Action action, ActionExecutionRequest request, ActionExecutionResponse response) {
+        if (action != null && request != null && response != null) {
+            forEachActionFilter(f -> f.afterActionExecution(action, request, response));
+        }
+    }
+
+    /**
+     * Execute filters
+     *
+     * @param action
+     * @param evt
+     */
+    public static void fireAfterActionFilter(Action action, ActionEvent evt) {
+        if (action != null && evt != null) {
+            forEachActionFilter(f -> f.afterActionPerformed(action, evt));
+        }
     }
 }

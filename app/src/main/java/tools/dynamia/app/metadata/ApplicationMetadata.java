@@ -1,20 +1,20 @@
 package tools.dynamia.app.metadata;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import tools.dynamia.app.ApplicationInfo;
 import tools.dynamia.navigation.NavigationNode;
 import tools.dynamia.navigation.NavigationTree;
 
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApplicationMetadata extends BasicMetadata {
 
     private String title;
     private String version;
     private String logo;
     private String template;
-    private List<EntityMetadata> entities;
-    private List<NavigationNode> navigation;
-    private List<ActionMetadata> globalActions;
+    private String author;
 
     public ApplicationMetadata() {
     }
@@ -26,7 +26,9 @@ public class ApplicationMetadata extends BasicMetadata {
         setIcon(info.getDefaultIcon());
         setLogo(info.getDefaultLogo());
         setTemplate(info.getTemplate());
-        setNavigation(NavigationTree.buildDefault().getNavigation());
+        setVersion(info.getVersion());
+        setAuthor(info.getAuthor());
+        setEndpoint("/api/app/metadata");
     }
 
     public String getTitle() {
@@ -45,29 +47,6 @@ public class ApplicationMetadata extends BasicMetadata {
         this.version = version;
     }
 
-    public List<EntityMetadata> getEntities() {
-        return entities;
-    }
-
-    public void setEntities(List<EntityMetadata> entities) {
-        this.entities = entities;
-    }
-
-    public List<NavigationNode> getNavigation() {
-        return navigation;
-    }
-
-    public void setNavigation(List<NavigationNode> navigation) {
-        this.navigation = navigation;
-    }
-
-    public List<ActionMetadata> getGlobalActions() {
-        return globalActions;
-    }
-
-    public void setGlobalActions(List<ActionMetadata> globalActions) {
-        this.globalActions = globalActions;
-    }
 
     public String getLogo() {
         return logo;
@@ -85,8 +64,11 @@ public class ApplicationMetadata extends BasicMetadata {
         this.template = template;
     }
 
-    public EntityMetadata getEntityMetadata(String className) {
-        return entities != null ? entities.stream().filter(e -> e.getClassName().equals(className))
-                .findFirst().orElse(null) : null;
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
     }
 }

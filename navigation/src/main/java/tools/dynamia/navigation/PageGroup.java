@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +43,8 @@ public class PageGroup extends NavigationElement<PageGroup> implements Serializa
     private String listeners;
     private static final LoggingService logger = new SLF4JLoggingService(PageGroup.class);
     private boolean dynamic;
+    private String prettyVirtualPath;
+    private String virtualPath;
 
     public PageGroup() {
     }
@@ -55,7 +59,7 @@ public class PageGroup extends NavigationElement<PageGroup> implements Serializa
 
     public PageGroup addPage(Page page) {
         if (getPageById(page.getId()) != null) {
-            logger.warn("There is a page with the same ID added in:" + getVirtualPath());
+            throw new PageAlreadyExistsException("There is a page with the same ID " + page.getId() + " added in page group: " + getVirtualPath());
         } else {
             page.setPageGroup(this);
             page.setIndex(pages.size());
@@ -64,13 +68,49 @@ public class PageGroup extends NavigationElement<PageGroup> implements Serializa
         return this;
     }
 
+    /**
+     * Add multiple pages
+     *
+     * @param pages list
+     * @return this
+     */
+    public PageGroup addPage(Page... pages) {
+        if (pages != null) {
+            for (Page page : pages) {
+                addPage(page);
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Add inner page group
+     *
+     * @param group
+     * @return this
+     */
     public PageGroup addPageGroup(PageGroup group) {
         if (getPageGroupById(group.getId()) != null) {
-            logger.warn("There is a page group with the same ID added in:" + getVirtualPath());
+            throw new PageAlreadyExistsException("There is a page group with the same ID " + group.getId() + "added in :" + getVirtualPath());
         } else {
             group.setParentModule(null);
             group.setParentGroup(this);
             pageGroups.add(group);
+        }
+        return this;
+    }
+
+    /**
+     * Add multiple inner groups
+     *
+     * @param groups
+     * @return
+     */
+    public PageGroup addPageGroup(PageGroup... groups) {
+        if (groups != null) {
+            for (PageGroup group : groups) {
+                addPageGroup(group);
+            }
         }
         return this;
     }
@@ -128,21 +168,32 @@ public class PageGroup extends NavigationElement<PageGroup> implements Serializa
     @Override
     public String getVirtualPath() {
         if (virtualPath == null) {
-            if (getParentModule() != null) {
-                virtualPath = getParentModule().getVirtualPath() + "/" + getId();
-            } else {
-                virtualPath = getParentGroup().getVirtualPath() + "/" + getId();
-            }
+            virtualPath = buildVirtualPath(this);
         }
         return virtualPath;
     }
 
+    protected String buildVirtualPath(PageGroup group) {
+        if (group.getParentGroup() != null) {
+            return group.getParentGroup().getVirtualPath() + PATH_SEPARATOR + group.getId();
+        } else {
+            return (parentModule != null ? parentModule.getVirtualPath() + PATH_SEPARATOR : "") + group.getId();
+        }
+    }
+
     @Override
     public String getPrettyVirtualPath() {
-        if (getParentModule() != null) {
-            return getParentModule().getPrettyVirtualPath() + "/" + StringUtils.simplifiedString(getName());
+        if (prettyVirtualPath == null) {
+            prettyVirtualPath = buildPrettyVirtualPath(this);
+        }
+        return prettyVirtualPath;
+    }
+
+    protected String buildPrettyVirtualPath(PageGroup group) {
+        if (group.getParentGroup() != null) {
+            return group.getParentGroup().getPrettyVirtualPath() + PATH_SEPARATOR + StringUtils.simplifiedString(group.getName());
         } else {
-            return getParentGroup().getPrettyVirtualPath() + "/" + StringUtils.simplifiedString(getName());
+            return (parentModule != null ? parentModule.getPrettyVirtualPath() + PATH_SEPARATOR : "") + StringUtils.simplifiedString(group.getName());
         }
     }
 
@@ -159,7 +210,7 @@ public class PageGroup extends NavigationElement<PageGroup> implements Serializa
     }
 
     public Page getFirstPage() {
-        return pages.stream().findFirst().orElse(null);
+        return getPages().stream().findFirst().orElse(null);
     }
 
     @Override

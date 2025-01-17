@@ -24,6 +24,11 @@ import tools.dynamia.commons.Messages;
 
 public class Required implements Constraint {
 
+	private boolean required = true;
+
+	public Required() {
+	}
+
 	@Override
 	public void validate(Component comp, Object value) throws WrongValueException {
 
@@ -34,4 +39,11 @@ public class Required implements Constraint {
 		}
 	}
 
+	public boolean isRequired() {
+		return required;
+	}
+
+	public void setRequired(boolean required) {
+		this.required = required;
+	}
 }

@@ -33,6 +33,7 @@ import java.util.function.Supplier;
  * @author Mario A. Serrano Leones
  */
 public class NavigationElement<T extends NavigationElement> implements Serializable, Comparable<NavigationElement>, Cloneable {
+    public static final String PATH_SEPARATOR = "/";
 
     private String id;
     private String name;
@@ -49,19 +50,19 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
     private String iconSize;
     private String badge;
     private Supplier<String> longNameSupplier;
-    protected String virtualPath;
+    private String virtualPath;
 
 
     public NavigationElement() {
     }
 
     public NavigationElement(String id, String name) {
-        this.id = id;
+        setId(id);
         this.name = name;
     }
 
     public NavigationElement(String id, String name, String description) {
-        this.id = id;
+        setId(id);
         this.name = name;
         this.description = description;
     }
@@ -96,6 +97,10 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
 
     public Set<String> getAttributesNames() {
         return attributes.keySet();
+    }
+
+    public Map<String, Object> getAttributes() {
+        return attributes;
     }
 
     public boolean isAlwaysAllowed() {
@@ -200,7 +205,7 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
     }
 
     public String getPrettyVirtualPath() {
-        return StringUtils.simplifiedString(name);
+        return StringUtils.simplifiedString(getName());
     }
 
     @Override
