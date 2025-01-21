@@ -18,13 +18,11 @@ import java.util.Set;
 public interface SessionStateStorage {
 
     String SESSION_UUID_PARAM = "session-uuid";
-    String AUTHORIZATION_HEADER = "Authorization";
-    String BEARER_TOKEN = "Bearer ";
 
     /**
      * Find the current implementation (spring bean) or return a {@link MapSessionStateStorage} DEFAULT
      *
-     * @return
+     * @return current implementation or a {@link MapSessionStateStorage} DEFAULT
      */
     static SessionStateStorage getCurrent() {
         SessionStateStorage storage = Containers.get().findObject(SessionStateStorage.class);
@@ -44,110 +42,86 @@ public interface SessionStateStorage {
     }
 
     /**
-     * Try to find current session id
+     * Try to find current session id in current request using cookie or http header
      *
      * @return current session id
      */
     static String findCurrentSessionId(HttpServletRequest req) {
-        try {
-            if (req != null) {
-                Object sessionId = req.getAttribute(SESSION_UUID_PARAM);
-                if (sessionId == null) {
-                    sessionId = findCookie(req, SESSION_UUID_PARAM);
-                }
-                if (sessionId == null) {
-                    //find in headers
-                    sessionId = req.getHeader(SessionStateStorage.SESSION_UUID_PARAM);
-                }
-
-                if (sessionId == null) {
-                    //find in authorization bearer
-                    String authorization = req.getHeader(AUTHORIZATION_HEADER);
-                    if (authorization != null && authorization.startsWith(BEARER_TOKEN)) {
-                        sessionId = authorization.substring(7);
-                    }
-                }
-
-                if (sessionId != null) {
-                    return sessionId.toString();
-                }
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        SessionIdFinder sessionIdFinder = DefaultSessionIdFinder.getCustomFinder();
+        if (sessionIdFinder == null) {
+            sessionIdFinder = DefaultSessionIdFinder.getInstance();
         }
-        return null;
+
+        return sessionIdFinder.findSessionId(req);
     }
 
-
-    private static String findCookie(HttpServletRequest request, String tokenName) {
-        var cookies = request.getCookies();
-        if (cookies != null) {
-            for (var cookie : cookies) {
-                if (cookie.getName().equals(tokenName)) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
-    }
 
     /**
      * Put a value in session
      *
-     * @param sessionId
-     * @param key
-     * @param value
+     * @param sessionId id of session
+     * @param key       key to put
+     * @param value     value to put
      */
     void put(String sessionId, String key, String value);
+
+    /**
+     * Put multiple values in session
+     *
+     * @param sessionId id of session
+     * @param values    values to put
+     */
+    default void put(String sessionId, Map<String, String> values) {
+        values.forEach((k, v) -> put(sessionId, k, v));
+    }
 
     /**
      * Get a value from session
      *
      * @param sessionId id of session
-     * @param key
-     * @return
+     * @param key       key to get
+     * @return value or null if not exists
      */
     String get(String sessionId, String key);
 
     /**
      * Get a value from session or return a default value
      *
-     * @param sessionId
-     * @param key
-     * @param defaultValue
-     * @return
+     * @param sessionId    id of session
+     * @param key          key to get
+     * @param defaultValue default value to return if key not exists
+     * @return value or defaultValue if not exists
      */
     String get(String sessionId, String key, String defaultValue);
 
     /**
      * Get all keys from session
      *
-     * @param sessionId
-     * @return
+     * @param sessionId id of session
+     * @return keys or empty list if not exists
      */
     Set<String> getKeys(String sessionId);
 
     /**
      * Get all values from session
      *
-     * @param sessionId
-     * @return
+     * @param sessionId id of session
+     * @return values or empty map if not exists
      */
     Map<String, String> getAllValues(String sessionId);
 
     /**
      * Remove a value from session
      *
-     * @param sessionId
-     * @param key
+     * @param sessionId id of session
+     * @param key       key to remove
      */
     void remove(String sessionId, String key);
 
     /**
      * Get all sessions ids
      *
-     * @return
+     * @return sessions ids
      */
     List<String> getSessions();
 
@@ -164,6 +138,13 @@ public interface SessionStateStorage {
      * @return sessionId
      */
     String newSession();
+
+    /**
+     * Check if session is valid
+     * @param sessionId session id to check
+     * @return true if session is valid
+     */
+    boolean isValidSession(String sessionId);
 
 
 }
