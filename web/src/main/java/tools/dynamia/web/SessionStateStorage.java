@@ -3,6 +3,8 @@ package tools.dynamia.web;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import tools.dynamia.commons.StringPojoParser;
+import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.domain.AbstractEntity;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.web.util.HttpUtils;
@@ -17,11 +19,13 @@ import java.util.Set;
  * <p>
  * By default use a {@link MapSessionStateStorage} as backend.
  * <p>
- * You can replace the backend implementation using CDI {@link SessionStateStorage} qualifier.
+ * You can replace the backend implementation using a {@link tools.dynamia.integration.sterotypes.Component} qualifier.
  */
 public interface SessionStateStorage {
 
-    String SESSION_UUID_PARAM = "session-uuid";
+    LoggingService LOGGER = new SLF4JLoggingService(SessionStateStorage.class);
+
+   String SESSION_UUID_PARAM = "session-uuid";
 
     /**
      * Find the current implementation (spring bean) or return a {@link MapSessionStateStorage} DEFAULT
@@ -43,7 +47,11 @@ public interface SessionStateStorage {
      * @param value value to put
      */
     static void putInSession(String key, String value) {
-        getCurrent().put(findCurrentSessionId(), key, value);
+        try {
+            getCurrent().put(findCurrentSessionId(), key, value);
+        } catch (Exception e) {
+            LOGGER.error("Error putting value in session: " + key + " = " + value, e);
+        }
     }
 
     /**
@@ -53,7 +61,7 @@ public interface SessionStateStorage {
      * @param value value to put
      */
     static void putInSession(@NotNull String key, @NotNull Number value) {
-        getCurrent().put(findCurrentSessionId(), key, value.toString());
+        putInSession(key, value.toString());
     }
 
     /**
@@ -63,7 +71,7 @@ public interface SessionStateStorage {
      * @param value value to put
      */
     static void putInSession(@NotNull String key, @NotNull Temporal value) {
-        getCurrent().put(findCurrentSessionId(), key, value.toString());
+        putInSession(key, value.toString());
     }
 
     /**
@@ -73,7 +81,7 @@ public interface SessionStateStorage {
      * @param value value to put
      */
     static void putInSession(@NotNull String key, boolean value) {
-        getCurrent().put(findCurrentSessionId(), key, String.valueOf(value));
+        putInSession(key, String.valueOf(value));
     }
 
     /**
@@ -83,7 +91,7 @@ public interface SessionStateStorage {
      * @param pojo value to put
      */
     static void putInSession(@NotNull String key, @NotNull Object pojo) {
-        getCurrent().put(findCurrentSessionId(), key, StringPojoParser.convertPojoToJson(pojo));
+        putInSession(key, StringPojoParser.convertPojoToJson(pojo));
     }
 
     /**
@@ -92,7 +100,11 @@ public interface SessionStateStorage {
      * @param values values to put
      */
     static void putInSession(Map<String, String> values) {
-        getCurrent().put(findCurrentSessionId(), values);
+        try {
+            getCurrent().put(findCurrentSessionId(), values);
+        } catch (Exception e) {
+            LOGGER.error("Error putting values in session: " + values, e);
+        }
     }
 
     /**
@@ -102,7 +114,25 @@ public interface SessionStateStorage {
      * @return value or null if not exists
      */
     static String getFromSession(String key) {
-        return getCurrent().get(findCurrentSessionId(), key);
+        try {
+            return getCurrent().get(findCurrentSessionId(), key);
+        } catch (Exception e) {
+            LOGGER.error("Error getting value from session. Returning null. key = " + key, e);
+            return null;
+        }
+    }
+
+    /**
+     * Remove value from current session
+     *
+     * @param key key to remove
+     */
+    static void removeFromSession(String key) {
+        try {
+            getCurrent().remove(findCurrentSessionId(), key);
+        } catch (Exception e) {
+            LOGGER.error("Error removing value from session: " + key, e);
+        }
     }
 
     /**
