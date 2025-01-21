@@ -25,6 +25,28 @@ package tools.dynamia.commons.logger;
 public interface LoggingService {
 
     /**
+     * Get a logging service for a class.
+     *
+     * @param clazz the clazz
+     * @return the logging service
+     */
+    static LoggingService get(Class clazz) {
+        return new SLF4JLoggingService(clazz);
+    }
+
+    /**
+     * Get a logging service for a class.
+     *
+     * @param clazz  the clazz
+     * @param prefix the prefix
+     * @return the logging service
+     */
+    static LoggingService get(Class clazz, String prefix) {
+        return new SLF4JLoggingService(clazz, prefix);
+    }
+
+
+    /**
      * Debug.
      *
      * @param message the message
