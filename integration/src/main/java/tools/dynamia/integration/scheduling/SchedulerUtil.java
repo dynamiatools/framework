@@ -30,6 +30,7 @@ import tools.dynamia.integration.SimpleObjectContainer;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.function.Supplier;
@@ -174,7 +175,7 @@ public class SchedulerUtil {
      * @param task     the task
      * @return the scheduled future
      */
-    public static ScheduledFuture schedule(String cron, TimeZone timeZone, Task task) {
+    public static ScheduledFuture<?> schedule(String cron, TimeZone timeZone, Task task) {
         TaskScheduler scheduler = Containers.get().findObject(TaskScheduler.class);
         if (scheduler != null) {
             Trigger trigger = new CronTrigger(cron, timeZone);
@@ -192,7 +193,7 @@ public class SchedulerUtil {
      * @param task the task
      * @return the scheduled future
      */
-    public static ScheduledFuture schedule(String cron, Task task) {
+    public static ScheduledFuture<?> schedule(String cron, Task task) {
         return schedule(cron, TimeZone.getDefault(), task);
     }
 
@@ -204,7 +205,7 @@ public class SchedulerUtil {
      * @param task the task
      * @return the scheduled future
      */
-    public static ScheduledFuture schedule(String cron, Callback task) {
+    public static ScheduledFuture<?> schedule(String cron, Callback task) {
         return schedule(cron, TimeZone.getDefault(), task);
     }
 
@@ -217,7 +218,7 @@ public class SchedulerUtil {
      * @param task     the task
      * @return the scheduled future
      */
-    public static ScheduledFuture schedule(String cron, TimeZone timeZone, Callback task) {
+    public static ScheduledFuture<?> schedule(String cron, TimeZone timeZone, Callback task) {
         return schedule(cron, timeZone, new Task() {
             @Override
             public void doWork() {
@@ -233,7 +234,7 @@ public class SchedulerUtil {
      * @param task      the task
      * @return the scheduled future
      */
-    public static ScheduledFuture schedule(Date startDate, Task task) {
+    public static ScheduledFuture<?> schedule(Date startDate, Task task) {
         TaskScheduler scheduler = Containers.get().findObject(TaskScheduler.class);
         if (scheduler != null) {
             return scheduler.schedule(task, startDate.toInstant());
@@ -258,12 +259,13 @@ public class SchedulerUtil {
         return Containers.get().findObject(ScheduledAnnotationBeanPostProcessor.class) != null;
     }
 
-    public static ScheduledFuture scheduleWithFixedDelay(Duration delay, Task task) {
+    public static ScheduledFuture<?> scheduleWithFixedDelay(Duration delay, Task task) {
         TaskScheduler scheduler = Containers.get().findObject(TaskScheduler.class);
         if (scheduler != null) {
             return scheduler.scheduleWithFixedDelay(task, delay);
         } else {
-            throw new TaskException("No TaskScheduler found to run task " + task + " with delay " + delay);
+            return Executors.newScheduledThreadPool(1)
+                    .scheduleWithFixedDelay(task, 0, delay.toMillis(), MILLISECONDS);
         }
     }
 
@@ -275,13 +277,8 @@ public class SchedulerUtil {
      * @param callback the task
      * @return the scheduled future
      */
-    public static ScheduledFuture scheduleWithFixedDelay(Duration delay, Callback callback) {
-        return scheduleWithFixedDelay(delay, new Task() {
-            @Override
-            public void doWork() {
-                callback.doSomething();
-            }
-        });
+    public static ScheduledFuture<?> scheduleWithFixedDelay(Duration delay, Callback callback) {
+        return scheduleWithFixedDelay(delay, new SimpleTask(callback));
     }
 
 }
