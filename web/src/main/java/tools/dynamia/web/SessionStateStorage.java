@@ -1,9 +1,13 @@
 package tools.dynamia.web;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.NotNull;
+import tools.dynamia.commons.StringPojoParser;
+import tools.dynamia.domain.AbstractEntity;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.web.util.HttpUtils;
 
+import java.time.temporal.Temporal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +34,75 @@ public interface SessionStateStorage {
             storage = MapSessionStateStorage.DEFAULT;
         }
         return storage;
+    }
+
+    /**
+     * Put a value in current session
+     *
+     * @param key   key to put
+     * @param value value to put
+     */
+    static void putInSession(String key, String value) {
+        getCurrent().put(findCurrentSessionId(), key, value);
+    }
+
+    /**
+     * Put a number in current session. It will be converted to string
+     *
+     * @param key   key to put
+     * @param value value to put
+     */
+    static void putInSession(@NotNull String key, @NotNull Number value) {
+        getCurrent().put(findCurrentSessionId(), key, value.toString());
+    }
+
+    /**
+     * Put a temporal in current session. It will be converted to string
+     *
+     * @param key   key to put
+     * @param value value to put
+     */
+    static void putInSession(@NotNull String key, @NotNull Temporal value) {
+        getCurrent().put(findCurrentSessionId(), key, value.toString());
+    }
+
+    /**
+     * Put a boolean in current session. It will be converted to string
+     *
+     * @param key   key to put
+     * @param value value to put
+     */
+    static void putInSession(@NotNull String key, boolean value) {
+        getCurrent().put(findCurrentSessionId(), key, String.valueOf(value));
+    }
+
+    /**
+     * Put a pojo in current session. It will be converted to json string
+     *
+     * @param key  key to put
+     * @param pojo value to put
+     */
+    static void putInSession(@NotNull String key, @NotNull Object pojo) {
+        getCurrent().put(findCurrentSessionId(), key, StringPojoParser.convertPojoToJson(pojo));
+    }
+
+    /**
+     * Put multiple values in current session
+     *
+     * @param values values to put
+     */
+    static void putInSession(Map<String, String> values) {
+        getCurrent().put(findCurrentSessionId(), values);
+    }
+
+    /**
+     * Get a value from current session
+     *
+     * @param key key to get
+     * @return value or null if not exists
+     */
+    static String getFromSession(String key) {
+        return getCurrent().get(findCurrentSessionId(), key);
     }
 
     /**
@@ -141,6 +214,7 @@ public interface SessionStateStorage {
 
     /**
      * Check if session is valid
+     *
      * @param sessionId session id to check
      * @return true if session is valid
      */
