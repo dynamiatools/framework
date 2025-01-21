@@ -20,6 +20,13 @@ public abstract class TaskWithResult<R> extends Task {
 
     private R result;
 
+    public TaskWithResult() {
+    }
+
+    public TaskWithResult(String name) {
+        super(name);
+    }
+
     @Override
     public void doWork() {
         result = doWorkWithResult();

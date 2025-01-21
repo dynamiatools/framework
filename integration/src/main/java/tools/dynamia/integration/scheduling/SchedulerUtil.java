@@ -22,16 +22,19 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor;
 import org.springframework.scheduling.support.CronTrigger;
+import tools.dynamia.commons.Callback;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.ObjectContainerContextHolder;
 import tools.dynamia.integration.SimpleObjectContainer;
 
-import java.util.Date;
-import java.util.TimeZone;
+import java.time.Duration;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.function.Supplier;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 
 /**
@@ -75,6 +78,41 @@ public class SchedulerUtil {
         } else {
             CompletableFuture.runAsync(runnableWithContext);
         }
+    }
+
+    /**
+     * Run a list of task in sequence. Each task will be executed in order and
+     * only when the previous task is completed.
+     *
+     * @param firstTask the first task
+     * @param others    the tasks
+     */
+    public static void run(Task firstTask, Task... others) {
+
+        List<Task> allTasks = new ArrayList<>();
+        allTasks.add(firstTask);
+        if (others != null) {
+            allTasks.addAll(Arrays.asList(others));
+        }
+        run(allTasks);
+    }
+
+    /**
+     * Run a list of task in sequence. Each task will be executed in order and
+     * only when the previous task is completed.
+     *
+     * @param allTasks the tasks
+     */
+    public static void run(List<Task> allTasks) {
+        CompletableFuture<Void> sequence = CompletableFuture.completedFuture(null);
+        for (var task : allTasks) {
+            sequence = sequence.thenCompose(fn -> CompletableFuture.supplyAsync(() -> {
+                task.doWork();
+                return null;
+            }));
+        }
+
+        sequence.join();
     }
 
     private static Runnable getWithContext(Runnable runnable) {
@@ -159,6 +197,36 @@ public class SchedulerUtil {
     }
 
     /**
+     * Schedule a WorkerTask using the cron expression passed. This method use
+     * Spring TaskScheduler to perform scheduling
+     *
+     * @param cron the cron
+     * @param task the task
+     * @return the scheduled future
+     */
+    public static ScheduledFuture schedule(String cron, Callback task) {
+        return schedule(cron, TimeZone.getDefault(), task);
+    }
+
+    /**
+     * Schedule a WorkerTask using the cron expression passed. This method use
+     * Spring TaskScheduler to perform scheduling
+     *
+     * @param cron     the cron
+     * @param timeZone the time zone
+     * @param task     the task
+     * @return the scheduled future
+     */
+    public static ScheduledFuture schedule(String cron, TimeZone timeZone, Callback task) {
+        return schedule(cron, timeZone, new Task() {
+            @Override
+            public void doWork() {
+                task.doSomething();
+            }
+        });
+    }
+
+    /**
      * Schedule a Task at specified date.
      *
      * @param startDate the start date
@@ -168,7 +236,7 @@ public class SchedulerUtil {
     public static ScheduledFuture schedule(Date startDate, Task task) {
         TaskScheduler scheduler = Containers.get().findObject(TaskScheduler.class);
         if (scheduler != null) {
-            return scheduler.schedule(task, startDate);
+            return scheduler.schedule(task, startDate.toInstant());
         } else {
             throw new TaskException("No TaskScheduler found to run task " + task + " at start date " + startDate);
         }
@@ -188,6 +256,32 @@ public class SchedulerUtil {
             return "true".equalsIgnoreCase(env.getProperty(schedulingEnabledProperty, "true"));
         }
         return Containers.get().findObject(ScheduledAnnotationBeanPostProcessor.class) != null;
+    }
+
+    public static ScheduledFuture scheduleWithFixedDelay(Duration delay, Task task) {
+        TaskScheduler scheduler = Containers.get().findObject(TaskScheduler.class);
+        if (scheduler != null) {
+            return scheduler.scheduleWithFixedDelay(task, delay);
+        } else {
+            throw new TaskException("No TaskScheduler found to run task " + task + " with delay " + delay);
+        }
+    }
+
+    /**
+     * Schedule a task with fixed delay using the duration passed. This method use
+     * Spring TaskScheduler to perform scheduling
+     *
+     * @param delay    the delay
+     * @param callback the task
+     * @return the scheduled future
+     */
+    public static ScheduledFuture scheduleWithFixedDelay(Duration delay, Callback callback) {
+        return scheduleWithFixedDelay(delay, new Task() {
+            @Override
+            public void doWork() {
+                callback.doSomething();
+            }
+        });
     }
 
 }
