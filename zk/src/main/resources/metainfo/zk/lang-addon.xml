@@ -22,7 +22,7 @@
 
 
     <!-- Global Css -->
-
+    <stylesheet href="/static/dynamia-tools/css/variables.css?v=${project.version}" type="text/css"/>
     <stylesheet href="/static/dynamia-tools/css/colors.css?v=${project.version}" type="text/css"/>
     <stylesheet href="/static/dynamia-tools/css/animate.css?v=${project.version}" type="text/css"/>
     <stylesheet href="/static/dynamia-tools/css/flex.css?v=${project.version}" type="text/css"/>

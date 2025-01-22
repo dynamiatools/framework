@@ -20,14 +20,16 @@
 .form-zcontrol {
     display: block;
     line-height: 1.5;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .form-zcontrol .z-combobox-readonly, .entitypickerbox .z-combobox-readonly {
     background-color: white;
 }
 
-.form-zcontrol input {
-    padding: .375rem .75rem;
+.form-zcontrol input, input.form-zcontrol {
+    padding: var(--dt-padding-2) var(--dt-padding-3);
     height: 34px;
     font-size: 1rem;
     font-weight: 400;
