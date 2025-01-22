@@ -260,8 +260,8 @@ public class BootstrapCrudView<T> extends CrudView<T> {
 
     }
 
-
-    private void controlChangedState(ChangedStateEvent evt) {
+    @Override
+    protected void controlChangedState(ChangedStateEvent evt) {
         CrudState crudState = evt.getNewState();
 
         switch (crudState) {
