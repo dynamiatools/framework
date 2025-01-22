@@ -23,6 +23,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import tools.dynamia.app.SessionApplicationTemplate;
+import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.templates.ApplicationTemplateNotFoundException;
+import tools.dynamia.templates.ApplicationTemplates;
 import tools.dynamia.web.navigation.NavigationIndexInterceptor;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Controller;
@@ -35,6 +38,8 @@ import java.util.stream.Stream;
 @Order(1)
 public class CommonController implements PageNavigationInterceptor {
 
+    private final static LoggingService logger = LoggingService.get(CommonController.class);
+
     @RequestMapping("/")
     public ModelAndView index(HttpServletRequest request, HttpServletResponse response) {
         ModelAndView mv = new ModelAndView("index");
@@ -43,6 +48,7 @@ public class CommonController implements PageNavigationInterceptor {
             mv.addObject("zoom", "zoom: " + request.getParameter("zoom") + ";");
         }
 
+        setupTemplate(request, response, mv);
         setupSkin(request, response, mv);
 
         Containers.get().findObjects(NavigationIndexInterceptor.class).forEach(indexInterceptor -> indexInterceptor.afterIndex(mv, request));
@@ -50,6 +56,54 @@ public class CommonController implements PageNavigationInterceptor {
         return mv;
     }
 
+    /**
+     * Setup template and skin from request parameters
+     *
+     * @param request
+     * @param response
+     * @param mv
+     */
+    public static void setupTemplate(HttpServletRequest request, HttpServletResponse response, ModelAndView mv) {
+
+        boolean updateCookie = true;
+
+        var template = request.getParameter("template");
+
+        if (template == null || template.isBlank()) {
+            if (request.getCookies() != null) {
+                template = Stream.of(request.getCookies()).filter(c -> c.getName().equals("template")).map(Cookie::getValue)
+                        .findFirst().orElse(null);
+                updateCookie = false;
+            }
+
+        }
+
+        if (template != null) {
+            try {
+                var appTemplate = ApplicationTemplates.findTemplate(template);
+                SessionApplicationTemplate.get().setTemplate(appTemplate);
+                SessionApplicationTemplate.get().setSkin(appTemplate.getDefaultSkin().getId());
+                var currentSkin = SessionApplicationTemplate.get().getSkin();
+                if (currentSkin != null && currentSkin.isCustomLayout() && currentSkin.getLayoutView() != null) {
+                    mv.setViewName(currentSkin.getLayoutView());
+                }
+                if (updateCookie) {
+                    response.addCookie(new Cookie("template", template));
+                }
+            } catch (ApplicationTemplateNotFoundException e) {
+                logger.warn("Template not found: " + e.getMessage());
+            }
+        }
+
+    }
+
+    /**
+     * Setup skin from request parameters
+     *
+     * @param request
+     * @param response
+     * @param mv
+     */
     public static void setupSkin(HttpServletRequest request, HttpServletResponse response, ModelAndView mv) {
 
         boolean updateCookie = true;
@@ -57,7 +111,7 @@ public class CommonController implements PageNavigationInterceptor {
         var skin = request.getParameter("skin");
 
         if (skin == null || skin.isBlank()) {
-            if(request.getCookies()!=null) {
+            if (request.getCookies() != null) {
                 skin = Stream.of(request.getCookies()).filter(c -> c.getName().equals("skin")).map(Cookie::getValue)
                         .findFirst().orElse(null);
                 updateCookie = false;
@@ -71,7 +125,7 @@ public class CommonController implements PageNavigationInterceptor {
                 response.addCookie(new Cookie("skin", skin));
             }
         }
-//3054288807
+
         var currentSkin = SessionApplicationTemplate.get().getSkin();
         if (currentSkin != null && currentSkin.isCustomLayout() && currentSkin.getLayoutView() != null) {
             mv.setViewName(currentSkin.getLayoutView());
