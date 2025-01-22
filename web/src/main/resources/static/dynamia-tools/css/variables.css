@@ -1,0 +1,156 @@
+:root {
+    /* Padding */
+    --dt-padding-0: 0;
+    --dt-padding-1: 0.25rem;
+    --dt-padding-2: 0.5rem;
+    --dt-padding-3: 0.75rem;
+    --dt-padding-4: 1rem;
+    --dt-padding-5: 1.25rem;
+    --dt-padding-6: 1.5rem;
+    --dt-padding-8: 2rem;
+    --dt-padding-10: 2.5rem;
+    --dt-padding-12: 3rem;
+    --dt-padding-16: 4rem;
+    --dt-padding-20: 5rem;
+
+    --dt-padding-x-0: 0;
+    --dt-padding-x-1: 0.25rem;
+    --dt-padding-x-2: 0.5rem;
+    --dt-padding-x-3: 0.75rem;
+    --dt-padding-x-4: 1rem;
+    --dt-padding-x-5: 1.25rem;
+    --dt-padding-x-6: 1.5rem;
+    --dt-padding-x-8: 2rem;
+    --dt-padding-x-10: 2.5rem;
+    --dt-padding-x-12: 3rem;
+    --dt-padding-x-16: 4rem;
+    --dt-padding-x-20: 5rem;
+
+    --dt-padding-y-0: 0;
+    --dt-padding-y-1: 0.25rem;
+    --dt-padding-y-2: 0.5rem;
+    --dt-padding-y-3: 0.75rem;
+    --dt-padding-y-4: 1rem;
+    --dt-padding-y-5: 1.25rem;
+    --dt-padding-y-6: 1.5rem;
+    --dt-padding-y-8: 2rem;
+    --dt-padding-y-10: 2.5rem;
+    --dt-padding-y-12: 3rem;
+    --dt-padding-y-16: 4rem;
+    --dt-padding-y-20: 5rem;
+
+    /* Margin */
+    --dt-margin-0: 0;
+    --dt-margin-1: 0.25rem;
+    --dt-margin-2: 0.5rem;
+    --dt-margin-3: 0.75rem;
+    --dt-margin-4: 1rem;
+    --dt-margin-5: 1.25rem;
+    --dt-margin-6: 1.5rem;
+    --dt-margin-8: 2rem;
+    --dt-margin-10: 2.5rem;
+    --dt-margin-12: 3rem;
+    --dt-margin-16: 4rem;
+    --dt-margin-20: 5rem;
+
+    --dt-margin-x-0: 0;
+    --dt-margin-x-1: 0.25rem;
+    --dt-margin-x-2: 0.5rem;
+    --dt-margin-x-3: 0.75rem;
+    --dt-margin-x-4: 1rem;
+    --dt-margin-x-5: 1.25rem;
+    --dt-margin-x-6: 1.5rem;
+    --dt-margin-x-8: 2rem;
+    --dt-margin-x-10: 2.5rem;
+    --dt-margin-x-12: 3rem;
+    --dt-margin-x-16: 4rem;
+    --dt-margin-x-20: 5rem;
+
+    --dt-margin-y-0: 0;
+    --dt-margin-y-1: 0.25rem;
+    --dt-margin-y-2: 0.5rem;
+    --dt-margin-y-3: 0.75rem;
+    --dt-margin-y-4: 1rem;
+    --dt-margin-y-5: 1.25rem;
+    --dt-margin-y-6: 1.5rem;
+    --dt-margin-y-8: 2rem;
+    --dt-margin-y-10: 2.5rem;
+    --dt-margin-y-12: 3rem;
+    --dt-margin-y-16: 4rem;
+    --dt-margin-y-20: 5rem;
+
+    /* Font Sizes */
+    --dt-font-size-xs: 0.75rem;
+    --dt-font-size-sm: 0.875rem;
+    --dt-font-size-base: 1rem;
+    --dt-font-size-lg: 1.125rem;
+    --dt-font-size-xl: 1.25rem;
+    --dt-font-size-2xl: 1.5rem;
+    --dt-font-size-3xl: 1.875rem;
+    --dt-font-size-4xl: 2.25rem;
+    --dt-font-size-5xl: 3rem;
+    --dt-font-size-6xl: 4rem;
+
+    /* Font Weights */
+    --dt-font-weight-thin: 100;
+    --dt-font-weight-extralight: 200;
+    --dt-font-weight-light: 300;
+    --dt-font-weight-normal: 400;
+    --dt-font-weight-medium: 500;
+    --dt-font-weight-semibold: 600;
+    --dt-font-weight-bold: 700;
+    --dt-font-weight-extrabold: 800;
+    --dt-font-weight-black: 900;
+
+    /* Box Shadows */
+    --dt-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --dt-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --dt-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+    --dt-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.1);
+    --dt-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+    --dt-shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.25);
+    --dt-shadow-none: none;
+
+    /* Border Radius */
+    --dt-border-radius-none: 0;
+    --dt-border-radius-sm: 0.125rem;
+    --dt-border-radius: 0.25rem;
+    --dt-border-radius-md: 0.375rem;
+    --dt-border-radius-lg: 0.5rem;
+    --dt-border-radius-xl: 0.75rem;
+    --dt-border-radius-2xl: 1rem;
+    --dt-border-radius-full: 9999px;
+
+    /* Border Witdh */
+    --dt-border-width: 1px;
+    --dt-border-width-2: 2px;
+    --dt-border-width-4: 4px;
+    --dt-border-width-8: 8px;
+
+    --dt-border-color: #ccc;
+
+    /* Grid container */
+    --dt-grid-gap: 15px;
+    --dt-flex-wrap: wrap;
+
+    /* Column widths */
+    --dt-col-width-1: 8.333%;
+    --dt-col-width-2: 16.667%;
+    --dt-col-width-3: 25%;
+    --dt-col-width-4: 33.333%;
+    --dt-col-width-5: 41.667%;
+    --dt-col-width-6: 50%;
+    --dt-col-width-7: 58.333%;
+    --dt-col-width-8: 66.667%;
+    --dt-col-width-9: 75%;
+    --dt-col-width-10: 83.333%;
+    --dt-col-width-11: 91.667%;
+    --dt-col-width-12: 100%;
+
+    /* Breakpoints */
+    --dt-sm: 576px;
+    --dt-md: 768px;
+    --dt-lg: 992px;
+    --dt-xl: 1200px;
+    --dt-xxl: 1400px;
+}
