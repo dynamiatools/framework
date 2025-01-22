@@ -3,6 +3,7 @@ package tools.dynamia.domain.services;
 import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.commons.Callback;
 import tools.dynamia.domain.AbstractEntity;
+import tools.dynamia.domain.AutoEvictEntityCacheCrudListener;
 import tools.dynamia.domain.query.DataPaginator;
 import tools.dynamia.domain.query.QueryMetadata;
 import tools.dynamia.domain.query.QueryParameters;
