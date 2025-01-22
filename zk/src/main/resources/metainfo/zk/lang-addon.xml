@@ -26,6 +26,7 @@
     <stylesheet href="/static/dynamia-tools/css/colors.css?v=${project.version}" type="text/css"/>
     <stylesheet href="/static/dynamia-tools/css/animate.css?v=${project.version}" type="text/css"/>
     <stylesheet href="/static/dynamia-tools/css/flex.css?v=${project.version}" type="text/css"/>
+    <stylesheet href="/static/dynamia-tools/css/flex-grid.css?v=${project.version}" type="text/css"/>
     <stylesheet href="/static/dynamia-tools/css/grid.css?v=${project.version}" type="text/css"/>
     <stylesheet href="/static/dynamia-tools/css/commons.css?v=${project.version}" type="text/css"/>
 
