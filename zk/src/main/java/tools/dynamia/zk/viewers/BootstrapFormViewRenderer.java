@@ -118,7 +118,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
 
     private Div newRow() {
         Div div = new Div();
-        div.setZclass("row");
+        div.setZclass("dt-row");
         return div;
     }
 
@@ -173,7 +173,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
 
 
         colspan = getRealColspan(colspan, realCols);
-        column.setZclass("form-group col-xs-12 col-sm-" + tabletColSpan + " col-md-" + colspan);
+        column.setZclass("form-group dt-col-xs-12 dt-col-sm-" + tabletColSpan + " dt-col-md-" + colspan);
 
         Component component = createComponent(field, view, value);
 
