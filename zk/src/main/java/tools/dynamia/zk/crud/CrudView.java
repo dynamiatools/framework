@@ -66,9 +66,7 @@ import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.web.util.HttpUtils;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
-import tools.dynamia.zk.actions.ActionToolbar;
-import tools.dynamia.zk.actions.MenuitemActionRenderer;
-import tools.dynamia.zk.actions.ToolbarbuttonActionRenderer;
+import tools.dynamia.zk.actions.*;
 import tools.dynamia.zk.navigation.ComponentPage;
 import tools.dynamia.zk.ui.CanBeReadonly;
 import tools.dynamia.zk.util.ZKUtil;
@@ -110,8 +108,8 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
     private Class objectClass;
     private View parentView;
     private String dataSetViewType = "table";
-    protected ActionToolbar toolbarLeft;
-    protected ActionToolbar toolbarRight;
+    protected ActionPanel toolbarLeft;
+    protected ActionPanel toolbarRight;
 
     protected FormView<T> formView;
     protected MultiView<T> formViewContainer;
@@ -139,6 +137,7 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
     private Consumer onSourceChange;
     private boolean queryProjection;
     private LocalizedMessagesProvider messagesProvider;
+    private ButtonActionRenderer defaultActionRenderer;
 
 
     public CrudView() {
@@ -149,26 +148,26 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
     }
 
     protected void buildToolbars() {
-        ActionToolbar toolbar = new ActionToolbar(this);
-        toolbar.setAlign("start");
+        ActionPanel toolbar = new ActionPanel(this);
+        toolbar.setSclass("dt-flex dt-gap-1");
         toolbar.setActionRenderer(getDefaultActionRenderer());
         toolbarLeft = toolbar;
 
-        toolbar = new ActionToolbar(this);
-        toolbar.setAlign("end");
+        toolbar = new ActionPanel(this);
+        toolbar.setSclass("dt-flex dt-gap-1");
         toolbar.setActionRenderer(getDefaultActionRenderer());
         toolbarRight = toolbar;
     }
 
     protected void buildToolbarContainer() {
-        Box boxToolbarContainer = new Box(new Component[]{toolbarLeft, toolbarRight});
-        boxToolbarContainer.setOrient("horizontal");
-        boxToolbarContainer.setPack("stretch");
-        boxToolbarContainer.setStyle("width:100%; padding:0px");
-        boxToolbarContainer.setSclass(ActionToolbar.CONTAINER_SCLASS);
+        Div container = new Div();
+        container.setZclass("dt-flex dt-justify-between");
+        container.appendChild(toolbarLeft);
+        container.appendChild(toolbarRight);
+        container.setSclass(ActionToolbar.CONTAINER_SCLASS);
         if (layout instanceof Borderlayout borderlayout) {
-            boxToolbarContainer.setParent(borderlayout.getNorth());
-            toolbarContainer = boxToolbarContainer;
+            container.setParent(borderlayout.getNorth());
+            toolbarContainer = container;
         }
     }
 
@@ -177,19 +176,36 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         setZclass("crudview");
         Borderlayout borderLayout = new Borderlayout();
         borderLayout.setVflex("1");
-        {
-            North north = new North();
-            north.setSclass("crudview-header");
-            north.setParent(borderLayout);
-            north.setBorder("none");
 
-            Center center = new Center();
-            center.setSclass("crudview-body");
-            center.setParent(borderLayout);
-            center.setBorder("none");
-        }
+        North north = new North();
+        north.setSclass("crudview-header");
+        north.setParent(borderLayout);
+        north.setBorder("none");
+
+        Center center = new Center();
+        center.setSclass("crudview-body");
+        center.setParent(borderLayout);
+        center.setBorder("none");
+
         borderLayout.setParent(this);
         layout = borderLayout;
+        addCrudStateChangedListener(this::controlChangedState);
+    }
+
+    protected void controlChangedState(ChangedStateEvent evt) {
+        CrudState crudState = evt.getNewState();
+        if (layout instanceof Borderlayout borderlayout) {
+            switch (crudState) {
+                case READ -> borderlayout.getNorth().setVisible(true);
+                default -> {
+                    if (toolbarLeft != null && toolbarRight != null) {
+                        if (toolbarLeft.getChildren().isEmpty() && toolbarRight.getChildren().isEmpty()) {
+                            borderlayout.getNorth().setVisible(false);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     protected void buildDataSetView() {
@@ -287,6 +303,7 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
                     ((Center) activeViewParent).setAutoscroll(true);
                 }
                 setTitle(null);
+
             }
             case READ -> {
                 activeView = (Component) getDataSetView();
@@ -463,7 +480,14 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
     }
 
     protected ActionRenderer getDefaultActionRenderer() {
-        return new ToolbarbuttonActionRenderer();
+        if (defaultActionRenderer == null) {
+            defaultActionRenderer = new ButtonActionRenderer();
+            defaultActionRenderer.setStyleClass("btn btn-sm");
+            defaultActionRenderer.setShowLabels(false);
+            defaultActionRenderer.setAppendActionNameSclass(true);
+
+        }
+        return defaultActionRenderer;
     }
 
     private void renderMenuActions(Class valueClass) {

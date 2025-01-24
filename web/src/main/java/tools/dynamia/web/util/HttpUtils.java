@@ -294,11 +294,13 @@ public class HttpUtils {
      * Return subdomain name or null if current server host has no subdomian
      */
     public static String getSubdomain(HttpServletRequest request) {
-        String host = request.getServerName();
-        if (host != null && host.contains(".")) {
-            return host.substring(0, host.indexOf("."));
-        } else
-            return null;
+        if (request != null) {
+            String host = request.getServerName();
+            if (host != null && host.contains(".")) {
+                return host.substring(0, host.indexOf("."));
+            }
+        }
+        return null;
     }
 }
 

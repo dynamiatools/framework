@@ -107,6 +107,9 @@ public class SessionApplicationTemplate implements ApplicationTemplateHolder, Se
 
     public void setTemplate(ApplicationTemplate template) {
         this.template = template;
+        if (template != null) {
+            template.init();
+        }
     }
 
     private void init() {

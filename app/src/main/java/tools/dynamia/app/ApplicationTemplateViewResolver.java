@@ -17,32 +17,39 @@
 package tools.dynamia.app;
 
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import tools.dynamia.templates.ApplicationTemplate;
 import tools.dynamia.templates.ApplicationTemplates;
 
 /**
- *
  * @author Mario A. Serrano Leones
  */
 public class ApplicationTemplateViewResolver extends InternalResourceViewResolver {
 
-	private final ApplicationInfo applicationInfo;
+    private final ApplicationInfo applicationInfo;
 
-	public ApplicationTemplateViewResolver(ApplicationInfo applicationInfo) {
-		this.applicationInfo = applicationInfo;
-		setViewClass(ApplicationTemplateResourceView.class);
-		setCache(false);
+    public ApplicationTemplateViewResolver(ApplicationInfo applicationInfo) {
+        this.applicationInfo = applicationInfo;
+        setViewClass(ApplicationTemplateResourceView.class);
+        setCache(false);
 
-	}
+    }
 
-	@Override
-	protected String getPrefix() {
-		return "/zkau/web/templates/"
-				+ ApplicationTemplates.findTemplate(applicationInfo.getTemplate()).getName().toLowerCase() + "/views/";
-	}
+    @Override
+    protected String getPrefix() {
+        ApplicationTemplate template = ApplicationTemplates.findTemplate(applicationInfo.getTemplate());
 
-	@Override
-	protected String getSuffix() {
-		return ".zhtml";
-	}
+        try {
+            template = SessionApplicationTemplate.get().getTemplate();
+        } catch (Exception e) {
+
+        }
+
+        return "/zkau/web/templates/" + template.getName().toLowerCase() + "/views/";
+    }
+
+    @Override
+    protected String getSuffix() {
+        return ".zul";
+    }
 
 }

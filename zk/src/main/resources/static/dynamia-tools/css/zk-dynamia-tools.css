@@ -17,120 +17,7 @@
  * along with DynamiaTools.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-.keypad {
-    background-color: #EEEEEE;
-    border: 4px solid #EEEEEE;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-}
 
-.keypad table, .keypad .z-grid-body, .keypad table tbody {
-    width: 100%;
-    height: 100%;
-}
-
-.keypad .z-cell {
-    padding: 1px;
-}
-
-.kp-key {
-    font-weight: bold;
-    font-size: 160%;
-    margin: 0.5px;
-    color: white;
-    border: 2px solid transparent;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-    border-radius: 3px;
-    background: #709bc4;
-    background: -moz-linear-gradient(top, #709bc4 0%, #5080b6 100%);
-    background: -webkit-linear-gradient(top, #709bc4 0%, #5080b6 100%);
-    background: linear-gradient(to bottom, #709bc4 0%, #5080b6 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#709bc4',
-    endColorstr='#5080b6', GradientType=0);
-    -moz-min-height: 60px;
-}
-
-.kp-key:active {
-    background: #709bc4;
-    border: 2px solid black;
-}
-
-.kp-Ckey, .kp-CEkey, .kp-key-red {
-    background: #ff3019;
-    background: -moz-linear-gradient(top, #ff3019 0%, #cf0404 100%);
-    background: -webkit-linear-gradient(top, #ff3019 0%, #cf0404 100%);
-    background: linear-gradient(to bottom, #ff3019 0%, #cf0404 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff3019',
-    endColorstr='#cf0404', GradientType=0);
-}
-
-.kp-Ckey:active {
-    background: #ff3019;
-}
-
-.kp-backspacekey, .kp-key-orange {
-    background: #ffa84c;
-    background: -moz-linear-gradient(top, #ffa84c 0%, #ff7b0d 100%);
-    background: -webkit-linear-gradient(top, #ffa84c 0%, #ff7b0d 100%);
-    background: linear-gradient(to bottom, #ffa84c 0%, #ff7b0d 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffa84c',
-    endColorstr='#ff7b0d', GradientType=0);
-}
-
-.kp-backspacekey:active {
-    background: #ffa84c;
-}
-
-.kp-OKkey, .kp-key-green {
-    background: #299a0b;
-    background: -moz-linear-gradient(top, #299a0b 0%, #299a0b 100%);
-    background: -webkit-linear-gradient(top, #299a0b 0%, #299a0b 100%);
-    background: linear-gradient(to bottom, #299a0b 0%, #299a0b 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#299a0b',
-    endColorstr='#299a0b', GradientType=0);
-}
-
-.kp-OKkey:active {
-    background: #299a0b;
-}
-
-.kp-0key, .kp-00key, .kp-000key, .kp-key-dark {
-    background: #606c88;
-    background: -moz-linear-gradient(top, #606c88 0%, #3f4c6b 100%);
-    background: -webkit-linear-gradient(top, #606c88 0%, #3f4c6b 100%);
-    background: linear-gradient(to bottom, #606c88 0%, #3f4c6b 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#606c88',
-    endColorstr='#3f4c6b', GradientType=0);
-}
-
-.kp-0key:active, .kp-00key:active, .kp-000key:active {
-    background: #606c88;
-}
-
-.kp-label {
-    background: white;
-    display: block;
-    padding: 10px;
-    color: black;
-    font-family: monospace;
-    text-align: right;
-    font-size: 30px;
-}
-
-.kp-display-box {
-    width: 100%;
-    font-size: 27px;
-    font-family: 'Courier New', Monospace;
-    text-align: right;
-    height: 40px;
-}
-
-.kp-display {
-    padding-left: 4px;
-    padding-right: 5px;
-}
 
 .pageContentWindow .z-window-content {
     overflow: auto;
@@ -147,25 +34,7 @@
 Colors
  */
 
-/* Background colors */
-.bg-red, .bg-yellow, .bg-aqua, .bg-blue, .bg-light-blue, .bg-green,
-.bg-navy, .bg-teal, .bg-olive, .bg-lime, .bg-orange, .bg-fuchsia,
-.bg-purple, .bg-maroon, .bg-black, .bg-red-active, .bg-yellow-active,
-.bg-aqua-active, .bg-blue-active, .bg-light-blue-active,
-.bg-green-active, .bg-navy-active, .bg-teal-active, .bg-olive-active,
-.bg-lime-active, .bg-orange-active, .bg-fuchsia-active,
-.bg-purple-active, .bg-maroon-active, .bg-black-active, .callout.callout-danger,
-.callout.callout-warning, .callout.callout-info, .callout.callout-success,
-.alert-success, .alert-danger, .alert-error, .alert-warning,
-.alert-info, .label-danger, .label-info, .label-waring, .label-primary,
-.label-success, .modal-primary .modal-body, .modal-primary .modal-header,
-.modal-primary .modal-footer, .modal-warning .modal-body,
-.modal-warning .modal-header, .modal-warning .modal-footer, .modal-info .modal-body,
-.modal-info .modal-header, .modal-info .modal-footer, .modal-success .modal-body,
-.modal-success .modal-header, .modal-success .modal-footer,
-.modal-danger .modal-body, .modal-danger .modal-header, .modal-danger .modal-footer {
-    color: #fff !important;
-}
+
 
 .bg-gray {
     color: #000;

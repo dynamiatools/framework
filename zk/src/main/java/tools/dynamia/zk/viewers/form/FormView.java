@@ -45,6 +45,7 @@ import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.actions.ActionPanel;
+import tools.dynamia.zk.actions.ButtonActionRenderer;
 import tools.dynamia.zk.ui.CanBeReadonly;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
@@ -341,7 +342,7 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
     private void updateTitle() {
         if (titleArea instanceof AbstractTag tag) {
             tag.appendChild(new Text(title));
-            tag.setStyle("display: normal");
+            tag.setStyle("display: block");
         } else if (titleArea instanceof LabelElement label) {
             label.setLabel(title);
         }
@@ -436,6 +437,10 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
     private void initActionsArea() {
         if (actionsArea == null) {
             actionPanel = new ActionPanel(getActionEventBuilder());
+            var renderer = new ButtonActionRenderer();
+            renderer.setAppendActionNameSclass(true);
+            renderer.setStyleClass("btn");
+            actionPanel.setActionRenderer(renderer);
             if (layout instanceof Borderlayout) {
                 var south = new South();
                 south.setSclass("form-view-actions");

@@ -25,25 +25,23 @@ import java.util.*;
  */
 public class ApplicationTemplates {
 
+    /**
+     * Find the template using name, if not found default template is returned. If
+     * default template is not found too, throw {@link ApplicationTemplateNotFoundException}
+     * @param theme
+     * @return
+     */
     public static ApplicationTemplate findTemplate(final String theme) {
-        Collection<ApplicationTemplate> themes = Containers.get().findObjects(ApplicationTemplate.class,
-                (ApplicationTemplate object) -> object.getName().equalsIgnoreCase(theme));
-
-        Iterator<ApplicationTemplate> iterator = themes.iterator();
-        if (iterator.hasNext()) {
-            return iterator.next();
-        } else {
-            ApplicationTemplate defaultTemplate = getDefaultTemplate(
-                    Containers.get().findObjects(ApplicationTemplate.class));
-            if (defaultTemplate != null) {
-                return defaultTemplate;
-            }
-
-            throw new ApplicationTemplateNotFoundException("Application template [" + theme + "] not found");
-        }
-
+        return findTemplate(theme, Containers.get().findObjects(ApplicationTemplate.class).stream().toList());
     }
 
+    /**
+     * Find the template using name, if not found default template is returned. If
+     * default template is not found too, throw {@link ApplicationTemplateNotFoundException}
+     * @param name
+     * @param templates
+     * @return
+     */
     public static ApplicationTemplate findTemplate(final String name, List<ApplicationTemplate> templates) {
         if (templates != null) {
             for (ApplicationTemplate applicationTemplate : templates) {

@@ -33,6 +33,8 @@ public abstract class ZKActionRenderer<T extends Component> implements ActionRen
     private String zclass;
     private String placeholder;
 
+    private boolean appendActionNameSclass;
+
     public String getPlaceholder() {
         return placeholder;
     }
@@ -98,7 +100,7 @@ public abstract class ZKActionRenderer<T extends Component> implements ActionRen
     }
 
     protected void configureProperties(T component, Action action) {
-        if (component instanceof HtmlBasedComponent hc) {
+        if (component instanceof HtmlBasedComponent hc && action != null) {
             hc.setSclass(styleClass);
             hc.setStyle(style);
             hc.setWidth(width);
@@ -111,16 +113,17 @@ public abstract class ZKActionRenderer<T extends Component> implements ActionRen
             }
             String background = null;
             String color = null;
-            if (action != null) {
-                background = (String) action.getAttribute("background");
-                color = (String) action.getAttribute("color");
 
-                if (!action.isVisible()) {
-                    hc.setVisible(false);
-                }
+            background = (String) action.getAttribute("background");
+            color = (String) action.getAttribute("color");
+
+            if (!action.isVisible()) {
+                hc.setVisible(false);
             }
+
             StringBuilder styleBuilder = new StringBuilder();
             StringBuilder styleClassBuilder = new StringBuilder();
+
 
             if (background != null) {
                 if (background.startsWith(".")) {
@@ -138,14 +141,17 @@ public abstract class ZKActionRenderer<T extends Component> implements ActionRen
                 }
             }
 
-            if (styleClassBuilder.length() > 0) {
+            if (isAppendActionNameSclass()) {
+                styleClassBuilder.append(action.getClass().getSimpleName()).append(" ");
+            }
+
+            if (!styleClassBuilder.isEmpty()) {
                 hc.setSclass(getStyleClass() + " " + styleClassBuilder);
             }
 
-            if (styleBuilder.length() > 0) {
+            if (!styleBuilder.isEmpty()) {
                 hc.setStyle(styleBuilder.toString());
             }
-
 
         }
 
@@ -154,4 +160,11 @@ public abstract class ZKActionRenderer<T extends Component> implements ActionRen
         }
     }
 
+    public boolean isAppendActionNameSclass() {
+        return appendActionNameSclass;
+    }
+
+    public void setAppendActionNameSclass(boolean appendActionNameSclass) {
+        this.appendActionNameSclass = appendActionNameSclass;
+    }
 }

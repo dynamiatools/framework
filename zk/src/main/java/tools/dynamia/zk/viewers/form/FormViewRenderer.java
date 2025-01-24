@@ -40,6 +40,9 @@ import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.constraints.ZKExtraConstraints;
 import tools.dynamia.zk.converters.Util;
+import tools.dynamia.zk.ui.DateRangebox;
+import tools.dynamia.zk.ui.DateSelector;
+import tools.dynamia.zk.ui.DurationSelector;
 import tools.dynamia.zk.ui.Import;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
@@ -103,92 +106,130 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
     // protected METHODS
     protected int renderHeaders(FormView<T> view, ViewDescriptor d) {
-        Grid grid = (Grid) view.getFirstChild().getNextSibling();
-
-        Columns columns = new Columns();
-        columns.setParent(grid);
-
         int colNum = 2;
 
-        try {
-            ViewLayout layout = d.getLayout();
-            if (layout != null) {
+        ViewLayout layout = d.getLayout();
+        if (layout != null) {
+            try {
                 colNum = Integer.parseInt(layout.getParams().get(Viewers.LAYOUT_PARAM_COLUMNS).toString());
+            } catch (Exception ignored) {
+
             }
-        } catch (Exception ignored) {
         }
 
-        int realColNum = colNum;// * 2;
-
-        for (int i = 0; i < realColNum; i++) {
-            Column column = new Column();
-            column.setParent(columns);
-
+        if (colNum > 12) {
+            colNum = 12;
+        }
+        if (colNum < 1) {
+            colNum = 1;
         }
 
-        return realColNum;
+        return colNum;
     }
 
+
     protected Component renderRows(FormView<T> view, ViewDescriptor viewDesc, int realCols, T value) {
-        Grid grid = (Grid) view.getFirstChild().getNextSibling();
-        Binder binder = ZKBindingUtil.createBinder();
-        ZKBindingUtil.initBinder(binder, view, view);
+        Div row = null;
+        Div panel = new Div();
+        panel.setZclass("panel");
 
-        Rows rows = new Rows();
-        rows.setParent(grid);
+        Div panelBody = new Div();
+        panelBody.setZclass("panel-body");
+        panelBody.setParent(panel);
 
-        Row row = null;
-        viewDesc.getFields().sort(new IndexableComparator());
-
-
-        for (Field field : viewDesc.getFields()) {
+        for (Field field : viewDesc.sortFields()) {
             if (field.isVisible() && field.getGroup() == null && ViewRendererUtil.isFieldRenderable(viewDesc, field)) {
 
                 if (!hasSpace(row, realCols, field)) {
-                    row = new Row();
-                    row.setParent(rows);
+                    row = newRow();
+                    row.setParent(panelBody);
+                    if (panel.getParent() == null) {
+                        panel.setParent(view.getContentArea());
+                    }
                 }
-                renderField(row, field, binder, view, value);
+                renderField(row, field, view.getBinder(), view, value, realCols);
             }
         }
 
         viewDesc.getFieldGroups().sort(new IndexableComparator());
         for (FieldGroup fieldGroup : viewDesc.getFieldGroups()) {
             List<Field> groupFields = getGroupFields(viewDesc, fieldGroup);
+
             if (!groupFields.isEmpty()) {
-                FormFieldGroupComponent groupComponent = renderGroup(fieldGroup, realCols, rows);
-                if (groupComponent != null) {
-                    view.getGroupsComponentsMap().put(fieldGroup.getName(), groupComponent);
-                }
-                row = new Row();
-                row.setParent(rows);
+
+                panel = new Div();
+                panel.setZclass("panel panel-default  field-group");
+                panel.setParent(view.getContentArea());
+
+                FormFieldGroupComponent groupComponent = renderGroup(fieldGroup, realCols, panel);
+                view.getGroupsComponentsMap().put(fieldGroup.getName(), groupComponent);
+                panelBody = new Div();
+                panelBody.setZclass("panel-body");
+                panelBody.setParent(panel);
+
+                row = newRow();
+                row.setParent(panelBody);
+
+
                 for (Field field : groupFields) {
                     if (!hasSpace(row, realCols, field)) {
-                        row = new Row();
-                        row.setParent(rows);
+                        row = newRow();
+                        row.setParent(panelBody);
                     }
-                    renderField(row, field, binder, view, value);
+                    renderField(row, field, view.getBinder(), view, value, realCols);
+                    FormFieldComponent formFieldComponent = view.getFieldComponent(field.getName());
+                    if (formFieldComponent != null && groupComponent != null) {
+                        groupComponent.getFieldsComponents().add(formFieldComponent);
+                    }
                 }
             }
         }
 
-        view.setBinder(binder);
-        return rows;
+        return view;
     }
 
-    protected FormFieldGroupComponent renderGroup(FieldGroup fieldGroup, int realCols, Component rows) {
+    protected Div newRow() {
+        Div div = new Div();
+        div.setZclass("dt-row dt-items-center");
+        return div;
+    }
 
-        Row group = new Row();
-        group.setParent(rows);
+    protected Div newColumn(Component row, int realCols, int colspan, int tabletColSpan) {
+        Div column = new Div();
+        column.setParent(row);
+        column.setAttribute(Viewers.ATTRIBUTE_COLSPAN, colspan);
+        colspan = getRealColspan(colspan, realCols);
+        column.setZclass("form-group dt-px-2 dt-col-12 dt-col-sm-" + tabletColSpan + " dt-col-md-" + colspan);
+        return column;
+    }
 
-        Cell cell = new Cell();
-        cell.setColspan(realCols);
-        cell.setParent(group);
+
+    protected Label newLabel(Field field, String labelText, String decriptionText) {
+        Label label = new Label(labelText);
+        if (field.isRequired()) {
+            label.addSclass("required");
+        }
+
+        label.setTooltiptext(decriptionText);
+        ZKViewersUtil.setupFieldIcon(field, label);
+        return label;
+    }
+
+    protected FormFieldGroupComponent renderGroup(FieldGroup fieldGroup, int realCols, Component box) {
+
+
+        Div header = new Div();
+        header.setZclass("panel-heading");
+        if (box instanceof FormView<?> formView) {
+            formView.getContentArea().appendChild(header);
+        } else {
+            box.appendChild(header);
+        }
 
 
         H3 title = new H3();
-        title.setStyle("color: #3bafda");
-        cell.appendChild(title);
+        title.setSclass("panel-title");
+        header.appendChild(title);
 
         String label = fieldGroup.getLocalizedLabel(Messages.getDefaultLocale());
         label = filterFieldGroupLabel(fieldGroup, label);
@@ -200,12 +241,23 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
             ZKUtil.configureComponentIcon(IconsTheme.get().getIcon(fieldGroup.getIcon()), icon, IconSize.NORMAL);
         }
         title.appendChild(new Text(label));
-        return new FormFieldGroupComponent(fieldGroup.getName(), group);
+
+        if (fieldGroup.getParams() != null) {
+            BeanUtils.setupBean(box, fieldGroup.getParams());
+        }
+
+        return new FormFieldGroupComponent(fieldGroup.getName(), box);
+
     }
 
-    protected void renderField(Component row, Field field, Binder binder, FormView<T> view, T value) {
-        Viewers.customizeField("form", field);
+    protected void renderField(Component row, Field field, Binder binder, FormView<T> view, T value, int realCols) {
         boolean showLabel = true;
+        Viewers.customizeField("form", field);
+        Object sl = field.getParams().get(Viewers.PARAM_SHOW_LABEL);
+        if (sl != null && (sl == Boolean.FALSE || sl.toString().equalsIgnoreCase("false"))) {
+            showLabel = false;
+        }
+
 
         String labelText = field.getLocalizedLabel(Messages.getDefaultLocale());
         if (isExpression(labelText)) {
@@ -221,79 +273,80 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
             decriptionText = filterFieldDescription(field, decriptionText);
         }
 
-        Object sl = field.getParam(Viewers.PARAM_SHOW_LABEL);
-        if (sl != null && (sl == Boolean.FALSE || sl.toString().equalsIgnoreCase("false"))) {
-            showLabel = false;
-        }
-
-
-        Label label = null;
-        if (showLabel) {
-            label = new Label(labelText);
-            label.setTooltiptext($s(decriptionText));
-            label.setSclass("form-view-lbl " + (field.isRequired() ? "required" : ""));
-            if (field.getParam("labelStyle") != null) {
-                label.setStyle((String) field.getParam("labelStyle"));
-            }
-            ZKViewersUtil.setupFieldIcon(field, label);
-
-        }
-
+        Label label = newLabel(field, labelText, decriptionText);
         int colspan = 1;
+        int tabletColSpan = 6;
         try {
-            colspan = Integer.parseInt(field.getParam(Viewers.PARAM_SPAN).toString());
+            colspan = Integer.parseInt(field.getParams().get("span").toString());
         } catch (Exception ignored) {
         }
 
-        int compRealSpan = getRealColspan(colspan);
-
-
-        Cell compCell = new Cell();
-        compCell.setColspan(compRealSpan);
-        compCell.setParent(row);
-        compCell.setStyle("padding:6px");
-        if (colspan > 1) {
-            int realColspan = getRealColspan(colspan);
-
-            compCell.setColspan(realColspan);
+        if (colspan == realCols) {
+            tabletColSpan = 12;
         }
+
+        try {
+            if (field.getParams().containsKey(Viewers.PARAM_SPAN + "-sm")) {
+                tabletColSpan = Integer.parseInt(field.getParams().get(Viewers.PARAM_SPAN + "-sm").toString());
+            }
+        } catch (Exception ignored) {
+        }
+
+        Div column = newColumn(row, realCols, colspan, tabletColSpan);
 
         Component component = createComponent(field, view, value);
+
+        if (component instanceof Checkbox) {
+            showLabel = false;
+        }
+
+        if (showLabel) {
+            label.setParent(column);
+        }
+
         if (component instanceof HtmlBasedComponent hcom) {
-            hcom.setTooltiptext(decriptionText);
-
+            hcom.setTooltiptext($s(field.getDescription()));
         }
-        if (component instanceof InputElement && !field.getParams().containsKey("placeholder")) {
-            ((InputElement) component).setPlaceholder(labelText);
-        }
-
-
-        //Add Label
-        if (label != null) {
-            label.setParent(compCell);
-
-            if (!(component instanceof Checkbox) && !(component instanceof Radio)) {
-                label.setStyle("display: block");
-            }
-        }
-
-        //Add Component
         if (component.getClass().getName().contains("CKeditor")) {
             Form form = new Form();
             component.setParent(form);
-            form.setParent(compCell);
-            Object config = field.getParam("config");
+            form.setParent(column);
+            Object config = field.getParams().get("config");
             if (config instanceof java.util.Map) {
                 BeanUtils.invokeSetMethod(component, "config", config);
             }
         } else {
-
-            component.setParent(compCell);
+            applyComponentCSS(component, labelText, field);
+            component.setParent(column);
         }
         createBinding(component, field, binder, value);
         view.getComponentsFieldsMap().put(field.getName(), new FormFieldComponent(field.getName(), label, component));
-        ViewRendererUtil.afterFieldRender(view.getViewDescriptor(), field, component);
     }
+
+
+    protected void applyComponentCSS(Component component, String labelText, Field field) {
+        String styleClass = (String) field.getParams().get(Viewers.PARAM_STYLE_CLASS);
+        if (styleClass == null) {
+            styleClass = "";
+        }
+
+        if (component instanceof InputElement element) {
+            if (!field.getParams().containsKey("placeholder")) {
+                element.setPlaceholder(labelText + " " + (field.isRequired() ? "*" : ""));
+            }
+            if (element.getWidth() == null) {
+                element.setHflex(null);
+            }
+            element.addSclass("form-zcontrol");
+
+        }
+
+        if (component instanceof Checkbox checkbox) {
+            checkbox.setLabel(" " + labelText);
+        }
+
+    }
+
 
     protected Component createComponent(Field field, FormView<T> view, T value) {
         Component component = null;
@@ -394,9 +447,12 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
     }
 
-    protected int getRealColspan(int colspan) {
-        return colspan;
+
+    protected int getRealColspan(int colspan, int realCols) {
+        return (12 / realCols) * colspan;
+
     }
+
 
     protected boolean hasSpace(Component row, int realCols, Field field) {
         if (row == null) {
@@ -413,9 +469,11 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
         int space = 0;
         if (row.getChildren() != null) {
-            for (Object object : row.getChildren()) {
-                if (object instanceof Cell cell) {
+            for (Component comp : row.getChildren()) {
+                if (comp instanceof Cell cell) {
                     space += cell.getColspan();
+                } else if (comp.getAttribute(Viewers.ATTRIBUTE_COLSPAN) != null) {
+                    space += (int) comp.getAttribute(Viewers.ATTRIBUTE_COLSPAN);
                 } else {
                     space++;
                 }
@@ -424,14 +482,15 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
         int colspan = 1;
         try {
-            colspan = Integer.parseInt(field.getParam(Viewers.PARAM_SPAN).toString());
+            colspan = Integer.parseInt(field.getParams().get(Viewers.PARAM_SPAN).toString());
         } catch (Exception ignored) {
         }
 
         int empty = realCols - space;
 
-        return (empty >= (colspan));
+        return (empty >= colspan);
     }
+
 
     protected void applyFieldParams(Component comp, Field field) {
         comp.setAttribute(Viewers.ATTRIBUTE_FIELD_NAME, field.getName());
@@ -439,8 +498,6 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
         if ((comp instanceof Textbox || comp instanceof NumberInputElement) && !field.getParams().containsKey(Viewers.PARAM_WIDTH)
                 && !field.getParams().containsKey(Viewers.PARAM_HFLEX)) {
-            HtmlBasedComponent tb = (HtmlBasedComponent) comp;
-            tb.setWidth("99%");
         }
 
         if (field.getParams().containsKey(Viewers.PARAMS_ATTRIBUTES)) {
@@ -479,10 +536,6 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
     protected FormView<T> newFormView() {
         FormView<T> formView = new FormView<>();
-        Grid grid = new Grid();
-        grid.setOddRowSclass("none");
-        grid.setParent(formView.getContentArea());
-        grid.setStyle("border: 0");
         return formView;
     }
 

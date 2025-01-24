@@ -27,7 +27,6 @@ import tools.dynamia.ui.icons.InstallIcons;
 import java.io.IOException;
 import java.util.Properties;
 
-@InstallIcons
 public class FontAwesomeIconsProvider extends AbstractFontIconsProvider {
 
     private static final LoggingService logger = new SLF4JLoggingService(FontAwesomeIconsProvider.class);
@@ -39,7 +38,7 @@ public class FontAwesomeIconsProvider extends AbstractFontIconsProvider {
         try {
             properties.load(FontAwesomeIconsProvider.class.getResourceAsStream(getIconsPath()));
         } catch (IOException | NullPointerException e) {
-            logger.error("Unable to load icons from file "+getIconsPath(), e);
+            logger.error("Unable to load icons from file " + getIconsPath(), e);
         }
 
         return properties;

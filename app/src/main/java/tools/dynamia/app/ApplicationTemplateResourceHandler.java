@@ -22,7 +22,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
-import tools.dynamia.app.ApplicationInfo;
 import tools.dynamia.templates.ApplicationTemplate;
 import tools.dynamia.templates.ApplicationTemplates;
 
@@ -38,7 +37,8 @@ import java.util.List;
 public class ApplicationTemplateResourceHandler extends ResourceHttpRequestHandler {
 
     public static final List<String> STATIC_PATHS = List.of(
-            "/*.jpg", "/*.jpeg", "/*.png", "*.gif", "*.mp4", "/*.html", "/*.css", "/*.js", "/*.webp", "/*.ico", "/*.bmp", "/manifest.json", "/*.webmanifest", "/static/**"
+            "/*.jpg", "/*.jpeg", "/*.png", "*.gif", "*.mp4", "/*.html", "/*.css", "/*.js", "/*.webp",
+            "/*.ico", "/*.bmp", "/manifest.json", "/*.webmanifest", "/static/**", "/*.map", "/*.svg"
     );
 
 
@@ -75,7 +75,12 @@ public class ApplicationTemplateResourceHandler extends ResourceHttpRequestHandl
                     if (!path.startsWith("/static/")) {
                         path = "/static/" + path;
                     }
-                    resource = new ClassPathResource(path);
+                    try {
+                        resource = new ClassPathResource(path);
+                        resource.getURL(); //test if exit
+                    } catch (IOException ex) {
+                        resource = null;
+                    }
                 }
             }
             return resource;

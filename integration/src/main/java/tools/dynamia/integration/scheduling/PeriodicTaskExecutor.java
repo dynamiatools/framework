@@ -19,9 +19,7 @@ package tools.dynamia.integration.scheduling;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import tools.dynamia.commons.logger.LoggingService;
-import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.Containers;
-import tools.dynamia.integration.sterotypes.Service;
 
 
 /**
@@ -31,12 +29,29 @@ import tools.dynamia.integration.sterotypes.Service;
  * {@link AfternoonTask} at 6:00 PM (18:00) <br/>
  * {@link MidnightTask} at 12:00 AM (23:59) <br/>
  * <p>
- * It use @{@link Scheduled} spring annotation with default server's local time zone.
+ * It use @{@link Scheduled} spring annotation with default server's local time zone. Disabled by default, to enable
+ * you need register this class as a new spring bean in your application.
+ * if you are using spring boot, you can add the following annotation to your
+ * main class:
+ *
+ * <pre>
+ * {@literal @}SpringBootApplication
+ * public class MyApplication {
+ *
+ *     public static void main(String[] args) {
+ *         SpringApplication.run(MyApplication.class, args);
+ *     }
+ *
+ *     {@literal @}Bean
+ *     public PeriodicTaskExecutor periodicTaskExecutor() {
+ *         return new PeriodicTaskExecutor();
+ *     }
+ * }
+ * </pre>
  */
-@Service
 public class PeriodicTaskExecutor {
 
-    private final LoggingService logger = new SLF4JLoggingService(PeriodicTaskExecutor.class);
+    private final LoggingService logger = LoggingService.get(getClass());
 
     public PeriodicTaskExecutor() {
         logger.info("Starting " + getClass());

@@ -1,0 +1,201 @@
+*, ::after, ::before {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.form-view-title{
+    padding-left: var(--dt-padding-4);
+    padding-right: var(--dt-padding-4);
+}
+
+.form-view-actions .btn{
+    padding: var(--dt-padding-2);
+}
+
+.form-view .uploadLink{
+    display: block;
+    background-color: var(--dt-secondary);
+    color: var(--dt-text-secondary);
+    padding: var(--dt-padding-2);
+}
+
+.btn.actiontb-a, .btn.actionpanel-a {
+    background-color: var(--dt-neutral-light);
+    color: var(--dt-text-primary);
+}
+
+.btn.actiontb-a:hover, .btn.actionpanel-a:hover {
+    background-color: var(--dt-neutral);
+}
+
+.dark-mode .btn.actiontb-a {
+    background-color: var(--dt-neutral-dark);
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .btn.actiontb-a:hover {
+    background-color: var(--dt-neutral-dark);
+}
+
+/* NewAction */
+.btn.NewAction {
+    background-color: var(--dt-success);
+    color: var(--dt-success-contrast);
+}
+
+.btn.NewAction:hover {
+    background-color: var(--dt-success-light);
+    color: var(--dt-text-primary);
+}
+
+.dark-mode .btn.NewAction {
+    background-color: var(--dt-success-dark);
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .btn.NewAction:hover {
+    background-color: var(--dt-success)
+}
+
+/* ViewDataAction */
+.btn.ViewDataAction {
+    background-color: var(--dt-info);
+    color: var(--dt-info-contrast);
+}
+
+.btn.ViewDataAction:hover {
+    background-color: var(--dt-info-light);
+    color: var(--dt-text-primary);
+}
+
+.dark-mode .btn.ViewDataAction {
+    background-color: var(--dt-info-dark);
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .btn.ViewDataAction:hover {
+    background-color: var(--dt-info);
+}
+
+/* EditAction */
+.btn.EditAction {
+    background-color: var(--dt-warning);
+    color: var(--dt-warning-contrast);
+}
+
+.btn.EditAction:hover {
+    background-color: var(--dt-warning-light);
+    color: var(--dt-text-primary);
+}
+
+.dark-mode .btn.EditAction {
+    background-color: var(--dt-warning-dark);
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .btn.EditAction:hover {
+    background-color: var(--dt-warning);
+}
+
+/* DeleteAction */
+.btn.DeleteAction {
+    background-color: var(--dt-danger);
+    color: var(--dt-danger-contrast);
+}
+
+.btn.DeleteAction:hover {
+    background-color: var(--dt-danger-light);
+    color: var(--dt-danger-contrast);
+}
+
+.dark-mode .btn.DeleteAction {
+    background-color: var(--dt-danger-dark);
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .btn.DeleteAction:hover {
+    background-color: var(--dt-danger);
+}
+
+/* FilterAction */
+.btn.FilterAction {
+    background-color: var(--dt-secondary);
+    color: var(--dt-text-primary);
+}
+
+.btn.FilterAction:hover {
+    background-color: var(--dt-secondary-light);
+    color: var(--dt-text-primary);
+}
+
+.dark-mode .btn.FilterAction {
+    background-color: var(--dt-secondary-dark);
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .btn.FilterAction:hover {
+    background-color: var(--dt-secondary);
+}
+
+/* ExportAction */
+.btn.ExportAction {
+    background-color: var(--dt-primary);
+    color: var(--dt-text-primary);
+}
+
+.btn.ExportAction:hover {
+    background-color: var(--dt-primary-light);
+    color: var(--dt-text-primary);
+}
+
+.dark-mode .btn.ExportAction {
+    background-color: var(--dt-primary-dark);
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .btn.ExportAction:hover {
+    background-color: var(--dt-primary);
+}
+
+/* SaveAction */
+.btn.SaveAction {
+    background-color: var(--dt-primary);
+    color: var(--dt-primary-contrast);
+}
+
+.btn.SaveAction:hover {
+    background-color: var(--dt-primary-light);
+    color: var(--dt-primary-contrast);
+}
+
+.dark-mode .btn.SaveAction {
+    background-color: var(--dt-primary-dark);
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .btn.SaveAction:hover {
+    background-color: var(--dt-primary);
+}
+
+/* CancelAction */
+.btn.CancelAction {
+    background-color: var(--dt-danger);
+    color: var(--dt-text-primary);
+}
+
+.btn.CancelAction:hover {
+    background-color: var(--dt-danger-light);
+    color: var(--dt-text-primary);
+}
+
+.dark-mode .btn.CancelAction {
+    background-color: var(--dt-danger-dark);
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .btn.CancelAction:hover {
+    background-color: var(--dt-danger);
+}

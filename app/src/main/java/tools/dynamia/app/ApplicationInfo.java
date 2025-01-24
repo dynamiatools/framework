@@ -66,7 +66,7 @@ public class ApplicationInfo implements Serializable, PropertiesContainer {
         systemProperties = new HashMap(System.getProperties());
         systemEnvironment = System.getenv();
         properties = new HashMap<>();
-        properties.put(TEMPLATE, "Dynamical");
+        properties.put(TEMPLATE, "Default");
     }
 
 

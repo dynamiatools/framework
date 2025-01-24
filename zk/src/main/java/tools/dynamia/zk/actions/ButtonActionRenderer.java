@@ -29,6 +29,7 @@ public class ButtonActionRenderer extends ZKActionRenderer<Button> {
 
     private boolean showLabels = true;
 
+
     @Override
     public Button render(final Action action, final ActionEventBuilder actionEventBuilder) {
         Button btn = new Button();
@@ -49,6 +50,8 @@ public class ButtonActionRenderer extends ZKActionRenderer<Button> {
         String description = action.getLocalizedDescription(Messages.getDefaultLocale());
         if (description != null && !description.isEmpty()) {
             btn.setTooltiptext(description);
+        }else{
+            btn.setTooltiptext(actionName);
         }
 
         String zclass = (String) action.getAttribute("zclass");

@@ -241,6 +241,10 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         render();
     }
 
+    public void setType(String viewType) {
+        setViewType(viewType);
+    }
+
     public Class getBeanClass() {
         return beanClass;
     }

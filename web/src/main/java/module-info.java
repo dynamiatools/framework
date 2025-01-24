@@ -16,6 +16,7 @@ open module tools.dynamia.web {
 
     requires java.net.http;
     requires java.scripting;
+    requires jakarta.validation;
     exports tools.dynamia.web.navigation;
     exports tools.dynamia.web.util;
 }

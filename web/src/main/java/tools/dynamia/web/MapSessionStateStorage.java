@@ -67,4 +67,9 @@ public class MapSessionStateStorage implements SessionStateStorage {
         getSession(sessionId);
         return sessionId;
     }
+
+    @Override
+    public boolean isValidSession(String sessionId) {
+        return storage.containsKey(sessionId);
+    }
 }

@@ -18,6 +18,9 @@ package tools.dynamia.integration;
 
 import java.io.Serializable;
 
+/**
+ * The Class ProgressEvent.
+ */
 public class ProgressEvent implements Serializable {
 
     private final long current;

@@ -71,7 +71,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
         actionsMenu.setParent(this);
 
         actionsButton = new Button();
-        actionsButton.setZclass("btn btn-primary actions actiontb-a");
+        actionsButton.setZclass("btn btn-sm btn-primary actions actiontb-a");
         actionsButton.setPopup(menuId + ", after_start");
         ZKUtil.configureComponentIcon("fa-ellipsis-v", actionsButton, IconSize.SMALL);
 
@@ -107,7 +107,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
     protected ActionRenderer getDefaultActionRenderer() {
         if (defaultActionRenderer == null) {
             defaultActionRenderer = new ButtonActionRenderer();
-            defaultActionRenderer.setZclass("btn btn-default");
+            defaultActionRenderer.setZclass("btn btn-sm btn-default");
             defaultActionRenderer.setShowLabels(false);
 
         }
@@ -260,8 +260,8 @@ public class BootstrapCrudView<T> extends CrudView<T> {
 
     }
 
-
-    private void controlChangedState(ChangedStateEvent evt) {
+    @Override
+    protected void controlChangedState(ChangedStateEvent evt) {
         CrudState crudState = evt.getNewState();
 
         switch (crudState) {

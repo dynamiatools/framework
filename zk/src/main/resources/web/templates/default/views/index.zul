@@ -1,0 +1,28 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+
+<?page title="${applicationInfo.name}"?>
+
+<?meta charset="utf-8"?>
+<?meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"?>
+<?meta name="name" content="${applicationInfo.name}"?>
+<?meta name="description" content="${applicationInfo.description}"?>
+<?meta name="author" content="${applicationInfo.author}"?>
+<?meta name="version" content="${applicationInfo.version}"?>
+<?meta name="build" content="${applicationInfo.build}"?>
+<?meta name="skin" content="${appTemplate.skin.id}"?>
+
+<?link rel="shortcut icon" href="${contextPath}/static/favicon.ico"?>
+<?link rel="apple-touch-icon" sizes="180x180" href="${contextPath}/static/apple-touch-icon.png"?>
+<?link rel="icon" type="image/png" sizes="32x32" href="${contextPath}/static/favicon-32x32.png"?>
+<?link rel="icon" type="image/png" sizes="16x16" href="${contextPath}/static/favicon-16x16.png"?>
+
+<?link href="${contextPath}/static/dynamia-tools/css/default.css?v=${applicationInfo.version}" rel="stylesheet" type="text/css"?>
+
+
+<zk>
+
+    <div id="workspace" vflex="1" apply="${navComposer}">
+        <custom-attributes builderClass="tools.dynamia.zk.workspace.builders.Basic"/>
+    </div>
+
+</zk>

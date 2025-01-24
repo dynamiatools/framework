@@ -28,7 +28,9 @@ import org.zkoss.zk.ui.http.HttpSessionListener;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.ui.MessageDisplayer;
+import tools.dynamia.ui.icons.IconsProvider;
 import tools.dynamia.zk.ui.MessageNotification;
+import tools.dynamia.zk.ui.ZIconsProvider;
 import tools.dynamia.zk.util.ZKUtil;
 
 import java.util.HashMap;
@@ -54,6 +56,13 @@ public class ZKAppConfiguration {
     @ConditionalOnMissingBean(MessageDisplayer.class)
     public MessageDisplayer messageDialog() {
         return new MessageNotification();
+    }
+
+
+    @Bean
+    @ConditionalOnMissingBean(IconsProvider.class)
+    public IconsProvider iconsProvider() {
+        return new ZIconsProvider();
     }
 
     /*

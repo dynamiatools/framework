@@ -52,7 +52,7 @@ public class ViewReportParametersAction extends AbstractCrudAction {
 
     public ViewReportParametersAction() {
         setName(Messages.get(getClass(), "viewParams"));
-        setImage("fa-code");
+        setImage("code");
         setGroup(ActionGroup.get("EXPORT"));
 
     }

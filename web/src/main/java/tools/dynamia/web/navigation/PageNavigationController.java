@@ -46,6 +46,7 @@ public class PageNavigationController {
         if (pagePath.startsWith("/page/")) {
             pagePath = pagePath.replaceFirst("/page/", "");
         }
+
         return PageNavigationController.navigate(pagePath, request, response);
     }
 
