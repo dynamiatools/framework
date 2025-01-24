@@ -70,7 +70,7 @@ public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
             if (element instanceof Datebox || element instanceof Combobox || element instanceof Bandbox
                     || element instanceof Spinner || element instanceof Timebox) {
 
-
+                element.setSclass("form-zcontrol");
             } else {
                 element.setZclass("form-control");
             }
