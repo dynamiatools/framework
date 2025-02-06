@@ -105,7 +105,7 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
 
     @Override
     public boolean setCurrentPage(Page newPage, Map<String, Serializable> params) {
-        if (lastPage != null && lastPage.equals(newPage)) {
+        if (currentPage != null && currentPage.equals(newPage)) {
             //already in that page
             return false;
         }
@@ -253,12 +253,12 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
 
     public void setRawCurrentPage(Page page) {
         this.currentPage = page;
-        this.lastPage = null;
     }
 
     @Override
     public void reload() {
-        setRawCurrentPage(null);
+        this.lastPage = null;
+        this.currentPage = null;
     }
 
     @Override
@@ -273,5 +273,9 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
 
     public Map<String, Serializable> getCurrentPageParams() {
         return currentPageParams;
+    }
+
+    public void setLastPage(Page lastPage) {
+        this.lastPage = lastPage;
     }
 }

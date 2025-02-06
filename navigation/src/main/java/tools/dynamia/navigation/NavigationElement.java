@@ -16,8 +16,7 @@
  */
 package tools.dynamia.navigation;
 
-import tools.dynamia.commons.Messages;
-import tools.dynamia.commons.StringUtils;
+import tools.dynamia.commons.*;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -32,7 +31,10 @@ import java.util.function.Supplier;
  *
  * @author Mario A. Serrano Leones
  */
-public class NavigationElement<T extends NavigationElement> implements Serializable, Comparable<NavigationElement>, Cloneable {
+public class NavigationElement<T extends NavigationElement> implements Serializable, Comparable<NavigationElement>, Cloneable, PropertyChangeListenerContainer {
+
+    private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+
     public static final String PATH_SEPARATOR = "/";
 
     private String id;
@@ -50,7 +52,8 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
     private String iconSize;
     private String badge;
     private Supplier<String> longNameSupplier;
-    private String virtualPath;
+    private Supplier<String> customLabelSupplier;
+    private String customLabel;
 
 
     public NavigationElement() {
@@ -219,14 +222,23 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
     @Override
     public NavigationElement clone() {
         NavigationElement ne = new NavigationElement();
-        ne.setDescription(description);
-        ne.setEnable(enable);
-        ne.setIcon(icon);
-        ne.setId(id);
-        ne.setName(name);
-        ne.setRenderOnUserRoles(renderOnUserRoles);
-        ne.setVisible(visible);
-        ne.setPosition(position);
+        ne.description = description;
+        ne.enable = enable;
+        ne.icon = icon;
+        ne.id = id;
+        ne.name = name;
+        ne.renderOnUserRoles = renderOnUserRoles;
+        ne.visible = visible;
+        ne.position = position;
+        ne.reference = reference;
+        ne.alwaysAllowed = alwaysAllowed;
+        ne.attributes.putAll(attributes);
+        ne.longNameSupplier = longNameSupplier;
+        ne.badge = badge;
+        ne.iconSize = iconSize;
+        ne.customLabel = customLabel;
+        ne.customLabelSupplier = customLabelSupplier;
+
         return ne;
     }
 
@@ -245,13 +257,13 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
             return false;
         }
         final NavigationElement other = (NavigationElement) obj;
-        return Objects.equals(this.id, other.id);
+        return Objects.equals(this.getVirtualPath(), other.getVirtualPath());
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 29 * hash + (this.id != null ? this.id.hashCode() : 0);
+        hash = 29 * hash + (this.getVirtualPath() != null ? this.getVirtualPath().hashCode() : 0);
         return hash;
     }
 
@@ -260,7 +272,9 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
     }
 
     public void setBadge(String badge) {
+        var old = this.badge;
         this.badge = badge;
+        firePropertyChange("badge", old, badge);
     }
 
     public String getLocalizedName() {
@@ -290,6 +304,27 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
             return defaultValue;
         }
         return text;
+    }
+
+    public void setCustomLabel(String customLabel) {
+        var old = this.customLabel;
+        this.customLabel = customLabel;
+        firePropertyChange("customLabel", old, customLabel);
+    }
+
+    public String getCustomLabel() {
+        if (customLabelSupplier != null) {
+            return customLabelSupplier.get();
+        }
+        return customLabel;
+    }
+
+    public void setCustomLabelSupplier(Supplier<String> customLabelSupplier) {
+        this.customLabelSupplier = customLabelSupplier;
+    }
+
+    public Supplier<String> getCustomLabelSupplier() {
+        return customLabelSupplier;
     }
 
     protected String msgKey(String sufix) {
@@ -339,4 +374,39 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
         return (T) this;
     }
 
+    public T badge(String badge) {
+        setBadge(badge);
+        //noinspection unchecked
+        return (T) this;
+    }
+
+    public T customLabel(String customLabel) {
+        setCustomLabel(customLabel);
+        //noinspection unchecked
+        return (T) this;
+    }
+
+    public T customLabelSupplier(Supplier<String> customLabelSupplier) {
+        setCustomLabelSupplier(customLabelSupplier);
+        //noinspection unchecked
+        return (T) this;
+    }
+
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        propertyChangeSupport.addPropertyChangeListener(listener);
+    }
+
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        propertyChangeSupport.removePropertyChangeListener(listener);
+    }
+
+    protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+        propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
+    }
+
+    protected void clearPropertyChangeListeners() {
+        propertyChangeSupport.clearListeners();
+    }
 }

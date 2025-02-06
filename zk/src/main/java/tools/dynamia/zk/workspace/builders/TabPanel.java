@@ -47,10 +47,10 @@ import java.util.Map;
  */
 public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable {
 
-    private final LoggingService logger = new SLF4JLoggingService();
-    private static final String TAB_PAGE = "tab-page";
-    private final Tabbox tabbox;
-    private final Locale locale = Messages.getDefaultLocale();
+    private final LoggingService logger = LoggingService.get(getClass());
+    protected static final String TAB_PAGE = "tab-page";
+    protected final Tabbox tabbox;
+    protected final Locale locale = Messages.getDefaultLocale();
 
     public TabPanel() {
         tabbox = new Tabbox();
@@ -59,14 +59,16 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
         new Tabs().setParent(tabbox);
         new Tabpanels().setParent(tabbox);
         createToolbar();
+        initTabsListener();
+    }
 
+    private void initTabsListener() {
         tabbox.addEventListener(Events.ON_SELECT, event -> {
             Page page = (Page) tabbox.getSelectedTab().getAttributes().get(TAB_PAGE);
             if (page != null) {
                 NavigationManager.getCurrent().setCurrentPage(page);
             }
         });
-
     }
 
     @Override
@@ -75,7 +77,7 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
         tabbox.setParent(container);
     }
 
-    private void createToolbar() {
+    protected void createToolbar() {
         Toolbar toolbar = new Toolbar();
         toolbar.setParent(tabbox);
         IconsTheme iconsTheme = IconsTheme.get();
@@ -126,7 +128,6 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
                     super.update(page, params);
                 } else {
                     tabbox.setSelectedTab(tab);
-                    ZKNavigationManager.getInstance().setRawCurrentPage(page);
                 }
             }
         }
@@ -154,23 +155,32 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
 
             label = filterPageLabel(page, locale, label);
 
-            Tab tab = new Tab(label);
-            tab.getAttributes().put(TAB_PAGE, page);
-            tab.setClosable(page.isClosable());
-            ZKUtil.configureComponentIcon(page.getIcon(), tab, IconSize.SMALL);
-
-            tab.setSclass("tabpage");
-            tab.addSclass("page-" + page.getId());
-            tab.setTooltiptext(page.getLocalizedDescription(locale));
-
-            final Tabpanel panel = new Tabpanel();
-            panel.setSclass("tabpanel");
-            panel.addSclass("page-" + page.getId());
+            Tab tab = createTab(page, label);
+            final Tabpanel panel = createTabPanel(page);
             tabbox.getTabs().appendChild(tab);
             tabbox.getTabpanels().appendChild(panel);
 
             return panel;
         }
+    }
+
+    protected Tabpanel createTabPanel(Page page) {
+        final Tabpanel panel = new Tabpanel();
+        panel.setSclass("tabpanel");
+        panel.addSclass("page-" + page.getId());
+        return panel;
+    }
+
+    protected Tab createTab(Page page, String label) {
+        Tab tab = new Tab(label);
+        tab.getAttributes().put(TAB_PAGE, page);
+        tab.setClosable(page.isClosable());
+        ZKUtil.configureComponentIcon(page.getIcon(), tab, IconSize.SMALL);
+
+        tab.setSclass("tabpage");
+        tab.addSclass("page-" + page.getId());
+        tab.setTooltiptext(page.getLocalizedDescription(locale));
+        return tab;
     }
 
     protected String filterPageLabel(Page page, Locale locale, String label) {
@@ -205,7 +215,7 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
         }
     }
 
-    private Tab getTab(Page page) {
+    protected Tab getTab(Page page) {
         for (Object object : tabbox.getTabs().getChildren()) {
             Tab tab = (Tab) object;
             if (tab.getAttributes().containsKey(TAB_PAGE)) {
@@ -252,7 +262,7 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
         }
     }
 
-    private void closeTabs(List<Tab> tabs) {
+    protected void closeTabs(List<Tab> tabs) {
         if (tabs != null) {
             for (Tab tab : tabs) {
                 tab.onClose();
@@ -260,7 +270,7 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
         }
     }
 
-    private void refreshSelectedPage() {
+    protected void refreshSelectedPage() {
         Tab tab = tabbox.getSelectedTab();
         if (tab != null) {
             Page page = (Page) tab.getAttribute(TAB_PAGE);
