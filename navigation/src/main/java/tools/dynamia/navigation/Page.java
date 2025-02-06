@@ -167,10 +167,22 @@ public class Page extends NavigationElement<Page> implements Serializable, Clone
     @Override
     public Page clone() {
         Page page = (Page) super.clone();
-        page.setIndex(index);
-        page.setPath(path);
-        page.setShowAsPopup(showAsPopup);
-        page.setClosable(closable);
+        page.index = index;
+        page.path = path;
+        page.showAsPopup = showAsPopup;
+        page.closable = closable;
+        page.featured = featured;
+        page.priority = priority;
+        page.temporal = temporal;
+        page.main = main;
+        page.pageGroup = pageGroup;
+        page.actions.addAll(actions);
+        page.onCloseCallback = onCloseCallback;
+        page.onOpenCallback = onOpenCallback;
+        page.onUnloadCallback = onUnloadCallback;
+        page.virtualPath = getVirtualPath();
+        page.prettyVirtualPath = getPrettyVirtualPath();
+
         return page;
     }
 

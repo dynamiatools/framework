@@ -23,14 +23,14 @@
     <artifactId>tools.dynamia.web</artifactId>
     <packaging>jar</packaging>
 
-    <version>5.3.2</version>
+    <version>5.3.3</version>
     <description>A set of common classes and interfaces for web application development</description>
 
 
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.3.2</version>
+        <version>5.3.3</version>
     </parent>
 
     <name>DynamiaTools - Web</name>
@@ -88,27 +88,27 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.commons</artifactId>
-            <version>5.3.2</version>
+            <version>5.3.3</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.integration</artifactId>
-            <version>5.3.2</version>
+            <version>5.3.3</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.navigation</artifactId>
-            <version>5.3.2</version>
+            <version>5.3.3</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.viewers</artifactId>
-            <version>5.3.2</version>
+            <version>5.3.3</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.crud</artifactId>
-            <version>5.3.2</version>
+            <version>5.3.3</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

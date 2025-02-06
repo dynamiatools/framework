@@ -4,7 +4,7 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.3.2</version>
+        <version>5.3.3</version>
     </parent>
     <artifactId>dynamia-tools-starter</artifactId>
     <name>DynamiaTools - Starter</name>
@@ -26,17 +26,17 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.app</artifactId>
-            <version>5.3.2</version>
+            <version>5.3.3</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.zk</artifactId>
-            <version>5.3.2</version>
+            <version>5.3.3</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.domain.jpa</artifactId>
-            <version>5.3.2</version>
+            <version>5.3.3</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate.validator</groupId>

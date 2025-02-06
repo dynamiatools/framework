@@ -179,6 +179,10 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
                 updateURL = false;
             }
 
+            if (desktopCurrentPage.isTemporal()) {
+                updateURL = false;
+            }
+
             if (updateURL) {
                 updateClientURL();
             }
