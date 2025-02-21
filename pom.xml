@@ -24,7 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>tools.dynamia</groupId>
     <artifactId>tools.dynamia.parent</artifactId>
-    <version>5.3.3</version>
+    <version>5.3.4</version>
     <packaging>pom</packaging>
     <organization>
         <name>Dynamia Soluciones IT SAS</name>
@@ -80,12 +80,12 @@
 
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
-        <springboot.version>3.4.1</springboot.version>
+        <springboot.version>3.4.3</springboot.version>
         <mongodb.version>1</mongodb.version>
 
         <!-- Web -->
         <zk.version>10.0.0-jakarta</zk.version>
-        <dynamia.zk.version>1.0.3</dynamia.zk.version>
+        <dynamia.zk.version>1.0.4</dynamia.zk.version>
 
         <!--Reports -->
         <jasperreports.version>6.21.4</jasperreports.version>

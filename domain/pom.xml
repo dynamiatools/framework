@@ -21,13 +21,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>tools.dynamia.domain</artifactId>
-    <version>5.3.3</version>
+    <version>5.3.4</version>
     <packaging>jar</packaging>
 
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.3.3</version>
+        <version>5.3.4</version>
     </parent>
     <name>DynamiaTools - Domain</name>
     <url>https://dynamia.tools/docs/domain</url>
