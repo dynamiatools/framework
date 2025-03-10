@@ -23,11 +23,11 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.3.4</version>
+        <version>5.3.5</version>
     </parent>
 
     <artifactId>tools.dynamia.ui</artifactId>
-    <version>5.3.4</version>
+    <version>5.3.5</version>
     <name>DynamiaTools - UI</name>
     <url>https://dynamia.tools/docs/ui</url>
     <description>Helper classes for module integrations and messages</description>
@@ -64,17 +64,17 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.integration</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.commons</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.io</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
     </dependencies>
 </project>

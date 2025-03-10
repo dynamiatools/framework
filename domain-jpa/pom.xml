@@ -23,13 +23,13 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.3.4</version>
+        <version>5.3.5</version>
     </parent>
 
     <name>DynamiaTools - Domain JPA</name>
     <url>https://dynamia.tools/docs/domain</url>
     <artifactId>tools.dynamia.domain.jpa</artifactId>
-    <version>5.3.4</version>
+    <version>5.3.5</version>
     <packaging>jar</packaging>
 
     <licenses>

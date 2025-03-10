@@ -21,12 +21,12 @@
     <parent>
         <artifactId>tools.dynamia.parent</artifactId>
         <groupId>tools.dynamia</groupId>
-        <version>5.3.4</version>
+        <version>5.3.5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>tools.dynamia.zk</artifactId>
-    <version>5.3.4</version>
+    <version>5.3.5</version>
     <packaging>jar</packaging>
     <name>DynamiaTools - ZK</name>
     <url>https://dynamia.tools/docs/zk</url>
@@ -99,31 +99,31 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.web</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.navigation</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.ui</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.domain</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.viewers</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
@@ -134,19 +134,19 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.crud</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.reports</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.templates</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
             <scope>compile</scope>
         </dependency>
 

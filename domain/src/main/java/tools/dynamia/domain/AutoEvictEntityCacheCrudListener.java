@@ -38,6 +38,11 @@ public class AutoEvictEntityCacheCrudListener extends CrudServiceListenerAdapter
     }
 
     @Override
+    public void afterCreate(Object entity) {
+        clearEntityCache(entity);
+    }
+
+    @Override
     public void afterUpdate(Object entity) {
         clearEntityCache(entity);
     }
