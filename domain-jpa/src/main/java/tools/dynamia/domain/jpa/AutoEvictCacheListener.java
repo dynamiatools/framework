@@ -1,5 +1,6 @@
 package tools.dynamia.domain.jpa;
 
+import jakarta.persistence.PostPersist;
 import jakarta.persistence.PostRemove;
 import jakarta.persistence.PostUpdate;
 import tools.dynamia.domain.AbstractEntity;
@@ -13,6 +14,7 @@ public class AutoEvictCacheListener {
 
     @PostUpdate
     @PostRemove
+    @PostPersist
     public void clearCache(AbstractEntity object) {
         AutoEvictEntityCacheCrudListener.clearEntityCache(object);
 
