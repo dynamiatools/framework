@@ -23,11 +23,11 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.3.4</version>
+        <version>5.3.5</version>
     </parent>
 
     <artifactId>tools.dynamia.app</artifactId>
-    <version>5.3.4</version>
+    <version>5.3.5</version>
     <name>DynamiaTools - App</name>
     <url>https://dynamia.tools/docs/app</url>
 
@@ -74,58 +74,58 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.actions</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.commons</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.crud</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.domain</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.integration</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.io</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.navigation</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.reports</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.templates</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.viewers</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.web</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
@@ -208,7 +208,7 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.domain.jpa</artifactId>
-            <version>5.3.4</version>
+            <version>5.3.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
