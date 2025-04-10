@@ -22,15 +22,10 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.ProgressMonitor;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * @author Ing. Mario Serrano Leones
@@ -281,15 +276,17 @@ public class Module extends NavigationElement<Module> implements Serializable, C
      * Traverse all pages in all (NON dynamic) groups and subgroups
      */
     public void forEachPage(Consumer<Page> action, ProgressMonitor monitor) {
-        var allGroups = new ArrayList<PageGroup>();
-        allGroups.add(defaultGroup);
-        allGroups.addAll(pageGroups);
+        forEachPage(action, monitor, false);
+    }
 
-        allGroups.forEach(grp -> {
-            if (!grp.isDynamic()) {
-                forEachPageGroup(action, grp, monitor);
-            }
-        });
+    public void forEachPage(Consumer<Page> action, ProgressMonitor monitor, boolean includeDynamic) {
+        Stream<PageGroup> groups = Stream.concat(
+                Stream.of(defaultGroup),
+                pageGroups.stream()
+        );
+
+        groups.filter(grp -> includeDynamic || !grp.isDynamic())
+                .forEach(grp -> forEachPageGroup(action, grp, monitor));
     }
 
     public void forEachPage(Consumer<Page> action) {
@@ -361,7 +358,7 @@ public class Module extends NavigationElement<Module> implements Serializable, C
                     reference.set(page);
                     monitor.stop();
                 }
-            }, monitor);
+            }, monitor, true);
         } catch (Exception e) {
 
         }
