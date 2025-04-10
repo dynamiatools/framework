@@ -18,6 +18,7 @@ package tools.dynamia.actions;
 
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.LocalizedMessagesProvider;
+import tools.dynamia.commons.SimpleCache;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.ObjectMatcher;
 
@@ -41,6 +42,8 @@ public class ActionLoader<T extends Action> {
     private boolean ignoreRestrictions;
 
     private boolean autolocalize = true;
+
+
 
     public ActionLoader(Class<T> targetClass) {
         super();

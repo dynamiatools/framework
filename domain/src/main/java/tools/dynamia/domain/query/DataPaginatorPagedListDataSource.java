@@ -82,6 +82,9 @@ public class DataPaginatorPagedListDataSource<T> implements PagedListDataSource<
         if (relativeIndex == activePageData.size()) {
             relativeIndex--;
         }
+        if (activePageData.isEmpty()) {
+            return null;
+        }
         return activePageData.get(relativeIndex);
     }
 

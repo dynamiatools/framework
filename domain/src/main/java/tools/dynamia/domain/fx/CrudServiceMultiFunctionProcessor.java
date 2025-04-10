@@ -48,6 +48,9 @@ public class CrudServiceMultiFunctionProcessor<T> implements MultiFunctionProces
             if (pagedList.getDataSource() instanceof DataPaginatorPagedListDataSource<T> datasource) {
 
                 var query = datasource.getQueryMetadata().getQueryBuilder().clone();
+                query.resultType(null);
+
+
                 var projections = new ArrayList<String>();
                 functions.forEach(fx -> {
                     var proj = fx.getFunction() + "(" + query.getVarName() + fx.getName() + ")";

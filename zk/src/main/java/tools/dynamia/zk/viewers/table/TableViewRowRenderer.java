@@ -33,10 +33,7 @@ import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionLoader;
 import tools.dynamia.actions.ActionRenderer;
 import tools.dynamia.actions.Actions;
-import tools.dynamia.commons.BeanMap;
-import tools.dynamia.commons.BeanUtils;
-import tools.dynamia.commons.MapBuilder;
-import tools.dynamia.commons.PropertyChangeListenerContainer;
+import tools.dynamia.commons.*;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.ReflectionException;
@@ -66,6 +63,8 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
     private ViewDescriptor viewDescriptor;
     private TableView tableView;
     private List<Field> fields;
+
+    private SimpleCache<String, Action> actionsCache = new SimpleCache<>();
 
     public TableViewRowRenderer() {
     }
@@ -155,8 +154,12 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                 Listcell actionCell = new Listcell();
                 item.appendChild(actionCell);
 
-                TableViewRowAction action = Containers.get().findObjects(TableViewRowAction.class, a -> a.getId().equals(actionRef.getId()))
-                        .stream().findFirst().orElse(null);
+                TableViewRowAction action = (TableViewRowAction) actionsCache.get(actionRef.getId());
+                if (action == null) {
+                    action = Containers.get().findObjects(TableViewRowAction.class, a -> a.getId().equals(actionRef.getId()))
+                            .stream().findFirst().orElse(null);
+                    actionsCache.add(actionRef.getId(), action);
+                }
 
                 if (action != null) {
                     ActionEvent evt = new ActionEvent(data, item);
@@ -266,7 +269,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
 
                 if (field.getAction() != null) {
                     String actionId = field.getAction().getId();
-                    Action action = ActionLoader.findActionById(Action.class, actionId);
+                    Action action = actionsCache.getOrLoad(actionId, key -> ActionLoader.findActionById(Action.class, actionId));
                     if (action != null) {
                         if (comp instanceof HtmlBasedComponent hcomp) {
                             if (hcomp.getTooltiptext() == null && action.getDescription() != null) {
