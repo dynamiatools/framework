@@ -230,7 +230,6 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
 
     /**
      * Order by a column name ascending order
-     *
      */
     public QueryParameters orderBy(String column) {
         return orderBy(column, true);
@@ -253,6 +252,10 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
      */
     public BeanSorter<?> getSorter() {
         return sorter;
+    }
+
+    public void setSorter(BeanSorter<?> sorter) {
+        this.sorter = sorter;
     }
 
     /*
@@ -437,7 +440,6 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
 
     /**
      * Return the list of keys sorted the order of add or put method invocation
-     *
      */
     public List<String> getSortedKeys() {
         return Collections.unmodifiableList(sortedKeys);
@@ -452,5 +454,19 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
         return sorter != null && sorter.getColumnName() != null && !sorter.getColumnName().isEmpty();
     }
 
+    public QueryParameters clone() {
+        QueryParameters clone = new QueryParameters();
+        clone.putAll(this);
+        clone.sorter = sorter;
+        clone.paginator = paginator;
+        clone.autocreateSearcheableStrings = autocreateSearcheableStrings;
+        clone.groups = groups;
+        clone.type = type;
+        clone.hints.putAll(hints);
+        clone.depth = depth;
+        clone.maxResults = maxResults;
+        clone.sortedKeys.addAll(sortedKeys);
+        return clone;
+    }
 
 }

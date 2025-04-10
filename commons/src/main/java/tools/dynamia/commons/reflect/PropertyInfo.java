@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * PropertyInfo.
@@ -113,7 +114,6 @@ public class PropertyInfo implements Serializable {
 
     /**
      * Check if this property is primitive or belong to java.lang, java.util or java.math packages
-     *
      */
     public boolean isStandardClass() {
         return BeanUtils.isStantardClass(getType());
@@ -258,5 +258,14 @@ public class PropertyInfo implements Serializable {
             result = readMethod.getAnnotation(annotationClass);
         }
         return result;
+    }
+
+    public boolean isTransient() {
+        Field field = getField();
+        if (field != null) {
+            return Modifier.isTransient(field.getModifiers());
+        } else {
+            return false;
+        }
     }
 }

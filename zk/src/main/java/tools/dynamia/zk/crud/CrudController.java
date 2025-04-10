@@ -34,6 +34,7 @@ import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.crud.CrudControllerAPI;
+import tools.dynamia.crud.QueryProjectionBuilder;
 import tools.dynamia.domain.CrudServiceException;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.jdbc.QueryInterruptedException;
@@ -224,8 +225,10 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
                 setQueryResult(new ListDataSet(queryExecutor.executeQuery(crudService, getParams())));
             } else if (alwaysFindByExample) {
                 setQueryResult(new ListDataSet(crudService.findByExample(getExample(), getParams())));
-            } else if (queryProjection) {
-                setQueryResult(new ListDataSet(crudService.executeQuery(createQueryProjection(), getParams())));
+            } else if (isQueryProjection()) {
+                var queryProjection = createQueryProjection();
+                var projectionResult = crudService.executeQuery(queryProjection, getParams());
+                setQueryResult(new ListDataSet(projectionResult));
             } else {
                 setQueryResult(new ListDataSet(crudService.find(entityClass, getParams())));
             }
@@ -247,11 +250,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     }
 
     private QueryBuilder createQueryProjection() {
-        List<String> fields = Viewers.getFields(dataSetView.getViewDescriptor()).stream().map(Field::getName).collect(Collectors.toList());
-        fields = new ArrayList<>(fields);
-        fields.add(0, "id");
-        return QueryBuilder.select(fields.toArray(new String[0])).from(entityClass, "e").where(getParams())
-                .resultType(BeanMap.class);
+        return QueryProjectionBuilder.buildFromViewDescriptor(getEntityClass(), dataSetView.getViewDescriptor(), getParams());
     }
 
     /*

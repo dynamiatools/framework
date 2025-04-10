@@ -451,16 +451,30 @@ public class JpaCrudService extends AbstractCrudService {
             List beanMapResult = new ArrayList<>();
             for (Object o : result) {
                 Tuple t = (Tuple) o;
+                String[] fields = queryBuilder.getFields();
                 BeanMap element = new BeanMap();
                 element.setBeanClass(queryBuilder.getType());
-                element.setFields(queryBuilder.getFields());
-                int pos = 0;
-                for (String field : element.getFields()) {
-                    element.set(field, t.get(pos));
-                    if (field.equalsIgnoreCase("id")) {
-                        element.setId(t.get(pos));
+                element.setFields(fields);
+
+
+                for (int i = 0; i < fields.length; i++) {
+                    try {
+                        String field = fields[i];
+                        Object value = t.get(i);
+                        var as = " as ";
+                        if (field.contains(as)) {
+                            field = field.substring(field.lastIndexOf(as) + as.length()).trim();
+                            field = field.replace("_", ".");
+                        }
+
+                        element.set(field, value);
+                        if (field.equalsIgnoreCase("id")) {
+                            element.setId(value);
+                        }
+                    } catch (Exception e) {
+                        logger.warn("Error mapping tuple to BeanMap: " + e.getMessage());
                     }
-                    pos++;
+
                 }
                 beanMapResult.add(element);
             }
@@ -965,7 +979,7 @@ public class JpaCrudService extends AbstractCrudService {
     @Override
     public void executeWithinTransaction(Callback callback) {
         PlatformTransactionManager txManager = Containers.get().findObject(PlatformTransactionManager.class);
-        if (txManager!=null) {
+        if (txManager != null) {
             TransactionTemplate tx = new TransactionTemplate(txManager);
             tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             tx.execute(new TransactionCallbackWithoutResult() {
@@ -974,7 +988,7 @@ public class JpaCrudService extends AbstractCrudService {
                     callback.doSomething();
                 }
             });
-        }else {
+        } else {
             logger.warn("No TransactionManager found. Callback will be executed without transaction");
             callback.doSomething();
         }

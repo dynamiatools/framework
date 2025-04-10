@@ -73,6 +73,10 @@ public class Field implements Serializable, Indexable, Cloneable {
     private String icon;
     private boolean showIconOnly;
 
+    private boolean optional;
+    private String path;
+    private String variable;
+
     public Field() {
     }
 
@@ -627,11 +631,43 @@ public class Field implements Serializable, Indexable, Cloneable {
         this.showIconOnly = showIconOnly;
     }
 
-    public Class<?> getGenericType(){
-        if(propertyInfo != null){
+    public Class<?> getGenericType() {
+        if (propertyInfo != null) {
             return propertyInfo.getGenericType();
-        }else{
+        } else {
             return fieldClass;
         }
+    }
+
+    public boolean isOptional() {
+        return optional;
+    }
+
+    public void setOptional(boolean optional) {
+        this.optional = optional;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public boolean hasPath() {
+        return StringUtils.hasText(path);
+    }
+
+    public String getVariable() {
+        return variable;
+    }
+
+    public void setVariable(String variable) {
+        this.variable = variable;
+    }
+
+    public boolean hasVariable() {
+        return StringUtils.hasText(variable);
     }
 }

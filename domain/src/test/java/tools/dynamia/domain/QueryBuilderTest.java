@@ -45,7 +45,7 @@ public class QueryBuilderTest {
         String queryText = fromParameters(Parameter.class, "p", params).toString();
 
         String expected = "select p from " + Parameter.class.getName()
-                + " p where p.name like :name and (p.value = :value or p.id in (:id)) order by p.name DESC";
+                + " as p where p.name like :name and (p.value = :value or p.id in (:id)) order by p.name DESC";
         assertEquals(expected, queryText);
 
     }
@@ -54,7 +54,7 @@ public class QueryBuilderTest {
     public void testSelectWhereWithParams() {
         QueryParameters params = with("name", "123");
 
-        String expected = "select p from " + Parameter.class.getName() + " p where p.name like :name";
+        String expected = "select p from " + Parameter.class.getName() + " as p where p.name like :name";
         String queryText = select(Parameter.class, "p").where(params).toString();
         assertEquals(expected, queryText);
 
@@ -62,7 +62,7 @@ public class QueryBuilderTest {
 
     @Test
     public void testFluentApi() {
-        String expected = "select p.name, p.value from " + Parameter.class.getName() + " p where p.name = :name and p.value = :value order by p.name";
+        String expected = "select p.name, p.value from " + Parameter.class.getName() + " as p where p.name = :name and p.value = :value order by p.name";
         QueryBuilder query = QueryBuilder.select("name", "value")
                 .from(Parameter.class, "p")
                 .where("name", eq("TEST"))
@@ -79,21 +79,21 @@ public class QueryBuilderTest {
 
     @Test
     public void joinsTest() {
-        String expected = "select p from " + Parameter.class.getName() + " p left join p.test t where p.id > :pid";
+        String expected = "select p from " + Parameter.class.getName() + " as p left join p.test t where p.id > :pid";
         String queryText = QueryBuilder.select().from(Parameter.class, "p").leftJoin("p.test t").where("p.id", QueryConditions.gt(1)).toString();
         assertEquals(expected, queryText);
     }
 
     @Test
     public void shouldBuildComplexWhere() {
-        String expected = "select p from " + Parameter.class.getName() + " p where (p.id + 100) > 1000";
+        String expected = "select p from " + Parameter.class.getName() + " as p where (p.id + 100) > 1000";
         String queryText = QueryBuilder.select().from(Parameter.class, "p").where("(p.id + 100) > 1000").toString();
         assertEquals(expected, queryText);
     }
 
     @Test
     public void testOr() {
-        String expected = "select p from " + Parameter.class.getName() + " p where p.value = :value or p.id in (:id)";
+        String expected = "select p from " + Parameter.class.getName() + " as p where p.value = :value or p.id in (:id)";
         String queryText = QueryBuilder.select().from(Parameter.class, "p").where("value", eq(1)).or("id", in(1, 2, 3)).toString();
         assertEquals(expected, queryText);
     }
@@ -101,7 +101,7 @@ public class QueryBuilderTest {
     @Test
     public void shouldBuildCountProjection() {
         QueryBuilder query = QueryBuilder.select().from(Parameter.class, "p").leftJoin("p.test t").where("p.id", QueryConditions.gt(1));
-        String expected = "select count(p.id) from " + Parameter.class.getName() + " p left join p.test t where p.id > :pid";
+        String expected = "select count(p.id) from " + Parameter.class.getName() + " as p left join p.test t where p.id > :pid";
         String queryText = query.createProjection("count", "id");
         assertEquals(expected, queryText);
 
@@ -118,7 +118,7 @@ public class QueryBuilderTest {
 
         var query = QueryBuilder.update(Parameter.class, "p").set(fields)
                 .where("p.id > 1000");
-        var expected = "update " + Parameter.class.getName() + " p set p.label='El Param', p.id=p.id+1, p.value=:newValuevalue where p.id > 1000";
+        var expected = "update " + Parameter.class.getName() + " as p set p.label='El Param', p.id=p.id+1, p.value=:newValuevalue where p.id > 1000";
         var queryText = query.toString();
 
         assertEquals(expected, queryText);
@@ -130,7 +130,7 @@ public class QueryBuilderTest {
 
         var query = QueryBuilder.delete(Parameter.class, "p")
                 .where("p.id > 1000");
-        var expected = "delete from " + Parameter.class.getName() + " p where p.id > 1000";
+        var expected = "delete from " + Parameter.class.getName() + " as p where p.id > 1000";
         var queryText = query.toString();
 
         assertEquals(expected, queryText);

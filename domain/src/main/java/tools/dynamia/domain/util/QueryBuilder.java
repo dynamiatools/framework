@@ -40,6 +40,8 @@ import java.util.Map;
 public class QueryBuilder implements Cloneable {
 
 
+    public static final String AS = "as";
+
     enum QueryType {
         SELECT, UPDATE, DELETE
     }
@@ -126,7 +128,6 @@ public class QueryBuilder implements Cloneable {
 
     /**
      * If fields is empty means all fields
-     *
      */
     public static QueryBuilder select(String... fields) {
         QueryBuilder qb = new QueryBuilder();
@@ -137,7 +138,6 @@ public class QueryBuilder implements Cloneable {
 
     /**
      * Query type and query var
-     *
      */
     public QueryBuilder from(Class<?> entityType, String var) {
         this.type = entityType;
@@ -149,7 +149,6 @@ public class QueryBuilder implements Cloneable {
     /**
      * List result type can be different from query type, use this to create DTO
      * like collections
-     *
      */
     public QueryBuilder resultType(Class<?> resultType) {
         this.resultType = resultType;
@@ -240,8 +239,8 @@ public class QueryBuilder implements Cloneable {
     /**
      * Adds the condition.
      *
-     * @param property  the property
-     * @param qc        the qc
+     * @param property the property
+     * @param qc       the qc
      */
     private void addCondition(String property, QueryCondition qc, BooleanOp booleanOp) {
         String condition = renderCondition(property, qc);
@@ -410,7 +409,6 @@ public class QueryBuilder implements Cloneable {
     public String toString() {
 
         return switch (queryType) {
-            case SELECT -> buildSelect();
             case UPDATE -> buildUpdate();
             case DELETE -> buildDelete();
             default -> buildSelect();
@@ -442,7 +440,7 @@ public class QueryBuilder implements Cloneable {
         if (customFrom != null) {
             from = customFrom + SPACE;
         } else {
-            from = FROM_WORD + SPACE + type.getName() + SPACE + var;
+            from = FROM_WORD + SPACE + type.getName() + SPACE + AS + SPACE + var;
         }
 
         String whereWord = getWhereWord();
@@ -450,7 +448,7 @@ public class QueryBuilder implements Cloneable {
         String parseOrders = orders.isEmpty() ? "" : " order by " + parse(orders, ", ");
         String parseJoins = joins.isEmpty() ? "" : parse(joins, " ") + SPACE;
 
-        return select + SPACE + from + SPACE + parseJoins + whereWord + SPACE + parse(wheres, " ") + parseGroups + parseOrders;
+        return (select + SPACE + from + SPACE + parseJoins + whereWord + SPACE + parse(wheres, " ") + parseGroups + parseOrders).trim();
     }
 
     private String buildUpdate() {
@@ -490,7 +488,7 @@ public class QueryBuilder implements Cloneable {
         if (customFrom != null) {
             from = customFrom + SPACE;
         } else {
-            from = SPACE + type.getName() + SPACE + var;
+            from = SPACE + type.getName() + SPACE + AS + SPACE + var;
         }
 
         String whereWord = getWhereWord();
@@ -508,7 +506,7 @@ public class QueryBuilder implements Cloneable {
         if (customFrom != null) {
             from = customFrom + SPACE;
         } else {
-            from = SPACE + type.getName() + SPACE + var;
+            from = SPACE + type.getName() + SPACE + AS + SPACE + var;
         }
 
         String whereWord = getWhereWord();
@@ -598,18 +596,27 @@ public class QueryBuilder implements Cloneable {
         return this;
     }
 
+    private void addJoin(String text) {
+        if (text != null) {
+            text = text.trim();
+            if (!joins.contains(text)) {
+                joins.add(text);
+            }
+        }
+    }
+
     public QueryBuilder innerJoin(String join) {
-        joins.add("inner join " + join);
+        addJoin("inner join " + join);
         return this;
     }
 
     public QueryBuilder leftJoin(String join) {
-        joins.add("left join " + join);
+        addJoin("left join " + join);
         return this;
     }
 
     public QueryBuilder rightJoin(String join) {
-        joins.add("right join " + join);
+        addJoin("right join " + join);
         return this;
     }
 
@@ -671,7 +678,6 @@ public class QueryBuilder implements Cloneable {
 
     /**
      * Update query
-     *
      */
     public static QueryBuilder update(Class entityType, String var) {
         var builder = new QueryBuilder();
