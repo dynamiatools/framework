@@ -41,7 +41,7 @@ public class QueryConditionsTest {
 	public void testEq_Object() {
 		Object value = null;
 		QueryCondition result = QueryConditions.eq(value);
-		String expected = "select s from java.lang.String s where s.prop = :prop";
+		String expected = "select s from java.lang.String as s where s.prop = :prop";
 		String realResult = createRealResult(result);
 		assertEquals(expected, realResult);
 	}
@@ -50,7 +50,7 @@ public class QueryConditionsTest {
 	public void testLike_Object() {
 		String value = "value";
 		QueryCondition result = QueryConditions.like(value);
-		String expected = "select s from java.lang.String s where s.prop like :prop";
+		String expected = "select s from java.lang.String as s where s.prop like :prop";
 		String realResult = createRealResult(result);
 		assertEquals(expected, realResult);
 	}
@@ -59,7 +59,7 @@ public class QueryConditionsTest {
 	public void testGt_Number() {
 		Number value = null;
 		QueryCondition result = QueryConditions.gt(value);
-		String expected = "select s from java.lang.String s where s.prop > :prop";
+		String expected = "select s from java.lang.String as s where s.prop > :prop";
 		String realResult = createRealResult(result);
 		assertEquals(expected, realResult);
 	}
@@ -68,7 +68,7 @@ public class QueryConditionsTest {
 	public void testGeqt_Number() {
 		Number value = null;
 		QueryCondition result = QueryConditions.geqt(value);
-		String expected = "select s from java.lang.String s where s.prop >= :prop";
+		String expected = "select s from java.lang.String as s where s.prop >= :prop";
 		String realResult = createRealResult(result);
 		assertEquals(expected, realResult);
 	}
@@ -77,7 +77,7 @@ public class QueryConditionsTest {
 	public void testLt_Number() {
 		Number value = null;
 		QueryCondition result = QueryConditions.lt(value);
-		String expected = "select s from java.lang.String s where s.prop < :prop";
+		String expected = "select s from java.lang.String as s where s.prop < :prop";
 		String realResult = createRealResult(result);
 		assertEquals(expected, realResult);
 	}
@@ -86,7 +86,7 @@ public class QueryConditionsTest {
 	public void testLeqt_Number() {
 		Number value = null;
 		QueryCondition result = QueryConditions.leqt(value);
-		String expected = "select s from java.lang.String s where s.prop <= :prop";
+		String expected = "select s from java.lang.String as s where s.prop <= :prop";
 		String realResult = createRealResult(result);
 		assertEquals(expected, realResult);
 	}
@@ -96,7 +96,7 @@ public class QueryConditionsTest {
 		Object valueLo = null;
 		Object valueHi = null;
 		QueryCondition result = QueryConditions.between(valueLo, valueHi);
-		String expected = "select s from java.lang.String s where s.prop between :prop1 and :prop2";
+		String expected = "select s from java.lang.String as s where s.prop between :prop1 and :prop2";
 		String realResult = createRealResult(result);
 		assertEquals(expected, realResult);
 	}
@@ -104,7 +104,7 @@ public class QueryConditionsTest {
 	@Test
 	public void testIn_ObjectArr() {
 		QueryCondition result = QueryConditions.in("a", "b", "c");
-		String expected = "select s from java.lang.String s where s.prop in (:prop)";
+		String expected = "select s from java.lang.String as s where s.prop in (:prop)";
 		String realResult = createRealResult(result);
 		assertEquals(expected, realResult);
 	}
@@ -113,7 +113,7 @@ public class QueryConditionsTest {
 	public void testIn_List() {
 		List values = null;
 		QueryCondition result = QueryConditions.in(values);
-		String expected = "select s from java.lang.String s where s.prop in (:prop)";
+		String expected = "select s from java.lang.String as s where s.prop in (:prop)";
 		String realResult = createRealResult(result);
 		assertEquals(expected, realResult);
 	}
@@ -121,7 +121,7 @@ public class QueryConditionsTest {
 	@Test
 	public void testIsNull() {
 		QueryCondition result = QueryConditions.isNull();
-		String expected = "select s from java.lang.String s where s.prop is null";
+		String expected = "select s from java.lang.String as s where s.prop is null";
 		String realResult = createRealResult(result);
 		assertEquals(expected, realResult);
 	}
@@ -129,7 +129,7 @@ public class QueryConditionsTest {
 	@Test
 	public void testIsNotNull() {
 		QueryCondition result = QueryConditions.isNotNull();
-		String expected = "select s from java.lang.String s where s.prop is not null";
+		String expected = "select s from java.lang.String as s where s.prop is not null";
 		String realResult = createRealResult(result);
 		assertEquals(expected, realResult);
 	}
@@ -138,7 +138,7 @@ public class QueryConditionsTest {
 	public void testNotEq_Object() {
 		Object value = null;
 		QueryCondition result = QueryConditions.notEq(value);
-		String expected = "select s from java.lang.String s where s.prop <> :prop";
+		String expected = "select s from java.lang.String as s where s.prop <> :prop";
 		String realResult = createRealResult(result);
 		assertEquals(expected, realResult);
 	}
@@ -146,7 +146,7 @@ public class QueryConditionsTest {
 	@Test
 	public void testNotIn_ObjectArr() {
 		QueryCondition result = QueryConditions.notIn("a", "b", "c");
-		String expected = "select s from java.lang.String s where s.prop not in (:prop)";
+		String expected = "select s from java.lang.String as s where s.prop not in (:prop)";
 		String realResult = createRealResult(result);
 		assertEquals(expected, realResult);
 	}
@@ -155,7 +155,7 @@ public class QueryConditionsTest {
 	public void testNotIn_List() {
 		List values = null;
 		QueryCondition result = QueryConditions.notIn(values);
-		String expected = "select s from java.lang.String s where s.prop not in (:prop)";
+		String expected = "select s from java.lang.String as s where s.prop not in (:prop)";
 		String realResult = createRealResult(result);
 		assertEquals(expected, realResult);
 	}
@@ -164,7 +164,7 @@ public class QueryConditionsTest {
 	public void testIn_Subquery() {
 		String subquery = "select b from Entity b";
 		QueryCondition result = QueryConditions.in(subquery);
-		String expected = "select s from java.lang.String s where s.prop in (" + subquery + ")";
+		String expected = "select s from java.lang.String as s where s.prop in (" + subquery + ")";
 		String realResult = createRealResult(result);
 		assertEquals(expected, realResult);
 	}
@@ -177,7 +177,7 @@ public class QueryConditionsTest {
 				QueryParameters.with("prop2", 2L).add("prop3", QueryConditions.in(subquery, BooleanOp.OR)),
 				BooleanOp.AND);
 
-		String expected = "select s from java.lang.String s where s.prop = :prop and (s.prop2 = :prop2 or s.prop3 in ("
+		String expected = "select s from java.lang.String as s where s.prop = :prop and (s.prop2 = :prop2 or s.prop3 in ("
 				+ subquery + "))";
 		String realResult = QueryBuilder.fromParameters(String.class, "s", params).toString();
 
@@ -186,12 +186,12 @@ public class QueryConditionsTest {
 
 	@Test
 	public void testIn_SubqueryComplexWithParams() {
-		String subquery = "select b from Entity b where b.data = :data";
+		String subquery = "select b from Entity as b where b.data = :data";
 
 		QueryParameters params = QueryParameters.with("prop", 1L).addGroup(QueryParameters.with("prop2", 2L)
 				.add("prop3", QueryConditions.in(subquery, MapBuilder.put("result", 2L), BooleanOp.OR)), BooleanOp.AND);
 
-		String expected = "select s from java.lang.String s where s.prop = :prop and (s.prop2 = :prop2 or s.prop3 in ("
+		String expected = "select s from java.lang.String as s where s.prop = :prop and (s.prop2 = :prop2 or s.prop3 in ("
 				+ subquery + "))";
 		String realResult = QueryBuilder.fromParameters(String.class, "s", params).toString();
 		assertEquals(expected, realResult);

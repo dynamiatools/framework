@@ -144,6 +144,28 @@ public class FieldBuilder {
         return this;
     }
 
+
+    public FieldBuilder path(String path) {
+        field.setPath(path);
+        return this;
+    }
+
+    public FieldBuilder optional(boolean optional) {
+        field.setOptional(optional);
+        return this;
+    }
+
+    public FieldBuilder required(boolean required) {
+        field.setRequired(required);
+        return this;
+    }
+
+    public FieldBuilder variable(String variable) {
+        field.setVariable(variable);
+        return this;
+    }
+
+
     /**
      * Builds the.
      *

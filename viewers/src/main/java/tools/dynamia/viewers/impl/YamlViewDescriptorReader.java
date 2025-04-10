@@ -79,6 +79,9 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
     private static final String EQUAL_SYMBOL = "=";
 
     private static final String VD_ACTIONS = "actions";
+    private static final String FIELD_OPTIONAL = "optional";
+    private static final String FIELD_PATH = "path";
+    private static final String FIELD_VARIABLE = "variable";
 
 
     /**
@@ -362,6 +365,9 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
                 setValue(field, FIELD_ACTION, String.class, fieldProps);
                 setValue(field, FIELD_ICON, String.class, fieldProps);
                 setValue(field, FIELD_SHOW_ICON_ONLY, Boolean.class, fieldProps);
+                setValue(field, FIELD_OPTIONAL, Boolean.class, fieldProps);
+                setValue(field, FIELD_PATH, String.class, fieldProps);
+                setValue(field, FIELD_VARIABLE, String.class, fieldProps);
 
                 parseFieldClassAlias(fieldProps, field);
 
