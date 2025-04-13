@@ -24,7 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>tools.dynamia</groupId>
     <artifactId>tools.dynamia.parent</artifactId>
-    <version>5.3.6</version>
+    <version>5.3.7</version>
     <packaging>pom</packaging>
     <organization>
         <name>Dynamia Soluciones IT SAS</name>
@@ -81,6 +81,7 @@
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
         <springboot.version>3.4.4</springboot.version>
+        <swagger.version>2.2.28</swagger.version>
         <mongodb.version>1</mongodb.version>
 
         <!-- Web -->
@@ -173,6 +174,7 @@
             <artifactId>slf4j-jdk14</artifactId>
             <scope>test</scope>
         </dependency>
+
 
     </dependencies>
 

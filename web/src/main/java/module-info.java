@@ -17,6 +17,7 @@ open module tools.dynamia.web {
     requires java.net.http;
     requires java.scripting;
     requires jakarta.validation;
+    requires io.swagger.v3.oas.annotations;
     exports tools.dynamia.web.navigation;
     exports tools.dynamia.web.util;
 }

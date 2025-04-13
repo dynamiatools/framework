@@ -1,6 +1,7 @@
 package tools.dynamia.web.controllers;
 
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,6 +9,7 @@ import tools.dynamia.integration.scheduling.PeriodicTaskExecutor;
 
 @RestController
 @RequestMapping("/schedule/execute-tasks")
+@Tag(name = "DynamiaPeriodicTasks")
 public class PeriodicTaskExecutorRestController extends PeriodicTaskExecutor {
 
     @Override

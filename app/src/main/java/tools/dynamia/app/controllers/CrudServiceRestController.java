@@ -2,6 +2,8 @@ package tools.dynamia.app.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tools.dynamia.commons.StringPojoParser;
@@ -14,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/crud-service/{className}", consumes = "application/json", produces = "application/json")
+@Tag(name = "DynamiaCrudService")
 public class CrudServiceRestController {
 
     private final CrudService crudService;
