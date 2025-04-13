@@ -1,5 +1,6 @@
 package tools.dynamia.app.controllers;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import tools.dynamia.actions.ActionExecutionRequest;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = ApplicationMetadataController.PATH, produces = "application/json")
+@Tag(name = "DynamiaApplicationMetadata")
 public class ApplicationMetadataController {
     public static final String PATH = "/api/app/metadata";
     private final ApplicationMetadataLoader metadataLoader;
