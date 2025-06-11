@@ -22,7 +22,6 @@ import org.zkoss.bind.Binder;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.HtmlBasedComponent;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
@@ -42,7 +41,7 @@ import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.ComponentCustomizerUtil;
 import tools.dynamia.viewers.util.Viewers;
-import tools.dynamia.zk.actions.BoostrapButtonActionRenderer;
+import tools.dynamia.zk.actions.BootstrapButtonActionRenderer;
 import tools.dynamia.zk.converters.Util;
 import tools.dynamia.zk.ui.Import;
 import tools.dynamia.zk.util.ZKBindingUtil;
@@ -145,7 +144,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                 return;
             }
 
-            BoostrapButtonActionRenderer defaultRenderer = new BoostrapButtonActionRenderer();
+            BootstrapButtonActionRenderer defaultRenderer = new BootstrapButtonActionRenderer();
             defaultRenderer.setSmall(true);
 
 

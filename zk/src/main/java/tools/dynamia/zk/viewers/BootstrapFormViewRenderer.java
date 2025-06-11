@@ -30,6 +30,12 @@ import tools.dynamia.zk.viewers.form.FormViewRenderer;
 
 public class BootstrapFormViewRenderer<T> extends FormViewRenderer<T> {
 
+
+    @Override
+    protected FormView<T> newFormView() {
+        return new BootstrapFormView<>();
+    }
+
     @Override
     protected Div newRow() {
         Div div = super.newRow();

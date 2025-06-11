@@ -21,7 +21,7 @@ import org.zkoss.zul.Button;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionEventBuilder;
 
-public class BoostrapButtonActionRenderer extends ButtonActionRenderer {
+public class BootstrapButtonActionRenderer extends ButtonActionRenderer {
 
     private boolean small;
     private boolean large;

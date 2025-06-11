@@ -48,7 +48,7 @@ public class ActionPanel extends Div {
 
     private List<Action> actions = new ArrayList<>();
     private ActionEventBuilder eventBuilder;
-    private ActionRenderer<?> actionRenderer = new BoostrapButtonActionRenderer();
+    private ActionRenderer<?> actionRenderer = new BootstrapButtonActionRenderer();
 
     public ActionPanel() {
         init();

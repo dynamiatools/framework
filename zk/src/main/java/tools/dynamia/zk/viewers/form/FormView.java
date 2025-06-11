@@ -339,7 +339,7 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
         }
     }
 
-    private void updateTitle() {
+    protected void updateTitle() {
         if (titleArea instanceof AbstractTag tag) {
             tag.appendChild(new Text(title));
             tag.setStyle("display: block");
@@ -434,7 +434,7 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
         }
     }
 
-    private void initActionsArea() {
+    protected void initActionsArea() {
         if (actionsArea == null) {
             actionPanel = new ActionPanel(getActionEventBuilder());
             var renderer = new ButtonActionRenderer();

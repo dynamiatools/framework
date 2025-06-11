@@ -43,14 +43,14 @@ public class BootstrapCrudView<T> extends CrudView<T> {
      */
     private static final long serialVersionUID = 1773528227238113127L;
 
-    private Component leftActions;
-    private Component rightActions;
-    private Menupopup actionsMenu;
-    private Button actionsButton;
+    protected Component leftActions;
+    protected Component rightActions;
+    protected Menupopup actionsMenu;
+    protected Button actionsButton;
 
-    private Borderlayout borderlayout;
-    private Map<ActionGroup, Div> actionGroupContainers;
-    private ButtonActionRenderer defaultActionRenderer;
+    protected Borderlayout borderlayout;
+    protected Map<ActionGroup, Div> actionGroupContainers;
+    protected ButtonActionRenderer defaultActionRenderer;
 
     @Override
     protected void buildGeneralView() {
@@ -106,8 +106,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
     @Override
     protected ActionRenderer getDefaultActionRenderer() {
         if (defaultActionRenderer == null) {
-            defaultActionRenderer = new ButtonActionRenderer();
-            defaultActionRenderer.setZclass("btn btn-sm btn-default");
+            defaultActionRenderer = new BootstrapButtonActionRenderer();
             defaultActionRenderer.setShowLabels(false);
 
         }
@@ -159,6 +158,8 @@ public class BootstrapCrudView<T> extends CrudView<T> {
                     hcom.setSclass(hcom.getSclass() + " flexit");
                 }
             }
+
+
         }
 
         return component;
