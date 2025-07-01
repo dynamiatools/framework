@@ -65,19 +65,19 @@ class MyApplication {
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.app</artifactId>
-        <version>5.3.3</version>
+        <version>5.4.0</version>
     </dependency>
 
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.zk</artifactId>
-        <version>5.3.3</version>
+        <version>5.4.0</version>
     </dependency>
 
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.domain.jpa</artifactId>
-        <version>5.3.3</version>
+        <version>5.4.0</version>
     </dependency>
 </dependencies>
 ```
@@ -85,9 +85,9 @@ class MyApplication {
 **Gradle**
 
 ```groovy
-compile 'tools.dynamia:tools.dynamia.app:5.3.3'
-compile 'tools.dynamia:tools.dynamia.zk:5.3.3'
-compile 'tools.dynamia:tools.dynamia.domain.jpa:5.3.3'
+compile 'tools.dynamia:tools.dynamia.app:5.4.0'
+compile 'tools.dynamia:tools.dynamia.zk:5.4.0'
+compile 'tools.dynamia:tools.dynamia.domain.jpa:5.4.0'
 ```
 
 Artifacts are available in **Maven Central** repositories
@@ -98,7 +98,7 @@ Please visit (https://dynamia.tools) for full documentation and tutorials
 
 ## Building
 
-- Install OpenJDK 17
+- Install OpenJDK 21
 - Install Maven 3.x
 - Install Git
 - Clone this repository
