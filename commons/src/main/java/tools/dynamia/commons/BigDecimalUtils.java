@@ -16,6 +16,7 @@
  */
 package tools.dynamia.commons;
 
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.math.MathFunction;
 
 import java.math.BigDecimal;
@@ -56,7 +57,7 @@ public class BigDecimalUtils {
                 }
             }
         } catch (Exception exception) {
-            exception.printStackTrace();
+            LoggingService.get(BigDecimalUtils.class).error(exception.getMessage(), exception);
         }
         return total;
     }

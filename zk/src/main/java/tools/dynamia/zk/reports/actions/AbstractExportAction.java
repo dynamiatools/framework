@@ -117,8 +117,7 @@ public abstract class AbstractExportAction extends AbstractAction implements Rea
         try {
             return File.createTempFile("export_" + System.currentTimeMillis(), "." + getOuputType().getExtension());
         } catch (IOException e) {
-
-            e.printStackTrace();
+            log("Error creating temp file", e);
             UIMessages.showMessage("Error: " + e.getMessage(), MessageType.ERROR);
             return null;
         }
@@ -128,7 +127,7 @@ public abstract class AbstractExportAction extends AbstractAction implements Rea
         try {
             Filedownload.save(temp, null);
         } catch (Exception e) {
-            e.printStackTrace();
+            log("Error downloading file", e);
         }
     }
 

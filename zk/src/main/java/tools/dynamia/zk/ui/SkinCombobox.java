@@ -22,6 +22,7 @@ import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.ComboitemRenderer;
 import org.zkoss.zul.ListModelList;
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.templates.ApplicationTemplate;
 import tools.dynamia.templates.ApplicationTemplateHolder;
 import tools.dynamia.templates.ApplicationTemplateSkin;
@@ -78,7 +79,7 @@ public class SkinCombobox extends Combobox {
                     model.addToSelection(skin);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LoggingService.get(SkinCombobox.class).error("Error setting skin", e);
             }
         } else {
             setSelectedIndex(-1);

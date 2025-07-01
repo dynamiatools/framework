@@ -1,5 +1,7 @@
 package tools.dynamia.commons;
 
+import tools.dynamia.commons.logger.LoggingService;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +49,7 @@ public class PropertyChangeSupport implements PropertyChangeListenerContainer {
         try {
             listeners.clear();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggingService.get(getClass()).warn("Error clearing listeners: " + e.getMessage());
         }
     }
 }

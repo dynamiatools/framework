@@ -16,6 +16,9 @@
  */
 package tools.dynamia.reports.excel;
 
+import tools.dynamia.commons.logger.AbstractLoggable;
+import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.ProgressMonitor;
 import tools.dynamia.reports.EnumValueType;
 import tools.dynamia.reports.ExporterColumn;
@@ -30,7 +33,7 @@ import java.util.Map;
 /**
  * @author Mario A. Serrano Leones
  */
-public abstract class AbstractExcelExporter<T, DATA> {
+public abstract class AbstractExcelExporter<T, DATA> extends AbstractLoggable {
 
     private final List<ExporterColumn<T>> columns = new ArrayList<>();
     private final Map<String, String> columnsTitle = new HashMap<>();
@@ -103,7 +106,6 @@ public abstract class AbstractExcelExporter<T, DATA> {
     /**
      * Start writing file using multiple data sources. Invoke appendData(data)
      * and the stop() to complete
-     *
      */
     public void start(File outpufile) {
         if (outpufile != null) {
@@ -120,8 +122,7 @@ public abstract class AbstractExcelExporter<T, DATA> {
             try {
                 excelWriter.write();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log("Error writing excel file", e);
             }
             excelWriter.close();
             excelWriter = null;
@@ -130,7 +131,6 @@ public abstract class AbstractExcelExporter<T, DATA> {
 
     /**
      * Append rows to current file. Invoke start(File outpufile) method first.
-     *
      */
     public void appendData(DATA data, ProgressMonitor monitor) {
         if (excelWriter == null) {
@@ -143,7 +143,6 @@ public abstract class AbstractExcelExporter<T, DATA> {
 
     /**
      * Append rows to current file. Invoke start(File outpufile) method first
-     *
      */
     public void appendData(DATA data) {
         appendData(data, null);

@@ -18,6 +18,7 @@ package tools.dynamia.domain.jdbc;
 
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.logger.AbstractLoggable;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.PropertyInfo;
@@ -42,9 +43,8 @@ import java.util.Map;
  *
  * @author Mario A. Serrano Leones
  */
-public class JdbcHelper {
+public class JdbcHelper extends AbstractLoggable {
 
-	private final LoggingService logger = new SLF4JLoggingService(JdbcHelper.class);
 
 	/**
 	 * The connection.
@@ -521,7 +521,7 @@ public class JdbcHelper {
 
 	private void showSQL(String sql) {
 		if (isShowSQL()) {
-			logger.info(sql);
+			log(sql);
 		}
 
 	}
@@ -544,11 +544,11 @@ public class JdbcHelper {
 			con.setAutoCommit(false);
 			this.batch = con.createStatement();
 			this.batchSupported = con.getMetaData().supportsBatchUpdates();
-			logger.info("Creating new batch statement");
+			log("Creating new batch statement");
 			if (!batchSupported) {
-				logger.warn("Current database driver do not support Batch updates, using normal executeUpdate");
+				logWarn("Current database driver do not support Batch updates, using normal executeUpdate");
 			} else {
-				logger.info("Batch ready");
+				log("Batch ready");
 			}
 		} catch (SQLException e) {
 			throw new JdbcException("Exception creating batch", e);
@@ -589,25 +589,23 @@ public class JdbcHelper {
 		if (batch != null) {
 			try {
 				if (batchSupported) {
-					logger.info("Executing batch");
+					log("Executing batch");
 					result = batch.executeBatch();
 				}
 				commit();
-				logger.info("Batch completed");
+				log("Batch completed");
 			} catch (SQLException e) {
 				throw new JdbcException("Exception executing batch: " + e.getMessage(), e);
 			} finally {
 				try {
 					batch.clearBatch();
 				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log("Error clearing batch", e);
 				}
 				try {
 					batch.close();
 				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log("Error closing batch", e);
 				}
 				batch = null;
 				batchSupported = false;
@@ -615,8 +613,7 @@ public class JdbcHelper {
 				try {
 					getConnection().setAutoCommit(true);
 				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log("Error setting autocommit true", e);
 				}
 			}
 

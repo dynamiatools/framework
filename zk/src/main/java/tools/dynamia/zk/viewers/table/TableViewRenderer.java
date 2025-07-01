@@ -33,6 +33,7 @@ import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.fx.CrudServiceMultiFunctionProcessor;
 import tools.dynamia.domain.fx.MultiFunctionProcessor;
 import tools.dynamia.viewers.Field;
@@ -185,7 +186,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LoggingService.get(getClass()).error("Error setting header params", e);
                 }
                 if (descriptor.getParams().get(Viewers.PARAMS_SORTABLE) == Boolean.TRUE) {
                     header.setSortAscending(new FieldComparator(field.getName(), true));
@@ -277,7 +278,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LoggingService.get(getClass()).error("Error setting footer params", e);
                 }
             }
         }

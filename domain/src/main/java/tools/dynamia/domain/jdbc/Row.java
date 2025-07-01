@@ -17,6 +17,8 @@
 
 package tools.dynamia.domain.jdbc;
 
+import tools.dynamia.commons.logger.LoggingService;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -96,7 +98,7 @@ public class Row extends HashMap<String, Object> {
                 try {
                     cache.put(c, resultSet.getObject(c));
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    LoggingService.get(Row.class).error("Error loading data", e);
                 }
             });
         }

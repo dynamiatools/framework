@@ -19,6 +19,7 @@ package tools.dynamia.actions;
 import tools.dynamia.commons.ClassMessages;
 import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
+import tools.dynamia.commons.logger.AbstractLoggable;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 
@@ -32,9 +33,8 @@ import java.util.Map;
  *
  * @author Mario A. Serrano Leones
  */
-public abstract class AbstractAction implements Action {
+public abstract class AbstractAction extends AbstractLoggable implements Action {
     public static final String CLASSIFIER = "* UI Actions";
-    private final LoggingService logger = new SLF4JLoggingService(getClass());
 
     private String name;
     private String description;
@@ -226,18 +226,6 @@ public abstract class AbstractAction implements Action {
 
     public void setKeyCode(int keyCode) {
         this.keyCode = keyCode;
-    }
-
-    protected void log(String message) {
-        logger.info(message);
-    }
-
-    protected void log(String messsage, Throwable exception) {
-        logger.error(messsage, exception);
-    }
-
-    protected void logWarn(String message) {
-        logger.warn(message);
     }
 
     /**

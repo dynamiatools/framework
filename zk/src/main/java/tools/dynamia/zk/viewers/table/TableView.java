@@ -32,6 +32,7 @@ import org.zkoss.zul.Menupopup;
 import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.commons.PropertyChangeListenerContainer;
 import tools.dynamia.commons.collect.PagedList;
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.fx.Functions;
 import tools.dynamia.domain.fx.MultiFunctionProcessor;
 import tools.dynamia.domain.query.DataSet;
@@ -431,7 +432,7 @@ public class TableView<T> extends Listbox implements TableViewComponent<T>, CanB
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggingService.get(getClass()).error("Error computing footers", e);
         }
     }
 

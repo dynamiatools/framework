@@ -16,7 +16,6 @@
  */
 
 
-
 package tools.dynamia.zk.viewers.tree;
 
 import org.zkoss.zul.Frozen;
@@ -27,6 +26,7 @@ import org.zkoss.zul.TreeitemRenderer;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.FieldGroup;
 import tools.dynamia.viewers.View;
@@ -85,7 +85,6 @@ public class TreeViewRenderer<T> implements ViewRenderer<TreeModel<TreeViewNode<
         }
 
 
-
         for (Field field : descriptor.sortFields()) {
             if (field.isVisible()) {
                 TreeViewHeader header = new TreeViewHeader(tree, field.getLocalizedLabel(Messages.getDefaultLocale()));
@@ -102,7 +101,7 @@ public class TreeViewRenderer<T> implements ViewRenderer<TreeModel<TreeViewNode<
                         BeanUtils.setupBean(header, headerParams);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LoggingService.get(TreeViewRenderer.class).error("Error setting header for field " + field.getName(), e);
                 }
             }
         }

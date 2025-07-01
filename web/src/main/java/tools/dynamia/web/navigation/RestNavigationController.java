@@ -33,6 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.StringPojoParser;
 import tools.dynamia.commons.collect.PagedList;
+import tools.dynamia.commons.logger.AbstractLoggable;
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.crud.CrudPage;
 import tools.dynamia.domain.query.DataPaginator;
 import tools.dynamia.domain.query.QueryParameters;
@@ -54,7 +56,7 @@ import java.util.Map;
 
 @RestController("restNavigationController")
 @Order(1000)
-public class RestNavigationController {
+public class RestNavigationController extends AbstractLoggable {
 
 
     private final static int DEFAULT_PAGINATION_SIZE = 50;
@@ -287,7 +289,7 @@ public class RestNavigationController {
                 }
             });
         } catch (IOException e) {
-            e.printStackTrace();
+            log("Error updating entity", e);
         }
 
 
@@ -318,7 +320,7 @@ public class RestNavigationController {
                 conditions.forEach((k, v) -> query.and(v));
             }
         } catch (Exception ignored) {
-
+            LoggingService.get(RestNavigationController.class).error("Error parsing conditions", ignored);
         }
     }
 
