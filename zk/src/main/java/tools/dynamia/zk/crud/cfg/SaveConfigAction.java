@@ -58,7 +58,7 @@ public class SaveConfigAction extends AbstractConfigPageAction {
                 UIMessages.showMessage(Messages.get(getClass(), "succesfull_save"));
             } catch (Exception e) {
                 log("Error saving data", e);
-                UIMessages.showException(Messages.get(getClass(), "error_save", e.getMessage()), MessageType.ERROR);
+                UIMessages.showException(Messages.get(getClass(), "error_save", e.getMessage()), e);
             }
         } else {
             UIMessages.showMessage(Messages.get(getClass(), "error_save", "Parameters are null"), MessageType.ERROR);
