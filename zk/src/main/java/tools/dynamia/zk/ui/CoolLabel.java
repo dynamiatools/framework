@@ -26,6 +26,7 @@ import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Progressmeter;
 import tools.dynamia.commons.URLable;
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.io.IOUtils;
 import tools.dynamia.io.Resource;
 import tools.dynamia.zk.BindingComponentIndex;
@@ -131,8 +132,7 @@ public class CoolLabel extends Div implements LoadableOnly {
                 setImage(image);
             }
         } catch (IOException e) {
-
-            e.printStackTrace();
+            LoggingService.get(CoolLabel.class).error("Error loading image", e);
         }
     }
 
@@ -183,7 +183,7 @@ public class CoolLabel extends Div implements LoadableOnly {
     }
 
     public void setTitle(String title) {
-        if (!Objects.equals(this.title,title)) {
+        if (!Objects.equals(this.title, title)) {
             this.title = title;
             titleLabel.setValue(title);
             fireOnTitleChanged();
@@ -270,9 +270,9 @@ public class CoolLabel extends Div implements LoadableOnly {
 
     public void setBreakLinesSubtitle(boolean breakLinesSubtitle) {
         this.breakLinesSubtitle = breakLinesSubtitle;
-        if(breakLinesSubtitle){
+        if (breakLinesSubtitle) {
             subtitleLabel.setStyle("display: block; white-space: pre-line");
-        }else{
+        } else {
             subtitleLabel.setStyle("display: block");
         }
     }
@@ -283,9 +283,9 @@ public class CoolLabel extends Div implements LoadableOnly {
 
     public void setBreakLinesDescription(boolean breakLinesDescription) {
         this.breakLinesDescription = breakLinesDescription;
-        if(breakLinesDescription){
+        if (breakLinesDescription) {
             descriptionLabel.setStyle("display: block; white-space: pre-line");
-        }else{
+        } else {
             descriptionLabel.setStyle("display: block");
         }
     }

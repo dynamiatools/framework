@@ -86,7 +86,7 @@ public class JpaCrudServiceTest {
         List<DummyEntity> result = DummyEntity.findByName("Dummy0");
         Assert.assertEquals(1, result.size());
 
-        DummyEntity dummyEntity = result.get(0);
+        DummyEntity dummyEntity = result.getFirst();
         Assert.assertEquals("Dummy0", dummyEntity.getName());
     }
 }

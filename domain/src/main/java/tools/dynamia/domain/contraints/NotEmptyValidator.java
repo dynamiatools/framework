@@ -42,23 +42,14 @@ public class NotEmptyValidator implements ConstraintValidator<NotEmpty, Object> 
      */
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {
-        if (value == null) {
-            return false;
-        }
+        return switch (value) {
+            case null -> false;
+            case CharSequence charSequence -> !value.toString().trim().isEmpty();
+            case Collection collection -> !collection.isEmpty();
+            case Map map -> !map.isEmpty();
+            default -> true;
+        };
 
-        if (value instanceof CharSequence) {
-            return !value.toString().trim().isEmpty();
-        }
-
-        if (value instanceof Collection collection) {
-            return !collection.isEmpty();
-        }
-
-        if (value instanceof Map map) {
-            return !map.isEmpty();
-        }
-
-        return true;
     }
 
     public boolean isValid(Object value) {

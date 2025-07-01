@@ -20,6 +20,7 @@ import org.zkoss.bind.BindContext;
 import org.zkoss.bind.Converter;
 import org.zkoss.zk.ui.Component;
 import tools.dynamia.commons.Messages;
+import tools.dynamia.commons.logger.LoggingService;
 
 import java.time.format.TextStyle;
 
@@ -36,8 +37,7 @@ public class Month implements Converter<Object, Object, Component> {
                 return ((java.time.Month) val).getValue();
             }
         } catch (Exception e) {
-
-            e.printStackTrace();
+            LoggingService.get(Month.class).error("Error converting month", e);
         }
 
         return null;

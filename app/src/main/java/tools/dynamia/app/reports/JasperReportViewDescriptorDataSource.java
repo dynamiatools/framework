@@ -19,6 +19,7 @@ package tools.dynamia.app.reports;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.data.JRAbstractBeanDataSource;
 import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.EntityReference;
 import tools.dynamia.domain.EntityReferenceRepository;
 import tools.dynamia.domain.util.DomainUtils;
@@ -88,7 +89,7 @@ public class JasperReportViewDescriptorDataSource extends JRAbstractBeanDataSour
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggingService.get(JasperReportViewDescriptorDataSource.class).error("Error loading entity reference", e);
         }
         return value;
     }

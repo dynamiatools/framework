@@ -82,7 +82,7 @@ public class SimpleObjectContainer implements ObjectContainer {
     public <T> T getObject(Class<T> type) {
         List<T> r = getObjects(type);
         if (!r.isEmpty()) {
-            return r.get(0);
+            return r.getFirst();
         } else {
             return null;
         }

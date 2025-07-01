@@ -1,13 +1,16 @@
 package tools.dynamia.web;
 
 import jakarta.servlet.http.HttpServletRequest;
+import tools.dynamia.commons.logger.AbstractLoggable;
+import tools.dynamia.commons.logger.Loggable;
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.integration.Containers;
 
 /**
  * Default implementation of session id finder. Try to find current session id in
  * current request using cookie or http headers
  */
-public class DefaultSessionIdFinder implements SessionIdFinder {
+public class DefaultSessionIdFinder implements SessionIdFinder, Loggable {
 
     private static SessionIdFinder INSTANCE = new DefaultSessionIdFinder();
     private static SessionIdFinder customFinder;
@@ -46,7 +49,7 @@ public class DefaultSessionIdFinder implements SessionIdFinder {
 
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log("Error finding session id", e);
         }
         return null;
     }

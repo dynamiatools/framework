@@ -17,6 +17,7 @@
 package tools.dynamia.zk.crud;
 
 import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.logger.AbstractLoggable;
 import tools.dynamia.crud.CrudAction;
 import tools.dynamia.crud.CrudDataSetViewBuilder;
 import tools.dynamia.crud.CrudState;
@@ -29,11 +30,10 @@ import tools.dynamia.viewers.util.Viewers;
 import java.util.Map;
 
 /**
- *
  * @author Mario A. Serrano Leones
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class CrudViewRenderer<T> implements ViewRenderer<T> {
+public class CrudViewRenderer<T> extends AbstractLoggable implements ViewRenderer<T> {
 
     @Override
     public View<T> render(ViewDescriptor descriptor, T value) {
@@ -106,7 +106,7 @@ public class CrudViewRenderer<T> implements ViewRenderer<T> {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log("Error loading descriptor actions", e);
         }
 
     }

@@ -243,7 +243,6 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
                             " o intente mas tarde. Por ejemplo, si esta usando un rango de fechas reduzca la diferencia. ", "Error al Consultar",
                     Messagebox.OK, Messagebox.ERROR);
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error(e);
             UIMessages.showMessage("Error al consultar: " + e.getMessage(), MessageType.ERROR);
         }

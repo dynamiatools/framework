@@ -250,7 +250,7 @@ public abstract class AbstractCrudService implements CrudService {
     public Object findSingleWithNameQuery(String namedQueryName, QueryParameters parameters) {
         List list = findWithNamedQuery(namedQueryName, parameters, 1);
         if (list != null && list.size() == 1) {
-            return list.get(0);
+            return list.getFirst();
         }
         return null;
     }

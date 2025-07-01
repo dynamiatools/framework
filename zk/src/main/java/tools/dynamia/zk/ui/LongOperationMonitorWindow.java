@@ -29,6 +29,7 @@ import tools.dynamia.commons.Callback;
 import tools.dynamia.commons.ClassMessages;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.StopWatch;
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.integration.ProgressMonitor;
 import tools.dynamia.ui.UIMessages;
 import tools.dynamia.zk.util.LongOperation;
@@ -80,7 +81,6 @@ public class LongOperationMonitorWindow extends Window {
 
     /**
      * Run and show a progress window for a long-running operation
-     *
      */
     public static LongOperationMonitorWindow start(String title, Consumer<ProgressMonitor> operation, Callback onFinish) {
         var monitor = new ProgressMonitor();
@@ -95,7 +95,6 @@ public class LongOperationMonitorWindow extends Window {
 
     /**
      * Run and show a progress window for a long-running operation
-     *
      */
     public static LongOperationMonitorWindow start(String title, String finishMessage, Consumer<ProgressMonitor> operation) {
         return start(title, operation, () -> UIMessages.showMessage(finishMessage));
@@ -185,7 +184,7 @@ public class LongOperationMonitorWindow extends Window {
             longOperation.onFinish(null);
             monitor.stop();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggingService.get(getClass()).error("Error stopping long operation", e);
         } finally {
             finish();
         }

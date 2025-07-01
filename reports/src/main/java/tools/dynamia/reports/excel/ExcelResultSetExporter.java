@@ -57,8 +57,7 @@ public class ExcelResultSetExporter extends AbstractExcelExporter<Object, Result
                     data.beforeFirst();
                 }
             } catch (SQLException e) {
-
-                e.printStackTrace();
+                log("Error getting row count", e);
             }
         }
 
@@ -74,8 +73,7 @@ public class ExcelResultSetExporter extends AbstractExcelExporter<Object, Result
                 }
             }
         } catch (SQLException e) {
-
-            e.printStackTrace();
+            log("Error writing row", e);
         }
     }
 

@@ -16,6 +16,7 @@
  */
 package tools.dynamia.domain.jdbc;
 
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.query.DataSet;
 
 import java.sql.ResultSet;
@@ -182,7 +183,7 @@ public class JdbcDataSet extends DataSet<ResultSet> implements Iterable<Row> {
 
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LoggingService.get(getClass()).error("Error in reset", e);
         }
     }
 
@@ -223,7 +224,7 @@ public class JdbcDataSet extends DataSet<ResultSet> implements Iterable<Row> {
                     return getData().getObject((String) key);
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LoggingService.get(getClass()).error("Error in getDataMap", e);
                     return null;
                 }
             }

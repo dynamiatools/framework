@@ -32,7 +32,7 @@ public class Mustache implements Converter<Object, Object, Component> {
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {
 
         if (val instanceof String text) {
-            return  ((String) val).replace("{{", "<b>{{").replace("}}", "}}</b>");
+            return  text.replace("{{", "<b>{{").replace("}}", "}}</b>");
 
         }
         return val != null ? val.toString() : null;

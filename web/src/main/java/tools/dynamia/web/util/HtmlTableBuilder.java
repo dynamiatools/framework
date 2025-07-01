@@ -96,16 +96,12 @@ public class HtmlTableBuilder implements Serializable {
 
     public void addData(Object... data) {
         for (Object obj : data) {
-            if (obj instanceof BigDecimal) {
-                addCurrency((BigDecimal) obj);
-            } else if (obj instanceof Integer) {
-                addInteger((Integer) obj);
-            } else if (obj instanceof Number) {
-                addNumber((Number) obj);
-            } else if (obj instanceof Date) {
-                addDate((Date) obj);
-            } else {
-                addText(obj);
+            switch (obj) {
+                case BigDecimal bigDecimal -> addCurrency(bigDecimal);
+                case Integer i -> addInteger(i);
+                case Number number -> addNumber(number);
+                case Date date -> addDate(date);
+                case null, default -> addText(obj);
             }
         }
     }

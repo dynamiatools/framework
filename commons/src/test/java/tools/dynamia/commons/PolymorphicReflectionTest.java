@@ -88,7 +88,7 @@ public class PolymorphicReflectionTest {
 
     }
 
-    class ChildBean extends ParentBean {
+    static class ChildBean extends ParentBean {
 
         @Override
         public String getName() {

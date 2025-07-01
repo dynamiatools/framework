@@ -196,7 +196,7 @@ public interface ViewDescriptor extends Serializable {
     @JsonIgnore
     default Field getFirstField() {
         if (!getFields().isEmpty()) {
-            return getFields().get(0);
+            return getFields().getFirst();
         }
         return null;
     }

@@ -54,8 +54,7 @@ public class SimpleMessageService implements MessageService {
             try {
                 channel.setAsync(Boolean.parseBoolean(properties.getProperty("async", "false")));
             } catch (Exception e) {
-
-                e.printStackTrace();
+                LOGGER.error("Error parsing property async: " + e.getMessage());
             }
         }
 

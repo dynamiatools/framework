@@ -133,7 +133,7 @@ public class CollectionsUtils {
         }
 
         if (collection instanceof List) {
-            return ((List<T>) collection).get(0);
+            return ((List<T>) collection).getFirst();
         } else {
             return collection.stream().findFirst().get();
         }

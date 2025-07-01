@@ -145,36 +145,42 @@ public class JasperReportCompiler implements ReportCompiler {
             Map<String, Object> params = buildParams(reportDescriptor.getParameters());
 
             if (datasource instanceof JRDataSource jrds) {
-                if (template instanceof String) {
-                    InputStream is = ReportFiller.class.getResourceAsStream(reportDescriptor.getTemplate().toString());
-                    JasperFillManager.fillReportToStream(is, out, params, jrds);
-                } else if (template instanceof JasperReport jr) {
-                    JasperFillManager.fillReportToStream(jr, out, params, jrds);
-                } else if (template instanceof File file) {
-                    params.put("CURRENT_DIRECTORY", file.getParentFile().getAbsolutePath());
-                    InputStream is = new FileInputStream(file);
-                    JasperFillManager.fillReportToStream(is, out, params, jrds);
-                } else if (template instanceof URL) {
-                    InputStream is = ((URL) template).openStream();
-                    JasperFillManager.fillReportToStream(is, out, params, jrds);
-                } else {
-                    throw new ReportFillerException("Unknow report template type :" + reportDescriptor.getTemplate());
+                switch (template) {
+                    case String s -> {
+                        InputStream is = ReportFiller.class.getResourceAsStream(reportDescriptor.getTemplate().toString());
+                        JasperFillManager.fillReportToStream(is, out, params, jrds);
+                    }
+                    case JasperReport jr -> JasperFillManager.fillReportToStream(jr, out, params, jrds);
+                    case File file -> {
+                        params.put("CURRENT_DIRECTORY", file.getParentFile().getAbsolutePath());
+                        InputStream is = new FileInputStream(file);
+                        JasperFillManager.fillReportToStream(is, out, params, jrds);
+                    }
+                    case URL url -> {
+                        InputStream is = url.openStream();
+                        JasperFillManager.fillReportToStream(is, out, params, jrds);
+                    }
+                    case null, default ->
+                            throw new ReportFillerException("Unknow report template type :" + reportDescriptor.getTemplate());
                 }
             } else if (datasource instanceof Connection connection) {
-                if (template instanceof String) {
-                    InputStream is = ReportFiller.class.getResourceAsStream(reportDescriptor.getTemplate().toString());
-                    JasperFillManager.fillReportToStream(is, out, params, connection);
-                } else if (template instanceof JasperReport jr) {
-                    JasperFillManager.fillReportToStream(jr, out, params, connection);
-                } else if (template instanceof File file) {
-                    params.put("CURRENT_DIRECTORY", file.getParentFile().getAbsolutePath());
-                    InputStream is = new FileInputStream(file);
-                    JasperFillManager.fillReportToStream(is, out, params, connection);
-                } else if (template instanceof URL) {
-                    InputStream is = ((URL) template).openStream();
-                    JasperFillManager.fillReportToStream(is, out, params, connection);
-                } else {
-                    throw new ReportFillerException("Unknow report template type :" + reportDescriptor.getTemplate());
+                switch (template) {
+                    case String s -> {
+                        InputStream is = ReportFiller.class.getResourceAsStream(reportDescriptor.getTemplate().toString());
+                        JasperFillManager.fillReportToStream(is, out, params, connection);
+                    }
+                    case JasperReport jr -> JasperFillManager.fillReportToStream(jr, out, params, connection);
+                    case File file -> {
+                        params.put("CURRENT_DIRECTORY", file.getParentFile().getAbsolutePath());
+                        InputStream is = new FileInputStream(file);
+                        JasperFillManager.fillReportToStream(is, out, params, connection);
+                    }
+                    case URL url -> {
+                        InputStream is = url.openStream();
+                        JasperFillManager.fillReportToStream(is, out, params, connection);
+                    }
+                    case null, default ->
+                            throw new ReportFillerException("Unknow report template type :" + reportDescriptor.getTemplate());
                 }
             }
         }
@@ -206,36 +212,42 @@ public class JasperReportCompiler implements ReportCompiler {
         Object template = getTemplate(reportDescriptor);
         Map<String, Object> params = new HashMap<>(reportDescriptor.getParameters());
         if (datasource instanceof JRDataSource jrds) {
-            if (template instanceof String) {
-                InputStream is = ReportFiller.class.getResourceAsStream(reportDescriptor.getTemplate().toString());
-                jasperPrint = JasperFillManager.fillReport(is, params, jrds);
-            } else if (template instanceof JasperReport jr) {
-                jasperPrint = JasperFillManager.fillReport(jr, params, jrds);
-            } else if (template instanceof File file) {
-                params.put("CURRENT_DIRECTORY", file.getParentFile().getAbsolutePath());
-                InputStream is = new FileInputStream(file);
-                jasperPrint = JasperFillManager.fillReport(is, params, jrds);
-            } else if (template instanceof URL) {
-                InputStream is = ((URL) template).openStream();
-                jasperPrint = JasperFillManager.fillReport(is, params, jrds);
-            } else {
-                throw new ReportFillerException("Unknow report template type :" + reportDescriptor.getTemplate());
+            switch (template) {
+                case String s -> {
+                    InputStream is = ReportFiller.class.getResourceAsStream(reportDescriptor.getTemplate().toString());
+                    jasperPrint = JasperFillManager.fillReport(is, params, jrds);
+                }
+                case JasperReport jr -> jasperPrint = JasperFillManager.fillReport(jr, params, jrds);
+                case File file -> {
+                    params.put("CURRENT_DIRECTORY", file.getParentFile().getAbsolutePath());
+                    InputStream is = new FileInputStream(file);
+                    jasperPrint = JasperFillManager.fillReport(is, params, jrds);
+                }
+                case URL url -> {
+                    InputStream is = url.openStream();
+                    jasperPrint = JasperFillManager.fillReport(is, params, jrds);
+                }
+                case null, default ->
+                        throw new ReportFillerException("Unknow report template type :" + reportDescriptor.getTemplate());
             }
         } else if (datasource instanceof Connection connection) {
-            if (template instanceof String) {
-                InputStream is = ReportFiller.class.getResourceAsStream(reportDescriptor.getTemplate().toString());
-                jasperPrint = JasperFillManager.fillReport(is, params, connection);
-            } else if (template instanceof JasperReport jr) {
-                jasperPrint = JasperFillManager.fillReport(jr, params, connection);
-            } else if (template instanceof File file) {
-                params.put("CURRENT_DIRECTORY", file.getParentFile().getAbsolutePath());
-                InputStream is = new FileInputStream(file);
-                jasperPrint = JasperFillManager.fillReport(is, params, connection);
-            } else if (template instanceof URL) {
-                InputStream is = ((URL) template).openStream();
-                jasperPrint = JasperFillManager.fillReport(is, params, connection);
-            } else {
-                throw new ReportFillerException("Unknow report template type :" + reportDescriptor.getTemplate());
+            switch (template) {
+                case String s -> {
+                    InputStream is = ReportFiller.class.getResourceAsStream(reportDescriptor.getTemplate().toString());
+                    jasperPrint = JasperFillManager.fillReport(is, params, connection);
+                }
+                case JasperReport jr -> jasperPrint = JasperFillManager.fillReport(jr, params, connection);
+                case File file -> {
+                    params.put("CURRENT_DIRECTORY", file.getParentFile().getAbsolutePath());
+                    InputStream is = new FileInputStream(file);
+                    jasperPrint = JasperFillManager.fillReport(is, params, connection);
+                }
+                case URL url -> {
+                    InputStream is = url.openStream();
+                    jasperPrint = JasperFillManager.fillReport(is, params, connection);
+                }
+                case null, default ->
+                        throw new ReportFillerException("Unknow report template type :" + reportDescriptor.getTemplate());
             }
         }
 
@@ -258,9 +270,8 @@ public class JasperReportCompiler implements ReportCompiler {
             realDatasource = new JRResultSetDataSource((ResultSet) dataSource);
         } else if (dataSource instanceof Connection) {
             realDatasource = dataSource;
-        } else if (dataSource instanceof DataSource) {
+        } else if (dataSource instanceof DataSource jdbcDatasource) {
             try {
-                DataSource jdbcDatasource = (DataSource) dataSource;
                 realDatasource = jdbcDatasource.getConnection();
             } catch (SQLException e) {
                 logger.error("Error getting connection from JDBC DataSource for ReportDescriptor " + reportDescriptor, e);
@@ -291,7 +302,7 @@ public class JasperReportCompiler implements ReportCompiler {
                 //noinspection unchecked
                 exporter.setExporterInput(new SimpleExporterInput(items));
             } else if (reports.size() == 1) {
-                Report report = reports.get(0);
+                Report report = reports.getFirst();
                 if (report.getContent() instanceof File reportFile) {
                     //noinspection unchecked
                     exporter.setExporterInput(new SimpleExporterInput(reportFile));

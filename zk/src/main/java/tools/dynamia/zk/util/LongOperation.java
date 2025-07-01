@@ -26,6 +26,7 @@ import org.zkoss.zk.ui.sys.DesktopCache;
 import org.zkoss.zk.ui.sys.DesktopCtrl;
 import org.zkoss.zk.ui.sys.WebAppCtrl;
 import tools.dynamia.commons.Callback;
+import tools.dynamia.commons.logger.LoggingService;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -87,7 +88,6 @@ public class LongOperation implements Runnable {
     /**
      * optional callback method when the task has completed with an uncaught
      * Excepion
-     *
      */
     public LongOperation onException(Consumer<Exception> onExceptionConsumer) {
         this.onExceptionConsumer = onExceptionConsumer;
@@ -114,7 +114,6 @@ public class LongOperation implements Runnable {
 
     /**
      * check the cancelled flag
-     *
      */
     public final boolean isCancelled() {
         return cancelled.get();
@@ -123,7 +122,6 @@ public class LongOperation implements Runnable {
     /**
      * activate the thread (and cached desktop) for UI updates call
      * {@link #deactivate()} once done updating the UI
-     *
      */
     protected final void activate() throws InterruptedException {
         Executions.activate(getDesktop());
@@ -247,8 +245,7 @@ public class LongOperation implements Runnable {
             runCallback(callback);
             deactivate();
         } catch (DesktopUnavailableException | InterruptedException e) {
-
-            e.printStackTrace();
+            LoggingService.get(getClass()).error("Error updating UI", e);
         }
     }
 

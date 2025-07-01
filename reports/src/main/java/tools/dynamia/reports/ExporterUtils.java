@@ -17,6 +17,7 @@
 
 package tools.dynamia.reports;
 
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.EntityReference;
 import tools.dynamia.domain.EntityReferenceRepository;
 import tools.dynamia.domain.util.DomainUtils;
@@ -27,35 +28,35 @@ import java.util.Map;
 
 public class ExporterUtils {
 
-	private static final Map<String, Object> cache = new HashMap<>();
+    private static final Map<String, Object> cache = new HashMap<>();
 
-	public static void clearCache(){
-		cache.clear();
-	}
+    public static void clearCache() {
+        cache.clear();
+    }
 
-	public static Object checkAndLoadEntityReferenceValue(ExporterColumn col, Object value) {
-		try {
-			if (col.isEntityAlias() && value instanceof Serializable) {
-				String key = col.getEntityAlias() + ":" + value;
-				Object cacheValue = cache.get(key);
-				if (cacheValue == null) {
-					EntityReferenceRepository repo = DomainUtils
-							.getEntityReferenceRepositoryByAlias(col.getEntityAlias());
-					if (repo != null) {
-						@SuppressWarnings("unchecked") EntityReference ref = repo.load((Serializable) value);
-						if (ref != null) {
-							value = ref.toString();
-							cache.put(key, value);
-						}
-					}
-				} else {
-					value = cacheValue;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return value;
-	}
+    public static Object checkAndLoadEntityReferenceValue(ExporterColumn col, Object value) {
+        try {
+            if (col.isEntityAlias() && value instanceof Serializable) {
+                String key = col.getEntityAlias() + ":" + value;
+                Object cacheValue = cache.get(key);
+                if (cacheValue == null) {
+                    EntityReferenceRepository repo = DomainUtils
+                            .getEntityReferenceRepositoryByAlias(col.getEntityAlias());
+                    if (repo != null) {
+                        @SuppressWarnings("unchecked") EntityReference ref = repo.load((Serializable) value);
+                        if (ref != null) {
+                            value = ref.toString();
+                            cache.put(key, value);
+                        }
+                    }
+                } else {
+                    value = cacheValue;
+                }
+            }
+        } catch (Exception e) {
+            LoggingService.get(ExporterUtils.class).error("Error checking entity reference value", e);
+        }
+        return value;
+    }
 
 }

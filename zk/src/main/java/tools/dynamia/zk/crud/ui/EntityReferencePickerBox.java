@@ -150,7 +150,7 @@ public class EntityReferencePickerBox extends Bandbox implements CanBeReadonly {
             if (result == null) {
                 result = new ArrayList<>();
             }
-            result.add(0, null);
+            result.addFirst(null);
             this.lastSearchText = param;
             ZKUtil.fillListbox(resultTable, result, true);
 

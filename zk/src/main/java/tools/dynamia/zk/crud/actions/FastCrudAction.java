@@ -30,8 +30,10 @@ public class FastCrudAction extends AbstractCrudAction {
 
     private final Consumer<CrudActionEvent> onAction;
 
-    public void FastCrudAction(String name) {
+    public FastCrudAction(String name) {
         setName(name);
+        onAction = crudActionEvent -> {
+        };
     }
 
     public FastCrudAction(String name, String image, Consumer<CrudActionEvent> onAction) {

@@ -63,7 +63,7 @@ public class CrudServiceMultiFunctionProcessor<T> implements MultiFunctionProces
                 if (!queryResult.isEmpty()) {
                     for (int i = 0; i < functions.size(); i++) {
                         var function = functions.get(i);
-                        Object[] functionResult = (Object[]) queryResult.get(0);
+                        Object[] functionResult = (Object[]) queryResult.getFirst();
                         result.put(function, (Number) functionResult[i]);
                     }
                 }

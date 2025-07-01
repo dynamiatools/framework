@@ -78,23 +78,31 @@ public class CacheCrudService extends AbstractCrudService {
      * @return
      */
     protected String toString(Object arg) {
-        if (arg == null) {
-            return "#";
-        }
-        if (arg instanceof String string) {
-            return string.trim().replace(" ", "_");
-        } else if (arg instanceof Class<?> clazz) {
-            return clazz.getSimpleName();
-        } else if (arg instanceof AbstractEntity<?> entity) {
-            return entity.getClass().getSimpleName() + "-" + entity.getId();
-        } else if (arg instanceof Map<?, ?> map) {
-            StringBuilder mapKey = new StringBuilder();
-            map.forEach((k, v) -> mapKey.append(k).append(":").append(toString(v)));
-            return mapKey.toString();
-        } else if (arg instanceof Collection<?> collection) {
-            StringBuilder colkey = new StringBuilder();
-            collection.forEach(v -> colkey.append(toString(v)).append(":"));
-            return colkey.toString();
+        switch (arg) {
+            case null -> {
+                return "#";
+            }
+            case String string -> {
+                return string.trim().replace(" ", "_");
+            }
+            case Class<?> clazz -> {
+                return clazz.getSimpleName();
+            }
+            case AbstractEntity<?> entity -> {
+                return entity.getClass().getSimpleName() + "-" + entity.getId();
+            }
+            case Map<?, ?> map -> {
+                StringBuilder mapKey = new StringBuilder();
+                map.forEach((k, v) -> mapKey.append(k).append(":").append(toString(v)));
+                return mapKey.toString();
+            }
+            case Collection<?> collection -> {
+                StringBuilder colkey = new StringBuilder();
+                collection.forEach(v -> colkey.append(toString(v)).append(":"));
+                return colkey.toString();
+            }
+            default -> {
+            }
         }
 
 

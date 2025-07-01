@@ -121,7 +121,6 @@ public class JpaConfigurationAdapter {
             logger.info("AWS Datasource Created Succesfully");
             return dataSource;
         } catch (Exception ex) {
-            ex.printStackTrace();
             logger.warn("Cannot create a MySQL DataSource using AWS System properties. Exception Message: " + ex.getClass() + ": "
                     + ex.getMessage());
             return null;
@@ -154,7 +153,6 @@ public class JpaConfigurationAdapter {
             return dataSource;
 
         } catch (Exception ex) {
-            ex.printStackTrace();
             logger.warn("Cannot create a MySQL DataSource using AWS System properties. Exception Message: " + ex.getClass() + ": "
                     + ex.getMessage());
             return null;
@@ -174,7 +172,6 @@ public class JpaConfigurationAdapter {
             logger.info("ApplicationInfo Datasource Created Succesfully");
             return dataSource;
         } catch (Exception ex) {
-            ex.printStackTrace();
             logger.warn("Cannot create DataSource using ApplicationInfo properties. Exception Message: " + ex.getClass() + ": "
                     + ex.getMessage());
             return null;
@@ -190,7 +187,6 @@ public class JpaConfigurationAdapter {
             logger.info("JNDI Datasource " + dataSource + " found succesfully");
             return dataSource;
         } catch (NamingException ex) {
-            ex.printStackTrace();
             logger.warn("Cannot create JNDI DataSource using " + jndiName() + ". Exception Message: " + ex.getClass() + ": "
                     + ex.getMessage());
             return null;

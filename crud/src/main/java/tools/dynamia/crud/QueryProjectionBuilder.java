@@ -27,7 +27,7 @@ public class QueryProjectionBuilder {
 
         fields = new ArrayList<>(fields);
 
-        fields.add(0, "id");
+        fields.addFirst("id");
 
 
         var query = QueryBuilder.select(fields.toArray(new String[0]))

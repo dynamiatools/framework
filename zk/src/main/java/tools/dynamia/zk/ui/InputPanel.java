@@ -29,6 +29,7 @@ import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vbox;
 import org.zkoss.zul.Window;
 import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.logger.Loggable;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.viewers.ComponentCustomizer;
 import tools.dynamia.viewers.Field;
@@ -40,7 +41,7 @@ import tools.dynamia.zk.util.ZKUtil;
 import java.util.Collection;
 
 @SuppressWarnings("rawtypes")
-public class InputPanel extends Div {
+public class InputPanel extends Div implements Loggable {
 
     public static final String ON_INPUT = "onInput";
     private static final long serialVersionUID = 7388726856898185544L;
@@ -145,7 +146,7 @@ public class InputPanel extends Div {
                 ComponentCustomizer customizer = BeanUtils.newInstance(field.getComponentCustomizer());
                 customizer.cutomize(field, comp);
             } catch (Exception e) {
-                // TODO: handle exception
+                log("Cannot create component customizer", e);
             }
         }
         BeanUtils.setupBean(comp, field.getParams());
@@ -185,7 +186,7 @@ public class InputPanel extends Div {
         try {
             win.doModal();
         } catch (Exception e) {
-            e.printStackTrace();
+            log("Error showing dialog", e);
         }
         return getValue();
     }

@@ -72,7 +72,7 @@ public class MathFunction {
      */
     private double eval(final String f_x, final double xi) throws MathCalculationException {
         double value = 0;
-        String number = "";
+        StringBuilder number = new StringBuilder();
         String function = "";
         boolean hasNumber = false;
         boolean hasFunction = false;
@@ -83,22 +83,22 @@ public class MathFunction {
             if (character >= '0' && character <= '9') {
 
                 hasNumber = true;
-                number += character;
+                number.append(character);
                 if (i == (f_x.length() - 1)) {
-                    value = Double.parseDouble(number);
-                    number = "";
+                    value = Double.parseDouble(number.toString());
+                    number = new StringBuilder();
                     hasNumber = false;
                 }
 
             } else if (character == '+') {
 
                 if (hasNumber) {
-                    final Double numb = Double.valueOf(number);
+                    final double numb = Double.parseDouble(number.toString());
                     final String new_f_x = f_x.substring(i + 1);
                     value = numb + eval(new_f_x, xi);
                     i += new_f_x.length();
                     hasNumber = false;
-                    number = "";
+                    number = new StringBuilder();
                 } else if (hasFunction) {
                     final String new_f_x = f_x.substring(i + 1);
                     value = eval(function, xi) + eval(new_f_x, xi);
@@ -114,12 +114,12 @@ public class MathFunction {
             } else if (character == '*') {
 
                 if (hasNumber) {
-                    final Double numb = Double.valueOf(number);
+                    final double numb = Double.parseDouble(number.toString());
                     final String new_f_x = nextFunction(f_x.substring(i + 1));
                     value = numb * eval(new_f_x, xi);
                     i += new_f_x.length();
                     hasNumber = false;
-                    number = "";
+                    number = new StringBuilder();
                 } else if (hasFunction) {
                     final String new_f_x = nextFunction(f_x.substring(i + 1));
                     value = eval(function, xi) * eval(new_f_x, xi);
@@ -135,12 +135,12 @@ public class MathFunction {
             } else if (character == '-') {
 
                 if (hasNumber) {
-                    final Double numb = Double.valueOf(number);
+                    final double numb = Double.parseDouble(number.toString());
                     final String new_f_x = nextMinusFunction(f_x.substring(i + 1));
                     value = numb - eval(new_f_x, xi);
                     i += new_f_x.length();
                     hasNumber = false;
-                    number = "";
+                    number = new StringBuilder();
                 } else if (hasFunction) {
                     final String new_f_x = nextMinusFunction(f_x.substring(i + 1));
                     value = eval(function, xi) - eval(new_f_x, xi);
@@ -156,12 +156,12 @@ public class MathFunction {
             } else if (character == '/') {
 
                 if (hasNumber) {
-                    final Double numb = Double.valueOf(number);
+                    final double numb = Double.parseDouble(number.toString());
                     final String new_f_x = nextFunction(f_x.substring(i + 1));
                     value = numb / eval(new_f_x, xi);
                     i += new_f_x.length();
                     hasNumber = false;
-                    number = "";
+                    number = new StringBuilder();
                 } else if (hasFunction) {
                     final String new_f_x = nextFunction(f_x.substring(i + 1));
                     value = eval(function, xi) / eval(new_f_x, xi);
@@ -177,12 +177,12 @@ public class MathFunction {
             } else if (character == '^') {
 
                 if (hasNumber) {
-                    final Double numb = Double.valueOf(number);
+                    final double numb = Double.parseDouble(number.toString());
                     final String new_f_x = nextFunction(f_x.substring(i + 1));
                     value = StrictMath.pow(numb, eval(new_f_x, xi));
                     i += new_f_x.length();
                     hasNumber = false;
-                    number = "";
+                    number = new StringBuilder();
                 } else if (hasFunction) {
                     final String new_f_x = nextFunction(f_x.substring(i + 1));
                     value = StrictMath.pow(eval(function, xi), eval(new_f_x, xi));
@@ -201,7 +201,7 @@ public class MathFunction {
                     throw new MathCalculationException("The function is not well-formed");
                 }
                 if (hasNumber && (number.length() > 0)) {
-                    number += character;
+                    number.append(character);
                 }
 
             } else if (character == '(') {
@@ -308,30 +308,30 @@ public class MathFunction {
      * @throws MathCalculationException the calculator exception
      */
     private String nextFunction(final String f_x) throws MathCalculationException {
-        String result = "";
+        StringBuilder result = new StringBuilder();
 
         for (int i = 0; i < f_x.length(); i++) {
             final char character = f_x.charAt(i);
 
             if (isValidNumericAndCharacter(character)) {
-                result += character;
+                result.append(character);
             } else if (character == '+' || character == '*' || character == '-' || character == '/') {
                 i = f_x.length();
             } else if (character == '.' || character == '^') {
-                result += character;
+                result.append(character);
             } else if (character == '(') {
                 final String new_f_x = f_x.substring(i, nextBracket(f_x) + 1);
-                result += new_f_x;
+                result.append(new_f_x);
                 i = (i + new_f_x.length()) - 1;
             } else if (character == ')') {
                 throw new MathCalculationException(" '(' is not finished ");
             } else if (character == ' ') {
-                result += character;
+                result.append(character);
             } else {
                 throw new MathCalculationException("Invalid character:" + character);
             }
         }
-        return result;
+        return result.toString();
     }
 
     /**
@@ -342,29 +342,29 @@ public class MathFunction {
      * @throws MathCalculationException the calculator exception
      */
     private String nextMinusFunction(final String f_x) throws MathCalculationException {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < f_x.length(); i++) {
             final char character = f_x.charAt(i);
 
             if (isValidNumericAndCharacter(character)) {
-                result += character;
+                result.append(character);
             } else if (character == '+' || character == '-') {
                 i = f_x.length();
             } else if (character == '*' || character == '/' || character == '.' || character == '^') {
-                result += character;
+                result.append(character);
             } else if (character == '(') {
                 final String new_f_x = f_x.substring(i, nextBracket(f_x) + 1);
-                result += new_f_x;
+                result.append(new_f_x);
                 i = (i + new_f_x.length()) - 1;
             } else if (character == ')') {
                 throw new MathCalculationException(" '(' is not finished ");
             } else if (character == ' ') {
-                result += character;
+                result.append(character);
             } else {
                 throw new MathCalculationException("Invalid character:" + character);
             }
         }
-        return result;
+        return result.toString();
     }
 
     /**
