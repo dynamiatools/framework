@@ -849,10 +849,9 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
             case READ, DELETE -> getDataSetView().getSelected();
         };
 
-        if (data instanceof BeanMap && ((BeanMap) data).getId() != null) {
+        if (data instanceof BeanMap beanMap && ((BeanMap) data).getId() != null) {
             CrudService crudService = crudServiceName != null ? Containers.get().findObject(crudServiceName, CrudService.class) : Containers.get().findObject(CrudService.class);
             if (crudService != null) {
-                BeanMap beanMap = (BeanMap) data;
                 data = crudService.find(beanMap.getBeanClass(), (Serializable) beanMap.getId());
             }
         }

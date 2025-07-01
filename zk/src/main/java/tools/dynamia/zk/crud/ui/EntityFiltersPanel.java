@@ -239,13 +239,11 @@ public class EntityFiltersPanel extends Borderlayout implements View {
 
             Component comp = buildComponent(field, prop, filterCondition);
             Component comp2 = buildComponent(field, prop, filterCondition);
-            if (comp instanceof InputElement) {
-                InputElement input = (InputElement) comp;
+            if (comp instanceof InputElement input) {
                 input.setHflex("1");
                 input.setPlaceholder(Messages.get(EntityFiltersPanel.class, "from"));
             }
-            if (comp2 instanceof InputElement) {
-                InputElement input = (InputElement) comp2;
+            if (comp2 instanceof InputElement input) {
                 input.setHflex("1");
                 input.setPlaceholder(Messages.get(EntityFiltersPanel.class, "from"));
             }

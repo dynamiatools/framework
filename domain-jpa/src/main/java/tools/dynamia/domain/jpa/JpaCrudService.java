@@ -241,7 +241,7 @@ public class JpaCrudService extends AbstractCrudService {
         try {
             resultList = query.getResultList();
             if (!resultList.isEmpty()) {
-                result = resultList.get(0);
+                result = resultList.getFirst();
             }
         } catch (Exception ignored) {
         }
@@ -791,7 +791,7 @@ public class JpaCrudService extends AbstractCrudService {
     public Object findSingleWithNameQuery(String namedQueryName, QueryParameters parameters) {
         List list = findWithNamedQuery(namedQueryName, parameters, 1);
         if (list != null && list.size() == 1) {
-            return list.get(0);
+            return list.getFirst();
         }
         return null;
     }

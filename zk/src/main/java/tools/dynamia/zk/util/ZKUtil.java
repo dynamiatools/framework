@@ -715,15 +715,13 @@ public abstract class ZKUtil {
 
         String realPath = icon.getRealPath(component, size);
 
-        if (component instanceof LabelImageElement) {
+        if (component instanceof LabelImageElement element) {
 
-            LabelImageElement element = (LabelImageElement) component;
             switch (icon.getType()) {
                 case IMAGE -> element.setImage(realPath);
                 case FONT -> element.setIconSclass(realPath);
             }
-        } else if (component instanceof AbstractTag) {
-            AbstractTag element = (AbstractTag) component;
+        } else if (component instanceof AbstractTag element) {
             switch (icon.getType()) {
                 case IMAGE -> {
                     Image img = new Image(realPath);

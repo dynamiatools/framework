@@ -23,6 +23,7 @@ import tools.dynamia.integration.Containers;
 import tools.dynamia.io.impl.SpringResourceLocator;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -474,7 +475,7 @@ public abstract class IOUtils {
                 separator = "";
             }
 
-            final URL url = new URL(baseURL + separator + fileURI);
+            final URL url = URI.create(baseURL + separator + fileURI).toURL();
             final Path folder = Paths.get(localFolder);
             final Path localFile = folder.resolve(fileURI);
 

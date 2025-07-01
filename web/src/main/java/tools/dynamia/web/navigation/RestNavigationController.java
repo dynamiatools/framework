@@ -281,7 +281,7 @@ public class RestNavigationController extends AbstractLoggable {
             final ViewDescriptor desc = descriptor;
             JsonNode node = mapper.readTree(jsonData);
             System.out.println("TYPE: " + node.getNodeType());
-            node.fields().forEachRemaining(entry -> {
+            node.properties().forEach(entry -> {
                 Field field = desc.getField(entry.getKey());
                 if (field != null) {
                     Object fieldValue = JsonViewDescriptorDeserializer.getNodeValue(field.getPropertyInfo(), entry.getValue());

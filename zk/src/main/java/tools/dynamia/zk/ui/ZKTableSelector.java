@@ -86,7 +86,7 @@ public class ZKTableSelector<T> extends Div {
                     if (tableView.getSelectedCount() > 0) {
                         var selected = tableView.getSelectedItems().stream().map(Listitem::getValue).toList();
                         if (onSelect != null) {
-                            onSelect.onSelect((T) selected.get(0));
+                            onSelect.onSelect((T) selected.getFirst());
                         }
 
                         if (onSelection != null) {

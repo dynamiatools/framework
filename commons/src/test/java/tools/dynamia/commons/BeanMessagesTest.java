@@ -36,7 +36,7 @@ public class BeanMessagesTest {
 
     @Test
     public void testAllProperties() {
-        BeanMessages msg = new BeanMessages(Dummy.class, new Locale("es"));
+        BeanMessages msg = new BeanMessages(Dummy.class, Locale.of("es"));
         Assert.assertEquals("El idiota", msg.getLocalizedName());
         Assert.assertEquals("nombrecito", msg.getMessage("name"));
         Assert.assertEquals("edad", msg.getMessage("age"));
@@ -45,10 +45,11 @@ public class BeanMessagesTest {
 
     @Test
     public void testChild() {
-        BeanMessages msg = new BeanMessages(ChildDummy.class, new Locale("es"));
+        BeanMessages msg = new BeanMessages(ChildDummy.class, Locale.of("es"));
         List<PropertyInfo> info = BeanUtils.getPropertiesInfo(ChildDummy.class);
 
         for (PropertyInfo propertyInfo : info) {
+            System.out.println(propertyInfo);
         }
         Assert.assertEquals("El idiota hijo", msg.getLocalizedName());
     }

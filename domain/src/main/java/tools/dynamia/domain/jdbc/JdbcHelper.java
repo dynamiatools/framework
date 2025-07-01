@@ -482,15 +482,12 @@ public class JdbcHelper extends AbstractLoggable {
 	}
 
 	private Object mapBoolean(Object value) {
-		if (value instanceof Boolean) {
-			return value;
-		} else if (value instanceof String) {
-			return value.equals("Y") || value.equals("true");
-		} else if (value instanceof Number) {
-			return ((Number) value).intValue() == 1;
-		} else {
-			return value;
-		}
+        return switch (value) {
+            case Boolean b -> value;
+            case String s -> value.equals("Y") || value.equals("true");
+            case Number number -> number.intValue() == 1;
+            case null, default -> value;
+        };
 	}
 
 	/**

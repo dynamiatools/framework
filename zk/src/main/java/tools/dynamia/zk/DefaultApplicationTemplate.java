@@ -52,7 +52,7 @@ public class DefaultApplicationTemplate implements ApplicationTemplate {
 
     @Override
     public ApplicationTemplateSkin getDefaultSkin() {
-        return skins.get(0);
+        return skins.getFirst();
     }
 
     @Override

@@ -168,7 +168,7 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
 
         inputField.addEventListener(Events.ON_OK, evt -> {
             if (result != null && result.size() == 1) {
-                setSelected(result.get(0));
+                setSelected(result.getFirst());
                 Events.postEvent(Events.ON_SELECT, this, getSelected());
                 close();
             }
@@ -281,7 +281,7 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
             }
 
             //noinspection unchecked
-            result.add(0, null);
+            result.addFirst(null);
 
             ZKUtil.fillListbox(resultTable, result, true);
             if ((param == null || param.isEmpty()) && selected != null) {

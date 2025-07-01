@@ -18,6 +18,8 @@
 package tools.dynamia.domain.jpa;
 
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Converter;
 import tools.dynamia.commons.JsonParsingException;
 import tools.dynamia.commons.StringPojoParser;
 import tools.dynamia.commons.logger.LoggingService;
@@ -35,9 +37,10 @@ import java.util.List;
  *     }
  * }
  * <p>
- * And then annotate entity field with {@link jakarta.persistence.Convert}
+ * And then annotate entity field with {@link Convert}
  *
  */
+@Converter
 public abstract class AbstractListToJsonConverter<T> implements AttributeConverter<List<T>, String> {
 
     private final LoggingService logger = new SLF4JLoggingService();

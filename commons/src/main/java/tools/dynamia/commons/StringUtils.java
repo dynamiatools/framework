@@ -671,13 +671,13 @@ public abstract class StringUtils {
                 tops--;
             } else {
                 // Normal path element found.
-                pathElements.add(0, element);
+                pathElements.addFirst(element);
             }
         }
 
         // Remaining top paths need to be retained.
         for (int i = 0; i < tops; i++) {
-            pathElements.add(0, TOP_PATH);
+            pathElements.addFirst(TOP_PATH);
         }
 
         return prefix + collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);
@@ -722,7 +722,7 @@ public abstract class StringUtils {
                 variant = trimLeadingCharacter(variant, '_');
             }
         }
-        return (language.length() > 0 ? new Locale(language, country, variant) : null);
+        return (language.length() > 0 ? Locale.of(language, country, variant) : null);
     }
 
     /**
@@ -1076,7 +1076,7 @@ public abstract class StringUtils {
             return new String[]{str};
         }
         List<String> result = new ArrayList<>();
-        if ("".equals(delimiter)) {
+        if (delimiter.isEmpty()) {
             for (int i = 0; i < str.length(); i++) {
                 result.add(deleteAny(str.substring(i, i + 1), charsToDelete));
             }

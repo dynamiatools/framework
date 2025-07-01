@@ -115,24 +115,24 @@ public class ExcelFileWriter {
         }
 
         if (value != null) {
-            if (value instanceof Number) {
-                cell.setCellValue(((Number) value).doubleValue());
-            } else if (value instanceof Date) {
-                cell.setCellValue((Date) value);
-                if (isShowCellBorders()) {
-                    style = mixStyle;
-                } else {
-                    style = dateStyle;
+            switch (value) {
+                case Number number -> cell.setCellValue(number.doubleValue());
+                case Date date -> {
+                    cell.setCellValue(date);
+                    if (isShowCellBorders()) {
+                        style = mixStyle;
+                    } else {
+                        style = dateStyle;
+                    }
                 }
-
-            } else if (value instanceof Boolean) {
-                cell.setCellValue((Boolean) value);
-            } else {
-                try {
-                    cell.setCellValue(value.toString());
-                } catch (Exception e) {
-                    cell.setCellValue("");
-                    LOGGER.error("Error writing cell. Using empty string as value", e);
+                case Boolean b -> cell.setCellValue(b);
+                default -> {
+                    try {
+                        cell.setCellValue(value.toString());
+                    } catch (Exception e) {
+                        cell.setCellValue("");
+                        LOGGER.error("Error writing cell. Using empty string as value", e);
+                    }
                 }
             }
         }
