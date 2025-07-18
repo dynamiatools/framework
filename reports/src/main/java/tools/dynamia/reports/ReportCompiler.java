@@ -23,6 +23,29 @@ import java.util.Map;
 
 /**
  * The Interface ReportCompiler. Represents a service that can compile and process reports.
+ * This interface defines the contract for report compilation engines that can transform report
+ * templates into executable reports and generate various output formats. Report compilers handle
+ * the complete report lifecycle including template compilation, data binding, report filling,
+ * and export to different formats like PDF, Excel, HTML, or images. They are essential components
+ * in business intelligence and document generation systems.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * ReportCompiler compiler = reportEngine.getCompiler("jasper");
+ * 
+ * // Compile a report template
+ * File compiledReport = compiler.compile(new File("invoice.jrxml"));
+ * 
+ * // Fill report with data
+ * ReportDescriptor descriptor = new ReportDescriptor(compiledReport, dataMap);
+ * Report filledReport = compiler.fill(descriptor);
+ * 
+ * // Export to PDF
+ * FileOutputStream output = new FileOutputStream("invoice.pdf");
+ * compiler.export(Arrays.asList(filledReport), output, 
+ *                ReportOutputType.PDF, exportParams);
+ * </code>
  *
  * @author Mario A. Serrano Leones
  */

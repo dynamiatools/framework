@@ -20,6 +20,32 @@ import java.util.Map;
 
 /**
  * The Interface TemplateParametersProvider. Provides parameters for template processing.
+ * This interface defines the contract for extracting template parameters from target objects,
+ * enabling dynamic parameter injection into template evaluation processes. Parameter providers
+ * are commonly used to transform domain objects into template-friendly data structures,
+ * apply business logic during parameter extraction, and provide computed values or formatted
+ * data for template rendering in reports, emails, and dynamic content generation.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * public class UserParametersProvider implements TemplateParametersProvider&lt;User&gt; {
+ *     
+ *     public Map&lt;String, Object&gt; getParameters(User user) {
+ *         Map&lt;String, Object&gt; params = new HashMap&lt;&gt;();
+ *         params.put("fullName", user.getFirstName() + " " + user.getLastName());
+ *         params.put("displayAge", user.getAge() + " years old");
+ *         params.put("isActive", user.getStatus() == UserStatus.ACTIVE);
+ *         params.put("memberSince", formatDate(user.getCreatedDate()));
+ *         return params;
+ *     }
+ * }
+ * 
+ * // Usage
+ * TemplateParametersProvider&lt;User&gt; provider = new UserParametersProvider();
+ * Map&lt;String, Object&gt; params = provider.getParameters(user);
+ * String content = templateEngine.evaluate(template, params);
+ * </code>
  *
  * @param <T> the type of target object
  * @author Mario A. Serrano Leones

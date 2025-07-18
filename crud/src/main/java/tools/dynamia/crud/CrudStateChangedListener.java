@@ -18,6 +18,34 @@ package tools.dynamia.crud;
 
 /**
  * The Interface CrudStateChangedListener. Listens for changes in CRUD operation states.
+ * This interface provides a mechanism for observing state transitions in CRUD components,
+ * allowing applications to respond to changes between CREATE, READ, UPDATE, and DELETE modes.
+ * State change listeners are commonly used for updating UI elements, enabling/disabling actions,
+ * refreshing data, and implementing business logic that depends on the current operation mode.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * public class CrudToolbarManager implements CrudStateChangedListener {
+ *     
+ *     public void changedState(ChangedStateEvent evt) {
+ *         switch (evt.getNewState()) {
+ *             case CREATE:
+ *                 enableSaveButton();
+ *                 disableDeleteButton();
+ *                 break;
+ *             case READ:
+ *                 enableEditButton();
+ *                 enableDeleteButton();
+ *                 break;
+ *             case UPDATE:
+ *                 enableSaveButton();
+ *                 enableCancelButton();
+ *                 break;
+ *         }
+ *     }
+ * }
+ * </code>
  *
  * @author Mario A. Serrano Leones
  */

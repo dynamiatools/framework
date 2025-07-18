@@ -22,6 +22,27 @@ import java.util.Map;
 
 /**
  * The Interface TemplateEngine. Provides template evaluation capabilities.
+ * This interface defines the contract for template processing engines that can evaluate
+ * template content with dynamic data substitution. Template engines are commonly used for
+ * generating dynamic content such as HTML pages, email templates, reports, configuration
+ * files, and code generation. The interface supports both parameter-based and object-based
+ * template evaluation with flexible input/output mechanisms.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * TemplateEngine engine = templateEngineProvider.getEngine();
+ * 
+ * // Using parameters map
+ * Map&lt;String, Object&gt; params = new HashMap&lt;&gt;();
+ * params.put("name", "John");
+ * params.put("age", 30);
+ * String result = engine.evaluate("Hello ${name}, you are ${age} years old", params);
+ * 
+ * // Using object context
+ * User user = new User("Alice", 25);
+ * String result = engine.evaluate("Welcome ${name}!", user);
+ * </code>
  *
  * @author Mario A. Serrano Leones
  */

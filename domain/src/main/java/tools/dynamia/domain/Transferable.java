@@ -22,6 +22,32 @@ import tools.dynamia.domain.util.DomainUtils;
 
 /**
  * The Interface Transferable. Represents entities that can be converted to Data Transfer Objects (DTOs).
+ * This interface provides automatic conversion capabilities from domain entities to DTOs, which is
+ * essential for API responses, service layer communication, and decoupling presentation logic from
+ * domain logic. The default implementation uses the framework's automatic mapping utilities to
+ * create DTOs based on generic type information, reducing boilerplate code while maintaining flexibility.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * public class User implements Transferable&lt;UserDTO&gt; {
+ *     private String name;
+ *     private String email;
+ *     
+ *     // The toDTO() method is inherited and works automatically
+ *     // Custom implementation example:
+ *     public UserDTO toDTO() {
+ *         UserDTO dto = new UserDTO();
+ *         dto.setDisplayName(this.name);
+ *         dto.setContactEmail(this.email);
+ *         return dto;
+ *     }
+ * }
+ * 
+ * // Usage
+ * User user = userService.findById(1L);
+ * UserDTO dto = user.toDTO();
+ * </code>
  *
  * @param <DTO> the type of the data transfer object
  * @author Mario A. Serrano Leones

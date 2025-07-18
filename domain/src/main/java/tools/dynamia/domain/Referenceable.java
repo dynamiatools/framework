@@ -19,7 +19,29 @@ package tools.dynamia.domain;
 import java.io.Serializable;
 
 /**
- * Class that can be entity referenceables
+ * The Interface Referenceable. Represents entities that can be converted to entity references.
+ * This interface provides a standardized mechanism for creating lightweight references to domain
+ * entities, which is essential for distributed systems, caching strategies, serialization, and
+ * lazy loading patterns. Entity references typically contain just the identifier and type information,
+ * allowing for efficient storage and transmission while maintaining referential integrity.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * public class Product implements Referenceable&lt;Long&gt; {
+ *     private Long id;
+ *     private String name;
+ *     
+ *     public EntityReference&lt;Long&gt; toEntityReference() {
+ *         return EntityReference.create(this.getClass(), this.id);
+ *     }
+ * }
+ * 
+ * // Usage
+ * Product product = productService.findById(1L);
+ * EntityReference&lt;Long&gt; ref = product.toEntityReference();
+ * // Send reference instead of full entity
+ * </code>
  *
  * @param <ID> the identifier type
  * @author Ing. Mario Serrano

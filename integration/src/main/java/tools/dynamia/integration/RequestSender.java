@@ -20,6 +20,29 @@ import java.util.Map;
 
 /**
  * The Interface RequestSender. Provides functionality to send requests to remote services.
+ * This functional interface defines the contract for sending HTTP requests or other types
+ * of network communications to remote endpoints. Request senders are commonly used in
+ * integration scenarios, microservices communication, webhook notifications, API calls,
+ * and distributed system interactions. The interface abstracts the underlying communication
+ * protocol and provides a simple, consistent API for request transmission.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * // Lambda expression for HTTP POST
+ * RequestSender httpSender = (hostname, uri, params) -> {
+ *     HttpClient client = HttpClient.newHttpClient();
+ *     String url = "https://" + hostname + uri;
+ *     // Build and send request with parameters
+ * };
+ * 
+ * // Method reference
+ * RequestSender apiSender = this::sendApiRequest;
+ * 
+ * // Usage
+ * Map&lt;String, String&gt; params = Map.of("action", "notify", "data", "payload");
+ * sender.send("api.example.com", "/webhook", params);
+ * </code>
  *
  * @author Mario A. Serrano Leones
  */

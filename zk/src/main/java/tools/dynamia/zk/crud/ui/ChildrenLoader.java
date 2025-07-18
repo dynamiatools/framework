@@ -18,6 +18,30 @@ package tools.dynamia.zk.crud.ui;
 
 /**
  * The Interface ChildrenLoader. Provides functionality to load children for lazy tree nodes.
+ * This functional interface defines the contract for dynamically loading child nodes in tree
+ * structures when they are needed (lazy loading). It's commonly used in hierarchical data
+ * representations like file explorers, organizational charts, category trees, and nested
+ * data structures where loading all nodes upfront would be inefficient or impractical.
+ * The interface enables performance optimization by deferring child node loading until expansion.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * // Lambda expression for loading department employees
+ * ChildrenLoader&lt;Department&gt; deptLoader = node -> {
+ *     Department dept = node.getData();
+ *     List&lt;Employee&gt; employees = employeeService.findByDepartment(dept);
+ *     employees.forEach(emp -> node.add(new LazyEntityTreeNode&lt;&gt;(emp)));
+ *     node.setChildrenLoaded(true);
+ * };
+ * 
+ * // Method reference
+ * ChildrenLoader&lt;Category&gt; categoryLoader = this::loadSubcategories;
+ * 
+ * // Usage in tree component
+ * LazyEntityTreeNode&lt;Department&gt; rootNode = new LazyEntityTreeNode&lt;&gt;(rootDept);
+ * rootNode.setChildrenLoader(deptLoader);
+ * </code>
  *
  * @param <E> the type of entity
  * @author Mario A. Serrano Leones
