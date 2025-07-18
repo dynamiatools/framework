@@ -21,16 +21,45 @@ import java.io.Writer;
 import java.util.Map;
 
 /**
+ * The Interface TemplateEngine. Provides template evaluation capabilities.
  *
- * @author programador
+ * @author Mario A. Serrano Leones
  */
 public interface TemplateEngine {
 
+    /**
+     * Evaluates a template content with the given parameters.
+     *
+     * @param content the template content
+     * @param params the parameters map
+     * @return the evaluated template as string
+     */
     String evaluate(String content, Map<String, Object> params);
 
+    /**
+     * Evaluates a template content using a target object as context.
+     *
+     * @param content the template content
+     * @param target the target object for context
+     * @return the evaluated template as string
+     */
     String evaluate(String content, Object target);
 
+    /**
+     * Evaluates a template from reader and writes the result to writer using parameters.
+     *
+     * @param reader the input reader for template content
+     * @param writer the output writer for evaluated content
+     * @param params the parameters map
+     */
     void evaluate(Reader reader, Writer writer, Map<String, Object> params);
 
+    /**
+     * Evaluates a template from reader and writes the result to writer using target object.
+     *
+     * @param reader the input reader for template content
+     * @param writer the output writer for evaluated content
+     * @param target the target object for context
+     */
     void evaluate(Reader reader, Writer writer, Object target);
 }

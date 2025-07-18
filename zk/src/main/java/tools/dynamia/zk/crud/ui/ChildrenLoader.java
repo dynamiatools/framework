@@ -16,8 +16,19 @@
  */
 package tools.dynamia.zk.crud.ui;
 
+/**
+ * The Interface ChildrenLoader. Provides functionality to load children for lazy tree nodes.
+ *
+ * @param <E> the type of entity
+ * @author Mario A. Serrano Leones
+ */
 @FunctionalInterface
 public interface ChildrenLoader<E> {
 
+    /**
+     * Loads children for the specified lazy tree node.
+     *
+     * @param node the lazy entity tree node
+     */
     void loadChildren(LazyEntityTreeNode<E> node);
 }

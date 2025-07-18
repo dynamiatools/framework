@@ -127,27 +127,63 @@ public interface Action extends Comparable<Action>, Serializable {
     String getLocalizedName(Locale locale);
 
     /**
-     *
-     * @return
+     * Get the localized description of this action
+     * @return the localized description
      */
     default String getLocalizedDescription() {
         return getLocalizedDescription(Messages.getDefaultLocale());
     }
 
+    /**
+     * Get the localized description of this action using a custom locale
+     *
+     * @param locale the locale to use
+     * @return the localized description
+     */
     String getLocalizedDescription(Locale locale);
 
+    /**
+     * Gets the keyboard key code associated with this action.
+     *
+     * @return the key code, or 0 if no key is associated
+     */
     default int getKeyCode() {
         return 0;
     }
 
+    /**
+     * Gets the localized messages provider for this action.
+     *
+     * @return the localized messages provider
+     */
     LocalizedMessagesProvider getLocalizedMessagesProvider();
 
+    /**
+     * Gets the message classifier for this action.
+     *
+     * @return the message classifier
+     */
     String getMessageClassifier();
 
+    /**
+     * Checks if this action is visible.
+     *
+     * @return true if visible, false otherwise
+     */
     boolean isVisible();
 
+    /**
+     * Sets the parent action of this action.
+     *
+     * @param action the parent action
+     */
     void setParent(Action action);
 
+    /**
+     * Gets the parent action of this action.
+     *
+     * @return the parent action
+     */
     Action getParent();
 
     /**

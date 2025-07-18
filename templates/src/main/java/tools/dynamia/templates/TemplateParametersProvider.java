@@ -18,8 +18,20 @@ package tools.dynamia.templates;
 
 import java.util.Map;
 
+/**
+ * The Interface TemplateParametersProvider. Provides parameters for template processing.
+ *
+ * @param <T> the type of target object
+ * @author Mario A. Serrano Leones
+ */
 public interface TemplateParametersProvider<T> {
 
+    /**
+     * Gets the parameters for template processing from the target object.
+     *
+     * @param target the target object
+     * @return the map of parameters
+     */
     Map<String, Object> getParameters(T target);
 
 }

@@ -18,9 +18,21 @@ package tools.dynamia.integration;
 
 import java.util.Map;
 
+/**
+ * The Interface RequestSender. Provides functionality to send requests to remote services.
+ *
+ * @author Mario A. Serrano Leones
+ */
 @FunctionalInterface
 public interface RequestSender {
 
+    /**
+     * Sends a request to the specified hostname and URI with parameters.
+     *
+     * @param hostname the target hostname
+     * @param uri the target URI
+     * @param parameters the request parameters
+     */
     void send(String hostname, String uri, Map<String, String> parameters);
 
 }

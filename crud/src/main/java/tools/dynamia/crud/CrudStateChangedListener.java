@@ -16,8 +16,18 @@
  */
 package tools.dynamia.crud;
 
+/**
+ * The Interface CrudStateChangedListener. Listens for changes in CRUD operation states.
+ *
+ * @author Mario A. Serrano Leones
+ */
 public interface CrudStateChangedListener {
 
+    /**
+     * Called when the CRUD state changes.
+     *
+     * @param evt the state change event
+     */
     void changedState(ChangedStateEvent evt);
 
 }
