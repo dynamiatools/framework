@@ -2,6 +2,22 @@ package tools.dynamia.ui;
 
 /**
  * The Interface ButtonComponent. Represents a UI button component with basic operations.
+ * This interface defines the essential functionality for button components in user interfaces,
+ * including label and icon management, as well as click event handling. It's commonly used
+ * by UI framework adapters to provide a consistent button API across different UI technologies
+ * like Swing, JavaFX, web frameworks, or mobile interfaces.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * ButtonComponent saveButton = uiFactory.createButton();
+ * saveButton.setLabel("Save");
+ * saveButton.setIcon("fa-save");
+ * saveButton.onClick(() -> saveDocument());
+ * 
+ * // Or with method reference
+ * saveButton.onClick(this::handleSaveAction);
+ * </code>
  *
  * @author Mario A. Serrano Leones
  */

@@ -18,7 +18,27 @@
 package tools.dynamia.commons;
 
 /**
- * Implement this interface if your class can generate a URL string
+ * The Interface URLable. Represents objects that can generate or expose URL string representations.
+ * This interface is commonly implemented by entities, resources, and web components that need to
+ * provide URL access or navigation capabilities. It's particularly useful for creating dynamic
+ * links, REST endpoints, web resources, and navigation elements in web applications.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * public class Document implements URLable {
+ *     private String id;
+ *     private String baseUrl;
+ *     
+ *     public String toURL() {
+ *         return baseUrl + "/documents/" + id;
+ *     }
+ *     
+ *     public void url(String url) {
+ *         this.baseUrl = url;
+ *     }
+ * }
+ * </code>
  *
  * @author Mario A. Serrano Leones
  */

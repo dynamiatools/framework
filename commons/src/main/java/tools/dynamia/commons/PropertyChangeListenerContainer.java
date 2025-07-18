@@ -19,6 +19,29 @@ package tools.dynamia.commons;
 
 /**
  * The Interface PropertyChangeListenerContainer. Represents objects that can manage property change listeners.
+ * This interface provides the contract for objects that support property change notification through
+ * a listener pattern. Implementing classes must maintain a collection of listeners and invoke
+ * notifyChange() to fire change events when properties are modified. It's essential for creating
+ * observable objects and implementing the Observer pattern in domain models and UI components.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * public class ObservableModel implements PropertyChangeListenerContainer {
+ *     private List&lt;PropertyChangeListener&gt; listeners = new ArrayList&lt;&gt;();
+ *     private String name;
+ *     
+ *     public void addPropertyChangeListener(PropertyChangeListener listener) {
+ *         listeners.add(listener);
+ *     }
+ *     
+ *     public void setName(String name) {
+ *         String oldName = this.name;
+ *         this.name = name;
+ *         notifyChange("name", oldName, name);
+ *     }
+ * }
+ * </code>
  *
  * @author Mario A. Serrano Leones
  */

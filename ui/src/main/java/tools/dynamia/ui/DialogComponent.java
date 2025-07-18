@@ -2,6 +2,23 @@ package tools.dynamia.ui;
 
 /**
  * The Interface DialogComponent. Represents a UI dialog component with configurable properties.
+ * This interface defines the essential functionality for modal and non-modal dialog windows
+ * in user interfaces. It provides comprehensive control over dialog presentation, content
+ * management, user interaction, and lifecycle events. Dialogs are commonly used for forms,
+ * confirmations, detailed views, and complex user interactions that require focused attention.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * DialogComponent dialog = uiFactory.createDialog();
+ * dialog.setTitle("User Details");
+ * dialog.setWidth("600px");
+ * dialog.setHeight("400px");
+ * dialog.setContent(userFormPanel);
+ * dialog.setDraggable(true);
+ * dialog.onClose(() -> refreshUserList());
+ * dialog.show();
+ * </code>
  *
  * @author Mario A. Serrano Leones
  */

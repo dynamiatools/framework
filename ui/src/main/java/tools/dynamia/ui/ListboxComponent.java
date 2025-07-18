@@ -4,6 +4,22 @@ import java.util.List;
 
 /**
  * The Interface ListboxComponent. Represents a UI listbox component for item selection.
+ * This interface defines the functionality for list components that display multiple items
+ * and support both single and multiple selection modes. Listboxes are commonly used in
+ * data selection interfaces, transfer lists, multi-choice configurations, and bulk operations.
+ * The component supports custom item rendering, selection event callbacks, and flexible
+ * data management with refresh capabilities.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * ListboxComponent&lt;User&gt; userList = uiFactory.createListbox();
+ * userList.setData(userCollection);
+ * userList.setMultiple(true);
+ * userList.onSelection(selectedUsers -> processSelectedUsers(selectedUsers));
+ * userList.onSelect(user -> showUserDetails(user));
+ * userList.setItemRenderer(user -> user.getFullName());
+ * </code>
  *
  * @param <T> the type of items in the listbox
  * @author Mario A. Serrano Leones

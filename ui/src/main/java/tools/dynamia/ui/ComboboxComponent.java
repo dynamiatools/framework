@@ -4,6 +4,21 @@ import java.util.List;
 
 /**
  * The Interface ComboboxComponent. Represents a UI combobox component for item selection.
+ * This interface defines the functionality for dropdown list components that allow users
+ * to select a single item from a predefined list of options. Comboboxes are commonly used
+ * in forms, filters, and configuration interfaces where users need to choose from a limited
+ * set of values. The component supports custom item rendering, flexible layout properties,
+ * and programmatic selection control.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * ComboboxComponent&lt;Country&gt; countryCombo = uiFactory.createCombobox();
+ * countryCombo.setData(countryList);
+ * countryCombo.setSelected(defaultCountry);
+ * countryCombo.setHflex("1");
+ * countryCombo.setItemRenderer(country -> country.getName());
+ * </code>
  *
  * @param <T> the type of items in the combobox
  * @author Mario A. Serrano Leones
