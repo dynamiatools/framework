@@ -19,10 +19,16 @@ package tools.dynamia.commons;
 
 /**
  * Allow POJO classes to be converted to XML strings
+ *
+ * @author Mario A. Serrano Leones
  */
 public interface Xmlable {
 
-
+    /**
+     * Converts this object to an XML string representation.
+     *
+     * @return the XML as string
+     */
     default String toXml() {
         return StringPojoParser.convertPojoToXml(this);
     }

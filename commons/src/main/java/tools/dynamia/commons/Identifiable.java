@@ -19,9 +19,25 @@ package tools.dynamia.commons;
 
 import java.io.Serializable;
 
+/**
+ * The Interface Identifiable. Represents entities that have a unique identifier.
+ *
+ * @param <ID> the identifier type
+ * @author Mario A. Serrano Leones
+ */
 public interface Identifiable<ID extends Serializable> {
 
+    /**
+     * Gets the unique identifier of this entity.
+     *
+     * @return the id
+     */
     ID getId();
 
+    /**
+     * Sets the unique identifier of this entity.
+     *
+     * @param id the id to set
+     */
     void setId(ID id);
 }

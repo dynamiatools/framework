@@ -20,8 +20,19 @@ package tools.dynamia.domain;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.domain.util.DomainUtils;
 
+/**
+ * The Interface Transferable. Represents entities that can be converted to Data Transfer Objects (DTOs).
+ *
+ * @param <DTO> the type of the data transfer object
+ * @author Mario A. Serrano Leones
+ */
 public interface Transferable<DTO> {
 
+    /**
+     * Converts this entity to a Data Transfer Object (DTO).
+     *
+     * @return the DTO representation of this entity
+     */
     default DTO toDTO() {
         DTO dto = null;
         try {

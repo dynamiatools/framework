@@ -19,11 +19,23 @@ package tools.dynamia.commons;
 
 /**
  * Implement this interface if your class can generate a URL string
+ *
+ * @author Mario A. Serrano Leones
  */
 public interface URLable {
 
+    /**
+     * Converts this object to a URL string representation.
+     *
+     * @return the URL as string
+     */
     String toURL();
 
+    /**
+     * Sets the URL for this object.
+     *
+     * @param url the URL to set
+     */
     default void url(String url) {
 
     }

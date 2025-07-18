@@ -21,10 +21,16 @@ import java.io.Serializable;
 /**
  * Class that can be entity referenceables
  *
+ * @param <ID> the identifier type
  * @author Ing. Mario Serrano
  */
 public interface Referenceable<ID extends Serializable> {
 
+    /**
+     * Converts this entity to an entity reference.
+     *
+     * @return the entity reference
+     */
     EntityReference<ID> toEntityReference();
 
 }

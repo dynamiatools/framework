@@ -18,10 +18,25 @@ package tools.dynamia.crud;
 
 import tools.dynamia.actions.ClassAction;
 
+/**
+ * The Interface CrudAction. Represents actions that can be performed in CRUD operations.
+ *
+ * @author Mario A. Serrano Leones
+ */
 public interface CrudAction extends ClassAction {
 
+    /**
+     * Gets the states where this action is applicable.
+     *
+     * @return the array of applicable CRUD states
+     */
     CrudState[] getApplicableStates();
 
+    /**
+     * Checks if this action supports menu display.
+     *
+     * @return true if menu is supported, false otherwise
+     */
     boolean isMenuSupported();
 
 }
