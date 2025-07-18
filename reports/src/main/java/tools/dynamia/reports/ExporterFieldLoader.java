@@ -17,7 +17,20 @@
 
 package tools.dynamia.reports;
 
+/**
+ * The Interface ExporterFieldLoader. Used to load field values for report export.
+ *
+ * @param <T> the type of data being processed
+ * @author Mario A. Serrano Leones
+ */
 public interface ExporterFieldLoader<T> {
 
+    /**
+     * Loads the value for a specific field from the given data.
+     *
+     * @param field the field name
+     * @param data the data object
+     * @return the loaded field value
+     */
     Object load(String field, T data);
 }

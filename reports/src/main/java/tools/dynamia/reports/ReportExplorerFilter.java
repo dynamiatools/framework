@@ -18,7 +18,18 @@ package tools.dynamia.reports;
 
 import java.io.File;
 
+/**
+ * The Interface ReportExplorerFilter. Used to filter files when exploring report directories.
+ *
+ * @author Mario A. Serrano Leones
+ */
 public interface ReportExplorerFilter {
 
+    /**
+     * Checks if the given file matches the filter criteria.
+     *
+     * @param file the file to check
+     * @return true if the file matches, false otherwise
+     */
     boolean match(File file);
 }

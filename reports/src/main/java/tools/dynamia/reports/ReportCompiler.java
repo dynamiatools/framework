@@ -21,20 +21,52 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The Interface ReportCompiler. Represents a service that can compile and process reports.
+ *
+ * @author Mario A. Serrano Leones
+ */
 public interface ReportCompiler {
 
+    /**
+     * Gets the unique identifier of this compiler.
+     *
+     * @return the compiler ID
+     */
     String getId();
 
     /**
      * Compile the reportFile
      *
+     * @param reportFile the report file to compile
      * @return compiled report
      */
     File compile(File reportFile);
 
+    /**
+     * Fills a report with data based on the report descriptor.
+     *
+     * @param reportDescriptor the report descriptor
+     * @return the filled report
+     */
     Report fill(ReportDescriptor reportDescriptor);
 
+    /**
+     * Fills a report with data based on the report descriptor.
+     *
+     * @param reportDescriptor the report descriptor
+     * @param inMemory whether to process the report in memory
+     * @return the filled report
+     */
     Report fill(ReportDescriptor reportDescriptor, boolean inMemory);
 
+    /**
+     * Exports reports to the specified output stream.
+     *
+     * @param reports the reports to export
+     * @param outputStream the output stream
+     * @param outputType the output type
+     * @param exportParameters additional export parameters
+     */
     void export(List<Report> reports, OutputStream outputStream, ReportOutputType outputType, Map exportParameters);
 }

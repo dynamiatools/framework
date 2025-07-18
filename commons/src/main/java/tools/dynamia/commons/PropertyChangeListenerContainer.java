@@ -17,18 +17,25 @@
 package tools.dynamia.commons;
 
 
+/**
+ * The Interface PropertyChangeListenerContainer. Represents objects that can manage property change listeners.
+ *
+ * @author Mario A. Serrano Leones
+ */
 public interface PropertyChangeListenerContainer {
 
     /**
      * Add a PropertyChangeListener to get object change, subclasses must invoke
      * notifyChange to fire listeners
      *
+     * @param listener the property change listener to add
      */
     void addPropertyChangeListener(PropertyChangeListener listener);
 
     /**
      * Remove PropertyChangeListener
      *
+     * @param listener the property change listener to remove
      */
     void removePropertyChangeListener(PropertyChangeListener listener);
 }

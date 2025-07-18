@@ -20,16 +20,50 @@ import tools.dynamia.io.FileInfo;
 
 import java.util.List;
 
+/**
+ * The Interface ReportsRepository. Provides access to report files and templates.
+ *
+ * @author Mario A. Serrano Leones
+ */
 public interface ReportsRepository {
 
+    /**
+     * Finds a report by name.
+     *
+     * @param name the report name
+     * @return the file info for the report
+     */
 	FileInfo findReport(String name);
 
+    /**
+     * Finds a report in a specific subdirectory.
+     *
+     * @param subdirectory the subdirectory to search in
+     * @param name the report name
+     * @return the file info for the report
+     */
 	FileInfo findReport(String subdirectory, String name);
 
+    /**
+     * Scans for all available reports.
+     *
+     * @return the list of available reports
+     */
 	List<FileInfo> scan();
 
+    /**
+     * Scans for reports in a specific subdirectory.
+     *
+     * @param subdirectory the subdirectory to scan
+     * @return the list of reports in the subdirectory
+     */
 	List<FileInfo> scan(String subdirectory);
 
+    /**
+     * Gets the location where reports are stored.
+     *
+     * @return the report location path
+     */
 	String getReportLocation();
 
 }
