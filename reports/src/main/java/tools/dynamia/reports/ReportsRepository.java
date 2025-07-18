@@ -20,16 +20,73 @@ import tools.dynamia.io.FileInfo;
 
 import java.util.List;
 
+/**
+ * The Interface ReportsRepository. Provides access to report files and templates.
+ * This interface defines the contract for report storage and retrieval systems that manage
+ * report templates, compiled reports, and related resources. Report repositories abstract
+ * the underlying storage mechanism (file system, database, cloud storage) and provide
+ * standardized access to report resources. They support hierarchical organization through
+ * subdirectories and enable efficient report discovery and management in enterprise applications.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * ReportsRepository repository = reportService.getRepository();
+ * 
+ * // Find a specific report
+ * FileInfo reportFile = repository.findReport("invoice-template");
+ * 
+ * // Find report in subdirectory
+ * FileInfo customerReport = repository.findReport("customers", "monthly-summary");
+ * 
+ * // Scan all available reports
+ * List&lt;FileInfo&gt; allReports = repository.scan();
+ * 
+ * // Scan reports in specific directory
+ * List&lt;FileInfo&gt; salesReports = repository.scan("sales");
+ * </code>
+ *
+ * @author Mario A. Serrano Leones
+ */
 public interface ReportsRepository {
 
+    /**
+     * Finds a report by name.
+     *
+     * @param name the report name
+     * @return the file info for the report
+     */
 	FileInfo findReport(String name);
 
+    /**
+     * Finds a report in a specific subdirectory.
+     *
+     * @param subdirectory the subdirectory to search in
+     * @param name the report name
+     * @return the file info for the report
+     */
 	FileInfo findReport(String subdirectory, String name);
 
+    /**
+     * Scans for all available reports.
+     *
+     * @return the list of available reports
+     */
 	List<FileInfo> scan();
 
+    /**
+     * Scans for reports in a specific subdirectory.
+     *
+     * @param subdirectory the subdirectory to scan
+     * @return the list of reports in the subdirectory
+     */
 	List<FileInfo> scan(String subdirectory);
 
+    /**
+     * Gets the location where reports are stored.
+     *
+     * @return the report location path
+     */
 	String getReportLocation();
 
 }

@@ -18,10 +18,49 @@ package tools.dynamia.crud;
 
 import tools.dynamia.actions.ClassAction;
 
+/**
+ * The Interface CrudAction. Represents actions that can be performed in CRUD operations.
+ * This interface extends ClassAction to provide specialized functionality for Create, Read, Update,
+ * and Delete operations in data management interfaces. CRUD actions are context-aware and can be
+ * configured to appear only in specific states (viewing, editing, creating), providing a dynamic
+ * and state-sensitive user interface for data manipulation operations.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * public class DeleteUserAction implements CrudAction {
+ *     
+ *     public CrudState[] getApplicableStates() {
+ *         return new CrudState[]{CrudState.READ};
+ *     }
+ *     
+ *     public boolean isMenuSupported() {
+ *         return true;
+ *     }
+ *     
+ *     public void actionPerformed(ActionEvent evt) {
+ *         User user = (User) evt.getData();
+ *         userService.delete(user);
+ *     }
+ * }
+ * </code>
+ *
+ * @author Mario A. Serrano Leones
+ */
 public interface CrudAction extends ClassAction {
 
+    /**
+     * Gets the states where this action is applicable.
+     *
+     * @return the array of applicable CRUD states
+     */
     CrudState[] getApplicableStates();
 
+    /**
+     * Checks if this action supports menu display.
+     *
+     * @return true if menu is supported, false otherwise
+     */
     boolean isMenuSupported();
 
 }

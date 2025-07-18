@@ -19,9 +19,45 @@ package tools.dynamia.commons;
 
 import java.io.Serializable;
 
+/**
+ * The Interface Identifiable. Represents entities that have a unique identifier.
+ * This interface is commonly implemented by domain entities, data objects, and persistent entities
+ * to provide a standard way to access and manage unique identifiers. The identifier is typically
+ * used for persistence operations, caching, equality comparisons, and entity referencing.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * public class User implements Identifiable&lt;Long&gt; {
+ *     private Long id;
+ *     private String name;
+ *     
+ *     public Long getId() {
+ *         return id;
+ *     }
+ *     
+ *     public void setId(Long id) {
+ *         this.id = id;
+ *     }
+ * }
+ * </code>
+ *
+ * @param <ID> the identifier type, must extend Serializable
+ * @author Mario A. Serrano Leones
+ */
 public interface Identifiable<ID extends Serializable> {
 
+    /**
+     * Gets the unique identifier of this entity.
+     *
+     * @return the id
+     */
     ID getId();
 
+    /**
+     * Sets the unique identifier of this entity.
+     *
+     * @param id the id to set
+     */
     void setId(ID id);
 }
