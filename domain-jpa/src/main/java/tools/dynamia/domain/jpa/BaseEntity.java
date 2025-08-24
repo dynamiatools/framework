@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.domain.Auditable;
@@ -194,6 +195,7 @@ public abstract class BaseEntity extends SimpleEntity implements Serializable, A
         this.creationTimestamp = creationTimestamp;
     }
 
+    @Transient
     public Instant getCreationInstant() {
         if (creationTimestamp != null) {
             return DateTimeUtils.toInstant(creationTimestamp);
@@ -206,15 +208,18 @@ public abstract class BaseEntity extends SimpleEntity implements Serializable, A
         return null;
     }
 
+    @Transient
     public ZonedDateTime getCreationDateZoned(ZoneId zone) {
         Instant instant = getCreationInstant();
         return instant != null ? instant.atZone(zone) : null;
     }
 
+    @Transient
     public ZonedDateTime getCreationDateZoned() {
         return getCreationDateZoned(Messages.getDefaultTimeZone());
     }
 
+    @Transient
     public OffsetDateTime getCreationDateOffset(ZoneOffset offset) {
         Instant instant = getCreationInstant();
         return instant != null ? instant.atOffset(offset) : null;
