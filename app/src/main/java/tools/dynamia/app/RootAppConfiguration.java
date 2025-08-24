@@ -23,10 +23,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.web.context.annotation.SessionScope;
-import tools.dynamia.commons.LocaleProvider;
-import tools.dynamia.commons.StringUtils;
-import tools.dynamia.commons.SystemLocaleProvider;
-import tools.dynamia.commons.UserInfo;
+import tools.dynamia.commons.*;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.domain.services.ValidatorService;
@@ -42,6 +39,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
+/**
+ * RootAppConfiguration defines the main Spring Boot application configuration for DynamiaTools.
+ * <p>
+ * It provides beans for application info, module provider, locale provider, time zone provider, and user info.
+ * Beans are conditionally created if missing, and some are marked as primary for dependency injection.
+ *
+ * @author Mario
+ */
 @EnableAspectJAutoProxy
 public class RootAppConfiguration {
 
@@ -82,12 +87,22 @@ public class RootAppConfiguration {
         return ApplicationInfo.load(pro);
     }
 
+    /**
+     * Provides the primary {@link LoggingService} bean.
+     *
+     * @return the default LoggingService implementation
+     */
     @Bean
     @Primary
     public LoggingService defaultLoggingService() {
         return logger;
     }
 
+    /**
+     * Provides the default {@link ValidatorService} bean if none is registered.
+     *
+     * @return the default ValidatorService implementation
+     */
     @Bean
     @ConditionalOnMissingBean(ValidatorService.class)
     public ValidatorService defaultValidatorService() {
@@ -95,6 +110,11 @@ public class RootAppConfiguration {
     }
 
 
+    /**
+     * Provides the primary {@link ApplicationInfo} bean.
+     *
+     * @return the ApplicationInfo instance for the application
+     */
     @Bean
     public ApplicationInfo applicationInfo() {
         try {
@@ -125,18 +145,44 @@ public class RootAppConfiguration {
         }
     }
 
+    /**
+     * Provides an empty {@link ModuleProvider} bean if none is registered.
+     *
+     * @return a ModuleProvider that returns a dummy module with a random name and message
+     */
     @Bean
     @ConditionalOnMissingBean(ModuleProvider.class)
     public ModuleProvider emptyModuleProvider() {
         return () -> new Module(StringUtils.randomString(), "No modules registered");
     }
 
+    /**
+     * Provides the primary {@link LocaleProvider} bean using the system locale.
+     *
+     * @return a LocaleProvider instance using the system default locale
+     */
     @Bean
     @Primary
     public LocaleProvider systemLocaleProvider() {
         return new SystemLocaleProvider();
     }
 
+    /**
+     * Provides the primary {@link TimeZoneProvider} bean using the system time zone.
+     *
+     * @return a TimeZoneProvider instance using the system default time zone
+     */
+    @Bean
+    @Primary
+    public TimeZoneProvider systemTimeZoneProvider() {
+        return new SystemTimeZoneProvider();
+    }
+
+    /**
+     * Provides a session-scoped {@link UserInfo} bean if none is registered.
+     *
+     * @return a new UserInfo instance for the session
+     */
     @Bean("userInfo")
     @SessionScope
     @ConditionalOnMissingBean(UserInfo.class)
