@@ -19,6 +19,7 @@ package tools.dynamia.commons;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -52,7 +53,15 @@ import java.util.stream.Collectors;
 public class Messages {
 
 
+    /**
+     * The locale providers.
+     */
     private static Supplier<Collection<LocaleProvider>> localeProviders;
+
+    /**
+     * The time zone providers.
+     */
+    private static Supplier<Collection<TimeZoneProvider>> timeZoneProviders;
 
     /**
      * Get the ResourceBundle for the package of the class using the default JVM
@@ -169,15 +178,14 @@ public class Messages {
     }
 
     /**
-     * Return the default Locale usef for this class.
+     * Return the default Locale used for this class.
      *
      * @return the default locale
      */
     public static Locale getDefaultLocale() {
 
-
         if (localeProviders != null) {
-            List<LocaleProvider> providers = localeProviders.get().stream().sorted(Comparator.comparingInt(LocaleProvider::getPriority)).collect(Collectors.toList());
+            List<LocaleProvider> providers = localeProviders.get().stream().sorted(Comparator.comparingInt(LocaleProvider::getPriority)).toList();
             for (LocaleProvider provider : providers) {
                 Locale locale = provider.getDefaultLocale();
                 if (locale != null && locale.getLanguage() != null && !locale.getLanguage().isEmpty()) {
@@ -189,14 +197,44 @@ public class Messages {
         return Locale.getDefault();
     }
 
+    /**
+     * Get the default time zone.
+     * @return the default time zone
+     */
+    public static ZoneId getDefaultTimeZone() {
+
+        if (timeZoneProviders != null) {
+            List<TimeZoneProvider> providers = timeZoneProviders.get().stream().sorted(Comparator.comparingInt(TimeZoneProvider::getPriority)).toList();
+            for (TimeZoneProvider provider : providers) {
+                ZoneId timeZone = provider.getDefaultTimeZone();
+                if (timeZone != null) {
+                    return timeZone;
+                }
+            }
+        }
+        return ZoneId.systemDefault();
+    }
+
     private Messages() {
     }
 
+    /**
+     * Sets the locale providers supplier.
+     *
+     * @param supplier the new locale providers supplier
+     */
     public static void setLocaleProvidersSupplier(Supplier<Collection<LocaleProvider>> supplier) {
         localeProviders = supplier;
     }
 
-
+    /**
+     * Sets the time zone providers supplier.
+     *
+     * @param timeZoneProviders the new time zone providers supplier
+     */
+    public static void setTimeZoneProviders(Supplier<Collection<TimeZoneProvider>> timeZoneProviders) {
+        Messages.timeZoneProviders = timeZoneProviders;
+    }
 }
 
 
