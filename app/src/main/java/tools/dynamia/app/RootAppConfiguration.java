@@ -34,6 +34,8 @@ import tools.dynamia.navigation.Module;
 import tools.dynamia.navigation.ModuleProvider;
 import tools.dynamia.templates.ApplicationTemplate;
 import tools.dynamia.templates.ApplicationTemplates;
+import tools.dynamia.web.pwa.PWAIcon;
+import tools.dynamia.web.pwa.PWAManifest;
 
 import java.io.IOException;
 import java.util.List;
@@ -188,6 +190,23 @@ public class RootAppConfiguration {
     @ConditionalOnMissingBean(UserInfo.class)
     public UserInfo userInfo() {
         return new UserInfo();
+    }
+
+
+    @Bean
+    @ConditionalOnMissingBean(PWAManifest.class)
+    public PWAManifest defaultManifest(ApplicationInfo applicationInfo) {
+        return PWAManifest.builder()
+                .name(applicationInfo.getName())
+                .shortName(applicationInfo.getShortName())
+                .startUrl("/")
+                .display("standalone")
+                .description(applicationInfo.getDescription())
+                .addIcon(PWAIcon.builder()
+                        .src(applicationInfo.getDefaultIcon())
+                        .build()
+                )
+                .build();
     }
 
 }
