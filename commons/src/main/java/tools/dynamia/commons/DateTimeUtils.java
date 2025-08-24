@@ -642,6 +642,16 @@ public final class DateTimeUtils {
                 instant = localDate.atStartOfDay(zoneId).toInstant();
             }
             return instant;
+        } else if (input instanceof java.sql.Time) {
+            LocalTime localTime = ((java.sql.Time) input).toLocalTime();
+            Instant instant = null;
+            try {
+                instant = Instant.from(localTime);
+            } catch (DateTimeException e) {
+                instant = localTime.atDate(LocalDate.of(1970, 1, 1)).atZone(zoneId).toInstant();
+            }
+            return instant;
+
         } else {
             return input.toInstant();
         }
