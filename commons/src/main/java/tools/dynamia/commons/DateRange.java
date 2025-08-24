@@ -17,6 +17,7 @@
 package tools.dynamia.commons;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -60,6 +61,12 @@ public class DateRange implements Serializable {
         this.endDate = endDate;
     }
 
+    public DateRange(LocalDate startDate, LocalDate endDate) {
+        super();
+        this.startDate = DateTimeUtils.toDate(startDate);
+        this.endDate = DateTimeUtils.toDate(endDate);
+    }
+
     /**
      * Gets the end date.
      *
@@ -68,6 +75,16 @@ public class DateRange implements Serializable {
     public Date getEndDate() {
         return endDate;
     }
+
+    /**
+     * Gets the end local date.
+     *
+     * @return the end local date
+     */
+    public LocalDate getEndLocalDate() {
+        return DateTimeUtils.toLocalDate(endDate);
+    }
+
 
     /**
      * Gets the start date.
@@ -79,12 +96,25 @@ public class DateRange implements Serializable {
     }
 
     /**
+     * Gets the start local date.
+     *
+     * @return the start local date
+     */
+    public LocalDate getStartLocalDate() {
+        return DateTimeUtils.toLocalDate(startDate);
+    }
+
+    /**
      * Sets the end date.
      *
      * @param endDate the new end date
      */
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
+    }
+
+    public void setEndDate(LocalDate endLocalDate) {
+        this.endDate = DateTimeUtils.toDate(endLocalDate);
     }
 
     /**
@@ -94,6 +124,10 @@ public class DateRange implements Serializable {
      */
     public void setStartDate(Date startDate) {
         this.startDate = startDate;
+    }
+
+    public void setStartDate(LocalDate startLocalDate) {
+        this.startDate = DateTimeUtils.toDate(startLocalDate);
     }
 
     public long getDaysBetween() {
