@@ -33,8 +33,8 @@ public abstract class AbstractTemporalConverter implements Converter<Object, Obj
     @Override
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {
 
-        if (val instanceof TemporalAccessor date) {
-            return buildFormatter().format(date);
+        if (val instanceof TemporalAccessor temporalAccessor) {
+            return format(temporalAccessor);
         }
         return null;
     }
