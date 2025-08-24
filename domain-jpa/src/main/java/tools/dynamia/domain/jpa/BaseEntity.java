@@ -209,6 +209,14 @@ public abstract class BaseEntity extends SimpleEntity implements Serializable, A
     }
 
     @Transient
+    public Instant getLastUpdateInstant() {
+        if (lastUpdate != null) {
+            return DateTimeUtils.toInstant(lastUpdate);
+        }
+        return null;
+    }
+
+    @Transient
     public ZonedDateTime getCreationDateZoned(ZoneId zone) {
         Instant instant = getCreationInstant();
         return instant != null ? instant.atZone(zone) : null;
@@ -220,8 +228,13 @@ public abstract class BaseEntity extends SimpleEntity implements Serializable, A
     }
 
     @Transient
-    public OffsetDateTime getCreationDateOffset(ZoneOffset offset) {
-        Instant instant = getCreationInstant();
-        return instant != null ? instant.atOffset(offset) : null;
+    public ZonedDateTime getLastUpdateZoned(ZoneId zone) {
+        Instant instant = getLastUpdateInstant();
+        return instant != null ? instant.atZone(zone) : null;
+    }
+
+    @Transient
+    public ZonedDateTime getLastUpdateZoned() {
+        return getLastUpdateZoned(Messages.getDefaultTimeZone());
     }
 }
