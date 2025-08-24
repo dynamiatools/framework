@@ -20,9 +20,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import tools.dynamia.commons.DateTimeUtils;
+import tools.dynamia.commons.Messages;
 import tools.dynamia.domain.Auditable;
 
 import java.io.Serializable;
+import java.time.*;
 import java.util.Date;
 
 
@@ -189,5 +193,48 @@ public abstract class BaseEntity extends SimpleEntity implements Serializable, A
 
     public void setCreationTimestamp(Date creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
+    }
+
+    @Transient
+    public Instant getCreationInstant() {
+        if (creationTimestamp != null) {
+            return DateTimeUtils.toInstant(creationTimestamp);
+        }
+        if (creationDate != null && creationTime != null) {
+            return DateTimeUtils.toLocalDateTime(creationDate, creationTime, ZoneId.systemDefault())
+                    .atZone(ZoneId.systemDefault()).toInstant();
+
+        }
+        return null;
+    }
+
+    @Transient
+    public Instant getLastUpdateInstant() {
+        if (lastUpdate != null) {
+            return DateTimeUtils.toInstant(lastUpdate);
+        }
+        return null;
+    }
+
+    @Transient
+    public ZonedDateTime getCreationDateZoned(ZoneId zone) {
+        Instant instant = getCreationInstant();
+        return instant != null ? instant.atZone(zone) : null;
+    }
+
+    @Transient
+    public ZonedDateTime getCreationDateZoned() {
+        return getCreationDateZoned(Messages.getDefaultTimeZone());
+    }
+
+    @Transient
+    public ZonedDateTime getLastUpdateZoned(ZoneId zone) {
+        Instant instant = getLastUpdateInstant();
+        return instant != null ? instant.atZone(zone) : null;
+    }
+
+    @Transient
+    public ZonedDateTime getLastUpdateZoned() {
+        return getLastUpdateZoned(Messages.getDefaultTimeZone());
     }
 }

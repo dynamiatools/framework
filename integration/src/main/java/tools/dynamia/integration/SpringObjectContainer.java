@@ -23,13 +23,11 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import tools.dynamia.commons.LocaleProvider;
 import tools.dynamia.commons.Messages;
+import tools.dynamia.commons.TimeZoneProvider;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * The Class SpringObjectContainer.
@@ -135,5 +133,6 @@ public class SpringObjectContainer implements ObjectContainer, ApplicationContex
         this.appContext = applicationContext;
 
         Messages.setLocaleProvidersSupplier(() -> Containers.get().findObjects(LocaleProvider.class));
+        Messages.setTimeZoneProviders(() -> Containers.get().findObjects(TimeZoneProvider.class));
     }
 }

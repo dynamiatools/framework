@@ -20,18 +20,34 @@ package tools.dynamia.commons;
 import java.util.Locale;
 
 /**
- * Priority 1000
+ * SystemLocaleProvider is an implementation of {@link LocaleProvider} that provides the system default locale.
+ * <p>
+ * This provider always returns the default {@link Locale} of the JVM, regardless of context.
+ * <p>
+ * The priority for this provider is set to 1000, making it a fallback when other providers are not available.
  *
  * @author Mario
  */
 
 public class SystemLocaleProvider implements LocaleProvider {
 
+    /**
+     * Returns the priority of this provider. Higher values indicate higher priority.
+     *
+     * @return the priority value (1000)
+     */
     @Override
     public int getPriority() {
         return 1000;
     }
 
+    /**
+     * Returns the default {@link Locale} of the JVM.
+     * <p>
+     * This method always returns {@link Locale#getDefault()}.
+     *
+     * @return the system default Locale
+     */
     @Override
     public Locale getDefaultLocale() {
         return Locale.getDefault();

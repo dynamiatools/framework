@@ -19,13 +19,7 @@ package tools.dynamia.commons;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.DateTimeException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.chrono.ChronoLocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -34,7 +28,14 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * Utility class for common dates operations. Internally its use LocalDate, Instants and other Java 8 Date API
+ * Utility class providing a wide range of static methods for date and time manipulation.
+ * <p>
+ * This class leverages Java 8 Date and Time API (LocalDate, LocalDateTime, Instant, ZoneId, etc.)
+ * to perform common operations such as date conversion, arithmetic, formatting, and parsing.
+ * It is designed to simplify handling of dates and times in applications, including legacy {@link java.util.Date}
+ * and modern Java time types.
+ * <p>
+ * All methods are thread-safe and stateless.
  *
  * @author Mario A. Serrano Leones
  */
@@ -56,62 +57,64 @@ public final class DateTimeUtils {
     public static final int LONG = DateFormat.LONG;
 
     /**
-     * Return the last day of month
+     * Returns the last day of the specified month as an integer value.
      *
-     * @return last day
+     * @param month the month as an integer (1-12)
+     * @return the last day of the month (28-31)
      */
     public static int getLastDayOfMonth(int month) {
         return getLastDayOfMonth(Month.of(month));
     }
 
     /**
-     * Return the last day of month
+     * Returns the last day of the specified {@link Month}.
      *
-     * @return last day
+     * @param month the {@link Month} instance
+     * @return the last day of the month (28-31)
      */
     public static int getLastDayOfMonth(Month month) {
         return month.length(LocalDate.now().isLeapYear());
     }
 
     /**
-     * Instantiates a new date time utils.
+     * Private constructor to prevent instantiation of utility class.
      */
     private DateTimeUtils() {
     }
 
     /**
-     * Checks if is future.
+     * Determines if the given {@link Date} is in the future compared to the current system date.
      *
-     * @param date the date
-     * @return true, if is future
+     * @param date the date to check
+     * @return true if the date is in the future, false otherwise
      */
     public static boolean isFuture(Date date) {
         return date.after(new Date());
     }
 
     /**
-     * Checks if is past.
+     * Determines if the given {@link Date} is in the past compared to the current system date.
      *
-     * @param date the date
-     * @return true, if is past
+     * @param date the date to check
+     * @return true if the date is in the past, false otherwise
      */
     public static boolean isPast(Date date) {
         return date.before(new Date());
     }
 
     /**
-     * Null safe check if passed date has the same year, month and day of current system date
+     * Checks if the given {@link Date} is today, comparing year, month, and day.
      *
-     * @return if is today
+     * @param date the date to check
+     * @return true if the date is today, false otherwise
      */
     public static boolean isToday(Date date) {
         Date today = new Date();
-
         return getYear(today) == getYear(date) && getMonth(today) == getMonth(date) && getDay(today) == getDay(date);
     }
 
     /**
-     * is the same that DateTimeUtils.getYear(new Date());
+     * Returns the current year as an integer.
      *
      * @return the current year
      */
@@ -120,7 +123,7 @@ public final class DateTimeUtils {
     }
 
     /**
-     * Gets the current month.
+     * Returns the current month as an integer (1-12).
      *
      * @return the current month
      */
@@ -129,7 +132,7 @@ public final class DateTimeUtils {
     }
 
     /**
-     * Gets the current month name.
+     * Returns the name of the current month in the default locale.
      *
      * @return the current month name
      */
@@ -139,107 +142,102 @@ public final class DateTimeUtils {
     }
 
     /**
-     * Gets the current day.
+     * Returns the current day of the month as an integer.
      *
-     * @return the current day
+     * @return the current day of the month
      */
     public static int getCurrentDay() {
         return getDay(new Date());
     }
 
     /**
-     * Millis between.
+     * Calculates the number of milliseconds between two {@link Date} instances.
      *
-     * @param date1 the date1
-     * @param date2 the date2
-     * @return the long
+     * @param date1 the start date
+     * @param date2 the end date
+     * @return the number of milliseconds between date1 and date2
      */
     public static long millisBetween(Date date1, Date date2) {
         LocalDate localDate1 = toLocalDate(date1);
         LocalDate localDate2 = toLocalDate(date2);
-
         return localDate1.until(localDate2, ChronoUnit.MILLIS);
     }
 
-
     /**
-     * Months between.
+     * Calculates the number of years between two {@link Date} instances.
      *
-     * @param date1 the date1
-     * @param date2 the date2
-     * @return the long
+     * @param date1 the start date
+     * @param date2 the end date
+     * @return the number of years between date1 and date2
      */
     public static long yearsBetween(Date date1, Date date2) {
         LocalDate localDate1 = toLocalDate(date1);
         LocalDate localDate2 = toLocalDate(date2);
-
         return localDate1.until(localDate2, ChronoUnit.YEARS);
     }
 
     /**
-     * Months between.
+     * Calculates the number of months between two {@link Date} instances.
      *
-     * @param date1 the date1
-     * @param date2 the date2
-     * @return the long
+     * @param date1 the start date
+     * @param date2 the end date
+     * @return the number of months between date1 and date2
      */
     public static long monthsBetween(Date date1, Date date2) {
         LocalDate localDate1 = toLocalDate(date1);
         LocalDate localDate2 = toLocalDate(date2);
-
         return localDate1.until(localDate2, ChronoUnit.MONTHS);
     }
 
-
     /**
-     * Days between.
+     * Calculates the number of days between two {@link Date} instances.
      *
-     * @param date1 the date1
-     * @param date2 the date2
-     * @return the long
+     * @param date1 the start date
+     * @param date2 the end date
+     * @return the number of days between date1 and date2
      */
     public static long daysBetween(Date date1, Date date2) {
         return toInstant(date1).until(toInstant(date2), ChronoUnit.DAYS);
     }
 
     /**
-     * Hours between.
+     * Calculates the number of hours between two {@link Date} instances.
      *
-     * @param date1 the date1
-     * @param date2 the date2
-     * @return the long
+     * @param date1 the start date
+     * @param date2 the end date
+     * @return the number of hours between date1 and date2
      */
     public static long hoursBetween(Date date1, Date date2) {
         return toInstant(date1).until(toInstant(date2), ChronoUnit.HOURS);
     }
 
     /**
-     * Minutes between.
+     * Calculates the number of minutes between two {@link Date} instances.
      *
-     * @param date1 the date1
-     * @param date2 the date2
-     * @return the long
+     * @param date1 the start date
+     * @param date2 the end date
+     * @return the number of minutes between date1 and date2
      */
     public static long minutesBetween(Date date1, Date date2) {
         return toInstant(date1).until(toInstant(date2), ChronoUnit.MINUTES);
     }
 
     /**
-     * Seconds between.
+     * Calculates the number of seconds between two {@link Date} instances.
      *
-     * @param date1 the date1
-     * @param date2 the date2
-     * @return the long
+     * @param date1 the start date
+     * @param date2 the end date
+     * @return the number of seconds between date1 and date2
      */
     public static long secondsBetween(Date date1, Date date2) {
         return toInstant(date1).until(toInstant(date2), ChronoUnit.SECONDS);
     }
 
     /**
-     * Creates the date.
+     * Creates a {@link Date} from a given timestamp in milliseconds.
      *
-     * @param timestamp the timestamp
-     * @return the date
+     * @param timestamp the timestamp in milliseconds since epoch
+     * @return a {@link Date} representing the given timestamp
      */
     public static Date createDate(long timestamp) {
         Calendar calendar = Calendar.getInstance();
@@ -248,62 +246,62 @@ public final class DateTimeUtils {
     }
 
     /**
-     * Creates the date.
+     * Creates a {@link Date} for the current month and specified day.
      *
-     * @param dayOfMonth the day of month
-     * @return the date
+     * @param dayOfMonth the day of the month (1-31)
+     * @return a {@link Date} for the specified day in the current month
      */
     public static Date createDate(int dayOfMonth) {
         return toDate(LocalDate.now().withDayOfMonth(dayOfMonth));
     }
 
     /**
-     * Creates the date.
+     * Creates a {@link Date} for the specified year, month, and day.
      *
      * @param year  the year
-     * @param month the month from 1 to 12
-     * @param day   the day
-     * @return the date
+     * @param month the month (1-12)
+     * @param day   the day of the month (1-31)
+     * @return a {@link Date} for the specified year, month, and day
      */
     public static Date createDate(int year, int month, int day) {
         return toDate(LocalDate.of(year, month, day));
     }
 
     /**
-     * Creates the date.
+     * Creates a {@link Date} for the specified year, month, day, hour, minute, and second.
      *
      * @param year      the year
-     * @param month     the month
-     * @param day       the day
-     * @param hourOfDay the hour of day
-     * @param minute    the minute
-     * @param second    the second
-     * @return the date
+     * @param month     the month (1-12)
+     * @param day       the day of the month (1-31)
+     * @param hourOfDay the hour of day (0-23)
+     * @param minute    the minute (0-59)
+     * @param second    the second (0-59)
+     * @return a {@link Date} for the specified date and time
      */
     public static Date createDate(int year, int month, int day, int hourOfDay, int minute, int second) {
         return toDate(LocalDateTime.of(year, month, day, hourOfDay, minute, second));
     }
 
     /**
-     * Creates the date.
+     * Creates a {@link Date} for the specified year, month, day, hour, and minute.
      *
      * @param year      the year
-     * @param month     the month
-     * @param day       the day
-     * @param hourOfDay the hour of day
-     * @param minute    the minute
-     * @return the date
+     * @param month     the month (1-12)
+     * @param day       the day of the month (1-31)
+     * @param hourOfDay the hour of day (0-23)
+     * @param minute    the minute (0-59)
+     * @return a {@link Date} for the specified date and time
      */
     public static Date createDate(int year, int month, int day, int hourOfDay, int minute) {
         return toDate(LocalDateTime.of(year, month, day, hourOfDay, minute));
     }
 
     /**
-     * Creates the date.
+     * Parses a {@link Date} from a string using the default date format for the current locale.
      *
-     * @param dateText the date text
-     * @return the date
-     * @throws ParseException the parse exception
+     * @param dateText the date string to parse
+     * @return the parsed {@link Date}
+     * @throws ParseException if the string cannot be parsed
      */
     public static Date createDate(String dateText) throws ParseException {
         DateFormat df = DateFormat.getDateInstance();
@@ -311,12 +309,12 @@ public final class DateTimeUtils {
     }
 
     /**
-     * Creates the date.
+     * Parses a {@link Date} from a string using the specified pattern.
      *
-     * @param dateText the date text
-     * @param pattern  the pattern
-     * @return the date
-     * @throws ParseException the parse exception
+     * @param dateText the date string to parse
+     * @param pattern  the date pattern (e.g. "yyyy-MM-dd")
+     * @return the parsed {@link Date}
+     * @throws ParseException if the string cannot be parsed
      */
     public static Date createDate(String dateText, String pattern) throws ParseException {
         DateFormat df = new SimpleDateFormat(pattern);
@@ -324,80 +322,77 @@ public final class DateTimeUtils {
     }
 
     /**
-     * Adds the days.
-     * This method is immplemented using Java 7+ DateTime API
+     * Returns a new {@link Date} by adding the specified number of days to the given date.
      *
-     * @param date the date
-     * @param days the days
-     * @return the date
+     * @param date the original date
+     * @param days the number of days to add (can be negative)
+     * @return a new {@link Date} with the days added
      */
     public static Date addDays(Date date, int days) {
         return toDate(toLocalDateTime(date).plusDays(days));
-
     }
 
     /**
-     * Adds the months.
-     * <p>
-     * This method is immplemented using Java 7+ DateTime API
+     * Returns a new {@link Date} by adding the specified number of months to the given date.
      *
-     * @param date   the date
-     * @param months the months
-     * @return the date
+     * @param date   the original date
+     * @param months the number of months to add (can be negative)
+     * @return a new {@link Date} with the months added
      */
     public static Date addMonths(Date date, int months) {
         return toDate(toLocalDateTime(date).plusMonths(months));
     }
 
     /**
-     * Adds the years.
+     * Returns a new {@link Date} by adding the specified number of years to the given date.
      *
-     * @param date  the date
-     * @param years the years
-     * @return the date
+     * @param date  the original date
+     * @param years the number of years to add (can be negative)
+     * @return a new {@link Date} with the years added
      */
     public static Date addYears(Date date, int years) {
         return toDate(toLocalDateTime(date).plusYears(years));
     }
 
     /**
-     * Adds weeks.
+     * Returns a new {@link Date} by adding the specified number of weeks to the given date.
      *
-     * @param date the date
-     * @return the date
+     * @param date  the original date
+     * @param weeks the number of weeks to add (can be negative)
+     * @return a new {@link Date} with the weeks added
      */
     public static Date addWeeks(Date date, int weeks) {
         return toDate(toLocalDateTime(date).plusWeeks(weeks));
     }
 
     /**
-     * Adds the hours.
+     * Returns a new {@link Date} by adding the specified number of hours to the given date.
      *
-     * @param date  the date
-     * @param hours the hours
-     * @return the date
+     * @param date  the original date
+     * @param hours the number of hours to add (can be negative)
+     * @return a new {@link Date} with the hours added
      */
     public static Date addHours(Date date, int hours) {
-        return toDate(toLocalDateTime(date).plus(hours, ChronoUnit.HOURS));
+        return toDate(toLocalDateTime(date).plusHours(hours));
     }
 
     /**
-     * Adds the minutes.
+     * Returns a new {@link Date} by adding the specified number of minutes to the given date.
      *
-     * @param date    the date
-     * @param minutes the minutes
-     * @return the date
+     * @param date    the original date
+     * @param minutes the number of minutes to add (can be negative)
+     * @return a new {@link Date} with the minutes added
      */
     public static Date addMinutes(Date date, int minutes) {
-        return toDate(toLocalDateTime(date).plus(minutes, ChronoUnit.MINUTES));
+        return toDate(toLocalDateTime(date).plusMinutes(minutes));
     }
 
     /**
-     * Format.
+     * Formats a {@link Date} using the specified pattern and default locale.
      *
-     * @param date    the date
-     * @param pattern the pattern
-     * @return the string
+     * @param date    the date to format
+     * @param pattern the date pattern (e.g. "yyyy-MM-dd")
+     * @return the formatted date string
      */
     public static String format(Date date, String pattern) {
         DateFormat df = new SimpleDateFormat(pattern, Messages.getDefaultLocale());
@@ -405,11 +400,11 @@ public final class DateTimeUtils {
     }
 
     /**
-     * Format LocalDate, LocalTime, LocalDateTime and other {@link TemporalAccessor}
+     * Formats a {@link TemporalAccessor} (such as LocalDate, LocalTime, LocalDateTime) using the specified pattern and default locale.
      *
-     * @param temporalAccessor date, time, instant
-     * @param pattern          date patter
-     * @return
+     * @param temporalAccessor the temporal object to format
+     * @param pattern          the date pattern (e.g. "yyyy-MM-dd HH:mm:ss")
+     * @return the formatted date/time string
      */
     public static String format(TemporalAccessor temporalAccessor, String pattern) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern, Messages.getDefaultLocale());
@@ -417,11 +412,11 @@ public final class DateTimeUtils {
     }
 
     /**
-     * Format date.
+     * Formats a {@link Date} as a date string using the specified style.
      *
-     * @param date  the date
-     * @param style the style
-     * @return the string
+     * @param date  the date to format
+     * @param style the formatting style (SHORT, MEDIUM, LONG)
+     * @return the formatted date string
      */
     public static String formatDate(Date date, int style) {
         DateFormat df = DateFormat.getDateInstance(style);
@@ -429,21 +424,21 @@ public final class DateTimeUtils {
     }
 
     /**
-     * Format date.
+     * Formats a {@link Date} as a date string using the medium style.
      *
-     * @param date the date
-     * @return the string
+     * @param date the date to format
+     * @return the formatted date string
      */
     public static String formatDate(Date date) {
         return formatDate(date, DateFormat.MEDIUM);
     }
 
     /**
-     * Format time.
+     * Formats a {@link Date} as a time string using the specified style.
      *
-     * @param date  the date
-     * @param style the style
-     * @return the string
+     * @param date  the date to format
+     * @param style the formatting style (SHORT, MEDIUM, LONG)
+     * @return the formatted time string
      */
     public static String formatTime(Date date, int style) {
         DateFormat df = DateFormat.getTimeInstance(style);
@@ -451,40 +446,39 @@ public final class DateTimeUtils {
     }
 
     /**
-     * Format time.
+     * Formats a {@link Date} as a time string using the medium style.
      *
-     * @param date the date
-     * @return the string
+     * @param date the date to format
+     * @return the formatted time string
      */
     public static String formatTime(Date date) {
         return formatTime(date, DateFormat.MEDIUM);
     }
 
     /**
-     * return the month value in the date, where january is 1 and december is
-     * 12.
+     * Returns the month value (1-12) from the given {@link Date}.
      *
-     * @param date the date
-     * @return the month
+     * @param date the date to extract the month from
+     * @return the month value (1 for January, 12 for December)
      */
     public static int getMonth(Date date) {
         return toLocalDate(date).getMonth().getValue();
     }
 
     /**
-     * Gets the day.
+     * Returns the day of the month from the given {@link Date}.
      *
-     * @param date the date
-     * @return the day
+     * @param date the date to extract the day from
+     * @return the day of the month
      */
     public static int getDay(Date date) {
         return toLocalDate(date).getDayOfMonth();
     }
 
     /**
-     * Gets the year.
+     * Returns the year from the given {@link Date}.
      *
-     * @param date the date
+     * @param date the date to extract the year from
      * @return the year
      */
     public static int getYear(Date date) {
@@ -510,23 +504,29 @@ public final class DateTimeUtils {
     }
 
     /**
-     * Create a new date and substract one day
+     * Returns a {@link Date} representing yesterday (one day before the current date).
      *
-     * @return date
+     * @return the date of yesterday
      */
     public static Date yesterday() {
         return addDays(now(), -1);
     }
 
     /**
-     * Create a tomorrow date and add one day
+     * Returns a {@link Date} representing the day after tomorrow (two days after the current date).
+     *
+     * @return the date of the day after tomorrow
      */
     public static Date dayAfterTomorrow() {
         return addDays(tomorrow(), 1);
     }
 
     /**
-     * Convert a Date to LocalDate
+     * Converts a {@link Date} to a {@link LocalDate} using the system default time zone.
+     * Supports both {@link java.util.Date} and {@link java.sql.Date}.
+     *
+     * @param input the date to convert
+     * @return the corresponding LocalDate
      */
     public static LocalDate toLocalDate(Date input) {
         if (input instanceof java.sql.Date) {
@@ -538,6 +538,24 @@ public final class DateTimeUtils {
         }
     }
 
+    /**
+     * Converts a {@link Date} to a {@link LocalDate} using a specific {@link ZoneId}.
+     *
+     * @param input  the date to convert
+     * @param zoneId the time zone to use for conversion
+     * @return the corresponding LocalDate
+     */
+    public static LocalDate toLocalDate(Date input, ZoneId zoneId) {
+        return toInstant(input).atZone(zoneId).toLocalDate();
+    }
+
+    /**
+     * Converts a {@link Date} to a {@link LocalDateTime} using the system default time zone.
+     * Supports both {@link java.util.Date} and {@link java.sql.Date}.
+     *
+     * @param input the date to convert
+     * @return the corresponding LocalDateTime
+     */
     public static LocalDateTime toLocalDateTime(Date input) {
         Instant instant = null;
         if (input instanceof java.sql.Date) {
@@ -549,16 +567,91 @@ public final class DateTimeUtils {
         return zdt.toLocalDateTime();
     }
 
+    /**
+     * Convert a Date to LocalDateTime with specific ZoneId
+     *
+     * @param input  original date
+     * @param zoneId zone id
+     * @return local date time
+     */
+    public static LocalDateTime toLocalDateTime(Date input, ZoneId zoneId) {
+        return toInstant(input).atZone(zoneId).toLocalDateTime();
+    }
+
+    /**
+     * Combine a Date and a Time into a LocalDateTime using specific ZoneId
+     *
+     * @param date   original date
+     * @param time   original time
+     * @param zoneId zone id
+     * @return local date time
+     */
+    public static LocalDateTime toLocalDateTime(Date date, Date time, ZoneId zoneId) {
+        LocalDate localDate = toLocalDate(date, zoneId);
+        LocalTime localTime = toLocalTime(time, zoneId);
+        return LocalDateTime.of(localDate, localTime);
+    }
+
+    /**
+     * Convert a Date to LocalTime
+     */
+    public static LocalTime toLocalTime(Date input) {
+        Instant instant = null;
+        if (input instanceof java.sql.Date) {
+            instant = Instant.ofEpochMilli(input.getTime());
+        } else {
+            instant = input.toInstant();
+        }
+        ZonedDateTime zdt = instant.atZone(ZoneId.systemDefault());
+        return zdt.toLocalTime();
+    }
+
+    /**
+     * Convert a Date to LocalTime with specific ZoneId
+     *
+     * @param input  original date
+     * @param zoneId zone id
+     * @return local time
+     */
+    public static LocalTime toLocalTime(Date input, ZoneId zoneId) {
+        return toInstant(input).atZone(zoneId).toLocalTime();
+    }
+
+
+    /**
+     * Convert a Date to Instant
+     */
     public static Instant toInstant(Date input) {
+        return toInstant(input, ZoneId.systemDefault());
+    }
+
+    /**
+     * Convert a Date to Instant with specific ZoneId
+     *
+     * @param input  original date
+     * @param zoneId zone id
+     * @return instant
+     */
+    public static Instant toInstant(Date input, ZoneId zoneId) {
         if (input instanceof java.sql.Date) {
             LocalDate localDate = ((java.sql.Date) input).toLocalDate();
             Instant instant = null;
             try {
                 instant = Instant.from(localDate);
             } catch (DateTimeException e) {
-                instant = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+                instant = localDate.atStartOfDay(zoneId).toInstant();
             }
             return instant;
+        } else if (input instanceof java.sql.Time) {
+            LocalTime localTime = ((java.sql.Time) input).toLocalTime();
+            Instant instant = null;
+            try {
+                instant = Instant.from(localTime);
+            } catch (DateTimeException e) {
+                instant = localTime.atDate(LocalDate.of(1970, 1, 1)).atZone(zoneId).toInstant();
+            }
+            return instant;
+
         } else {
             return input.toInstant();
         }
@@ -571,14 +664,23 @@ public final class DateTimeUtils {
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
+    /**
+     * Convert a LocalDateTime to Date
+     */
     public static Date toDate(LocalDateTime localDateTime) {
         return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 
+    /**
+     * Convert a Instant to Date
+     */
     public static Date getEndOfDay(Date date) {
         return Date.from(toLocalDate(date).atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
     }
 
+    /**
+     * Convert a Instant to Date
+     */
     public static Date getStartOfDay(Date date) {
         return Date.from(toLocalDate(date).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
     }

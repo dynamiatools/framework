@@ -29,6 +29,11 @@ public interface LocaleProvider {
      */
     int getPriority();
 
+    /**
+     * Returns the default locale
+     *
+     * @return the default locale
+     */
     Locale getDefaultLocale();
 
 }

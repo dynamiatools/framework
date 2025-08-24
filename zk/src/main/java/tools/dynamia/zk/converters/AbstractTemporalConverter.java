@@ -19,10 +19,12 @@ package tools.dynamia.zk.converters;
 import org.zkoss.bind.BindContext;
 import org.zkoss.bind.Converter;
 import org.zkoss.zk.ui.Component;
+import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.commons.Messages;
 
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
+import java.util.Date;
 
 /**
  * @author Mario A. Serrano Leones
@@ -33,8 +35,13 @@ public abstract class AbstractTemporalConverter implements Converter<Object, Obj
     @Override
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {
 
-        if (val instanceof TemporalAccessor date) {
-            return buildFormatter().format(date);
+        if (val instanceof TemporalAccessor temporalAccessor) {
+            return format(temporalAccessor);
+        } else if (val instanceof Date date) {
+            var instant = DateTimeUtils.toInstant(date);
+            if (instant != null) {
+                return format(instant.atZone(Messages.getDefaultTimeZone()));
+            }
         }
         return null;
     }
