@@ -40,6 +40,23 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 /**
+ * DefaultFieldCustomizer is responsible for automatically configuring and customizing fields for ZK UI components
+ * based on their type, name, and context within a view. It maps Java types to ZK components, sets labels, handles
+ * special cases (such as enums, dates, colors), and applies appropriate bindings for form views. This class enables
+ * dynamic and context-aware UI generation, reducing manual configuration and ensuring consistency across views.
+ * <p>
+ * Main features:
+ * <ul>
+ *   <li>Maps Java field types to ZK UI components using a predefined index.</li>
+ *   <li>Automatically sets field labels and component classes.</li>
+ *   <li>Handles special cases for booleans, enums, dates, times, and colors.</li>
+ *   <li>Configures data bindings for form views, including date and time fields.</li>
+ *   <li>Supports extensibility via customizers for specific field types.</li>
+ * </ul>
+ * <p>
+ * Usage: This class is typically used by the DynamiaTools framework to prepare fields for rendering in ZK-based views.
+ * It is registered as a provider and invoked automatically during view generation.
+ *
  * @author Mario A. Serrano Leones
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -64,6 +81,17 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
         INDEX.put(DurationSelector.class, Duration.class);
     }
 
+    /**
+     * Customizes the given field based on its properties and the view type.
+     * <p>
+     * This method determines the appropriate ZK component for the field, sets its label if missing,
+     * and configures bindings and customizations for form views. It also handles special cases for booleans,
+     * enums, and date/time fields, ensuring the field is properly set up for display or editing.
+     * </p>
+     *
+     * @param viewTypeName The name of the view type (e.g., "form").
+     * @param field        The field to customize.     *
+     */
     @Override
     public void customize(String viewTypeName, Field field) {
 
@@ -91,8 +119,9 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
             }
         }
 
+        customizeCombobox(field);
+
         if (isForm(viewTypeName) && field.getFieldClass() != null && field.getComponentClass() != null) {
-            customizeCombobox(field);
             customizeDateboxBindings(field);
             customizeTimeboxBindings(field);
             customizeDateSelectorBinding(field);
@@ -100,16 +129,39 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
 
     }
 
+    /**
+     * Checks if the given view type name corresponds to a form view.
+     *
+     * @param viewTypeName The name of the view type.
+     * @return true if the view type is "form", false otherwise.
+     */
     private static boolean isForm(String viewTypeName) {
-        return viewTypeName.equals("form");
+        return viewTypeName != null && viewTypeName.equalsIgnoreCase("form");
     }
 
+    /**
+     * Customizes a Combobox field to be readonly if not already specified.
+     * <p>
+     * Ensures that Combobox components are set to readonly by default unless overridden.
+     * </p>
+     *
+     * @param field The field to customize.
+     */
     public static void customizeCombobox(Field field) {
-        if (field.getComponentClass() == Combobox.class && field.getParams().get("readonly") == null) {
-            field.addParam("readonly", true);
+        if (field.getComponentClass() == Combobox.class && field.getParams().get(Viewers.PARAM_READ_ONLY) == null) {
+            field.addParam(Viewers.PARAM_READ_ONLY, true);
         }
     }
 
+    /**
+     * Recursively searches for a ZK component class that matches the given superclass.
+     * <p>
+     * This method traverses the class hierarchy to find a suitable component mapping.
+     * </p>
+     *
+     * @param superClass The superclass to search for.
+     * @return The matching ZK component class, or null if not found.
+     */
     private static Class<? extends Component> getComponentForSuperClass(Class superClass) {
         if (superClass == null) {
             return null;
@@ -123,10 +175,25 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
         return component;
     }
 
+    /**
+     * Retrieves the ZK component class associated with the given field class.
+     *
+     * @param fieldClass The field class to look up.
+     * @return The corresponding ZK component class, or null if not mapped.
+     */
     private static Class<? extends Component> getComponentClass(Class fieldClass) {
         return INDEX.getKey(fieldClass);
     }
 
+    /**
+     * Configures the field for form views by assigning the appropriate ZK component and customizer.
+     * <p>
+     * Handles special cases for color fields, enums, and date/time fields, ensuring correct component assignment
+     * and binding setup for form editing.
+     * </p>
+     *
+     * @param field The field to configure.
+     */
     public static void configureForm(Field field) {
         if (field.getFieldClass() == null) {
             return;
@@ -152,13 +219,20 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
             field.setComponentCustomizer(EnumComponentCustomizer.class.getName());
         }
 
-        customizeCombobox(field);
         customizeDateboxBindings(field);
-        customizeTimeboxBindings(field);
         customizeDateSelectorBinding(field);
+        customizeTimeboxBindings(field);
 
     }
 
+    /**
+     * Sets up binding attributes for DateSelector components when used with LocalDate fields.
+     * <p>
+     * Ensures that the correct binding attribute is set for proper data synchronization.
+     * </p>
+     *
+     * @param field The field to customize.
+     */
     public static void customizeDateSelectorBinding(Field field) {
         if (field.getComponentClass() == DateSelector.class && !field.containsParam(Viewers.PARAM_BINDINGS) && !field.containsParam(Viewers.PARAM_BINDING_ATTRIBUTE) && field.getFieldClass() == LocalDate.class) {
             String attribute = "selectedLocalDate";
@@ -166,6 +240,14 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
         }
     }
 
+    /**
+     * Configures binding attributes and formatting for Datebox components.
+     * <p>
+     * Sets the binding attribute, time zone, locale, and format for date fields, especially for LocalDateTime.
+     * </p>
+     *
+     * @param field The field to customize.
+     */
     public static void customizeDateboxBindings(Field field) {
         if (field.getComponentClass() == Datebox.class && !field.containsParam(Viewers.PARAM_BINDINGS) && !field.containsParam(Viewers.PARAM_BINDING_ATTRIBUTE)) {
             String attribute = getDateboxBindingAttribute(field);
@@ -178,6 +260,14 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
         }
     }
 
+    /**
+     * Sets up binding attributes for Timebox components.
+     * <p>
+     * Ensures that the correct binding attribute is set for time fields.
+     * </p>
+     *
+     * @param field The field to customize.
+     */
     public static void customizeTimeboxBindings(Field field) {
         if (field.getComponentClass() == Timebox.class && !field.containsParam(Viewers.PARAM_BINDINGS) && !field.containsParam(Viewers.PARAM_BINDING_ATTRIBUTE)) {
             String attribute = getDateboxBindingAttribute(field);
@@ -185,7 +275,15 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
         }
     }
 
-
+    /**
+     * Determines the appropriate binding property name for date/time fields based on their type.
+     * <p>
+     * Returns the correct property name to use for data binding in ZK components.
+     * </p>
+     *
+     * @param field The field to analyze.
+     * @return The binding property name for the field's type.
+     */
     public static String getDateboxBindingAttribute(Field field) {
         String bindingProperty = "value";
         if (field.getFieldClass() == LocalDate.class) {
@@ -199,4 +297,5 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
         }
         return bindingProperty;
     }
+
 }
