@@ -188,17 +188,9 @@ public class EntityFiltersPanel extends Borderlayout implements View {
         if (field.getParams().containsKey(PATH)) {
             path = (String) field.getParams().get(PATH);
         }
-        String label = field.getLocalizedLabel(Messages.getDefaultLocale());
-        if (messagesProvider != null) {
-            label = messagesProvider.getMessage(field.getName(), Viewers.buildMessageClasffier(field.getViewDescriptor()), Messages.getDefaultLocale(), label);
-        }
+        String label = buildFilterLabel(field, prop);
 
-        if (prop != null) {
-            if (prop.is(Boolean.class) || prop.is(boolean.class)) {
-                label += "?";
-            }
-        }
-
+        DefaultFieldCustomizer.configureForm(field);
 
         QueryCondition qc = BeanUtils.newInstance(filterCondition.getConditionClass());
         Vlayout filterGroup = new Vlayout();
@@ -239,7 +231,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
             comp.setParent(filterGroup);
             comp2.setParent(filterGroup);
 
-            bindComponentToBetween(binder, qc, comp, comp2);
+            bindComponentToBetween(field, binder, qc, comp, comp2);
             componentsFieldsMap.put(field.getName(), new FormFieldComponent(field.getName(), labelComp, comp, comp2));
         } else {
             Component comp = null;
@@ -248,7 +240,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
             } else {
                 comp = buildComponent(field, prop, filterCondition);
             }
-            bindComponentToCondition(binder, qc, comp);
+            bindComponentToCondition(field, binder, qc, comp);
 
             if (comp instanceof InputElement ie) {
                 ie.setStyle("text-align:left");
@@ -268,6 +260,20 @@ public class EntityFiltersPanel extends Borderlayout implements View {
 
         binder.loadComponent(filterGroup, false);
 
+    }
+
+    private String buildFilterLabel(Field field, PropertyInfo prop) {
+        String label = field.getLocalizedLabel(Messages.getDefaultLocale());
+        if (messagesProvider != null) {
+            label = messagesProvider.getMessage(field.getName(), Viewers.buildMessageClasffier(field.getViewDescriptor()), Messages.getDefaultLocale(), label);
+        }
+
+        if (prop != null) {
+            if (prop.is(Boolean.class) || prop.is(boolean.class)) {
+                label += "?";
+            }
+        }
+        return label;
     }
 
     private Component buildComponent(Field field, PropertyInfo prop, FilterCondition filterCondition) {
@@ -371,20 +377,29 @@ public class EntityFiltersPanel extends Borderlayout implements View {
             }
         }
         return null;
-
     }
 
-    private void bindComponentToCondition(Binder binder, QueryCondition qc, Component comp) {
-        String beanId = "QC";
-        ZKBindingUtil.bindBean(binder.getView(), beanId, qc);
-        ZKBindingUtil.bindComponent(binder, comp, beanId + ".value", null);
+
+    private static String getBindingAttribute(Field field) {
+        if (field.getParam(Viewers.PARAM_BINDING_ATTRIBUTE) instanceof String bingingAttribute && !bingingAttribute.isBlank()) {
+            return bingingAttribute;
+        }
+        return null;
     }
 
-    private void bindComponentToBetween(Binder binder, QueryCondition qc, Component comp, Component comp2) {
+
+    private void bindComponentToCondition(Field field, Binder binder, QueryCondition qc, Component comp) {
         String beanId = "QC";
         ZKBindingUtil.bindBean(binder.getView(), beanId, qc);
-        ZKBindingUtil.bindComponent(binder, comp, beanId + ".valueLo", null);
-        ZKBindingUtil.bindComponent(binder, comp2, beanId + ".valueHi", null);
+        ZKBindingUtil.bindComponent(binder, comp, getBindingAttribute(field), beanId + ".value", null);
+    }
+
+
+    private void bindComponentToBetween(Field field, Binder binder, QueryCondition qc, Component comp, Component comp2) {
+        String beanId = "QC";
+        ZKBindingUtil.bindBean(binder.getView(), beanId, qc);
+        ZKBindingUtil.bindComponent(binder, comp, getBindingAttribute(field), beanId + ".valueLo", null);
+        ZKBindingUtil.bindComponent(binder, comp2, getBindingAttribute(field), beanId + ".valueHi", null);
     }
 
     private Component buildDefaultComponent(Field field, PropertyInfo prop) {

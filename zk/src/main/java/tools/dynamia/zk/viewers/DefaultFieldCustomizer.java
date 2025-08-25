@@ -22,7 +22,6 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zul.*;
 import tools.dynamia.commons.DateRange;
 import tools.dynamia.commons.DayOfWeek;
-import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.collect.ArrayListMultiMap;
 import tools.dynamia.commons.collect.ListMultiMap;
@@ -37,7 +36,6 @@ import java.math.BigDecimal;
 import java.time.*;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * @author Mario A. Serrano Leones
@@ -97,13 +95,13 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
 
     }
 
-    private static void customizeCombobox(Field field) {
+    public static void customizeCombobox(Field field) {
         if (field.getComponentClass() == Combobox.class && field.getParams().get("readonly") == null) {
             field.addParam("readonly", true);
         }
     }
 
-    private Class<? extends Component> getComponentForSuperClass(Class superClass) {
+    private static Class<? extends Component> getComponentForSuperClass(Class superClass) {
         if (superClass == null) {
             return null;
         }
@@ -116,11 +114,11 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
         return component;
     }
 
-    private Class<? extends Component> getComponentClass(Class fieldClass) {
+    private static Class<? extends Component> getComponentClass(Class fieldClass) {
         return INDEX.getKey(fieldClass);
     }
 
-    private void configureForm(Field field) {
+    public static void configureForm(Field field) {
         if (field.getFieldClass() == null) {
             return;
         }
@@ -146,26 +144,25 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
         }
 
         customizeDateboxBindings(field);
-
         customizeDateSelectorBinding(field);
 
     }
 
-    private static void customizeDateSelectorBinding(Field field) {
+    public static void customizeDateSelectorBinding(Field field) {
         if (field.getComponentClass() == DateSelector.class && !field.containsParam(Viewers.PARAM_BINDINGS) && !field.containsParam(Viewers.PARAM_BINDING_ATTRIBUTE) && field.getFieldClass() == LocalDate.class) {
             String attribute = "selectedLocalDate";
             field.addParam(Viewers.PARAM_BINDING_ATTRIBUTE, attribute);
         }
     }
 
-    private void customizeDateboxBindings(Field field) {
+    public static void customizeDateboxBindings(Field field) {
         if (field.getComponentClass() == Datebox.class && !field.containsParam(Viewers.PARAM_BINDINGS) && !field.containsParam(Viewers.PARAM_BINDING_ATTRIBUTE)) {
             String attribute = getDateboxBindingAttribute(field);
             field.addParam(Viewers.PARAM_BINDING_ATTRIBUTE, attribute);
         }
     }
 
-    protected String getDateboxBindingAttribute(Field field) {
+    public static String getDateboxBindingAttribute(Field field) {
         String bindingProperty = "value";
         if (field.getFieldClass() == LocalDate.class) {
             bindingProperty = "valueInLocalDate";
