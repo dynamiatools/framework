@@ -111,6 +111,7 @@ public class Viewers {
     public static final String PARAM_PAGINATION = "pagination";
     public static final String PARAM_MULTIVIEW = "multiview";
     public static final String PARAM_VISIBLE = "visible";
+    public static final String PARAM_READ_ONLY = "readonly";
 
     /**
      * Find view descriptor.
