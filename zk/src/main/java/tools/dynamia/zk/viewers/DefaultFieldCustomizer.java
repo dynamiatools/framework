@@ -77,7 +77,7 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
 
         if (field.getComponentClass() == null && field.isVisible()) {
 
-            if (viewTypeName.equals("form") || field.getParams().containsKey(Viewers.PARAM_WRITABLE)) {
+            if (isForm(viewTypeName) || field.getParams().containsKey(Viewers.PARAM_WRITABLE)) {
                 configureForm(field);
             } else if (field.getFieldClass() == Boolean.class || field.getFieldClass() == boolean.class) {
                 field.setComponentClass(Checkbox.class);
@@ -91,11 +91,17 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
             }
         }
 
-        customizeCombobox(field);
-        customizeDateboxBindings(field);
-        customizeTimeboxBindings(field);
-        customizeDateSelectorBinding(field);
+        if (isForm(viewTypeName) && field.getFieldClass() != null && field.getComponentClass() != null) {
+            customizeCombobox(field);
+            customizeDateboxBindings(field);
+            customizeTimeboxBindings(field);
+            customizeDateSelectorBinding(field);
+        }
 
+    }
+
+    private static boolean isForm(String viewTypeName) {
+        return viewTypeName.equals("form");
     }
 
     public static void customizeCombobox(Field field) {
@@ -146,9 +152,10 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
             field.setComponentCustomizer(EnumComponentCustomizer.class.getName());
         }
 
+        customizeCombobox(field);
         customizeDateboxBindings(field);
-        customizeDateSelectorBinding(field);
         customizeTimeboxBindings(field);
+        customizeDateSelectorBinding(field);
 
     }
 
