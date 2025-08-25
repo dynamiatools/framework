@@ -20,14 +20,7 @@ import org.zkoss.bind.Binder;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.HtmlBasedComponent;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.Borderlayout;
-import org.zkoss.zul.Button;
-import org.zkoss.zul.Center;
-import org.zkoss.zul.Combobox;
-import org.zkoss.zul.Label;
-import org.zkoss.zul.South;
-import org.zkoss.zul.Textbox;
-import org.zkoss.zul.Vlayout;
+import org.zkoss.zul.*;
 import org.zkoss.zul.impl.InputElement;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.LocalizedMessagesProvider;
@@ -56,13 +49,7 @@ import tools.dynamia.zk.util.ZKUtil;
 import tools.dynamia.zk.viewers.DefaultFieldCustomizer;
 import tools.dynamia.zk.viewers.form.FormFieldComponent;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class EntityFiltersPanel extends Borderlayout implements View {
@@ -245,7 +232,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
             }
             if (comp2 instanceof InputElement input) {
                 input.setHflex("1");
-                input.setPlaceholder(Messages.get(EntityFiltersPanel.class, "from"));
+                input.setPlaceholder(Messages.get(EntityFiltersPanel.class, "to"));
             }
 
 
@@ -474,7 +461,14 @@ public class EntityFiltersPanel extends Borderlayout implements View {
                 || fieldClass == double.class
                 || fieldClass == long.class
                 || fieldClass == float.class
-                || fieldClass == int.class) {
+                || fieldClass == int.class
+                || fieldClass == short.class
+                || fieldClass == byte.class
+                || fieldClass == java.time.LocalDate.class
+                || fieldClass == java.time.Instant.class
+                || fieldClass == java.time.LocalDateTime.class
+                || fieldClass == java.time.ZonedDateTime.class
+                || fieldClass == java.time.LocalTime.class) {
             return FilterCondition.BETWEEN;
         }
 

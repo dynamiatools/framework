@@ -22,6 +22,7 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zul.*;
 import tools.dynamia.commons.DateRange;
 import tools.dynamia.commons.DayOfWeek;
+import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.collect.ArrayListMultiMap;
 import tools.dynamia.commons.collect.ListMultiMap;
@@ -33,12 +34,10 @@ import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.ui.*;
 
 import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * @author Mario A. Serrano Leones
@@ -92,10 +91,16 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
             }
         }
 
+        customizeCombobox(field);
+        customizeDateboxBindings(field);
+        customizeDateSelectorBinding(field);
+
+    }
+
+    private static void customizeCombobox(Field field) {
         if (field.getComponentClass() == Combobox.class && field.getParams().get("readonly") == null) {
             field.addParam("readonly", true);
         }
-
     }
 
     private Class<? extends Component> getComponentForSuperClass(Class superClass) {
@@ -116,28 +121,61 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
     }
 
     private void configureForm(Field field) {
-        if (field.getFieldClass() != null) {
-            Class componentClass = null;
+        if (field.getFieldClass() == null) {
+            return;
+        }
 
-            if (field.getFieldClass().equals(String.class) && (field.getName().equalsIgnoreCase("color")
-                    || field.getName().toLowerCase().endsWith(".color"))) {
-                componentClass = Colorbox.class;
-            }
+        Class componentClass = null;
 
-            if (componentClass == null) {
-                componentClass = getComponentClass(field.getFieldClass());
-            }
-
+        if (field.getFieldClass().equals(String.class) && (
+                "color".equalsIgnoreCase(field.getName()) ||
+                        field.getName().toLowerCase().endsWith(".color"))) {
+            componentClass = Colorbox.class;
+        } else {
+            componentClass = getComponentClass(field.getFieldClass());
             if (componentClass == null) {
                 componentClass = getComponentForSuperClass(field.getFieldClass().getSuperclass());
             }
-            field.setComponentClass(componentClass);
-
-            if ((field.getFieldClass() != null && field.getFieldClass().isEnum())
-                    || (field.getPropertyInfo() != null && field.getPropertyInfo().isEnum())) {
-                field.setComponentCustomizer(EnumComponentCustomizer.class.getName());
-            }
-
         }
+
+        field.setComponentClass(componentClass);
+
+        if ((field.getFieldClass().isEnum()) ||
+                (field.getPropertyInfo() != null && field.getPropertyInfo().isEnum())) {
+            field.setComponentCustomizer(EnumComponentCustomizer.class.getName());
+        }
+
+        customizeDateboxBindings(field);
+
+        customizeDateSelectorBinding(field);
+
+    }
+
+    private static void customizeDateSelectorBinding(Field field) {
+        if (field.getComponentClass() == DateSelector.class && !field.containsParam(Viewers.PARAM_BINDINGS) && !field.containsParam(Viewers.PARAM_BINDING_ATTRIBUTE) && field.getFieldClass() == LocalDate.class) {
+            String attribute = "selectedLocalDate";
+            field.addParam(Viewers.PARAM_BINDING_ATTRIBUTE, attribute);
+        }
+    }
+
+    private void customizeDateboxBindings(Field field) {
+        if (field.getComponentClass() == Datebox.class && !field.containsParam(Viewers.PARAM_BINDINGS) && !field.containsParam(Viewers.PARAM_BINDING_ATTRIBUTE)) {
+            String attribute = getDateboxBindingAttribute(field);
+            field.addParam(Viewers.PARAM_BINDING_ATTRIBUTE, attribute);
+        }
+    }
+
+    protected String getDateboxBindingAttribute(Field field) {
+        String bindingProperty = "value";
+        if (field.getFieldClass() == LocalDate.class) {
+            bindingProperty = "valueInLocalDate";
+        } else if (field.getFieldClass() == LocalDateTime.class) {
+            bindingProperty = "valueInLocalDateTime";
+        } else if (field.getFieldClass() == LocalTime.class) {
+            bindingProperty = "valueInLocalTime";
+        } else if (field.getFieldClass() == ZonedDateTime.class) {
+            bindingProperty = "valueInZonedDateTime";
+        }
+        return bindingProperty;
     }
 }
