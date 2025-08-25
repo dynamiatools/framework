@@ -22,6 +22,7 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zul.*;
 import tools.dynamia.commons.DateRange;
 import tools.dynamia.commons.DayOfWeek;
+import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.collect.ArrayListMultiMap;
 import tools.dynamia.commons.collect.ListMultiMap;
@@ -36,6 +37,7 @@ import java.math.BigDecimal;
 import java.time.*;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * @author Mario A. Serrano Leones
@@ -52,7 +54,7 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
         INDEX.put(Doublebox.class, double.class, Double.class);
         INDEX.put(Checkbox.class, boolean.class, Boolean.class);
         INDEX.put(Textbox.class, String.class);
-        INDEX.put(Datebox.class, Date.class, LocalDate.class, Instant.class);
+        INDEX.put(Datebox.class, Date.class, LocalDate.class, Instant.class, LocalDateTime.class, ZonedDateTime.class);
         INDEX.put(DecimalboxCalculator.class, BigDecimal.class);
         INDEX.put(Combobox.class, Enum.class);
         INDEX.put(DayWeekbox.class, DayOfWeek.class);
@@ -91,6 +93,7 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
 
         customizeCombobox(field);
         customizeDateboxBindings(field);
+        customizeTimeboxBindings(field);
         customizeDateSelectorBinding(field);
 
     }
@@ -145,6 +148,7 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
 
         customizeDateboxBindings(field);
         customizeDateSelectorBinding(field);
+        customizeTimeboxBindings(field);
 
     }
 
@@ -159,8 +163,21 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
         if (field.getComponentClass() == Datebox.class && !field.containsParam(Viewers.PARAM_BINDINGS) && !field.containsParam(Viewers.PARAM_BINDING_ATTRIBUTE)) {
             String attribute = getDateboxBindingAttribute(field);
             field.addParam(Viewers.PARAM_BINDING_ATTRIBUTE, attribute);
+            field.addParam("timeZone", TimeZone.getTimeZone(Messages.getDefaultTimeZone()));
+            field.addParam("locale", Messages.getDefaultLocale());
+            if (field.getFieldClass() == LocalDateTime.class) {
+                field.addParam("format", "medium+medium");
+            }
         }
     }
+
+    public static void customizeTimeboxBindings(Field field) {
+        if (field.getComponentClass() == Timebox.class && !field.containsParam(Viewers.PARAM_BINDINGS) && !field.containsParam(Viewers.PARAM_BINDING_ATTRIBUTE)) {
+            String attribute = getDateboxBindingAttribute(field);
+            field.addParam(Viewers.PARAM_BINDING_ATTRIBUTE, attribute);
+        }
+    }
+
 
     public static String getDateboxBindingAttribute(Field field) {
         String bindingProperty = "value";
