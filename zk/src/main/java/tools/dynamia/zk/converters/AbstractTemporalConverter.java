@@ -21,16 +21,20 @@ import org.zkoss.bind.Converter;
 import org.zkoss.zk.ui.Component;
 import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.commons.Messages;
+import tools.dynamia.commons.SimpleCache;
 
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * @author Mario A. Serrano Leones
  */
 
 public abstract class AbstractTemporalConverter implements Converter<Object, Object, Component> {
+
+    private static final SimpleCache<String, DateTimeFormatter> FORMATTER_SIMPLE_CACHE = new SimpleCache<>();
 
     @Override
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {
@@ -53,7 +57,10 @@ public abstract class AbstractTemporalConverter implements Converter<Object, Obj
     }
 
     private DateTimeFormatter buildFormatter() {
-        return DateTimeFormatter.ofPattern(getPattern(), Messages.getDefaultLocale());
+        Locale locale = Messages.getDefaultLocale();
+        String pattern = getPattern();
+        String key = pattern + "#" + locale.toString();
+        return FORMATTER_SIMPLE_CACHE.getOrLoad(key, s -> DateTimeFormatter.ofPattern(pattern, locale));
     }
 
     public String format(TemporalAccessor temporalAccessor) {

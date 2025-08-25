@@ -45,6 +45,7 @@ public class ComponentAliasIndex extends HashMap<String, Class<? extends Compone
         getInstance().add(Longbox.class);
         getInstance().add(Decimalbox.class);
         getInstance().add(Datebox.class);
+        getInstance().add(DateSelector.class);
         getInstance().add(Button.class);
         getInstance().add(A.class);
         getInstance().add("link", A.class);

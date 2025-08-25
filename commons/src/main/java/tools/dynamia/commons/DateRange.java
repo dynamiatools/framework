@@ -113,7 +113,7 @@ public class DateRange implements Serializable {
         this.endDate = endDate;
     }
 
-    public void setEndDate(LocalDate endLocalDate) {
+    public void setEndLocalDate(LocalDate endLocalDate) {
         this.endDate = DateTimeUtils.toDate(endLocalDate);
     }
 
@@ -126,7 +126,7 @@ public class DateRange implements Serializable {
         this.startDate = startDate;
     }
 
-    public void setStartDate(LocalDate startLocalDate) {
+    public void setStartLocalDate(LocalDate startLocalDate) {
         this.startDate = DateTimeUtils.toDate(startLocalDate);
     }
 

@@ -16,41 +16,15 @@
  */
 package tools.dynamia.zk.converters;
 
-import org.zkoss.bind.BindContext;
-import org.zkoss.bind.Converter;
-import org.zkoss.zk.ui.Component;
-import tools.dynamia.commons.Messages;
-
-import java.text.DateFormat;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
-
 /**
+ *
+ * Time converter using the pattern "HH:mm:ss", delegate conversion to {@link LocalTime} converter
+ *
  * @author Mario A. Serrano Leones
  */
 
-public class Time implements Converter<Object, Object, Component>{
+public class Time extends LocalTime {
 
-    private final DateFormat formatter;
-
-    public Time() {
-        formatter = DateFormat.getTimeInstance(DateFormat.MEDIUM, Messages.getDefaultLocale());
-    }
-
-    @Override
-    public Object coerceToUi(Object val, Component comp, BindContext context) {
-
-        if (val instanceof java.util.Date) {
-
-            return formatter.format(val);
-        }
-        return null;
-    }
-
-    @Override
-    public Object coerceToBean(Object val, Component comp, BindContext context) {
-        return Util.coerceToBean(val, formatter);
-    }
-
+    //delegate to LocalTime
 
 }

@@ -16,38 +16,13 @@
  */
 package tools.dynamia.zk.converters;
 
-import org.zkoss.bind.BindContext;
-import org.zkoss.bind.Converter;
-import org.zkoss.zk.ui.Component;
-import tools.dynamia.commons.Messages;
-
-import java.text.DateFormat;
-
 /**
- * @author Mario A. Serrano Leones
+ *
+ * A DateTime converter using the pattern "yyyy-MM-dd HH:mm:ss", delegate conversion to {@link LocalDateTime} converter
+ * * @author Mario A. Serrano Leones
  */
 
-public class DateTime implements Converter<Object, Object, Component> {
+public class DateTime extends LocalDateTime {
 
-
-    @Override
-    public Object coerceToUi(Object val, Component comp, BindContext ctx) {
-
-        if (val instanceof java.util.Date) {
-            DateFormat df = buildFormatter();
-            Util.applyStylesClass((java.util.Date) val, comp);
-            return df.format(val);
-        }
-        return null;
-    }
-
-    @Override
-    public Object coerceToBean(Object val, Component comp, BindContext ctx) {
-        return Util.coerceToBean(val, buildFormatter());
-    }
-
-    private DateFormat buildFormatter() {
-        return DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, Messages.getDefaultLocale());
-    }
-
+    //delegate to LocalDateTime
 }
