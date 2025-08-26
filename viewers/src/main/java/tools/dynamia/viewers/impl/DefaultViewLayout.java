@@ -51,4 +51,11 @@ public class DefaultViewLayout implements ViewLayout {
     public void addParam(String name, Object value) {
         map.put(name, value);
     }
+
+    @Override
+    public void addParams(Map<String, Object> params) {
+        if (params != null && !params.isEmpty()) {
+            map.putAll(params);
+        }
+    }
 }

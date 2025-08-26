@@ -29,10 +29,13 @@ import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.FieldCustomizer;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.impl.DefaultViewDescriptor;
+import tools.dynamia.viewers.util.Viewers;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Mario A. Serrano Leones
@@ -58,7 +61,7 @@ public class DefaultFieldCustomizerTest {
 
     @Test
     public void testFieldEnums() {
-        ViewDescriptor vd = new DefaultViewDescriptor(DummyBean.class, "form",true);
+        ViewDescriptor vd = new DefaultViewDescriptor(DummyBean.class, "form", true);
         Field type = vd.getField("type");
         assertEquals(Combobox.class, type.getComponentClass());
         assertEquals(EnumComponentCustomizer.class.getName(), type.getComponentCustomizer());
@@ -95,6 +98,21 @@ public class DefaultFieldCustomizerTest {
             Field field = vd.getField("age");
             assertEquals(Intbox.class, field.getComponentClass());
         }
+
+    }
+
+    @Test
+    public void testDateboxLocalDate() {
+        FieldCustomizer fc = new DefaultFieldCustomizer();
+        Field field = new Field("test");
+        field.setFieldClass(LocalDate.class);
+        fc.customize("form", field);
+        assertEquals(Datebox.class, field.getComponentClass());
+        assertEquals("datebox", field.getComponent());
+        assertEquals("valueInLocalDate", field.getParams().get(Viewers.PARAM_BINDING_ATTRIBUTE));
+        assertNotNull(field.getParam("timeZone"));
+        assertNotNull(field.getParam("locale"));
+
 
     }
 }

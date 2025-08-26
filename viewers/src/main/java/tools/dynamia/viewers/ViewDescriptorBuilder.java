@@ -18,7 +18,9 @@ package tools.dynamia.viewers;
 
 import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.viewers.impl.DefaultViewDescriptor;
+import tools.dynamia.viewers.util.Viewers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -281,5 +283,51 @@ public class ViewDescriptorBuilder {
     public ViewDescriptorBuilder autofields(boolean autofields) {
         descriptor.setAutofields(autofields);
         return this;
+    }
+
+    /**
+     * Creates a new ViewDescriptorBuilder from an existing ViewDescriptor
+     *
+     * @param other the other
+     * @return the view descriptor builder
+     */
+    public static ViewDescriptorBuilder from(ViewDescriptor other) {
+        return from(other.getViewTypeName(), other.getBeanClass(), other);
+    }
+
+    /**
+     * Creates a new ViewDescriptorBuilder from an existing ViewDescriptor
+     *
+     * @param viewType  the view type
+     * @param beanClass the bean class
+     * @param other     the other
+     * @return the view descriptor builder
+     */
+    public static ViewDescriptorBuilder from(String viewType, Class<?> beanClass, ViewDescriptor other) {
+        ViewDescriptorBuilder builder = new ViewDescriptorBuilder();
+        builder.descriptor = new DefaultViewDescriptor();
+        builder.descriptor.setAutofields(other.isAutofields());
+        builder.descriptor.setViewTypeName(viewType);
+        builder.descriptor.setBeanClass(beanClass);
+        builder.descriptor.setMessages(other.getMessages());
+        if (other.getActions() != null && !other.getActions().isEmpty()) {
+            builder.descriptor.setActions(new ArrayList<>(other.getActions()));
+        }
+        builder.descriptor.setExtends(other.getExtends());
+        other.getFields().forEach(f -> {
+            builder.descriptor.addField(f.clone());
+        });
+
+        other.getFieldGroups().forEach(group -> {
+            FieldGroup newGroup = group.clone();
+            group.getFields().forEach(f -> {
+                newGroup.addField(builder.descriptor.getField(f.getName()));
+            });
+            builder.descriptor.addFieldGroup(newGroup);
+        });
+
+        builder.descriptor.getLayout().addParams(other.getLayout().getParams());
+        builder.descriptor.getParams().putAll(other.getParams());
+        return builder;
     }
 }

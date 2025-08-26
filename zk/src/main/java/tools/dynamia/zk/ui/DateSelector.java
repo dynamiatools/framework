@@ -33,6 +33,7 @@ import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.util.ZKUtil;
 
+import java.time.LocalDate;
 import java.time.Month;
 import java.util.Date;
 import java.util.List;
@@ -183,6 +184,15 @@ public class DateSelector extends Div {
         saveValues();
         return selected;
     }
+
+    public LocalDate getSelectedLocalDate() {
+        return DateTimeUtils.toLocalDate(getSelected());
+    }
+
+    public void setSelectedLocalDate(LocalDate selectedLocalDate) {
+        setSelected(DateTimeUtils.toDate(selectedLocalDate));
+    }
+
 
     public void setSelected(Date selected) {
         this.selected = selected;

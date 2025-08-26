@@ -41,4 +41,11 @@ public interface ViewLayout extends Serializable {
      * @param value the value
      */
     void addParam(String name, Object value);
+
+    /**
+     * Adds the params.
+     *
+     * @param params the params
+     */
+    void addParams(Map<String, Object> params);
 }

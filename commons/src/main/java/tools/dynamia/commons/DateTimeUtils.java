@@ -89,7 +89,7 @@ public final class DateTimeUtils {
      * @return true if the date is in the future, false otherwise
      */
     public static boolean isFuture(Date date) {
-        return date.after(new Date());
+        return date != null && date.after(new Date());
     }
 
     /**
@@ -99,7 +99,7 @@ public final class DateTimeUtils {
      * @return true if the date is in the past, false otherwise
      */
     public static boolean isPast(Date date) {
-        return date.before(new Date());
+        return date != null && date.before(new Date());
     }
 
     /**
@@ -109,6 +109,9 @@ public final class DateTimeUtils {
      * @return true if the date is today, false otherwise
      */
     public static boolean isToday(Date date) {
+        if (date == null) {
+            return false;
+        }
         Date today = new Date();
         return getYear(today) == getYear(date) && getMonth(today) == getMonth(date) && getDay(today) == getDay(date);
     }
@@ -158,6 +161,9 @@ public final class DateTimeUtils {
      * @return the number of milliseconds between date1 and date2
      */
     public static long millisBetween(Date date1, Date date2) {
+        if (date1 == null || date2 == null) {
+            throw new IllegalArgumentException("Dates must not be null");
+        }
         LocalDate localDate1 = toLocalDate(date1);
         LocalDate localDate2 = toLocalDate(date2);
         return localDate1.until(localDate2, ChronoUnit.MILLIS);
@@ -171,6 +177,9 @@ public final class DateTimeUtils {
      * @return the number of years between date1 and date2
      */
     public static long yearsBetween(Date date1, Date date2) {
+        if (date1 == null || date2 == null) {
+            throw new IllegalArgumentException("Dates must not be null");
+        }
         LocalDate localDate1 = toLocalDate(date1);
         LocalDate localDate2 = toLocalDate(date2);
         return localDate1.until(localDate2, ChronoUnit.YEARS);
@@ -184,6 +193,9 @@ public final class DateTimeUtils {
      * @return the number of months between date1 and date2
      */
     public static long monthsBetween(Date date1, Date date2) {
+        if (date1 == null || date2 == null) {
+            throw new IllegalArgumentException("Dates must not be null");
+        }
         LocalDate localDate1 = toLocalDate(date1);
         LocalDate localDate2 = toLocalDate(date2);
         return localDate1.until(localDate2, ChronoUnit.MONTHS);
@@ -197,6 +209,9 @@ public final class DateTimeUtils {
      * @return the number of days between date1 and date2
      */
     public static long daysBetween(Date date1, Date date2) {
+        if (date1 == null || date2 == null) {
+            throw new IllegalArgumentException("Dates must not be null");
+        }
         return toInstant(date1).until(toInstant(date2), ChronoUnit.DAYS);
     }
 
@@ -208,6 +223,9 @@ public final class DateTimeUtils {
      * @return the number of hours between date1 and date2
      */
     public static long hoursBetween(Date date1, Date date2) {
+        if (date1 == null || date2 == null) {
+            throw new IllegalArgumentException("Dates must not be null");
+        }
         return toInstant(date1).until(toInstant(date2), ChronoUnit.HOURS);
     }
 
@@ -219,6 +237,9 @@ public final class DateTimeUtils {
      * @return the number of minutes between date1 and date2
      */
     public static long minutesBetween(Date date1, Date date2) {
+        if (date1 == null || date2 == null) {
+            throw new IllegalArgumentException("Dates must not be null");
+        }
         return toInstant(date1).until(toInstant(date2), ChronoUnit.MINUTES);
     }
 
@@ -230,6 +251,9 @@ public final class DateTimeUtils {
      * @return the number of seconds between date1 and date2
      */
     public static long secondsBetween(Date date1, Date date2) {
+        if (date1 == null || date2 == null) {
+            throw new IllegalArgumentException("Dates must not be null");
+        }
         return toInstant(date1).until(toInstant(date2), ChronoUnit.SECONDS);
     }
 
@@ -332,6 +356,18 @@ public final class DateTimeUtils {
         return toDate(toLocalDateTime(date).plusDays(days));
     }
 
+
+    /**
+     * Returns a new {@link LocalDate} by adding the specified number of days to the given date.
+     *
+     * @param date original date
+     * @param days number of days to add (can be negative)
+     * @return a new {@link LocalDate} with the days added
+     */
+    public static LocalDate addDays(LocalDate date, int days) {
+        return date.plusDays(days);
+    }
+
     /**
      * Returns a new {@link Date} by adding the specified number of months to the given date.
      *
@@ -341,6 +377,17 @@ public final class DateTimeUtils {
      */
     public static Date addMonths(Date date, int months) {
         return toDate(toLocalDateTime(date).plusMonths(months));
+    }
+
+    /**
+     * Returns a new {@link LocalDate} by adding the specified number of months to the given date.
+     *
+     * @param date   original date
+     * @param months number of months to add (can be negative)
+     * @return a new {@link LocalDate} with the months added
+     */
+    public static LocalDate addMonths(LocalDate date, int months) {
+        return date.plusMonths(months);
     }
 
     /**
@@ -355,6 +402,17 @@ public final class DateTimeUtils {
     }
 
     /**
+     * Returns a new {@link LocalDate} by adding the specified number of years to the given date.
+     *
+     * @param date  original date
+     * @param years number of years to add (can be negative)
+     * @return a new {@link LocalDate} with the years added
+     */
+    public static LocalDate addYears(LocalDate date, int years) {
+        return date.plusYears(years);
+    }
+
+    /**
      * Returns a new {@link Date} by adding the specified number of weeks to the given date.
      *
      * @param date  the original date
@@ -363,6 +421,17 @@ public final class DateTimeUtils {
      */
     public static Date addWeeks(Date date, int weeks) {
         return toDate(toLocalDateTime(date).plusWeeks(weeks));
+    }
+
+    /**
+     * Returns a new {@link LocalDate} by adding the specified number of weeks to the given date.
+     *
+     * @param date  original date
+     * @param weeks number of weeks to add (can be negative)
+     * @return a new {@link LocalDate} with the weeks added
+     */
+    public static LocalDate addWeeks(LocalDate date, int weeks) {
+        return date.plusWeeks(weeks);
     }
 
     /**
@@ -395,6 +464,9 @@ public final class DateTimeUtils {
      * @return the formatted date string
      */
     public static String format(Date date, String pattern) {
+        if (date == null) {
+            return null;
+        }
         DateFormat df = new SimpleDateFormat(pattern, Messages.getDefaultLocale());
         return df.format(date);
     }
@@ -407,6 +479,9 @@ public final class DateTimeUtils {
      * @return the formatted date/time string
      */
     public static String format(TemporalAccessor temporalAccessor, String pattern) {
+        if (temporalAccessor == null) {
+            return null;
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern, Messages.getDefaultLocale());
         return formatter.format(temporalAccessor);
     }
@@ -419,6 +494,9 @@ public final class DateTimeUtils {
      * @return the formatted date string
      */
     public static String formatDate(Date date, int style) {
+        if (date == null) {
+            return null;
+        }
         DateFormat df = DateFormat.getDateInstance(style);
         return df.format(date);
     }
@@ -452,6 +530,9 @@ public final class DateTimeUtils {
      * @return the formatted time string
      */
     public static String formatTime(Date date) {
+        if (date == null) {
+            return null;
+        }
         return formatTime(date, DateFormat.MEDIUM);
     }
 
@@ -462,6 +543,9 @@ public final class DateTimeUtils {
      * @return the month value (1 for January, 12 for December)
      */
     public static int getMonth(Date date) {
+        if (date == null) {
+            return 0;
+        }
         return toLocalDate(date).getMonth().getValue();
     }
 
@@ -472,6 +556,9 @@ public final class DateTimeUtils {
      * @return the day of the month
      */
     public static int getDay(Date date) {
+        if (date == null) {
+            return 0;
+        }
         return toLocalDate(date).getDayOfMonth();
     }
 
@@ -482,6 +569,9 @@ public final class DateTimeUtils {
      * @return the year
      */
     public static int getYear(Date date) {
+        if (date == null) {
+            return 0;
+        }
         return toLocalDate(date).getYear();
     }
 
@@ -529,6 +619,9 @@ public final class DateTimeUtils {
      * @return the corresponding LocalDate
      */
     public static LocalDate toLocalDate(Date input) {
+        if (input == null) {
+            return null;
+        }
         if (input instanceof java.sql.Date) {
             return ((java.sql.Date) input).toLocalDate();
         } else {
@@ -546,6 +639,9 @@ public final class DateTimeUtils {
      * @return the corresponding LocalDate
      */
     public static LocalDate toLocalDate(Date input, ZoneId zoneId) {
+        if (input == null || zoneId == null) {
+            return null;
+        }
         return toInstant(input).atZone(zoneId).toLocalDate();
     }
 
@@ -557,6 +653,9 @@ public final class DateTimeUtils {
      * @return the corresponding LocalDateTime
      */
     public static LocalDateTime toLocalDateTime(Date input) {
+        if (input == null) {
+            return null;
+        }
         Instant instant = null;
         if (input instanceof java.sql.Date) {
             instant = Instant.ofEpochMilli(input.getTime());
@@ -575,6 +674,9 @@ public final class DateTimeUtils {
      * @return local date time
      */
     public static LocalDateTime toLocalDateTime(Date input, ZoneId zoneId) {
+        if (input == null || zoneId == null) {
+            return null;
+        }
         return toInstant(input).atZone(zoneId).toLocalDateTime();
     }
 
@@ -587,6 +689,9 @@ public final class DateTimeUtils {
      * @return local date time
      */
     public static LocalDateTime toLocalDateTime(Date date, Date time, ZoneId zoneId) {
+        if (date == null || time == null || zoneId == null) {
+            return null;
+        }
         LocalDate localDate = toLocalDate(date, zoneId);
         LocalTime localTime = toLocalTime(time, zoneId);
         return LocalDateTime.of(localDate, localTime);
@@ -596,6 +701,9 @@ public final class DateTimeUtils {
      * Convert a Date to LocalTime
      */
     public static LocalTime toLocalTime(Date input) {
+        if (input == null) {
+            return null;
+        }
         Instant instant = null;
         if (input instanceof java.sql.Date) {
             instant = Instant.ofEpochMilli(input.getTime());
@@ -614,6 +722,9 @@ public final class DateTimeUtils {
      * @return local time
      */
     public static LocalTime toLocalTime(Date input, ZoneId zoneId) {
+        if (input == null || zoneId == null) {
+            return null;
+        }
         return toInstant(input).atZone(zoneId).toLocalTime();
     }
 
@@ -622,6 +733,9 @@ public final class DateTimeUtils {
      * Convert a Date to Instant
      */
     public static Instant toInstant(Date input) {
+        if (input == null) {
+            return null;
+        }
         return toInstant(input, ZoneId.systemDefault());
     }
 
@@ -633,6 +747,9 @@ public final class DateTimeUtils {
      * @return instant
      */
     public static Instant toInstant(Date input, ZoneId zoneId) {
+        if (input == null || zoneId == null) {
+            return null;
+        }
         if (input instanceof java.sql.Date) {
             LocalDate localDate = ((java.sql.Date) input).toLocalDate();
             Instant instant = null;
@@ -661,6 +778,9 @@ public final class DateTimeUtils {
      * Convert a LocalDate to Date
      */
     public static Date toDate(LocalDate localDate) {
+        if (localDate == null) {
+            return null;
+        }
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
@@ -668,6 +788,9 @@ public final class DateTimeUtils {
      * Convert a LocalDateTime to Date
      */
     public static Date toDate(LocalDateTime localDateTime) {
+        if (localDateTime == null) {
+            return null;
+        }
         return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 
@@ -675,6 +798,9 @@ public final class DateTimeUtils {
      * Convert a Instant to Date
      */
     public static Date getEndOfDay(Date date) {
+        if (date == null) {
+            return null;
+        }
         return Date.from(toLocalDate(date).atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
     }
 
@@ -682,6 +808,9 @@ public final class DateTimeUtils {
      * Convert a Instant to Date
      */
     public static Date getStartOfDay(Date date) {
+        if (date == null) {
+            return null;
+        }
         return Date.from(toLocalDate(date).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
     }
 

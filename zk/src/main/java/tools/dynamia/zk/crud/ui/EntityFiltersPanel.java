@@ -20,14 +20,7 @@ import org.zkoss.bind.Binder;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.HtmlBasedComponent;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.Borderlayout;
-import org.zkoss.zul.Button;
-import org.zkoss.zul.Center;
-import org.zkoss.zul.Combobox;
-import org.zkoss.zul.Label;
-import org.zkoss.zul.South;
-import org.zkoss.zul.Textbox;
-import org.zkoss.zul.Vlayout;
+import org.zkoss.zul.*;
 import org.zkoss.zul.impl.InputElement;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.LocalizedMessagesProvider;
@@ -45,6 +38,8 @@ import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.View;
 import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.ViewDescriptorBuilder;
+import tools.dynamia.viewers.impl.DefaultViewDescriptor;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.crud.EntityFilterCustomizer;
@@ -56,13 +51,11 @@ import tools.dynamia.zk.util.ZKUtil;
 import tools.dynamia.zk.viewers.DefaultFieldCustomizer;
 import tools.dynamia.zk.viewers.form.FormFieldComponent;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
+import static java.util.function.Predicate.not;
 
 @SuppressWarnings("unchecked")
 public class EntityFiltersPanel extends Borderlayout implements View {
@@ -138,11 +131,21 @@ public class EntityFiltersPanel extends Borderlayout implements View {
         if (viewDescriptor == null) {
             viewDescriptor = Viewers.findViewDescriptor(entityClass, "entityfilters");
         }
+
+        // Fallback to cloning table view and removing non filtrable fields
         if (viewDescriptor == null) {
-            viewDescriptor = Viewers.getViewDescriptor(entityClass, "table");
+            ViewDescriptor tableDescriptor = Viewers.getViewDescriptor(entityClass, "table");
+            viewDescriptor = ViewDescriptorBuilder.from(tableDescriptor).build();
+            viewDescriptor.removeFieldsIf(not(this::isFiltrable));
         }
+
         List<Field> fields = Viewers.getFields(viewDescriptor);
+        DefaultFieldCustomizer defaultFieldCustomizer = new DefaultFieldCustomizer();
         for (Field field : fields) {
+            field.setComponent(null);
+            field.setComponentClass(null);
+            defaultFieldCustomizer.customize("form", field);
+
             EntityFilterCustomizer filterCustomizer = null;
             try {
                 String customizerClass = (String) field.getParams().get(Viewers.PARAM_FILTER_CUSTOMIZER);
@@ -182,6 +185,16 @@ public class EntityFiltersPanel extends Borderlayout implements View {
 
     }
 
+    private boolean isFiltrable(Field field) {
+        if (!field.isVisible() || field.isTemporal() || field.getFieldClass() == null || field.getPropertyInfo() == null
+                || field.getPropertyInfo().isTransient()) {
+            return false;
+        }
+
+
+        return Stream.of(field.getFieldClass().getAnnotations()).noneMatch(a -> a.toString().contains("Transient"));
+    }
+
     private void buildButtons() {
 
         searchButton = new Button();
@@ -201,17 +214,9 @@ public class EntityFiltersPanel extends Borderlayout implements View {
         if (field.getParams().containsKey(PATH)) {
             path = (String) field.getParams().get(PATH);
         }
-        String label = field.getLocalizedLabel(Messages.getDefaultLocale());
-        if (messagesProvider != null) {
-            label = messagesProvider.getMessage(field.getName(), Viewers.buildMessageClasffier(field.getViewDescriptor()), Messages.getDefaultLocale(), label);
-        }
+        String label = buildFilterLabel(field, prop);
 
-        if (prop != null) {
-            if (prop.is(Boolean.class) || prop.is(boolean.class)) {
-                label += "?";
-            }
-        }
-
+        DefaultFieldCustomizer.configureForm(field);
 
         QueryCondition qc = BeanUtils.newInstance(filterCondition.getConditionClass());
         Vlayout filterGroup = new Vlayout();
@@ -245,14 +250,14 @@ public class EntityFiltersPanel extends Borderlayout implements View {
             }
             if (comp2 instanceof InputElement input) {
                 input.setHflex("1");
-                input.setPlaceholder(Messages.get(EntityFiltersPanel.class, "from"));
+                input.setPlaceholder(Messages.get(EntityFiltersPanel.class, "to"));
             }
 
 
             comp.setParent(filterGroup);
             comp2.setParent(filterGroup);
 
-            bindComponentToBetween(binder, qc, comp, comp2);
+            bindComponentToBetween(field, binder, qc, comp, comp2);
             componentsFieldsMap.put(field.getName(), new FormFieldComponent(field.getName(), labelComp, comp, comp2));
         } else {
             Component comp = null;
@@ -261,7 +266,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
             } else {
                 comp = buildComponent(field, prop, filterCondition);
             }
-            bindComponentToCondition(binder, qc, comp);
+            bindComponentToCondition(field, binder, qc, comp);
 
             if (comp instanceof InputElement ie) {
                 ie.setStyle("text-align:left");
@@ -281,6 +286,20 @@ public class EntityFiltersPanel extends Borderlayout implements View {
 
         binder.loadComponent(filterGroup, false);
 
+    }
+
+    private String buildFilterLabel(Field field, PropertyInfo prop) {
+        String label = field.getLocalizedLabel(Messages.getDefaultLocale());
+        if (messagesProvider != null) {
+            label = messagesProvider.getMessage(field.getName(), Viewers.buildMessageClasffier(field.getViewDescriptor()), Messages.getDefaultLocale(), label);
+        }
+
+        if (prop != null) {
+            if (prop.is(Boolean.class) || prop.is(boolean.class)) {
+                label += "?";
+            }
+        }
+        return label;
     }
 
     private Component buildComponent(Field field, PropertyInfo prop, FilterCondition filterCondition) {
@@ -384,34 +403,34 @@ public class EntityFiltersPanel extends Borderlayout implements View {
             }
         }
         return null;
-
     }
 
-    private void bindComponentToCondition(Binder binder, QueryCondition qc, Component comp) {
-        String beanId = "QC";
-        ZKBindingUtil.bindBean(binder.getView(), beanId, qc);
-        ZKBindingUtil.bindComponent(binder, comp, beanId + ".value", null);
+
+    private static String getBindingAttribute(Field field) {
+        if (field.getParam(Viewers.PARAM_BINDING_ATTRIBUTE) instanceof String bingingAttribute && !bingingAttribute.isBlank()) {
+            return bingingAttribute;
+        }
+        return null;
     }
 
-    private void bindComponentToBetween(Binder binder, QueryCondition qc, Component comp, Component comp2) {
+
+    private void bindComponentToCondition(Field field, Binder binder, QueryCondition qc, Component comp) {
         String beanId = "QC";
         ZKBindingUtil.bindBean(binder.getView(), beanId, qc);
-        ZKBindingUtil.bindComponent(binder, comp, beanId + ".valueLo", null);
-        ZKBindingUtil.bindComponent(binder, comp2, beanId + ".valueHi", null);
+        ZKBindingUtil.bindComponent(binder, comp, getBindingAttribute(field), beanId + ".value", null);
+    }
+
+
+    private void bindComponentToBetween(Field field, Binder binder, QueryCondition qc, Component comp, Component comp2) {
+        String beanId = "QC";
+        ZKBindingUtil.bindBean(binder.getView(), beanId, qc);
+        ZKBindingUtil.bindComponent(binder, comp, getBindingAttribute(field), beanId + ".valueLo", null);
+        ZKBindingUtil.bindComponent(binder, comp2, getBindingAttribute(field), beanId + ".valueHi", null);
     }
 
     private Component buildDefaultComponent(Field field, PropertyInfo prop) {
-        Field dummyField = new Field("thefield", prop.getType());
-        DefaultFieldCustomizer dfc = new DefaultFieldCustomizer();
-        dfc.customize("form", dummyField);
-        if (dummyField.getComponentClass() == null) {
-            dummyField.setComponentClass(Textbox.class);
-        }
-        Component comp = (Component) BeanUtils.newInstance(dummyField.getComponentClass());
-        if (comp != null) {
-            BeanUtils.setupBean(comp, field.getParams());
-
-        }
+        Component comp = (Component) BeanUtils.newInstance(field.getComponentClass());
+        BeanUtils.setupBean(comp, field.getParams());
         return comp;
     }
 
@@ -474,7 +493,14 @@ public class EntityFiltersPanel extends Borderlayout implements View {
                 || fieldClass == double.class
                 || fieldClass == long.class
                 || fieldClass == float.class
-                || fieldClass == int.class) {
+                || fieldClass == int.class
+                || fieldClass == short.class
+                || fieldClass == byte.class
+                || fieldClass == java.time.LocalDate.class
+                || fieldClass == java.time.Instant.class
+                || fieldClass == java.time.LocalDateTime.class
+                || fieldClass == java.time.ZonedDateTime.class
+                || fieldClass == java.time.LocalTime.class) {
             return FilterCondition.BETWEEN;
         }
 

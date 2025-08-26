@@ -199,4 +199,20 @@ public class DecimalboxCalculator extends Span implements CanBeReadonly {
     public Calculator getCalculator() {
         return calculator;
     }
+
+    public void setBoxSclass(String sclass) {
+        decimalbox.setSclass(sclass);
+    }
+
+    public String getBoxSclass() {
+        return decimalbox.getSclass();
+    }
+
+    public void setButtonSclass(String sclass) {
+        calcButton.setSclass(sclass);
+    }
+
+    public String getButtonSclass() {
+        return calcButton.getSclass();
+    }
 }
