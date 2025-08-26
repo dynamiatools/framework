@@ -114,7 +114,7 @@ public class Viewers {
     public static final String PARAM_READ_ONLY = "readonly";
 
     /**
-     * Find view descriptor.
+     * Find view descriptor. Return null if nothing found
      *
      * @param clazz the clazz
      * @param name  the name
@@ -122,12 +122,11 @@ public class Viewers {
      */
     public static ViewDescriptor findViewDescriptor(Class clazz, String name) {
         ViewDescriptorFactory vdf = Containers.get().findObject(ViewDescriptorFactory.class);
-
         return vdf.findDescriptor(clazz, name);
     }
 
     /**
-     * Find view descriptor.
+     * Find view descriptor. Return null if nothing found
      *
      * @param clazz  the clazz
      * @param device the device
@@ -141,7 +140,7 @@ public class Viewers {
     }
 
     /**
-     * Get view descriptor.
+     * Get view descriptor. If nothing found a new descriptor is created
      *
      * @param clazz the clazz
      * @param name  the name
@@ -149,12 +148,11 @@ public class Viewers {
      */
     public static ViewDescriptor getViewDescriptor(Class clazz, String name) {
         ViewDescriptorFactory vdf = Containers.get().findObject(ViewDescriptorFactory.class);
-
         return vdf.getDescriptor(clazz, name);
     }
 
     /**
-     * Get view descriptor.
+     * Get view descriptor. If nothing found a new descriptor is created
      *
      * @param clazz  the clazz
      * @param device the device
@@ -168,7 +166,7 @@ public class Viewers {
     }
 
     /**
-     * Find view descriptor.
+     * Find view descriptor. Return null if nothing found
      *
      * @param id the id
      * @return the view descriptor
@@ -179,7 +177,7 @@ public class Viewers {
     }
 
     /**
-     * Find view descriptor for a specific Devices
+     * Find view descriptor for a specific Device (smartphone, tablet, desktop). Return null if nothing found
      *
      * @param id the id
      * @return the view descriptor
