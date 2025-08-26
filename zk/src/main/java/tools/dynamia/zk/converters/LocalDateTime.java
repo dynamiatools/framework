@@ -16,6 +16,8 @@
  */
 package tools.dynamia.zk.converters;
 
+import java.time.format.FormatStyle;
+
 /**
  * @author Mario A. Serrano Leones
  */
@@ -24,7 +26,12 @@ public class LocalDateTime extends AbstractTemporalConverter {
 
 
     @Override
-    public String getPattern() {
-        return "yyyy-MM-dd HH:mm:ss";
+    protected FormatStyle getDateStyle() {
+        return FormatStyle.MEDIUM;
+    }
+
+    @Override
+    protected FormatStyle getTimeStyle() {
+        return FormatStyle.MEDIUM;
     }
 }

@@ -16,33 +16,16 @@
  */
 package tools.dynamia.zk.converters;
 
-import org.zkoss.bind.BindContext;
-import org.zkoss.bind.Converter;
-import org.zkoss.zk.ui.Component;
-
-import java.text.DateFormat;
+import java.time.format.FormatStyle;
 
 /**
  * @author Mario A. Serrano Leones
  */
 
-public class LongDate implements Converter<Object, Object, Component> {
-
-    private static final DateFormat df = DateFormat.getDateInstance(DateFormat.LONG);
+public class LongDate extends Date {
 
     @Override
-    public Object coerceToUi(Object val, Component comp, BindContext ctx) {
-
-        if (val instanceof java.util.Date) {
-            return df.format(val);
-        }
-        return null;
-
+    protected FormatStyle getDateStyle() {
+        return FormatStyle.LONG;
     }
-
-    @Override
-    public Object coerceToBean(Object val, Component comp, BindContext ctx) {
-        return Util.coerceToBean(val, df);
-    }
-
 }

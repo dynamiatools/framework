@@ -22,8 +22,10 @@ import org.zkoss.zk.ui.Component;
 import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.SimpleCache;
+import tools.dynamia.commons.logger.LoggingService;
 
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.Locale;
@@ -35,6 +37,7 @@ import java.util.Locale;
 public abstract class AbstractTemporalConverter implements Converter<Object, Object, Component> {
 
     private static final SimpleCache<String, DateTimeFormatter> FORMATTER_SIMPLE_CACHE = new SimpleCache<>();
+    private final LoggingService logger = LoggingService.get(getClass());
 
     @Override
     public Object coerceToUi(Object val, Component comp, BindContext ctx) {
@@ -52,22 +55,51 @@ public abstract class AbstractTemporalConverter implements Converter<Object, Obj
 
     @Override
     public Object coerceToBean(Object val, Component comp, BindContext ctx) {
-        var formatter = buildFormatter();
+        var formatter = loadFormatter();
         return Util.coerceToBean(val, formatter);
     }
 
-    private DateTimeFormatter buildFormatter() {
+    private DateTimeFormatter loadFormatter() {
         Locale locale = Messages.getDefaultLocale();
         String pattern = getPattern();
-        String key = pattern + "#" + locale.toString();
-        return FORMATTER_SIMPLE_CACHE.getOrLoad(key, s -> DateTimeFormatter.ofPattern(pattern, locale));
+        FormatStyle dateStyle = getDateStyle();
+        FormatStyle timeStyle = getTimeStyle();
+        String key = pattern + "#" + locale.toString() + "#" + dateStyle + "#" + timeStyle;
+        return FORMATTER_SIMPLE_CACHE.getOrLoad(key, s -> buildFormatter(pattern, locale, dateStyle, timeStyle));
+    }
+
+    protected DateTimeFormatter buildFormatter(String pattern, Locale locale, FormatStyle dateStyle, FormatStyle timeStyle) {
+        if (pattern != null && !pattern.isBlank()) {
+            return DateTimeFormatter.ofPattern(pattern, locale);
+        } else if (dateStyle != null && timeStyle != null) {
+            return DateTimeFormatter.ofLocalizedDateTime(dateStyle, timeStyle).withLocale(locale);
+        } else if (dateStyle != null && timeStyle == null) {
+            return DateTimeFormatter.ofLocalizedDate(dateStyle).withLocale(locale);
+        } else if (dateStyle == null && timeStyle != null) {
+            return DateTimeFormatter.ofLocalizedTime(timeStyle).withLocale(locale);
+        } else {
+            return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withLocale(locale);
+        }
     }
 
     public String format(TemporalAccessor temporalAccessor) {
-        return buildFormatter().format(temporalAccessor);
+        logger.debug("Formatting:" + temporalAccessor.getClass() + " " + temporalAccessor + " with pattern: " + getPattern());
+        var formatter = loadFormatter();
+        var result = formatter.format(temporalAccessor);
+        return result;
     }
 
 
-    public abstract String getPattern();
+    protected String getPattern() {
+        return null;
+    }
+
+    protected FormatStyle getDateStyle() {
+        return null;
+    }
+
+    protected FormatStyle getTimeStyle() {
+        return null;
+    }
 
 }
