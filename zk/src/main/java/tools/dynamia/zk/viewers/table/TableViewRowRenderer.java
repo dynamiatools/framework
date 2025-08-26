@@ -109,7 +109,6 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
         }
 
         for (Field field : fields) {
-            Viewers.customizeField(VIEW_TYPE_NAME, field);
             renderFieldCell(binder, item, data, fieldsComponentsMap, field, index);
         }
 
@@ -287,7 +286,8 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
     }
 
     protected Component createFieldComponent(Object data, Object cellValue, Field field, Listcell cell) {
-        Component component = (Component) BeanUtils.newInstance(field.getComponentClass());
+        Class<?> componentClass = field.getComponentClass() != null ? field.getComponentClass() : Label.class;
+        Component component = (Component) BeanUtils.newInstance(componentClass);
         if (component != null) {
             ZKUtil.changeReadOnly(component, tableView.isReadonly());
         }
