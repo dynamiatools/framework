@@ -139,6 +139,10 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
         return viewTypeName != null && viewTypeName.equalsIgnoreCase("form");
     }
 
+    public static boolean isForm(Field field) {
+        return field != null && field.getViewDescriptor() != null && isForm(field.getViewDescriptor().getViewTypeName());
+    }
+
     /**
      * Customizes a Combobox field to be readonly if not already specified.
      * <p>
