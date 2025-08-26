@@ -76,6 +76,7 @@ public class Field implements Serializable, Indexable, Cloneable {
     private boolean optional;
     private String path;
     private String variable;
+    private boolean temporal;
 
     public Field() {
     }
@@ -514,15 +515,19 @@ public class Field implements Serializable, Indexable, Cloneable {
         return p;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
-        return "Field{" + "name=" + name + '}';
+        String type = viewDescriptor != null ? viewDescriptor.getViewTypeName() + " " : "unknown";
+        return "Field{" +
+                "name='" + name + '\'' +
+                ", fieldClass=" + fieldClass +
+                ", componentClass=" + componentClass +
+                ", component='" + component + '\'' +
+                ", visible=" + visible +
+                ", viewType=" + type +
+                '}';
     }
+
 
     /*
      * (non-Javadoc)
@@ -669,5 +674,13 @@ public class Field implements Serializable, Indexable, Cloneable {
 
     public boolean hasVariable() {
         return StringUtils.hasText(variable);
+    }
+
+    public boolean isTemporal() {
+        return temporal;
+    }
+
+    public void setTemporal(boolean temporal) {
+        this.temporal = temporal;
     }
 }
