@@ -18,6 +18,8 @@
 
 package tools.dynamia.zk.viewers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zul.*;
 import tools.dynamia.commons.DateRange;
@@ -26,6 +28,7 @@ import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.collect.ArrayListMultiMap;
 import tools.dynamia.commons.collect.ListMultiMap;
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.integration.sterotypes.Provider;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.FieldCustomizer;
@@ -64,6 +67,8 @@ import java.util.TimeZone;
 public class DefaultFieldCustomizer implements FieldCustomizer {
 
     private final static ListMultiMap<Class<? extends Component>, Class> INDEX = new ArrayListMultiMap<>();
+    private static final Logger log = LoggerFactory.getLogger(DefaultFieldCustomizer.class);
+    private LoggingService logger = LoggingService.get(getClass());
 
     static {
         INDEX.put(Intbox.class, int.class, Integer.class);
@@ -119,14 +124,14 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
             }
         }
 
-        customizeCombobox(field);
 
-        if (isForm(viewTypeName) && field.getFieldClass() != null && field.getComponentClass() != null) {
+        if (field.getFieldClass() != null && field.getComponentClass() != null) {
+            customizeCombobox(field);
             customizeDateboxBindings(field);
             customizeTimeboxBindings(field);
             customizeDateSelectorBinding(field);
         }
-
+        logger.info("Customized field: " + field + " params: " + field.getParams());
     }
 
     /**
@@ -222,11 +227,6 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
                 (field.getPropertyInfo() != null && field.getPropertyInfo().isEnum())) {
             field.setComponentCustomizer(EnumComponentCustomizer.class.getName());
         }
-
-        customizeDateboxBindings(field);
-        customizeDateSelectorBinding(field);
-        customizeTimeboxBindings(field);
-
     }
 
     /**
