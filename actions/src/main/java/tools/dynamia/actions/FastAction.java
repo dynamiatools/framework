@@ -19,34 +19,98 @@ package tools.dynamia.actions;
 import tools.dynamia.commons.BeanUtils;
 
 /**
- * Helper class to create and action instance without need to extend classes or implement methods
+ * Helper class to create an action instance without the need to extend classes or implement methods.
  */
 public class FastAction extends AbstractAction {
 
+    /**
+     * Functional interface to handle action performed events.
+     */
+    private OnActionPerfomed onActionPerfomed;
 
-    private final OnActionPerfomed onActionPerfomed;
+    /**
+     * Default constructor.
+     */
+    public FastAction() {
+    }
 
+    /**
+     * Constructor with action name.
+     *
+     * @param name the name of the action
+     */
+    public FastAction(String name) {
+        setName(name);
+    }
 
+    /**
+     * Constructor with action name and event handler.
+     *
+     * @param name             the name of the action
+     * @param onActionPerfomed the event handler
+     */
     public FastAction(String name, OnActionPerfomed onActionPerfomed) {
         this(name, null, onActionPerfomed);
     }
 
+    /**
+     * Constructor with name, image and event handler.
+     *
+     * @param name             the name of the action
+     * @param image            the image for the action
+     * @param onActionPerfomed the event handler
+     */
     public FastAction(String name, String image, OnActionPerfomed onActionPerfomed) {
         this(name, image, null, null, onActionPerfomed);
     }
 
+    /**
+     * Constructor with name, image, description and event handler.
+     *
+     * @param name             the name of the action
+     * @param image            the image for the action
+     * @param description      the description of the action
+     * @param onActionPerfomed the event handler
+     */
     public FastAction(String name, String image, String description, OnActionPerfomed onActionPerfomed) {
         this(name, image, description, null, onActionPerfomed);
     }
 
+    /**
+     * Constructor with name, image, description, renderer and event handler.
+     *
+     * @param name             the name of the action
+     * @param image            the image for the action
+     * @param description      the description of the action
+     * @param actionRenderer   the renderer for the action
+     * @param onActionPerfomed the event handler
+     */
     public FastAction(String name, String image, String description, ActionRenderer<?> actionRenderer, OnActionPerfomed onActionPerfomed) {
         this(null, name, image, description, actionRenderer, onActionPerfomed);
     }
 
+    /**
+     * Constructor with name, image, renderer and event handler.
+     *
+     * @param name             the name of the action
+     * @param image            the image for the action
+     * @param actionRenderer   the renderer for the action
+     * @param onActionPerfomed the event handler
+     */
     public FastAction(String name, String image, ActionRenderer<?> actionRenderer, OnActionPerfomed onActionPerfomed) {
         this(null, name, image, null, actionRenderer, onActionPerfomed);
     }
 
+    /**
+     * Full constructor with all properties.
+     *
+     * @param id               the id of the action
+     * @param name             the name of the action
+     * @param image            the image for the action
+     * @param description      the description of the action
+     * @param actionRenderer   the renderer for the action
+     * @param onActionPerfomed the event handler
+     */
     public FastAction(String id, String name, String image, String description, ActionRenderer<?> actionRenderer,
                       OnActionPerfomed onActionPerfomed) {
 
@@ -62,10 +126,18 @@ public class FastAction extends AbstractAction {
         init();
     }
 
+    /**
+     * Initialization method. Can be overridden for custom initialization.
+     */
     protected void init() {
 
     }
 
+    /**
+     * Invokes the action performed event handler.
+     *
+     * @param evt the action event
+     */
     @Override
     public void actionPerformed(ActionEvent evt) {
         if (onActionPerfomed != null) {
@@ -73,15 +145,121 @@ public class FastAction extends AbstractAction {
         }
     }
 
+    /**
+     * Executes the action by firing an ActionEvent.
+     */
     public void execute() {
         actionPerformed(new ActionEvent(null, this));
     }
 
+    /**
+     * Sets the action renderer class if it is not the default renderer.
+     *
+     * @param actionRendererClass the renderer class
+     */
     public void setActionRendererClass(Class<? extends ActionRenderer<?>> actionRendererClass) {
         if (actionRendererClass != DefaultActionRenderer.class) {
             setRenderer(BeanUtils.newInstance(actionRendererClass));
         }
     }
 
+    /**
+     * Sets the background property and returns this instance.
+     *
+     * @param background the background value
+     * @return this FastAction instance
+     */
+    public FastAction background(String background) {
+        setBackground(background);
+        return this;
+    }
+
+    /**
+     * Sets the color property and returns this instance.
+     *
+     * @param color the color value
+     * @return this FastAction instance
+     */
+    public FastAction color(String color) {
+        setColor(color);
+        return this;
+    }
+
+    /**
+     * Sets the image property and returns this instance.
+     *
+     * @param image the image value
+     * @return this FastAction instance
+     */
+    public FastAction image(String image) {
+        setImage(image);
+        return this;
+    }
+
+    /**
+     * Sets the description property and returns this instance.
+     *
+     * @param description the description value
+     * @return this FastAction instance
+     */
+    public FastAction description(String description) {
+        setDescription(description);
+        return this;
+    }
+
+    /**
+     * Sets the name property and returns this instance.
+     *
+     * @param name the name value
+     * @return this FastAction instance
+     */
+    public FastAction name(String name) {
+        setName(name);
+        return this;
+    }
+
+    /**
+     * Sets the id property and returns this instance.
+     *
+     * @param id the id value
+     * @return this FastAction instance
+     */
+    public FastAction id(String id) {
+        setId(id);
+        return this;
+    }
+
+    /**
+     * Sets the renderer and returns this instance.
+     *
+     * @param actionRenderer the renderer
+     * @return this FastAction instance
+     */
+    public FastAction renderer(ActionRenderer<?> actionRenderer) {
+        setRenderer(actionRenderer);
+        return this;
+    }
+
+    /**
+     * Sets the event handler and returns this instance.
+     *
+     * @param onActionPerfomed the event handler
+     * @return this FastAction instance
+     */
+    public FastAction onActionPerfomed(OnActionPerfomed onActionPerfomed) {
+        this.onActionPerfomed = onActionPerfomed;
+        return this;
+    }
+
+    /**
+     * Sets the type property and returns this instance.
+     *
+     * @param type the type value
+     * @return this FastAction instance
+     */
+    public FastAction type(String type) {
+        setType(type);
+        return this;
+    }
 
 }
