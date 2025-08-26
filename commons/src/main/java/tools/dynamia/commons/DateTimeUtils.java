@@ -464,6 +464,9 @@ public final class DateTimeUtils {
      * @return the formatted date string
      */
     public static String format(Date date, String pattern) {
+        if (date == null) {
+            return null;
+        }
         DateFormat df = new SimpleDateFormat(pattern, Messages.getDefaultLocale());
         return df.format(date);
     }
@@ -476,6 +479,9 @@ public final class DateTimeUtils {
      * @return the formatted date/time string
      */
     public static String format(TemporalAccessor temporalAccessor, String pattern) {
+        if (temporalAccessor == null) {
+            return null;
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern, Messages.getDefaultLocale());
         return formatter.format(temporalAccessor);
     }
@@ -488,6 +494,9 @@ public final class DateTimeUtils {
      * @return the formatted date string
      */
     public static String formatDate(Date date, int style) {
+        if (date == null) {
+            return null;
+        }
         DateFormat df = DateFormat.getDateInstance(style);
         return df.format(date);
     }
@@ -521,6 +530,9 @@ public final class DateTimeUtils {
      * @return the formatted time string
      */
     public static String formatTime(Date date) {
+        if (date == null) {
+            return null;
+        }
         return formatTime(date, DateFormat.MEDIUM);
     }
 
@@ -531,6 +543,9 @@ public final class DateTimeUtils {
      * @return the month value (1 for January, 12 for December)
      */
     public static int getMonth(Date date) {
+        if (date == null) {
+            return 0;
+        }
         return toLocalDate(date).getMonth().getValue();
     }
 
@@ -541,6 +556,9 @@ public final class DateTimeUtils {
      * @return the day of the month
      */
     public static int getDay(Date date) {
+        if (date == null) {
+            return 0;
+        }
         return toLocalDate(date).getDayOfMonth();
     }
 
@@ -551,6 +569,9 @@ public final class DateTimeUtils {
      * @return the year
      */
     public static int getYear(Date date) {
+        if (date == null) {
+            return 0;
+        }
         return toLocalDate(date).getYear();
     }
 
@@ -653,7 +674,7 @@ public final class DateTimeUtils {
      * @return local date time
      */
     public static LocalDateTime toLocalDateTime(Date input, ZoneId zoneId) {
-        if(input == null || zoneId == null){
+        if (input == null || zoneId == null) {
             return null;
         }
         return toInstant(input).atZone(zoneId).toLocalDateTime();
@@ -757,7 +778,7 @@ public final class DateTimeUtils {
      * Convert a LocalDate to Date
      */
     public static Date toDate(LocalDate localDate) {
-        if( localDate == null){
+        if (localDate == null) {
             return null;
         }
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -767,7 +788,7 @@ public final class DateTimeUtils {
      * Convert a LocalDateTime to Date
      */
     public static Date toDate(LocalDateTime localDateTime) {
-        if( localDateTime == null){
+        if (localDateTime == null) {
             return null;
         }
         return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
@@ -777,7 +798,7 @@ public final class DateTimeUtils {
      * Convert a Instant to Date
      */
     public static Date getEndOfDay(Date date) {
-        if(date == null){
+        if (date == null) {
             return null;
         }
         return Date.from(toLocalDate(date).atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
@@ -787,7 +808,7 @@ public final class DateTimeUtils {
      * Convert a Instant to Date
      */
     public static Date getStartOfDay(Date date) {
-        if(date == null){
+        if (date == null) {
             return null;
         }
         return Date.from(toLocalDate(date).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
