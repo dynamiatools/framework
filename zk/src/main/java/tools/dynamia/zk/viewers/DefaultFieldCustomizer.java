@@ -125,7 +125,7 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
         }
 
 
-        if (field.getFieldClass() != null && field.getComponentClass() != null) {
+        if (field.getComponentClass() != null) {
             customizeCombobox(field);
             customizeDateboxBindings(field);
             customizeTimeboxBindings(field);
