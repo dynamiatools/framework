@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 
 /**
@@ -200,5 +202,18 @@ public interface ViewDescriptor extends Serializable {
         }
         return null;
     }
+
+    /**
+     * Remove fields that matches the given filter. Also removes from any field group
+     *
+     * @param filter the action
+     */
+    default void removeFieldsIf(Predicate<Field> filter) {
+        getFields().removeIf(filter);
+        getFieldGroups().forEach(fieldGroup -> {
+            fieldGroup.getFields().removeIf(filter);
+        });
+    }
+
 
 }
