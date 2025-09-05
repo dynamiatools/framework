@@ -136,9 +136,26 @@ public class QueryBuilderTest {
         assertEquals(expected, queryText);
     }
 
-    public void shouldSendPrintln(){
+    public void shouldSendPrintln() {
         var num = 1;
         var numer2 = 2;
+
+    }
+
+
+    @Test
+    public void testHaving() {
+
+        String expected = "select p.name, count(p.id) from " + Parameter.class.getName() + " as p where p.value = :value group by p.name having count(p.id) > :countpid order by p.name";
+
+        QueryBuilder query = QueryBuilder.select("p.name", "count(p.id)")
+                .from(Parameter.class, "p")
+                .where("value", eq("true"))
+                .groupBy("p.name")
+                .having("count(p.id)", QueryConditions.gt(1))
+                .orderBy("p.name");
+
+        assertEquals(expected, query.toString());
 
     }
 
