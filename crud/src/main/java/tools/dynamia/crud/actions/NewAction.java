@@ -37,6 +37,7 @@ public class NewAction extends AbstractCrudAction {
         setName(Messages.get(NewAction.class, "new"));
         setImage("add");
         setGroup(ActionGroup.get("CRUD"));
+        setShowLabel(true);
         setPosition(1);
     }
 
