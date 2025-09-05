@@ -40,6 +40,8 @@ import tools.dynamia.integration.Containers;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.ComponentCustomizerUtil;
+import tools.dynamia.viewers.util.FieldRestrictions;
+import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.actions.BootstrapButtonActionRenderer;
 import tools.dynamia.zk.converters.Util;
@@ -75,7 +77,6 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
 
     public final void setViewDescriptor(ViewDescriptor descriptor) {
         this.viewDescriptor = descriptor;
-        this.fields = descriptor.sortFields();
 
     }
 
@@ -106,6 +107,10 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
 
         if (tableView != null) {
             renderCommonsCell(item, index);
+        }
+
+        if (fields == null) {
+            fields = ViewRendererUtil.filterRenderableFields(tableView, viewDescriptor);
         }
 
         for (Field field : fields) {
@@ -201,85 +206,84 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
     @SuppressWarnings("unchecked")
     protected void renderFieldCell(Binder binder, Listitem item, Object data,
                                    Map<String, TableFieldComponent> fieldsComponentsMap, Field field, int index) {
-        if (field.isVisible()) {
-            Listcell cell = new Listcell();
-            cell.setParent(item);
-            BeanUtils.setupBean(cell, (Map) field.getParam("cell"));
-            Object cellValue = "";
 
-            try {
+        Listcell cell = new Listcell();
+        cell.setParent(item);
+        BeanUtils.setupBean(cell, (Map) field.getParam("cell"));
+        Object cellValue = "";
 
-                if (field.getFieldClass() != null && field.getFieldClass().equals(boolean.class)) {
-                    cellValue = BeanUtils.invokeBooleanGetMethod(data, field.getName());
-                } else {
-                    cellValue = BeanUtils.invokeGetMethod(data, field.getName());
-                    if (cellValue != null && !BeanUtils.isStantardClass(cellValue.getClass())) {
-                        cellValue = BeanUtils.getInstanceName(cellValue);
-                    }
+        try {
+
+            if (field.getFieldClass() != null && field.getFieldClass().equals(boolean.class)) {
+                cellValue = BeanUtils.invokeBooleanGetMethod(data, field.getName());
+            } else {
+                cellValue = BeanUtils.invokeGetMethod(data, field.getName());
+                if (cellValue != null && !BeanUtils.isStantardClass(cellValue.getClass())) {
+                    cellValue = BeanUtils.getInstanceName(cellValue);
                 }
-            } catch (ReflectionException e) {
-                // nothing to do
+            }
+        } catch (ReflectionException e) {
+            // nothing to do
+        }
+
+        boolean renderWhenNull = field.getParam(Viewers.PARAM_RENDER_WHEN_NULL) == Boolean.TRUE;
+
+        if (cellValue == null && !renderWhenNull) {
+            cellValue = field.getParam(Viewers.PARAM_NULLVALUE);
+            Label nullValue = new Label((String) cellValue);
+            nullValue.setSclass(Viewers.PARAM_NULLVALUE);
+            nullValue.setParent(cell);
+        } else {
+            Component comp = createFieldComponent(data, cellValue, field, cell);
+
+            if (comp instanceof Import importComp) {
+                importComp.setValue(data);
+                importComp.addArgs(field.getParams());
+                importComp.addArg("index", index);
+            }
+            BeanUtils.setupBean(comp, field.getParams());
+
+            if (field.containsParam(Viewers.PARAMS_ATTRIBUTES)) {
+                Map attributes = (Map) field.getParam(Viewers.PARAMS_ATTRIBUTES);
+                if (attributes != null) {
+                    attributes.forEach((k, v) -> comp.setAttribute(k.toString(), v));
+                }
+
             }
 
-            boolean renderWhenNull = field.getParam(Viewers.PARAM_RENDER_WHEN_NULL) == Boolean.TRUE;
+            comp.setParent(cell);
 
-            if (cellValue == null && !renderWhenNull) {
-                cellValue = field.getParam(Viewers.PARAM_NULLVALUE);
-                Label nullValue = new Label((String) cellValue);
-                nullValue.setSclass(Viewers.PARAM_NULLVALUE);
-                nullValue.setParent(cell);
-            } else {
-                Component comp = createFieldComponent(data, cellValue, field, cell);
-
-                if (comp instanceof Import importComp) {
-                    importComp.setValue(data);
-                    importComp.addArgs(field.getParams());
-                    importComp.addArg("index", index);
-                }
-                BeanUtils.setupBean(comp, field.getParams());
-
-                if (field.containsParam(Viewers.PARAMS_ATTRIBUTES)) {
-                    Map attributes = (Map) field.getParam(Viewers.PARAMS_ATTRIBUTES);
-                    if (attributes != null) {
-                        attributes.forEach((k, v) -> comp.setAttribute(k.toString(), v));
-                    }
-
-                }
-
-                comp.setParent(cell);
-
-                ComponentCustomizerUtil.customizeComponent(field, comp, field.getComponentCustomizer());
-                fieldsComponentsMap.put(field.getName(), new TableFieldComponent(field.getName(), comp));
-                if (field.getParam(Viewers.PARAM_IGNORE_BINDINGS) != Boolean.TRUE) {
-                    if (isBindiable(field, comp)) {
-                        Object bmapObject = field.getParam(Viewers.PARAM_BINDINGS);
-                        if (bmapObject instanceof Map bindingMap) {
-                            ZKBindingUtil.bindComponent(binder, comp, bindingMap, Viewers.BEAN);
-                        } else {
-                            String converterExpression = (String) field.getParam(Viewers.PARAM_CONVERTER);
-                            converterExpression = Util.checkConverterClass(converterExpression);
-                            String attr = (String) field.getParam(Viewers.PARAM_BINDING_ATTRIBUTE);
-                            String expression = data instanceof BeanMap ? Viewers.BEAN + "['" + field.getName() + "']" : Viewers.BEAN + "." + field.getName();
-                            ZKBindingUtil.bindComponent(binder, comp, attr, expression, converterExpression);
-                        }
+            ComponentCustomizerUtil.customizeComponent(field, comp, field.getComponentCustomizer());
+            fieldsComponentsMap.put(field.getName(), new TableFieldComponent(field.getName(), comp));
+            if (field.getParam(Viewers.PARAM_IGNORE_BINDINGS) != Boolean.TRUE) {
+                if (isBindiable(field, comp)) {
+                    Object bmapObject = field.getParam(Viewers.PARAM_BINDINGS);
+                    if (bmapObject instanceof Map bindingMap) {
+                        ZKBindingUtil.bindComponent(binder, comp, bindingMap, Viewers.BEAN);
+                    } else {
+                        String converterExpression = (String) field.getParam(Viewers.PARAM_CONVERTER);
+                        converterExpression = Util.checkConverterClass(converterExpression);
+                        String attr = (String) field.getParam(Viewers.PARAM_BINDING_ATTRIBUTE);
+                        String expression = data instanceof BeanMap ? Viewers.BEAN + "['" + field.getName() + "']" : Viewers.BEAN + "." + field.getName();
+                        ZKBindingUtil.bindComponent(binder, comp, attr, expression, converterExpression);
                     }
                 }
+            }
 
-                if (field.getAction() != null) {
-                    String actionId = field.getAction().getId();
-                    Action action = actionsCache.getOrLoad(actionId, key -> ActionLoader.findActionById(Action.class, actionId));
-                    if (action != null) {
-                        if (comp instanceof HtmlBasedComponent hcomp) {
-                            if (hcomp.getTooltiptext() == null && action.getDescription() != null) {
-                                hcomp.setTooltiptext(action.getDescription());
-                            }
+            if (field.getAction() != null) {
+                String actionId = field.getAction().getId();
+                Action action = actionsCache.getOrLoad(actionId, key -> ActionLoader.findActionById(Action.class, actionId));
+                if (action != null) {
+                    if (comp instanceof HtmlBasedComponent hcomp) {
+                        if (hcomp.getTooltiptext() == null && action.getDescription() != null) {
+                            hcomp.setTooltiptext(action.getDescription());
                         }
-                        String event = Events.ON_CLICK;
-                        if (comp instanceof InputElement) {
-                            event = Events.ON_OK;
-                        }
-                        comp.addEventListener(event, e -> action.actionPerformed(new ActionEvent(data, comp, MapBuilder.put("field", field, "tableView", tableView))));
                     }
+                    String event = Events.ON_CLICK;
+                    if (comp instanceof InputElement) {
+                        event = Events.ON_OK;
+                    }
+                    comp.addEventListener(event, e -> action.actionPerformed(new ActionEvent(data, comp, MapBuilder.put("field", field, "tableView", tableView))));
                 }
             }
         }

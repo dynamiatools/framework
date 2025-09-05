@@ -28,6 +28,7 @@ import tools.dynamia.domain.query.ApplicationParameters;
 import tools.dynamia.domain.query.Parameter;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.viewers.*;
+import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.converters.Util;
@@ -58,14 +59,14 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
 
     @Override
     public View<List<Parameter>> render(ViewDescriptor descriptor, List<Parameter> value) {
-        value = loadConfigValue(descriptor);
         ConfigView view = newConfigView();
+        value = loadConfigValue(view, descriptor);
         checkConfigLayout(descriptor);
         delegateRender(view, descriptor, value);
         createBindings(view, descriptor, value);
         view.setAutosaveBindings(true);
         view.setActionEventBuilder((source, params) -> new ActionEvent(view.getValue(), view));
-        view.setValueSupplier(() -> loadConfigValue(descriptor));
+        view.setValueSupplier(() -> loadConfigValue(view, descriptor));
         view.setValue(value);
         view.updateUI();
 
@@ -78,12 +79,12 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
         }
     }
 
-    protected List<Parameter> loadConfigValue(ViewDescriptor descriptor) {
+    protected List<Parameter> loadConfigValue(ConfigView configView, ViewDescriptor descriptor) {
         List<Parameter> value = new ArrayList<>();
         descriptor.addParam(Viewers.PARAM_IGNORE_BINDINGS, true);
 
 
-        for (Field field : descriptor.getFields()) {
+        for (Field field : ViewRendererUtil.filterRenderableFields(configView, descriptor)) {
             if (field.isVisible()) {
                 value.add(loadParam(field));
 
@@ -102,7 +103,7 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
     }
 
     protected void createBindings(ConfigView view, ViewDescriptor descriptor, List<Parameter> value) {
-        for (Field field : descriptor.getFields()) {
+        for (Field field : ViewRendererUtil.filterRenderableFields(view, descriptor)) {
             Component component = view.getFieldComponent(field.getName()).getInputComponent();
             createBinding(component, field, view.getBinder(), view, value);
         }

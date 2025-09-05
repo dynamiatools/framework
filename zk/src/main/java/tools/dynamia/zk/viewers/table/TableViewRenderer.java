@@ -20,15 +20,7 @@ package tools.dynamia.zk.viewers.table;
 
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.SortEvent;
-import org.zkoss.zul.Auxhead;
-import org.zkoss.zul.Auxheader;
-import org.zkoss.zul.FieldComparator;
-import org.zkoss.zul.Frozen;
-import org.zkoss.zul.Listfoot;
-import org.zkoss.zul.Listhead;
-import org.zkoss.zul.Listheader;
-import org.zkoss.zul.ListitemRenderer;
-import org.zkoss.zul.Style;
+import org.zkoss.zul.*;
 import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.LocalizedMessagesProvider;
@@ -36,12 +28,7 @@ import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.fx.CrudServiceMultiFunctionProcessor;
 import tools.dynamia.domain.fx.MultiFunctionProcessor;
-import tools.dynamia.viewers.Field;
-import tools.dynamia.viewers.FieldGroup;
-import tools.dynamia.viewers.View;
-import tools.dynamia.viewers.ViewDescriptor;
-import tools.dynamia.viewers.ViewRenderer;
-import tools.dynamia.viewers.ViewRendererException;
+import tools.dynamia.viewers.*;
 import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.util.ZKUtil;
@@ -155,59 +142,59 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
         }
 
 
-        for (Field field : descriptor.sortFields()) {
-            if (field.isVisible()) {
+        for (Field field : ViewRendererUtil.filterRenderableFields(table, descriptor)) {
 
-                String label = field.getLocalizedLabel(Messages.getDefaultLocale());
-                label = filterFieldLabel(field, label);
 
-                String description = field.getLocalizedDescription(Messages.getDefaultLocale());
-                description = filterFieldDescription(field, description);
+            String label = field.getLocalizedLabel(Messages.getDefaultLocale());
+            label = filterFieldLabel(field, label);
 
-                TableViewHeader header = new TableViewHeader(table, label);
-                header.setTooltiptext(description);
-                header.setParent(head);
-                header.setField(field);
-                ZKViewersUtil.setupFieldIcon(field, header);
-                if (field.isShowIconOnly()) {
-                    header.setAlign("center");
-                }
-                header.setAttribute("field-name", field.getName());
-                header.setAttribute("field-class", field.getFieldClass());
+            String description = field.getLocalizedDescription(Messages.getDefaultLocale());
+            description = filterFieldDescription(field, description);
 
-                try {
-                    Map headerParams = (Map) field.getParams().get("header");
-                    if (headerParams != null) {
-                        //noinspection unchecked
-                        BeanUtils.setupBean(header, headerParams);
+            TableViewHeader header = new TableViewHeader(table, label);
+            header.setTooltiptext(description);
+            header.setParent(head);
+            header.setField(field);
+            ZKViewersUtil.setupFieldIcon(field, header);
+            if (field.isShowIconOnly()) {
+                header.setAlign("center");
+            }
+            header.setAttribute("field-name", field.getName());
+            header.setAttribute("field-class", field.getFieldClass());
 
-                        if (headerParams.containsKey(Viewers.PARAM_BINDINGS)) {
+            try {
+                Map headerParams = (Map) field.getParams().get("header");
+                if (headerParams != null) {
+                    //noinspection unchecked
+                    BeanUtils.setupBean(header, headerParams);
 
-                        }
+                    if (headerParams.containsKey(Viewers.PARAM_BINDINGS)) {
+
                     }
-                } catch (Exception e) {
-                    LoggingService.get(getClass()).error("Error setting header params", e);
                 }
-                if (descriptor.getParams().get(Viewers.PARAMS_SORTABLE) == Boolean.TRUE) {
-                    header.setSortAscending(new FieldComparator(field.getName(), true));
-                    header.setSortDescending(new FieldComparator(field.getName(), false));
-                    header.addEventListener(Events.ON_SORT, event -> {
-                        SortEvent sortEvent = (SortEvent) event;
+            } catch (Exception e) {
+                LoggingService.get(getClass()).error("Error setting header params", e);
+            }
+            if (descriptor.getParams().get(Viewers.PARAMS_SORTABLE) == Boolean.TRUE) {
+                header.setSortAscending(new FieldComparator(field.getName(), true));
+                header.setSortDescending(new FieldComparator(field.getName(), false));
+                header.addEventListener(Events.ON_SORT, event -> {
+                    SortEvent sortEvent = (SortEvent) event;
 
-                        var data = table.getValue();
-                        if (data != null) {
-                            BeanSorter sorter = new BeanSorter();
-                            sorter.setAscending(sortEvent.isAscending());
-                            sorter.setColumnName(field.getName());
-                            //noinspection unchecked
-                            sorter.sort(data);
-                            table.setValue(data);
-                        }
+                    var data = table.getValue();
+                    if (data != null) {
+                        BeanSorter sorter = new BeanSorter();
+                        sorter.setAscending(sortEvent.isAscending());
+                        sorter.setColumnName(field.getName());
+                        //noinspection unchecked
+                        sorter.sort(data);
+                        table.setValue(data);
+                    }
 
-                    });
-                }
+                });
             }
         }
+
 
         if (descriptor.getParams().containsKey(Viewers.PARAM_FROZEN_COLUMNS)) {
             Frozen frozen = new Frozen();
@@ -255,7 +242,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
 
         List<TableViewFooter> footersWithFunctions = new ArrayList<>();
 
-        for (Field field : descriptor.sortFields()) {
+        for (Field field : ViewRendererUtil.filterRenderableFields(table, descriptor)) {
             if (field.isVisible()) {
                 TableViewFooter footer = new TableViewFooter(table, field);
                 footer.setTooltiptext(field.getDescription());

@@ -32,6 +32,7 @@ import tools.dynamia.viewers.FieldGroup;
 import tools.dynamia.viewers.View;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.ViewRenderer;
+import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
 
 import java.util.Map;
@@ -85,24 +86,22 @@ public class TreeViewRenderer<T> implements ViewRenderer<TreeModel<TreeViewNode<
         }
 
 
-        for (Field field : descriptor.sortFields()) {
-            if (field.isVisible()) {
-                TreeViewHeader header = new TreeViewHeader(tree, field.getLocalizedLabel(Messages.getDefaultLocale()));
-                header.setTooltiptext(field.getLocalizedDescription(Messages.getDefaultLocale()));
-                header.setParent(head);
-                header.setField(field);
-                header.setAttribute("field-name", field.getName());
-                header.setAttribute("field-class", field.getFieldClass());
+        for (Field field : ViewRendererUtil.filterRenderableFields(tree, descriptor)) {
+            TreeViewHeader header = new TreeViewHeader(tree, field.getLocalizedLabel(Messages.getDefaultLocale()));
+            header.setTooltiptext(field.getLocalizedDescription(Messages.getDefaultLocale()));
+            header.setParent(head);
+            header.setField(field);
+            header.setAttribute("field-name", field.getName());
+            header.setAttribute("field-class", field.getFieldClass());
 
-                try {
-                    Map headerParams = (Map) field.getParams().get("header");
-                    if (headerParams != null) {
-                        //noinspection unchecked
-                        BeanUtils.setupBean(header, headerParams);
-                    }
-                } catch (Exception e) {
-                    LoggingService.get(TreeViewRenderer.class).error("Error setting header for field " + field.getName(), e);
+            try {
+                Map headerParams = (Map) field.getParams().get("header");
+                if (headerParams != null) {
+                    //noinspection unchecked
+                    BeanUtils.setupBean(header, headerParams);
                 }
+            } catch (Exception e) {
+                LoggingService.get(TreeViewRenderer.class).error("Error setting header for field " + field.getName(), e);
             }
         }
 

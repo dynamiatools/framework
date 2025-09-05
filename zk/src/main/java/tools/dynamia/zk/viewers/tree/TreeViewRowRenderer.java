@@ -34,6 +34,7 @@ import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.ComponentCustomizerUtil;
+import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.converters.Util;
@@ -105,10 +106,9 @@ public class TreeViewRowRenderer<E> implements TreeitemRenderer<TreeViewNode<E>>
 
 
             int colIndex = 0;
-            List<Field> fields = Viewers.getFields(viewDescriptor);
+            List<Field> fields = ViewRendererUtil.filterRenderableFields(treeView, viewDescriptor);
             if (!node.isRoot()) {
                 for (Field field : fields) {
-                    Viewers.customizeField("tree", field);
                     renderFieldCell(row, node, binder, fieldsComponentsMap, field, colIndex);
                     colIndex++;
                 }

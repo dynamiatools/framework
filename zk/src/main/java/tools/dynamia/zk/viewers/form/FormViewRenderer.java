@@ -35,14 +35,12 @@ import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.ui.icons.IconsTheme;
 import tools.dynamia.viewers.*;
 import tools.dynamia.viewers.util.ComponentCustomizerUtil;
+import tools.dynamia.viewers.util.FieldRestrictions;
 import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.constraints.ZKExtraConstraints;
 import tools.dynamia.zk.converters.Util;
-import tools.dynamia.zk.ui.DateRangebox;
-import tools.dynamia.zk.ui.DateSelector;
-import tools.dynamia.zk.ui.DurationSelector;
 import tools.dynamia.zk.ui.Import;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
@@ -137,18 +135,18 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         panelBody.setZclass("panel-body");
         panelBody.setParent(panel);
 
-        for (Field field : viewDesc.sortFields()) {
-            if (field.isVisible() && field.getGroup() == null && ViewRendererUtil.isFieldRenderable(viewDesc, field)) {
 
-                if (!hasSpace(row, realCols, field)) {
-                    row = newRow();
-                    row.setParent(panelBody);
-                    if (panel.getParent() == null) {
-                        panel.setParent(view.getContentArea());
-                    }
+        for (Field field : ViewRendererUtil.filterRenderableFields(view, viewDesc)) {
+
+            if (!hasSpace(row, realCols, field)) {
+                row = newRow();
+                row.setParent(panelBody);
+                if (panel.getParent() == null) {
+                    panel.setParent(view.getContentArea());
                 }
-                renderField(row, field, view.getBinder(), view, value, realCols);
             }
+            renderField(row, field, view.getBinder(), view, value, realCols);
+
         }
 
         viewDesc.getFieldGroups().sort(new IndexableComparator());
@@ -367,6 +365,10 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         }
         BeanUtils.setupBean(component, params);
         applyFieldConstraints(component, field);
+
+        if (FieldRestrictions.isFieldReadOnly(FieldRestrictions.findRestrictions(), view, field)) {
+            ZKUtil.changeReadOnly(component, true);
+        }
 
         return component;
     }
