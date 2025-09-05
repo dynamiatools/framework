@@ -17,1096 +17,677 @@
  * along with DynamiaTools.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-.red.lighten-5 {
-    background: #FFEBEE !important;
+:root {
+    /* Definición de variables de hue para colores básicos */
+    --red-hue: 4;
+    --pink-hue: 330;
+    --purple-hue: 280;
+    --deep-purple-hue: 260;
+    --indigo-hue: 231;
+    --blue-hue: 207;
+    --light-blue-hue: 197;
+    --cyan-hue: 187;
+    --teal-hue: 174;
+    --green-hue: 122;
+    --light-green-hue: 88;
+    --lime-hue: 65;
+    --yellow-hue: 54;
+    --amber-hue: 45;
+    --orange-hue: 36;
+    --deep-orange-hue: 14;
+    --brown-hue: 24;
+    --blue-grey-hue: 200;
+    --grey-hue: 0;
+    --black-hue: 0;
+    --white-hue: 0;
 }
 
-.red.lighten-4 {
-    background: #FFCDD2 !important;
-}
-
-.red.lighten-3 {
-    background: #EF9A9A !important;
-}
-
-.red.lighten-2 {
-    background: #E57373 !important;
-}
-
-.red.lighten-1 {
-    background: #EF5350 !important;
-}
-
+/* Ejemplo para RED */
 .red {
-    background: #F44336 !important;
+    background: hsl(var(--red-hue), 90%, 56%) !important;
 }
-
 .red-text {
-    color: #F44336 !important;
+    color: hsl(var(--red-hue), 90%, 56%) !important;
 }
-
+.red.lighten-5 {
+    background: hsl(var(--red-hue), 90%, 95%) !important;
+}
+.red.lighten-4 {
+    background: hsl(var(--red-hue), 90%, 85%) !important;
+}
+.red.lighten-3 {
+    background: hsl(var(--red-hue), 90%, 75%) !important;
+}
+.red.lighten-2 {
+    background: hsl(var(--red-hue), 90%, 65%) !important;
+}
+.red.lighten-1 {
+    background: hsl(var(--red-hue), 90%, 60%) !important;
+}
 .red.darken-1 {
-    background: #E53935 !important;
+    background: hsl(var(--red-hue), 90%, 46%) !important;
 }
-
 .red.darken-2 {
-    background: #D32F2F !important;
+    background: hsl(var(--red-hue), 90%, 36%) !important;
 }
-
 .red.darken-3 {
-    background: #C62828 !important;
+    background: hsl(var(--red-hue), 90%, 26%) !important;
 }
-
 .red.darken-4 {
-    background: #B71C1C !important;
+    background: hsl(var(--red-hue), 90%, 16%) !important;
 }
-
-.red.accent-1 {
-    background: #FF8A80 !important;
-}
-
-.red.accent-2 {
-    background: #FF5252 !important;
-}
-
-.red.accent-3 {
-    background: #FF1744 !important;
-}
-
-.red.accent-4 {
-    background: #D50000 !important;
-}
-
-.pink.lighten-5 {
-    background: #fce4ec !important;
-}
-
-.pink.lighten-4 {
-    background: #f8bbd0 !important;
-}
-
-.pink.lighten-3 {
-    background: #f48fb1 !important;
-}
-
-.pink.lighten-2 {
-    background: #f06292 !important;
-}
-
-.pink.lighten-1 {
-    background: #ec407a !important;
-}
+/* Repetir patrón para los demás colores básicos usando sus variables de hue */
 
 .pink {
-    background: #e91e63 !important;
+    background: hsl(var(--pink-hue), 90%, 56%) !important;
 }
-
 .pink-text {
-    color: #e91e63 !important;
+    color: hsl(var(--pink-hue), 90%, 56%) !important;
 }
-
+.pink.lighten-5 {
+    background: hsl(var(--pink-hue), 90%, 95%) !important;
+}
+.pink.lighten-4 {
+    background: hsl(var(--pink-hue), 90%, 85%) !important;
+}
+.pink.lighten-3 {
+    background: hsl(var(--pink-hue), 90%, 75%) !important;
+}
+.pink.lighten-2 {
+    background: hsl(var(--pink-hue), 90%, 65%) !important;
+}
+.pink.lighten-1 {
+    background: hsl(var(--pink-hue), 90%, 60%) !important;
+}
 .pink.darken-1 {
-    background: #d81b60 !important;
+    background: hsl(var(--pink-hue), 90%, 46%) !important;
 }
-
 .pink.darken-2 {
-    background: #c2185b !important;
+    background: hsl(var(--pink-hue), 90%, 36%) !important;
 }
-
 .pink.darken-3 {
-    background: #ad1457 !important;
+    background: hsl(var(--pink-hue), 90%, 26%) !important;
 }
-
 .pink.darken-4 {
-    background: #880e4f !important;
-}
-
-.pink.accent-1 {
-    background: #ff80ab !important;
-}
-
-.pink.accent-2 {
-    background: #ff4081 !important;
-}
-
-.pink.accent-3 {
-    background: #f50057 !important;
-}
-
-.pink.accent-4 {
-    background: #c51162 !important;
-}
-
-.purple.lighten-5 {
-    background: #f3e5f5 !important;
-}
-
-.purple.lighten-4 {
-    background: #e1bee7 !important;
-}
-
-.purple.lighten-3 {
-    background: #ce93d8 !important;
-}
-
-.purple.lighten-2 {
-    background: #ba68c8 !important;
-}
-
-.purple.lighten-1 {
-    background: #ab47bc !important;
+    background: hsl(var(--pink-hue), 90%, 16%) !important;
 }
 
 .purple {
-    background: #9c27b0 !important;
+    background: hsl(var(--purple-hue), 90%, 56%) !important;
 }
-
 .purple-text {
-    color: #9c27b0 !important;
+    color: hsl(var(--purple-hue), 90%, 56%) !important;
 }
-
+.purple.lighten-5 {
+    background: hsl(var(--purple-hue), 90%, 95%) !important;
+}
+.purple.lighten-4 {
+    background: hsl(var(--purple-hue), 90%, 85%) !important;
+}
+.purple.lighten-3 {
+    background: hsl(var(--purple-hue), 90%, 75%) !important;
+}
+.purple.lighten-2 {
+    background: hsl(var(--purple-hue), 90%, 65%) !important;
+}
+.purple.lighten-1 {
+    background: hsl(var(--purple-hue), 90%, 60%) !important;
+}
 .purple.darken-1 {
-    background: #8e24aa !important;
+    background: hsl(var(--purple-hue), 90%, 46%) !important;
 }
-
 .purple.darken-2 {
-    background: #7b1fa2 !important;
+    background: hsl(var(--purple-hue), 90%, 36%) !important;
 }
-
 .purple.darken-3 {
-    background: #6a1b9a !important;
+    background: hsl(var(--purple-hue), 90%, 26%) !important;
 }
-
 .purple.darken-4 {
-    background: #4a148c !important;
-}
-
-.purple.accent-1 {
-    background: #ea80fc !important;
-}
-
-.purple.accent-2 {
-    background: #e040fb !important;
-}
-
-.purple.accent-3 {
-    background: #d500f9 !important;
-}
-
-.purple.accent-4 {
-    background: #aa00ff !important;
-}
-
-.deep-purple.lighten-5 {
-    background: #ede7f6 !important;
-}
-
-.deep-purple.lighten-4 {
-    background: #d1c4e9 !important;
-}
-
-.deep-purple.lighten-3 {
-    background: #b39ddb !important;
-}
-
-.deep-purple.lighten-2 {
-    background: #9575cd !important;
-}
-
-.deep-purple.lighten-1 {
-    background: #7e57c2 !important;
+    background: hsl(var(--purple-hue), 90%, 16%) !important;
 }
 
 .deep-purple {
-    background: #673ab7 !important;
+    background: hsl(var(--deep-purple-hue), 90%, 56%) !important;
 }
-
 .deep-purple-text {
-    color: #673ab7 !important;
+    color: hsl(var(--deep-purple-hue), 90%, 56%) !important;
 }
-
+.deep-purple.lighten-5 {
+    background: hsl(var(--deep-purple-hue), 90%, 95%) !important;
+}
+.deep-purple.lighten-4 {
+    background: hsl(var(--deep-purple-hue), 90%, 85%) !important;
+}
+.deep-purple.lighten-3 {
+    background: hsl(var(--deep-purple-hue), 90%, 75%) !important;
+}
+.deep-purple.lighten-2 {
+    background: hsl(var(--deep-purple-hue), 90%, 65%) !important;
+}
+.deep-purple.lighten-1 {
+    background: hsl(var(--deep-purple-hue), 90%, 60%) !important;
+}
 .deep-purple.darken-1 {
-    background: #5e35b1 !important;
+    background: hsl(var(--deep-purple-hue), 90%, 46%) !important;
 }
-
 .deep-purple.darken-2 {
-    background: #512da8 !important;
+    background: hsl(var(--deep-purple-hue), 90%, 36%) !important;
 }
-
 .deep-purple.darken-3 {
-    background: #4527a0 !important;
+    background: hsl(var(--deep-purple-hue), 90%, 26%) !important;
 }
-
 .deep-purple.darken-4 {
-    background: #311b92 !important;
-}
-
-.deep-purple.accent-1 {
-    background: #b388ff !important;
-}
-
-.deep-purple.accent-2 {
-    background: #7c4dff !important;
-}
-
-.deep-purple.accent-3 {
-    background: #651fff !important;
-}
-
-.deep-purple.accent-4 {
-    background: #6200ea !important;
-}
-
-.indigo.lighten-5 {
-    background: #e8eaf6 !important;
-}
-
-.indigo.lighten-4 {
-    background: #c5cae9 !important;
-}
-
-.indigo.lighten-3 {
-    background: #9fa8da !important;
-}
-
-.indigo.lighten-2 {
-    background: #7986cb !important;
-}
-
-.indigo.lighten-1 {
-    background: #5c6bc0 !important;
+    background: hsl(var(--deep-purple-hue), 90%, 16%) !important;
 }
 
 .indigo {
-    background: #3f51b5 !important;
+    background: hsl(var(--indigo-hue), 90%, 56%) !important;
 }
-
 .indigo-text {
-    color: #3f51b5 !important;
+    color: hsl(var(--indigo-hue), 90%, 56%) !important;
 }
-
+.indigo.lighten-5 {
+    background: hsl(var(--indigo-hue), 90%, 95%) !important;
+}
+.indigo.lighten-4 {
+    background: hsl(var(--indigo-hue), 90%, 85%) !important;
+}
+.indigo.lighten-3 {
+    background: hsl(var(--indigo-hue), 90%, 75%) !important;
+}
+.indigo.lighten-2 {
+    background: hsl(var(--indigo-hue), 90%, 65%) !important;
+}
+.indigo.lighten-1 {
+    background: hsl(var(--indigo-hue), 90%, 60%) !important;
+}
 .indigo.darken-1 {
-    background: #3949ab !important;
+    background: hsl(var(--indigo-hue), 90%, 46%) !important;
 }
-
 .indigo.darken-2 {
-    background: #303f9f !important;
+    background: hsl(var(--indigo-hue), 90%, 36%) !important;
 }
-
 .indigo.darken-3 {
-    background: #283593 !important;
+    background: hsl(var(--indigo-hue), 90%, 26%) !important;
 }
-
 .indigo.darken-4 {
-    background: #1a237e !important;
-}
-
-.indigo.accent-1 {
-    background: #8c9eff !important;
-}
-
-.indigo.accent-2 {
-    background: #536dfe !important;
-}
-
-.indigo.accent-3 {
-    background: #3d5afe !important;
-}
-
-.indigo.accent-4 {
-    background: #304ffe !important;
-}
-
-.blue.lighten-5 {
-    background: #E3F2FD !important;
-}
-
-.blue.lighten-4 {
-    background: #BBDEFB !important;
-}
-
-.blue.lighten-3 {
-    background: #90CAF9 !important;
-}
-
-.blue.lighten-2 {
-    background: #64B5F6 !important;
-}
-
-.blue.lighten-1 {
-    background: #42A5F5 !important;
+    background: hsl(var(--indigo-hue), 90%, 16%) !important;
 }
 
 .blue {
-    background: #2196F3 !important;
+    background: hsl(var(--blue-hue), 90%, 56%) !important;
 }
-
 .blue-text {
-    color: #2196F3 !important;
+    color: hsl(var(--blue-hue), 90%, 56%) !important;
 }
-
+.blue.lighten-5 {
+    background: hsl(var(--blue-hue), 90%, 95%) !important;
+}
+.blue.lighten-4 {
+    background: hsl(var(--blue-hue), 90%, 85%) !important;
+}
+.blue.lighten-3 {
+    background: hsl(var(--blue-hue), 90%, 75%) !important;
+}
+.blue.lighten-2 {
+    background: hsl(var(--blue-hue), 90%, 65%) !important;
+}
+.blue.lighten-1 {
+    background: hsl(var(--blue-hue), 90%, 60%) !important;
+}
 .blue.darken-1 {
-    background: #1E88E5 !important;
+    background: hsl(var(--blue-hue), 90%, 46%) !important;
 }
-
 .blue.darken-2 {
-    background: #1976D2 !important;
+    background: hsl(var(--blue-hue), 90%, 36%) !important;
 }
-
 .blue.darken-3 {
-    background: #1565C0 !important;
+    background: hsl(var(--blue-hue), 90%, 26%) !important;
 }
-
 .blue.darken-4 {
-    background: #0D47A1 !important;
-}
-
-.blue.accent-1 {
-    background: #82B1FF !important;
-}
-
-.blue.accent-2 {
-    background: #448AFF !important;
-}
-
-.blue.accent-3 {
-    background: #2979FF !important;
-}
-
-.blue.accent-4 {
-    background: #2962FF !important;
-}
-
-.light-blue.lighten-5 {
-    background: #e1f5fe !important;
-}
-
-.light-blue.lighten-4 {
-    background: #b3e5fc !important;
-}
-
-.light-blue.lighten-3 {
-    background: #81d4fa !important;
-}
-
-.light-blue.lighten-2 {
-    background: #4fc3f7 !important;
-}
-
-.light-blue.lighten-1 {
-    background: #29b6f6 !important;
+    background: hsl(var(--blue-hue), 90%, 16%) !important;
 }
 
 .light-blue {
-    background: #03a9f4 !important;
+    background: hsl(var(--light-blue-hue), 90%, 56%) !important;
 }
-
 .light-blue-text {
-    color: #03a9f4 !important;
+    color: hsl(var(--light-blue-hue), 90%, 56%) !important;
 }
-
+.light-blue.lighten-5 {
+    background: hsl(var(--light-blue-hue), 90%, 95%) !important;
+}
+.light-blue.lighten-4 {
+    background: hsl(var(--light-blue-hue), 90%, 85%) !important;
+}
+.light-blue.lighten-3 {
+    background: hsl(var(--light-blue-hue), 90%, 75%) !important;
+}
+.light-blue.lighten-2 {
+    background: hsl(var(--light-blue-hue), 90%, 65%) !important;
+}
+.light-blue.lighten-1 {
+    background: hsl(var(--light-blue-hue), 90%, 60%) !important;
+}
 .light-blue.darken-1 {
-    background: #039be5 !important;
+    background: hsl(var(--light-blue-hue), 90%, 46%) !important;
 }
-
 .light-blue.darken-2 {
-    background: #0288d1 !important;
+    background: hsl(var(--light-blue-hue), 90%, 36%) !important;
 }
-
 .light-blue.darken-3 {
-    background: #0277bd !important;
+    background: hsl(var(--light-blue-hue), 90%, 26%) !important;
 }
-
 .light-blue.darken-4 {
-    background: #01579b !important;
-}
-
-.light-blue.accent-1 {
-    background: #80d8ff !important;
-}
-
-.light-blue.accent-2 {
-    background: #40c4ff !important;
-}
-
-.light-blue.accent-3 {
-    background: #00b0ff !important;
-}
-
-.light-blue.accent-4 {
-    background: #0091ea !important;
-}
-
-.cyan.lighten-5 {
-    background: #e0f7fa !important;
-}
-
-.cyan.lighten-4 {
-    background: #b2ebf2 !important;
-}
-
-.cyan.lighten-3 {
-    background: #80deea !important;
-}
-
-.cyan.lighten-2 {
-    background: #4dd0e1 !important;
-}
-
-.cyan.lighten-1 {
-    background: #26c6da !important;
+    background: hsl(var(--light-blue-hue), 90%, 16%) !important;
 }
 
 .cyan {
-    background: #00bcd4 !important;
+    background: hsl(var(--cyan-hue), 90%, 56%) !important;
 }
-
 .cyan-text {
-    color: #00bcd4 !important;
+    color: hsl(var(--cyan-hue), 90%, 56%) !important;
 }
-
+.cyan.lighten-5 {
+    background: hsl(var(--cyan-hue), 90%, 95%) !important;
+}
+.cyan.lighten-4 {
+    background: hsl(var(--cyan-hue), 90%, 85%) !important;
+}
+.cyan.lighten-3 {
+    background: hsl(var(--cyan-hue), 90%, 75%) !important;
+}
+.cyan.lighten-2 {
+    background: hsl(var(--cyan-hue), 90%, 65%) !important;
+}
+.cyan.lighten-1 {
+    background: hsl(var(--cyan-hue), 90%, 60%) !important;
+}
 .cyan.darken-1 {
-    background: #00acc1 !important;
+    background: hsl(var(--cyan-hue), 90%, 46%) !important;
 }
-
 .cyan.darken-2 {
-    background: #0097a7 !important;
+    background: hsl(var(--cyan-hue), 90%, 36%) !important;
 }
-
 .cyan.darken-3 {
-    background: #00838f !important;
+    background: hsl(var(--cyan-hue), 90%, 26%) !important;
 }
-
 .cyan.darken-4 {
-    background: #006064 !important;
-}
-
-.cyan.accent-1 {
-    background: #84ffff !important;
-}
-
-.cyan.accent-2 {
-    background: #18ffff !important;
-}
-
-.cyan.accent-3 {
-    background: #00e5ff !important;
-}
-
-.cyan.accent-4 {
-    background: #00b8d4 !important;
-}
-
-.teal.lighten-5 {
-    background: #e0f2f1 !important;
-}
-
-.teal.lighten-4 {
-    background: #b2dfdb !important;
-}
-
-.teal.lighten-3 {
-    background: #80cbc4 !important;
-}
-
-.teal.lighten-2 {
-    background: #4db6ac !important;
-}
-
-.teal.lighten-1 {
-    background: #26a69a !important;
+    background: hsl(var(--cyan-hue), 90%, 16%) !important;
 }
 
 .teal {
-    background: #009688 !important;
+    background: hsl(var(--teal-hue), 90%, 56%) !important;
 }
-
 .teal-text {
-    color: #009688 !important;
+    color: hsl(var(--teal-hue), 90%, 56%) !important;
 }
-
+.teal.lighten-5 {
+    background: hsl(var(--teal-hue), 90%, 95%) !important;
+}
+.teal.lighten-4 {
+    background: hsl(var(--teal-hue), 90%, 85%) !important;
+}
+.teal.lighten-3 {
+    background: hsl(var(--teal-hue), 90%, 75%) !important;
+}
+.teal.lighten-2 {
+    background: hsl(var(--teal-hue), 90%, 65%) !important;
+}
+.teal.lighten-1 {
+    background: hsl(var(--teal-hue), 90%, 60%) !important;
+}
 .teal.darken-1 {
-    background: #00897b !important;
+    background: hsl(var(--teal-hue), 90%, 46%) !important;
 }
-
 .teal.darken-2 {
-    background: #00796b !important;
+    background: hsl(var(--teal-hue), 90%, 36%) !important;
 }
-
 .teal.darken-3 {
-    background: #00695c !important;
+    background: hsl(var(--teal-hue), 90%, 26%) !important;
 }
-
 .teal.darken-4 {
-    background: #004d40 !important;
-}
-
-.teal.accent-1 {
-    background: #a7ffeb !important;
-}
-
-.teal.accent-2 {
-    background: #64ffda !important;
-}
-
-.teal.accent-3 {
-    background: #1de9b6 !important;
-}
-
-.teal.accent-4 {
-    background: #00bfa5 !important;
-}
-
-.green.lighten-5 {
-    background: #E8F5E9 !important;
-}
-
-.green.lighten-4 {
-    background: #C8E6C9 !important;
-}
-
-.green.lighten-3 {
-    background: #A5D6A7 !important;
-}
-
-.green.lighten-2 {
-    background: #81C784 !important;
-}
-
-.green.lighten-1 {
-    background: #66BB6A !important;
+    background: hsl(var(--teal-hue), 90%, 16%) !important;
 }
 
 .green {
-    background: #4CAF50 !important;
+    background: hsl(var(--green-hue), 90%, 56%) !important;
 }
-
 .green-text {
-    color: #4CAF50 !important;
+    color: hsl(var(--green-hue), 90%, 56%) !important;
 }
-
+.green.lighten-5 {
+    background: hsl(var(--green-hue), 90%, 95%) !important;
+}
+.green.lighten-4 {
+    background: hsl(var(--green-hue), 90%, 85%) !important;
+}
+.green.lighten-3 {
+    background: hsl(var(--green-hue), 90%, 75%) !important;
+}
+.green.lighten-2 {
+    background: hsl(var(--green-hue), 90%, 65%) !important;
+}
+.green.lighten-1 {
+    background: hsl(var(--green-hue), 90%, 60%) !important;
+}
 .green.darken-1 {
-    background: #43A047 !important;
+    background: hsl(var(--green-hue), 90%, 46%) !important;
 }
-
 .green.darken-2 {
-    background: #388E3C !important;
+    background: hsl(var(--green-hue), 90%, 36%) !important;
 }
-
 .green.darken-3 {
-    background: #2E7D32 !important;
+    background: hsl(var(--green-hue), 90%, 26%) !important;
 }
-
 .green.darken-4 {
-    background: #1B5E20 !important;
-}
-
-.green.accent-1 {
-    background: #B9F6CA !important;
-}
-
-.green.accent-2 {
-    background: #69F0AE !important;
-}
-
-.green.accent-3 {
-    background: #00E676 !important;
-}
-
-.green.accent-4 {
-    background: #00C853 !important;
-}
-
-.light-green.lighten-5 {
-    background: #f1f8e9 !important;
-}
-
-.light-green.lighten-4 {
-    background: #dcedc8 !important;
-}
-
-.light-green.lighten-3 {
-    background: #c5e1a5 !important;
-}
-
-.light-green.lighten-2 {
-    background: #aed581 !important;
-}
-
-.light-green.lighten-1 {
-    background: #9ccc65 !important;
+    background: hsl(var(--green-hue), 90%, 16%) !important;
 }
 
 .light-green {
-    background: #8bc34a !important;
+    background: hsl(var(--light-green-hue), 90%, 56%) !important;
 }
-
 .light-green-text {
-    color: #8bc34a !important;
+    color: hsl(var(--light-green-hue), 90%, 56%) !important;
 }
-
+.light-green.lighten-5 {
+    background: hsl(var(--light-green-hue), 90%, 95%) !important;
+}
+.light-green.lighten-4 {
+    background: hsl(var(--light-green-hue), 90%, 85%) !important;
+}
+.light-green.lighten-3 {
+    background: hsl(var(--light-green-hue), 90%, 75%) !important;
+}
+.light-green.lighten-2 {
+    background: hsl(var(--light-green-hue), 90%, 65%) !important;
+}
+.light-green.lighten-1 {
+    background: hsl(var(--light-green-hue), 90%, 60%) !important;
+}
 .light-green.darken-1 {
-    background: #7cb342 !important;
+    background: hsl(var(--light-green-hue), 90%, 46%) !important;
 }
-
 .light-green.darken-2 {
-    background: #689f38 !important;
+    background: hsl(var(--light-green-hue), 90%, 36%) !important;
 }
-
 .light-green.darken-3 {
-    background: #558b2f !important;
+    background: hsl(var(--light-green-hue), 90%, 26%) !important;
 }
-
 .light-green.darken-4 {
-    background: #33691e !important;
-}
-
-.light-green.accent-1 {
-    background: #ccff90 !important;
-}
-
-.light-green.accent-2 {
-    background: #b2ff59 !important;
-}
-
-.light-green.accent-3 {
-    background: #76ff03 !important;
-}
-
-.light-green.accent-4 {
-    background: #64dd17 !important;
-}
-
-.lime.lighten-5 {
-    background: #f9fbe7 !important;
-}
-
-.lime.lighten-4 {
-    background: #f0f4c3 !important;
-}
-
-.lime.lighten-3 {
-    background: #e6ee9c !important;
-}
-
-.lime.lighten-2 {
-    background: #dce775 !important;
-}
-
-.lime.lighten-1 {
-    background: #d4e157 !important;
+    background: hsl(var(--light-green-hue), 90%, 16%) !important;
 }
 
 .lime {
-    background: #cddc39 !important;
+    background: hsl(var(--lime-hue), 90%, 56%) !important;
 }
-
 .lime-text {
-    color: #cddc39 !important;
+    color: hsl(var(--lime-hue), 90%, 56%) !important;
 }
-
+.lime.lighten-5 {
+    background: hsl(var(--lime-hue), 90%, 95%) !important;
+}
+.lime.lighten-4 {
+    background: hsl(var(--lime-hue), 90%, 85%) !important;
+}
+.lime.lighten-3 {
+    background: hsl(var(--lime-hue), 90%, 75%) !important;
+}
+.lime.lighten-2 {
+    background: hsl(var(--lime-hue), 90%, 65%) !important;
+}
+.lime.lighten-1 {
+    background: hsl(var(--lime-hue), 90%, 60%) !important;
+}
 .lime.darken-1 {
-    background: #c0ca33 !important;
+    background: hsl(var(--lime-hue), 90%, 46%) !important;
 }
-
 .lime.darken-2 {
-    background: #afb42b !important;
+    background: hsl(var(--lime-hue), 90%, 36%) !important;
 }
-
 .lime.darken-3 {
-    background: #9e9d24 !important;
+    background: hsl(var(--lime-hue), 90%, 26%) !important;
 }
-
 .lime.darken-4 {
-    background: #827717 !important;
-}
-
-.lime.accent-1 {
-    background: #f4ff81 !important;
-}
-
-.lime.accent-2 {
-    background: #eeff41 !important;
-}
-
-.lime.accent-3 {
-    background: #c6ff00 !important;
-}
-
-.lime.accent-4 {
-    background: #aeea00 !important;
-}
-
-.yellow.lighten-5 {
-    background: #fffde7 !important;
-}
-
-.yellow.lighten-4 {
-    background: #fff9c4 !important;
-}
-
-.yellow.lighten-3 {
-    background: #fff59d !important;
-}
-
-.yellow.lighten-2 {
-    background: #fff176 !important;
-}
-
-.yellow.lighten-1 {
-    background: #ffee58 !important;
+    background: hsl(var(--lime-hue), 90%, 16%) !important;
 }
 
 .yellow {
-    background: #ffeb3b !important;
+    background: hsl(var(--yellow-hue), 90%, 56%) !important;
 }
-
 .yellow-text {
-    color: #ffeb3b !important;
+    color: hsl(var(--yellow-hue), 90%, 56%) !important;
 }
-
+.yellow.lighten-5 {
+    background: hsl(var(--yellow-hue), 90%, 95%) !important;
+}
+.yellow.lighten-4 {
+    background: hsl(var(--yellow-hue), 90%, 85%) !important;
+}
+.yellow.lighten-3 {
+    background: hsl(var(--yellow-hue), 90%, 75%) !important;
+}
+.yellow.lighten-2 {
+    background: hsl(var(--yellow-hue), 90%, 65%) !important;
+}
+.yellow.lighten-1 {
+    background: hsl(var(--yellow-hue), 90%, 60%) !important;
+}
 .yellow.darken-1 {
-    background: #fdd835 !important;
+    background: hsl(var(--yellow-hue), 90%, 46%) !important;
 }
-
 .yellow.darken-2 {
-    background: #fbc02d !important;
+    background: hsl(var(--yellow-hue), 90%, 36%) !important;
 }
-
 .yellow.darken-3 {
-    background: #f9a825 !important;
+    background: hsl(var(--yellow-hue), 90%, 26%) !important;
 }
-
 .yellow.darken-4 {
-    background: #f57f17 !important;
-}
-
-.yellow.accent-1 {
-    background: #ffff8d !important;
-}
-
-.yellow.accent-2 {
-    background: #ffff00 !important;
-}
-
-.yellow.accent-3 {
-    background: #ffea00 !important;
-}
-
-.yellow.accent-4 {
-    background: #ffd600 !important;
-}
-
-.amber.lighten-5 {
-    background: #fff8e1 !important;
-}
-
-.amber.lighten-4 {
-    background: #ffecb3 !important;
-}
-
-.amber.lighten-3 {
-    background: #ffe082 !important;
-}
-
-.amber.lighten-2 {
-    background: #ffd54f !important;
-}
-
-.amber.lighten-1 {
-    background: #ffca28 !important;
+    background: hsl(var(--yellow-hue), 90%, 16%) !important;
 }
 
 .amber {
-    background: #ffc107 !important;
+    background: hsl(var(--amber-hue), 90%, 56%) !important;
 }
-
 .amber-text {
-    color: #ffc107 !important;
+    color: hsl(var(--amber-hue), 90%, 56%) !important;
 }
-
+.amber.lighten-5 {
+    background: hsl(var(--amber-hue), 90%, 95%) !important;
+}
+.amber.lighten-4 {
+    background: hsl(var(--amber-hue), 90%, 85%) !important;
+}
+.amber.lighten-3 {
+    background: hsl(var(--amber-hue), 90%, 75%) !important;
+}
+.amber.lighten-2 {
+    background: hsl(var(--amber-hue), 90%, 65%) !important;
+}
+.amber.lighten-1 {
+    background: hsl(var(--amber-hue), 90%, 60%) !important;
+}
 .amber.darken-1 {
-    background: #ffb300 !important;
+    background: hsl(var(--amber-hue), 90%, 46%) !important;
 }
-
 .amber.darken-2 {
-    background: #ffa000 !important;
+    background: hsl(var(--amber-hue), 90%, 36%) !important;
 }
-
 .amber.darken-3 {
-    background: #ff8f00 !important;
+    background: hsl(var(--amber-hue), 90%, 26%) !important;
 }
-
 .amber.darken-4 {
-    background: #ff6f00 !important;
-}
-
-.amber.accent-1 {
-    background: #ffe57f !important;
-}
-
-.amber.accent-2 {
-    background: #ffd740 !important;
-}
-
-.amber.accent-3 {
-    background: #ffc400 !important;
-}
-
-.amber.accent-4 {
-    background: #ffab00 !important;
-}
-
-.orange.lighten-5 {
-    background: #fff3e0 !important;
-}
-
-.orange.lighten-4 {
-    background: #ffe0b2 !important;
-}
-
-.orange.lighten-3 {
-    background: #ffcc80 !important;
-}
-
-.orange.lighten-2 {
-    background: #ffb74d !important;
-}
-
-.orange.lighten-1 {
-    background: #ffa726 !important;
+    background: hsl(var(--amber-hue), 90%, 16%) !important;
 }
 
 .orange {
-    background: #ff9800 !important;
+    background: hsl(var(--orange-hue), 90%, 56%) !important;
 }
-
 .orange-text {
-    color: #ff9800 !important;
+    color: hsl(var(--orange-hue), 90%, 56%) !important;
 }
-
+.orange.lighten-5 {
+    background: hsl(var(--orange-hue), 90%, 95%) !important;
+}
+.orange.lighten-4 {
+    background: hsl(var(--orange-hue), 90%, 85%) !important;
+}
+.orange.lighten-3 {
+    background: hsl(var(--orange-hue), 90%, 75%) !important;
+}
+.orange.lighten-2 {
+    background: hsl(var(--orange-hue), 90%, 65%) !important;
+}
+.orange.lighten-1 {
+    background: hsl(var(--orange-hue), 90%, 60%) !important;
+}
 .orange.darken-1 {
-    background: #fb8c00 !important;
+    background: hsl(var(--orange-hue), 90%, 46%) !important;
 }
-
 .orange.darken-2 {
-    background: #f57c00 !important;
+    background: hsl(var(--orange-hue), 90%, 36%) !important;
 }
-
 .orange.darken-3 {
-    background: #ef6c00 !important;
+    background: hsl(var(--orange-hue), 90%, 26%) !important;
 }
-
 .orange.darken-4 {
-    background: #e65100 !important;
-}
-
-.orange.accent-1 {
-    background: #ffd180 !important;
-}
-
-.orange.accent-2 {
-    background: #ffab40 !important;
-}
-
-.orange.accent-3 {
-    background: #ff9100 !important;
-}
-
-.orange.accent-4 {
-    background: #ff6d00 !important;
-}
-
-.deep-orange.lighten-5 {
-    background: #fbe9e7 !important;
-}
-
-.deep-orange.lighten-4 {
-    background: #ffccbc !important;
-}
-
-.deep-orange.lighten-3 {
-    background: #ffab91 !important;
-}
-
-.deep-orange.lighten-2 {
-    background: #ff8a65 !important;
-}
-
-.deep-orange.lighten-1 {
-    background: #ff7043 !important;
+    background: hsl(var(--orange-hue), 90%, 16%) !important;
 }
 
 .deep-orange {
-    background: #ff5722 !important;
+    background: hsl(var(--deep-orange-hue), 90%, 56%) !important;
 }
-
 .deep-orange-text {
-    color: #ff5722 !important;
+    color: hsl(var(--deep-orange-hue), 90%, 56%) !important;
 }
-
+.deep-orange.lighten-5 {
+    background: hsl(var(--deep-orange-hue), 90%, 95%) !important;
+}
+.deep-orange.lighten-4 {
+    background: hsl(var(--deep-orange-hue), 90%, 85%) !important;
+}
+.deep-orange.lighten-3 {
+    background: hsl(var(--deep-orange-hue), 90%, 75%) !important;
+}
+.deep-orange.lighten-2 {
+    background: hsl(var(--deep-orange-hue), 90%, 65%) !important;
+}
+.deep-orange.lighten-1 {
+    background: hsl(var(--deep-orange-hue), 90%, 60%) !important;
+}
 .deep-orange.darken-1 {
-    background: #f4511e !important;
+    background: hsl(var(--deep-orange-hue), 90%, 46%) !important;
 }
-
 .deep-orange.darken-2 {
-    background: #e64a19 !important;
+    background: hsl(var(--deep-orange-hue), 90%, 36%) !important;
 }
-
 .deep-orange.darken-3 {
-    background: #d84315 !important;
+    background: hsl(var(--deep-orange-hue), 90%, 26%) !important;
 }
-
 .deep-orange.darken-4 {
-    background: #bf360c !important;
-}
-
-.deep-orange.accent-1 {
-    background: #ff9e80 !important;
-}
-
-.deep-orange.accent-2 {
-    background: #ff6e40 !important;
-}
-
-.deep-orange.accent-3 {
-    background: #ff3d00 !important;
-}
-
-.deep-orange.accent-4 {
-    background: #dd2c00 !important;
-}
-
-.brown.lighten-5 {
-    background: #efebe9 !important;
-}
-
-.brown.lighten-4 {
-    background: #d7ccc8 !important;
-}
-
-.brown.lighten-3 {
-    background: #bcaaa4 !important;
-}
-
-.brown.lighten-2 {
-    background: #a1887f !important;
-}
-
-.brown.lighten-1 {
-    background: #8d6e63 !important;
+    background: hsl(var(--deep-orange-hue), 90%, 16%) !important;
 }
 
 .brown {
-    background: #795548 !important;
+    background: hsl(var(--brown-hue), 90%, 56%) !important;
 }
-
 .brown-text {
-    color: #795548 !important;
+    color: hsl(var(--brown-hue), 90%, 56%) !important;
 }
-
+.brown.lighten-5 {
+    background: hsl(var(--brown-hue), 90%, 95%) !important;
+}
+.brown.lighten-4 {
+    background: hsl(var(--brown-hue), 90%, 85%) !important;
+}
+.brown.lighten-3 {
+    background: hsl(var(--brown-hue), 90%, 75%) !important;
+}
+.brown.lighten-2 {
+    background: hsl(var(--brown-hue), 90%, 65%) !important;
+}
+.brown.lighten-1 {
+    background: hsl(var(--brown-hue), 90%, 60%) !important;
+}
 .brown.darken-1 {
-    background: #6d4c41 !important;
+    background: hsl(var(--brown-hue), 90%, 46%) !important;
 }
-
 .brown.darken-2 {
-    background: #5d4037 !important;
+    background: hsl(var(--brown-hue), 90%, 36%) !important;
 }
-
 .brown.darken-3 {
-    background: #4e342e !important;
+    background: hsl(var(--brown-hue), 90%, 26%) !important;
 }
-
 .brown.darken-4 {
-    background: #3e2723 !important;
-}
-
-.blue-grey.lighten-5 {
-    background: #eceff1 !important;
-}
-
-.blue-grey.lighten-4 {
-    background: #cfd8dc !important;
-}
-
-.blue-grey.lighten-3 {
-    background: #b0bec5 !important;
-}
-
-.blue-grey.lighten-2 {
-    background: #90a4ae !important;
-}
-
-.blue-grey.lighten-1 {
-    background: #78909c !important;
+    background: hsl(var(--brown-hue), 90%, 16%) !important;
 }
 
 .blue-grey {
-    background: #607d8b !important;
+    background: hsl(var(--blue-grey-hue), 90%, 56%) !important;
 }
-
 .blue-grey-text {
-    color: #607d8b !important;
+    color: hsl(var(--blue-grey-hue), 90%, 56%) !important;
 }
-
+.blue-grey.lighten-5 {
+    background: hsl(var(--blue-grey-hue), 90%, 95%) !important;
+}
+.blue-grey.lighten-4 {
+    background: hsl(var(--blue-grey-hue), 90%, 85%) !important;
+}
+.blue-grey.lighten-3 {
+    background: hsl(var(--blue-grey-hue), 90%, 75%) !important;
+}
+.blue-grey.lighten-2 {
+    background: hsl(var(--blue-grey-hue), 90%, 65%) !important;
+}
+.blue-grey.lighten-1 {
+    background: hsl(var(--blue-grey-hue), 90%, 60%) !important;
+}
 .blue-grey.darken-1 {
-    background: #546e7a !important;
+    background: hsl(var(--blue-grey-hue), 90%, 46%) !important;
 }
-
 .blue-grey.darken-2 {
-    background: #455a64 !important;
+    background: hsl(var(--blue-grey-hue), 90%, 36%) !important;
 }
-
 .blue-grey.darken-3 {
-    background: #37474f !important;
+    background: hsl(var(--blue-grey-hue), 90%, 26%) !important;
 }
-
 .blue-grey.darken-4 {
-    background: #263238 !important;
-}
-
-.grey.lighten-5 {
-    background: #fafafa !important;
-}
-
-.grey.lighten-4 {
-    background: #f5f5f5 !important;
-}
-
-.grey.lighten-3 {
-    background: #eeeeee !important;
-}
-
-.grey.lighten-2 {
-    background: #e0e0e0 !important;
-}
-
-.grey.lighten-1 {
-    background: #bdbdbd !important;
+    background: hsl(var(--blue-grey-hue), 90%, 16%) !important;
 }
 
 .grey {
-    background: #9e9e9e !important;
+    background: hsl(var(--grey-hue), 90%, 56%) !important;
 }
-
 .grey-text {
-    color: #9e9e9e !important;
+    color: hsl(var(--grey-hue), 90%, 56%) !important;
 }
-
+.grey.lighten-5 {
+    background: hsl(var(--grey-hue), 90%, 95%) !important;
+}
+.grey.lighten-4 {
+    background: hsl(var(--grey-hue), 90%, 85%) !important;
+}
+.grey.lighten-3 {
+    background: hsl(var(--grey-hue), 90%, 75%) !important;
+}
+.grey.lighten-2 {
+    background: hsl(var(--grey-hue), 90%, 65%) !important;
+}
+.grey.lighten-1 {
+    background: hsl(var(--grey-hue), 90%, 60%) !important;
+}
 .grey.darken-1 {
-    background: #757575 !important;
+    background: hsl(var(--grey-hue), 90%, 46%) !important;
 }
-
 .grey.darken-2 {
-    background: #616161 !important;
+    background: hsl(var(--grey-hue), 90%, 36%) !important;
 }
-
 .grey.darken-3 {
-    background: #424242 !important;
+    background: hsl(var(--grey-hue), 90%, 26%) !important;
 }
-
 .grey.darken-4 {
-    background: #212121 !important;
+    background: hsl(var(--grey-hue), 90%, 16%) !important;
 }
 
 .shades.black {
@@ -1122,19 +703,19 @@
 }
 
 .black {
-    background: #000000 !important;
+    background: hsl(var(--black-hue), 0%, 0%) !important;
 }
 
 .black-text, .btn-link {
-    color: #000000 !important;
+    color: hsl(var(--black-hue), 0%, 0%) !important;
 }
 
 .white {
-    background: #FFFFFF !important;
+    background: hsl(var(--white-hue), 0%, 100%) !important;
 }
 
 .white-text {
-    color: #FFFFFF !important;
+    color: hsl(var(--white-hue), 0%, 100%) !important;
 }
 
 .transparent {
@@ -1568,4 +1149,3 @@
 .bg-blue-grey {
     background: #78909c !important;
 }
-

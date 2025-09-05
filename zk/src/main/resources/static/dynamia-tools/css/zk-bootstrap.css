@@ -25,7 +25,7 @@
 }
 
 .form-zcontrol .z-combobox-readonly, .entitypickerbox .z-combobox-readonly {
-    background-color: white;
+    background-color: var(--dt-white);
 }
 
 .form-zcontrol input, input.form-zcontrol {
@@ -69,7 +69,7 @@
 }
 
 .form-zcontrol input:focus, .entitypickerbox input:focus, .decimalbox-calc input:focus {
-    border-color: #3c8dbc !important;
+    border-color: var(--dt-primary-light) !important;
     box-shadow: none;
 }
 
@@ -88,9 +88,9 @@
 }
 
 .entitypickerbox .entitypickerbox-button, .decimalbox-calc .decimalbox-calc-button {
-    color: white;
-    background: #337ab7;
-    border-color: #337ab7;
+    color: var(--dt-white);
+    background: var(--dt-primary);
+    border-color: var(--dt-primary);
     border-bottom-right-radius: 6px;
     border-top-right-radius: 6px;
     width: 30px;
@@ -157,11 +157,11 @@
 }
 
 .form-group .conv-positive {
-    color: #529500 !important;
+    color: var(--dt-primary) !important;
 }
 
 .form-group .conv-negative {
-    color: maroon !important;
+    color: var(--dt-danger) !important;
 }
 
 .z-checkbox-content {
@@ -267,9 +267,9 @@
 }
 
 .panel-default > .panel-heading {
-    background-color: #fafafa;
+    background-color: var(--dt-background);
     border-bottom: none;
-    color: #797979;
+    color: var(--dt-text-secondary);
 }
 
 .panel-title {
@@ -283,13 +283,13 @@
 
 .panel-sub-title {
     margin-bottom: 3px;
-    color: #CEE4FD;
+    color: var(--dt-text-secondary);
     margin-top: -3px;
 }
 
 .panel-footer {
-    background: #fafafa;
-    border-top: 0px;
+    background: var(--dt-background);
+    border-top: 0;
 }
 
 .panel-default .panel-sub-title {
@@ -297,27 +297,27 @@
 }
 
 .panel-color .panel-title {
-    color: #ffffff;
+    color: var(--dt-white);
 }
 
 .panel-primary > .panel-heading {
-    background-color: #3bafda;
+    background-color: var(--dt-primary);
 }
 
 .panel-success > .panel-heading {
-    background-color: #00b19d;
+    background-color: var(--dt-success);
 }
 
 .panel-info > .panel-heading {
-    background-color: #3ddcf7;
+    background-color: var(--dt-info);
 }
 
 .panel-warning > .panel-heading {
-    background-color: #ffaa00;
+    background-color: var(--dt-warning);
 }
 
 .panel-danger > .panel-heading {
-    background-color: #ef5350;
+    background-color: var(--dt-danger);
 }
 
 .panel-purple > .panel-heading {
@@ -329,7 +329,7 @@
 }
 
 .panel-inverse > .panel-heading {
-    background-color: #4c5667;
+    background-color: var(--dt-neutral-dark);
 }
 
 .panel-border {
@@ -337,7 +337,7 @@
 }
 
 .panel-border .panel-heading {
-    background-color: #ffffff;
+    background-color: var(--dt-white);
     border-top: 3px solid #ccc !important;
     border-radius: 3px;
     padding: 10px 20px 0px;
@@ -348,28 +348,28 @@
 }
 
 .panel-border.panel-primary .panel-heading {
-    border-color: #3bafda !important;
-    color: #3bafda !important;
+    border-color: var(--dt-primary) !important;
+    color: var(--dt-primary) !important;
 }
 
 .panel-border.panel-success .panel-heading {
-    border-color: #00b19d !important;
-    color: #00b19d !important;
+    border-color: var(--dt-success) !important;
+    color: var(--dt-success) !important;
 }
 
 .panel-border.panel-info .panel-heading {
-    border-color: #3ddcf7 !important;
-    color: #3ddcf7 !important;
+    border-color: var(--dt-info) !important;
+    color: var(--dt-info) !important;
 }
 
 .panel-border.panel-warning .panel-heading {
-    border-color: #ffaa00 !important;
-    color: #ffaa00 !important;
+    border-color: var(--dt-warning) !important;
+    color: var(--dt-warning) !important;
 }
 
 .panel-border.panel-danger .panel-heading {
-    border-color: #ef5350 !important;
-    color: #ef5350 !important;
+    border-color: var(--dt-danger) !important;
+    color: var(--dt-danger) !important;
 }
 
 .panel-border.panel-purple .panel-heading {
@@ -383,8 +383,8 @@
 }
 
 .panel-border.panel-inverse .panel-heading {
-    border-color: #4c5667 !important;
-    color: #4c5667 !important;
+    border-color: var(--dt-neutral-dark) !important;
+    color: var(--dt-neutral-dark) !important;
 }
 
 .btn-group-sm > .btn, .btn-sm {
@@ -427,4 +427,358 @@
 
 .pull-left {
     float: left;
+}
+
+.dark-mode, .dark-mode .bg-body-tertiary {
+    --bs-body-bg: var(--dt-background-dark);
+    --dt-border-color: #3a3f4f;
+    --dt-boder-input-color: #6c757d;
+    background-color: var(--dt-background-dark) !important;
+}
+
+
+.dark-mode .bg-body, .dark-mode body {
+    background: var(--dt-background-dark) !important;
+}
+
+.dark-mode .sidebar-brand {
+    background: var(--dt-background-dark-hover) !important;
+}
+
+
+.dark-mode .table-view .z-listheader-hover,
+.dark-mode .tree-view .z-treecol-hover {
+    background: var(--dt-primary-dark) !important;
+}
+
+.dark-mode .table-view .z-listheader-content,
+.dark-mode .tree-view .z-treecol-content,
+.dark-mode .z-listheader-content,
+.dark-mode .z-treecol-content {
+    color: var(--dt-text-primary-dark) !important;
+}
+
+.dark-mode .app-header .fa, .dark-mode .app-header .fas {
+    color: var(--dt-text-primary-dark);
+}
+
+
+.dark-mode.login-page, .dark-mode .register-page, .dark-mode .card, .dark-mode .panel,
+.dark-mode .z-tabpanel, .dark-mode .pageContent .z-window-content, .dark-mode .z-window,
+.dark-mode .z-tabs, .dark-mode .z-toolbar.z-toolbar-tabs, .dark-mode .z-tabbox,
+.dark-mode .actiontb {
+    background: var(--dt-background-dark) !important;
+}
+
+.dark-mode .crudview-header {
+    background: var(--dt-background-dark) !important;
+}
+
+.dark-mode .z-tab-selected .z-tab-button {
+    color: var(--dt-primary);
+}
+
+.dark-mode .card {
+    border-color: var(--dt-border-color) !important;
+}
+
+.dark-mode .z-tabbox {
+    border-color: var(--dt-border-color);
+}
+
+.dark-mode input, .dark-mode textarea {
+    background: var(--dt-background-dark) !important;
+    border-color: var(--dt-boder-input-color);
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode input:focus, .dark-mode textarea:focus {
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .z-textbox-inplace,
+.dark-mode .z-decimalbox-inplace,
+.dark-mode .z-intbox-inplace,
+.dark-mode .z-longbox-inplace,
+.dark-mode .z-doublebox-inplace {
+    border-color: transparent !important;
+}
+
+.dark-mode ::placeholder, .dark-mode ::-webkit-input-placeholder {
+    color: var(--dt-text-secondary) !important;
+}
+
+.dark-mode .input-group-text {
+    color: var(--dt-text-primary-dark);
+    background-color: var(--dt-background-dark);
+    border-color: var(--dt-background-dark);
+}
+
+.dark-mode .z-window {
+    border-color: var(--dt-background-dark);
+}
+
+.dark-mode .z-label, .dark-mode .form-view-lbl, .dark-mode label {
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .bg-body-secondary {
+    background-color: var(--dt-background-dark) !important;
+}
+
+.dark-mode .tabpage.z-tab-selected {
+    background-color: var(--dt-background-dark) !important;
+    border-color: var(--dt-background-dark) !important;
+    box-shadow: none !important;
+}
+
+.dark-mode .tabpage.z-tab {
+    background-color: var(--dt-background-dark) !important;
+}
+
+.dark-mode .tabpage .z-tab-text {
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .tabpage.z-tab-selected .z-tab-text {
+    color: var(--dt-primary);
+}
+
+.dark-mode .btn.btn-default, .dark-mode .z-toolbarbutton {
+    background-color: var(--dt-background-dark);
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .btn.btn-default:hover, .dark-mode .z-toolbarbutton:hover {
+    background-color: var(--dt-background-dark);
+    color: var(--dt-text-primary-dark);
+}
+
+
+.dark-mode .crudview .table-view .z-listheader,
+.dark-mode .crudview .table-view .z-listbox-header,
+.dark-mode .crudview .tree-view .z-treecol,
+.dark-mode .crudview .tree-view .z-tree-header,
+.dark-mode .z-listheader,
+.dark-mode .z-listbox-header,
+.dark-mode .z-listhead-bar,
+.dark-mode .z-treecol,
+.dark-mode .z-tree-header,
+.dark-mode .z-listbox-footer,
+.dark-mode .z-listfooter {
+    background: var(--dt-background-dark) !important;
+    border-left: 1px solid var(--dt-background-dark);
+    border-color: var(--dt-background-dark);
+}
+
+.dark-mode .crudview .table-view .z-listheader:hover,
+.dark-mode .crudview .table-view .z-listbox-header:hover,
+.dark-mode .crudview .tree-view .z-treecol:hover,
+.dark-mode .crudview .tree-view .z-tree-header:hover {
+    background: var(--dt-background-dark) !important;
+    border-left: 1px solid var(--dt-background-dark) !important;
+}
+
+.dark-mode .z-listbox,
+.dark-mode .table-view .z-listbox-body,
+.dark-mode .tree-view .z-tree-body,
+.dark-mode .z-tree {
+    background: var(--dt-background-dark);
+    border-color: var(--dt-border-color);
+}
+
+.dark-mode .z-listbox .z-listcell, .dark-mode .z-listitem .z-listcell, .dark-mode .z-treerow .z-treecell {
+    background: var(--dt-background-dark);
+    border-color: var(--dt-border-color);
+}
+
+
+.dark-mode .z-listitem-selected .z-listcell,
+.dark-mode .z-treerow-selected .z-treecell {
+    background: var(--dt-primary);
+}
+
+.dark-mode .z-listcell-content, .dark-mode .z-listgroup-content, .dark-mode .z-listgroupfoot-content, .dark-mode .z-listfooter-content {
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .z-listitem-selected .z-listcell .z-listcell-content,
+.dark-mode .z-listitem-selected .z-listcell .z-listcell-content .z-label,
+.dark-mode .z-treerow-selected .z-treecell .z-treecell-content,
+.dark-mode .z-treerow-selected .z-treecell .z-treecell-content .z-label {
+    color: var(--dt-text-primary-dark) !important;
+}
+
+
+.dark-mode .multi-view .multi-view-tab, .dark-mode .z-tab {
+    background: var(--dt-background-dark);
+    border-color: var(--dt-background-dark) !important;;
+}
+
+.dark-mode .multi-view .multi-view-tab .z-tab-text, .dark-mode .z-tab-text {
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .multi-view .multi-view-tab.z-tab-selected {
+    background: var(--dt-background-dark) !important;
+    border-color: var(--dt-background-dark) !important;
+}
+
+.dark-mode .multi-view .multi-view-tab.z-tab-selected .z-tab-text,
+.dark-mode .z-tab-selected .z-tab-text {
+    color: var(--dt-primary);
+}
+
+.dark-mode .z-menupopup,
+.dark-mode .z-combobox-popup, .dark-mode .z-bandbox-popup, .dark-mode .z-datebox-popup, .dark-mode .z-timebox-popup {
+    background: var(--dt-background-dark);
+    border-color: var(--dt-background-dark);
+}
+
+.dark-mode .z-menupopup .z-menu-content, .dark-mode .z-menupopup .z-menuitem-content {
+    background: var(--dt-background-dark);
+    border-color: var(--dt-background-dark);;
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .z-menuitem-content {
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .z-menuitem-content:hover, .dark-mode .z-caption-content, .dark-mode .z-tree-icon {
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .z-menupopup .z-menuseparator {
+    color: var(--dt-background-dark);
+}
+
+.dark-mode .z-window-content {
+    background: var(--dt-background-dark);
+}
+
+
+.dark-mode .z-east-splitter, .dark-mode .z-west-splitter, .dark-mode .z-north-splitter, .dark-mode .z-south-splitter {
+    background: var(--dt-background-dark);
+}
+
+.dark-mode .z-north, .dark-mode .z-south, .dark-mode .z-west, .dark-mode .z-center, .dark-mode .z-east {
+    border-color: var(--dt-background-dark);
+    background: var(--dt-background-dark);
+}
+
+.dark-mode .z-tree-icon i {
+    color: var(--dt-background-dark) !important;
+}
+
+.dark-mode .z-treecell-content i {
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .z-north-header, .dark-mode .z-south-header,
+.dark-mode .z-west-header, .dark-mode .z-center-header, .dark-mode .z-east-header {
+    background: var(--dt-background-dark);
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .z-east-title, .dark-mode .z-west-title, .dark-mode .z-north-title, .dark-mode .z-south-title,
+.dark-mode .z-window-header, .dark-mode .z-window-icon {
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .z-north-collapsed,
+.dark-mode .z-south-collapsed,
+.dark-mode .z-west-collapsed,
+.dark-mode .z-center-collapsed,
+.dark-mode .z-east-collapsed {
+    background: var(--dt-primary);
+}
+
+.dark-mode .user-menu, .dark-mode .user-menu a.nav-link,
+.dark-mode .user-menu p, .dark-mode .user-menu small {
+    color: var(--dt-text-primary-dark);
+}
+
+
+.dark-mode .user-menu .user-header {
+    background-color: var(--dt-background-dark) !important;
+}
+
+.dark-mode .user-menu .user-footer {
+    background-color: var(--dt-background-dark) !important;
+}
+
+.dark-mode .navbar-nav .nav-link.active, .dark-mode .navbar-nav .nav-link.show {
+    color: var(--dt-text-primary-dark);;
+}
+
+.dark-mode .modal-dialog {
+    --bs-modal-bg: var(--dt-background-dark);
+    --bs-modal-color: var(--dt-text-primary-dark);
+
+}
+
+.dark-mode .z-bandbox-button,
+.dark-mode .z-combobox-button {
+    background-color: var(--dt-background-dark);
+    color: var(--dt-text-primary-dark);
+    border-color: var(--dt-boder-input-color);
+}
+
+
+.dark-mode .z-comboitem, .dark-mode .z-comboitem a, .dark-mode .z-comboitem a:visited {
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .z-comboitem:hover {
+    background-color: var(--dt-primary);
+}
+
+.dark-mode .z-menu-content, .dark-mode .z-menuitem-content {
+    background-color: var(--dt-background-dark);
+}
+
+.dark-mode .z-menu-text {
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .z-menubar {
+    background-color: var(--dt-background-dark);
+    border-color: var(--dt-background-dark);
+}
+
+.dark-mode .z-menubar-horizontal li {
+    margin-top: 0;
+}
+
+.dark-mode .z-menu-icon {
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .z-paging {
+    background-color: var(--dt-background-dark);
+}
+
+.dark-mode .z-paging-icon, .dark-mode .z-paging-text, .dark-mode .z-paging-info {
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode ::-webkit-scrollbar-track {
+    background: var(--dt-background-dark);
+}
+
+.dark-mode .z-grid .z-row-inner, .dark-mode .z-grid .z-cell {
+    background: var(--dt-background-dark) !important;
+}
+
+.dark-mode .panel-default > .panel-heading {
+    background-color: var(--dt-background-dark);
+}
+
+.dark-mode .z-calendar-weekday {
+    color: var(--dt-text-primary-dark);
+}
+
+.dark-mode .z-tab-icon {
+    color: var(--dt-text-primary-dark);
 }

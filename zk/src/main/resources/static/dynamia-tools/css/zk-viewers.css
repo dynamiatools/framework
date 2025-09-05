@@ -21,11 +21,11 @@
     padding: 5px;
     margin-bottom: 10px;
     text-align: left;
-    background: #006699;
+    background: var(--dt-primary);
 }
 
 .separator * {
-    color: white;
+    color: var(--dt-white);
     font-family: Verdana;
     font-weight: bold;
     font-size: 10pt;
@@ -44,7 +44,7 @@
 
 .entitypicker .z-bandbox-inp {
     font-style: italic;
-    color: silver;
+    color: var(--dt-gray-400);
 }
 
 .entitypicker-changing .z-bandbox-inp {
@@ -70,5 +70,5 @@
 
 .nullvalue {
     font-style: italic;
-    color: silver;
+    color: var(--dt-gray-400);
 }

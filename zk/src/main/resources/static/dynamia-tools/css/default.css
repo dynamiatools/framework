@@ -6,16 +6,16 @@ body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-.form-view-title{
+.form-view-title {
     padding-left: var(--dt-padding-4);
     padding-right: var(--dt-padding-4);
 }
 
-.form-view-actions .btn{
+.form-view-actions .btn {
     padding: var(--dt-padding-2);
 }
 
-.form-view .uploadLink{
+.form-view .uploadLink {
     display: block;
     background-color: var(--dt-secondary);
     color: var(--dt-text-secondary);
@@ -42,22 +42,22 @@ body {
 
 /* NewAction */
 .btn.NewAction {
-    background-color: var(--dt-success);
-    color: var(--dt-success-contrast);
+    background-color: var(--dt-primary);
+    color: var(--dt-primary-contrast);
 }
 
 .btn.NewAction:hover {
-    background-color: var(--dt-success-light);
+    background-color: var(--dt-primary-light);
     color: var(--dt-text-primary);
 }
 
 .dark-mode .btn.NewAction {
-    background-color: var(--dt-success-dark);
+    background-color: var(--dt-primary-dark);
     color: var(--dt-text-primary-dark);
 }
 
 .dark-mode .btn.NewAction:hover {
-    background-color: var(--dt-success)
+    background-color: var(--dt-primary)
 }
 
 /* ViewDataAction */
