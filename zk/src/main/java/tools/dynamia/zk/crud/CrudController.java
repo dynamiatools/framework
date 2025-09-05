@@ -841,25 +841,26 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
         deleted = false;
         if (getSelected() != null) {
             beforeDelete();
-            UIMessages.showQuestion(messages.get("deleteConfirmMessage", name, getSelected()), () -> {
-                try {
-                    delete();
-                    afterDelete();
-                    doQuery();
-                    deleted = true;
-                    UIMessages.showMessage(messages.get("deletedSuccessfully", name), MessageType.NORMAL);
-                    setSelected(null);
-                } catch (ValidationError e) {
-                    UIMessages.showMessage(e.getMessage(), MessageType.WARNING);
-                } catch (Exception e) {
-                    logger.error(e);
-                    if (e.getMessage() != null && e.getMessage().contains("ConstraintViolationException")) {
-                        UIMessages.showMessage(messages.get("deleteErrorMessageConstraint", name), MessageType.WARNING);
-                    } else {
-                        UIMessages.showMessage(messages.get("deleteErrorMessage", name), MessageType.ERROR);
-                    }
-                }
-            });
+            UIMessages.getDisplayer().showCustomQuestion(messages.get("deleteConfirmMessage", name, getSelected()), messages.get("deleteConfirmTitle"),
+                    messages.get("deleteYesLabel"), messages.get("deleteNoLabel"), MessageType.CRITICAL, () -> {
+                        try {
+                            delete();
+                            afterDelete();
+                            doQuery();
+                            deleted = true;
+                            UIMessages.showMessage(messages.get("deletedSuccessfully", name), MessageType.NORMAL);
+                            setSelected(null);
+                        } catch (ValidationError e) {
+                            UIMessages.showMessage(e.getMessage(), MessageType.WARNING);
+                        } catch (Exception e) {
+                            logger.error(e);
+                            if (e.getMessage() != null && e.getMessage().contains("ConstraintViolationException")) {
+                                UIMessages.showMessage(messages.get("deleteErrorMessageConstraint", name), MessageType.WARNING);
+                            } else {
+                                UIMessages.showMessage(messages.get("deleteErrorMessage", name), MessageType.ERROR);
+                            }
+                        }
+                    }, Callback.DO_NOTHING);
         } else {
             UIMessages.showMessage(messages.get("deleteSelectItemMessage", name), MessageType.WARNING);
         }
