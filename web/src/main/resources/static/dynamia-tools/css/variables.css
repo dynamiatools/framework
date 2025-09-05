@@ -185,7 +185,7 @@
     /* Background and Surface */
     --dt-background: #ffffff; /* Fondo para superficies de la app */
     --dt-background-dark: #282a36; /* Fondo en modo oscuro */
-    --dt-background-dark-hover: #2a3f4d; /* Fondo hover en modo oscuro */
+    --dt-background-dark-hover: #343846; /* Fondo hover en modo oscuro */
     --dt-surface: #f5f5f5; /* Fondo de superficie */
     --dt-surface-dark: #232323; /* Superficie en modo oscuro */
     --dt-on-background: #000000; /* Texto sobre fondo */
