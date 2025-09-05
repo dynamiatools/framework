@@ -84,6 +84,20 @@ public interface MessageDisplayer {
     void showQuestion(String message, String title, Callback onYesResponse, Callback onNoResponse);
 
     /**
+     * Show a question with custom button labels and yes/no response
+     *
+     * @param message        the question message
+     * @param title          the question title
+     * @param yesButtonLabel the label for the yes button
+     * @param noButtonLabel  the label for the no button
+     * @param onYesResponse  the callback to execute if the user responds yes
+     * @param onNoResponse   the callback to execute if the user responds no
+     */
+    default void showCustomQuestion(String message, String title, String yesButtonLabel, String noButtonLabel, MessageType messageType, Callback onYesResponse, Callback onNoResponse) {
+        showQuestion(message, title, onYesResponse, onNoResponse);
+    }
+
+    /**
      * Show an input dialog
      *
      * @param title      the input title
