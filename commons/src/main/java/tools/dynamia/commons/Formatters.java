@@ -44,6 +44,9 @@ public class Formatters {
      * @return the formatted integer string
      */
     public static String formatInteger(Number number) {
+        if (number == null) {
+            return "";
+        }
         return NumberFormat.getIntegerInstance(Messages.getDefaultLocale()).format(number);
     }
 
@@ -54,6 +57,9 @@ public class Formatters {
      * @return the formatted decimal string
      */
     public static String formatDecimal(Number number) {
+        if (number == null) {
+            return "";
+        }
         return DecimalFormat.getInstance(Messages.getDefaultLocale()).format(number);
     }
 
@@ -64,6 +70,9 @@ public class Formatters {
      * @return the formatted currency string
      */
     public static String formatCurrency(Number number) {
+        if (number == null) {
+            return "";
+        }
         return DecimalFormat.getCurrencyInstance(Messages.getDefaultLocale()).format(number);
     }
 
@@ -74,6 +83,9 @@ public class Formatters {
      * @return the formatted currency string without decimals
      */
     public static String formatCurrencySimple(Number number) {
+        if (number == null) {
+            return "";
+        }
         var locale = Messages.getDefaultLocale();
         var formatter = NumberFormat.getCurrencyInstance(locale);
         formatter.setMaximumFractionDigits(0);
@@ -87,6 +99,9 @@ public class Formatters {
      * @return the formatted percent string
      */
     public static String formatPercent(Number number) {
+        if (number == null) {
+            return "";
+        }
         return DecimalFormat.getPercentInstance(Messages.getDefaultLocale()).format(number);
     }
 
@@ -97,6 +112,9 @@ public class Formatters {
      * @return the formatted date string
      */
     public static String formatDate(Date date) {
+        if (date == null) {
+            return "";
+        }
         return DateFormat.getDateInstance(DateFormat.DEFAULT, Messages.getDefaultLocale()).format(date);
     }
 
@@ -107,6 +125,9 @@ public class Formatters {
      * @return the formatted ISO date string
      */
     public static String formatDate(LocalDate date) {
+        if (date == null) {
+            return "";
+        }
         return date.format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
@@ -117,6 +138,9 @@ public class Formatters {
      * @return the formatted ISO time string
      */
     public static String formatTime(LocalTime localTime) {
+        if (localTime == null) {
+            return "";
+        }
         return localTime.format(DateTimeFormatter.ISO_LOCAL_TIME);
     }
 
@@ -127,6 +151,9 @@ public class Formatters {
      * @return the formatted ISO date-time string
      */
     public static String formatDateTime(LocalDateTime localDateTime) {
+        if (localDateTime == null) {
+            return "";
+        }
         return localDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 
@@ -138,6 +165,9 @@ public class Formatters {
      * @return the formatted date string
      */
     public static String formatDate(LocalDate date, String pattern) {
+        if (date == null || pattern == null) {
+            return "";
+        }
         return date.format(DateTimeFormatter.ofPattern(pattern)
                 .withLocale(Messages.getDefaultLocale())
                 .withZone(Messages.getDefaultTimeZone()));
@@ -151,6 +181,9 @@ public class Formatters {
      * @return the formatted time string
      */
     public static String formatTime(LocalTime localTime, String pattern) {
+        if (localTime == null || pattern == null) {
+            return "";
+        }
         return localTime.format(DateTimeFormatter.ofPattern(pattern)
                 .withLocale(Messages.getDefaultLocale())
                 .withZone(Messages.getDefaultTimeZone()));
@@ -164,6 +197,9 @@ public class Formatters {
      * @return the formatted date-time string
      */
     public static String formatDateTime(LocalDateTime localDateTime, String pattern) {
+        if (localDateTime == null || pattern == null) {
+            return "";
+        }
         return localDateTime.format(DateTimeFormatter.ofPattern(pattern)
                 .withLocale(Messages.getDefaultLocale())
                 .withZone(Messages.getDefaultTimeZone()));
@@ -177,6 +213,9 @@ public class Formatters {
      * @return the formatted string
      */
     public static String formatTemporal(TemporalAccessor temporal, String pattern) {
+        if (temporal == null || pattern == null) {
+            return "";
+        }
         return DateTimeFormatter.ofPattern(pattern)
                 .withLocale(Messages.getDefaultLocale())
                 .withZone(Messages.getDefaultTimeZone())
@@ -194,14 +233,78 @@ public class Formatters {
         if (date == null || pattern == null) {
             return "";
         }
-
         var instant = DateTimeUtils.toInstant(date);
         if (instant != null) {
             return formatTemporal(instant.atZone(Messages.getDefaultTimeZone()), pattern);
         } else {
             return "";
         }
+    }
 
+    /**
+     * Formats a {@link LocalDate} object using a custom pattern, locale and zone.
+     *
+     * @param date the local date to format
+     * @param pattern the pattern to use for formatting
+     * @param locale the locale to use
+     * @param zoneId the zone id to use
+     * @return the formatted date string
+     */
+    public static String formatDate(LocalDate date, String pattern, java.util.Locale locale, java.time.ZoneId zoneId) {
+        if (date == null || pattern == null || locale == null || zoneId == null) {
+            return "";
+        }
+        return date.format(DateTimeFormatter.ofPattern(pattern).withLocale(locale).withZone(zoneId));
+    }
+
+    /**
+     * Formats a {@link LocalTime} object using a custom pattern, locale and zone.
+     *
+     * @param localTime the local time to format
+     * @param pattern the pattern to use for formatting
+     * @param locale the locale to use
+     * @param zoneId the zone id to use
+     * @return the formatted time string
+     */
+    public static String formatTime(LocalTime localTime, String pattern, java.util.Locale locale, java.time.ZoneId zoneId) {
+        if (localTime == null || pattern == null || locale == null || zoneId == null) {
+            return "";
+        }
+        return localTime.format(DateTimeFormatter.ofPattern(pattern).withLocale(locale).withZone(zoneId));
+    }
+
+    /**
+     * Formats a {@link LocalDateTime} object using a custom pattern, locale and zone.
+     *
+     * @param localDateTime the local date-time to format
+     * @param pattern the pattern to use for formatting
+     * @param locale the locale to use
+     * @param zoneId the zone id to use
+     * @return the formatted date-time string
+     */
+    public static String formatDateTime(LocalDateTime localDateTime, String pattern, java.util.Locale locale, java.time.ZoneId zoneId) {
+        if (localDateTime == null || pattern == null || locale == null || zoneId == null) {
+            return "";
+        }
+        return localDateTime.format(DateTimeFormatter.ofPattern(pattern).withLocale(locale).withZone(zoneId));
+    }
+
+    /**
+     * Formats a {@link Date} object using a custom pattern, locale and zone.
+     *
+     * @param date the date to format
+     * @param pattern the pattern to use for formatting
+     * @param locale the locale to use
+     * @param zoneId the zone id to use
+     * @return the formatted date string
+     */
+    public static String formatDate(Date date, String pattern, java.util.Locale locale, java.time.ZoneId zoneId) {
+        if (date == null || pattern == null || locale == null || zoneId == null) {
+            return "";
+        }
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(pattern, locale);
+        sdf.setTimeZone(java.util.TimeZone.getTimeZone(zoneId));
+        return sdf.format(date);
     }
 
     /**
