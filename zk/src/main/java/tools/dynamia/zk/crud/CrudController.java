@@ -26,11 +26,7 @@ import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Window;
 import org.zkoss.zul.ext.Paginal;
-import tools.dynamia.commons.BeanMap;
-import tools.dynamia.commons.BeanSorter;
-import tools.dynamia.commons.BeanUtils;
-import tools.dynamia.commons.Callback;
-import tools.dynamia.commons.StringUtils;
+import tools.dynamia.commons.*;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.crud.CrudControllerAPI;
@@ -104,6 +100,8 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     private QueryParameters defaultParameters;
     private Map<String, Object> attributes = new HashMap<>();
     private boolean saveWithNewTransaction = true;
+
+    private final ClassMessages messages = ClassMessages.get(CrudController.class);
 
 
     public CrudController() {
@@ -235,16 +233,14 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
 
         } catch (CrudServiceException e) {
             if (getQueryResult() == null || getQueryResult().getSize() <= 0) {
-                UIMessages.showMessage("La consulta no arrojo resultados");
+                UIMessages.showMessage(messages.get("noRecordsFound"));
             }
         } catch (QueryInterruptedException e) {
             logger.error(e);
-            Messagebox.show("La consulta demora mucho tiempo en procesarse, por favor utilice otros filtros" +
-                            " o intente mas tarde. Por ejemplo, si esta usando un rango de fechas reduzca la diferencia. ", "Error al Consultar",
-                    Messagebox.OK, Messagebox.ERROR);
+            UIMessages.showMessageDialog(messages.get("searchInterruptedMessage"), messages.get("error"), MessageType.ERROR);
         } catch (Exception e) {
             logger.error(e);
-            UIMessages.showMessage("Error al consultar: " + e.getMessage(), MessageType.ERROR);
+            UIMessages.showException(messages.get("searchErrorMessage", e.getMessage()), e);
         }
     }
 
@@ -638,8 +634,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
                 setEntityClass(BeanUtils.getGenericTypeClass(this));
 
             } catch (Exception e) {
-                logger.warn(
-                        "Cannot get generic class for EntityClass, you should invoke setEntityClass or use the constructor");
+                logger.warn("Cannot get generic class for EntityClass, you should invoke setEntityClass or use the constructor");
             }
         }
 
@@ -730,13 +725,13 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
             } catch (WrongValueException | WrongValuesException e) {
                 throw e;
             } catch (Exception e) {
-                logger.error("Error al guardar " + entityClass, e);
+                logger.error("Error saving " + entityClass, e);
                 exceptionCaught(e);
             }
         };
 
         if (isConfirmBeforeSave()) {
-            UIMessages.showQuestion("¿Esta seguro que desea guardar " + name + "?", saveCallbak);
+            UIMessages.showQuestion(messages.get("saveConfirmMessage", name), saveCallbak);
         } else {
             saveCallbak.doSomething();
         }
@@ -750,9 +745,9 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
 
     public void showMessageOnSaveSuccessfull() {
         if (name != null) {
-            UIMessages.showMessage(name + " guardado correctamente ");
+            UIMessages.showMessage(messages.get("savedSuccessfully", name));
         } else {
-            UIMessages.showMessage(getEntity() + " guardado correctamente ");
+            UIMessages.showMessage(messages.get("savedSuccessfully", getEntity()));
         }
     }
 
@@ -797,7 +792,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
         try {
             beforeSave();
             save();
-            UIMessages.showMessage(name + " guardado correctamente, puede continuar editando el registro ");
+            UIMessages.showMessage(messages.get("saveAndEditMessage", name));
             afterSave();
             setSelected(getEntity());
             doEdit();
@@ -830,7 +825,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
             }
             afterEdit();
         } else {
-            UIMessages.showMessage("Seleccione " + name + " para editar", MessageType.WARNING);
+            UIMessages.showMessage(messages.get("editSelectItemMessage", name), MessageType.WARNING);
         }
     }
 
@@ -846,33 +841,27 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
         deleted = false;
         if (getSelected() != null) {
             beforeDelete();
-            UIMessages.showQuestion(
-                    "¿Esta seguro que desea borrar: " + name + "  " + getSelected().toString() + "?", () -> {
-                        try {
-                            delete();
-
-                            afterDelete();
-                            doQuery();
-                            deleted = true;
-                            UIMessages.showMessage(getSelected() + " borrado exitosamente");
-                            setSelected(null);
-                        } catch (ValidationError e) {
-                            UIMessages.showMessage(e.getMessage(), MessageType.WARNING);
-                        } catch (Exception e) {
-                            logger.error(e);
-                            if (e.getMessage() != null && e.getMessage().contains("ConstraintViolationException")) {
-                                UIMessages.showMessage("No se puede eliminar " + name + " porque esta siendo usado o tiene registros asociados",
-                                        MessageType.WARNING);
-                            } else {
-                                UIMessages.showMessage("Error al eliminar " + name + " contacte al administrador del sistema",
-                                        MessageType.ERROR);
-
-                            }
-
-                        }
-                    });
+            UIMessages.showQuestion(messages.get("deleteConfirmMessage", name, getSelected()), () -> {
+                try {
+                    delete();
+                    afterDelete();
+                    doQuery();
+                    deleted = true;
+                    UIMessages.showMessage(messages.get("deletedSuccessfully", name), MessageType.NORMAL);
+                    setSelected(null);
+                } catch (ValidationError e) {
+                    UIMessages.showMessage(e.getMessage(), MessageType.WARNING);
+                } catch (Exception e) {
+                    logger.error(e);
+                    if (e.getMessage() != null && e.getMessage().contains("ConstraintViolationException")) {
+                        UIMessages.showMessage(messages.get("deleteErrorMessageConstraint", name), MessageType.WARNING);
+                    } else {
+                        UIMessages.showMessage(messages.get("deleteErrorMessage", name), MessageType.ERROR);
+                    }
+                }
+            });
         } else {
-            UIMessages.showMessage("Seleccione " + name + " para borrar", MessageType.WARNING);
+            UIMessages.showMessage(messages.get("deleteSelectItemMessage", name), MessageType.WARNING);
         }
 
     }
