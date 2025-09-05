@@ -35,9 +35,7 @@ public class CancelAction extends AbstractCrudAction {
         setImage("cancel");
         setGroup(ActionGroup.get("CRUD"));
         setPosition(Double.MAX_VALUE);
-        setAttribute("background", "rgb(239, 83, 80)");
-        setAttribute("color", "white");
-        setType("danger");
+        setType("outline-secondary");
     }
 
     @Override

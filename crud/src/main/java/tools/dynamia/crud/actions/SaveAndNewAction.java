@@ -34,7 +34,7 @@ public class SaveAndNewAction extends SaveAction {
         setGroup(ActionGroup.get("CRUD"));
         setPosition(3);
         setShowLabel(true);
-        setType("default");
+        setType("secondary");
         setSclass("hidden-xs");
     }
 
