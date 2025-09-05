@@ -23,7 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.services.CrudService;
+import tools.dynamia.domain.util.QueryBuilder;
 
 import java.util.List;
 
@@ -88,5 +90,34 @@ public class JpaCrudServiceTest {
 
         DummyEntity dummyEntity = result.getFirst();
         Assert.assertEquals("Dummy0", dummyEntity.getName());
+    }
+
+    @Test
+    @Transactional
+    public void shouldGroupAndHavingEntities() {
+
+        for (int i = 0; i < 10; i++) {
+            DummyEntity ent = new DummyEntity("Dummy" + i, "TypeA", i * 2);
+            crudService.save(ent);
+        }
+
+        for (int i = 0; i < 10; i++) {
+            DummyEntity ent = new DummyEntity("Other" + i, "TypeB", i * 3);
+            crudService.save(ent);
+        }
+
+        for (int i = 0; i < 10; i++) {
+            DummyEntity ent = new DummyEntity("Dummy" + i, "TypeC", i * 4);
+            crudService.save(ent);
+        }
+
+
+        QueryBuilder query = QueryBuilder.select("type, sum(size)")
+                .from(DummyEntity.class, "d")
+                .groupBy("d.type")
+                .having("sum(d.size)", QueryConditions.gt(10));
+
+        List<DummyEntity> result = crudService.executeQuery(query);
+        Assert.assertFalse(result.isEmpty());
     }
 }
