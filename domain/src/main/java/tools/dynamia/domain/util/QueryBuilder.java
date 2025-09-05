@@ -19,13 +19,7 @@ package tools.dynamia.domain.util;
 import tools.dynamia.commons.BeanMap;
 import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.domain.ValidationError;
-import tools.dynamia.domain.query.AbstractQueryCondition;
-import tools.dynamia.domain.query.BooleanOp;
-import tools.dynamia.domain.query.Group;
-import tools.dynamia.domain.query.QueryCondition;
-import tools.dynamia.domain.query.QueryConditionGroup;
-import tools.dynamia.domain.query.QueryConditions;
-import tools.dynamia.domain.query.QueryParameters;
+import tools.dynamia.domain.query.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +54,9 @@ public class QueryBuilder implements Cloneable {
     private List<String> orders = new ArrayList<>();
     private List<String> groups = new ArrayList<>();
     private List<String> joins = new ArrayList<>();
+
+    private List<String> havings = new ArrayList<>();
+    private QueryParameters havingParameters;
     private Class resultType;
     private String[] fields;
     private String customSelect;
@@ -392,6 +389,30 @@ public class QueryBuilder implements Cloneable {
         return this;
     }
 
+    /**
+     * Having.
+     *
+     * @param field         the field
+     * @param anotherFields the another fields
+     * @return the query builder
+     */
+    public QueryBuilder having(String field, String... anotherFields) {
+        addField(havings, field);
+        addFields(havings, anotherFields);
+        return this;
+    }
+
+    public QueryBuilder having(String field, QueryCondition condition) {
+        String rendered = renderCondition(field, condition);
+        having(rendered);
+        if (havingParameters == null) {
+            havingParameters = new QueryParameters();
+            getQueryParameters().setNestedParameters(havingParameters);
+        }
+        havingParameters.add(QueryConditionUtils.cleanProperty(field), condition);
+        return this;
+    }
+
     private void addFields(List<String> list, String[] fields) {
         if (fields != null) {
             for (String field : fields) {
@@ -445,10 +466,11 @@ public class QueryBuilder implements Cloneable {
 
         String whereWord = getWhereWord();
         String parseGroups = groups.isEmpty() ? "" : " group by " + parse(groups, ", ");
+        String parseHavings = havings.isEmpty() ? "" : " having " + parse(havings, ", ");
         String parseOrders = orders.isEmpty() ? "" : " order by " + parse(orders, ", ");
         String parseJoins = joins.isEmpty() ? "" : parse(joins, " ") + SPACE;
 
-        return (select + SPACE + from + SPACE + parseJoins + whereWord + SPACE + parse(wheres, " ") + parseGroups + parseOrders).trim();
+        return (select + SPACE + from + SPACE + parseJoins + whereWord + SPACE + parse(wheres, " ") + parseGroups + parseHavings + parseOrders).trim();
     }
 
     private String buildUpdate() {

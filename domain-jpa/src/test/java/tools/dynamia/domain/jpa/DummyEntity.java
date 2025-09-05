@@ -29,6 +29,8 @@ import static tools.dynamia.domain.EntityHandler.handle;
 public class DummyEntity extends BaseEntity {
 
     private String name;
+    private String type;
+    private int size;
 
 
     public DummyEntity() {
@@ -40,6 +42,11 @@ public class DummyEntity extends BaseEntity {
         this.name = name;
     }
 
+    public DummyEntity(String name, String type, int size) {
+        this.name = name;
+        this.type = type;
+        this.size = size;
+    }
 
     public String getName() {
         return name;
@@ -47,6 +54,22 @@ public class DummyEntity extends BaseEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 
     public static List<DummyEntity> findByName(String name) {

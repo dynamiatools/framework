@@ -149,7 +149,7 @@ products to share.
 
 ### v5.x
 
-The main goal of 5.x version is to upgrade to latest version of Java 17, spring and hibernate.
+The main goal of 5.x version is to upgrade to latest version of Java 21, spring and hibernate.
 
 ## Want contribute?
 

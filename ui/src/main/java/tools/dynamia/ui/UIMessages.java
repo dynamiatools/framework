@@ -80,7 +80,10 @@ public class UIMessages {
         showLocalizedMessage(template, MessageType.NORMAL, vars);
     }
 
-    private static MessageDisplayer getDisplayer() {
+    /**
+     * Return the current MessageDisplayer, if not set try to find one in the container
+     */
+    public static MessageDisplayer getDisplayer() {
         if (currentMessageDisplayer == null) {
             currentMessageDisplayer = Containers.get().findObject(MessageDisplayer.class);
             if (currentMessageDisplayer == null) {

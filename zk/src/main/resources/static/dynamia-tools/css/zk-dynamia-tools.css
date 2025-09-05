@@ -18,14 +18,13 @@
  */
 
 
-
 .pageContentWindow .z-window-content {
     overflow: auto;
 }
 
 .form-view-lbl.required:after {
     content: "*";
-    color: #ca0000;
+    color: var(--dt-danger);
     font-weight: bold;
 }
 
@@ -33,7 +32,6 @@
 /**
 Colors
  */
-
 
 
 .bg-gray {
@@ -47,16 +45,16 @@ Colors
 
 .bg-red, .callout.callout-danger, .alert-danger, .alert-error,
 .label-danger, .modal-danger .modal-body {
-    background-color: #dd4b39 !important;
+    background-color: var(--dt-danger) !important;
 }
 
 .bg-yellow, .callout.callout-warning, .alert-warning, .label-waring,
 .modal-warning .modal-body {
-    background-color: #f39c12 !important;
+    background-color: var(--dt-warning) !important;
 }
 
 .bg-aqua, .callout.callout-info, .alert-info, .label-info, .modal-info .modal-body {
-    background-color: #00c0ef !important;
+    background-color: var(--dt-info) !important;
 }
 
 .bg-blue {
@@ -180,7 +178,7 @@ Colors
 .color-black, .color-black .z-auxheader-content,
 .color-black .z-toolbarbutton-content,
 .color-black .z-listheader-content,
-.color-black .z-treecol-content{
+.color-black .z-treecol-content {
     color: black !important;
 }
 
@@ -194,18 +192,18 @@ Colors
 }
 
 .z-tabbox-special .z-tabbox {
-    border: 1px solid #ddd;
+    border: 1px solid var(--dt-surface);
     border-radius: 5px;
 }
 
 .z-tabbox-special .z-tabs {
-    background-color: #ddd;
+    background-color: var(--dt-surface);
     padding-top: 5px;
     padding-left: 5px;
 }
 
 .z-tabbox-special .z-tab {
-    background-color: #ddd;
+    background-color: var(--dt-surface);
     border-color: transparent !important;
 }
 
@@ -245,61 +243,64 @@ Colors
 }
 
 .z-tabbox-primary .z-tabbox {
-    border-color: #428bca;
+    border-color: var(--dt-primary);
 }
 
 .z-tabbox-primary .z-tabs,
 .z-tabbox-primary .z-tab {
-    background-color: #428bca;
+    background-color: var(--dt-primary);
 }
 
 .z-tabbox-primary .z-tab-selected .z-tab-content .z-tab-text {
-    color: #428bca !important;
+    color: var(--dt-primary) !important;
 }
 
 /* --- */
 .z-tabbox-success .z-tabbox {
-    border-color: #008d4c;
+    border-color: var(--dt-success);
 }
 
 .z-tabbox-success .z-tabs,
 .z-tabbox-success .z-tab {
-    background-color: #008d4c;
+    background-color: var(--dt-success);
 }
 
 .z-tabbox-success .z-tab-selected .z-tab-content .z-tab-text {
-    color: #008d4c !important;
+    color: var(--dt-success) important;
 }
 
 /* --- */
 .z-tabbox-danger .z-tabbox {
-    border-color: #d33724;
+    border-color: var(--dt-danger);
 }
 
 .z-tabbox-danger .z-tabs,
 .z-tabbox-danger .z-tab {
-    background-color: #d33724;
+    background-color: var(--dt-danger);
 }
 
 .z-tabbox-danger .z-tab-selected .z-tab-content .z-tab-text {
-    color: #d33724 !important;
+    color: var(--dt-danger) !important;
 }
 
 /* --- */
 .z-tabbox-warning .z-tabbox {
-    border-color: #f39c12;
+    border-color: var(--dt-warning);
 }
 
 .z-tabbox-warning .z-tabs,
 .z-tabbox-warning .z-tab {
-    background-color: #f39c12;
+    background-color: var(--dt-warning);
 }
 
 .z-tabbox-warning .z-tab-selected .z-tab-content .z-tab-text {
-    color: #f39c12 !important;
+    color: var(--dt-warning) !important;
 }
 
 .decimalbox-calc-popup .z-popup-content {
     padding: 0;
 }
 
+.MenuDeleteAction .z-menuitem-content {
+    color: var(--dt-danger-light);
+}

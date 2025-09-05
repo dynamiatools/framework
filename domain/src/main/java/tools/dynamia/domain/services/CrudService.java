@@ -480,6 +480,19 @@ public interface CrudService {
      */
     <T> T executeProjection(Class<T> resultClass, String projectionQueryText, QueryParameters parameters);
 
+    /**
+     * Execute a query projection like count, sum, max, avg, etc. It returns a
+     * single value result.
+     *
+     * @param <T>          the generic type
+     * @param resultClass  the result class
+     * @param query the query builder
+     * @return the t
+     */
+    default <T> T executeProjection(Class<T> resultClass, QueryBuilder query) {
+        return executeProjection(resultClass, query.toString(), query.getQueryParameters());
+    }
+
 
     /**
      * Execute callback in a new transaction

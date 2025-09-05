@@ -23,6 +23,7 @@ import tools.dynamia.ui.MessageDisplayer;
 import tools.dynamia.ui.MessageType;
 import tools.dynamia.zk.util.ZKUtil;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class MessageDialog implements MessageDisplayer {
@@ -101,4 +102,31 @@ public class MessageDialog implements MessageDisplayer {
         showMessage(message, title, messageType);
     }
 
+    @Override
+    public void showCustomQuestion(String message, String title, String yesButtonLabel, String noButtonLabel, MessageType messageType, Callback onYesResponse, Callback onNoResponse) {
+
+        String icon = switch (messageType) {
+            case NORMAL -> Messagebox.QUESTION;
+            case ERROR, CRITICAL -> Messagebox.ERROR;
+            case INFO, SPECIAL -> Messagebox.INFORMATION;
+            case WARNING -> Messagebox.EXCLAMATION;
+        };
+
+        String yesButtonType = switch (messageType) {
+            case NORMAL, INFO, SPECIAL -> "primary";
+            case ERROR, CRITICAL -> "danger";
+            case WARNING -> "warning";
+        };
+
+        Messagebox.Button[] buttons = {Messagebox.Button.YES, Messagebox.Button.NO};
+        String[] labels = {yesButtonLabel, noButtonLabel};
+
+        Messagebox.show(message, title, buttons, labels, icon, null, evt -> {
+            if (evt.getButton() == Messagebox.Button.YES) {
+                onYesResponse.doSomething();
+            } else if (evt.getButton() == Messagebox.Button.NO) {
+                onNoResponse.doSomething();
+            }
+        }, Map.of("type", yesButtonType));
+    }
 }

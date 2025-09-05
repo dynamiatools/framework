@@ -23,6 +23,8 @@ import tools.dynamia.viewers.View;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.ViewRendererCustomizer;
 
+import java.util.List;
+
 /**
  * Util class for ViewRenderers implementation to call {@link ViewRendererCustomizer} methods
  */
@@ -96,5 +98,22 @@ public class ViewRendererUtil {
         if (customizer != null) {
             customizer.afterFieldRender(field, component);
         }
+    }
+
+    /**
+     * Filters the fields of a view descriptor to include only those that are renderable based on visibility,
+     * field restrictions, and custom renderability logic.
+     *
+     * @param view       the view containing context for field restrictions
+     * @param descriptor the view descriptor containing the fields to be filtered
+     * @return a list of fields that are renderable
+     */
+    public static List<Field> filterRenderableFields(View view, ViewDescriptor descriptor) {
+        var restrictions = FieldRestrictions.findRestrictions();
+        return descriptor.sortFields()
+                .stream().filter(Field::isVisible)
+                .filter(f -> isFieldRenderable(descriptor, f))
+                .filter(f -> FieldRestrictions.isFieldVisble(restrictions, view, f))
+                .toList();
     }
 }

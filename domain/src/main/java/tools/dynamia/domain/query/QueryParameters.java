@@ -19,11 +19,7 @@ package tools.dynamia.domain.query;
 import tools.dynamia.commons.BeanSorter;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The Class QueryParameters.
@@ -48,6 +44,8 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
     private int depth = 0;
     private int maxResults;
     private final List<String> sortedKeys = new ArrayList<>();
+
+    private QueryParameters nestedParameters;
 
     public QueryParameters() {
     }
@@ -415,6 +413,10 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
             group.params().applyTo(query);
         }
 
+        if (nestedParameters != null) {
+            nestedParameters.applyTo(query);
+        }
+
         if (!hints.isEmpty()) {
             hints.forEach(query::setHint);
         }
@@ -454,6 +456,16 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
         return sorter != null && sorter.getColumnName() != null && !sorter.getColumnName().isEmpty();
     }
 
+    public void setNestedParameters(QueryParameters nestedParameters) {
+        if (this != nestedParameters) {
+            this.nestedParameters = nestedParameters;
+        }
+    }
+
+    public QueryParameters getNestedParameters() {
+        return nestedParameters;
+    }
+
     public QueryParameters clone() {
         QueryParameters clone = new QueryParameters();
         clone.putAll(this);
@@ -466,6 +478,9 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
         clone.depth = depth;
         clone.maxResults = maxResults;
         clone.sortedKeys.addAll(sortedKeys);
+        if (nestedParameters != null) {
+            clone.setNestedParameters(nestedParameters.clone());
+        }
         return clone;
     }
 

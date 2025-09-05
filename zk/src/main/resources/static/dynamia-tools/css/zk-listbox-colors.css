@@ -1,13 +1,13 @@
 .dark-table .z-listbox {
-    background: #4c5667 !important;
-    border: 1px solid #4e4e4e;
+    background: var(--dt-background-dark) !important;
+    border: 1px solid var(--dt-neutral-dark);
     overflow: hidden;
     zoom: 1
 }
 
 .dark-table .z-listbox-header {
     width: 100%;
-    background: #0093f9;
+    background: var(--dt-primary-dark);
     position: relative;
     overflow: hidden
 }
@@ -20,13 +20,13 @@
 
 
 .dark-table .z-listbox-body, .dark-table .z-listbox-body .z-listbox-emptybody .z-listbox-emptybody-content {
-    background: #4c5667 !important;
+    background: var(--dt-background-dark) !important;
 
 }
 
 .dark-table .z-listbox-footer {
-    background: #404040;
-    border-top: 1px solid #4e4e4e;
+    background: var(--dt-neutral-dark);
+    border-top: 1px solid var(--dt-neutral);
     overflow: hidden;
     white-space: nowrap
 }
@@ -46,15 +46,15 @@
 
 .dark-table .z-listbox-footer .z-listfooter {
     overflow: hidden;
-    background: #404040
+    background: var(--dt-background-dark);
 }
 
 .dark-table .z-listbox .z-listcell {
-    background: #4c5667
+    background: var(--dt-background-dark)
 }
 
 .dark-table .z-listbox-odd > .z-listcell, .dark-table .z-listcell {
-    background: #4c5667
+    background: var(--dt-background-dark)
 }
 
 
@@ -66,12 +66,12 @@
 
 
 .dark-table .z-listheader-sort .z-listheader-content:active {
-    background: #0064ed
+    background: var(--dt-primary-dark)
 }
 
 .dark-table .z-listheader-sort .z-listheader-sorticon {
     font-size: 18px;
-    color: #fff;
+    color: var(--dt-white);
     position: absolute;
     top: -3px;
     left: 50%;
@@ -83,16 +83,16 @@
 }
 
 .dark-table .z-listheader-hover {
-    background: #4fb7ff
+    background: var(--dt-primary-light);
 }
 
 
 .dark-table .z-listheader-visited {
-    background: #0093f9
+    background: var(--dt-primary-light);
 }
 
 .dark-table .z-listheader-visited .z-listheader-button {
-    background: #0064ed
+    background: var(--dt-primary-dark)
 }
 
 .dark-table .z-listheader-checkable {
@@ -100,9 +100,9 @@
     width: 20px;
     height: 20px;
     font-size: 18px;
-    color: #0093f9;
+    color: var(--dt-primary-dark);
     border: 1px solid #4e4e4e;
-    background: #fff;
+    background: var(--dt-white);
     vertical-align: text-top;
     margin-right: 8px;
     border-radius: 4px
@@ -111,7 +111,7 @@
 
 .dark-table .z-listheader-button {
     font-size: 18px;
-    color: #fff !important;
+    color: var(--dt-white) !important;
     display: none;
     width: 34px;
     height: 48px;
@@ -122,13 +122,13 @@
     right: 0;
     text-decoration: none;
     cursor: pointer;
-    box-shadow: inset 1px 0 #0064ed;
+    box-shadow: inset 1px 0 var(--dt-primary-dark);
     z-index: 15
 }
 
 .dark-table .z-listheader-content, .dark-table .z-listcell-content, .dark-table .z-listgroup-content,
 .dark-table .z-listgroupfoot-content, .dark-table .z-listfooter-content {
-    color: #fff !important;
+    color: var(--dt-white) !important;
 }
 
 
@@ -141,7 +141,7 @@
 }
 
 .dark-table .z-listitem:hover > .z-listcell {
-    background: #314758
+    background: var(--dt-background-dark-hover);
 }
 
 .dark-table .z-listitem:hover > .z-listcell > .z-listcell-content {
@@ -153,9 +153,9 @@
     width: 20px;
     height: 20px;
     font-size: 18px;
-    color: #0093f9;
+    color: var(--dt-primary-dark);
     border: 1px solid #4e4e4e;
-    background: #fff;
+    background: var(--dt-white);
     vertical-align: text-top;
     margin-right: 8px;
     border-radius: 4px
@@ -167,7 +167,7 @@
 }
 
 .dark-table .z-listitem-checkable.z-listitem-radio:hover {
-    border-color: #0093f9
+    border-color: var(--dt-primary);
 }
 
 
@@ -181,11 +181,11 @@
 }
 
 .dark-table .z-listitem.z-listitem-selected > .z-listcell > .z-listcell-content > .z-listitem-checkable.z-listitem-radio {
-    border-color: #0093f9
+    border-color: var(--dt-primary-light);
 }
 
 .dark-table .z-listitem.z-listitem-selected:hover > .z-listcell {
-    background: #314758;
+    background: var(--dt-background-dark-hover);
     position: relative
 }
 

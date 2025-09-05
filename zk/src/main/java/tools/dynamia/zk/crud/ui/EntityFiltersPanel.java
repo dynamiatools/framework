@@ -40,6 +40,7 @@ import tools.dynamia.viewers.View;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.ViewDescriptorBuilder;
 import tools.dynamia.viewers.impl.DefaultViewDescriptor;
+import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.crud.EntityFilterCustomizer;
@@ -139,7 +140,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
             viewDescriptor.removeFieldsIf(not(this::isFiltrable));
         }
 
-        List<Field> fields = Viewers.getFields(viewDescriptor);
+        List<Field> fields = ViewRendererUtil.filterRenderableFields(this, viewDescriptor);
         DefaultFieldCustomizer defaultFieldCustomizer = new DefaultFieldCustomizer();
         for (Field field : fields) {
             field.setComponent(null);

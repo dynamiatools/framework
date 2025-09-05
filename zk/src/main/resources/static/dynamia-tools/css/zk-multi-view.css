@@ -8,7 +8,7 @@
 }
 
 .multi-view .multi-view-tab{
-    background-color: #ffffff;
+    background-color: var(--dt-white);
     border: none !important;
 }
 .multi-view .multi-view-tab .z-tab-text{

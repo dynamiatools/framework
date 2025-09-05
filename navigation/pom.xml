@@ -23,11 +23,11 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.4.2</version>
+        <version>5.4.3</version>
     </parent>
 
     <artifactId>tools.dynamia.navigation</artifactId>
-    <version>5.4.2</version>
+    <version>5.4.3</version>
     <name>DynamiaTools - Navigation</name>
     <url>https://dynamia.tools/docs/navigation</url>
 
@@ -63,17 +63,17 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.commons</artifactId>
-            <version>5.4.2</version>
+            <version>5.4.3</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.integration</artifactId>
-            <version>5.4.2</version>
+            <version>5.4.3</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.actions</artifactId>
-            <version>5.4.2</version>
+            <version>5.4.3</version>
         </dependency>
 
         <dependency>
