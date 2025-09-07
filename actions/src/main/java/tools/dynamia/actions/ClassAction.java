@@ -19,9 +19,28 @@ package tools.dynamia.actions;
 import tools.dynamia.commons.ApplicableClass;
 
 /**
- * An action that only is applicable to certain classes
+ * Represents an action that is only applicable to specific classes.
+ * <p>
+ * Implementations of this interface define actions that can be executed only for certain target classes.
+ * This is useful for scenarios where actions should be restricted or customized based on the type of object
+ * or context in which they are used.
+ * </p>
+ * <p>
+ * The {@link #getApplicableClasses()} method returns an array of {@link ApplicableClass} objects, indicating
+ * the classes for which this action is valid. This allows dynamic filtering and handling of actions depending
+ * on the runtime type of the target.
+ * </p>
  */
 public interface ClassAction extends Action {
 
+    /**
+     * Returns the array of {@link ApplicableClass} objects that this action is applicable to.
+     * <p>
+     * The returned array should contain all classes for which this action can be executed. If the array is empty,
+     * the action may be considered applicable to all classes, depending on the implementation.
+     * </p>
+     *
+     * @return an array of applicable classes
+     */
     ApplicableClass[] getApplicableClasses();
 }

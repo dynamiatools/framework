@@ -16,9 +16,30 @@
  */
 package tools.dynamia.actions;
 
+/**
+ * Functional interface to handle the event when an {@link Action} is performed.
+ * <p>
+ * Implementations of this interface can be used as lambda expressions or method references
+ * to execute custom logic when an action is triggered. This is useful for event-driven programming
+ * and for decoupling action handling from action definition.
+ * </p>
+ * <p>
+ * Example usage:
+ * <pre>
+ *     OnActionPerfomed handler = evt -> {
+ *         // custom logic when action is performed
+ *     };
+ * </pre>
+ * </p>
+ */
 @FunctionalInterface
 public interface OnActionPerfomed {
 
+    /**
+     * Invoked when an {@link Action} is performed.
+     *
+     * @param evt the event representing the action that was performed
+     */
     void actionPerformed(ActionEvent evt);
 
 }

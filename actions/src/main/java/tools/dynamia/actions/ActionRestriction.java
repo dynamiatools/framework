@@ -17,17 +17,54 @@
 package tools.dynamia.actions;
 
 /**
- * Implement this interface if you need control when an action is allowed to the user
+ * Interface for restricting access to {@link Action} instances based on custom logic or policies.
+ * <p>
+ * Implement this interface if you need fine-grained control over when an action is allowed for a user or context.
+ * Multiple {@code ActionRestriction} implementations can be chained or prioritized using {@link #getOrder()}.
+ * </p>
+ * <p>
+ * The {@link #actionAllowed(Action)} method should return:
+ * <ul>
+ *     <li>{@code true} if access to the action is explicitly granted</li>
+ *     <li>{@code false} if access is explicitly denied</li>
+ *     <li>{@code null} if the restriction cannot decide, allowing other {@code ActionRestriction} instances to check</li>
+ * </ul>
+ * </p>
+ * <p>
+ * Example usage:
+ * <pre>
+ *     public class RoleBasedActionRestriction implements ActionRestriction {
+ *         @Override
+ *         public int getOrder() { return 1; }
+ *         @Override
+ *         public Boolean actionAllowed(Action action) {
+ *             // Custom logic based on user roles
+ *         }
+ *     }
+ * </pre>
+ * </p>
  *
  * @author Mario A. Serrano Leones
  */
 public interface ActionRestriction {
 
+    /**
+     * Returns the order (priority) of this restriction in the chain of restrictions.
+     * Lower values indicate higher priority.
+     *
+     * @return the order value
+     */
     int getOrder();
 
     /**
-     * Return true if access to action is granted, false is access is denied or null if access is unknow to let other {@link ActionRestriction} check
+     * Determines whether access to the given {@link Action} is allowed.
+     * <p>
+     * Return {@code true} if access is granted, {@code false} if denied, or {@code null} if undecided
+     * (to allow other {@code ActionRestriction} instances to check).
+     * </p>
      *
+     * @param action the action to check
+     * @return {@code true} if access is granted, {@code false} if denied, or {@code null} if undecided
      */
     Boolean actionAllowed(Action action);
 }

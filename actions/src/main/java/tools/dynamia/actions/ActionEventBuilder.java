@@ -19,10 +19,35 @@ package tools.dynamia.actions;
 import java.util.Map;
 
 /**
- * {@link ActionEvent} builder. Implement this class when you need custom action execute
+ * Builder interface for creating {@link ActionEvent} instances with custom parameters and source objects.
+ * <p>
+ * Implement this interface when you need to customize how {@link ActionEvent} objects are constructed for action execution.
+ * This is useful for scenarios where additional context, parameters, or logic are required to build the event before
+ * triggering an action.
+ * </p>
+ * <p>
+ * Example usage:
+ * <pre>
+ *     ActionEventBuilder builder = ...;
+ *     ActionEvent event = builder.buildActionEvent(source, params);
+ * </pre>
+ * </p>
+ *
+ * @author Mario A. Serrano Leones
  */
 public interface ActionEventBuilder {
 
+    /**
+     * Builds an {@link ActionEvent} using the provided source object and parameters.
+     * <p>
+     * The source typically represents the origin of the event (such as a UI component or domain object),
+     * and the params map contains additional data to be passed to the action.
+     * </p>
+     *
+     * @param source the source object for the event (e.g., UI component, domain entity)
+     * @param params a map of parameters to include in the event
+     * @return a constructed {@link ActionEvent} instance
+     */
     ActionEvent buildActionEvent(Object source, Map<String, Object> params);
 
 }

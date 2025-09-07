@@ -16,8 +16,28 @@
  */
 package tools.dynamia.actions;
 
+/**
+ * Default implementation of the {@link ActionRenderer} interface for rendering actions.
+ * <p>
+ * This renderer creates a basic {@link ActionComponent} using the provided {@link Action} and {@link ActionEventBuilder}.
+ * It is typically used when no custom rendering logic is required for actions.
+ * <p>
+ * This class is stateless and thread-safe.
+ *
+ * @author Mario A. Serrano Leones
+ * @since 2023
+ */
 public class DefaultActionRenderer implements ActionRenderer<ActionComponent> {
 
+    /**
+     * Renders the given {@link Action} using the specified {@link ActionEventBuilder}.
+     * <p>
+     * This method creates a new {@link ActionComponent} that encapsulates the action and its event builder.
+     *
+     * @param action the action to be rendered
+     * @param actionEventBuilder the builder for action events
+     * @return a new {@link ActionComponent} representing the rendered action
+     */
     @Override
     public ActionComponent render(Action action, ActionEventBuilder actionEventBuilder) {
 

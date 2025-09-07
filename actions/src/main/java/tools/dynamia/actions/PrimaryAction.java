@@ -23,7 +23,21 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Mark an Action as Primary
+ * Annotation to mark an {@link Action} as the primary action in a context or group.
+ * <p>
+ * Use this annotation on an action class to indicate that it should be treated as the main or default action
+ * among a set of actions. Primary actions are typically highlighted in the UI, given priority in execution,
+ * or used as the default option in dialogs and toolbars.
+ * </p>
+ * <p>
+ * Example usage:
+ * <pre>
+ *     @PrimaryAction
+ *     public class SaveAction implements Action {
+ *         // Implementation details
+ *     }
+ * </pre>
+ * </p>
  *
  * @author Mario A. Serrano Leones
  */

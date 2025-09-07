@@ -31,9 +31,28 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Load actions and control access using {@link ActionRestriction}
+ * Utility class for loading, configuring, and controlling access to {@link Action} instances.
+ * <p>
+ * The {@code ActionLoader} provides methods to discover actions, apply restrictions, configure attributes,
+ * and support localization. It integrates with the framework's dependency injection and event system.
+ * </p>
+ * <p>
+ * <b>Example usage:</b>
+ * <pre>
+ *     // Load all allowed actions of a specific type
+ *     ActionLoader<MyAction> loader = new ActionLoader<>(MyAction.class);
+ *     List<MyAction> actions = loader.load();
  *
- * @param <T>
+ *     // Load actions with a custom matcher
+ *     List<MyAction> filtered = loader.load(myMatcher);
+ *
+ *     // Load action commands from an object
+ *     List<Action> commands = ActionLoader.loadActionCommands(myObject);
+ * </pre>
+ * </p>
+ *
+ * @param <T> the type of Action to load
+ * @author Mario A. Serrano Leones
  */
 public class ActionLoader<T extends Action> {
 
@@ -44,16 +63,34 @@ public class ActionLoader<T extends Action> {
     private boolean autolocalize = true;
 
 
-
     public ActionLoader(Class<T> targetClass) {
         super();
         this.targetActionClass = targetClass;
     }
 
+    /**
+     * Sets custom attributes for actions loaded by this loader.
+     * <p>
+     * The attributes map should use the action ID as key and a map of properties as value.
+     * These properties will be applied to each action after loading.
+     * </p>
+     *
+     * @param actionAttributes a map of action IDs to property maps
+     */
     public void setActionAttributes(Map<String, Object> actionAttributes) {
         this.actionAttributes = actionAttributes;
     }
 
+    /**
+     * Loads all actions matching the given matcher, applies restrictions, configures attributes, and localizes them if needed.
+     * <p>
+     * Only actions allowed by restrictions are included. Attributes and localization are applied after loading.
+     * Lifecycle hooks are called for each action.
+     * </p>
+     *
+     * @param matcher an ObjectMatcher to filter actions (can be null for all)
+     * @return a list of allowed and configured actions
+     */
     public List<T> load(ObjectMatcher<T> matcher) {
         final var localizer = findDefaultLocalizedMessagesProvider();
         Collection<T> allActions = Containers.get().findObjects(targetActionClass, matcher);
@@ -75,6 +112,15 @@ public class ActionLoader<T extends Action> {
         return actions;
     }
 
+    /**
+     * Loads all actions matching the given matcher and returns them as Action references.
+     * <p>
+     * Attributes are configured for each action, but restrictions are not checked.
+     * </p>
+     *
+     * @param matcher an ObjectMatcher to filter actions
+     * @return a list of Action references
+     */
     public List<Action> getActionsReferences(ObjectMatcher<T> matcher) {
         Collection<T> allActions = Containers.get().findObjects(targetActionClass, matcher);
         List<Action> actions = new ArrayList<>();
@@ -83,9 +129,16 @@ public class ActionLoader<T extends Action> {
             configureAttributes(action);
         }
         return actions;
-
     }
 
+    /**
+     * Configures custom attributes for the given action using the attributes map.
+     * <p>
+     * Properties are set using BeanUtils and additional attributes are merged into the action's attribute map.
+     * </p>
+     *
+     * @param action the action to configure
+     */
     @SuppressWarnings("unchecked")
     private void configureAttributes(Action action) {
         if (actionAttributes != null) {
@@ -101,10 +154,27 @@ public class ActionLoader<T extends Action> {
 
     }
 
+    /**
+     * Loads all actions allowed by restrictions and configuration.
+     * <p>
+     * Equivalent to {@code load(null)}.
+     * </p>
+     *
+     * @return a list of allowed and configured actions
+     */
     public List<T> load() {
         return load(null);
     }
 
+    /**
+     * Checks if the given action is allowed according to restrictions.
+     * <p>
+     * If restrictions are ignored, always returns true. Otherwise, checks all registered restrictions.
+     * </p>
+     *
+     * @param action the action to check
+     * @return true if allowed, false otherwise
+     */
     public boolean isActionAllowed(Action action) {
         if (isIgnoreRestrictions()) {
             return true;
@@ -117,15 +187,33 @@ public class ActionLoader<T extends Action> {
         return allowed;
     }
 
-
+    /**
+     * Returns whether restrictions are ignored when loading actions.
+     *
+     * @return true if restrictions are ignored, false otherwise
+     */
     public boolean isIgnoreRestrictions() {
         return ignoreRestrictions;
     }
 
+    /**
+     * Sets whether restrictions should be ignored when loading actions.
+     *
+     * @param ignoreRestrictions true to ignore restrictions, false otherwise
+     */
     public void setIgnoreRestrictions(boolean ignoreRestrictions) {
         this.ignoreRestrictions = ignoreRestrictions;
     }
 
+    /**
+     * Loads all {@link ActionCommand}-annotated methods from the given object as FastAction instances.
+     * <p>
+     * Each method is wrapped as a FastAction, with localization and renderer applied as needed.
+     * </p>
+     *
+     * @param object the object containing ActionCommand methods
+     * @return a list of FastAction instances
+     */
     public static List<Action> loadActionCommands(Object object) {
         List<Action> actionsCommands = new ArrayList<>();
 
@@ -134,8 +222,12 @@ public class ActionLoader<T extends Action> {
             final var localizer = findDefaultLocalizedMessagesProvider();
             for (Method method : methods) {
                 ActionCommand actionCommand = method.getAnnotation(ActionCommand.class);
-                FastAction action = new FastAction(actionCommand.name(), actionCommand.image(),
-                        actionCommand.description(), null, evt -> invokeActionCommand(object, method, evt));
+                FastAction action = new FastAction(actionCommand.name())
+                        .image(actionCommand.image())
+                        .type(actionCommand.type())
+                        .description(actionCommand.description())
+                        .onActionPerfomed(evt -> invokeActionCommand(object, method, evt));
+
 
                 if (actionCommand.name().isEmpty()) {
                     action.setName(method.getName());
@@ -153,6 +245,16 @@ public class ActionLoader<T extends Action> {
         return actionsCommands;
     }
 
+    /**
+     * Invokes an ActionCommand method on the given object with the provided ActionEvent.
+     * <p>
+     * Supports methods with zero or one parameter (ActionEvent). Throws exception for invalid signatures.
+     * </p>
+     *
+     * @param object the target object
+     * @param method the method to invoke
+     * @param evt    the ActionEvent to pass (if required)
+     */
     private static void invokeActionCommand(Object object, Method method, ActionEvent evt) {
         try {
             method.setAccessible(true);
@@ -174,6 +276,17 @@ public class ActionLoader<T extends Action> {
 
     }
 
+    /**
+     * Finds an action by its ID among all registered actions of the given type.
+     * <p>
+     * Returns the first matching action or null if not found.
+     * </p>
+     *
+     * @param actionType the class of the action type
+     * @param actionId   the ID of the action
+     * @param <T>        the type of Action
+     * @return the found action or null
+     */
     public static <T extends Action> T findActionById(Class<T> actionType, String actionId) {
         return Containers.get().findObjects(actionType)
                 .stream().filter(a -> a.getId().equals(actionId))
@@ -181,14 +294,32 @@ public class ActionLoader<T extends Action> {
                 .orElse(null);
     }
 
+    /**
+     * Returns whether actions should be automatically localized after loading.
+     *
+     * @return true if autolocalize is enabled, false otherwise
+     */
     public boolean isAutolocalize() {
         return autolocalize;
     }
 
+    /**
+     * Sets whether actions should be automatically localized after loading.
+     *
+     * @param autolocalize true to enable autolocalization, false otherwise
+     */
     public void setAutolocalize(boolean autolocalize) {
         this.autolocalize = autolocalize;
     }
 
+    /**
+     * Finds the default {@link LocalizedMessagesProvider} with the highest priority.
+     * <p>
+     * Used for automatic localization of actions.
+     * </p>
+     *
+     * @return the default LocalizedMessagesProvider or null if none found
+     */
     private static LocalizedMessagesProvider findDefaultLocalizedMessagesProvider() {
         return Containers.get().findObjects(LocalizedMessagesProvider.class)
                 .stream().min(Comparator.comparingInt(LocalizedMessagesProvider::getPriority))

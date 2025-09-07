@@ -26,7 +26,22 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Install an Action
+ * Annotation to mark a class as an installable {@link Action} in the application context.
+ * <p>
+ * Classes annotated with {@code InstallAction} are automatically registered as Spring components
+ * with prototype scope, allowing them to be instantiated and managed by the framework as actions.
+ * This annotation is typically used to facilitate the dynamic discovery and installation of actions
+ * in modular or plugin-based systems.
+ * </p>
+ * <p>
+ * Example usage:
+ * <pre>
+ *     @InstallAction
+ *     public class MyCustomAction implements Action {
+ *         // Implementation details
+ *     }
+ * </pre>
+ * </p>
  *
  * @author Mario A. Serrano Leones
  */
