@@ -34,12 +34,30 @@ import tools.dynamia.web.navigation.PageNavigationInterceptor;
 
 import java.util.stream.Stream;
 
+/**
+ * Common controller for handling the main index page and template/skin setup.
+ * <p>
+ * Provides logic for selecting and applying application templates and skins based on request parameters or cookies.
+ * Also integrates navigation index interceptors for post-processing the main view.
+ * <p>
+ * This controller is ordered first in the Spring context and implements {@link PageNavigationInterceptor}.
+ *
+ * @author Mario A. Serrano Leones
+ * @since 2023
+ */
 @Controller
 @Order(1)
 public class CommonController implements PageNavigationInterceptor {
 
     private final static LoggingService logger = LoggingService.get(CommonController.class);
 
+    /**
+     * Handles the root (index) page request, sets up template and skin, and applies navigation interceptors.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @return the {@link ModelAndView} for the index page
+     */
     @RequestMapping("/")
     public ModelAndView index(HttpServletRequest request, HttpServletResponse response) {
         ModelAndView mv = new ModelAndView("index");
@@ -57,11 +75,11 @@ public class CommonController implements PageNavigationInterceptor {
     }
 
     /**
-     * Setup template and skin from request parameters
+     * Sets up the application template and skin from request parameters or cookies, and updates the view accordingly.
      *
-     * @param request
-     * @param response
-     * @param mv
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @param mv       the {@link ModelAndView} to update
      */
     public static void setupTemplate(HttpServletRequest request, HttpServletResponse response, ModelAndView mv) {
 
@@ -98,11 +116,11 @@ public class CommonController implements PageNavigationInterceptor {
     }
 
     /**
-     * Setup skin from request parameters
+     * Sets up the skin for the application from request parameters or cookies, and updates the view accordingly.
      *
-     * @param request
-     * @param response
-     * @param mv
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @param mv       the {@link ModelAndView} to update
      */
     public static void setupSkin(HttpServletRequest request, HttpServletResponse response, ModelAndView mv) {
 
@@ -132,6 +150,14 @@ public class CommonController implements PageNavigationInterceptor {
         }
     }
 
+    /**
+     * After page processing, sets up the skin for the application.
+     *
+     * @param page          the current page
+     * @param modelAndView  the model and view for the current request
+     * @param request       the HTTP servlet request
+     * @param response      the HTTP servlet response
+     */
     @Override
     public void afterPage(Page page, ModelAndView modelAndView, HttpServletRequest request, HttpServletResponse response) {
 

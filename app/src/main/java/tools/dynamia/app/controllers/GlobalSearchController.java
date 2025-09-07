@@ -23,12 +23,33 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import tools.dynamia.integration.search.SearchService;
 
+/**
+ * Controller for global search functionality in the application.
+ * <p>
+ * Provides an endpoint to perform search queries using the {@link SearchService} and returns results in a view.
+ * <p>
+ * Endpoint:
+ * <ul>
+ *   <li>GET /search?q=... - Search query</li>
+ * </ul>
+ *
+ * @author Mario A. Serrano Leones
+ * @since 2023
+ */
 @Component("/search")
 public class GlobalSearchController {
 
+    /**
+     * Service for performing search queries.
+     */
     @Autowired
     private SearchService service;
 
+    /**
+     * Handles search queries and returns results in the "searchResult" view.
+     * @param q the search query string
+     * @return the {@link ModelAndView} containing search results
+     */
     @RequestMapping("/")
     public ModelAndView query(@RequestParam("q") String q) {
         ModelAndView mv = new ModelAndView("searchResult");
