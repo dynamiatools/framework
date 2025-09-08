@@ -18,11 +18,32 @@
 package tools.dynamia.commons;
 
 /**
- * Allow POJO classes to be converted to XML strings
+ * Interface for POJO classes that can be converted to XML strings.
+ * <p>
+ * Implementing this interface allows an object to be serialized to XML using the {@link StringPojoParser#convertPojoToXml(Object)} utility method.
+ * <p>
+ * Typical usage:
+ * <pre>
+ *     public class MyPojo implements Xmlable {
+ *         // fields and methods
+ *     }
+ *     MyPojo pojo = new MyPojo();
+ *     String xml = pojo.toXml();
+ * </pre>
+ * <p>
+ * This is useful for exporting, logging, or transmitting object data in XML format.
  */
 public interface Xmlable {
 
-
+    /**
+     * Converts this POJO instance to an XML string representation.
+     * <p>
+     * Uses {@link StringPojoParser#convertPojoToXml(Object)} to perform the conversion.
+     * <p>
+     * The resulting XML will include all serializable fields of the implementing class.
+     *
+     * @return XML string representation of this object
+     */
     default String toXml() {
         return StringPojoParser.convertPojoToXml(this);
     }

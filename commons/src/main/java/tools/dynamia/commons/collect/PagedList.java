@@ -18,65 +18,87 @@ package tools.dynamia.commons.collect;
 
 import java.util.AbstractList;
 
-
 /**
- * The Class PagedList.
+ * <p>
+ * PagedList is a specialized implementation of {@link AbstractList} that provides access to a paginated data source.
+ * It delegates all data operations to a {@link PagedListDataSource}, allowing efficient handling of large datasets
+ * by loading only the current page into memory. This class is useful for UI components or APIs that require
+ * paginated access to data, such as tables or grids.
+ * </p>
  *
- * @param <T> the generic type
+ * <p>
+ * Note: Methods like {@code toArray()} and {@code add(int, T)} operate only on the current page, not the entire dataset.
+ * </p>
+ *
+ * @param <T> the type of elements in this list
+ * @author Dynamia Soluciones IT S.A.S
+ * @since 2023
  */
 public class PagedList<T> extends AbstractList<T> {
 
     /**
-     * The data source.
+     * The data source providing paginated access to the underlying dataset.
      */
     private final PagedListDataSource<T> dataSource;
 
     /**
-     * Instantiates a new paged list.
+     * Constructs a new {@code PagedList} backed by the specified {@link PagedListDataSource}.
      *
-     * @param dataSource the data source
+     * @param dataSource the data source to use for pagination and data retrieval
+     * @throws NullPointerException if {@code dataSource} is {@code null}
      */
     public PagedList(PagedListDataSource<T> dataSource) {
         super();
         this.dataSource = dataSource;
     }
 
-    /* (non-Javadoc)
-	 * @see java.util.AbstractList#get(int)
+    /**
+     * Returns the element at the specified position in the overall dataset.
+     * The element is retrieved from the data source, which may load it from the current page or fetch it as needed.
+     *
+     * @param index index of the element to return
+     * @return the element at the specified position
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
     @Override
     public T get(int index) {
         return dataSource.getData(index);
     }
 
-    /* (non-Javadoc)
-	 * @see java.util.AbstractCollection#size()
+    /**
+     * Returns the total number of elements in the dataset, not just the current page.
+     *
+     * @return the total size of the dataset
      */
     @Override
     public int size() {
         return dataSource.getTotalSize();
     }
 
-    /* (non-Javadoc)
-	 * @see java.util.AbstractList#clear()
+    /**
+     * Removes all elements from the data source, clearing the entire dataset.
+     * This operation affects all pages, not just the current one.
      */
     @Override
     public void clear() {
         dataSource.clear();
     }
 
-    /* (non-Javadoc)
-	 * @see java.util.AbstractCollection#toString()
+    /**
+     * Returns a string representation of the data source, typically including paging information.
+     *
+     * @return a string representation of this paged list
      */
     @Override
     public String toString() {
         return dataSource.toString();
     }
 
-
     /**
-     * Create and return an array with CURRENT page data. NOT ALL DATA like a normal List
-     * @return array
+     * Returns an array containing all elements in the current page.
+     * Unlike standard {@code List#toArray()}, this does NOT include all elements in the dataset.
+     *
+     * @return an array containing the elements of the current page
      */
     @Override
     public Object[] toArray() {
@@ -84,8 +106,12 @@ public class PagedList<T> extends AbstractList<T> {
     }
 
     /**
-     * Create and return an array with CURRENT page data. NOT ALL DATA like a normal List
-     * @return array
+     * Returns an array containing all elements in the current page; the runtime type of the returned array is that of the specified array.
+     * If the array is too small, a new array of the same runtime type is allocated for this purpose.
+     *
+     * @param a the array into which the elements of the current page are to be stored, if it is big enough; otherwise, a new array of the same runtime type is allocated
+     * @param <U> the runtime type of the array to contain the elements
+     * @return an array containing the elements of the current page
      */
     @Override
     public <U> U[] toArray(U[] a) {
@@ -93,22 +119,27 @@ public class PagedList<T> extends AbstractList<T> {
     }
 
     /**
-     * Gets the data source.
+     * Returns the underlying {@link PagedListDataSource} used by this list.
      *
-     * @return the data source
+     * @return the data source backing this paged list
      */
     public PagedListDataSource<T> getDataSource() {
         return dataSource;
     }
 
-    /* (non-Javadoc)
-	 * @see java.util.AbstractList#add(int, java.lang.Object)
+    /**
+     * Inserts the specified element at the specified position in the current page.
+     * Shifts the element currently at that position (if any) and any subsequent elements to the right.
+     * This operation only affects the current page, not the entire dataset.
+     *
+     * @param index index at which the specified element is to be inserted
+     * @param element element to be inserted
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
     @Override
     public void add(int index, T element) {
         dataSource.getPageData().add(index, element);
     }
 
-
-
 }
+

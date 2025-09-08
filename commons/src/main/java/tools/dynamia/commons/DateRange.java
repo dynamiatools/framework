@@ -23,22 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Represents a range of dates from a start date to an end date.
- * <p>
- * Provides useful methods for working with date intervals, such as checking if a date is within the range,
- * generating lists of dates, and calculating the duration.
- * Commonly used in reporting, filtering, and scheduling features.
- * <p>
- * Example usage:
- * <pre>
- * {@code
- * DateRange range = new DateRange(start, end);
- * boolean isInRange = range.isInRange(new Date());
- * List<Date> allDates = range.getDates();
- * }
- * </pre>
- *
- * @author Mario A. Serrano Leones
+ * Represent a date range from start date to end date. Its provide usefull method to work with dates
  */
 public class DateRange implements Serializable {
 

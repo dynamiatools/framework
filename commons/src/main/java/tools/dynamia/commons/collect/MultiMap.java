@@ -23,92 +23,112 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 /**
- * The Interface MultiMap.
+ * <p>
+ * MultiMap is a generic interface representing a mapping from keys to multiple values. Unlike a standard {@link java.util.Map},
+ * each key in a MultiMap can be associated with a collection of values, allowing efficient grouping and retrieval of related data.
+ * </p>
  *
+ * <p>
+ * Typical use cases include grouping items by category, indexing, or representing relationships where a key may have multiple associated values.
+ * </p>
+ *
+ * <p>
+ * Implementations may vary in the type of collection used for values (e.g., {@link java.util.List}, {@link java.util.Set}).
+ * </p>
+ *
+ * @param <K> the type of keys maintained by this map
+ * @param <V> the type of mapped values
  * @author Mario A. Serrano Leones
- * @param <K> the key type
- * @param <V> the value type
+ * @since 2023
  */
 public interface MultiMap<K, V> {
 
     /**
-     * Put.
+     * Associates the specified value with the specified key in this multi-map.
+     * If the key already exists, the value is added to its collection.
      *
-     * @param key the key
-     * @param value the value
-     * @return the v
+     * @param key the key with which the specified value is to be associated
+     * @param value the value to be associated with the key
+     * @return the value added
      */
     V put(K key, V value);
 
     /**
-     * Put.
+     * Associates multiple values with the specified key in this multi-map.
+     * All provided values are added to the collection for the key.
      *
-     * @param key the key
-     * @param value the value
-     * @param values the values
+     * @param key the key with which the specified values are to be associated
+     * @param value the first value to be associated
+     * @param values additional values to be associated
      */
     void put(K key, V value, V... values);
 
     /**
-     * Put all.
+     * Associates all values in the given collection with the specified key.
      *
-     * @param key the key
-     * @param values the values
+     * @param key the key with which the specified values are to be associated
+     * @param values the collection of values to be associated
      */
     void putAll(K key, Collection<V> values);
 
     /**
-     * Gets the.
+     * Returns the collection of values associated with the specified key.
+     * If the key does not exist, returns an empty collection (never null).
      *
-     * @param key the key
-     * @return the collection
+     * @param key the key whose associated values are to be returned
+     * @return the collection of values associated with the key, or an empty collection if none
      */
     Collection<V> get(K key);
 
     /**
-     * Contains key.
+     * Returns true if this multi-map contains a mapping for the specified key.
      *
-     * @param key the key
-     * @return true, if successful
+     * @param key the key whose presence is to be tested
+     * @return true if this multi-map contains a mapping for the key
      */
     boolean containsKey(K key);
 
     /**
-     * Removes the.
+     * Removes the mapping for the specified key from this multi-map if present.
+     * Returns the collection of values that were associated with the key, or an empty collection if the key was not present.
      *
-     * @param key the key
-     * @return the collection
+     * @param key the key whose mapping is to be removed
+     * @return the collection of values previously associated with the key, or an empty collection if none
      */
     Collection<V> remove(K key);
 
     /**
-     * Clear.
+     * Removes all mappings from this multi-map, leaving it empty.
      */
     void clear();
 
     /**
-     * Key set.
+     * Returns a set view of the keys contained in this multi-map.
      *
-     * @return the sets the
+     * @return a set of the keys contained in this multi-map
      */
     Set<K> keySet();
 
     /**
-     * Gets the key.
+     * Returns the key associated with the specified value, or null if not found.
+     * If multiple keys map to the value, the implementation may return any one of them.
      *
-     * @param value the value
-     * @return the key
+     * @param value the value whose associated key is to be returned
+     * @return the key associated with the value, or null if not found
      */
     K getKey(V value);
 
     /**
-     * Check is the multimpa is empty
+     * Returns true if this multi-map contains no key-value mappings.
+     *
+     * @return true if this multi-map contains no key-value mappings
      */
     boolean isEmpty();
 
     /**
-     * Iterate over keys and collections
+     * Performs the given action for each key and its associated collection of values in this multi-map.
      *
+     * @param action the action to be performed for each entry
      */
     default void forEach(BiConsumer<? super K, ? super Collection<V>> action) {
         Objects.requireNonNull(action);

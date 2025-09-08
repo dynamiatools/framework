@@ -17,17 +17,43 @@
 package tools.dynamia.commons;
 
 /**
- * Simple @{@link FunctionalInterface} for callback. DynamiaTools API use it across the framework
+ * <p>
+ * Callback is a simple {@link FunctionalInterface} representing a generic callback action with no parameters and no return value.
+ * It is used throughout the DynamiaTools framework to provide hooks, event handlers, or deferred execution logic.
+ * </p>
+ *
+ * <p>
+ * Typical use cases include passing actions to be executed later, implementing listeners, or providing default behaviors.
+ * </p>
+ *
+ * <p>
+ * Example usage:
+ * <pre>
+ *     Callback callback = () -> System.out.println("Action executed!");
+ *     callback.doSomething();
+ * </pre>
+ * </p>
+ *
+ * <p>
+ * The {@link #DO_NOTHING} constant provides a reusable no-op callback instance.
+ * </p>
  *
  * @author Ing. Mario Serrano Leones
  */
 @FunctionalInterface
 public interface Callback {
 
+    /**
+     * A reusable no-op callback instance that performs no action when invoked.
+     * Useful as a default or placeholder callback.
+     */
     Callback DO_NOTHING = () -> {
         //empty body
     };
 
+    /**
+     * Executes the callback action. Implementations define the specific behavior to be performed.
+     */
     void doSomething();
 
 }

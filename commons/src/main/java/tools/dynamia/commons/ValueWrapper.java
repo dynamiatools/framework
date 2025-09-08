@@ -16,14 +16,11 @@
  */
 package tools.dynamia.commons;
 
+
 /**
- * Wrapper record for holding a value and its class type.
- * <p>
- * Useful for dynamic value handling, reflection, and type-safe operations where both the value and its type are needed.
- * Commonly used in bean utilities and dynamic property setters/getters.
- *
- * @param value      the value to wrap
- * @param valueClass the class type of the value
+ * The Class ValueWrapper.
+ * @param value      The value.
+ * @param valueClass The value class.
  * @author Mario A. Serrano Leones
  */
 public record ValueWrapper(Object value, Class<?> valueClass) {
@@ -31,17 +28,17 @@ public record ValueWrapper(Object value, Class<?> valueClass) {
     /**
      * Constructs a new {@code ValueWrapper} with the given value and class type.
      *
-     * @param value      the value to wrap
+     * Instantiates a new value wrapper.
      * @param valueClass the class type of the value
      */
-    public ValueWrapper {
-    }
+     * @param value      the value
+     * @param valueClass the value class
 
     /**
      * Returns the wrapped value.
      *
      * @return the value
-     */
+     * Gets the value.
     @Override
     public Object value() {
         return value;
@@ -51,7 +48,7 @@ public record ValueWrapper(Object value, Class<?> valueClass) {
      * Returns the class type of the wrapped value.
      *
      * @return the value class
-     */
+     * Gets the value class.
     @Override
     public Class<?> valueClass() {
         return valueClass;

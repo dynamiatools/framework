@@ -21,59 +21,73 @@ import java.util.List;
 
 
 /**
- * Archivo: BeanSorter.java Fecha Creacion: 4/05/2009
+ * <p>
+ * BeanSorter is a generic utility class for sorting lists of Java beans (POJOs) based on a specified property (column).
+ * It uses a {@link DynamicComparator} to perform property-based sorting and supports dynamic changes to the sort column and order (ascending/descending).
+ * BeanSorter also provides property change notifications for UI or other listeners via {@link PropertyChangeSupport}.
+ * </p>
  *
- * @param <T> the generic type
+ * <p>
+ * Typical use cases include table/grid sorting in UI frameworks, dynamic data ordering, and reusable sorting logic for collections of beans.
+ * </p>
+ *
+ * <p>
+ * Usage example:
+ * <pre>
+ *     BeanSorter<MyBean> sorter = new BeanSorter<>("name", true);
+ *     sorter.sort(myBeanList);
+ * </pre>
+ * </p>
+ *
+ * @param <T> the type of bean to be sorted
  * @author Ing. Mario Serrano Leones
+ * @since 2009
  */
 public class BeanSorter<T> extends PropertyChangeSupport implements Serializable {
 
     /**
-     * The Constant serialVersionUID.
+     * Serial version UID for serialization compatibility.
      */
     private static final long serialVersionUID = 961854285707596973L;
 
     /**
-     * The comparator.
+     * Comparator used for sorting beans by property.
      */
     private final DynamicComparator<T> comparator;
 
     /**
-     * The old column.
+     * Stores the previous column name used for sorting.
      */
     private String oldColumn;
 
     /**
-     * The old ascending.
+     * Stores the previous sort order (ascending/descending).
      */
     private boolean oldAscending;
 
     /**
-     * The property change support.
-     */
-
-
-    /**
-     * Instantiates a new bean sorter.
+     * Constructs a BeanSorter with no default sort column.
+     * Default sort order is ascending.
      */
     public BeanSorter() {
         this(null);
     }
 
     /**
-     * Instantiates a new bean sorter.
+     * Constructs a BeanSorter with the specified default sort column.
+     * Default sort order is ascending.
      *
-     * @param defaultField the default field
+     * @param defaultField the property name to sort by initially
      */
     public BeanSorter(String defaultField) {
         this(defaultField, true);
     }
 
     /**
-     * Instantiates a new bean sorter.
+     * Constructs a BeanSorter with the specified default sort column and order.
      *
-     * @param defaultField the default field
-     * @param asc          the asc
+     * @param defaultField the property name to sort by initially
+     * @param asc          true for ascending order, false for descending
      */
     public BeanSorter(String defaultField, boolean asc) {
         comparator = new DynamicComparator<>(defaultField);
@@ -81,30 +95,29 @@ public class BeanSorter<T> extends PropertyChangeSupport implements Serializable
     }
 
     /**
-     * Sets the column name.
+     * Sets the property (column) name to sort by. Fires a property change event if changed.
      *
-     * @param column the new column name
+     * @param column the new property name to sort by
      */
     public void setColumnName(String column) {
         oldColumn = comparator.getField();
         comparator.setField(column);
         firePropertyChange("columnName", oldColumn, column);
-
     }
 
     /**
-     * Gets the column name.
+     * Returns the current property (column) name used for sorting.
      *
-     * @return the column name
+     * @return the property name
      */
     public String getColumnName() {
         return comparator.getField();
     }
 
     /**
-     * Sets the ascending.
+     * Sets the sort order (ascending/descending). Fires a property change event if changed.
      *
-     * @param ascending the new ascending
+     * @param ascending true for ascending order, false for descending
      */
     public void setAscending(boolean ascending) {
         oldAscending = comparator.isAscending();
@@ -113,18 +126,19 @@ public class BeanSorter<T> extends PropertyChangeSupport implements Serializable
     }
 
     /**
-     * Checks if is ascending.
+     * Returns true if the current sort order is ascending.
      *
-     * @return true, if is ascending
+     * @return true if ascending, false if descending
      */
     public boolean isAscending() {
         return comparator.isAscending();
     }
 
     /**
-     * Sort.
+     * Sorts the given list of beans by the current property and order.
+     * Sorting is only performed if the property or order has changed since the last sort.
      *
-     * @param data the data
+     * @param data the list of beans to sort
      */
     public void sort(List<T> data) {
         if (data == null || data.isEmpty()) {
@@ -142,6 +156,4 @@ public class BeanSorter<T> extends PropertyChangeSupport implements Serializable
             oldColumn = comparator.getField();
         }
     }
-
-
 }
