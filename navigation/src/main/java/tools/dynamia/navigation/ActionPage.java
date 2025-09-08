@@ -23,12 +23,25 @@ import tools.dynamia.commons.StringUtils;
 import tools.dynamia.integration.Containers;
 
 /**
- * {@link tools.dynamia.navigation.Page} extension that execute associated action when open
+ * Extension of {@link Page} that executes an associated {@link Action} when opened.
+ * <p>
+ * This class is useful for pages that trigger an action automatically upon being accessed.
+ * The action is resolved from the container and executed with this page as the event source.
+ * </p>
  */
 public class ActionPage extends Page {
 
+    /**
+     * The class type of the associated action to execute.
+     */
     private final Class<? extends Action> actionClass;
 
+    /**
+     * Constructs an ActionPage using the given Action class.
+     * The page name and id are derived from the action class or instance if available.
+     *
+     * @param actionClass the class of the action to associate and execute
+     */
     public ActionPage(Class<? extends Action> actionClass) {
         this(actionClass.getName(), null, actionClass);
 
@@ -45,18 +58,35 @@ public class ActionPage extends Page {
         setId(id);
     }
 
+    /**
+     * Constructs an ActionPage with custom id, name and action class.
+     *
+     * @param id the page id
+     * @param name the page name
+     * @param actionClass the class of the action to associate and execute
+     */
     public ActionPage(String id, String name, Class<? extends Action> actionClass) {
         super(id, name, actionClass.getName());
         this.actionClass = actionClass;
     }
 
+    /**
+     * Constructs an ActionPage with custom id, name, closeable flag and action class.
+     *
+     * @param id the page id
+     * @param name the page name
+     * @param closeable whether the page can be closed
+     * @param actionClass the class of the action to associate and execute
+     */
     public ActionPage(String id, String name, boolean closeable, Class<? extends Action> actionClass) {
         super(id, name, actionClass.getName(), closeable);
         this.actionClass = actionClass;
-
     }
 
-
+    /**
+     * Executes the associated action for this page, if available.
+     * The action is resolved from the container and triggered with this page as the event source.
+     */
     public void execute() {
         Action action = Containers.get().findObject(actionClass);
         if (action != null) {
@@ -64,6 +94,11 @@ public class ActionPage extends Page {
         }
     }
 
+    /**
+     * Indicates that this page is temporal (not persistent).
+     *
+     * @return always true for ActionPage
+     */
     @Override
     public boolean isTemporal() {
         return true;

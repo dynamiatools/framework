@@ -16,24 +16,51 @@
  */
 package tools.dynamia.navigation;
 
+/**
+ * Abstract extension of {@link Page} for pages that can be rendered to a specific type.
+ * <p>
+ * Subclasses must implement {@link #renderPage()} to provide rendering logic for the page content.
+ * </p>
+ *
+ * @param <T> the type of the rendered page content
+ */
 public abstract class RendereablePage<T> extends Page {
 
+    /**
+     * Default constructor.
+     */
     public RendereablePage() {
         super();
-        
     }
 
+    /**
+     * Constructs a RendereablePage with id, name, path, and closable flag.
+     *
+     * @param id the page id
+     * @param name the page name
+     * @param path the content path
+     * @param closeable whether the page can be closed
+     */
     public RendereablePage(String id, String name, String path, boolean closeable) {
         super(id, name, path, closeable);
-        
-
     }
 
+    /**
+     * Constructs a RendereablePage with id, name, and path.
+     *
+     * @param id the page id
+     * @param name the page name
+     * @param path the content path
+     */
     public RendereablePage(String id, String name, String path) {
         super(id, name, path);
-        
     }
 
+    /**
+     * Renders the page content to the specified type.
+     *
+     * @return the rendered page content of type T
+     */
     public abstract T renderPage();
 
 }
