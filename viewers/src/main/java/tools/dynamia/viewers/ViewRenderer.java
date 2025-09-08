@@ -25,14 +25,20 @@ import java.io.Serializable;
  * @author Mario A. Serrano Leones
  * @param <T> the generic type
  */
+
+/**
+ * Interface for rendering views from a ViewDescriptor and value.
+ *
+ * @param <T> the type of value to render
+ */
 public interface ViewRenderer<T> extends Serializable {
 
     /**
-     * Render.
+     * Renders a view using the given descriptor and value.
      *
-     * @param descriptor the descriptor
-     * @param value the value
-     * @return the view
+     * @param descriptor the view descriptor
+     * @param value the value to render
+     * @return the rendered view
      */
     View<T> render(ViewDescriptor descriptor, T value);
 }

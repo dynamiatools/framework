@@ -20,9 +20,7 @@ package tools.dynamia.viewers;
 import tools.dynamia.integration.Containers;
 
 /**
- * A factory for creating View objects.
- *
- * @author Mario A. Serrano Leones
+ * Factory interface for creating View objects.
  */
 public interface ViewFactory {
 
@@ -31,7 +29,7 @@ public interface ViewFactory {
     }
 
     /**
-     * Gets the view.
+     * Gets a view for the given view descriptor.
      *
      * @param viewDescriptor the view descriptor
      * @return the view
@@ -39,11 +37,11 @@ public interface ViewFactory {
     View getView(ViewDescriptor viewDescriptor);
 
     /**
-     * Gets the view.
+     * Gets a view for the given view descriptor and value.
      *
-     * @param <T>            the generic type
+     * @param <T> the type of value
      * @param viewDescriptor the view descriptor
-     * @param value          the value
+     * @param value the value to set in the view
      * @return the view
      */
     <T> View<T> getView(ViewDescriptor viewDescriptor, T value);

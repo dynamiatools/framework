@@ -24,24 +24,24 @@ import java.util.List;
 
 
 /**
- * A interface for build view descriptors from files using readers.
+ * Interface for building view descriptors from files using readers.
  *
  * @author Mario A. Serrano Leones
  */
 public interface ViewDescriptorReader extends Serializable {
 
     /**
-     * Read.
+     * Reads a view descriptor from a resource and reader, applying customizers.
      *
-     * @param descriptorResource the descriptor resource
-     * @param reader             the reader
-     * @param customizers        the customizers
+     * @param descriptorResource the resource containing the descriptor
+     * @param reader the reader for the resource
+     * @param customizers the list of customizers to apply
      * @return the view descriptor
      */
     ViewDescriptor read(Resource descriptorResource, Reader reader, List<ViewDescriptorReaderCustomizer> customizers);
 
     /**
-     * Gets the supported file extensions.
+     * Gets the supported file extensions for this reader.
      *
      * @return the supported file extensions
      */

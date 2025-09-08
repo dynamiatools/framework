@@ -25,20 +25,33 @@ import tools.dynamia.viewers.ViewRenderer;
 import tools.dynamia.viewers.ViewType;
 
 /**
- *
- * @author Mario A. Serrano Leones
+ * Represents the tree view type in the viewers framework.
+ * Provides the name and renderer for tree views.
  */
 @Component
 @SuppressWarnings("rawtypes")
 public class TreeViewType implements ViewType {
 
+    /**
+     * The name identifier for the tree view type.
+     */
     public static final String NAME = "tree";
 
+    /**
+     * Returns the name of this view type.
+     *
+     * @return the name of the view type.
+     */
     @Override
     public String getName() {
         return NAME;
     }
 
+    /**
+     * Returns the renderer associated with this view type.
+     *
+     * @return the view renderer for tree views.
+     */
     @Override
     public ViewRenderer getViewRenderer() {
         return new TreeViewRenderer();

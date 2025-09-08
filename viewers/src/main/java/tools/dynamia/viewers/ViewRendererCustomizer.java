@@ -20,22 +20,53 @@ package tools.dynamia.viewers;
 import java.io.Serializable;
 
 /**
- * This class allow customize ViewRenderer process. Only the first customizers found that match target bean class
- * and target view type is use it.
+ * Interface for customizing the rendering process of a ViewRenderer.
  *
- * @param <V>
+ * @param <V> the type of view to customize
  */
 public interface ViewRendererCustomizer<V extends View>   extends Serializable {
 
+    /**
+     * Gets the target bean class for customization.
+     *
+     * @return the target bean class
+     */
     Class<?> getTargetBeanClass();
 
+    /**
+     * Gets the target view type for customization.
+     *
+     * @return the target view type
+     */
     String getTargetViewType();
 
+    /**
+     * Determines if the field is renderable.
+     *
+     * @param field the field to check
+     * @return true if renderable, false otherwise
+     */
     boolean isRenderable(Field field);
 
+    /**
+     * Called before rendering the view.
+     *
+     * @param view the view to customize
+     */
     void beforeRender(V view);
 
+    /**
+     * Called after rendering the view.
+     *
+     * @param view the view to customize
+     */
     void afterRender(V view);
 
+    /**
+     * Called after rendering a field component.
+     *
+     * @param field the field rendered
+     * @param component the rendered component
+     */
     void afterFieldRender(Field field, Object component);
 }

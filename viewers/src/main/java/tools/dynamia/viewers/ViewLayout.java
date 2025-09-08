@@ -21,31 +21,29 @@ import java.util.Map;
 
 
 /**
- * The Interface ViewLayout.
- *
- * @author Mario A. Serrano Leones
+ * Interface for managing layout parameters of a view.
  */
 public interface ViewLayout extends Serializable {
 
     /**
-     * Gets the params.
+     * Gets the layout parameters.
      *
-     * @return the params
+     * @return the parameters map
      */
     Map<String, Object> getParams();
 
     /**
-     * Adds the param.
+     * Adds a single parameter to the layout.
      *
-     * @param name  the name
-     * @param value the value
+     * @param name the parameter name
+     * @param value the parameter value
      */
     void addParam(String name, Object value);
 
     /**
-     * Adds the params.
+     * Adds multiple parameters to the layout.
      *
-     * @param params the params
+     * @param params the parameters map
      */
     void addParams(Map<String, Object> params);
 }

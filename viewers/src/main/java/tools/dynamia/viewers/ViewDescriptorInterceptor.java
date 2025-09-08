@@ -19,6 +19,7 @@ package tools.dynamia.viewers;
 
 /**
  * The Interface ViewDescriptorInterceptor.
+ * Interface for intercepting view descriptor processing.
  *
  * @author Mario A. Serrano Leones
  */
@@ -26,6 +27,7 @@ public interface ViewDescriptorInterceptor {
 
     /**
      * Gets the target.
+     * Gets the target for interception.
      *
      * @return the target
      */
@@ -33,6 +35,7 @@ public interface ViewDescriptorInterceptor {
 
     /**
      * Intercepted.
+     * Called when a view descriptor is intercepted.
      *
      * @param viewDescriptor the view descriptor
      */

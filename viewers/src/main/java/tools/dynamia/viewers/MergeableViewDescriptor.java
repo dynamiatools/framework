@@ -22,12 +22,16 @@ package tools.dynamia.viewers;
  *
  * @author Mario A. Serrano Leones
  */
+
+/**
+ * Interface for view descriptors that can be merged with another descriptor.
+ */
 public interface MergeableViewDescriptor extends ViewDescriptor {
 
     /**
-     * Merge.
+     * Merges the current descriptor with another view descriptor.
      *
-     * @param anotherViewDescriptor the another view descriptor
+     * @param anotherViewDescriptor the descriptor to merge with
      */
     void merge(ViewDescriptor anotherViewDescriptor);
 }

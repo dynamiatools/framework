@@ -22,26 +22,25 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A factory for creating ViewDescriptor objects.
- *
- * @author Mario A. Serrano Leones
+ * Factory interface for creating and retrieving ViewDescriptor objects.
  */
 public interface ViewDescriptorFactory extends Serializable {
 
     /**
-     * Gets the descriptor.
+     * Retrieves a view descriptor by its identifier.
      *
-     * @param id the id
-     * @return the descriptor
+     * @param id the descriptor identifier
+     * @return the view descriptor
      */
     ViewDescriptor getDescriptor(String id);
 
     /**
-     * Gets the descriptor. If descriptor is not found a new one may be created
+     * Retrieves a view descriptor for a target class and view type.
+     * If not found, a new one may be created.
      *
      * @param targetClass the target class
-     * @param viewType    the view type
-     * @return the descriptor
+     * @param viewType the view type
+     * @return the view descriptor
      */
     ViewDescriptor getDescriptor(Class<?> targetClass, String viewType);
 
