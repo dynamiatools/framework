@@ -20,10 +20,21 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Just a container for date values: year, month and day. By default this values
- * are zero. No negative values are allowed
+ * Simple container for date values: year, month, and day.
+ * <p>
+ * Used to represent and transfer date components independently of full date objects.
+ * Useful for date calculations, UI components, and validation logic.
+ * By default, values are zero and negative values are not allowed.
+ * <p>
+ * Example usage:
+ * <pre>
+ * {@code
+ * DateInfo info = new DateInfo(2025, 9, 7);
+ * int year = info.getYear();
+ * }
+ * </pre>
  *
- * @author Mario Serrano Leones
+ * @author Mario A. Serrano Leones
  */
 public class DateInfo implements Serializable {
 

@@ -131,7 +131,7 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
             customizeTimeboxBindings(field);
             customizeDateSelectorBinding(field);
         }
-        logger.info("Customized field: " + field + " params: " + field.getParams());
+        logger.debug("Customized field: " + field + " params: " + field.getParams());
     }
 
     /**

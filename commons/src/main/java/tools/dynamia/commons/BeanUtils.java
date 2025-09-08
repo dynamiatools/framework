@@ -41,7 +41,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Reflection utility class for working with beans
+ * Utility class for reflection and bean manipulation.
+ * <p>
+ * Provides static methods for accessing, modifying, and inspecting Java beans and their properties using reflection.
+ * Includes helpers for working with fields, methods, annotations, property descriptors, and type conversion.
+ * <p>
+ * All methods are stateless and thread-safe. This class cannot be instantiated.
  *
  * @author Ing. Mario Serrano Leones
  */
@@ -49,12 +54,12 @@ import java.util.stream.Stream;
 public final class BeanUtils {
 
     /**
-     * The Constant WRAPPERS.
+     * Mapping of primitive types to their wrapper classes.
      */
     private static final Map<Class, Class> WRAPPERS = new HashMap<>();
 
     /**
-     * The Constant LOGGER.
+     * Logger for internal error and debug messages.
      */
     private static final LoggingService LOGGER = new SLF4JLoggingService(BeanUtils.class);
 
@@ -70,11 +75,11 @@ public final class BeanUtils {
     }
 
     /**
-     * Gets the field value.
+     * Returns the value of a field from the given object using reflection.
      *
-     * @param fieldName the field name
-     * @param object    the object
-     * @return the field value
+     * @param fieldName the name of the field
+     * @param object    the object instance
+     * @return the value of the field, or null if not found or inaccessible
      */
     public static Object getFieldValue(final String fieldName, final Object object) {
         Object value = null;
@@ -93,22 +98,22 @@ public final class BeanUtils {
     }
 
     /**
-     * Sets the field value.
+     * Sets the value of a field in the given object using reflection.
      *
-     * @param propertyInfo the property info
-     * @param object       the object
-     * @param value        the value
+     * @param propertyInfo the property info descriptor
+     * @param object       the object instance
+     * @param value        the value to set
      */
     public static void setFieldValue(PropertyInfo propertyInfo, Object object, Object value) {
         setFieldValue(propertyInfo.getName(), object, value);
     }
 
     /**
-     * Sets the field value.
+     * Sets the value of a field in the given object using reflection.
      *
-     * @param fieldName the field name
-     * @param object    the object
-     * @param value     the value
+     * @param fieldName the name of the field
+     * @param object    the object instance
+     * @param value     the value to set
      */
     public static void setFieldValue(String fieldName, Object object, Object value) {
 

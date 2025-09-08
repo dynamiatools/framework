@@ -31,14 +31,22 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Helper class to parse and convert json strings to objects and objects to json
+ * Utility class for parsing and converting between JSON strings and Java objects (POJOs).
+ * <p>
+ * Provides static methods for serializing objects and maps to JSON, parsing JSON to objects and maps, and creating configured mappers.
+ * Supports both JSON and XML formats using Jackson library, and handles Java 8 time types.
+ * <p>
+ * All methods are stateless and thread-safe.
+ *
+ * @author Mario A. Serrano Leones
  */
 public class StringPojoParser {
 
     /**
-     * Convert Map to JSON string using Jackson
+     * Converts a {@link Map} to a JSON string using Jackson.
      *
-     * @return json string or an empty string if map is null or empty
+     * @param map the map to convert
+     * @return the JSON string, or an empty string if map is null or empty
      */
     public static String convertMapToJson(Map map) {
         try {
@@ -53,10 +61,9 @@ public class StringPojoParser {
     }
 
     /**
-     * Create a json {@link ObjectMapper} with enable IDENT_OUTPUT and disabled FAIL_ON_EMPTY_BEANS. Also add support
-     * to {@link JavaTimeModule} from JSR310 dependency
+     * Creates a configured JSON {@link ObjectMapper} with indentation, disabled empty beans, and JavaTimeModule support.
      *
-     * @return json ObjectMapper
+     * @return the configured JSON ObjectMapper
      */
     public static ObjectMapper createJsonMapper() {
         return JsonMapper.builder()
@@ -68,9 +75,10 @@ public class StringPojoParser {
     }
 
     /**
-     * Convert bean to JSON string using Jackson
+     * Converts a POJO to a JSON string using Jackson.
      *
-     * @return json string or an empty string if pojo is null
+     * @param pojo the object to convert
+     * @return the JSON string, or an empty string if pojo is null
      */
     public static String convertPojoToJson(Object pojo) {
         try {
@@ -85,9 +93,10 @@ public class StringPojoParser {
     }
 
     /**
-     * Parse JSON string to Map using Jackson
+     * Parses a JSON string to a {@link Map} using Jackson.
      *
-     * @return map object with json data or an empty Map if json is null or blank
+     * @param json the JSON string
+     * @return the parsed map, or an empty map if json is null or blank
      */
     public static Map<String, Object> parseJsonToMap(String json) {
         try {
@@ -243,5 +252,3 @@ public class StringPojoParser {
     }
 
 }
-
-

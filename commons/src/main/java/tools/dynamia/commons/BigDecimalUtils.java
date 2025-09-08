@@ -24,9 +24,19 @@ import java.math.MathContext;
 import java.util.List;
 import java.util.Map;
 
-
 /**
- * The Class BigDecimalUtils.
+ * Utility class for mathematical operations with {@link BigDecimal}.
+ * <p>
+ * Provides static methods for summing, multiplying, dividing, and performing custom calculations on lists and maps of data.
+ * Useful for financial calculations, aggregations, and dynamic math operations in business logic.
+ * <p>
+ * Example usage:
+ * <pre>
+ * {@code
+ * BigDecimal total = BigDecimalUtils.sum("amount", dataList);
+ * BigDecimal result = BigDecimalUtils.multiply("price", dataList);
+ * }
+ * </pre>
  *
  * @author Mario A. Serrano Leones
  */

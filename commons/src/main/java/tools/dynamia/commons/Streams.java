@@ -13,12 +13,24 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Streams utility class
+ * Utility class for working with Java Streams and collections.
+ * <p>
+ * Provides static helper methods for filtering, mapping, and collecting elements from collections and arrays.
+ * Includes methods for converting to {@link List}, {@link Set}, and for mapping to {@link BigDecimal}.
+ * <p>
+ * All methods are stateless and thread-safe.
+ *
+ * @author Mario A. Serrano Leones
  */
 public class Streams {
 
     /**
-     * Filter and collect to {@link List} in collection
+     * Filters a collection using the given predicate and collects the results into a {@link List}.
+     *
+     * @param collection the input collection
+     * @param predicate the filter predicate
+     * @param <T> the element type
+     * @return a list of filtered elements
      */
     public static <T> List<T> collectIf(Collection<T> collection, Predicate<T> predicate) {
         if (collection == null) {
@@ -31,7 +43,12 @@ public class Streams {
 
 
     /**
-     * Filter and collect to {@link Set} in collection
+     * Filters a collection using the given predicate and collects the results into a {@link Set}.
+     *
+     * @param collection the input collection
+     * @param predicate the filter predicate
+     * @param <T> the element type
+     * @return a set of filtered elements
      */
     public static <T> Set<T> collectSetIf(Collection<T> collection, Predicate<T> predicate) {
         if (collection == null) {
@@ -43,7 +60,13 @@ public class Streams {
     }
 
     /**
-     * Map and collect result to {@link List}
+     * Maps a collection using the given mapper function and collects the results into a {@link List}.
+     *
+     * @param collection the input collection
+     * @param mapper the mapping function
+     * @param <T> the input element type
+     * @param <R> the result type
+     * @return a list of mapped elements
      */
     public static <T, R> List<R> mapAndCollect(Collection<T> collection, Function<? super T, ? extends R> mapper) {
 
@@ -54,7 +77,14 @@ public class Streams {
     }
 
     /**
-     * Filter and the map result to {@link List}
+     * Filters a collection using the given predicate, maps the results, and collects them into a {@link List}.
+     *
+     * @param collection the input collection
+     * @param predicate the filter predicate
+     * @param mapper the mapping function
+     * @param <T> the input element type
+     * @param <R> the result type
+     * @return a list of filtered and mapped elements
      */
     public static <T, R> List<R> mapAndCollectIf(Collection<T> collection, Predicate<T> predicate, Function<? super T, ? extends R> mapper) {
         if (collection == null) {
@@ -64,7 +94,12 @@ public class Streams {
     }
 
     /**
-     * Map collection to {@link BigDecimal} and collect to {@link List}
+     * Maps a collection to {@link BigDecimal} using the given function and collects the results into a {@link List}.
+     *
+     * @param collection the input collection
+     * @param toBigDecimalFunction the mapping function to BigDecimal
+     * @param <T> the input element type
+     * @return a list of BigDecimal values
      */
     public static <T> List<BigDecimal> mapToBigDecimal(Collection<T> collection, Function<T, BigDecimal> toBigDecimalFunction) {
         if (collection == null) {
@@ -74,7 +109,13 @@ public class Streams {
     }
 
     /**
+     * Filters a collection using the given predicate, maps to {@link BigDecimal}, and collects the results into a {@link List}.
      *
+     * @param collection the input collection
+     * @param predicate the filter predicate
+     * @param toBigDecimalFunction the mapping function to BigDecimal
+     * @param <T> the input element type
+     * @return a list of filtered BigDecimal values
      */
     public static <T> List<BigDecimal> mapToBigDecimalIf(Collection<T> collection, Predicate<T> predicate, Function<T, BigDecimal> toBigDecimalFunction) {
         if (collection == null) {
@@ -85,13 +126,13 @@ public class Streams {
     }
 
     /**
-     * Map and collect result to {@link List}
+     * Maps an array using the given mapper function and collects the results into a {@link List}.
      *
-     * @param elements
-     * @param mapper
-     * @param <T>
-     * @param <R>
-     * @return
+     * @param elements the input array
+     * @param mapper the mapping function
+     * @param <T> the input element type
+     * @param <R> the result type
+     * @return a list of mapped elements
      */
     public static <T, R> List<R> mapAndCollect(T[] elements, Function<T, R> mapper) {
         return Stream.of(elements).map(mapper).toList();

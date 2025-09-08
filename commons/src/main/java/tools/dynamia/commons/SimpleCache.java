@@ -25,34 +25,50 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
- * Very simply cache helper classes. Internally it use a @{@link ConcurrentHashMap} collection to store data. Data is stored in memory.
+ * Simple in-memory cache implementation using {@link ConcurrentHashMap}.
+ * <p>
+ * Provides thread-safe methods to add, retrieve, remove, and clear cached values. Supports lazy loading via loader functions.
+ * Useful for caching frequently accessed data in applications.
+ * <p>
+ * All methods are stateless and thread-safe.
  *
- * @param <K>
- * @param <V>
+ * @param <K> the type of cache key
+ * @param <V> the type of cache value
+ * @author Mario A. Serrano Leones
  */
 public class SimpleCache<K, V> implements Serializable {
 
+    /**
+     * Internal data storage for cache entries.
+     */
     private final Map<K, V> data = new ConcurrentHashMap<>();
 
     /**
-     * Add to Cache
+     * Adds a value to the cache for the specified key.
      *
+     * @param key the cache key
+     * @param value the value to cache
      */
     public void add(K key, V value) {
         data.put(key, value);
     }
 
     /**
-     * Get value from cache
+     * Retrieves a value from the cache by key.
      *
+     * @param key the cache key
+     * @return the cached value, or null if not present
      */
     public V get(K key) {
         return data.get(key);
     }
 
     /**
-     * Get value from cache, if null loader function is called to obtain/create value
+     * Retrieves a value from the cache by key, loading it with the provided function if not present.
      *
+     * @param key the cache key
+     * @param loaderFunction the function to load the value if not present
+     * @return the cached or loaded value
      */
     public V getOrLoad(K key, Function<K, V> loaderFunction) {
         V value = get(key);
@@ -66,42 +82,55 @@ public class SimpleCache<K, V> implements Serializable {
     }
 
     /**
-     * Remove key from cache
+     * Removes a value from the cache by key.
      *
+     * @param key the cache key
+     * @return the removed value, or null if not present
      */
     public V remove(K key) {
         return data.remove(key);
     }
 
     /**
-     * Clear all cache
+     * Clears all entries from the cache.
      */
     public void clear() {
         data.clear();
     }
 
     /**
-     * Check if cache is empty
+     * Checks if the cache is empty.
      *
+     * @return true if the cache is empty, false otherwise
      */
     public boolean isEmpty() {
         return data.isEmpty();
     }
 
+    /**
+     * Returns the set of all cache keys.
+     *
+     * @return the set of cache keys
+     */
     public Set<K> keySet() {
         return data.keySet();
     }
 
+    /**
+     * Returns the set of all cache entries.
+     *
+     * @return the set of cache entries
+     */
     public Set<Map.Entry<K, V>> entrySet() {
         return data.entrySet();
     }
 
+    /**
+     * Performs the given action for each cache entry.
+     *
+     * @param action the action to perform
+     */
     public void forEach(BiConsumer<? super K, ? super V> action) {
         data.forEach(action);
-    }
-
-    @Override
-    public String toString() {
-        return super.toString() + "\n" + data;
     }
 }
