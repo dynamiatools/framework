@@ -18,7 +18,34 @@ package tools.dynamia.io;
 
 import java.util.List;
 
+/**
+ * Interface for providing virtual files.
+ * <p>
+ * Implementations supply a list of VirtualFile objects representing files not present in the physical file system.
+ * <p>
+ * <b>Usage Example:</b>
+ * <pre>
+ *     VirtualFileProvider provider = ...;
+ *     List<VirtualFile> files = provider.getVirtualFiles();
+ *     for (VirtualFile vf : files) {
+ *         System.out.println(vf.getName());
+ *     }
+ * </pre>
+ *
+ * <b>Important Methods:</b>
+ * <ul>
+ *   <li>{@link #getVirtualFiles()} - Returns a list of virtual files.</li>
+ * </ul>
+ *
+ * @author Dynamia Soluciones IT S.A.S
+ * @since 1.0
+ */
 public interface VirtualFileProvider {
 
+    /**
+     * Returns a list of virtual files.
+     *
+     * @return a list of {@link VirtualFile} objects
+     */
     List<VirtualFile> getVirtualFiles();
 }

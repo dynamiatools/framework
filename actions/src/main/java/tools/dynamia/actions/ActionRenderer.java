@@ -17,12 +17,34 @@
 package tools.dynamia.actions;
 
 /**
- * Control how an action will be rendered in UI
+ * Defines how an {@link Action} should be rendered in a user interface (UI).
+ * <p>
+ * Implementations of this interface are responsible for converting an {@link Action} and its associated event builder
+ * into a UI component or element of type <T>. This allows flexible rendering of actions in different UI frameworks or
+ * component models, such as buttons, menu items, links, etc.
+ * </p>
+ * <p>
+ * Example usage:
+ * <pre>
+ *     ActionRenderer<Button> renderer = ...;
+ *     Button button = renderer.render(action, eventBuilder);
+ * </pre>
+ * </p>
  *
- * @param <T>
+ * @param <T> the type of UI component or element produced by the renderer
  */
 public interface ActionRenderer<T> {
 
+    /**
+     * Renders the given {@link Action} using the provided {@link ActionEventBuilder} and returns a UI component.
+     * <p>
+     * The returned component can be added to the UI and will be configured to trigger the action when interacted with.
+     * </p>
+     *
+     * @param action the action to render
+     * @param actionEventBuilder the builder for creating action events
+     * @return a UI component or element representing the action
+     */
     T render(Action action, ActionEventBuilder actionEventBuilder);
 
 }

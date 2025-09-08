@@ -16,36 +16,31 @@
  */
 package tools.dynamia.commons;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.time.ZoneId;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 
 /**
- * Useful class for Locatization, iternally it use ResourceBundles to get
- * message in differente languages. To use this class you should create
- * Messages.properties files for each Locale (Messages_en.properties, etc) and
- * place that files in the same location (package) of the class you want
- * internationalize.
  * <p>
- * Example:<br/>
- * <p>
- * Class: <b>my.company.SomeClass</b> need a <b>Messages.properties</b> file
- * placed in /my/company/ in the classpath
- *
- * <p>
- * That file will be use it to all classes in the same package
+ * Messages is a utility class for internationalization and localization in Java applications. It provides convenient methods to retrieve localized messages and resources using {@link ResourceBundle} files, supporting multiple locales and time zones.
  * </p>
  *
+ * <p>
+ * To use this class, create Messages.properties files for each locale (e.g., Messages_en.properties, Messages_es.properties) and place them in the same package as the class you want to internationalize. The class will automatically resolve the correct resource bundle based on the package and locale.
+ * </p>
+ *
+ * <p>
+ * Example usage:
+ * <pre>
+ *     String msg = Messages.get(MyClass.class, "welcome.message");
+ *     String msgWithParams = Messages.get(MyClass.class, "error.message", "File not found", 404);
+ * </pre>
+ * </p>
+ *
+ * <p>
+ * Messages also supports custom providers for locale and time zone resolution, allowing integration with frameworks or user preferences.
  * </p>
  *
  * @author Mario A. Serrano Leones
@@ -64,25 +59,22 @@ public class Messages {
     private static Supplier<Collection<TimeZoneProvider>> timeZoneProviders;
 
     /**
-     * Get the ResourceBundle for the package of the class using the default JVM
-     * Locale. For example the ResourceBundle for my.company.SomeClass will be
-     * /my/company/Messages.properties
+     * Returns the {@link ResourceBundle} for the package of the given class using the default JVM locale.
+     * The bundle file should be named Messages.properties and placed in the same package as the class.
      *
-     * @param clazz the clazz
-     * @return the bundle
+     * @param clazz the class whose package is used to locate the resource bundle
+     * @return the resource bundle for the class's package
      */
     public static ResourceBundle getBundle(Class<?> clazz) {
         return getBundle(clazz, getDefaultLocale());
     }
 
     /**
-     * Get the ResourceBundle for the package of the class using the Locale. For
-     * example the ResourceBundle for my.company.SomeClass will be
-     * /my/company/Messages.properties
+     * Returns the {@link ResourceBundle} for the package of the given class using the specified locale.
      *
-     * @param clazz  the clazz
-     * @param locale the locale
-     * @return the bundle
+     * @param clazz  the class whose package is used to locate the resource bundle
+     * @param locale the locale to use for resource resolution
+     * @return the resource bundle for the class's package and locale
      */
     public static ResourceBundle getBundle(Class<?> clazz, Locale locale) {
         String baseName = clazz.getPackage().getName() + ".Messages";
@@ -91,44 +83,39 @@ public class Messages {
     }
 
     /**
-     * Get the message for the specified key in the ResourceBundle.
+     * Retrieves the localized message for the specified key from the resource bundle of the given class, using the default locale.
      *
-     * @param clazz the clazz
-     * @param key   the key
-     * @return the string
+     * @param clazz the class whose resource bundle is used
+     * @param key   the message key
+     * @return the localized message, or the key if not found
      */
     public static String get(Class<?> clazz, String key) {
         return get(clazz, getDefaultLocale(), key, new Object[0]);
     }
 
     /**
-     * Get the message for the specified key in the ResourceBundle using the
-     * specified locale.
+     * Retrieves the localized message for the specified key from the resource bundle of the given class and locale.
      *
-     * @param clazz  the clazz
-     * @param locale the locale
-     * @param key    the key
-     * @return the string
+     * @param clazz  the class whose resource bundle is used
+     * @param locale the locale to use
+     * @param key    the message key
+     * @return the localized message, or the key if not found
      */
     public static String get(Class<?> clazz, Locale locale, String key) {
         return get(clazz, locale, key, new Object[0]);
     }
 
     /**
-     * Get the message for the specified key in the ResourceBundle and parse the
-     * parameters in the message. A message parameter is placed using the {0}
-     * {1} {n} notation in the message text.
-     * <p>
-     * For example:<br/>
-     * <br/>
-     * <b>Messages.properties</b><br/>
-     * error_message: The systema has fail beacause {0}. Error code: {1}
-     * <p/>
+     * Retrieves the localized message for the specified key and formats it with the given parameters, using the default locale.
+     * Message parameters are placed using the {0}, {1}, {n} notation in the message text.
      *
-     * @param clazz  the clazz
-     * @param key    the key
-     * @param params the params
-     * @return the string
+     * Example in Messages.properties:
+     * error_message: The system has failed because {0}. Error code: {1}
+     *
+     * @param clazz  the class whose resource bundle is used
+     * @param key    the message key
+     * @param params the parameters to format into the message
+     * @return the formatted localized message, or the key if not found
      */
     public static String get(Class<?> clazz, String key, Object... params) {
         return get(clazz, getDefaultLocale(), key, params);
@@ -136,21 +123,17 @@ public class Messages {
     }
 
     /**
-     * Get the message for the specified key in the ResourceBundle and parse the
-     * parameters in the message. A message parameter is placed using the {0}
-     * {1} {n} notation in the message text.
-     * <p>
-     * For example:<br/>
-     * <br/>
-     * <b>Messages.properties</b><br/>
-     * error_message: The system has fail beacause {0}. Error code: {1}
-     * <p/>
+     * Retrieves the localized message for the specified key and formats it with the given parameters, using the specified locale.
+     * Message parameters are placed using the {0}, {1}, {n} notation in the message text.
      *
-     * @param clazz  the clazz
-     * @param locale the locale
-     * @param key    the key
-     * @param params the params
-     * @return the string
+     * Example in Messages.properties:
+     * error_message: The system has failed because {0}. Error code: {1}
+     *
+     * @param clazz  the class whose resource bundle is used
+     * @param locale the locale to use
+     * @param key    the message key
+     * @param params the parameters to format into the message
+     * @return the formatted localized message, or the key if not found
      */
     public static String get(Class<?> clazz, Locale locale, String key, Object... params) {
         if (key == null) {
@@ -173,12 +156,21 @@ public class Messages {
         return message;
     }
 
+    /**
+     * Formats a message string using the given parameters, following the MessageFormat pattern.
+     *
+     * @param message the message pattern
+     * @param params  the parameters to format into the message
+     * @return the formatted message string
+     */
     public static String format(String message, Object... params) {
         return MessageFormat.format(message, params);
     }
 
     /**
-     * Return the default Locale used for this class.
+     * Returns the default {@link Locale} used for message resolution.
+     * If custom locale providers are configured, the highest priority provider is used.
+     * Otherwise, the JVM default locale is returned.
      *
      * @return the default locale
      */
@@ -198,7 +190,10 @@ public class Messages {
     }
 
     /**
-     * Get the default time zone.
+     * Returns the default {@link ZoneId} used for time zone resolution.
+     * If custom time zone providers are configured, the highest priority provider is used.
+     * Otherwise, the system default time zone is returned.
+     *
      * @return the default time zone
      */
     public static ZoneId getDefaultTimeZone() {
@@ -215,26 +210,27 @@ public class Messages {
         return ZoneId.systemDefault();
     }
 
-    private Messages() {
-    }
-
     /**
-     * Sets the locale providers supplier.
+     * Sets the supplier for locale providers, allowing custom locale resolution strategies.
      *
-     * @param supplier the new locale providers supplier
+     * @param supplier the supplier of locale providers
      */
     public static void setLocaleProvidersSupplier(Supplier<Collection<LocaleProvider>> supplier) {
         localeProviders = supplier;
     }
 
     /**
-     * Sets the time zone providers supplier.
+     * Sets the supplier for time zone providers, allowing custom time zone resolution strategies.
      *
-     * @param timeZoneProviders the new time zone providers supplier
+     * @param timeZoneProviders the supplier of time zone providers
      */
     public static void setTimeZoneProviders(Supplier<Collection<TimeZoneProvider>> timeZoneProviders) {
         Messages.timeZoneProviders = timeZoneProviders;
     }
+
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
+    private Messages() {
+    }
 }
-
-

@@ -17,10 +17,23 @@
 package tools.dynamia.actions;
 
 /**
- * Implement this interface in actions that not perform write operations
+ * Marker interface for actions that do not perform write operations.
+ * <p>
+ * Implement this interface in actions that are strictly read-only, meaning they do not modify data or state.
+ * This can be used to distinguish read-only actions from those that may alter application data, enabling
+ * additional security, auditing, or UI logic based on the type of operation.
+ * </p>
+ * <p>
+ * Example usage:
+ * <pre>
+ *     public class ViewDetailsAction implements Action, ReadableOnly {
+ *         // Implementation for viewing details without modifying data
+ *     }
+ * </pre>
+ * </p>
  *
  * @author Mario Serrano Leones
  */
 public interface ReadableOnly {
-    
+    // Marker interface, no methods
 }

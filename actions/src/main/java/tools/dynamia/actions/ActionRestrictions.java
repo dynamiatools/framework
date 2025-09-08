@@ -25,16 +25,47 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Utilis for manage actions restrictions
+ * Utility class for managing {@link ActionRestriction} instances and checking access to actions.
+ * <p>
+ * This class provides static methods to evaluate whether an {@link Action} is allowed based on registered restrictions.
+ * Restrictions are discovered via the {@link Containers} integration and sorted by their priority (order).
+ * The first restriction that returns a non-null value determines the access decision.
+ * </p>
+ * <p>
+ * <b>Example usage:</b>
+ * <pre>
+ *     Boolean allowed = ActionRestrictions.allowAccess(myAction);
+ *     if (Boolean.TRUE.equals(allowed)) {
+ *         // Access granted
+ *     } else {
+ *         // Access denied
+ *     }
+ * </pre>
+ * </p>
+ *
+ * @author Mario A. Serrano Leones
  */
 public final class ActionRestrictions {
 
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private ActionRestrictions() {
     }
 
+    /**
+     * Checks if access to the given {@link Action} is allowed according to all registered {@link ActionRestriction} instances.
+     * <p>
+     * Restrictions are sorted by their order (priority). The first restriction that returns a non-null value
+     * determines the result. If no restrictions are found or all return null, access is allowed by default.
+     * </p>
+     *
+     * @param action the action to check
+     * @return {@code true} if access is allowed, {@code false} if denied, or {@code null} if undecided
+     */
     public static Boolean allowAccess(Action action) {
         Boolean allowed = true;
-        Collection<ActionRestriction> restrictions = Containers.get().findObjects(ActionRestriction.class);
+        Collection<ActionRestriction> restrictions = getActionRestrictions();
         if (restrictions != null) {
             List<ActionRestriction> restrictionsSorted = new ArrayList<>(restrictions);
             restrictionsSorted.sort((Comparator.comparingInt(ActionRestriction::getOrder)));
@@ -46,5 +77,14 @@ public final class ActionRestrictions {
             }
         }
         return allowed;
+    }
+
+    /**
+     * Retrieves all registered {@link ActionRestriction} instances from the application context.
+     *
+     * @return a collection of action restrictions
+     */
+    public static Collection<ActionRestriction> getActionRestrictions() {
+        return Containers.get().findObjects(ActionRestriction.class);
     }
 }

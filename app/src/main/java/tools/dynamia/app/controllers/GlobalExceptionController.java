@@ -27,11 +27,31 @@ import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.navigation.NavigationNotAllowedException;
 
+/**
+ * Global exception controller for handling application errors and exceptions.
+ * <p>
+ * Provides handlers for navigation errors, general exceptions, and error endpoints.
+ * Returns appropriate views and error information for UI clients.
+ * <p>
+ * Implements {@link ErrorController} for integration with Spring Boot error handling.
+ *
+ * @author Mario A. Serrano Leones
+ * @since 2023
+ */
 @Controller
 public class GlobalExceptionController implements ErrorController {
 
+    /**
+     * Logger for error and exception handling.
+     */
     private final LoggingService logger = new SLF4JLoggingService(GlobalExceptionController.class);
 
+    /**
+     * Handles navigation not allowed exceptions, returning a specific error view.
+     * @param req the HTTP servlet request
+     * @param e the exception
+     * @return the {@link ModelAndView} for the error
+     */
     @ExceptionHandler(NavigationNotAllowedException.class)
     public ModelAndView handleNavigationNotAllowed(HttpServletRequest req, Exception e) {
         ModelAndView mv = new ModelAndView("errors/notallow");
@@ -39,6 +59,12 @@ public class GlobalExceptionController implements ErrorController {
         return mv;
     }
 
+    /**
+     * Handles all other exceptions, returning the login view with error information.
+     * @param req the HTTP servlet request
+     * @param e the exception
+     * @return the {@link ModelAndView} for the error
+     */
     @ExceptionHandler(Exception.class)
     public ModelAndView handleOthersException(HttpServletRequest req, Exception e) {
         ModelAndView mv = new ModelAndView("login");
@@ -46,6 +72,11 @@ public class GlobalExceptionController implements ErrorController {
         return mv;
     }
 
+    /**
+     * Handles error endpoints, returning detailed error information and appropriate views.
+     * @param request the HTTP servlet request
+     * @return the {@link ModelAndView} for the error
+     */
     @RequestMapping(value = {"/errors", "/error"}, method = {RequestMethod.GET, RequestMethod.POST})
     public ModelAndView error(HttpServletRequest request) {
         var statusCode = (Integer) request.getAttribute("jakarta.servlet.error.status_code");

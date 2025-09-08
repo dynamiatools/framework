@@ -16,49 +16,51 @@
  */
 package tools.dynamia.commons;
 
-
 /**
- * The Interface PropertyChangeListenerContainer. Represents objects that can manage property change listeners.
- * This interface provides the contract for objects that support property change notification through
- * a listener pattern. Implementing classes must maintain a collection of listeners and invoke
- * notifyChange() to fire change events when properties are modified. It's essential for creating
- * observable objects and implementing the Observer pattern in domain models and UI components.
- * <br><br>
- * <b>Usage:</b><br>
- * <br>
- * <code>
- * public class ObservableModel implements PropertyChangeListenerContainer {
- *     private List&lt;PropertyChangeListener&gt; listeners = new ArrayList&lt;&gt;();
- *     private String name;
- *     
+ * Interface for objects that support registration and removal of {@link PropertyChangeListener}s.
+ * <p>
+ * Implementing this interface allows a class to manage a set of listeners interested in property change events.
+ * Subclasses must invoke their own notification logic (typically via a method like {@code notifyChange}) to fire events to listeners.
+ * <p>
+ * This is commonly used in observer patterns, event-driven architectures, and UI frameworks to enable reactive behavior
+ * when properties of an object change.
+ * <p>
+ * Example usage:
+ * <pre>
+ * {@code
+ * public class MyBean implements PropertyChangeListenerContainer {
+ *     private final List<PropertyChangeListener> listeners = new ArrayList<>();
  *     public void addPropertyChangeListener(PropertyChangeListener listener) {
  *         listeners.add(listener);
  *     }
- *     
- *     public void setName(String name) {
- *         String oldName = this.name;
- *         this.name = name;
- *         notifyChange("name", oldName, name);
+ *     public void removePropertyChangeListener(PropertyChangeListener listener) {
+ *         listeners.remove(listener);
+ *     }
+ *     protected void notifyChange(String property, Object oldValue, Object newValue) {
+ *         PropertyChangeEvent evt = new PropertyChangeEvent(property, this, oldValue, newValue);
+ *         listeners.forEach(l -> l.propertyChange(evt));
  *     }
  * }
- * </code>
+ * }
+ * </pre>
  *
  * @author Mario A. Serrano Leones
  */
 public interface PropertyChangeListenerContainer {
 
     /**
-     * Add a PropertyChangeListener to get object change, subclasses must invoke
-     * notifyChange to fire listeners
+     * Registers a {@link PropertyChangeListener} to receive notifications when properties of this object change.
+     * <p>
+     * Subclasses must invoke their own notification logic to fire events to listeners.
      *
-     * @param listener the property change listener to add
+     * @param listener the listener to register
      */
     void addPropertyChangeListener(PropertyChangeListener listener);
 
     /**
-     * Remove PropertyChangeListener
+     * Removes a previously registered {@link PropertyChangeListener}.
      *
-     * @param listener the property change listener to remove
+     * @param listener the listener to remove
      */
     void removePropertyChangeListener(PropertyChangeListener listener);
 }

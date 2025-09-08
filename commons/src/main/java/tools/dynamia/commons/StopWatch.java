@@ -18,17 +18,59 @@ package tools.dynamia.commons;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Utility class for measuring elapsed time and controlling execution rate.
+ * <p>
+ * The {@code StopWatch} class provides a simple way to measure the time elapsed since its creation and to control the frequency of operations based on a configurable rate (in milliseconds).
+ * <p>
+ * Typical use cases include profiling code, throttling operations, or implementing periodic tasks.
+ * <p>
+ * Example usage:
+ * <pre>
+ *     StopWatch sw = new StopWatch(1000); // 1 second rate
+ *     while (true) {
+ *         if (sw.now()) {
+ *             // Perform periodic action every second
+ *         }
+ *     }
+ * </pre>
+ * <p>
+ * Thread safety: This class is not thread-safe.
+ */
 public class StopWatch {
 
+    /**
+     * The minimum interval (in milliseconds) between allowed executions.
+     * If zero, {@link #now()} always returns false.
+     */
     private final long rate;
+    /**
+     * The timestamp (in nanoseconds) when the stopwatch was started.
+     */
     private final long startTime;
+    /**
+     * The current timestamp (in nanoseconds) when {@link #now()} is called.
+     */
     private long currentTime;
+    /**
+     * The last timestamp (in nanoseconds) when {@link #now()} returned true.
+     */
     private long lastNow;
 
+    /**
+     * Creates a new {@code StopWatch} with no rate limit.
+     * <p>
+     * Equivalent to {@code new StopWatch(0)}.
+     */
     public StopWatch() {
         this(0);
     }
 
+    /**
+     * Creates a new {@code StopWatch} with the specified rate limit.
+     *
+     * @param rate the minimum interval in milliseconds between allowed executions
+     */
     public StopWatch(long rate) {
         super();
         this.rate = rate;
@@ -37,6 +79,14 @@ public class StopWatch {
         currentTime = startTime;
     }
 
+    /**
+     * Checks if the specified rate interval has elapsed since the last successful call.
+     * <p>
+     * If the rate is greater than zero and the interval has passed, returns {@code true} and resets the timer.
+     * Otherwise, returns {@code false}.
+     *
+     * @return {@code true} if the rate interval has elapsed, {@code false} otherwise
+     */
     public boolean now() {
         currentTime = System.nanoTime();
 
@@ -48,6 +98,11 @@ public class StopWatch {
         }
     }
 
+    /**
+     * Returns the elapsed time in nanoseconds since the stopwatch was started.
+     *
+     * @return the duration in nanoseconds
+     */
     public long getDurantion() {
         return System.nanoTime() - startTime;
     }

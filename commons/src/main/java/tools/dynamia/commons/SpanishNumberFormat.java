@@ -18,48 +18,70 @@ package tools.dynamia.commons;
 
 
 /**
- * The Class SpanishNumberFormat.
+ * <p>
+ * SpanishNumberFormat is a utility class for converting numeric values into their textual representation in Spanish.
+ * It supports conversion of integers and long values, handling millions, billions, and trillions, and provides correct grammar for Spanish number formatting.
+ * </p>
+ *
+ * <p>
+ * This class is useful for applications that require displaying numbers in Spanish words, such as financial, educational, or reporting systems.
+ * </p>
+ *
+ * <p>
+ * Example usage:
+ * <pre>
+ *     String texto = SpanishNumberFormat.convert(1234567);
+ *     // Output: "un millon doscientos treinta y cuatro mil quinientos sesenta y siete"
+ * </pre>
+ * </p>
+ *
+ * <p>
+ * This class is not instantiable and only provides static methods.
+ * </p>
  *
  * @author Mario Serrano Leones
+ * @since 2023
  */
 public class SpanishNumberFormat {
 
     /**
-     * The _grupos.
+     * Array of group names for large numbers (million, billion, trillion, etc.).
+     * Used to format numbers in groups of six digits.
      */
     private static final String[] _grupos = {"", "millon", "billon", "trillon"};
 
     /**
-     * The _unidades.
+     * Array of unit names (0-9) in Spanish.
      */
     private static final String[] _unidades = {"", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"};
 
     /**
-     * The _decena1.
+     * Array of special names for numbers 11-19 in Spanish.
      */
     private static final String[] _decena1 = {"", "once", "doce", "trece", "catorce", "quince",
         "dieciseis", "diecisiete", "dieciocho", "diecinueve"
     };
 
     /**
-     * The _decenas.
+     * Array of tens names (10, 20, 30, ...) in Spanish.
      */
     private static final String[] _decenas = {"", "diez", "veinte", "treinta", "cuarenta", "cincuenta",
         "sesenta", "setenta", "ochenta", "noventa"
     };
 
     /**
-     * The _centenas.
+     * Array of hundreds names (100, 200, ...) in Spanish.
      */
     private static final String[] _centenas = {"", "cien", "doscientos", "trescientos", "cuatrocientos",
         "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos"
     };
 
     /**
-     * Millar a texto.
+     * Converts a number from 0 to 999 into its Spanish textual representation.
+     * Handles special cases for hundreds, tens, and units, including grammar rules for Spanish.
      *
-     * @param n the n
-     * @return the string
+     * @param n the number to convert (0-999)
+     * @return the Spanish text representation of the number, or empty string if n is 0
      */
     public static String millarATexto(int n) {
         if (n == 0) {
@@ -98,10 +120,11 @@ public class SpanishNumberFormat {
     }
 
     /**
-     * Convert.
+     * Converts a long number into its Spanish textual representation, handling millions, billions, and trillions.
+     * The conversion is performed in groups of six digits, applying the correct group name and grammar.
      *
-     * @param n the n
-     * @return the string
+     * @param n the number to convert
+     * @return the Spanish text representation of the number
      */
     public static String convert(long n) {
         StringBuilder resultado = new StringBuilder();
@@ -136,6 +159,9 @@ public class SpanishNumberFormat {
         return resultado.toString();
     }
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
     private SpanishNumberFormat() {
     }
 }

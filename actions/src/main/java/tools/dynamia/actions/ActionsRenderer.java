@@ -19,11 +19,30 @@ package tools.dynamia.actions;
 import java.util.List;
 
 /**
- * Render actions group
- * @param <T>
+ * Defines a renderer for an {@link ActionGroup} and its associated components.
+ * <p>
+ * Implementations of this interface are responsible for rendering a group of actions into a specific UI or container type.
+ * The generic type parameter <T> represents the type of UI component or element used for rendering actions.
+ * </p>
+ * <p>
+ * Typical use cases include rendering actions as buttons, menu items, toolbar elements, or other interactive components
+ * within a given container.
+ * </p>
+ *
+ * @param <T> the type of UI component or element used for rendering actions
  */
 public interface ActionsRenderer<T> {
 
+    /**
+     * Renders the specified {@link ActionGroup} into the provided container, using the given list of action components.
+     * <p>
+     * Implementations should add or arrange the action components within the container according to the group definition.
+     * </p>
+     *
+     * @param group the group of actions to render
+     * @param actionsComponents the list of UI components representing individual actions
+     * @param container the container in which the actions will be rendered
+     */
     void render(ActionGroup group, List<T> actionsComponents, T container);
 
 }

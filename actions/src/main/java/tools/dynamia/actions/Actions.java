@@ -7,13 +7,45 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ * Utility class for executing, rendering, and managing {@link Action} instances and their events.
+ * <p>
+ * Provides static helper methods to run actions, render UI components, execute actions with requests,
+ * and manage action filters and lifecycle events. Integrates with the framework's dependency injection
+ * and event system for flexible action handling.
+ * </p>
+ * <p>
+ * <b>Example usage:</b>
+ * <pre>
+ *     // Run an action with custom parameters
+ *     Actions.run(myAction, myEventBuilder, source, data, params);
+ *
+ *     // Render an action as a UI component
+ *     Button button = Actions.render(myRenderer, myAction, myEventBuilder);
+ *
+ *     // Execute an action using an ActionExecutionRequest
+ *     ActionExecutionResponse response = Actions.execute(myAction, myRequest);
+ * </pre>
+ * </p>
+ *
+ * @author Mario A. Serrano Leones
+ */
 public class Actions {
 
     private static final String ACTION_PARAM = "action";
     private static final String ACTION_COMPONENT = "ACTION_COMPONENT";
 
     /**
-     * Helper method to run actions
+     * Runs the specified {@link Action} using the provided {@link ActionEventBuilder}, source, data, and parameters.
+     * <p>
+     * Handles action filters, lifecycle events, and delegates execution to the configured {@link ActionRunner}.
+     * </p>
+     *
+     * @param action the action to execute
+     * @param eventBuilder the event builder for creating the action event
+     * @param source the source object for the event
+     * @param data the data to associate with the event
+     * @param params additional parameters for the event
      */
     public static void run(Action action, ActionEventBuilder eventBuilder, Object source, Object data, Map<String, Object> params) {
         if (action != null) {
@@ -54,40 +86,72 @@ public class Actions {
         }
     }
 
+    /**
+     * Runs the specified {@link Action} with the provided event builder, source, and parameters.
+     *
+     * @param action the action to execute
+     * @param eventBuilder the event builder
+     * @param source the source object
+     * @param params additional parameters
+     */
     public static void run(Action action, ActionEventBuilder eventBuilder, Object source, Map<String, Object> params) {
         run(action, eventBuilder, source, null, params);
     }
 
+    /**
+     * Runs the specified {@link Action} with the provided event builder, source, and data.
+     *
+     * @param action the action to execute
+     * @param eventBuilder the event builder
+     * @param source the source object
+     * @param data the data to associate with the event
+     */
     public static void run(Action action, ActionEventBuilder eventBuilder, Object source, Object data) {
         run(action, eventBuilder, source, data, null);
     }
 
     /**
-     * Run action without source and params
+     * Runs the specified {@link Action} with the provided event builder, without source or parameters.
+     *
+     * @param action the action to execute
+     * @param eventBuilder the event builder
      */
     public static void run(Action action, ActionEventBuilder eventBuilder) {
         run(action, eventBuilder, null, null);
     }
 
+    /**
+     * Runs the specified {@link Action} with the provided event builder and source.
+     *
+     * @param action the action to execute
+     * @param eventBuilder the event builder
+     * @param source the source object
+     */
     public static void run(Action action, ActionEventBuilder eventBuilder, Object source) {
         run(action, eventBuilder, source, null);
     }
 
     /**
-     * Run action without event builder
+     * Runs the specified {@link Action} with the given data, using a default event builder.
+     *
+     * @param action the action to execute
+     * @param data the data to associate with the event
      */
     public static void run(Action action, Object data) {
         run(action, (source, params) -> new ActionEvent(data, source, params));
     }
 
     /**
-     * Render action using {@link ActionRenderer}.render() method and call {@link ActionLifecycleAware} before and after render
+     * Renders the specified {@link Action} as a UI component using the given {@link ActionRenderer} and {@link ActionEventBuilder}.
+     * <p>
+     * Calls lifecycle hooks before and after rendering, and stores the rendered component as an attribute of the action.
+     * </p>
      *
-     * @param renderer
-     * @param action
-     * @param eventBuilder
-     * @param <T>
-     * @return action component
+     * @param renderer the action renderer
+     * @param action the action to render
+     * @param eventBuilder the event builder
+     * @param <T> the type of UI component
+     * @return the rendered UI component
      */
     public static <T> T render(ActionRenderer<T> renderer, Action action, ActionEventBuilder eventBuilder) {
 
@@ -107,21 +171,24 @@ public class Actions {
     }
 
     /**
-     * Call this method after action is rendered to get the last rendered action component
+     * Returns the last rendered UI component for the specified {@link Action}.
      *
-     * @param action
-     * @return
+     * @param action the action
+     * @return the last rendered component, or null if not rendered
      */
     public static Object getActionComponent(Action action) {
         return action.getAttribute(ACTION_COMPONENT);
     }
 
     /**
-     * Execute an action using {@link ActionExecutionRequest} instead of {@link ActionEvent}
+     * Executes the specified {@link Action} using an {@link ActionExecutionRequest} and returns the response.
+     * <p>
+     * Handles action filters and lifecycle events before and after execution.
+     * </p>
      *
-     * @param action
-     * @param request
-     * @return
+     * @param action the action to execute
+     * @param request the execution request
+     * @return the execution response
      */
     public static ActionExecutionResponse execute(Action action, ActionExecutionRequest request) {
 
@@ -143,19 +210,19 @@ public class Actions {
     }
 
     /**
-     * Execute filters
+     * Iterates over all registered {@link ActionFilter} instances and applies the given consumer.
      *
-     * @param filterConsumer
+     * @param filterConsumer the consumer to apply to each filter
      */
     public static void forEachActionFilter(Consumer<ActionFilter> filterConsumer) {
         Containers.get().findObjects(ActionFilter.class).forEach(filterConsumer);
     }
 
     /**
-     * Execute filters
+     * Executes all registered {@link ActionFilter} instances before an action execution request.
      *
-     * @param action
-     * @param request
+     * @param action the action
+     * @param request the execution request
      */
     public static void fireBeforeActionFilter(Action action, ActionExecutionRequest request) {
         if (action != null && request != null) {
@@ -164,10 +231,10 @@ public class Actions {
     }
 
     /**
-     * Execute filters
+     * Executes all registered {@link ActionFilter} instances before an action event is performed.
      *
-     * @param action
-     * @param evt
+     * @param action the action
+     * @param evt the action event
      */
     public static void fireBeforeActionFilter(Action action, ActionEvent evt) {
         if (action != null && evt != null) {
@@ -176,11 +243,11 @@ public class Actions {
     }
 
     /**
-     * Execute filters
+     * Executes all registered {@link ActionFilter} instances after an action execution request.
      *
-     * @param action
-     * @param request
-     * @param response
+     * @param action the action
+     * @param request the execution request
+     * @param response the execution response
      */
     public static void fireAfterActionFilter(Action action, ActionExecutionRequest request, ActionExecutionResponse response) {
         if (action != null && request != null && response != null) {
@@ -189,10 +256,10 @@ public class Actions {
     }
 
     /**
-     * Execute filters
+     * Executes all registered {@link ActionFilter} instances after an action event is performed.
      *
-     * @param action
-     * @param evt
+     * @param action the action
+     * @param evt the action event
      */
     public static void fireAfterActionFilter(Action action, ActionEvent evt) {
         if (action != null && evt != null) {

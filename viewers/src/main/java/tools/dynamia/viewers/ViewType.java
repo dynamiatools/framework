@@ -20,21 +20,19 @@ package tools.dynamia.viewers;
 import java.io.Serializable;
 
 /**
- * The Interface ViewType.
- *
- * @author Mario A. Serrano Leones
+ * Interface representing a type of view, providing its name and renderer.
  */
-public interface ViewType  extends Serializable {
+public interface ViewType extends Serializable {
 
     /**
-     * Gets the name.
+     * Gets the name of the view type.
      *
      * @return the name
      */
     String getName();
 
     /**
-     * Gets the view renderer.
+     * Gets the renderer for this view type.
      *
      * @return the view renderer
      */

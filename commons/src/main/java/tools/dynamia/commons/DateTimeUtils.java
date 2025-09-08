@@ -30,29 +30,27 @@ import java.util.Date;
 /**
  * Utility class providing a wide range of static methods for date and time manipulation.
  * <p>
- * This class leverages Java 8 Date and Time API (LocalDate, LocalDateTime, Instant, ZoneId, etc.)
- * to perform common operations such as date conversion, arithmetic, formatting, and parsing.
- * It is designed to simplify handling of dates and times in applications, including legacy {@link java.util.Date}
- * and modern Java time types.
+ * Leverages Java 8 Date and Time API (LocalDate, LocalDateTime, Instant, ZoneId, etc.) and legacy {@link java.util.Date}.
+ * Includes methods for conversion, arithmetic, formatting, parsing, and comparison of dates and times.
  * <p>
- * All methods are thread-safe and stateless.
+ * All methods are stateless and thread-safe. This class cannot be instantiated.
  *
  * @author Mario A. Serrano Leones
  */
 public final class DateTimeUtils {
 
     /**
-     * The Constant SHORT.
+     * Constant for short date format.
      */
     public static final int SHORT = DateFormat.SHORT;
 
     /**
-     * The Constant MEDIUM.
+     * Constant for medium date format.
      */
     public static final int MEDIUM = DateFormat.MEDIUM;
 
     /**
-     * The Constant LONG.
+     * Constant for long date format.
      */
     public static final int LONG = DateFormat.LONG;
 

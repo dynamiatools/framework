@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
@@ -23,19 +22,32 @@ import tools.dynamia.viewers.ViewRenderer;
 import tools.dynamia.viewers.ViewType;
 
 /**
- *
- * @author Mario A. Serrano Leones
+ * Represents the ZUL view type in the viewers framework.
+ * Provides the name and renderer for ZUL views.
  */
 @Component
 public class ZulViewType implements ViewType {
 
+    /**
+     * The name identifier for the ZUL view type.
+     */
     public static final String NAME = "zul";
 
+    /**
+     * Returns the name of this view type.
+     *
+     * @return the name of the view type.
+     */
     @Override
     public String getName() {
         return NAME;
     }
 
+    /**
+     * Returns the renderer associated with this view type.
+     *
+     * @return the view renderer for ZUL views.
+     */
     @Override
     public ViewRenderer getViewRenderer() {
         return new ZulViewRenderer();

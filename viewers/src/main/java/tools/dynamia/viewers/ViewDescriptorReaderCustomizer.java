@@ -18,25 +18,24 @@ package tools.dynamia.viewers;
 
 
 /**
- * The Interface ViewDescriptorReaderCustomizer.
+ * Interface for customizing the reading of view descriptors.
  *
- * @author Mario A. Serrano Leones
- * @param <T> the generic type
+ * @param <T> the type of content to customize
  */
 public interface ViewDescriptorReaderCustomizer<T> {
 
     /**
-     * Gets the target reader.
+     * Gets the target reader class for customization.
      *
-     * @return the target reader
+     * @return the target reader class
      */
     Class<? extends ViewDescriptorReader> getTargetReader();
 
     /**
-     * Customize.
+     * Customizes the view descriptor based on the content.
      *
-     * @param content the content
-     * @param viewDescriptor the view descriptor
+     * @param content the content to use for customization
+     * @param viewDescriptor the view descriptor to customize
      */
     void customize(T content, ViewDescriptor viewDescriptor);
 

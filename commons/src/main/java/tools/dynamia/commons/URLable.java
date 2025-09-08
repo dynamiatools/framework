@@ -18,45 +18,41 @@
 package tools.dynamia.commons;
 
 /**
- * The Interface URLable. Represents objects that can generate or expose URL string representations.
- * This interface is commonly implemented by entities, resources, and web components that need to
- * provide URL access or navigation capabilities. It's particularly useful for creating dynamic
- * links, REST endpoints, web resources, and navigation elements in web applications.
- * <br><br>
- * <b>Usage:</b><br>
- * <br>
- * <code>
- * public class Document implements URLable {
- *     private String id;
- *     private String baseUrl;
- *     
- *     public String toURL() {
- *         return baseUrl + "/documents/" + id;
+ * Interface for classes that can generate and handle URL strings.
+ * <p>
+ * Implement this interface if your class can provide a URL representation of its state or identity.
+ * <p>
+ * Typical usage:
+ * <pre>
+ *     public class MyResource implements URLable {
+ *         @Override
+ *         public String toURL() {
+ *             return "https://example.com/resource/" + getId();
+ *         }
  *     }
- *     
- *     public void url(String url) {
- *         this.baseUrl = url;
- *     }
- * }
- * </code>
- *
- * @author Mario A. Serrano Leones
+ * </pre>
+ * <p>
+ * This interface is useful for web applications, RESTful services, or any context where objects need to be referenced or accessed via URLs.
  */
 public interface URLable {
 
     /**
-     * Converts this object to a URL string representation.
+     * Returns a URL string representation of this object.
+     * <p>
+     * Implementations should generate a valid URL that uniquely identifies or locates the object.
      *
-     * @return the URL as string
+     * @return a URL string representing this object
      */
     String toURL();
 
     /**
-     * Sets the URL for this object.
+     * Sets or updates the URL for this object.
+     * <p>
+     * Default implementation does nothing. Override if your class needs to handle or store a URL value.
      *
-     * @param url the URL to set
+     * @param url the URL string to set
      */
     default void url(String url) {
-
+        // Default: no-op. Override to handle URL assignment if needed.
     }
 }

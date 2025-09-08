@@ -18,32 +18,31 @@
 package tools.dynamia.commons;
 
 /**
- * The Interface Xmlable. Allows POJO classes to be converted to XML string representations.
- * This interface provides automatic XML serialization capabilities for Plain Old Java Objects,
- * making it easy to convert object instances to XML format for data interchange, persistence,
- * configuration files, or API responses. The default implementation uses the framework's
- * StringPojoParser utility for automatic conversion.
- * <br><br>
- * <b>Usage:</b><br>
- * <br>
- * <code>
- * public class Product implements Xmlable {
- *     private String name;
- *     private double price;
- *     
- *     // The toXml() method is inherited and works automatically
- *     // Usage: String xml = product.toXml();
- * }
- * </code>
- *
- * @author Mario A. Serrano Leones
+ * Interface for POJO classes that can be converted to XML strings.
+ * <p>
+ * Implementing this interface allows an object to be serialized to XML using the {@link StringPojoParser#convertPojoToXml(Object)} utility method.
+ * <p>
+ * Typical usage:
+ * <pre>
+ *     public class MyPojo implements Xmlable {
+ *         // fields and methods
+ *     }
+ *     MyPojo pojo = new MyPojo();
+ *     String xml = pojo.toXml();
+ * </pre>
+ * <p>
+ * This is useful for exporting, logging, or transmitting object data in XML format.
  */
 public interface Xmlable {
 
     /**
-     * Converts this object to an XML string representation.
+     * Converts this POJO instance to an XML string representation.
+     * <p>
+     * Uses {@link StringPojoParser#convertPojoToXml(Object)} to perform the conversion.
+     * <p>
+     * The resulting XML will include all serializable fields of the implementing class.
      *
-     * @return the XML as string
+     * @return XML string representation of this object
      */
     default String toXml() {
         return StringPojoParser.convertPojoToXml(this);

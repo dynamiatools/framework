@@ -18,66 +18,78 @@ package tools.dynamia.commons.collect;
 
 import java.util.List;
 
-
 /**
- * The Interface PagedListDataSource.
+ * <p>
+ * PagedListDataSource is an interface that defines the contract for providing paginated access to a data set.
+ * Implementations are responsible for managing the underlying data, pagination logic, and page navigation.
+ * This interface is designed to support efficient handling of large data sets by exposing only the relevant page data.
+ * </p>
  *
- * @param <T> the generic type
+ * <p>
+ * Typical use cases include UI components (tables, grids) or APIs that require paginated data access and navigation.
+ * </p>
+ *
+ * @param <T> the type of elements in the data source
+ * @author Dynamia Soluciones IT S.A.S
+ * @since 2023
  */
 public interface PagedListDataSource<T> {
 
     /**
-     * Gets the data.
+     * Returns the element at the specified index in the entire data set (not just the current page).
      *
-     * @param index the index
-     * @return the data
+     * @param index the index of the element to retrieve (0-based)
+     * @return the element at the specified index
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
     T getData(int index);
 
     /**
-     * Gets the total size.
+     * Returns the total number of elements in the data set (all pages).
      *
-     * @return the total size
+     * @return the total size of the data set
      */
     int getTotalSize();
 
     /**
-     * Clear.
+     * Removes all elements from the data source, clearing the entire data set.
      */
     void clear();
 
     /**
-     * Gets the page data.
+     * Returns a list containing all elements in the current active page.
      *
-     * @return the page data
+     * @return a list of elements in the current page
      */
     List<T> getPageData();
 
     /**
-     * Gets the page size.
+     * Returns the size of each page (number of elements per page).
      *
      * @return the page size
      */
     int getPageSize();
 
     /**
-     * Gets the page count.
+     * Returns the total number of pages available in the data set.
      *
-     * @return the page count
+     * @return the total page count
      */
     int getPageCount();
 
     /**
-     * Gets the active page.
+     * Returns the index of the currently active page (0-based).
      *
-     * @return the active page
+     * @return the active page index
      */
     int getActivePage();
 
     /**
-     * Sets the active page.
+     * Sets the active page to the specified index.
+     * Implementations should update the current page and ensure the index is within valid bounds.
      *
-     * @param activePage the new active page
+     * @param activePage the new active page index (0-based)
+     * @throws IndexOutOfBoundsException if the page index is out of range
      */
     void setActivePage(int activePage);
 

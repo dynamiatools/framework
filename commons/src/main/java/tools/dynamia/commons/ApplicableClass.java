@@ -17,88 +17,103 @@
 package tools.dynamia.commons;
 
 /**
- * The Class ApplicableClass.
+ * Represents a wrapper for a target {@link Class} to be used for applicability checks.
+ * <p>
+ * This record is commonly used to determine if an action or feature is applicable to a specific class or set of classes.
+ * It provides utility methods for applicability checks and for creating arrays of applicable classes.
+ * </p>
  *
- * @param targetClass The target class.
+ * <p>
+ * Example usage:
+ * <pre>
+ *     ApplicableClass[] applicable = ApplicableClass.get(MyClass.class, OtherClass.class);
+ *     boolean isValid = ApplicableClass.isApplicable(target.getClass(), applicable);
+ * </pre>
+ * </p>
+ *
+ * @param targetClass the target class to check applicability against; may be {@code null} to represent all classes
  * @author Mario A. Serrano Leones
  */
 public record ApplicableClass(Class targetClass) {
 
-	/**
-	 * The Constant ALL.
-	 */
-	public static final ApplicableClass[] ALL = {new ApplicableClass(null)};
+    /**
+     * Constant representing applicability to all classes.
+     * If used, any class will be considered applicable.
+     */
+    public static final ApplicableClass[] ALL = {new ApplicableClass(null)};
 
-	/**
-	 * Checks if is applicable.
-	 *
-	 * @param objectClass       the object class
-	 * @param applicableClasses the applicable classes
-	 * @return true, if is applicable
-	 */
-	public static boolean isApplicable(Class<?> objectClass, ApplicableClass[] applicableClasses) {
-		return isApplicable(objectClass, applicableClasses, false);
-	}
+    /**
+     * Checks if the given object class is applicable to any of the provided {@link ApplicableClass} instances.
+     *
+     * @param objectClass the class to check
+     * @param applicableClasses the array of applicable classes
+     * @return {@code true} if the object class is applicable; {@code false} otherwise
+     */
+    public static boolean isApplicable(Class<?> objectClass, ApplicableClass[] applicableClasses) {
+        return isApplicable(objectClass, applicableClasses, false);
+    }
 
-	/**
-	 * Checks if is applicable.
-	 *
-	 * @param objectClass       the object class
-	 * @param applicableClasses the applicable classes
-	 * @param includeParents    the include parents
-	 * @return true, if is applicable
-	 */
-	public static boolean isApplicable(Class<?> objectClass, ApplicableClass[] applicableClasses,
-									   boolean includeParents) {
-		if (applicableClasses == ALL || applicableClasses == null) {
-			return true;
-		}
+    /**
+     * Checks if the given object class is applicable to any of the provided {@link ApplicableClass} instances,
+     * optionally including parent classes and interfaces.
+     *
+     * @param objectClass the class to check
+     * @param applicableClasses the array of applicable classes
+     * @param includeParents if {@code true}, parent classes and interfaces are considered
+     * @return {@code true} if the object class is applicable; {@code false} otherwise
+     */
+    public static boolean isApplicable(Class<?> objectClass, ApplicableClass[] applicableClasses,
+                                       boolean includeParents) {
+        if (applicableClasses == ALL || applicableClasses == null) {
+            return true;
+        }
 
-		for (ApplicableClass applicableClass : applicableClasses) {
-			if (applicableClass.targetClass().equals(objectClass)) {
-				return true;
-			} else if (includeParents) {
-				if (BeanUtils.isAssignable(objectClass, applicableClass.targetClass())) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+        for (ApplicableClass applicableClass : applicableClasses) {
+            if (applicableClass.targetClass() != null && applicableClass.targetClass().equals(objectClass)) {
+                return true;
+            } else if (includeParents && applicableClass.targetClass() != null) {
+                if (BeanUtils.isAssignable(objectClass, applicableClass.targetClass())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
-	/**
-	 * Instantiates a new applicable class.
-	 *
-	 * @param targetClass the target class
-	 */
-	public ApplicableClass {
-	}
+    /**
+     * Constructs an {@code ApplicableClass} for the given target class.
+     *
+     * @param targetClass the target class
+     */
+    public ApplicableClass {
+    }
 
-	/**
-	 * Gets the target class.
-	 *
-	 * @return the target class
-	 */
-	@Override
-	public Class targetClass() {
-		return targetClass;
-	}
+    /**
+     * Returns the target class for this {@code ApplicableClass}.
+     *
+     * @return the target class
+     */
+    @Override
+    public Class targetClass() {
+        return targetClass;
+    }
 
-	/**
-	 * Gets the.
-	 *
-	 * @param classes the classes
-	 * @return the applicable class[]
-	 */
-	public static ApplicableClass[] get(Class... classes) {
-		if (classes.length == 0) {
-			return ALL;
-		}
+    /**
+     * Creates an array of {@code ApplicableClass} instances for the given classes.
+     * If no classes are provided, returns {@link #ALL}.
+     *
+     * @param classes the classes to wrap
+     * @return an array of {@code ApplicableClass} instances
+     */
+    public static ApplicableClass[] get(Class... classes) {
+        if (classes.length == 0) {
+            return ALL;
+        }
 
-		ApplicableClass[] appClasses = new ApplicableClass[classes.length];
-		for (int i = 0; i < classes.length; i++) {
-			appClasses[i] = new ApplicableClass(classes[i]);
-		}
-		return appClasses;
-	}
+        ApplicableClass[] appClasses = new ApplicableClass[classes.length];
+        for (int i = 0; i < classes.length; i++) {
+            appClasses[i] = new ApplicableClass(classes[i]);
+        }
+        return appClasses;
+    }
 }

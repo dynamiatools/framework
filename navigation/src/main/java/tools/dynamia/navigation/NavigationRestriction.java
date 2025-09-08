@@ -17,21 +17,41 @@
 package tools.dynamia.navigation;
 
 /**
- * Implement this interface if you want control the access for a specific element(s)
+ * Interface for implementing access control restrictions on navigation elements.
+ * <p>
+ * Classes that implement this interface can define custom logic to allow or deny access
+ * to specific navigation elements (such as pages, modules, or groups) within the application.
+ * Restrictions are evaluated in order, allowing for flexible and layered access control.
+ * </p>
+ * <p>
+ * Usage: Register implementations as beans to participate in the navigation restriction chain.
+ * </p>
  *
  * @author Mario A. Serrano Leones
+ * @since 2023
  */
 public interface NavigationRestriction {
 
     /**
-     * Restriction order
+     * Returns the order in which this restriction should be evaluated.
+     * <p>
+     * Lower values indicate higher priority. Restrictions with higher order values are evaluated later.
+     * </p>
      *
+     * @return the order value for this restriction
      */
     int getOrder();
 
     /**
-     * Return true if access is granted, false is access is denied or null if access is unknow to let other {@link NavigationRestriction} check
+     * Determines whether access to the specified navigation element is allowed.
+     * <ul>
+     *     <li>Return {@code true} to grant access.</li>
+     *     <li>Return {@code false} to deny access.</li>
+     *     <li>Return {@code null} if undecided, allowing other restrictions to evaluate.</li>
+     * </ul>
      *
+     * @param element the {@link NavigationElement} to check
+     * @return {@code true} if access is granted, {@code false} if denied, or {@code null} if undecided
      */
     Boolean allowAccess(NavigationElement element);
 

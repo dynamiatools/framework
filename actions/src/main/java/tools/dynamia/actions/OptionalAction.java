@@ -19,7 +19,21 @@ package tools.dynamia.actions;
 import java.lang.annotation.*;
 
 /**
- * Mark an Action as Primary
+ * Annotation to mark an {@link Action} as optional within a context or group.
+ * <p>
+ * Use this annotation on an action class to indicate that it is not required or mandatory in a set of actions.
+ * Optional actions may be displayed differently in the UI, enabled/disabled based on context, or used for
+ * secondary operations that complement primary actions.
+ * </p>
+ * <p>
+ * Example usage:
+ * <pre>
+ *     @OptionalAction
+ *     public class ExportAction implements Action {
+ *         // Implementation details
+ *     }
+ * </pre>
+ * </p>
  *
  * @author Mario A. Serrano Leones
  */

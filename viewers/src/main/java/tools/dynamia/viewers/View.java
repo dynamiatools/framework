@@ -20,22 +20,21 @@ package tools.dynamia.viewers;
 import java.io.Serializable;
 
 /**
- * The Interface View.
+ * Interface representing a view with a value and descriptor.
  *
- * @param <T> the generic type
- * @author Mario A. Serrano Leones
+ * @param <T> the type of value managed by the view
  */
 public interface View<T> extends Serializable {
 
     /**
-     * Gets the value.
+     * Gets the value of the view.
      *
      * @return the value
      */
     T getValue();
 
     /**
-     * Sets the value.
+     * Sets the value of the view.
      *
      * @param value the new value
      */

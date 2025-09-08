@@ -19,12 +19,37 @@ package tools.dynamia.commons;
 import java.util.Map;
 
 /**
- * Allow POJO classes to be converted to map
+ * Interface to allow POJO classes to be converted to a {@link Map} representation.
+ * <p>
+ * Implementing this interface enables automatic conversion of an object's properties to a map, typically for serialization,
+ * logging, debugging, or dynamic property access. The default implementation uses {@link BeanUtils#getValuesMaps(Object)}
+ * to extract all standard properties and their values.
+ * <p>
+ * Example usage:
+ * <pre>
+ * {@code
+ * public class Person implements Mappable {
+ *     private String name;
+ *     private int age;
+ *     // getters and setters
+ * }
+ * // ...
+ * Person p = new Person();
+ * Map<String, Object> map = p.toMap();
+ * }
+ * </pre>
  *
  * @author Ing. Mario Serrano
  */
 public interface Mappable {
 
+    /**
+     * Converts the current object to a {@link Map} of property names and values.
+     * <p>
+     * Uses {@link BeanUtils#getValuesMaps(Object)} to extract all standard properties.
+     *
+     * @return a map containing property names as keys and their corresponding values
+     */
     default Map<String, Object> toMap() {
         return BeanUtils.getValuesMaps(this);
     }

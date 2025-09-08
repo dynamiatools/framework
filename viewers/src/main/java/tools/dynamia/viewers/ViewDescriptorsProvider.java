@@ -19,11 +19,17 @@ package tools.dynamia.viewers;
 import java.util.Collection;
 
 /**
+ * Interface for providing a collection of view descriptors.
  *
  * @author Ing. Mario Serrano Leones
  */
 public interface ViewDescriptorsProvider {
 
+    /**
+     * Gets the collection of view descriptors.
+     *
+     * @return the collection of view descriptors
+     */
     Collection<ViewDescriptor> getDescriptors();
 
 }

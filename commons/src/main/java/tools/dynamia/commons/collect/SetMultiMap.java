@@ -21,30 +21,47 @@ import java.util.Set;
 
 
 /**
- * The Interface SetMultiMap.
+ * <p>
+ * SetMultiMap is a specialized extension of {@link MultiMap} where each key is associated with a {@link Set} of values, ensuring uniqueness of values per key.
+ * This interface provides convenient access to sets of values and supports typical multi-map operations such as retrieval, removal, and entry iteration.
+ * </p>
  *
+ * <p>
+ * Use cases include grouping elements by key with no duplicate values, such as tags, roles, or categories.
+ * </p>
+ *
+ * @param <K> the type of keys maintained by this map
+ * @param <V> the type of mapped values
  * @author Mario A. Serrano Leones
- * @param <K> the key type
- * @param <V> the value type
+ * @since 2023
  */
 public interface SetMultiMap<K, V> extends MultiMap<K, V> {
 
-    /* (non-Javadoc)
-     * @see tools.dynamia.commons.collect.MultiMap#get(java.lang.Object)
+    /**
+     * Returns the set of values associated with the specified key.
+     * If the key does not exist, returns an empty set (never null).
+     *
+     * @param key the key whose associated values are to be returned
+     * @return a set of values associated with the key, or an empty set if none
      */
     @Override
     Set<V> get(K key);
 
-    /* (non-Javadoc)
-     * @see tools.dynamia.commons.collect.MultiMap#remove(java.lang.Object)
+    /**
+     * Removes the mapping for the specified key from this multi-map if present.
+     * Returns the set of values that were associated with the key, or an empty set if the key was not present.
+     *
+     * @param key the key whose mapping is to be removed
+     * @return the set of values previously associated with the key, or an empty set if none
      */
     @Override
     Set<V> remove(K key);
 
     /**
-     * Entry set.
+     * Returns a set view of the mappings contained in this multi-map.
+     * Each entry consists of a key and its associated set of values.
      *
-     * @return the sets the
+     * @return a set of entries, where each entry maps a key to a set of values
      */
     Set<Entry<K, Set<V>>> entrySet();
 }

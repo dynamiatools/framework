@@ -19,20 +19,21 @@ package tools.dynamia.viewers;
 
 /**
  * The Interface Indexable.
+ * Interface for objects that can be indexed.
  *
  * @author Mario A. Serrano Leones
  */
 public interface Indexable {
 
     /**
-     * Gets the index.
+     * Gets the index value.
      *
      * @return the index
      */
     int getIndex();
 
     /**
-     * Sets the index.
+     * Sets the index value.
      *
      * @param index the new index
      */

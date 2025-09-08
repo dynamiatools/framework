@@ -19,7 +19,30 @@ package tools.dynamia.actions;
 import tools.dynamia.commons.BeanUtils;
 
 /**
- * Helper class to create an action instance without the need to extend classes or implement methods.
+ * Helper class to quickly create an {@link Action} instance without extending classes or implementing methods.
+ * <p>
+ * FastAction provides a fluent API for configuring actions using chained methods, allowing you to set properties and event handlers concisely.
+ * This is useful for scenarios where you need to define simple actions inline, such as adding actions to a viewer or UI component.
+ * </p>
+ * <p>
+ * <b>Example usage:</b>
+ * <pre>
+ *     // Add a new FastAction to a Viewer using chained methods
+ *     viewer.addAction(new FastAction("Save")
+ *         .image("save")
+ *         .type("primary")
+ *         .onActionPerfomed(evt -> {
+ *             // Custom save logic here
+ *         })
+ *     );
+ * </pre>
+ * </p>
+ *
+ * <p>
+ * You can also use the various constructors and fluent setters to configure name, image, description, renderer, and event handler.
+ * </p>
+ *
+ * @author Mario A. Serrano Leones
  */
 public class FastAction extends AbstractAction {
 
@@ -46,7 +69,7 @@ public class FastAction extends AbstractAction {
     /**
      * Constructor with action name and event handler.
      *
-     * @param name             the name of the action
+     * @param name the name of the action
      * @param onActionPerfomed the event handler
      */
     public FastAction(String name, OnActionPerfomed onActionPerfomed) {
@@ -56,8 +79,8 @@ public class FastAction extends AbstractAction {
     /**
      * Constructor with name, image and event handler.
      *
-     * @param name             the name of the action
-     * @param image            the image for the action
+     * @param name the name of the action
+     * @param image the image for the action
      * @param onActionPerfomed the event handler
      */
     public FastAction(String name, String image, OnActionPerfomed onActionPerfomed) {
@@ -67,9 +90,9 @@ public class FastAction extends AbstractAction {
     /**
      * Constructor with name, image, description and event handler.
      *
-     * @param name             the name of the action
-     * @param image            the image for the action
-     * @param description      the description of the action
+     * @param name the name of the action
+     * @param image the image for the action
+     * @param description the description of the action
      * @param onActionPerfomed the event handler
      */
     public FastAction(String name, String image, String description, OnActionPerfomed onActionPerfomed) {
@@ -79,10 +102,10 @@ public class FastAction extends AbstractAction {
     /**
      * Constructor with name, image, description, renderer and event handler.
      *
-     * @param name             the name of the action
-     * @param image            the image for the action
-     * @param description      the description of the action
-     * @param actionRenderer   the renderer for the action
+     * @param name the name of the action
+     * @param image the image for the action
+     * @param description the description of the action
+     * @param actionRenderer the renderer for the action
      * @param onActionPerfomed the event handler
      */
     public FastAction(String name, String image, String description, ActionRenderer<?> actionRenderer, OnActionPerfomed onActionPerfomed) {
@@ -92,9 +115,9 @@ public class FastAction extends AbstractAction {
     /**
      * Constructor with name, image, renderer and event handler.
      *
-     * @param name             the name of the action
-     * @param image            the image for the action
-     * @param actionRenderer   the renderer for the action
+     * @param name the name of the action
+     * @param image the image for the action
+     * @param actionRenderer the renderer for the action
      * @param onActionPerfomed the event handler
      */
     public FastAction(String name, String image, ActionRenderer<?> actionRenderer, OnActionPerfomed onActionPerfomed) {
@@ -104,11 +127,11 @@ public class FastAction extends AbstractAction {
     /**
      * Full constructor with all properties.
      *
-     * @param id               the id of the action
-     * @param name             the name of the action
-     * @param image            the image for the action
-     * @param description      the description of the action
-     * @param actionRenderer   the renderer for the action
+     * @param id the id of the action
+     * @param name the name of the action
+     * @param image the image for the action
+     * @param description the description of the action
+     * @param actionRenderer the renderer for the action
      * @param onActionPerfomed the event handler
      */
     public FastAction(String id, String name, String image, String description, ActionRenderer<?> actionRenderer,
@@ -130,7 +153,7 @@ public class FastAction extends AbstractAction {
      * Initialization method. Can be overridden for custom initialization.
      */
     protected void init() {
-
+        // Custom initialization logic can be added here
     }
 
     /**
@@ -164,7 +187,7 @@ public class FastAction extends AbstractAction {
     }
 
     /**
-     * Sets the background property and returns this instance.
+     * Sets the background property and returns this instance (fluent API).
      *
      * @param background the background value
      * @return this FastAction instance
@@ -175,7 +198,7 @@ public class FastAction extends AbstractAction {
     }
 
     /**
-     * Sets the color property and returns this instance.
+     * Sets the color property and returns this instance (fluent API).
      *
      * @param color the color value
      * @return this FastAction instance
@@ -186,7 +209,7 @@ public class FastAction extends AbstractAction {
     }
 
     /**
-     * Sets the image property and returns this instance.
+     * Sets the image property and returns this instance (fluent API).
      *
      * @param image the image value
      * @return this FastAction instance
@@ -197,7 +220,7 @@ public class FastAction extends AbstractAction {
     }
 
     /**
-     * Sets the description property and returns this instance.
+     * Sets the description property and returns this instance (fluent API).
      *
      * @param description the description value
      * @return this FastAction instance
@@ -208,7 +231,7 @@ public class FastAction extends AbstractAction {
     }
 
     /**
-     * Sets the name property and returns this instance.
+     * Sets the name property and returns this instance (fluent API).
      *
      * @param name the name value
      * @return this FastAction instance
@@ -219,7 +242,7 @@ public class FastAction extends AbstractAction {
     }
 
     /**
-     * Sets the id property and returns this instance.
+     * Sets the id property and returns this instance (fluent API).
      *
      * @param id the id value
      * @return this FastAction instance
@@ -230,7 +253,7 @@ public class FastAction extends AbstractAction {
     }
 
     /**
-     * Sets the renderer and returns this instance.
+     * Sets the renderer and returns this instance (fluent API).
      *
      * @param actionRenderer the renderer
      * @return this FastAction instance
@@ -241,7 +264,7 @@ public class FastAction extends AbstractAction {
     }
 
     /**
-     * Sets the event handler and returns this instance.
+     * Sets the event handler and returns this instance (fluent API).
      *
      * @param onActionPerfomed the event handler
      * @return this FastAction instance
@@ -252,7 +275,7 @@ public class FastAction extends AbstractAction {
     }
 
     /**
-     * Sets the type property and returns this instance.
+     * Sets the type property and returns this instance (fluent API).
      *
      * @param type the type value
      * @return this FastAction instance

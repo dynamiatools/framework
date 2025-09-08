@@ -11,23 +11,56 @@ import tools.dynamia.viewers.ViewDescriptorFactory;
 
 import java.util.ArrayList;
 
+/**
+ * Loader and factory for application metadata objects.
+ * <p>
+ * This service provides methods to load metadata for the application, entities, and global actions.
+ * It uses {@link ApplicationInfo} and {@link ViewDescriptorFactory} to gather and construct metadata objects for API and UI clients.
+ * <p>
+ * Typical usage is in controllers or service layers that need to expose metadata endpoints.
+ *
+ * @author Mario A. Serrano Leones
+ * @since 2023
+ */
 @Service
 public class ApplicationMetadataLoader {
 
+    /**
+     * Application information source.
+     */
     private final ApplicationInfo applicationInfo;
+    /**
+     * Factory for view descriptors, used to discover entity views.
+     */
     private final ViewDescriptorFactory viewDescriptorFactory;
 
 
+    /**
+     * Constructs a new {@code ApplicationMetadataLoader} with the given application info and view descriptor factory.
+     *
+     * @param applicationInfo the application information source
+     * @param viewDescriptorFactory the factory for view descriptors
+     */
     public ApplicationMetadataLoader(ApplicationInfo applicationInfo, ViewDescriptorFactory viewDescriptorFactory) {
         this.applicationInfo = applicationInfo;
         this.viewDescriptorFactory = viewDescriptorFactory;
     }
 
 
+    /**
+     * Loads the metadata for the application.
+     *
+     * @return the {@link ApplicationMetadata} object
+     */
     public ApplicationMetadata load() {
         return new ApplicationMetadata(applicationInfo);
     }
 
+    /**
+     * Loads the metadata for all entities in the application.
+     *
+     * @return the {@link ApplicationMetadataEntities} object containing all entity metadata
+     */
     public ApplicationMetadataEntities loadEntities() {
         ApplicationMetadataEntities metadata = new ApplicationMetadataEntities();
         metadata.setEntities(new ArrayList<>());
@@ -40,6 +73,11 @@ public class ApplicationMetadataLoader {
         return metadata;
     }
 
+    /**
+     * Loads the metadata for all global actions in the application.
+     *
+     * @return the {@link ApplicationMetadataActions} object containing all global action metadata
+     */
     public ApplicationMetadataActions loadGlobalActions() {
         ApplicationMetadataActions metadata = new ApplicationMetadataActions();
         metadata.setActions(new ArrayList<>());

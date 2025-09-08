@@ -18,9 +18,36 @@
 package tools.dynamia.actions;
 
 /**
- * Allow externals security modules enable actions for specific user roles
+ * Interface for actions that are aware of user roles for security purposes.
+ * <p>
+ * Implementations of this interface allow external security modules to enable or restrict actions
+ * based on specific user roles. This is useful for integrating role-based access control (RBAC)
+ * into the action system, ensuring that only authorized users can execute certain actions.
+ * </p>
+ * <p>
+ * Example usage:
+ * <pre>
+ *     public class AdminOnlyAction implements UserRolesAwareAction {
+ *         @Override
+ *         public String[] getRoles() {
+ *             return new String[] {"ADMIN"};
+ *         }
+ *     }
+ * </pre>
+ * </p>
+ *
+ * @author Mario A. Serrano Leones
  */
 public interface UserRolesAwareAction {
 
+    /**
+     * Returns the array of user roles that are allowed to execute this action.
+     * <p>
+     * The returned array should contain all roles for which this action is enabled. If the array is empty or null,
+     * the action may be considered available to all roles, depending on the implementation.
+     * </p>
+     *
+     * @return an array of allowed user roles
+     */
     String[] getRoles();
 }

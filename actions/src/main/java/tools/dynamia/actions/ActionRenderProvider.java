@@ -18,12 +18,41 @@
 package tools.dynamia.actions;
 
 /**
- * {@link ActionRenderer} provider used when an action don't define an action renderer
+ * Provides a default {@link ActionRenderer} when an {@link Action} does not define its own renderer.
+ * <p>
+ * Implementations of this interface supply a named renderer that can be used to render actions in the UI
+ * when no specific renderer is set for the action. This enables flexible and pluggable rendering strategies
+ * for actions across different UI frameworks or contexts.
+ * </p>
+ * <p>
+ * Example usage:
+ * <pre>
+ *     ActionRenderProvider provider = ...;
+ *     String rendererName = provider.getName();
+ *     ActionRenderer renderer = provider.getActionRenderer();
+ * </pre>
+ * </p>
+ *
+ * @author Mario A. Serrano Leones
  */
 public interface ActionRenderProvider {
 
-	String getName();
+    /**
+     * Returns the name of this action renderer provider.
+     * <p>
+     * The name can be used to identify or select the provider among multiple implementations.
+     * </p>
+     * @return the provider name
+     */
+    String getName();
 
-	ActionRenderer getActionRenderer();
+    /**
+     * Returns the {@link ActionRenderer} instance provided by this provider.
+     * <p>
+     * This renderer will be used to render actions that do not have a specific renderer defined.
+     * </p>
+     * @return the action renderer
+     */
+    ActionRenderer getActionRenderer();
 
 }

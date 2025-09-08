@@ -44,4 +44,17 @@ public class JavaModuleBuilderTest {
         assertEquals(2, module.getPageGroups().size());
         assertEquals(3, module.getFirstPageGroup().getPages().size());
     }
+
+    @Test
+    public void testBuildWithPageGroup() {
+        Module module = new Module("customers", "Customers")
+                .addPageGroup(new PageGroup("page1", "The Page 1", "the/path/page")
+                        .addPage(new Page("page2", "The Page 2", "the/path/page"),
+                                new Page("page3", "The Page 3", "the/path/page"),
+                                new Page("page4", "The Page 4", "the/path/page")
+                        )
+                );
+
+
+    }
 }

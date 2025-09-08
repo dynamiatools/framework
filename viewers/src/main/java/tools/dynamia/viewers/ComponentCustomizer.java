@@ -20,17 +20,17 @@ package tools.dynamia.viewers;
 import java.io.Serializable;
 
 /**
- * The Interface ComponentCustomizer.
+ * Interface for customizing components associated with a field in a view.
  *
- * @param <T> the generic type
+ * @param <T> the type of component to customize
  */
-public interface ComponentCustomizer<T>  extends Serializable {
+public interface ComponentCustomizer<T> extends Serializable {
 
     /**
-     * Cutomize.
+     * Customizes the given component based on the field.
      *
-     * @param field the field
-     * @param component the component
+     * @param field the field to use for customization
+     * @param component the component to customize
      */
     void cutomize(Field field, T component);
 

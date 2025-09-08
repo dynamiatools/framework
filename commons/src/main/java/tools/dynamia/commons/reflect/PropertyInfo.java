@@ -26,57 +26,76 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 /**
- * PropertyInfo.
+ * <p>
+ * PropertyInfo encapsulates metadata about a property of a Java class, including its name, type, owner class, access mode, and reflection details.
+ * It provides utility methods for introspection, such as checking if the property is a collection, array, enum, or standard Java class, and for accessing annotations and field/method information.
+ * </p>
+ *
+ * <p>
+ * This class is commonly used in frameworks and libraries that require runtime introspection of class properties, such as serialization, mapping, UI generation, or validation.
+ * </p>
+ *
+ * <p>
+ * PropertyInfo is immutable except for generic type, collection flag, and read/write methods, which may be set after construction for advanced reflection scenarios.
+ * </p>
  *
  * @author Mario A. Serrano Leones
+ * @since 2023
  */
 public class PropertyInfo implements Serializable {
 
     /**
-     * The Constant serialVersionUID.
+     * Serial version UID for serialization compatibility.
      */
     private static final long serialVersionUID = -7216416220508812001L;
 
     /**
-     * The name.
+     * The property name.
      */
     private final String name;
 
     /**
-     * The type.
+     * The property type.
      */
     private final Class<?> type;
 
     /**
-     * The owner class.
+     * The class that owns this property.
      */
     private final Class<?> ownerClass;
 
     /**
-     * The generic type.
+     * The generic type of the property, if applicable (e.g., for collections).
      */
     private Class<?> genericType;
 
     /**
-     * The collection.
+     * Indicates if the property is a collection type.
      */
     private boolean collection;
 
     /**
-     * The access mode.
+     * The access mode (read/write) for this property.
      */
     private final AccessMode accessMode;
 
+    /**
+     * The method used to read the property value (getter).
+     */
     private Method readMethod;
+
+    /**
+     * The method used to write the property value (setter).
+     */
     private Method writeMethod;
 
     /**
-     * Instantiates a new property info.
+     * Constructs a new PropertyInfo instance with the specified metadata.
      *
-     * @param name       the name
-     * @param type       the type
-     * @param ownerClass the owner class
-     * @param accessMode the access mode
+     * @param name       the property name
+     * @param type       the property type
+     * @param ownerClass the class that owns the property
+     * @param accessMode the access mode (read/write)
      */
     public PropertyInfo(String name, Class<?> type, Class<?> ownerClass, AccessMode accessMode) {
         this.name = name;
@@ -86,60 +105,62 @@ public class PropertyInfo implements Serializable {
     }
 
     /**
-     * Checks if is collection.
+     * Returns true if the property is a collection type (e.g., List, Set).
      *
-     * @return true, if is collection
+     * @return true if the property is a collection
      */
     public boolean isCollection() {
         return collection;
     }
 
     /**
-     * Checks if is enum.
+     * Returns true if the property type is an enum.
      *
-     * @return true, if is enum
+     * @return true if the property is an enum
      */
     public boolean isEnum() {
         return getType().isEnum();
     }
 
     /**
-     * Checks if is array.
+     * Returns true if the property type is an array.
      *
-     * @return true, if is array
+     * @return true if the property is an array
      */
     public boolean isArray() {
         return getType().isArray();
     }
 
     /**
-     * Check if this property is primitive or belong to java.lang, java.util or java.math packages
+     * Returns true if the property type is a primitive or belongs to java.lang, java.util, or java.math packages.
+     *
+     * @return true if the property is a standard Java class
      */
     public boolean isStandardClass() {
         return BeanUtils.isStantardClass(getType());
     }
 
     /**
-     * Checks if is.
+     * Returns true if the property type is assignable from the specified class.
      *
-     * @param clazz the clazz
-     * @return true, if successful
+     * @param clazz the class to check
+     * @return true if the property type is assignable from clazz
      */
     public boolean is(Class<?> clazz) {
         return BeanUtils.isAssignable(getType(), clazz);
     }
 
     /**
-     * Sets the collection.
+     * Sets whether the property is a collection type.
      *
-     * @param collection the new collection
+     * @param collection true if the property is a collection
      */
     public void setCollection(boolean collection) {
         this.collection = collection;
     }
 
     /**
-     * Gets the generic type.
+     * Returns the generic type of the property, if applicable.
      *
      * @return the generic type
      */
@@ -148,16 +169,16 @@ public class PropertyInfo implements Serializable {
     }
 
     /**
-     * Sets the generic type.
+     * Sets the generic type of the property.
      *
-     * @param genericType the new generic type
+     * @param genericType the generic type to set
      */
     public void setGenericType(Class<?> genericType) {
         this.genericType = genericType;
     }
 
     /**
-     * Gets the access mode.
+     * Returns the access mode (read/write) for this property.
      *
      * @return the access mode
      */
@@ -166,25 +187,25 @@ public class PropertyInfo implements Serializable {
     }
 
     /**
-     * Gets the name.
+     * Returns the property name.
      *
-     * @return the name
+     * @return the property name
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Gets the type.
+     * Returns the property type.
      *
-     * @return the type
+     * @return the property type
      */
     public Class<?> getType() {
         return type;
     }
 
     /**
-     * Gets the owner class.
+     * Returns the class that owns this property.
      *
      * @return the owner class
      */
@@ -192,32 +213,57 @@ public class PropertyInfo implements Serializable {
         return ownerClass;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Returns a human-readable string representation of the property name, with spaces and capitalization.
      *
-     * @see java.lang.Object#toString()
+     * @return a formatted property name
      */
     @Override
     public String toString() {
         return StringUtils.capitalize(StringUtils.addSpaceBetweenWords(name));
     }
 
+    /**
+     * Returns the method used to read the property value (getter), or null if not available.
+     *
+     * @return the read method
+     */
     public Method getReadMethod() {
         return readMethod;
     }
 
+    /**
+     * Returns the method used to write the property value (setter), or null if not available.
+     *
+     * @return the write method
+     */
     public Method getWriteMethod() {
         return writeMethod;
     }
 
+    /**
+     * Sets the method used to write the property value (setter).
+     *
+     * @param writeMethod the write method to set
+     */
     public void setWriteMethod(Method writeMethod) {
         this.writeMethod = writeMethod;
     }
 
+    /**
+     * Sets the method used to read the property value (getter).
+     *
+     * @param readMethod the read method to set
+     */
     public void setReadMethod(Method readMethod) {
         this.readMethod = readMethod;
     }
 
+    /**
+     * Returns the {@link Field} object for this property, or null if not found.
+     *
+     * @return the field representing this property, or null if not found
+     */
     public Field getField() {
         if (ownerClass != null) {
             try {
@@ -229,6 +275,12 @@ public class PropertyInfo implements Serializable {
         return null;
     }
 
+    /**
+     * Returns true if the property or its getter method is annotated with the specified annotation class.
+     *
+     * @param annotationClass the annotation class to check
+     * @return true if the annotation is present
+     */
     public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
         Boolean result = null;
         Field field = getField();
@@ -247,6 +299,13 @@ public class PropertyInfo implements Serializable {
         return result;
     }
 
+    /**
+     * Returns the annotation of the specified type present on the property or its getter method, or null if not found.
+     *
+     * @param annotationClass the annotation class to retrieve
+     * @param <A> the annotation type
+     * @return the annotation instance, or null if not present
+     */
     public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
         A result = null;
         Field field = getField();
@@ -260,6 +319,11 @@ public class PropertyInfo implements Serializable {
         return result;
     }
 
+    /**
+     * Returns true if the property is marked as transient (not persisted).
+     *
+     * @return true if the property is transient
+     */
     public boolean isTransient() {
         Field field = getField();
         if (field != null) {

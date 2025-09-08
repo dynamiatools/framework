@@ -22,13 +22,17 @@ package tools.dynamia.viewers;
  *
  * @author Mario A. Serrano Leones
  */
+
+/**
+ * Interface for customizing fields in a view, based on the view type.
+ */
 public interface FieldCustomizer {
 
     /**
-     * Customize.
+     * Customizes the given field for the specified view type.
      *
-     * @param viewTypeName the view type name
-     * @param field the field
+     * @param viewTypeName the name of the view type
+     * @param field the field to customize
      */
     void customize(String viewTypeName, Field field);
 }

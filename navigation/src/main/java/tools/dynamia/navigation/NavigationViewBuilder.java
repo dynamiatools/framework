@@ -17,16 +17,47 @@
 package tools.dynamia.navigation;
 
 /**
- * Builder for navigation UI like menus or trees
+ * Builder interface for creating navigation UI components such as menus or trees.
+ * <p>
+ * Implementations of this interface are responsible for constructing views that represent
+ * the application's navigation structure, including modules, page groups, and individual pages.
+ * </p>
+ * <p>
+ * Usage: Use this builder to generate navigation views dynamically based on the application's
+ * configuration or user permissions.
+ * </p>
+ *
+ * @param <V> the type of navigation view produced by this builder
  * @author Mario A. Serrano Leones
+ * @since 2023
  */
 public interface NavigationViewBuilder<V> {
 
+    /**
+     * Returns the navigation view instance built by this builder.
+     *
+     * @return the navigation view of type {@code V}
+     */
     V getNavigationView();
 
+    /**
+     * Creates and adds a view for the specified module to the navigation UI.
+     *
+     * @param module the {@link Module} to represent in the navigation view
+     */
     void createModuleView(Module module);
 
+    /**
+     * Creates and adds a view for the specified page group to the navigation UI.
+     *
+     * @param pageGroup the {@link PageGroup} to represent in the navigation view
+     */
     void createPageGroupView(PageGroup pageGroup);
 
+    /**
+     * Creates and adds a view for the specified page to the navigation UI.
+     *
+     * @param page the {@link Page} to represent in the navigation view
+     */
     void createPageView(Page page);
 }
