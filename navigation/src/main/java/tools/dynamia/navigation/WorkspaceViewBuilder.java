@@ -20,17 +20,61 @@ import java.io.Serializable;
 import java.util.Map;
 
 /**
- * Workspace is the main area of application content. For example a simple DIV in a web page or MultiTab interface
+ * Builder interface for managing the main workspace area of the application.
+ * <p>
+ * Implementations of this interface are responsible for initializing, building, updating,
+ * and closing views for pages within the workspace. The workspace typically represents the
+ * primary content area, such as a DIV in a web page or a multi-tab interface in a desktop application.
+ * </p>
+ * <p>
+ * Usage: Use this builder to control the lifecycle and presentation of pages in the workspace,
+ * including dynamic updates and resource management.
+ * </p>
  *
+ * @param <T> the type of the workspace container managed by this builder
  * @author Mario A. Serrano Leones
+ * @since 2023
  */
 public interface WorkspaceViewBuilder<T> extends Serializable {
 
+    /**
+     * Initializes the workspace with the specified container.
+     * <p>
+     * This method should prepare the workspace for displaying content, setting up necessary resources or UI components.
+     * </p>
+     *
+     * @param container the workspace container of type {@code T}
+     */
     void init(T container);
 
+    /**
+     * Builds and displays the specified page in the workspace.
+     * <p>
+     * This method is responsible for rendering the page's content and integrating it into the workspace layout.
+     * </p>
+     *
+     * @param page the {@link Page} to build and display
+     */
     void build(Page page);
 
+    /**
+     * Updates the specified page in the workspace with new parameters.
+     * <p>
+     * This method allows dynamic changes to the page's content or state based on the provided parameters.
+     * </p>
+     *
+     * @param page the {@link Page} to update
+     * @param params a map of parameters to apply to the page
+     */
     void update(Page page, Map<String, Serializable> params);
 
+    /**
+     * Closes the specified page in the workspace, releasing resources and removing it from view.
+     * <p>
+     * This method should handle cleanup and ensure the workspace remains consistent after the page is closed.
+     * </p>
+     *
+     * @param page the {@link Page} to close
+     */
     void close(Page page);
 }

@@ -17,27 +17,48 @@
 package tools.dynamia.navigation;
 
 /**
- * Listener for navigation events
+ * Listener interface for navigation events within the application workspace.
+ * <p>
+ * Implement this interface to handle lifecycle events of pages, such as loading, unloading, and closing.
+ * This allows custom logic to be executed when navigation changes occur.
+ * </p>
+ * <p>
+ * Typical usage includes tracking user activity, managing resources, or updating UI components
+ * in response to navigation events.
+ * </p>
  *
  * @author Ing. Mario Serrano Leones
+ * @since 2023
  */
 public interface NavigationListener {
 
     /**
-     * Fired when some page in loaded
+     * Invoked when a page is loaded and becomes active in the workspace.
+     * <p>
+     * This event is typically fired after the page's initialization and before user interaction.
+     * </p>
      *
+     * @param evt the {@link PageEvent} containing details about the loaded page
      */
     void onPageLoad(PageEvent evt);
 
     /**
-     * Fired when current page is unloaded
+     * Invoked when the current page is unloaded from the workspace.
+     * <p>
+     * This event is fired before the page is removed or replaced, allowing cleanup or state saving.
+     * </p>
      *
+     * @param evt the {@link PageEvent} containing details about the unloaded page
      */
     void onPageUnload(PageEvent evt);
 
     /**
-     * Fired some page is closed
+     * Invoked when a page is closed permanently in the workspace.
+     * <p>
+     * This event is fired when the page is no longer available for navigation, such as when a tab is closed.
+     * </p>
      *
+     * @param evt the {@link PageEvent} containing details about the closed page
      */
     void onPageClose(PageEvent evt);
 }
