@@ -4,6 +4,7 @@ import tools.dynamia.actions.ActionLoader;
 import tools.dynamia.actions.ApplicationGlobalAction;
 import tools.dynamia.app.ApplicationInfo;
 import tools.dynamia.app.controllers.ApplicationMetadataController;
+import tools.dynamia.commons.ApplicableClass;
 import tools.dynamia.crud.CrudAction;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.viewers.ViewDescriptorFactory;
