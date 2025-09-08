@@ -141,11 +141,8 @@ public class EntityFiltersPanel extends Borderlayout implements View {
         }
 
         List<Field> fields = ViewRendererUtil.filterRenderableFields(this, viewDescriptor);
-        DefaultFieldCustomizer defaultFieldCustomizer = new DefaultFieldCustomizer();
+
         for (Field field : fields) {
-            field.setComponent(null);
-            field.setComponentClass(null);
-            defaultFieldCustomizer.customize("form", field);
 
             EntityFilterCustomizer filterCustomizer = null;
             try {
@@ -218,6 +215,9 @@ public class EntityFiltersPanel extends Borderlayout implements View {
         String label = buildFilterLabel(field, prop);
 
         DefaultFieldCustomizer.configureForm(field);
+        DefaultFieldCustomizer.customizeDateboxBindings(field);
+        DefaultFieldCustomizer.customizeDateSelectorBinding(field);
+        DefaultFieldCustomizer.customizeTimeboxBindings(field);
 
         QueryCondition qc = BeanUtils.newInstance(filterCondition.getConditionClass());
         Vlayout filterGroup = new Vlayout();

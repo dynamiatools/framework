@@ -59,7 +59,7 @@ public class ViewDataAction extends AbstractCrudAction implements ReadableOnly {
         setName(Messages.get(ViewDataAction.class, "viewData"));
         setImage("info");
         setGroup(ActionGroup.get("CRUD"));
-        setPosition(0);
+        setPosition(1.01f);
         setMenuSupported(true);
     }
 
@@ -72,6 +72,7 @@ public class ViewDataAction extends AbstractCrudAction implements ReadableOnly {
 
     /**
      * Reload entity data within transaction a show the data
+     *
      * @param data
      */
     public void reloadAndView(final Object data) {
