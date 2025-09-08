@@ -17,7 +17,49 @@
 
 package tools.dynamia.reports;
 
+/**
+ * The Interface ExporterFieldLoader. Used to load field values for report export.
+ * This interface provides a customizable mechanism for extracting and transforming field
+ * values from data objects during report export processes. Field loaders enable complex
+ * data transformation, computed field generation, nested property access, and custom
+ * formatting before values are written to export formats like Excel, CSV, or XML.
+ * They are essential for creating flexible and maintainable export solutions in reporting systems.
+ * <br><br>
+ * <b>Usage:</b><br>
+ * <br>
+ * <code>
+ * public class UserFieldLoader implements ExporterFieldLoader&lt;User&gt; {
+ *     
+ *     public Object load(String field, User user) {
+ *         switch (field) {
+ *             case "fullName":
+ *                 return user.getFirstName() + " " + user.getLastName();
+ *             case "age":
+ *                 return calculateAge(user.getBirthDate());
+ *             case "status":
+ *                 return user.isActive() ? "Active" : "Inactive";
+ *             default:
+ *                 return BeanUtils.getFieldValue(field, user);
+ *         }
+ *     }
+ * }
+ * 
+ * // Usage in exporter
+ * ExporterFieldLoader&lt;User&gt; loader = new UserFieldLoader();
+ * Object value = loader.load("fullName", user);
+ * </code>
+ *
+ * @param <T> the type of data being processed
+ * @author Mario A. Serrano Leones
+ */
 public interface ExporterFieldLoader<T> {
 
+    /**
+     * Loads the value for a specific field from the given data.
+     *
+     * @param field the field name
+     * @param data the data object
+     * @return the loaded field value
+     */
     Object load(String field, T data);
 }
