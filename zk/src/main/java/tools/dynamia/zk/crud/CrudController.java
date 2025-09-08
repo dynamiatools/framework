@@ -238,6 +238,8 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
         } catch (QueryInterruptedException e) {
             logger.error(e);
             UIMessages.showMessageDialog(messages.get("searchInterruptedMessage"), messages.get("error"), MessageType.ERROR);
+        } catch (ValidationError error) {
+            UIMessages.showMessage(error.getMessage(), MessageType.ERROR);
         } catch (Exception e) {
             logger.error(e);
             UIMessages.showException(messages.get("searchErrorMessage", e.getMessage()), e);
