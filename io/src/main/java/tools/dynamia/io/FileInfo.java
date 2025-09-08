@@ -25,7 +25,35 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * The Class FileInfo.
+ * Represents information about a file, including metadata such as name, description, size, date, extension, and directory status.
+ * <p>
+ * Provides utility methods for file operations and metadata management.
+ * <p>
+ * <b>Usage Example:</b>
+ * <pre>
+ *     FileInfo info = new FileInfo(new File("/tmp/test.txt"));
+ *     System.out.println(info.getName());
+ *     System.out.println(info.getFileSize());
+ *     info.addMetadata("owner", "admin");
+ *     Object owner = info.getMetadata("owner");
+ * </pre>
+ *
+ * <b>Important Methods:</b>
+ * <ul>
+ *   <li>{@link #getName()} - Returns the file name.</li>
+ *   <li>{@link #getFile()} - Returns the underlying File object.</li>
+ *   <li>{@link #getFileSize()} - Returns the formatted file size.</li>
+ *   <li>{@link #getFileDate()} - Returns the last modified date.</li>
+ *   <li>{@link #getExtension()} - Returns the file extension.</li>
+ *   <li>{@link #isDirectory()} - Checks if the file is a directory.</li>
+ *   <li>{@link #isReadOnly()} - Checks if the file is read-only.</li>
+ *   <li>{@link #delete()} - Deletes the file (throws FileException if read-only).</li>
+ *   <li>{@link #addMetadata(String, Object)} - Adds custom metadata.</li>
+ *   <li>{@link #getMetadata(String)} - Retrieves custom metadata.</li>
+ * </ul>
+ *
+ * @author Dynamia Soluciones IT S.A.S
+ * @since 1.0
  */
 public class FileInfo {
 

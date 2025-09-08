@@ -31,40 +31,66 @@ import java.net.URLConnection;
 
 
 /**
- * The Class ImageUtil.
+ * Utility class for image manipulation and processing.
+ * <p>
+ * Provides methods for resizing images, converting formats, checking image types,
+ * color analysis, and generating QR codes.
+ * </p>
  */
 public class ImageUtil {
 
+    /**
+     * File extension for JPG images.
+     */
     public static final String DOT_JPG = ".jpg";
+    /**
+     * Format name for JPG images.
+     */
     public static final String JPG = "jpg";
+    /**
+     * File extension for JPEG images.
+     */
     public static final String DOT_JPEG = ".jpeg";
 
+    /**
+     * File extension for WEBP images.
+     */
     public static final String DOT_WEBP = ".webp";
+    /**
+     * Format name for PNG images.
+     */
     public static final String PNG = "png";
+    /**
+     * Format name for GIF images.
+     */
     public static final String GIF = "gif";
 
+    /**
+     * Format name for WEBP images.
+     */
     public static final String WEBP = "webp";
 
     /**
-     * Resize jpeg image.
+     * Resize a JPEG image to the specified width and height.
      *
-     * @param input       the input
-     * @param output      the output
-     * @param thumbWidth  the thumb width
-     * @param thumbHeight the thumb height
+     * @param input      the input JPEG file
+     * @param output     the output file
+     * @param thumbWidth the desired width
+     * @param thumbHeight the desired height
      */
     public static void resizeJPEGImage(File input, File output, int thumbWidth, int thumbHeight) {
         resizeImage(input, output, "jpeg", thumbWidth, thumbHeight);
     }
 
     /**
-     * Resize image. See {@link ImageScaler} for custom image resize
+     * Resize an image to the specified width and height.
+     * See {@link ImageScaler} for custom image resize.
      *
-     * @param input       the input
-     * @param output      the output
-     * @param formatName  the format name
-     * @param thumbWidth  the thumb width
-     * @param thumbHeight the thumb height
+     * @param input      the input image file
+     * @param output     the output file
+     * @param formatName the format name (e.g., "jpg", "png")
+     * @param thumbWidth the desired width
+     * @param thumbHeight the desired height
      */
     public static void resizeImage(File input, File output, String formatName, int thumbWidth, int thumbHeight) {
         try {
@@ -80,10 +106,10 @@ public class ImageUtil {
     }
 
     /**
-     * Checks if is image.
+     * Checks if the given file is an image based on its extension or MIME type.
      *
-     * @param file the file
-     * @return true, if is image
+     * @param file the file to check
+     * @return true if the file is an image, false otherwise
      */
     public static boolean isImage(File file) {
         if (!file.exists()) {
@@ -100,16 +126,22 @@ public class ImageUtil {
     }
 
     /**
-     * Gets the mimetype.
+     * Gets the MIME type of the given file based on its name.
      *
      * @param file the file
-     * @return the mimetype
+     * @return the MIME type as a String
      */
     public static String getMimetype(File file) {
 
         return URLConnection.guessContentTypeFromName(file.getName());
     }
 
+    /**
+     * Calculates the brightness of a color string.
+     *
+     * @param colorStr the color string (e.g., "#FFFFFF" or "RED")
+     * @return the brightness value, or -1 if invalid
+     */
     public static int getBrightness(String colorStr) {
         Color c = getColor(colorStr);
         if (c != null) {
@@ -122,6 +154,12 @@ public class ImageUtil {
         }
     }
 
+    /**
+     * Converts a color string to a {@link Color} object.
+     *
+     * @param colorStr the color string (e.g., "#FFFFFF" or "RED")
+     * @return the {@link Color} object, or null if invalid
+     */
     public static Color getColor(String colorStr) {
 
         if (colorStr == null) {
@@ -139,17 +177,31 @@ public class ImageUtil {
         return null;
     }
 
+    /**
+     * Determines if a color is considered dark.
+     *
+     * @param color the color string
+     * @return true if the color is dark, false otherwise
+     */
     public static boolean isDark(String color) {
         return getBrightness(color) < 130;
     }
 
+    /**
+     * Determines if a color is considered light.
+     *
+     * @param color the color string
+     * @return true if the color is light, false otherwise
+     */
     public static boolean isLight(String color) {
         return getBrightness(color) >= 130;
     }
 
     /**
-     * Convert a png file to jpg
+     * Converts a PNG file to a JPG file.
      *
+     * @param input the input PNG file
+     * @return the output JPG file
      */
     public static File convertPngToJpg(File input) {
         try {
@@ -170,6 +222,12 @@ public class ImageUtil {
         }
     }
 
+    /**
+     * Gets the width of an image file.
+     *
+     * @param image the image file
+     * @return the width, or -1 if unable to read
+     */
     public static int getWidth(File image) {
         try {
             return ImageIO.read(image).getWidth();
@@ -178,6 +236,12 @@ public class ImageUtil {
         }
     }
 
+    /**
+     * Gets the height of an image file.
+     *
+     * @param image the image file
+     * @return the height, or -1 if unable to read
+     */
     public static int getHeight(File image) {
         try {
             return ImageIO.read(image).getHeight();
@@ -187,24 +251,32 @@ public class ImageUtil {
     }
 
     /**
-     * Generate QR code jpg image in a temporal file
+     * Generates a QR code as a JPG image in a temporary file.
      *
+     * @param content the content to encode in the QR code
+     * @return the temporary file containing the QR code image
      */
     public static File generateQR(String content) {
         return QRCode.from(content).to(ImageType.JPG).file();
     }
 
     /**
-     * Generate QR code jpg image in a temporal file with specific width and height
+     * Generates a QR code as a JPG image in a temporary file with specific width and height.
      *
+     * @param content the content to encode in the QR code
+     * @param width   the width of the QR code image
+     * @param height  the height of the QR code image
+     * @return the temporary file containing the QR code image
      */
     public static File generateQR(String content, int width, int height) {
         return QRCode.from(content).withSize(width, height).to(ImageType.JPG).file();
     }
 
     /**
-     * Generate qr code in base 64
+     * Generates a QR code as a Base64-encoded string.
      *
+     * @param content the content to encode in the QR code
+     * @return the Base64-encoded QR code image
      */
     public static String generateQRBase64(String content) {
         try {
@@ -215,8 +287,12 @@ public class ImageUtil {
     }
 
     /**
-     * Generate qr code in base 64 with specific width and height
+     * Generates a QR code as a Base64-encoded string with specific width and height.
      *
+     * @param content the content to encode in the QR code
+     * @param width   the width of the QR code image
+     * @param height  the height of the QR code image
+     * @return the Base64-encoded QR code image
      */
     public static String generateQRBase64(String content, int width, int height) {
         try {
@@ -227,6 +303,9 @@ public class ImageUtil {
     }
 
 
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private ImageUtil() {
     }
 

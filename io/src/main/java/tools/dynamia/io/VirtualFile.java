@@ -81,20 +81,57 @@ public class VirtualFile extends File {
         canWrite = true;
     }
 
+    /**
+     * Lists child file paths.
+     *
+     * @return an array of child file paths
+     */
     @Override
     public String[] list() {
         return getChildren().stream().map(File::getPath).toArray(String[]::new);
     }
 
+    /**
+     * Lists child files as File objects.
+     *
+     * @return an array of child files
+     */
+    @Override
+    public File[] listFiles() {
+        return getChildren().toArray(new File[0]);
+    }
+
+    /**
+     * Checks if the file is writable.
+     *
+     * @return true if the file is writable, false otherwise
+     */
+    public boolean isCanWrite() {
+        return canWrite;
+
+    /**
+     * Returns the virtual file length.
+     *
+     * @return the length of the virtual file
+     */
+    @Override
+    public long length() {
+        return length;
+    }
     @Override
     public String[] list(FilenameFilter filter) {
         return getChildren().stream().filter(f -> filter.accept(f.getParentFile(), f.getName())).map(File::getPath)
                 .toArray(String[]::new);
     }
 
+    /**
+     * Checks if the file is a directory.
+     *
+     * @return true if the file is a directory, false otherwise
+     */
     @Override
-    public File[] listFiles() {
-        return getChildren().toArray(new File[0]);
+    public boolean isDirectory() {
+        return directory;
     }
 
     @Override
@@ -103,36 +140,14 @@ public class VirtualFile extends File {
         return getChildren().stream().filter(filter::accept).toArray(File[]::new);
     }
 
-    public boolean isCanWrite() {
-        return canWrite;
-    }
-
-    public void setCanWrite(boolean canWrite) {
-        this.canWrite = canWrite;
-    }
-
-    @Override
-    public long length() {
-        return length;
-    }
-
-    public void setLength(long length) {
-        this.length = length;
-    }
-
-    @Override
-    public boolean isDirectory() {
-        return directory;
-    }
-
-    public void setDirectory(boolean directory) {
-        this.directory = directory;
-    }
-
+     * Returns the list of child files.
+     *
+     * @return the list of child files
+     */
     public List<File> getChildren() {
         return children;
     }
-
+     */
     @Override
     public boolean delete() {
         if (canWrite) {
@@ -140,6 +155,3 @@ public class VirtualFile extends File {
         } else {
             return false;
         }
-    }
-
-}
