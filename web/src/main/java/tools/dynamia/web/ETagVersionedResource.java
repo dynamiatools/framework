@@ -14,13 +14,13 @@ import java.net.URL;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 
-public class FileNameVersionedResource extends AbstractResource implements HttpResource {
+public class ETagVersionedResource extends AbstractResource implements HttpResource {
 
     private final Resource original;
 
     private final String version;
 
-    public FileNameVersionedResource(Resource original, String version) {
+    public ETagVersionedResource(Resource original, String version) {
         this.original = original;
         this.version = version;
     }

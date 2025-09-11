@@ -24,6 +24,7 @@ import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import tools.dynamia.templates.ApplicationTemplate;
 import tools.dynamia.templates.ApplicationTemplates;
+import tools.dynamia.web.ETagVersionedResource;
 
 import java.io.IOException;
 import java.util.List;
@@ -78,6 +79,7 @@ public class ApplicationTemplateResourceHandler extends ResourceHttpRequestHandl
                     try {
                         resource = new ClassPathResource(path);
                         resource.getURL(); //test if exit
+                        resource = new ETagVersionedResource(resource, appInfo.getVersion());
                     } catch (IOException ex) {
                         resource = null;
                     }
