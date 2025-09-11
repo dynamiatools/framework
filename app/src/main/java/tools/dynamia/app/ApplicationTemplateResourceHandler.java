@@ -44,6 +44,8 @@ public class ApplicationTemplateResourceHandler extends ResourceHttpRequestHandl
 
 
     private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
+    public static final String STATIC = "/static/";
+    public static final String WEB_TEMPLATES = "/web/templates/";
 
     private final ApplicationInfo appInfo;
     private String relativeContext;
@@ -68,13 +70,13 @@ public class ApplicationTemplateResourceHandler extends ResourceHttpRequestHandl
             return resource;
         } else {
             try {
-                String templateResourcePath = "/web/templates/" + theme.getName().toLowerCase() + path;
+                String templateResourcePath = WEB_TEMPLATES + theme.getName().toLowerCase() + path;
                 resource = new ClassPathResource(templateResourcePath, theme.getClass());
                 resource.getURL(); //test URL
             } catch (IOException e) {
                 if (isStaticResource(path)) {
-                    if (!path.startsWith("/static/")) {
-                        path = "/static/" + path;
+                    if (!path.startsWith(STATIC)) {
+                        path = STATIC + path;
                     }
                     try {
                         resource = new ClassPathResource(path);
