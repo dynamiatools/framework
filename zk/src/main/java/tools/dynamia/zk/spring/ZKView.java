@@ -19,6 +19,7 @@ package tools.dynamia.zk.spring;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.view.InternalResourceView;
+import org.zkoss.zk.ui.Executions;
 
 import java.util.Map;
 
@@ -28,33 +29,27 @@ import java.util.Map;
  */
 public class ZKView extends InternalResourceView {
 
-	private String realPath;
-	private boolean cacheable;
+    private final String url;
 
-	public String getRealPath() {
-		return realPath;
-	}
+    public ZKView(String url) {
+        this.url = url;
+    }
 
-	public void setRealPath(String realPath) {
-		this.realPath = realPath;
-	}
+    @Override
+    public String getContentType() {
+        return "text/html;charset=UTF-8";
+    }
 
-	public boolean isCacheable() {
-		return cacheable;
-	}
-
-	public void setCacheable(boolean cacheable) {
-		this.cacheable = cacheable;
-	}
-
-	@Override
-	protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
-
-		model.put("realPath", realPath);
-		model.put("cacheable", isCacheable());
-
-		super.renderMergedOutputModel(model, request, response);
-	}
+    @Override
+    public void render(java.util.Map<String, ?> model,
+                       HttpServletRequest request,
+                       HttpServletResponse response) throws Exception {
+        // Pasar atributos del modelo al request
+        if (model != null) {
+            model.forEach(request::setAttribute);
+        }
+        // Renderizar el .zul usando ZK
+        Executions.createComponents(url, null, model);
+    }
 
 }

@@ -90,8 +90,8 @@
 
         <!--Reports -->
         <jasperreports.version>6.21.4</jasperreports.version>
-        <poi.version>5.4.0</poi.version>
-        <snakeyaml.version>2.4</snakeyaml.version>
+        <poi.version>5.4.1</poi.version>
+        <snakeyaml.version>2.5</snakeyaml.version>
         <zxing.version>3.5.3</zxing.version>
         <velocity.version>2.4.1</velocity.version>
 
@@ -124,7 +124,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.11.2</version>
+                <version>3.11.3</version>
                 <configuration>
                     <failOnError>false</failOnError>
                     <doclint>none</doclint>
@@ -138,12 +138,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>3.5.3</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>3.5.3</version>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.central</groupId>

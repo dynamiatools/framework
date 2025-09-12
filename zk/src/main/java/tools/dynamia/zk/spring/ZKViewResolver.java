@@ -16,16 +16,18 @@
  */
 package tools.dynamia.zk.spring;
 
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import tools.dynamia.web.ChainableUrlBasedViewResolver;
 
 /**
  *
  * @author Mario A. Serrano Leones
  */
-public class ZKViewResolver extends InternalResourceViewResolver {
+public class ZKViewResolver extends ChainableUrlBasedViewResolver {
 
     public ZKViewResolver() {
+
         setViewClass(ZKView.class);
     }
+
 
 }

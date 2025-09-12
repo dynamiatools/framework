@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Configure ZK with Spring MVC
+ * Default Global MVC Configuration for DynamiaTools applications.
  *
  * @author Mario A. Serrano Leones
  */
@@ -87,25 +87,6 @@ public class MvcConfiguration implements WebMvcConfigurer {
         return vr;
     }
 
-    @Bean
-    public ViewResolver zkViewResolver(ApplicationInfo applicationInfo) {
-        UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
-        vr.setOrder(getViewResolverOrder(applicationInfo, "zkViewResolverOrder", 9));
-        vr.setPrefix("/zkau/web/views/");
-        vr.setSuffix(".zul");
-        vr.setCache(applicationInfo.isWebCacheEnabled());
-        return vr;
-    }
-
-    @Bean
-    public ViewResolver themeZulViewResolver(ApplicationInfo applicationInfo) {
-        UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
-        vr.setOrder(getViewResolverOrder(applicationInfo, "themeZulViewResolverOrder", 100));
-        vr.setPrefix("/zkau/web/templates/" + applicationInfo.getTemplate().toLowerCase() + "/views/");
-        vr.setSuffix(".zul");
-        vr.setCache(applicationInfo.isWebCacheEnabled());
-        return vr;
-    }
 
     /**
      * Resolve ZHTML templates
