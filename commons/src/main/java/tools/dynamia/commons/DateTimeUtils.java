@@ -16,6 +16,7 @@
  */
 package tools.dynamia.commons;
 
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -657,6 +658,8 @@ public final class DateTimeUtils {
         Instant instant = null;
         if (input instanceof java.sql.Date) {
             instant = Instant.ofEpochMilli(input.getTime());
+        } else if (input instanceof Time) {
+            instant = ((Time) input).toLocalTime().atDate(LocalDate.of(1970, 1, 1)).atZone(ZoneId.systemDefault()).toInstant();
         } else {
             instant = input.toInstant();
         }
@@ -705,6 +708,8 @@ public final class DateTimeUtils {
         Instant instant = null;
         if (input instanceof java.sql.Date) {
             instant = Instant.ofEpochMilli(input.getTime());
+        } else if (input instanceof Time time) {
+            return time.toLocalTime();
         } else {
             instant = input.toInstant();
         }
