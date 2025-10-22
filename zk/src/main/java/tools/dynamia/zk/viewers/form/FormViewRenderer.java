@@ -28,6 +28,7 @@ import org.zkoss.zk.ui.HtmlBasedComponent;
 import org.zkoss.zul.*;
 import org.zkoss.zul.impl.InputElement;
 import org.zkoss.zul.impl.NumberInputElement;
+import tools.dynamia.actions.ActionLoader;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
@@ -98,9 +99,10 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         view._realCols = realCols;
         view._rows = renderRows(view, descriptor, realCols, value);
         view.setValue(value);
-
+        renderActions(view, descriptor, value);
         return view;
     }
+
 
     // protected METHODS
     protected int renderHeaders(FormView<T> view, ViewDescriptor d) {
@@ -556,5 +558,20 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
     public void setMessagesProvider(LocalizedMessagesProvider messagesProvider) {
         this.messagesProvider = messagesProvider;
+    }
+
+
+    /**
+     * Render view descriptors actions
+     *
+     * @param view
+     * @param descriptor
+     * @param value
+     */
+    protected void renderActions(FormView<T> view, ViewDescriptor descriptor, T value) {
+        if (descriptor.getActions() != null && !descriptor.getActions().isEmpty()) {
+            ActionLoader<ViewAction> loader = new ActionLoader<>(ViewAction.class);
+            descriptor.getActions().forEach(actionRef -> loader.loadByReference(actionRef).ifPresent(view::addAction));
+        }
     }
 }
