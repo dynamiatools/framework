@@ -17,6 +17,7 @@
 package tools.dynamia.viewers.impl;
 
 import org.yaml.snakeyaml.Yaml;
+import tools.dynamia.actions.ActionReference;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
@@ -28,14 +29,10 @@ import tools.dynamia.viewers.util.Viewers;
 
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
+import static tools.dynamia.commons.Lambdas.ifValid;
 import static tools.dynamia.viewers.util.ViewersExpressionUtil.$s;
 
 /**
@@ -50,6 +47,8 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
     private static final String FIELD_REQUIRED = "required";
     private static final String VD_LAYOUT = "layout";
     private static final String FIELD_ICON = "icon";
+    private static final String FIELD_TYPE = "type";
+    private static final String FIELD_ATTRIBUTES = "attributes";
     private static final String FIELD_SHOW_ICON_ONLY = "showIconOnly";
     private static final String FIELD_PARAMS = "params";
     private static final String FIELD_VISIBLE = "visible";
@@ -60,6 +59,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
     private static final String FIELD_COMPONENT = "component";
     private static final String FIELD_DESCRIPTION = "description";
     private static final String FIELD_LABEL = "label";
+    private static final String FIELD_ID = "label";
     private static final String FIELD_COLLAPSE = "collapse";
     private static final String FIELD_ACTION = "action";
     private static final String VD_FIELDS = "fields";
@@ -117,12 +117,8 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
                                List<ViewDescriptorReaderCustomizer> customizers) {
         try {
             Yaml yml = new Yaml();
-
             Map map = yml.load(reader);
-
-
             parseExpressions(map);
-
             return runViewDescriptorReaderCustomizer(map, customizers);
         } catch (Exception ex) {
             throw new ViewDescriptorReaderException(
@@ -538,20 +534,21 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
                 Map<?, ?> actionsProps = entry.getValue();
 
                 if (actionsProps != null) {
-                    ActionRef action = new ActionRef();
+                    ActionReference action = new ActionReference();
                     action.setId(entry.getKey());
+                    ifValid(actionsProps.get(FIELD_ID), v -> action.setId(v.toString()));
                     setValue(action, Viewers.PARAM_WIDTH, String.class, actionsProps);
                     setValue(action, Viewers.PARAM_VISIBLE, Boolean.class, actionsProps);
-                    setValue(action, Viewers.PARAM_WIDTH, String.class, actionsProps);
                     setValue(action, FIELD_LABEL, String.class, actionsProps);
                     setValue(action, FIELD_DESCRIPTION, String.class, actionsProps);
                     setValue(action, FIELD_ICON, String.class, actionsProps);
+                    setValue(action, FIELD_TYPE, String.class, actionsProps);
 
-                    if (actionsProps.containsKey(FIELD_PARAMS) && actionsProps.get(FIELD_PARAMS) instanceof Map<?, ?> actionParams) {
-                        for (Object object : actionParams.entrySet()) {
+                    if (actionsProps.containsKey(FIELD_ATTRIBUTES) && actionsProps.get(FIELD_ATTRIBUTES) instanceof Map<?, ?> actionAttributes) {
+                        for (Object object : actionAttributes.entrySet()) {
                             Entry<?, ?> entry2 = (Entry<?, ?>) object;
                             Object value = getEntryValue(entry2);
-                            action.addParam(entry2.getKey().toString(), value);
+                            action.addAttribute(entry2.getKey().toString(), value);
                         }
                     }
                     descriptor.addAction(action);
