@@ -64,6 +64,11 @@ public final class ActionRestrictions {
      * @return {@code true} if access is allowed, {@code false} if denied, or {@code null} if undecided
      */
     public static Boolean allowAccess(Action action) {
+        // Always allow if the action is of type AlwaysAllowedAction
+        if (action instanceof AlwaysAllowedAction) {
+            return true;
+        }
+
         Boolean allowed = true;
         Collection<ActionRestriction> restrictions = getActionRestrictions();
         if (restrictions != null) {
