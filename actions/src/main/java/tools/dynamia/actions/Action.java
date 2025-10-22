@@ -20,6 +20,7 @@ import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -246,4 +247,35 @@ public interface Action extends Comparable<Action>, Serializable {
         return new ActionExecutionResponse(false);
     }
 
+    /**
+     * Converts this action into an {@link ActionReference} for lightweight representation.
+     *
+     * @return the action reference
+     */
+    default ActionReference toReference() {
+        var ref = new ActionReference(getId());
+        ref.setDescription(getDescription());
+        ref.setLabel(getName());
+        ref.setIcon(getImage());
+        ref.setType(getClass().getName());
+        ref.setVisible(isVisible());
+
+        if (getAttributes() != null) {
+            ref.setAttributes(new HashMap<>(getAttributes()));
+        }
+        return ref;
+    }
+
+    /**
+     * Configures this action based on the provided {@link ActionReference}.
+     * <p>
+     * Implement this method to customize action properties from a reference.
+     * The default implementation does nothing.
+     * </p>
+     *
+     * @param reference the action reference
+     */
+    default void config(ActionReference reference) {
+        // No default implementation
+    }
 }
