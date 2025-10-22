@@ -19,6 +19,7 @@ package tools.dynamia.viewers;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
+import tools.dynamia.actions.ActionReference;
 import tools.dynamia.commons.BeanMessages;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.StringUtils;
@@ -69,7 +70,7 @@ public class Field implements Serializable, Indexable, Cloneable {
     @JsonIgnore
     private String value;
     private boolean required;
-    private ActionRef action;
+    private ActionReference action;
     private String icon;
     private boolean showIconOnly;
 
@@ -592,16 +593,16 @@ public class Field implements Serializable, Indexable, Cloneable {
         }
     }
 
-    public ActionRef getAction() {
+    public ActionReference getAction() {
         return action;
     }
 
-    public void setAction(ActionRef action) {
+    public void setAction(ActionReference action) {
         this.action = action;
     }
 
     public void setAction(String actionId) {
-        this.action = new ActionRef(actionId);
+        this.action = new ActionReference(actionId);
     }
 
     public boolean isReadWrite() {
