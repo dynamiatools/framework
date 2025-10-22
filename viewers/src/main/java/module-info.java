@@ -12,4 +12,5 @@ open module tools.dynamia.viewers {
     requires spring.beans;
     requires org.yaml.snakeyaml;
     requires spring.expression;
+    requires tools.dynamia.actions;
 }
