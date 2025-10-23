@@ -27,6 +27,7 @@ import org.springframework.web.servlet.view.UrlBasedViewResolver;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.web.ChainableUrlBasedViewResolver;
+import tools.dynamia.web.ClassPathViewResolver;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -118,9 +119,9 @@ public class MvcConfiguration implements WebMvcConfigurer {
      */
     @Bean
     public ViewResolver classpathHtmlViewResolver(ApplicationInfo applicationInfo) {
-        UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
+        var vr = new ClassPathViewResolver();
         vr.setOrder(getDefaultViewResolverOrder(applicationInfo) + 1);
-        vr.setPrefix("classpath:/views/");
+        vr.setPrefix("views/");
         vr.setSuffix(".html");
         vr.setCache(applicationInfo.isWebCacheEnabled());
         return vr;
@@ -134,7 +135,7 @@ public class MvcConfiguration implements WebMvcConfigurer {
      */
     @Bean
     public ViewResolver classpathZulViewResolver(ApplicationInfo applicationInfo) {
-        UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
+        var vr = new ChainableUrlBasedViewResolver();
         vr.setOrder(getDefaultViewResolverOrder(applicationInfo) + 2);
         vr.setPrefix("/zkau/web/views/");
         vr.setSuffix(".zul");
