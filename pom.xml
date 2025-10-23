@@ -24,7 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>tools.dynamia</groupId>
     <artifactId>tools.dynamia.parent</artifactId>
-    <version>5.4.5</version>
+    <version>5.4.6</version>
     <packaging>pom</packaging>
     <organization>
         <name>Dynamia Soluciones IT SAS</name>
@@ -80,8 +80,8 @@
 
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
-        <springboot.version>3.5.5</springboot.version>
-        <swagger.version>2.2.31</swagger.version>
+        <springboot.version>3.5.6</springboot.version>
+        <swagger.version>2.2.38</swagger.version>
         <mongodb.version>1</mongodb.version>
 
         <!-- Web -->
@@ -90,8 +90,8 @@
 
         <!--Reports -->
         <jasperreports.version>6.21.4</jasperreports.version>
-        <poi.version>5.4.0</poi.version>
-        <snakeyaml.version>2.4</snakeyaml.version>
+        <poi.version>5.4.1</poi.version>
+        <snakeyaml.version>2.5</snakeyaml.version>
         <zxing.version>3.5.3</zxing.version>
         <velocity.version>2.4.1</velocity.version>
 
@@ -124,7 +124,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.11.2</version>
+                <version>3.11.3</version>
                 <configuration>
                     <failOnError>false</failOnError>
                     <doclint>none</doclint>
@@ -138,12 +138,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>3.5.3</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>3.5.3</version>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.central</groupId>

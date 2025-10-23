@@ -18,6 +18,7 @@ package tools.dynamia.app.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.boot.web.servlet.error.ErrorController;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +27,9 @@ import org.springframework.web.servlet.ModelAndView;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.navigation.NavigationNotAllowedException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Global exception controller for handling application errors and exceptions.
@@ -48,8 +52,9 @@ public class GlobalExceptionController implements ErrorController {
 
     /**
      * Handles navigation not allowed exceptions, returning a specific error view.
+     *
      * @param req the HTTP servlet request
-     * @param e the exception
+     * @param e   the exception
      * @return the {@link ModelAndView} for the error
      */
     @ExceptionHandler(NavigationNotAllowedException.class)
@@ -61,8 +66,9 @@ public class GlobalExceptionController implements ErrorController {
 
     /**
      * Handles all other exceptions, returning the login view with error information.
+     *
      * @param req the HTTP servlet request
-     * @param e the exception
+     * @param e   the exception
      * @return the {@link ModelAndView} for the error
      */
     @ExceptionHandler(Exception.class)
@@ -74,11 +80,12 @@ public class GlobalExceptionController implements ErrorController {
 
     /**
      * Handles error endpoints, returning detailed error information and appropriate views.
+     *
      * @param request the HTTP servlet request
      * @return the {@link ModelAndView} for the error
      */
-    @RequestMapping(value = {"/errors", "/error"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public ModelAndView error(HttpServletRequest request) {
+    @RequestMapping(value = {"/errors", "/error"}, method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT})
+    public ModelAndView htmlError(HttpServletRequest request) {
         var statusCode = (Integer) request.getAttribute("jakarta.servlet.error.status_code");
         var messageObj = request.getAttribute("jakarta.servlet.error.message");
         var throwable = (Throwable) request.getAttribute("jakarta.servlet.error.exception");
@@ -114,6 +121,44 @@ public class GlobalExceptionController implements ErrorController {
         }
 
         return mv;
+
+    }
+
+    /**
+     * Handles error endpoints for JSON requests, returning error details in JSON format.
+     *
+     * @param request the HTTP servlet request
+     * @return a {@link ResponseEntity} containing error details in JSON format
+     */
+    @RequestMapping(value = {"/errors", "/error"}, method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT},
+            consumes = "application/json", produces = "application/json")
+    public ResponseEntity<Map<String, String>> jsonError(HttpServletRequest request) {
+
+        Integer statusCode = (Integer) request.getAttribute("jakarta.servlet.error.status_code");
+        Object messageObj = request.getAttribute("jakarta.servlet.error.message");
+        Throwable throwable = (Throwable) request.getAttribute("jakarta.servlet.error.exception");
+        String requestUri = (String) request.getAttribute("jakarta.servlet.error.request_uri");
+
+
+        if (messageObj == null) {
+            messageObj = "";
+        }
+
+        if (requestUri == null) {
+            requestUri = "Unknown";
+        }
+
+        Map<String, String> body = new HashMap<>();
+        body.put("status", statusCode != null ? statusCode.toString() : "500");
+        body.put("message", messageObj.toString());
+        body.put("path", requestUri);
+        if (throwable != null) {
+            body.put("error", throwable.getClass().getName());
+            body.put("exception", throwable.getMessage());
+        }
+
+
+        return ResponseEntity.status(statusCode != null ? statusCode : 500).body(body);
 
     }
 }

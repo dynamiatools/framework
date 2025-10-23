@@ -16,9 +16,13 @@
  */
 package tools.dynamia.zk;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
+import tools.dynamia.web.ChainableUrlBasedViewResolver;
 import tools.dynamia.zk.spring.ApplicationScope;
 import tools.dynamia.zk.spring.DesktopScope;
 import tools.dynamia.zk.spring.ExecutionScope;
@@ -38,10 +42,30 @@ public class ZKConfig {
         scopes.put("zk-page", new PageScope());
         scopes.put("zk-application", new ApplicationScope());
         scopes.put("zk-execution", new ExecutionScope());
-
         configurer.setScopes(scopes);
-
         return configurer;
+    }
+
+    @Bean
+    public ViewResolver zkViewResolver() {
+        UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
+        vr.setOrder(9);
+        vr.setPrefix("/zkau/web/views/");
+        vr.setSuffix(".zul");
+        return vr;
+    }
+
+    @Bean
+    public ViewResolver themeZulViewResolver(@Value("${dynamia.app.template}") String template) {
+        if (template == null || template.isBlank()) {
+            template = "default";
+        }
+
+        UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
+        vr.setOrder(100);
+        vr.setPrefix("/zkau/web/templates/" + template.toLowerCase() + "/views/");
+        vr.setSuffix(".zul");
+        return vr;
     }
 
 

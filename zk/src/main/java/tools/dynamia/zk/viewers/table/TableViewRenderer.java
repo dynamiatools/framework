@@ -215,8 +215,8 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
             header.setParent(head);
             header.setLabel(actionRef.getLabel());
             header.setWidth(actionRef.getWidth());
-            if (actionRef.getParams() != null) {
-                BeanUtils.setupBean(header, actionRef.getParams());
+            if (actionRef.getAttributes() != null) {
+                BeanUtils.setupBean(header, actionRef.getAttributes());
             }
 
         });

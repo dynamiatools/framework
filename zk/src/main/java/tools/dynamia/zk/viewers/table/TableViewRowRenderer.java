@@ -27,20 +27,15 @@ import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.impl.InputElement;
-import tools.dynamia.actions.Action;
-import tools.dynamia.actions.ActionEvent;
-import tools.dynamia.actions.ActionLoader;
-import tools.dynamia.actions.ActionRenderer;
-import tools.dynamia.actions.Actions;
+import tools.dynamia.actions.*;
 import tools.dynamia.commons.*;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.ReflectionException;
-import tools.dynamia.integration.Containers;
 import tools.dynamia.viewers.Field;
+import tools.dynamia.viewers.ViewAction;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.ComponentCustomizerUtil;
-import tools.dynamia.viewers.util.FieldRestrictions;
 import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.actions.BootstrapButtonActionRenderer;
@@ -66,6 +61,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
     private List<Field> fields;
 
     private SimpleCache<String, Action> actionsCache = new SimpleCache<>();
+    private ActionLoader<ViewAction> actionLoader = new ActionLoader<>(ViewAction.class);
 
     public TableViewRowRenderer() {
     }
@@ -157,10 +153,9 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                 Listcell actionCell = new Listcell();
                 item.appendChild(actionCell);
 
-                TableViewRowAction action = (TableViewRowAction) actionsCache.get(actionRef.getId());
+                ViewAction action = (ViewAction) actionsCache.get(actionRef.getId());
                 if (action == null) {
-                    action = Containers.get().findObjects(TableViewRowAction.class, a -> a.getId().equals(actionRef.getId()))
-                            .stream().findFirst().orElse(null);
+                    action = actionLoader.loadById(actionRef.getId()).orElse(null);
                     actionsCache.add(actionRef.getId(), action);
                 }
 
@@ -169,13 +164,15 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                     evt.setSource(tableView.getSource() != null ? tableView.getSource() : item);
                     ActionRenderer actionRenderer = action.getRenderer() != null ? action.getRenderer() : defaultRenderer;
                     Component actionComp = (Component) Actions.render(actionRenderer, action, (s, p) -> evt);
-                    action.onRendered(data, item, actionComp);
+                    if (action instanceof TableViewRowAction rowAction) {
+                        rowAction.onRendered(data, item, actionComp);
+                    }
 
                     if (action.isEnabled()) {
                         actionCell.appendChild(actionComp);
                     }
-                    if (actionRef.getParams() != null && actionRef.getParams().containsKey(Viewers.PARAM_BINDINGS)) {
-                        Map bindingMap = (Map) actionRef.getParams().get(Viewers.PARAM_BINDINGS);
+                    if (actionRef.getAttributes() != null && actionRef.getAttributes().containsKey(Viewers.PARAM_BINDINGS)) {
+                        Map bindingMap = (Map) actionRef.getAttributes().get(Viewers.PARAM_BINDINGS);
                         ZKBindingUtil.bindComponent(binder, actionComp, bindingMap, Viewers.BEAN);
                     }
                 }

@@ -27,6 +27,7 @@ import org.springframework.web.servlet.view.UrlBasedViewResolver;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.web.ChainableUrlBasedViewResolver;
+import tools.dynamia.web.ClassPathViewResolver;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -34,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Configure ZK with Spring MVC
+ * Default Global MVC Configuration for DynamiaTools applications.
  *
  * @author Mario A. Serrano Leones
  */
@@ -78,37 +79,73 @@ public class MvcConfiguration implements WebMvcConfigurer {
         return mapping;
     }
 
+    /**
+     * Resolve views located in /WEB-INF/views
+     *
+     * @param applicationInfo
+     * @return
+     */
     @Bean
     public ViewResolver webinfViewResolver(ApplicationInfo applicationInfo) {
         UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
-        vr.setOrder(getViewResolverOrder(applicationInfo, "defaultViewResolverOrder", 1));
+        vr.setOrder(getDefaultViewResolverOrder(applicationInfo));
         vr.setPrefix("/WEB-INF/views/");
         vr.setCache(applicationInfo.isWebCacheEnabled());
         return vr;
     }
 
+
+    /**
+     * Resolve HTML views located in /WEB-INF/views
+     *
+     * @param applicationInfo
+     * @return
+     */
     @Bean
-    public ViewResolver zkViewResolver(ApplicationInfo applicationInfo) {
+    public ViewResolver webInfHtmlViewResolver(ApplicationInfo applicationInfo) {
         UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
-        vr.setOrder(getViewResolverOrder(applicationInfo, "zkViewResolverOrder", 9));
+        vr.setOrder(getDefaultViewResolverOrder(applicationInfo) + 1);
+        vr.setPrefix("/WEB-INF/views/");
+        vr.setSuffix(".html");
+        vr.setCache(applicationInfo.isWebCacheEnabled());
+        return vr;
+    }
+
+    /**
+     * Resolve HTML views located in classpath:/views
+     *
+     * @param applicationInfo
+     * @return
+     */
+    @Bean
+    public ViewResolver classpathHtmlViewResolver(ApplicationInfo applicationInfo) {
+        var vr = new ClassPathViewResolver();
+        vr.setOrder(getDefaultViewResolverOrder(applicationInfo) + 1);
+        vr.setPrefix("views/");
+        vr.setSuffix(".html");
+        vr.setCache(applicationInfo.isWebCacheEnabled());
+        return vr;
+    }
+
+    /**
+     * Resolve ZUL views located in classpath:/web/views
+     *
+     * @param applicationInfo
+     * @return
+     */
+    @Bean
+    public ViewResolver classpathZulViewResolver(ApplicationInfo applicationInfo) {
+        var vr = new ChainableUrlBasedViewResolver();
+        vr.setOrder(getDefaultViewResolverOrder(applicationInfo) + 2);
         vr.setPrefix("/zkau/web/views/");
         vr.setSuffix(".zul");
         vr.setCache(applicationInfo.isWebCacheEnabled());
         return vr;
     }
 
-    @Bean
-    public ViewResolver themeZulViewResolver(ApplicationInfo applicationInfo) {
-        UrlBasedViewResolver vr = new ChainableUrlBasedViewResolver();
-        vr.setOrder(getViewResolverOrder(applicationInfo, "themeZulViewResolverOrder", 100));
-        vr.setPrefix("/zkau/web/templates/" + applicationInfo.getTemplate().toLowerCase() + "/views/");
-        vr.setSuffix(".zul");
-        vr.setCache(applicationInfo.isWebCacheEnabled());
-        return vr;
-    }
 
     /**
-     * Resolve ZHTML templates
+     * Resolve Zul templates located in classpath:/web/views/templates/CURRENT_TEMPLATE/views
      *
      * @return ViewResolver
      */
@@ -130,6 +167,10 @@ public class MvcConfiguration implements WebMvcConfigurer {
             //invalid number, just ignore
         }
         return order;
+    }
+
+    private int getDefaultViewResolverOrder(ApplicationInfo applicationInfo) {
+        return getViewResolverOrder(applicationInfo, "defaultViewResolverOrder", 1);
     }
 
     protected void log(String message) {

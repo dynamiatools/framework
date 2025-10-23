@@ -18,6 +18,7 @@ package tools.dynamia.viewers.impl;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import tools.dynamia.actions.ActionReference;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.logger.LoggingService;
@@ -29,11 +30,7 @@ import tools.dynamia.viewers.util.ViewDescriptorReaderUtils;
 import tools.dynamia.viewers.util.Viewers;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -112,7 +109,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
 
     private String device = "screen";
 
-    private List<ActionRef> actions = new ArrayList<>();
+    private List<ActionReference> actions = new ArrayList<>();
 
     /**
      * Instantiates a new abstract view descriptor.
@@ -769,11 +766,11 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
     }
 
     @Override
-    public List<ActionRef> getActions() {
+    public List<ActionReference> getActions() {
         return actions;
     }
 
-    public void setActions(List<ActionRef> actions) {
+    public void setActions(List<ActionReference> actions) {
         this.actions = actions;
     }
 
@@ -782,7 +779,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
      *
      * @param actionRef
      */
-    public void addAction(ActionRef actionRef) {
+    public void addAction(ActionReference actionRef) {
         if (actions == null) {
             actions = new ArrayList<>();
         }

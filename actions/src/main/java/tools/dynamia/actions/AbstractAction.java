@@ -17,6 +17,7 @@
 package tools.dynamia.actions;
 
 import tools.dynamia.commons.ClassMessages;
+import tools.dynamia.commons.Lambdas;
 import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.logger.AbstractLoggable;
@@ -26,6 +27,8 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
+import static tools.dynamia.commons.Lambdas.ifNotNull;
 
 /**
  * Abstract base class for implementing user or system actions in the Dynamia Tools framework.
@@ -235,6 +238,29 @@ public abstract class AbstractAction extends AbstractLoggable implements Action 
     }
 
     /**
+     * Returns a custom attribute value as a string by key.
+     *
+     * @param key the attribute key
+     * @return the attribute value as string
+     */
+    public String getStringAttribute(String key) {
+        Object value = getAttribute(key);
+        return value != null ? value.toString() : null;
+    }
+
+    /**
+     * Returns a custom attribute value as a string by key, with a default if not found.
+     *
+     * @param key          the attribute key
+     * @param defaultValue the default value if attribute not found
+     * @return the attribute value as string or default
+     */
+    public String getStringAttribute(String key, String defaultValue) {
+        Object value = getAttribute(key);
+        return value != null ? value.toString() : defaultValue;
+    }
+
+    /**
      * Returns all custom attributes as a map.
      *
      * @return the attributes map
@@ -431,7 +457,7 @@ public abstract class AbstractAction extends AbstractLoggable implements Action 
      * Messages.properties files should be in the same package as this action. One file per locale, e.g. Messages_es.properties.
      * </p>
      *
-     * @param key the message key
+     * @param key    the message key
      * @param params parameters for the message
      * @return the localized message
      */
@@ -585,5 +611,22 @@ public abstract class AbstractAction extends AbstractLoggable implements Action 
      */
     public boolean isAlwaysVisible() {
         return Boolean.TRUE.equals(getAttribute("alwaysVisible"));
+    }
+
+
+    /**
+     * Configures this action based on the provided action reference.
+     *
+     * @param reference the action reference
+     */
+    @Override
+    public void config(ActionReference reference) {
+        if (reference != null) {
+            ifNotNull(reference.getLabel(), this::setName);
+            ifNotNull(reference.getIcon(), this::setImage);
+            ifNotNull(reference.getDescription(), this::setDescription);
+            ifNotNull(reference.getWidth(), w -> setAttribute("width", w));
+            setVisible(reference.isVisible());
+        }
     }
 }

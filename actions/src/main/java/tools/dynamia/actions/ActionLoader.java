@@ -18,17 +18,12 @@ package tools.dynamia.actions;
 
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.LocalizedMessagesProvider;
-import tools.dynamia.commons.SimpleCache;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.ObjectMatcher;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Utility class for loading, configuring, and controlling access to {@link Action} instances.
@@ -324,5 +319,30 @@ public class ActionLoader<T extends Action> {
         return Containers.get().findObjects(LocalizedMessagesProvider.class)
                 .stream().min(Comparator.comparingInt(LocalizedMessagesProvider::getPriority))
                 .orElse(null);
+    }
+
+    /**
+     * Loads an action by its ID.
+     *
+     * @param actionId the ID of the action to load
+     * @return an Optional containing the found action, or empty if not found
+     */
+    public Optional<T> loadById(String actionId) {
+        return load(a -> a.getId().equals(actionId)).stream().findFirst();
+    }
+
+    /**
+     * Loads an action by its reference.
+     *
+     * @param actionReference the ActionRef containing the ID of the action to load
+     * @return an Optional containing the found action, or empty if not found
+     */
+    public Optional<T> loadByReference(ActionReference actionReference) {
+        var action = loadById(actionReference.getId());
+        action.ifPresent(a -> {
+            a.config(actionReference);
+        });
+
+        return action;
     }
 }

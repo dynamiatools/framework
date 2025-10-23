@@ -1,4 +1,4 @@
-package tools.dynamia.viewers;
+package tools.dynamia.actions;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -9,19 +9,20 @@ import java.util.Map;
  * Represent an action reference
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ActionRef {
+public class ActionReference {
     private String id;
     private String width;
     private boolean visible;
     private String label;
     private String icon;
     private String description;
-    private Map<String, Object> params;
+    private Map<String, Object> attributes;
+    private String type;
 
-    public ActionRef() {
+    public ActionReference() {
     }
 
-    public ActionRef(String id) {
+    public ActionReference(String id) {
         this.id = id;
     }
 
@@ -49,12 +50,12 @@ public class ActionRef {
         this.visible = visible;
     }
 
-    public Map<String, Object> getParams() {
-        return params;
+    public Map<String, Object> getAttributes() {
+        return attributes;
     }
 
-    public void setParams(Map<String, Object> params) {
-        this.params = params;
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
     }
 
     public String getLabel() {
@@ -86,14 +87,22 @@ public class ActionRef {
         return id;
     }
 
-    public void addParam(String key, Object value) {
-        if (params == null) {
-            params = new HashMap<>();
+    public void addAttribute(String key, Object value) {
+        if (attributes == null) {
+            attributes = new HashMap<>();
         }
-        params.put(key, value);
+        attributes.put(key, value);
     }
 
-    public Object getParam(String key) {
-        return params != null ? params.get(key) : null;
+    public Object getAttribute(String key) {
+        return attributes != null ? attributes.get(key) : null;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

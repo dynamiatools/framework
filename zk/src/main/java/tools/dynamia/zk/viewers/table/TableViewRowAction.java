@@ -19,9 +19,9 @@ package tools.dynamia.zk.viewers.table;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zul.Listitem;
-import tools.dynamia.actions.AbstractAction;
+import tools.dynamia.viewers.ViewAction;
 
-public abstract class TableViewRowAction extends AbstractAction {
+public abstract class TableViewRowAction extends ViewAction {
 
     protected void onRendered(Object data, Listitem listitem, Component component) {
 
