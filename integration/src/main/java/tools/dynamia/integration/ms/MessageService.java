@@ -16,6 +16,8 @@
  */
 package tools.dynamia.integration.ms;
 
+import java.io.Serializable;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -81,6 +83,42 @@ public interface MessageService {
      * @param message     the message to publish
      */
     void publish(String channelName, Message message);
+
+    /**
+     * Publishes a message to a specific channel. The message can be of type Message, String, or Map.
+     * If the message is a String, it will be wrapped in a TextMessage. If it's a Map, it will be
+     * wrapped in a MapMessage.
+     *
+     * @param channelName the name of the channel to publish to
+     * @param message     the message to publish (Message, String, or Map)
+     */
+    default void publish(String channelName, Serializable message) {
+        publish(channelName, message, "");
+    }
+
+    /**
+     * Publishes a message to a specific channel with topic-based routing.
+     * The message can be of type Message, String, or Map.
+     * If the message is a String, it will be wrapped in a TextMessage. If it's a Map, it will be
+     * wrapped in a MapMessage.
+     *
+     * @param channelName the name of the channel to publish to
+     * @param message     the message to publish (Message, String, or Map)
+     * @param topic       the topic identifier for message routing/filtering
+     */
+    default void publish(String channelName, Serializable message, String topic) {
+        if (message instanceof Message msg) {
+            publish(channelName, msg);
+        } else if (message instanceof String strMsg) {
+            publish(channelName, new TextMessage(strMsg));
+        } else if (message instanceof Map<?, ?> map) {
+            publish(channelName, new MapMessage((Map<String, Object>) map));
+        } else if (message instanceof Number number) {
+            publish(channelName, new NumberMessage(number));
+        } else {
+            publish(channelName, new ObjectMessage(message));
+        }
+    }
 
     /**
      * Publishes a message to a specific channel with topic-based routing.

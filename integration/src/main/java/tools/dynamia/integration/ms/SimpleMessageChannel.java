@@ -85,7 +85,7 @@ public class SimpleMessageChannel implements MessageChannel {
     public void publish(Message message, String topic, String callback) {
         MessageEvent event = new MessageEvent(message, topic, callback);
         List<MessageListener> listeners = getMessageListeners(topic);
-        message.addHeader(Message.HEADER_LISTENER_COUNT, listeners.size());
+        message.addHeader(Message.HEADER_LISTENER_COUNT, 0);
 
         for (MessageListener messageListener : listeners) {
             if (!isAsync()) {
