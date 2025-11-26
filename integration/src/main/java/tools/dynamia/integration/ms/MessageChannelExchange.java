@@ -23,36 +23,49 @@ import java.lang.annotation.Target;
 
 
 /**
- * The Interface MessageChannelExchange.
+ * Annotation used to mark a type as a message channel exchange/consumer within the
+ * messaging subsystem. It declares the target channel, optional topic filters, the
+ * processing priority, and whether broadcast messages should be received.
+ * <p>
+ * Implementations of the messaging layer (e.g., Spring Application Events, JMS, Kafka,
+ * RabbitMQ, Redis Pub/Sub) may use this metadata to register and route messages to
+ * annotated components.
+ * </p>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface MessageChannelExchange {
 
     /**
-     * Channel name.
+     * Logical name of the channel this component listens to. Implementations use this value
+     * to bind/subscribe to the underlying messaging destination.
      *
-     * @return the string
+     * @return the channel name; an empty string may be treated as an implementation-specific default
      */
     String channel() default "";
 
     /**
-     * Channel Filter, by default topic is #, thats mean all topics.
+     * Topic filters used for message routing within the channel. By default, the topic is "*",
+     * which means all topics. Implementations may support wildcard patterns; "*" typically
+     * matches any topic.
      *
-     * @return the string
+     * @return one or more topic patterns
      */
-    String[] topic() default "#";
+    String[] topic() default MessageChannels.ALL_TOPICS;
 
     /**
-     * Priority. low value is hight priority, by default priority is 100
+     * Processing priority for this listener. Lower values indicate higher priority. The default
+     * priority is 100.
      *
-     * @return the int
+     * @return the numeric priority value
      */
     int priority() default 100;
 
     /**
-     * Specified is this Listener receive broadcast messages, default is true
+     * Indicates whether this listener should receive broadcast messages in addition to
+     * channel-specific messages. The default value is {@code true}.
      *
+     * @return {@code true} if broadcast messages should be delivered; {@code false} otherwise
      */
     boolean broadcastReceive() default true;
 }

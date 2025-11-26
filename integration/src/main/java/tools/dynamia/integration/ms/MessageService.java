@@ -16,73 +16,139 @@
  */
 package tools.dynamia.integration.ms;
 
+import java.util.Optional;
 import java.util.Properties;
 
 
 /**
- * The Interface MessageService.
+ * Generic abstraction for messaging systems that can be used as a facade for various messaging implementations
+ * including Spring Application Events, JMS, RabbitMQ, Kafka, Redis Pub/Sub, and other message-oriented middleware.
+ * <p>
+ * This service provides a unified API for publishing messages to specific channels or broadcasting to all listeners,
+ * with optional topic-based routing and callback support. The actual implementation depends on the underlying
+ * messaging system being used.
+ * </p>
+ * <p>
+ * Channels are similar to topics or queues in traditional messaging systems, allowing for organized message distribution.
+ * Messages can be published to specific channels, and listeners can subscribe to these channels to receive messages.
+ * </p>
+ * <p>
+ * Subscriptions can be registered using the {@link MessageChannel} interface obtained from the {@link #createChannel(String)} method.
+ * or like a funcional interface using lambda expressions.
+ * </p>
+ * <p>
+ * By default, a simple in-memory implementation is provided for basic use cases and testing purposes.
+ * </p>
+ *
+ * @author Mario A. Serrano Leones
+ * @see SimpleMessageService, {@link MessageChannel}, {@link Message}, {@link MessageListener}, {@link MessageEvent}, {@link MessageChannelExchange}
  */
 public interface MessageService {
 
     /**
-     * Create a new message channel, implementation depends on MessageService
+     * Creates a new message channel with the specified name. The actual channel implementation
+     * depends on the underlying messaging system (e.g., JMS Queue, Kafka Topic, Redis Channel).
+     *
+     * @param name the unique name identifier for the channel
+     * @return a MessageChannel instance for the created channel
      */
     MessageChannel createChannel(String name);
 
     /**
-     * Create a new message channel, implementation depends on MessageService
+     * Creates a new message channel with the specified name and custom properties.
+     * Properties can be used to configure channel-specific settings such as durability,
+     * message TTL, persistence, etc., depending on the messaging system implementation.
+     *
+     * @param name       the unique name identifier for the channel
+     * @param properties custom configuration properties for the channel
+     * @return a MessageChannel instance for the created channel
      */
     MessageChannel createChannel(String name, Properties properties);
 
     /**
-     * Post.
+     * Retrieves an existing message channel by its name.
      *
-     * @param channelName the channel uid
-     * @param message the message
+     * @param name the unique name identifier of the channel
+     * @return an Optional containing the MessageChannel if found, or empty if not found
+     */
+    Optional<MessageChannel> getChannel(String name);
+
+    /**
+     * Publishes a message to a specific channel. The message will be delivered to all
+     * subscribers of the specified channel.
+     *
+     * @param channelName the name of the channel to publish to
+     * @param message     the message to publish
      */
     void publish(String channelName, Message message);
 
     /**
-     * Publish.
+     * Publishes a message to a specific channel with topic-based routing.
+     * Subscribers can filter messages based on the topic for more granular control.
      *
-     * @param channelName the channel name
-     * @param message the message
-     * @param topic the topic
+     * @param channelName the name of the channel to publish to
+     * @param message     the message to publish
+     * @param topic       the topic identifier for message routing/filtering
      */
     void publish(String channelName, Message message, String topic);
 
     /**
-     * Publish.
+     * Publishes a message to a specific channel with topic-based routing and callback support.
+     * The callback can be used for acknowledgment, error handling, or response routing.
      *
-     * @param channelName the channel name
-     * @param message the message
-     * @param topic the topic
-     * @param callback the callback
+     * @param channelName the name of the channel to publish to
+     * @param message     the message to publish
+     * @param topic       the topic identifier for message routing/filtering
+     * @param callback    the callback identifier for handling responses or acknowledgments
      */
     void publish(String channelName, Message message, String topic, String callback);
 
     /**
-     * Broadcast.
+     * Broadcasts a message to all available channels and listeners in the messaging system.
+     * This is useful for system-wide notifications or events that need to reach all components.
      *
-     * @param message the message
+     * @param message the message to broadcast
      */
     void broadcast(Message message);
 
     /**
-     * Broadcast.
+     * Broadcasts a message to all available channels and listeners with topic-based filtering.
+     * Only subscribers interested in the specified topic will receive the message.
      *
-     * @param message the message
-     * @param topic the topic
+     * @param message the message to broadcast
+     * @param topic   the topic identifier for message filtering
      */
     void broadcast(Message message, String topic);
 
     /**
-     * Broadcast.
+     * Broadcasts a message to all available channels and listeners with topic-based filtering
+     * and callback support. The callback can be used for acknowledgment or response handling.
      *
-     * @param message the message
-     * @param topic the topic
-     * @param callback the callback
+     * @param message  the message to broadcast
+     * @param topic    the topic identifier for message filtering
+     * @param callback the callback identifier for handling responses or acknowledgments
      */
     void broadcast(Message message, String topic, String callback);
+
+    /**
+     * Subscribes a listener to a specific channel. The listener will receive
+     * all messages published to the specified channel.
+     *
+     * @param channelName the name of the channel to subscribe to
+     * @param listener    the MessageListener that will handle incoming messages
+     * @return a MessageChannelSubscription representing the subscription
+     */
+    <T extends Message> MessageChannelSubscription subscribe(String channelName, MessageListener<T> listener);
+
+    /**
+     * Subscribes a listener to a specific channel and topic. The listener will receive
+     * messages published to the specified channel that match the given topic.
+     *
+     * @param channelName the name of the channel to subscribe to
+     * @param topic       the topic identifier for filtering messages
+     * @param listener    the MessageListener that will handle incoming messages
+     * @return a MessageChannelSubscription representing the subscription
+     */
+    <T extends Message> MessageChannelSubscription subscribe(String channelName, String topic, MessageListener<T> listener);
 
 }
