@@ -17,25 +17,23 @@
 package tools.dynamia.integration.scheduling;
 
 import org.springframework.core.env.Environment;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
-import tools.dynamia.commons.Callback;
-import tools.dynamia.integration.Containers;
-import tools.dynamia.integration.ObjectContainerContextHolder;
-import tools.dynamia.integration.SimpleObjectContainer;
+import tools.dynamia.commons.DateTimeUtils;
+import tools.dynamia.integration.*;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.function.Supplier;
-
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 
 /**
@@ -61,24 +59,14 @@ public class SchedulerUtil {
     }
 
     /**
-     * Run the WorkerTask asynchronously using any Spring AsyncTaskExecutor
-     * found in the Spring Containers or standard java Thread(runnable) if no
-     * TaskExecutor is found.
+     * Execute a runnable using a Virtual Thread executor from {@link VT} helper class.
      *
-     * @param runnable the task to run
+     * @param runnable the runnable
      */
     public static void run(Runnable runnable) {
-
-
         Runnable runnableWithContext = getWithContext(runnable);
+        VT.executor().execute(runnableWithContext);
 
-        AsyncTaskExecutor executor = Containers.get().findObject(AsyncTaskExecutor.class);
-        if (executor != null) {
-            // use spring executor
-            executor.execute(runnableWithContext);
-        } else {
-            CompletableFuture.runAsync(runnableWithContext);
-        }
     }
 
     /**
@@ -110,34 +98,57 @@ public class SchedulerUtil {
             sequence = sequence.thenCompose(fn -> CompletableFuture.supplyAsync(() -> {
                 task.doWork();
                 return null;
-            }));
+            }, VT.executor()));
         }
 
         sequence.join();
     }
 
-    private static Runnable getWithContext(Runnable runnable) {
-        var asyncContextAwares = Containers.get().findObjects(AsyncContextAware.class);
-        var context = new SimpleObjectContainer();
-        if (asyncContextAwares != null && !asyncContextAwares.isEmpty()) {
-            asyncContextAwares.forEach(context::addObject);
+    public static Runnable getWithContext(Runnable runnable) {
+        SimpleObjectContainer context = new SimpleObjectContainer();
+
+
+        // add ThreadLocalObjectAware beans to context
+        Collection<ThreadLocalObjectAware> sessionBeans = Containers.get().findObjects(ThreadLocalObjectAware.class);
+        if (sessionBeans != null) {
+            sessionBeans.forEach(bean -> {
+                if (bean instanceof CloneableThreadLocalObject cloneable) {
+                    try {
+                        context.addObject(cloneable.clone());
+                    } catch (Exception e) {
+                        context.addObject(bean); // fallback a referencia
+                    }
+                } else {
+                    context.addObject(bean);
+                }
+            });
         }
 
-        ObjectContainerContextHolder.set(context);
-        Containers.get().installObjectContainer(context);
+        // add context objects from providers
+        Collection<ThreadLocalContextProvider> providers = Containers.get().findObjects(ThreadLocalContextProvider.class);
+        if (providers != null) {
+            providers.forEach(provider -> {
+                Map<String, Object> contextObjects = provider.getContextObjects();
+                if (contextObjects != null) {
+                    contextObjects.forEach(context::addObject);
+                }
+            });
+        }
+
+        // return runnable that set the context before run and clear after run
         return () -> {
+            ThreadLocalObjectContainer.set(context);
             try {
                 runnable.run();
             } finally {
-                ObjectContainerContextHolder.clear();
-                Containers.get().removeContainer(context.getName());
+                ThreadLocalObjectContainer.clear();
             }
         };
     }
 
 
     /**
-     * Run the WorkerTask asynchronously using Spring AsyncTaskExecutor
+     * Run the WorkerTask asynchronously using a Virtual Thread executor from {@link VT} helper class.
      * WorkerTask required override doWorkWithResult method.
      *
      * @param <T>  the generic type
@@ -145,13 +156,8 @@ public class SchedulerUtil {
      * @return the future
      */
     public static <T> Future<T> runWithResult(final TaskWithResult<T> task) {
-        AsyncTaskExecutor executor = Containers.get().findObject(AsyncTaskExecutor.class);
-        if (executor != null) {
-            // use spring executor
-            return executor.submit(task::doWorkWithResult);
-        } else {
-            return CompletableFuture.supplyAsync(task::doWorkWithResult);
-        }
+        return CompletableFuture.supplyAsync(task::doWorkWithResult, VT.executor());
+
     }
 
     /**
@@ -175,14 +181,26 @@ public class SchedulerUtil {
      * @param task     the task
      * @return the scheduled future
      */
-    public static ScheduledFuture<?> schedule(String cron, TimeZone timeZone, Task task) {
+    public static ScheduledFuture<?> schedule(String cron, TimeZone timeZone, Runnable task) {
+        TaskScheduler scheduler = getTaskScheduler();
+
+        Trigger trigger = new CronTrigger(cron, timeZone);
+        return scheduler.schedule(task, trigger);
+
+    }
+
+    /**
+     * Gets the task scheduler from spring containers or create a default one.
+     *
+     * @return the task scheduler
+     */
+    public static TaskScheduler getTaskScheduler() {
         TaskScheduler scheduler = Containers.get().findObject(TaskScheduler.class);
-        if (scheduler != null) {
-            Trigger trigger = new CronTrigger(cron, timeZone);
-            return scheduler.schedule(task, trigger);
-        } else {
-            throw new TaskException("No TaskScheduler found to run task " + task + " with cron " + cron);
+        if (scheduler == null) {
+            // create a default one
+            scheduler = new ThreadPoolTaskScheduler();
         }
+        return scheduler;
     }
 
     /**
@@ -193,39 +211,10 @@ public class SchedulerUtil {
      * @param task the task
      * @return the scheduled future
      */
-    public static ScheduledFuture<?> schedule(String cron, Task task) {
+    public static ScheduledFuture<?> schedule(String cron, Runnable task) {
         return schedule(cron, TimeZone.getDefault(), task);
     }
 
-    /**
-     * Schedule a WorkerTask using the cron expression passed. This method use
-     * Spring TaskScheduler to perform scheduling
-     *
-     * @param cron the cron
-     * @param task the task
-     * @return the scheduled future
-     */
-    public static ScheduledFuture<?> schedule(String cron, Callback task) {
-        return schedule(cron, TimeZone.getDefault(), task);
-    }
-
-    /**
-     * Schedule a WorkerTask using the cron expression passed. This method use
-     * Spring TaskScheduler to perform scheduling
-     *
-     * @param cron     the cron
-     * @param timeZone the time zone
-     * @param task     the task
-     * @return the scheduled future
-     */
-    public static ScheduledFuture<?> schedule(String cron, TimeZone timeZone, Callback task) {
-        return schedule(cron, timeZone, new Task() {
-            @Override
-            public void doWork() {
-                task.doSomething();
-            }
-        });
-    }
 
     /**
      * Schedule a Task at specified date.
@@ -234,13 +223,32 @@ public class SchedulerUtil {
      * @param task      the task
      * @return the scheduled future
      */
-    public static ScheduledFuture<?> schedule(Date startDate, Task task) {
-        TaskScheduler scheduler = Containers.get().findObject(TaskScheduler.class);
-        if (scheduler != null) {
-            return scheduler.schedule(task, startDate.toInstant());
-        } else {
-            throw new TaskException("No TaskScheduler found to run task " + task + " at start date " + startDate);
-        }
+    public static ScheduledFuture<?> schedule(Date startDate, Runnable task) {
+        return getTaskScheduler().schedule(task, DateTimeUtils.toInstant(startDate));
+    }
+
+    /**
+     * Schedule a Task at specified date.
+     *
+     * @param startDate the start date
+     * @param zoneId    the zone id
+     * @param task      the task
+     * @return the scheduled future
+     */
+    public static ScheduledFuture<?> schedule(LocalDateTime startDate, ZoneId zoneId, Runnable task) {
+        Instant instant = startDate.atZone(zoneId).toInstant();
+        return getTaskScheduler().schedule(task, instant);
+    }
+
+    /**
+     * Schedule a Task at specified date using system default time zone.
+     *
+     * @param startDate the start date
+     * @param task      the task
+     * @return the scheduled future
+     */
+    public static ScheduledFuture<?> schedule(LocalDateTime startDate, Runnable task) {
+        return schedule(startDate, ZoneId.systemDefault(), task);
     }
 
     private SchedulerUtil() {
@@ -249,7 +257,7 @@ public class SchedulerUtil {
     /**
      * Find in spring {@link Environment} if schedulingEnabledProperty is true
      *
-     * @return
+     * @return true, if is scheduling enabled
      */
     public static boolean isSchedulingEnabled() {
         Environment env = Containers.get().findObject(Environment.class);
@@ -259,26 +267,16 @@ public class SchedulerUtil {
         return Containers.get().findObject(ScheduledAnnotationBeanPostProcessor.class) != null;
     }
 
-    public static ScheduledFuture<?> scheduleWithFixedDelay(Duration delay, Task task) {
-        TaskScheduler scheduler = Containers.get().findObject(TaskScheduler.class);
-        if (scheduler != null) {
-            return scheduler.scheduleWithFixedDelay(task, delay);
-        } else {
-            return Executors.newScheduledThreadPool(1)
-                    .scheduleWithFixedDelay(task, 0, delay.toMillis(), MILLISECONDS);
-        }
-    }
-
     /**
-     * Schedule a task with fixed delay using the duration passed. This method use
-     * Spring TaskScheduler to perform scheduling
+     * Schedule a task with fixed delay using Spring TaskScheduler
      *
-     * @param delay    the delay
-     * @param callback the task
+     * @param delay the delay
+     * @param task  the task
      * @return the scheduled future
      */
-    public static ScheduledFuture<?> scheduleWithFixedDelay(Duration delay, Callback callback) {
-        return scheduleWithFixedDelay(delay, new SimpleTask(callback));
+    public static ScheduledFuture<?> scheduleWithFixedDelay(Duration delay, Runnable task) {
+        return getTaskScheduler().scheduleAtFixedRate(task, delay);
     }
+
 
 }
