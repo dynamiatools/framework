@@ -25,6 +25,11 @@ import tools.dynamia.integration.ms.listeners.AllMessageListener;
 import tools.dynamia.integration.ms.listeners.DummyMessageListener;
 import tools.dynamia.integration.ms.listeners.ThrowExceptionMessageListener;
 
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
 public class MessageChannelTest {
 
     @Before
@@ -68,5 +73,37 @@ public class MessageChannelTest {
         int listenerCount = (Integer) msg.getHeader(Message.HEADER_LISTENER_COUNT);
 
         Assert.assertEquals(1, listenerCount);
+    }
+
+    @Test
+    public void shouldSubscribeToChannel() {
+        MessageService service = new SimpleMessageService();
+        AtomicReference<String> result = new AtomicReference<>();
+        AtomicInteger salesCount = new AtomicInteger(0);
+        AtomicInteger promotionsCount = new AtomicInteger(0);
+
+        service.subscribe("sales", (MessageEvent<TextMessage> evt) -> {
+            result.set(evt.message().getContent());
+            salesCount.incrementAndGet();
+        });
+
+        service.subscribe("sales", "promotions", (MessageEvent<NumberMessage> evt) -> {
+            //should not be called for other topics
+            System.out.println("Promotion received: " + evt.message().getContent());
+            promotionsCount.incrementAndGet();
+
+        });
+
+        service.publish("sales", "Some cool stuff");
+        Assert.assertEquals("Some cool stuff", result.get());
+
+        service.publish("sales", 10, "promotions");
+        service.publish("sales", 20, "promotions");
+        service.publish("sales", 30, "promotions");
+
+        Assert.assertEquals(3, promotionsCount.get()); //all messages with topic
+        Assert.assertEquals(1, salesCount.get()); //only the first message without topic
+
+
     }
 }
