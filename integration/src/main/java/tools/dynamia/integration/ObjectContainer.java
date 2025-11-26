@@ -20,51 +20,53 @@ import java.util.List;
 
 
 /**
- * The Interface ObjectContainer.
+ * Interface for object containers that manage and provide access to objects, typically used for dependency injection or service lookup.
+ * Implementations include {@link SpringObjectContainer} for Spring-based applications and {@link SimpleObjectContainer} for basic in-memory storage.
  *
  * @author Mario A. Serrano Leones
  */
 public interface ObjectContainer {
 
     /**
-     * Object container name
-     * @return
+     * Returns the name of this object container.
+     *
+     * @return the name of the container
      */
     String getName();
 
     /**
-     * Gets the object.
+     * Retrieves an object by its name and type.
      *
-     * @param <T> the generic type
-     * @param name the name
-     * @param type the type
-     * @return the object
+     * @param <T> the type of the object
+     * @param name the name of the object
+     * @param type the class type of the object
+     * @return the object instance, or null if not found
      */
     <T> T getObject(String name, Class<T> type);
 
     /**
-     * Gets the object.
+     * Retrieves an object by its type. If multiple objects of the same type exist, the behavior is implementation-specific.
      *
-     * @param <T> the generic type
-     * @param type the type
-     * @return the object
+     * @param <T> the type of the object
+     * @param type the class type of the object
+     * @return the object instance, or null if not found
      */
     <T> T getObject(Class<T> type);
 
     /**
-     * Gets the objects.
+     * Retrieves all objects of the specified type.
      *
-     * @param <T> the generic type
-     * @param type the type
-     * @return the objects
+     * @param <T> the type of the objects
+     * @param type the class type of the objects
+     * @return a list of objects of the specified type, or an empty list if none found
      */
     <T> List<T> getObjects(Class<T> type);
 
     /**
-     * Gets the object.
+     * Retrieves an object by its name.
      *
-     * @param name the name
-     * @return the object
+     * @param name the name of the object
+     * @return the object instance, or null if not found
      */
     Object getObject(String name);
 }

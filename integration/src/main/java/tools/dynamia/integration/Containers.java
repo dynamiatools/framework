@@ -27,8 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
- * This class works like a Facade for all kind of object containers like Spring,
- * SLI, etc.
+ * This class acts as a facade for managing various object containers, such as those for Spring, SLI, and others.
+ * It provides a unified interface to find and retrieve objects from registered containers.
  *
  * @author Mario A. Serrano Leones
  */
@@ -47,9 +47,9 @@ public class Containers {
     private static final LoggingService logger = new SLF4JLoggingService(Containers.class);
 
     /**
-     * Gets the.
+     * Returns the singleton instance of the Containers facade.
      *
-     * @return the containers
+     * @return the singleton instance
      */
     public static Containers get() {
         if (instance == null) {
@@ -66,12 +66,13 @@ public class Containers {
     }
 
     /**
-     * Find object.
+     * Searches for an object by name and type across all registered containers.
+     * Returns the first match found, or null if no matching object is found.
      *
-     * @param <T>  the generic type
-     * @param name the name
-     * @param type the type
-     * @return the t
+     * @param <T> the type of the object
+     * @param name the name of the object
+     * @param type the class type of the object
+     * @return the object instance, or null if not found
      */
     public <T> T findObject(String name, Class<T> type) {
         if (objectContainers == null || objectContainers.isEmpty()) {
@@ -87,10 +88,11 @@ public class Containers {
     }
 
     /**
-     * Find object.
+     * Searches for an object by name across all registered containers.
+     * Returns the first match found, or null if no matching object is found.
      *
-     * @param name the name
-     * @return the object
+     * @param name the name of the object
+     * @return the object instance, or null if not found
      */
     public Object findObject(String name) {
         if (objectContainers == null) {
@@ -106,11 +108,13 @@ public class Containers {
     }
 
     /**
-     * Find object.
+     * Searches for an object by type across all registered containers.
+     * Returns the first match found, or null if no matching object is found.
+     * If multiple objects of the same type exist, the behavior is implementation-specific.
      *
-     * @param <T>  the generic type
-     * @param type the type
-     * @return the t
+     * @param <T> the type of the object
+     * @param type the class type of the object
+     * @return the object instance, or null if not found
      */
     public <T> T findObject(Class<T> type) {
         if (objectContainers == null) {
@@ -125,6 +129,15 @@ public class Containers {
         return null;
     }
 
+    /**
+     * Searches for an object by type and applies a matcher to filter results.
+     * Returns the first matching object, or null if none.
+     *
+     * @param <T> the type of the object
+     * @param type the class type of the object
+     * @param matcher the matcher to filter objects
+     * @return the first matching object, or null
+     */
     public <T> T findObject(Class<T> type, ObjectMatcher<T> matcher) {
         if (objectContainers == null) {
             return null;
@@ -133,23 +146,23 @@ public class Containers {
     }
 
     /**
-     * Find objects.
+     * Finds all objects of the specified type across all registered containers.
      *
-     * @param <T>  the generic type
-     * @param type the type
-     * @return the collection
+     * @param <T> the type of the objects
+     * @param type the class type of the objects
+     * @return a collection of objects of the specified type
      */
     public <T> Collection<T> findObjects(Class<T> type) {
         return findObjects(type, null);
     }
 
     /**
-     * Find objects.
+     * Finds all objects of the specified type across all registered containers and applies a matcher to filter them.
      *
-     * @param <T>     the generic type
-     * @param type    the type
-     * @param matcher the matcher
-     * @return the collection
+     * @param <T> the type of the objects
+     * @param type the class type of the objects
+     * @param matcher the matcher to filter objects, or null to include all
+     * @return a collection of matching objects
      */
     public <T> Collection<T> findObjects(Class<T> type, ObjectMatcher<T> matcher) {
         List<T> objects = new ArrayList<>();
@@ -169,9 +182,9 @@ public class Containers {
 
 
     /**
-     * Manually install a new ObjectContainer.
+     * Manually installs a new ObjectContainer into the facade.
      *
-     * @param obj the obj
+     * @param obj the ObjectContainer to install
      */
     public void installObjectContainer(ObjectContainer obj) {
         logger.info("Installing Object Container: " + obj.getName() + "  = " + obj.getClass());
@@ -179,7 +192,7 @@ public class Containers {
     }
 
     /**
-     * Gets the installed containers.
+     * Returns a collection of all installed containers.
      *
      * @return the installed containers
      */
@@ -188,27 +201,27 @@ public class Containers {
     }
 
     /**
-     * Removes the all containers.
+     * Removes all installed containers from the facade.
      */
     public void removeAllContainers() {
         objectContainers.clear();
     }
 
     /**
-     * Remove an {@link ObjectContainer} by his name
+     * Removes an ObjectContainer by its name.
      *
-     * @param name
-     * @return
+     * @param name the name of the container to remove
+     * @return the removed ObjectContainer, or null if not found
      */
     public ObjectContainer removeContainer(String name) {
         return objectContainers.remove(name);
     }
 
     /**
-     * Get object container by name
+     * Retrieves an ObjectContainer by its name.
      *
-     * @param name
-     * @return
+     * @param name the name of the container
+     * @return the ObjectContainer, or null if not found
      */
     public ObjectContainer getContainer(String name) {
         return objectContainers.get(name);
