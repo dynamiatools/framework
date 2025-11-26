@@ -4,7 +4,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Utility class for managing a reusable ExecutorService that uses virtual threads.
+ * Utility class for managing a reusable ExecutorService that uses virtual threads.  This register a shutdown
+ * hook to properly shutdown the executor when the application terminates.
  */
 public final class VT {
 
