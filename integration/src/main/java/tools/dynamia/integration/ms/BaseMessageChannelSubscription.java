@@ -42,4 +42,9 @@ public class BaseMessageChannelSubscription<T extends Message> implements Messag
     public MessageListener<T> getListener() {
         return listener;
     }
+
+    @Override
+    public boolean isActive() {
+        return true;
+    }
 }

@@ -31,4 +31,11 @@ public interface MessageChannelSubscription {
      * Unsubscribes from the message channel.
      */
     void unsubscribe();
+
+    /**
+     * Checks if the subscription is currently active.
+     *
+     * @return true if the subscription is active, false otherwise
+     */
+    boolean isActive();
 }
