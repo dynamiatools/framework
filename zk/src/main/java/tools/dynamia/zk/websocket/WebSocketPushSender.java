@@ -30,7 +30,7 @@ import tools.dynamia.zk.util.ZKUtil;
 import java.io.IOException;
 
 /**
- * Helper class to send push command to desktop cliente  using web socket
+ * Helper class to send push command to desktop client using web socket
  */
 public abstract class WebSocketPushSender {
 
