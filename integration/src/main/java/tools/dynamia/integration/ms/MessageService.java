@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Consumer;
 
 
 /**
@@ -188,5 +189,20 @@ public interface MessageService {
      * @return a MessageChannelSubscription representing the subscription
      */
     <T extends Message> MessageChannelSubscription subscribe(String channelName, String topic, MessageListener<T> listener);
+
+
+    /**
+     * Subscribes to a channel with a simple text message consumer. Its acts as a shortcut for a MessageListener that processes TextMessage only.
+     *
+     * @param channelName
+     * @param onTextMessage
+     * @param <T>
+     * @return
+     */
+    default <T extends Message> MessageChannelSubscription subscribeText(String channelName, Consumer<String> onTextMessage) {
+        return subscribe(channelName, (MessageEvent<TextMessage> evt) -> {
+            onTextMessage.accept(evt.message().getContent());
+        });
+    }
 
 }
