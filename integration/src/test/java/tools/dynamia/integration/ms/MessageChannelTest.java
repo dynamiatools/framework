@@ -82,7 +82,7 @@ public class MessageChannelTest {
         AtomicInteger salesCount = new AtomicInteger(0);
         AtomicInteger promotionsCount = new AtomicInteger(0);
 
-        service.subscribe("sales", (MessageEvent<TextMessage> evt) -> {
+        var sub = service.subscribe("sales", (MessageEvent<TextMessage> evt) -> {
             result.set(evt.message().getContent());
             salesCount.incrementAndGet();
         });
@@ -105,5 +105,23 @@ public class MessageChannelTest {
         Assert.assertEquals(1, salesCount.get()); //only the first message without topic
 
 
+        //cancel subscription
+        sub.unsubscribe();
+        service.publish("sales", "Another sale");
+        Assert.assertEquals("Some cool stuff", result.get()); //should not change
+    }
+
+    @Test
+    public void shouldSubscribeToTextMessagesOnly() {
+        MessageService service = new SimpleMessageService();
+        AtomicBoolean textMessageReceived = new AtomicBoolean(false);
+
+        service.subscribeText("mixedChannel", content -> textMessageReceived.set(true));
+
+        service.publish("mixedChannel", new NumberMessage(123));
+        Assert.assertFalse(textMessageReceived.get());
+
+        service.publish("mixedChannel", new TextMessage("Hello"));
+        Assert.assertTrue(textMessageReceived.get());
     }
 }

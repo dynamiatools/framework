@@ -128,8 +128,7 @@ public class MessageCallbakTest {
     }
 
     @MessageChannelExchange(channel = "calculator")
-    static
-    class CalculatorServiceListener implements MessageListener<MapMessage> {
+    static class CalculatorServiceListener implements MessageListener<MapMessage> {
 
         private final MessageService service;
 
