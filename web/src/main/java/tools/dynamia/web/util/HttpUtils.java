@@ -33,25 +33,47 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 /**
+ * Utility class for HTTP-related operations, including request handling, IP utilities, device detection, and HTTP requests.
+ *
  * @author Mario A. Serrano Leones
  */
 public class HttpUtils {
 
+    /**
+     * Constant representing a tablet device type.
+     */
     public static final String DEVICE_TABLET = "tablet";
+
+    /**
+     * Constant representing a smartphone device type.
+     */
     public static final String DEVICE_SMARTPHONE = "smartphone";
+
+    /**
+     * Constant representing a standard screen device type.
+     */
     public static final String DEVICE_SCREEN = "screen";
 
     private static final String _255 = "(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
     private static final Pattern pattern = Pattern.compile("^(?:" + _255 + "\\.){3}" + _255 + "$");
+
     /**
      * System property name to setup default server path. Useful when app is running in none servlet context
      */
     public static final String DEFAULT_SERVER_PATH_PROP = "defaultServerPath";
-    public static final String DEFAULT_SERVER_PATH_ENV = "DEFAULT_SERVER_PATH";
-
 
     /**
-     * Execute a plain simple http get request
+     * Environment variable name for default server path.
+     */
+    public static final String DEFAULT_SERVER_PATH_ENV = "DEFAULT_SERVER_PATH";
+
+    /**
+     * Executes a simple HTTP GET request to the specified URL and returns the response body as a string.
+     * Throws HttpServiceException if the request fails.
+     *
+     * @param url the URL to send the GET request to
+     * @return the response body as a string
+     * @throws HttpServiceException if an error occurs during the HTTP request
      */
     public static String executeHttpRequest(String url) {
         try {
@@ -67,12 +89,19 @@ public class HttpUtils {
     }
 
     /**
-     * Execute a GET request with headers and params
+     * Executes an HTTP GET request to the specified URL with custom headers and query parameters.
+     * Returns the response body as a string.
+     *
+     * @param url     the URL to send the GET request to
+     * @param headers a map of HTTP headers to include in the request
+     * @param params  a map of query parameters to append to the URL
+     * @return the response body as a string
+     * @throws IOException          if an I/O error occurs
+     * @throws HttpServiceException if an error occurs during the HTTP request
      */
     public static String executeHttpRequest(String url, Map<String, String> headers, Map<String, Object> params) throws IOException {
 
         try {
-
             var request = HttpRequest.newBuilder().GET()
                     .uri(new URI(url + "?" + formatRequestParams(params)));
 
@@ -86,7 +115,12 @@ public class HttpUtils {
 
     }
 
-
+    /**
+     * Retrieves the current HttpServletRequest from the Spring request context.
+     * Returns null if not in a web context or if an error occurs.
+     *
+     * @return the current HttpServletRequest, or null if unavailable
+     */
     public static HttpServletRequest getCurrentRequest() {
         try {
             ServletRequestAttributes requestAttrb = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
@@ -96,20 +130,41 @@ public class HttpUtils {
         }
     }
 
+    /**
+     * Retrieves the session ID from the current request.
+     *
+     * @return the session ID as a string
+     */
     public static String getSessionId() {
         ServletRequestAttributes requestAttrb = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         return requestAttrb.getSessionId();
     }
 
+    /**
+     * Retrieves the client IP address from the current request.
+     *
+     * @return the client IP address as a string
+     */
     public static String getClientIp() {
         return getIpFromRequest(getCurrentRequest());
     }
 
+    /**
+     * Retrieves the user-agent string from the current request.
+     *
+     * @return the user-agent header value, or null if unavailable
+     */
     public static String getBrowser() {
         HttpServletRequest request = getCurrentRequest();
         return request.getHeader("user-agent");
     }
 
+    /**
+     * Converts a long value representing an IPv4 address to its dotted decimal string representation.
+     *
+     * @param longIp the IPv4 address as a long
+     * @return the IPv4 address as a string in dotted decimal format
+     */
     public static String longToIpV4(long longIp) {
         int octet3 = (int) ((longIp >> 24) % 256);
         int octet2 = (int) ((longIp >> 16) % 256);
@@ -118,12 +173,24 @@ public class HttpUtils {
         return octet3 + "." + octet2 + "." + octet1 + "." + octet0;
     }
 
+    /**
+     * Converts an IPv4 address in dotted decimal format to its long representation.
+     *
+     * @param ip the IPv4 address as a string
+     * @return the IPv4 address as a long
+     */
     public static long ipV4ToLong(String ip) {
         String[] octets = ip.split("\\.");
         return (Long.parseLong(octets[0]) << 24) + ((long) Integer.parseInt(octets[1]) << 16)
                 + ((long) Integer.parseInt(octets[2]) << 8) + Integer.parseInt(octets[3]);
     }
 
+    /**
+     * Checks if the given IPv4 address is a private address (e.g., 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16).
+     *
+     * @param ip the IPv4 address as a string
+     * @return true if the address is private, false otherwise
+     */
     public static boolean isIPv4Private(String ip) {
         long longIp = ipV4ToLong(ip);
         return (longIp >= ipV4ToLong("10.0.0.0") && longIp <= ipV4ToLong("10.255.255.255"))
@@ -131,10 +198,23 @@ public class HttpUtils {
                 || longIp >= ipV4ToLong("192.168.0.0") && longIp <= ipV4ToLong("192.168.255.255");
     }
 
+    /**
+     * Validates if the given string is a valid IPv4 address.
+     *
+     * @param ip the string to validate
+     * @return true if the string is a valid IPv4 address, false otherwise
+     */
     public static boolean isIPv4Valid(String ip) {
         return pattern.matcher(ip).matches();
     }
 
+    /**
+     * Extracts the client IP address from the HttpServletRequest, considering forwarded headers.
+     * Prefers non-private IPs from the X-Forwarded-For header, falls back to remote address.
+     *
+     * @param request the HttpServletRequest
+     * @return the client IP address as a string, or "0.0.0.0" if request is null
+     */
     public static String getIpFromRequest(HttpServletRequest request) {
         String ip = "0.0.0.0";
         if (request != null) {
@@ -156,6 +236,11 @@ public class HttpUtils {
         return ip;
     }
 
+    /**
+     * Retrieves user agent information from the current request.
+     *
+     * @return a UserAgentInfo object containing user agent details
+     */
     public static UserAgentInfo getUserAgentInfo() {
 
         HttpServletRequest request = getCurrentRequest();
@@ -167,6 +252,11 @@ public class HttpUtils {
 
     }
 
+    /**
+     * Detects the device type (tablet, smartphone, or screen) based on the user agent of the current request.
+     *
+     * @return the device type as a string: "tablet", "smartphone", or "screen"
+     */
     public static String detectDevice() {
         UserAgentInfo userAgentInfo = getUserAgentInfo();
 
@@ -182,19 +272,29 @@ public class HttpUtils {
         return device;
     }
 
+    /**
+     * Checks if the current request is from a smartphone.
+     *
+     * @return true if the device is a smartphone, false otherwise
+     */
     public static boolean isSmartphone() {
         return detectDevice().equals(DEVICE_SMARTPHONE);
     }
 
+    /**
+     * Checks if the current request is from a tablet.
+     *
+     * @return true if the device is a tablet, false otherwise
+     */
     public static boolean isTablet() {
         return detectDevice().equals(DEVICE_TABLET);
     }
 
     /**
-     * Return the server path including, scheme, servername, port and context
-     * path using Current Request. If not current request {@link HttpUtils}.DEFAULT_SERVER_PATH system property is used.
+     * Returns the server path including scheme, server name, port, and context path using the current request.
+     * If no current request is available, uses the DEFAULT_SERVER_PATH system property or environment variable.
      *
-     * @return server path
+     * @return the server path as a string
      */
     public static String getServerPath() {
         HttpServletRequest request = getCurrentRequest();
@@ -225,7 +325,12 @@ public class HttpUtils {
 
     }
 
-
+    /**
+     * Formats a map of parameters into a URL query string.
+     *
+     * @param params a map of parameter names to values
+     * @return the formatted query string, or empty string if params is null
+     */
     public static String formatRequestParams(Map<String, Object> params) {
         if (params == null) {
             return "";
@@ -243,6 +348,11 @@ public class HttpUtils {
 
     }
 
+    /**
+     * Checks if the current execution is within a web request scope.
+     *
+     * @return true if in web scope, false otherwise
+     */
     public static boolean isInWebScope() {
         try {
             return getCurrentRequest() != null;
@@ -255,7 +365,9 @@ public class HttpUtils {
     }
 
     /**
-     * Detect if current request is from an iphone
+     * Detects if the current request is from an iPhone.
+     *
+     * @return true if the device is an iPhone, false otherwise
      */
     public static boolean isIphone() {
         try {
@@ -267,7 +379,9 @@ public class HttpUtils {
     }
 
     /**
-     * Detect if current request is from an iOS browser
+     * Detects if the current request is from an iOS device.
+     *
+     * @return true if the device is iOS, false otherwise
      */
     public static boolean isIOS() {
         try {
@@ -279,7 +393,9 @@ public class HttpUtils {
     }
 
     /**
-     * Detect if current request is from an Android browser
+     * Detects if the current request is from an Android device.
+     *
+     * @return true if the device is Android, false otherwise
      */
     public static boolean isAndroid() {
         try {
@@ -291,7 +407,10 @@ public class HttpUtils {
     }
 
     /**
-     * Return subdomain name or null if current server host has no subdomian
+     * Returns the subdomain name from the server name of the request, or null if no subdomain is present.
+     *
+     * @param request the HttpServletRequest
+     * @return the subdomain as a string, or null
      */
     public static String getSubdomain(HttpServletRequest request) {
         if (request != null) {
