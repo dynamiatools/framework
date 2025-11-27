@@ -91,12 +91,23 @@ public class MessageEvent<T extends Message> {
         return topic;
     }
 
+    public String topic() {
+        return topic;
+    }
 
     public String getCallback() {
         return callback;
     }
 
+    public String callback() {
+        return callback;
+    }
+
     public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant createdAt() {
         return createdAt;
     }
 }
