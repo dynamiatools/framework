@@ -30,9 +30,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 
@@ -48,25 +47,38 @@ public class SchedulerUtil {
     ;
 
     /**
-     * Run the WorkerTask asynchronously using any Spring AsyncTaskExecutor
-     * found in the Spring Containers or standard java Thread(runnable) if no
-     * TaskExecutor is found.
+     * Execute a task using a Virtual Thread executor from {@link VT} helper class.
      *
-     * @param task the task
+     * @param task the runnable
      */
-    public static void run(Task task) {
-        run((Runnable) task);
+    public static void run(Runnable task) {
+        Runnable runnableWithContext = getWithContext(task);
+        VT.executor().execute(runnableWithContext);
     }
 
     /**
-     * Execute a runnable using a Virtual Thread executor from {@link VT} helper class.
+     * Execute a task using a Virtual Thread executor from {@link VT} helper class and wait for its completion
+     * or timeout.
      *
-     * @param runnable the runnable
+     * @param task    the runnable
+     * @param timeout the timeout
      */
-    public static void run(Runnable runnable) {
-        Runnable runnableWithContext = getWithContext(runnable);
-        VT.executor().execute(runnableWithContext);
+    public static void runAndWait(Runnable task, Duration timeout) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        run(() -> {
+            try {
+                task.run();
+                future.complete(null);
+            } catch (Exception e) {
+                future.completeExceptionally(e);
+            }
+        });
 
+        try {
+            future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new TaskException(e.getMessage(), e);
+        }
     }
 
     /**
@@ -76,14 +88,14 @@ public class SchedulerUtil {
      * @param firstTask the first task
      * @param others    the tasks
      */
-    public static void run(Task firstTask, Task... others) {
+    public static CompletableFuture<Void> run(Runnable firstTask, Runnable... others) {
 
-        List<Task> allTasks = new ArrayList<>();
+        List<Runnable> allTasks = new ArrayList<>();
         allTasks.add(firstTask);
         if (others != null) {
             allTasks.addAll(Arrays.asList(others));
         }
-        run(allTasks);
+        return run(allTasks);
     }
 
     /**
@@ -92,16 +104,17 @@ public class SchedulerUtil {
      *
      * @param allTasks the tasks
      */
-    public static void run(List<Task> allTasks) {
+    public static CompletableFuture<Void> run(List<Runnable> allTasks) {
         CompletableFuture<Void> sequence = CompletableFuture.completedFuture(null);
         for (var task : allTasks) {
             sequence = sequence.thenCompose(fn -> CompletableFuture.supplyAsync(() -> {
-                task.doWork();
+                task.run();
                 return null;
             }, VT.executor()));
         }
 
         sequence.join();
+        return sequence;
     }
 
     public static Runnable getWithContext(Runnable runnable) {
@@ -155,7 +168,7 @@ public class SchedulerUtil {
      * @param task the task
      * @return the future
      */
-    public static <T> Future<T> runWithResult(final TaskWithResult<T> task) {
+    public static <T> CompletableFuture<T> runWithResult(final TaskWithResult<T> task) {
         return CompletableFuture.supplyAsync(task::doWorkWithResult, VT.executor());
 
     }
@@ -163,7 +176,7 @@ public class SchedulerUtil {
     /**
      * Functional override of runWithResult({@link TaskWithResult }
      */
-    public static <T> Future<T> runWithResult(Supplier<T> task) {
+    public static <T> CompletableFuture<T> runWithResult(Supplier<T> task) {
         return runWithResult(new TaskWithResult<>() {
             @Override
             public T doWorkWithResult() {
@@ -276,6 +289,37 @@ public class SchedulerUtil {
      */
     public static ScheduledFuture<?> scheduleWithFixedDelay(Duration delay, Runnable task) {
         return getTaskScheduler().scheduleAtFixedRate(task, delay);
+    }
+
+    /**
+     * Sleep current thread for the given duration. Handles InterruptedException by re-interrupting the thread.
+     *
+     * @param duration the duration
+     */
+    public static void sleep(Duration duration) {
+        try {
+            Thread.sleep(duration.toMillis());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
+     * Sleep current thread for the given duration. Handles InterruptedException by re-interrupting the thread
+     * and passing the exception to the provided consumer.
+     *
+     * @param duration          the duration
+     * @param exceptionConsumer the exception consumer
+     */
+    public static void sleep(Duration duration, Consumer<Exception> exceptionConsumer) {
+        try {
+            Thread.sleep(duration.toMillis());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            if (exceptionConsumer != null) {
+                exceptionConsumer.accept(e);
+            }
+        }
     }
 
 
