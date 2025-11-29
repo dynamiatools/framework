@@ -41,6 +41,7 @@
 
 
     <javascript src="/static/dynamia-tools/js/dynamia-tools.js?v=${project.version}"/>
+    <javascript src="/static/dynamia-tools/js/dynamia-tools-ws.js?v=${project.version}"/>
 
 
     <component>
