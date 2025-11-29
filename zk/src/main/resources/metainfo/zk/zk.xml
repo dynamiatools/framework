@@ -34,16 +34,6 @@
         <listener-class>tools.dynamia.zk.websocket.WebSocketDesktopListener</listener-class>
     </listener>
 
-    <listener>
-        <description>Delegate calls to DesktopListener</description>
-        <listener-class>tools.dynamia.zk.DesktopInitListenerDelegator</listener-class>
-    </listener>
-
-    <listener>
-        <description>Delegate calls to ComposerListener</description>
-        <listener-class>tools.dynamia.zk.ComposerListenerDelegator</listener-class>
-    </listener>
-
 
     <preference>
         <name>ThreadLocal</name>
