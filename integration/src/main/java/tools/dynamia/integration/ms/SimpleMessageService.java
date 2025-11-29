@@ -87,6 +87,7 @@ public class SimpleMessageService implements MessageService {
     @Override
     public void publish(String channelName, Message message, String topic, String callback) {
         try {
+            LOGGER.info("Publishing Message " + message + " to channel " + channelName + "   Topic: " + topic);
             MessageChannel channel = createChannel(channelName);
             channel.publish(message, topic, callback);
 
