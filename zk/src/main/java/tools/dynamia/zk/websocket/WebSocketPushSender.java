@@ -22,12 +22,15 @@ import org.springframework.web.socket.WebSocketSession;
 import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.util.Clients;
+import tools.dynamia.commons.StringPojoParser;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.zk.util.ZKUtil;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Helper class to send push command to desktop client using web socket
@@ -43,13 +46,30 @@ public abstract class WebSocketPushSender {
      *
      * @return true if command is sended successfull. Check log for false response
      */
+
     public static boolean sendPushCommand(Desktop desktop, String command) {
+        return sendPushCommand(desktop, command, null);
+    }
+
+    /**
+     * Send a push command to client desktop. The command its returned to the server as a ZK Global Command. You should
+     * have a ViemModel that receive this global command
+     *
+     * @return true if command is sended successfull. Check log for false response
+     */
+    public static boolean sendPushCommand(Desktop desktop, String command, Map<String, Object> payload) {
         WebSocketGlobalCommandHandler handler = Containers.get().findObject(WebSocketGlobalCommandHandler.class);
         if (handler != null) {
             try {
+                Map<String, Object> data = new HashMap<>();
+                if (payload != null) {
+                    data.putAll(payload);
+                }
+                data.put("command", command);
                 WebSocketSession session = handler.findSession(desktop);
                 if (session != null) {
-                    session.sendMessage(new TextMessage(command));
+                    String textData = StringPojoParser.convertMapToJson(data);
+                    session.sendMessage(new TextMessage(textData));
                     return true;
                 } else {
                     LOGGER.warn("No websocket session found for desktop " + desktop);
@@ -98,7 +118,7 @@ public abstract class WebSocketPushSender {
         if (ZKUtil.isInEventListener()) {
             try {
                 LOGGER.info("Requesting to initialize Websocket connection");
-                Clients.evalJavaScript("initWebSocket('/ws-commands');");
+                Clients.evalJavaScript("DynamiaToolsWS.init('/ws-commands');");
             } catch (Exception e) {
                 //
             }
