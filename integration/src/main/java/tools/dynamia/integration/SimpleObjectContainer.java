@@ -34,7 +34,7 @@ public class SimpleObjectContainer implements ObjectContainer {
     /**
      * The objects map, storing object instances as keys and their names as values.
      */
-    private final Map<Object, String> objects = new ConcurrentHashMap<>();
+    private final Map<String, Object> objects = new ConcurrentHashMap<>();
 
     private final String name;
 
@@ -79,9 +79,9 @@ public class SimpleObjectContainer implements ObjectContainer {
         if (name == null || type == null) {
             return null;
         }
-        for (Map.Entry<Object, String> entry : objects.entrySet()) {
-            if (name.equals(entry.getValue()) && type.isAssignableFrom(entry.getKey().getClass())) {
-                return (T) entry.getKey();
+        for (Map.Entry<String, Object> entry : objects.entrySet()) {
+            if (name.equals(entry.getKey()) && type.isAssignableFrom(entry.getValue().getClass())) {
+                return (T) entry.getValue();
             }
         }
         return null;
@@ -124,7 +124,7 @@ public class SimpleObjectContainer implements ObjectContainer {
         }
         List<T> r = new ArrayList<>();
         if (!objects.isEmpty()) {
-            for (Object obj : objects.keySet()) {
+            for (Object obj : objects.values()) {
                 if (type.isAssignableFrom(obj.getClass())) {
                     r.add((T) obj);
                 }
@@ -144,12 +144,7 @@ public class SimpleObjectContainer implements ObjectContainer {
         if (name == null) {
             return null;
         }
-        for (Map.Entry<Object, String> entry : objects.entrySet()) {
-            if (name.equals(entry.getValue())) {
-                return entry.getKey();
-            }
-        }
-        return null;
+        return objects.get(name);
     }
 
     /**
@@ -164,7 +159,7 @@ public class SimpleObjectContainer implements ObjectContainer {
         if (name == null || object == null) {
             throw new IllegalArgumentException("Name and object cannot be null");
         }
-        objects.put(object, name);
+        objects.put(name, object);
     }
 
     /**
@@ -191,18 +186,7 @@ public class SimpleObjectContainer implements ObjectContainer {
         if (name == null) {
             return false;
         }
-        Object objToRemove = null;
-        for (Map.Entry<Object, String> entry : objects.entrySet()) {
-            if (name.equals(entry.getValue())) {
-                objToRemove = entry.getKey();
-                break;
-            }
-        }
-        if (objToRemove != null) {
-            objects.remove(objToRemove);
-            return true;
-        }
-        return false;
+        return objects.remove(name) != null;
     }
 
     /**
@@ -215,7 +199,16 @@ public class SimpleObjectContainer implements ObjectContainer {
         if (object == null) {
             return false;
         }
-        return objects.remove(object) != null;
+        var keyToRemove = objects.entrySet().stream()
+                .filter(e -> e.getValue().equals(object))
+                .map(Map.Entry::getKey)
+                .findFirst();
+
+        if (keyToRemove.isPresent()) {
+            objects.remove(keyToRemove.get());
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -307,5 +300,9 @@ public class SimpleObjectContainer implements ObjectContainer {
     @Override
     public int hashCode() {
         return name != null ? name.hashCode() : 0;
+    }
+
+    public Map<String, Object> getObjects() {
+        return objects;
     }
 }
