@@ -91,6 +91,20 @@ public class ThreadLocalObjectContainer {
         }
 
         return Containers.get().findObjects(clazz);
+    }
 
+    /**
+     * Checks if the object container for the current thread is initialized.
+     *
+     * @return true if initialized, false otherwise
+     */
+    public static boolean isInitialized() {
+        return context.get() != null;
+    }
+
+    public static void copyTo(SimpleObjectContainer target) {
+        if (context.get() instanceof SimpleObjectContainer scon) {
+            target.getObjects().putAll(scon.getObjects());
+        }
     }
 }
