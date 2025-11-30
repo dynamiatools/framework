@@ -1,0 +1,35 @@
+/*
+ * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Colombia / South America
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+description = "DynamiaTools - IO - A set of classes and interfaces that help in any kind io task"
+
+dependencies {
+    api(project(":commons"))
+    api(project(":integration"))
+
+    api("org.springframework:spring-beans")
+    api("org.springframework:spring-context")
+
+    testImplementation("org.springframework:spring-test")
+
+    implementation("com.google.zxing:core:${rootProject.ext["zxingVersion"]}")
+    implementation("com.google.zxing:javase:${rootProject.ext["zxingVersion"]}")
+    implementation("org.apache.poi:poi:${rootProject.ext["poiVersion"]}")
+    implementation("org.apache.poi:poi-ooxml:${rootProject.ext["poiVersion"]}")
+    implementation("org.yaml:snakeyaml:${rootProject.ext["snakeyamlVersion"]}")
+}
+

@@ -12,7 +12,7 @@
 </p>
 
 <h1 align="center">DynamiaTools</h1>
-DynamiaTools is a cutting-edge full-stack Java 17+ framework designed for building powerful enterprise web applications, harnessing the strength of Spring Boot 3 and the elegance of ZK 10. 
+DynamiaTools is a cutting-edge full-stack Java 21+ framework designed for building powerful enterprise web applications, harnessing the strength of Spring Boot 3 and the elegance of ZK 10. The framework supports both **Maven** and **Gradle** as build tools. 
 
 
 ## With DynamiaTools you can
@@ -99,12 +99,26 @@ Please visit (https://dynamia.tools) for full documentation and tutorials
 
 ## Building
 
+The project supports both Maven and Gradle build tools.
+
+### Building with Maven
+
 - Install OpenJDK 21
 - Install Maven 3.x
 - Install Git
 - Clone this repository
-- Execute `mvn clean install` ;-)
+- Execute `mvn clean install`
 - Done
+
+### Building with Gradle
+
+- Install OpenJDK 21
+- Install Git
+- Clone this repository
+- Execute `./gradlew clean build` (or `gradlew.bat clean build` on Windows)
+- Done
+
+Note: Gradle wrapper is included in the project, so you don't need to install Gradle separately.
 
 ## License
 

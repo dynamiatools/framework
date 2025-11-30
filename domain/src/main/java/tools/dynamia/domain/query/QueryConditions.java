@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Usefull class for creating query conditions or criterias, you can use it using import
+ * Useful class for creating query conditions or criterias, you can use it using import
  * static.
  *
  * @author Mario A. Serrano Leones
@@ -145,7 +145,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a greate than condition '>'.
+	 * Create a greater than condition '&gt;'.
 	 *
 	 * @param value
 	 *            the value
@@ -156,7 +156,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a greate than condition '>'.
+	 * Create a greater than condition '&gt;'.
 	 *
 	 * @param value
 	 *            the value
@@ -169,7 +169,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a greate than condition '>'.
+	 * Create a greater than condition '&gt;'.
 	 *
 	 * @param value
 	 *            the value
@@ -179,9 +179,8 @@ public abstract class QueryConditions {
 		return new GreaterThan(value);
 	}
 
-
 	/**
-	 * Create a greate than condition '>'.
+	 * Create a greater than condition '&gt;'.
 	 *
 	 * @param value
 	 *            the value
@@ -194,7 +193,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a greate equals than condition '>='.
+	 * Create a greater equals than condition '&gt;='.
 	 *
 	 * @param value
 	 *            the value
@@ -205,7 +204,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a greate equals than condition '>='.
+	 * Create a greater equals than condition '&gt;='.
 	 *
 	 * @param value
 	 *            the value
@@ -218,7 +217,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a greate equals than condition '>='.
+	 * Create a greater equals than condition '&gt;='.
 	 *
 	 * @param value
 	 *            the value
@@ -229,7 +228,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a greate equals than condition '>='.
+	 * Create a greater equals than condition '&gt;='.
 	 *
 	 * @param value
 	 *            the value
@@ -242,7 +241,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a less than condition '<'.
+	 * Create a less than condition '&lt;'.
 	 *
 	 * @param value
 	 *            the value
@@ -253,7 +252,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a less than condition '<'.
+	 * Create a less than condition '&lt;'.
 	 *
 	 * @param value
 	 *            the value
@@ -266,7 +265,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a less than condition '<'.
+	 * Create a less than condition '&lt;'.
 	 *
 	 * @param value
 	 *            the value
@@ -277,7 +276,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a less than condition '<'.
+	 * Create a less than condition '&lt;'.
 	 *
 	 * @param value
 	 *            the value
@@ -290,7 +289,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a less equals than condition '<='.
+	 * Create a less equals than condition '&lt;='.
 	 *
 	 * @param value
 	 *            the value
@@ -301,7 +300,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a less equals than condition '<='.
+	 * Create a less equals than condition '&lt;='.
 	 *
 	 * @param value
 	 *            the value
@@ -314,7 +313,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a less equals than condition '<='.
+	 * Create a less equals than condition '&lt;='.
 	 *
 	 * @param value
 	 *            the value
@@ -325,7 +324,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a less equals than condition '<='.
+	 * Create a less equals than condition '&lt;='.
 	 *
 	 * @param value
 	 *            the value
@@ -366,7 +365,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Between.
+	 * Create a between condition using a date range.
 	 *
 	 * @param dateRange
 	 *            the date range
@@ -377,7 +376,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Between.
+	 * Create a between condition using a date range.
 	 *
 	 * @param dateRange
 	 *            the date range
@@ -386,7 +385,7 @@ public abstract class QueryConditions {
 	 * @return the query condition
 	 */
 	public static QueryCondition between(DateRange dateRange, BooleanOp booleanOp) {
-		return new Between(dateRange.getStartDate(), dateRange.getStartDate(), booleanOp);
+		return new Between(dateRange.getStartDate(), dateRange.getEndDate(), booleanOp);
 	}
 
 	/**
@@ -438,17 +437,22 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create an in condition using a subquery (JPAQL)
+	 * Create an in condition using a subquery (JPAQL).
 	 *
-     */
+	 * @param subquery the JPAQL subquery string
+	 * @return the query condition
+	 */
 	public static QueryCondition in(String subquery) {
 		return new Inlist(subquery);
 	}
 
 	/**
-	 * Create an in condition using a subquery (JPAQL)
+	 * Create an in condition using a subquery (JPAQL).
 	 *
-     */
+	 * @param subquery the JPAQL subquery string
+	 * @param booleanOp the boolean op
+	 * @return the query condition
+	 */
 	public static QueryCondition in(String subquery, BooleanOp booleanOp) {
 		Inlist in = new Inlist(subquery);
 		in.setBooleanOperator(booleanOp);
@@ -457,18 +461,25 @@ public abstract class QueryConditions {
 
 	/**
 	 * Create an in condition using a subquery (JPAQL) and params are applied to
-	 * subquery
+	 * subquery.
 	 *
-     */
+	 * @param subquery the JPAQL subquery string
+	 * @param params the parameters to apply to the subquery
+	 * @return the query condition
+	 */
 	public static QueryCondition in(String subquery, Map<String, Object> params) {
 		return new Inlist(subquery, params);
 	}
 
 	/**
 	 * Create an in condition using a subquery (JPAQL) and params are applied to
-	 * subquery
+	 * subquery.
 	 *
-     */
+	 * @param subquery the JPAQL subquery string
+	 * @param params the parameters to apply to the subquery
+	 * @param booleanOp the boolean op
+	 * @return the query condition
+	 */
 	public static QueryCondition in(String subquery, Map<String, Object> params, BooleanOp booleanOp) {
 		Inlist inlist = new Inlist(subquery, params);
 		inlist.setBooleanOperator(booleanOp);
@@ -516,7 +527,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a not equals condition '<>'.
+	 * Create a not equals condition '&lt;&gt;'.
 	 *
 	 * @param value
 	 *            the value
@@ -527,7 +538,7 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a not equals condition '<>'.
+	 * Create a not equals condition '&lt;&gt;'.
 	 *
 	 * @param value
 	 *            the value
@@ -588,17 +599,22 @@ public abstract class QueryConditions {
 	}
 
 	/**
-	 * Create a NOT in condition using a subquery (JPAQL)
+	 * Create a NOT in condition using a subquery (JPAQL).
 	 *
-     */
+	 * @param subquery the JPAQL subquery string
+	 * @return the query condition
+	 */
 	public static QueryCondition notIn(String subquery) {
 		return new NotInList(subquery);
 	}
 
 	/**
-	 * Create a NOT in condition using a subquery (JPAQL)
+	 * Create a NOT in condition using a subquery (JPAQL).
 	 *
-     */
+	 * @param subquery the JPAQL subquery string
+	 * @param booleanOp the boolean op
+	 * @return the query condition
+	 */
 	public static QueryCondition notIn(String subquery, BooleanOp booleanOp) {
 		NotInList notin = new NotInList(subquery);
 		notin.setBooleanOperator(booleanOp);
@@ -607,18 +623,25 @@ public abstract class QueryConditions {
 
 	/**
 	 * Create a NOT in condition using a subquery (JPAQL) and params are applied
-	 * to subquery
+	 * to subquery.
 	 *
-     */
+	 * @param subquery the JPAQL subquery string
+	 * @param params the parameters to apply to the subquery
+	 * @return the query condition
+	 */
 	public static QueryCondition notIn(String subquery, Map<String, Object> params) {
 		return new NotInList(subquery, params);
 	}
 
 	/**
 	 * Create a NOT in condition using a subquery (JPAQL) and params are applied
-	 * to subquery
+	 * to subquery.
 	 *
-     */
+	 * @param subquery the JPAQL subquery string
+	 * @param params the parameters to apply to the subquery
+	 * @param booleanOp the boolean op
+	 * @return the query condition
+	 */
 	public static QueryCondition notIn(String subquery, Map<String, Object> params, BooleanOp booleanOp) {
 		NotInList notin = new NotInList(subquery, params);
 		notin.setBooleanOperator(booleanOp);
