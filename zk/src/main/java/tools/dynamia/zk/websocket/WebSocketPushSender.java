@@ -58,7 +58,7 @@ public abstract class WebSocketPushSender {
      * @return true if command is sended successfull. Check log for false response
      */
     public static boolean sendPushCommand(Desktop desktop, String command, Map<String, Object> payload) {
-        WebSocketGlobalCommandHandler handler = Containers.get().findObject(WebSocketGlobalCommandHandler.class);
+        WebSocketGlobalCommandHandler handler = getHandler();
         if (handler != null) {
             try {
                 Map<String, Object> data = new HashMap<>();
@@ -99,7 +99,7 @@ public abstract class WebSocketPushSender {
      *
      */
     public static void broadcastCommand(String command) {
-        WebSocketGlobalCommandHandler handler = Containers.get().findObject(WebSocketGlobalCommandHandler.class);
+        WebSocketGlobalCommandHandler handler = getHandler();
         if (handler != null) {
             handler.getAllSessions().forEach(s -> {
                 try {
@@ -111,8 +111,12 @@ public abstract class WebSocketPushSender {
         }
     }
 
+    private static WebSocketGlobalCommandHandler getHandler() {
+        return Containers.get().findObject(WebSocketGlobalCommandHandler.class);
+    }
+
     /**
-     * Init WS connection with client
+     * Initialize WebSocket connection on client side by requesting it via Clients.evalJavaScript
      */
     public static void initWS() {
         if (ZKUtil.isInEventListener()) {
@@ -121,6 +125,19 @@ public abstract class WebSocketPushSender {
                 Clients.evalJavaScript("DynamiaToolsWS.init('/ws-commands');");
             } catch (Exception e) {
                 //
+            }
+        }
+    }
+
+    /**
+     * Check if desktop has an open WS session, if not try to init WS connection
+     */
+    public static void checkDesktop(Desktop desktop) {
+        var handler = getHandler();
+        if (handler != null) {
+            var session = handler.findSession(desktop);
+            if (session == null || !session.isOpen()) {
+                initWS();
             }
         }
     }
