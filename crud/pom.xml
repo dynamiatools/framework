@@ -23,11 +23,11 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.4.7</version>
+        <version>5.4.8</version>
     </parent>
 
     <artifactId>tools.dynamia.crud</artifactId>
-    <version>5.4.7</version>
+    <version>5.4.8</version>
     <name>DynamiaTools - CRUD</name>
     <url>https://dynamia.tools/docs/crud</url>
 
@@ -62,23 +62,23 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.actions</artifactId>
-            <version>5.4.7</version>
+            <version>5.4.8</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.viewers</artifactId>
-            <version>5.4.7</version>
+            <version>5.4.8</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.navigation</artifactId>
-            <version>5.4.7</version>
+            <version>5.4.8</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.domain.jpa</artifactId>
-            <version>5.4.7</version>
+            <version>5.4.8</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
