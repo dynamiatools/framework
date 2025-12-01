@@ -17,10 +17,10 @@
 package tools.dynamia.integration.ms;
 
 import tools.dynamia.commons.logger.LoggingService;
-import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.SimpleObjectContainer;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -29,14 +29,21 @@ import java.util.Properties;
  */
 public class SimpleMessageService implements MessageService {
 
-    private final SimpleObjectContainer container = new SimpleObjectContainer("LocalMessageChannels");
 
+    private final SimpleObjectContainer container = new SimpleObjectContainer("LocalMessageChannels");
+    private final LoggingService LOGGER = LoggingService.get(SimpleMessageService.class);
+
+    /**
+     * Creates a new MessageChannel with the given name, if exists returns the existing one
+     *
+     * @param name the unique name identifier for the channel
+     * @return the MessageChannel instance
+     */
     @Override
     public MessageChannel createChannel(String name) {
         return createChannel(name, null);
     }
 
-    private final LoggingService LOGGER = new SLF4JLoggingService(SimpleMessageService.class);
 
     @Override
     public MessageChannel createChannel(String name, Properties properties) {
@@ -61,6 +68,11 @@ public class SimpleMessageService implements MessageService {
     }
 
     @Override
+    public Optional<MessageChannel> getChannel(String name) {
+        return Optional.ofNullable(container.getObject(name, SimpleMessageChannel.class));
+    }
+
+    @Override
     public void publish(String channelName, Message message) {
         publish(channelName, message, "");
 
@@ -74,16 +86,13 @@ public class SimpleMessageService implements MessageService {
 
     @Override
     public void publish(String channelName, Message message, String topic, String callback) {
-        MessageChannel channel = null;
         try {
-            channel = createChannel(channelName, null);
-            if (channel == null) {
-                LOGGER.error("Cannot create channel " + channelName + ". Null returned");
-            } else {
-                channel.publish(message, topic, callback);
-            }
+            LOGGER.info("Publishing Message " + message + " to channel " + channelName + "   Topic: " + topic);
+            MessageChannel channel = createChannel(channelName);
+            channel.publish(message, topic, callback);
+
         } catch (Exception e) {
-            LOGGER.error("Error publishing Message " + message + " to channel " + channelName + "  (" + channel + "). Topic: " + topic + " - exception " + e.getMessage());
+            LOGGER.error("Error publishing Message " + message + " to channel " + channelName + "   Topic: " + topic + " - exception " + e.getMessage());
             if (e.getClass().getName().contains("ValidationError")) {
                 throw e;
             }
@@ -95,7 +104,7 @@ public class SimpleMessageService implements MessageService {
 
     @Override
     public void broadcast(Message message) {
-        broadcast(message, "");
+        broadcast(message, MessageChannels.ALL_TOPICS);
 
     }
 
@@ -108,11 +117,23 @@ public class SimpleMessageService implements MessageService {
     @Override
     public void broadcast(Message message, String topic, String callback) {
         if (message != null) {
-            message.addHeader("broadcast", 1);
+            LOGGER.info("Broadcasting Message " + message + " to topic " + topic);
             List<MessageChannel> channels = container.getObjects(MessageChannel.class);
+            message.addHeader("broadcast", 1);
+            message.addHeader("channelCount", channels.size());
             channels.forEach(m -> m.publish(message, topic, callback));
         }
-
     }
 
+    @Override
+    public <T extends Message> MessageChannelSubscription subscribe(String channelName, MessageListener<T> listener) {
+        LOGGER.info("Subscribing to channel: " + channelName + " listener: " + listener);
+        return createChannel(channelName).subscribe(listener);
+    }
+
+    @Override
+    public <T extends Message> MessageChannelSubscription subscribe(String channelName, String topic, MessageListener<T> listener) {
+        LOGGER.info("Subscribing to channel: " + channelName + " topic: " + topic + " listener: " + listener);
+        return createChannel(channelName).subscribe(topic, listener);
+    }
 }

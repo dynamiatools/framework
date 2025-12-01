@@ -112,10 +112,13 @@ public class EventQueueSubscriber {
             }
 
             if (method.getParameterCount() == 1) {
-                Class paramType = method.getParameterTypes()[0];
+                Class<?> paramType = method.getParameterTypes()[0];
 
-                if (paramType == Event.class) {
+                if (paramType.isAssignableFrom(Event.class)) {
                     method.invoke(target, evt);
+                    return true;
+                } else if ((evt.getData() != null) && paramType.isAssignableFrom(evt.getData().getClass())) {
+                    method.invoke(target, evt.getData());
                     return true;
                 } else if (paramType == Object.class) {
                     method.invoke(target, evt.getData());

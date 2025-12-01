@@ -30,7 +30,9 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 import java.util.*;
 
 /**
- * The Class SpringObjectContainer.
+ * Implementation of {@link ObjectContainer} for Spring-based applications.
+ * This container uses the Spring {@link ApplicationContext} to retrieve beans.
+ * It automatically registers itself with the {@link Containers} facade upon instantiation.
  *
  * @author Mario A. Serrano Leones
  */
@@ -45,34 +47,45 @@ public class SpringObjectContainer implements ObjectContainer, ApplicationContex
     private ApplicationContext appContext;
 
     /**
-     * Instantiates a new spring object container.
+     * Creates a new SpringObjectContainer and automatically installs it into the Containers facade.
      */
     public SpringObjectContainer() {
         Containers.get().installObjectContainer(this);
     }
 
+    /**
+     * Returns the name of this container, which is "spring".
+     *
+     * @return the name "spring"
+     */
     @Override
     public String getName() {
         return "spring";
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Retrieves a Spring bean by its name and type from the application context.
      *
-     * @see
-     * com.dynamia.tools.integration.ObjectContainer#getObject(java.lang.String,
-     * java.lang.Class)
+     * @param <T> the type of the bean
+     * @param name the name of the bean
+     * @param type the class type of the bean
+     * @return the bean instance
+     * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException if no bean is found with the given name
+     * @throws org.springframework.beans.factory.BeanNotOfRequiredTypeException if the bean is not of the required type
      */
     @Override
     public <T> T getObject(String name, Class<T> type) {
         return appContext.getBean(name, type);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Retrieves a Spring bean by its type from the application context.
+     * If multiple beans of the same type exist, returns the first one found.
+     * If no bean is found, returns null and logs a debug message.
      *
-     * @see
-     * com.dynamia.tools.integration.ObjectContainer#getObject(java.lang.Class)
+     * @param <T> the type of the bean
+     * @param type the class type of the bean
+     * @return the bean instance, or null if not found
      */
     @Override
     public <T> T getObject(Class<T> type) {
@@ -94,11 +107,12 @@ public class SpringObjectContainer implements ObjectContainer, ApplicationContex
 
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Retrieves all Spring beans of the specified type from the application context.
      *
-     * @see
-     * com.dynamia.tools.integration.ObjectContainer#getObjects(java.lang.Class)
+     * @param <T> the type of the beans
+     * @param type the class type of the beans
+     * @return a list of all beans of the specified type
      */
     @Override
     public <T> List<T> getObjects(Class<T> type) {
@@ -110,23 +124,22 @@ public class SpringObjectContainer implements ObjectContainer, ApplicationContex
         return beans;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Retrieves a Spring bean by its name from the application context.
      *
-     * @see
-     * com.dynamia.tools.integration.ObjectContainer#getObject(java.lang.String)
+     * @param name the name of the bean
+     * @return the bean instance
+     * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException if no bean is found with the given name
      */
     @Override
     public Object getObject(String name) {
         return appContext.getBean(name);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Sets the Spring ApplicationContext and configures the Messages class with suppliers for LocaleProvider and TimeZoneProvider.
      *
-     * @see
-     * org.springframework.context.ApplicationContextAware#setApplicationContext
-     * (org.springframework.context.ApplicationContext)
+     * @param applicationContext the Spring ApplicationContext
      */
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {

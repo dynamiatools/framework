@@ -17,6 +17,7 @@
 package tools.dynamia.integration.ms;
 
 import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.StringUtils;
 import tools.dynamia.integration.Containers;
 
 import java.util.ArrayList;
@@ -25,8 +26,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@SuppressWarnings("rawtypes")
 public class MessageChannels {
+
+    public static final String ALL_TOPICS = "*";
 
     /**
      * Lookup listeners.
@@ -36,25 +38,33 @@ public class MessageChannels {
      */
     public static List<MessageListener> lookupListeners(String channelName, String topic) {
 
-        List<MessageListener> result = new ArrayList<>();
+
         Collection<MessageListener> listeners = Containers.get().findObjects(MessageListener.class);
+
+        return filterListeners(channelName, topic, listeners);
+    }
+
+    public static List<MessageListener> filterListeners(String channelName, String topic, Collection<MessageListener> listeners) {
+        List<MessageListener> result = new ArrayList<>();
         if (listeners != null) {
             for (MessageListener messageListener : listeners) {
-                MessageChannelExchange exchange = getMessageChannelExchange(messageListener);
-                if (exchange != null) {
-                    if ((channelMatch(channelName, exchange) && topicMatch(topic, exchange))
-                            || (exchange.channel().isEmpty() && topicMatch(topic, exchange))) {
-                        result.add(messageListener);
-                    }
-                } else {
+                if (match(channelName, topic, messageListener)) {
                     result.add(messageListener);
                 }
             }
         }
-
         result.sort(new MessageChannelExchangeComparator());
-
         return result;
+    }
+
+    public static boolean match(String channelName, String topic, MessageListener<?> messageListener) {
+        MessageChannelExchange exchange = getMessageChannelExchange(messageListener);
+        if (exchange != null) {
+            return (channelMatch(channelName, exchange) && topicMatch(topic, exchange))
+                    || (exchange.channel().isEmpty() && topicMatch(topic, exchange));
+        } else {
+            return true;
+        }
     }
 
     public static MessageChannelExchange getMessageChannelExchange(MessageListener messageListener) {
@@ -74,7 +84,7 @@ public class MessageChannels {
 
         boolean match = false;
         for (String topic : exchange.topic()) {
-            if (messageTopic.equals(topic) || topic.equals("#")) {
+            if (messageTopic.equals(topic) || topic.equals(ALL_TOPICS)) {
                 match = true;
             } else {
                 Pattern pattern = Pattern.compile(topic);

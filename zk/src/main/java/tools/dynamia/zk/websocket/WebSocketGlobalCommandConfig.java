@@ -39,8 +39,8 @@ public class WebSocketGlobalCommandConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         logger.info("Registering WS Handler for ZK Commands");
-        registry.addHandler(globalCommandHandler(), "/ws-commands").withSockJS();
-
+        registry.addHandler(globalCommandHandler(), "/ws-commands")
+                .setAllowedOrigins("*"); // Permitir todas las origenes, ajustar según necesidades de seguridad
     }
 
     @Bean

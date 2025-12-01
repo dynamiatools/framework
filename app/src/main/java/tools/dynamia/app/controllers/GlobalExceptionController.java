@@ -105,7 +105,9 @@ public class GlobalExceptionController implements ErrorController {
             requestUri = "Unknown";
         }
 
-        logger.error("ERROR " + statusCode + ": " + requestUri + " on  " + request.getServerName() + ". " + messageObj, throwable);
+        if (!requestUri.endsWith(".map")) {
+            logger.error("ERROR " + statusCode + ": " + requestUri + " on  " + request.getServerName() + ". " + messageObj, throwable);
+        }
 
         ModelAndView mv = new ModelAndView("error/error");
 

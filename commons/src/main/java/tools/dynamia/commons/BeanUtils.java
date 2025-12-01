@@ -773,7 +773,7 @@ public final class BeanUtils {
      */
     public static Method[] getMethodsWithAnnotation(Class<?> targetClass, Class<? extends Annotation> annotationClass) {
         return Stream.of(targetClass.getMethods()).filter(m -> m.isAnnotationPresent(annotationClass))
-                .collect(Collectors.toList())
+                .toList()
                 .toArray(Method[]::new);
 
     }
@@ -787,7 +787,7 @@ public final class BeanUtils {
      */
     public static Field[] getFieldsWithAnnotation(Class<?> targetClass, Class<? extends Annotation> annotationClass) {
         return BeanUtils.getAllFields(targetClass).stream().filter(f -> f.isAnnotationPresent(annotationClass))
-                .collect(Collectors.toList())
+                .toList()
                 .toArray(Field[]::new);
     }
 

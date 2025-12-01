@@ -124,7 +124,7 @@ public class ZKNavigationManager extends BaseNavigationManager implements Serial
 
     @Override
     public void sendEvent(PageEvent evt) {
-        ZKUtil.eventQueuePublish(evt.getPage().getVirtualPath(), new Event("pageEvent", null, evt));
+        ZKUtil.publishToEventQueue(evt.getPage().getVirtualPath(), new Event("pageEvent", null, evt));
     }
 
     @Override

@@ -28,6 +28,7 @@ package tools.dynamia.integration.ms;
  * @param <T> the generic type
  * @see MessageEvent
  */
+@FunctionalInterface
 public interface MessageListener<T extends Message> {
 
     /**

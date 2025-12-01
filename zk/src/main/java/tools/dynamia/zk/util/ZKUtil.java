@@ -18,17 +18,9 @@ package tools.dynamia.zk.util;
 
 import jakarta.servlet.http.HttpSession;
 import org.zkoss.zhtml.impl.AbstractTag;
-import org.zkoss.zk.ui.Component;
-import org.zkoss.zk.ui.Desktop;
-import org.zkoss.zk.ui.Executions;
-import org.zkoss.zk.ui.HtmlBasedComponent;
-import org.zkoss.zk.ui.Page;
-import org.zkoss.zk.ui.UiException;
-import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.*;
+import org.zkoss.zk.ui.event.*;
 import org.zkoss.zk.ui.event.EventListener;
-import org.zkoss.zk.ui.event.EventQueues;
-import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zk.ui.event.SelectEvent;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.*;
 import org.zkoss.zul.ext.Paginal;
@@ -60,57 +52,98 @@ import tools.dynamia.zk.ui.SimpleListItemRenderer;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * Utility class for common ZK process
+ * Comprehensive utility class providing helper methods for common ZK framework operations.
+ * This class offers a wide range of utilities for working with ZK components, dialogs, messages,
+ * event handling, and UI manipulations in ZK-based applications.
+ *
+ * <p>Main functionalities include:</p>
+ * <ul>
+ *     <li>Message and dialog display (alerts, questions, custom dialogs)</li>
+ *     <li>Component data binding (comboboxes, listboxes)</li>
+ *     <li>Dynamic component creation and manipulation</li>
+ *     <li>Event queue management and subscriptions</li>
+ *     <li>UI component state management (readonly, disabled)</li>
+ *     <li>Navigation and execution context utilities</li>
+ *     <li>Icon configuration for components</li>
+ *     <li>Ajax loader creation</li>
+ *     <li>Tooltip generation</li>
+ * </ul>
+ *
+ * <p>This is an abstract utility class with only static methods and cannot be instantiated.</p>
+ *
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * // Show a message
+ * ZKUtil.showMessage("Operation completed successfully", MessageType.NORMAL);
+ *
+ * // Fill a combobox with data
+ * ZKUtil.fillCombobox(myCombo, dataList, true);
+ *
+ * // Show a dialog
+ * ZKUtil.showDialog("/views/myView.zul", "My Dialog", myData);
+ * }</pre>
  *
  * @author Mario A. Serrano Leones
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 public abstract class ZKUtil {
 
+    /**
+     * Logger instance for this utility class.
+     */
     private static final LoggingService LOGGER = new SLF4JLoggingService(ZKUtil.class);
 
+    /**
+     * Execution argument key for parent window reference.
+     */
     private static final String PARENT_WINDOW = "parentWindow";
+
+    /**
+     * Execution argument key for entity data.
+     */
     private static final String ENTITY = "entity";
+
+    /**
+     * Execution argument key for navigation page reference.
+     */
     public static final String NAVIGATION_PAGE = "navigationPage";
 
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
     private ZKUtil() {
     }
 
     /**
-     * The Constant YES.
+     * Constant representing the YES button option in messageboxes.
      */
     public static final int YES = Messagebox.YES;
 
     /**
-     * The Constant NO.
+     * Constant representing the NO button option in messageboxes.
      */
     public static final int NO = Messagebox.NO;
 
     /**
-     * show a message.
+     * Displays a message to the user with default title and normal type.
      *
-     * @param message the message
+     * @param message the message text to display
      */
     public static void showMessage(String message) {
         showMessage(message, "Mensaje", MessageType.NORMAL);
     }
 
     /**
-     * show a message by type.
+     * Displays a message to the user with a default title and specified type.
      *
-     * @param message the message
-     * @param type    the type
+     * @param message the message text to display
+     * @param type    the message type (NORMAL, INFO, WARNING, ERROR, etc.)
      */
     public static void showMessage(String message, MessageType type) {
         showMessage(message, "Message", type);
@@ -118,11 +151,13 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Show message.
+     * Displays a message to the user with custom title and type.
+     * Uses the configured {@link MessageDisplayer} from the container, or falls back
+     * to {@link MessageDialog} if none is configured.
      *
-     * @param message the message
-     * @param title   the title
-     * @param type    the type
+     * @param message the message text to display
+     * @param title   the dialog title
+     * @param type    the message type (NORMAL, INFO, WARNING, ERROR, etc.)
      */
     public static void showMessage(String message, String title, MessageType type) {
 
@@ -136,11 +171,13 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Show question.
+     * Displays a question dialog with YES/NO buttons.
+     * The listener is invoked when the user clicks a button, allowing the caller
+     * to handle the user's response.
      *
-     * @param question the question
-     * @param title    the title
-     * @param listener the listener
+     * @param question the question text to display
+     * @param title    the dialog title
+     * @param listener the event listener to handle button clicks
      */
     public static void showQuestion(String question, String title, EventListener<Messagebox.ClickEvent> listener) {
         Messagebox.Button[] buttons = {Messagebox.Button.YES, Messagebox.Button.NO};
@@ -148,23 +185,23 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Fill combobox.
+     * Fills a combobox with data from a collection.
      *
-     * @param combo the combo
-     * @param data  the data
-     * @param live  the live
+     * @param combo the combobox to fill
+     * @param data  the collection of data items
+     * @param live  if true, the model reflects changes in the underlying collection
      */
     public static void fillCombobox(Combobox combo, Collection data, boolean live) {
         fillCombobox(combo, data, null, live);
     }
 
     /**
-     * Fill combobox.
+     * Fills a combobox with data from a collection and sets a selected item.
      *
-     * @param combo    the combo
-     * @param data     the data
-     * @param selected the selected
-     * @param live     the live
+     * @param combo    the combobox to fill
+     * @param data     the collection of data items
+     * @param selected the item to be selected initially (can be null)
+     * @param live     if true, the model reflects changes in the underlying collection
      */
     public static void fillCombobox(Combobox combo, Collection data, Object selected, boolean live) {
         if (combo != null) {
@@ -177,32 +214,32 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Fill combobox.
+     * Fills a combobox with data from a list using a live model.
      *
-     * @param combo the combo
-     * @param data  the data
+     * @param combo the combobox to fill
+     * @param data  the list of data items
      */
     public static void fillCombobox(Combobox combo, List data) {
         fillCombobox(combo, data, true);
     }
 
     /**
-     * Fill combobox.
+     * Fills a combobox with data from a list.
      *
-     * @param combo the combo
-     * @param data  the data
-     * @param live  the live
+     * @param combo the combobox to fill
+     * @param data  the list of data items
+     * @param live  if true, the model reflects changes in the underlying list
      */
     public static void fillCombobox(Combobox combo, List data, boolean live) {
         fillCombobox(combo, data, null, live);
     }
 
     /**
-     * Fill combobox.
+     * Fills a combobox with data from an array.
      *
-     * @param combo the combo
-     * @param data  the data
-     * @param live  the live
+     * @param combo the combobox to fill
+     * @param data  the array of data items
+     * @param live  if true, the model reflects changes in the underlying collection
      */
     public static void fillCombobox(Combobox combo, Object[] data, boolean live) {
         if (combo != null) {
@@ -212,11 +249,12 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Fill listbox.
+     * Fills a listbox with data from a collection.
+     * The listbox model is cleared before populating with new data.
      *
-     * @param listbox the listbox
-     * @param data    the data
-     * @param live    the live
+     * @param listbox the listbox to fill
+     * @param data    the collection of data items
+     * @param live    if true, the model reflects changes in the underlying collection
      */
     public static void fillListbox(Listbox listbox, Collection data, boolean live) {
         if (listbox != null && data != null) {
@@ -230,11 +268,12 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Fill listbox.
+     * Fills a listbox with data from a list.
+     * The listbox model is cleared before populating with new data.
      *
-     * @param listbox the listbox
-     * @param data    the data
-     * @param live    the live
+     * @param listbox the listbox to fill
+     * @param data    the list of data items
+     * @param live    if true, the model reflects changes in the underlying list
      */
     public static void fillListbox(Listbox listbox, List data, boolean live) {
         if (listbox != null && data != null) {
@@ -244,11 +283,12 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Fill listbox.
+     * Fills a listbox with data from an array.
+     * The listbox model is cleared before populating with new data.
      *
-     * @param listbox the listbox
-     * @param data    the data
-     * @param live    the live
+     * @param listbox the listbox to fill
+     * @param data    the array of data items
+     * @param live    if true, the model reflects changes in the underlying collection
      */
     public static void fillListbox(Listbox listbox, Object[] data, boolean live) {
         if (listbox != null && data != null) {
@@ -258,9 +298,10 @@ public abstract class ZKUtil {
     }
 
     /**
-     * clean all input components in the page.
+     * Clears all input components on the page by setting their values to null.
+     * Recursively processes all components in the page hierarchy.
      *
-     * @param page the page
+     * @param page the page containing components to clear
      */
     public static void clearPage(Page page) {
         if (page != null) {
@@ -270,9 +311,11 @@ public abstract class ZKUtil {
     }
 
     /**
-     * clear the component value.
+     * Clears a component's value by setting it to null.
+     * If the component has children, recursively clears them as well.
+     * Only works with {@link InputElement} instances.
      *
-     * @param comp the comp
+     * @param comp the component to clear
      */
     public static void clearComponent(Component comp) {
 
@@ -288,41 +331,45 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Show dialog.
+     * Displays a modal dialog window with content loaded from a URI.
+     * Automatically adjusts size for smartphone devices.
      *
-     * @param uri    the uri
-     * @param title  the title
-     * @param data   the data
-     * @param height the height
-     * @param width  the width
+     * @param uri    the URI of the content to load (can be a ZUL file path)
+     * @param title  the dialog window title
+     * @param data   optional data to pass to the dialog content
+     * @param width  the dialog width (e.g., "500px", "80%")
+     * @param height the dialog height (e.g., "400px", "60%")
+     * @return the created modal window
      */
     public static Window showDialog(String uri, String title, Object data, String width, String height) {
         return showDialog(uri, title, data, width, height, null);
     }
 
     /**
-     * Show dialog.
+     * Displays a modal dialog window with content loaded from a URI.
+     * Automatically adjusts size for smartphone devices.
      *
-     * @param uri    the uri
-     * @param title  the title
-     * @param width  the width
-     * @param height the height
-     * @return the window
+     * @param uri    the URI of the content to load (can be a ZUL file path)
+     * @param title  the dialog window title
+     * @param width  the dialog width (e.g., "500px", "80%")
+     * @param height the dialog height (e.g., "400px", "60%")
+     * @return the created modal window
      */
     public static Window showDialog(String uri, String title, String width, String height) {
         return showDialog(uri, title, null, width, height, null);
     }
 
     /**
-     * Show dialog.
+     * Displays a modal dialog window with content loaded from a URI.
+     * Supports close event handling and automatic adjustment for smartphone devices.
      *
-     * @param uri             the uri
-     * @param title           the title
-     * @param data            the data
-     * @param height          the height
-     * @param width           the width
-     * @param onCloseListener the on close listener
-     * @return the window
+     * @param uri             the URI of the content to load (can be a ZUL file path)
+     * @param title           the dialog window title
+     * @param data            optional data to pass to the dialog content
+     * @param width           the dialog width (e.g., "500px", "80%")
+     * @param height          the dialog height (e.g., "400px", "60%")
+     * @param onCloseListener optional event listener triggered when dialog is closed
+     * @return the created modal window
      */
     public static Window showDialog(String uri, String title, Object data, String width, String height,
                                     EventListener onCloseListener) {
@@ -355,12 +402,14 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Creates the window.
+     * Creates a window component with content loaded from a URI.
+     * The window is created with a caption, close button, and normal border.
+     * Data can be passed to the content via execution arguments.
      *
-     * @param uri   the uri
-     * @param title the title
-     * @param data  the data
-     * @return the window
+     * @param uri   the URI of the content to load (can be null for an empty window)
+     * @param title the window title displayed in the caption
+     * @param data  optional data to pass to the window content (available as "data", "result", or "entity")
+     * @return the created window (not yet displayed)
      */
     public static Window createWindow(String uri, String title, Object data) {
         final Window dialog = new Window();
@@ -405,58 +454,73 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Creates the window.
+     * Creates an empty window with just a title.
      *
-     * @param title the title
-     * @return the window
+     * @param title the window title
+     * @return the created empty window
      */
     public static Window createWindow(String title) {
         return createWindow(null, title, null);
     }
 
     /**
-     * Show dialog.
+     * Displays a modal dialog with content loaded from a URI and optional data.
      *
-     * @param uri   the uri
-     * @param title the title
-     * @param data  the data
+     * @param uri   the URI of the content to load
+     * @param title the dialog title
+     * @param data  optional data to pass to the dialog
+     * @return the created modal window
      */
     public static Window showDialog(String uri, String title, Object data) {
         return showDialog(uri, title, data, null, null);
     }
 
     /**
-     * Show dialog.
+     * Displays a modal dialog with content loaded from a URI.
      *
-     * @param uri   the uri
-     * @param title the title
+     * @param uri   the URI of the content to load
+     * @param title the dialog title
+     * @return the created modal window
      */
     public static Window showDialog(String uri, String title) {
         return showDialog(uri, title, null, null, null);
     }
 
     /**
-     * Show dialog.
+     * Displays a modal dialog containing a component.
      *
-     * @param title     the title
-     * @param component the component
+     * @param title     the dialog title
+     * @param component the component to display in the dialog
+     * @return the created modal window
      */
     public static Window showDialog(String title, Component component) {
         return showDialog(title, component, null, null);
     }
 
     /**
-     * Show dialog.
+     * Displays a modal dialog containing a component with specified dimensions.
      *
-     * @param title     the title
-     * @param component the component
-     * @param width     the width
-     * @param height    the height
+     * @param title     the dialog title
+     * @param component the component to display in the dialog
+     * @param width     the dialog width (e.g., "500px", "80%")
+     * @param height    the dialog height (e.g., "400px", "60%")
+     * @return the created modal window
      */
     public static Window showDialog(String title, Component component, String width, String height) {
         return showDialog(title, component, width, height, null);
     }
 
+    /**
+     * Displays a modal dialog containing a component with dimensions and close listener.
+     * The dialog is maximizable and automatically adjusts for smartphone devices.
+     *
+     * @param title           the dialog title
+     * @param component       the component to display in the dialog
+     * @param width           the dialog width (e.g., "500px", "80%")
+     * @param height          the dialog height (e.g., "400px", "60%")
+     * @param onCloseListener optional event listener triggered when dialog is closed
+     * @return the created modal window, or null if an error occurs
+     */
     public static Window showDialog(String title, Component component, String width, String height,
                                     EventListener<Event> onCloseListener) {
         try {
@@ -501,7 +565,15 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Show a simple InputPanel
+     * Displays a simple input dialog with a label and input field of the specified type.
+     * The dialog triggers the provided listener when the user submits input.
+     *
+     * @param <T>           the type of input expected
+     * @param label         the label text for the input field
+     * @param inputClass    the class type of the input (String.class, Integer.class, etc.)
+     * @param value         the initial value for the input field (can be null)
+     * @param eventListener the listener to handle input submission
+     * @return the InputPanel component displaying the dialog
      */
     public static <T> InputPanel showInputDialog(String label, Class<T> inputClass, Object value,
                                                  EventListener eventListener) {
@@ -512,17 +584,27 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Show a simple InputPanel.
+     * Displays a simple input dialog with a label and input field of the specified type.
+     * The dialog triggers the provided listener when the user submits input.
      *
-     * @param <T>           the generic type
-     * @param label         the label
-     * @param inputClass    the input class
-     * @param eventListener the event listener
+     * @param <T>           the type of input expected
+     * @param label         the label text for the input field
+     * @param inputClass    the class type of the input (String.class, Integer.class, etc.)
+     * @param eventListener the listener to handle input submission
+     * @return the InputPanel component displaying the dialog
      */
     public static <T> InputPanel showInputDialog(String label, Class<T> inputClass, EventListener eventListener) {
         return showInputDialog(label, inputClass, null, eventListener);
     }
 
+    /**
+     * Displays a password input dialog.
+     * The input field is masked and the consumer receives the password value when submitted.
+     *
+     * @param label         the label text for the password field
+     * @param inputPassword the consumer to receive the password value
+     * @return the InputPanel component displaying the dialog
+     */
     public static InputPanel showInputPassword(String label, Consumer<String> inputPassword) {
         var inputPanel = showInputDialog(label, String.class, event -> {
             var password = (String) event.getData();
@@ -537,20 +619,22 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Checks if is empty.
+     * Checks if an input element is empty (null or empty string).
      *
-     * @param input the input
-     * @return true, if is empty
+     * @param input the input element to check
+     * @return true if the input text is null or empty, false otherwise
      */
     public static boolean isEmpty(InputElement input) {
         return input.getText() == null || input.getText().isEmpty();
     }
 
     /**
-     * Synchronize paginator.
+     * Synchronizes a data paginator with a ZK paginal component.
+     * Updates the paginator's page and page size to match the paginal,
+     * and updates the paginal's total size from the paginator.
      *
-     * @param dataPaginator the data paginator
-     * @param paginal       the paginal
+     * @param dataPaginator the data paginator to synchronize
+     * @param paginal       the ZK paginal component
      */
     public static void synchronizePaginator(DataPaginator dataPaginator, Paginal paginal) {
         if (dataPaginator != null && paginal != null) {
@@ -561,9 +645,9 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Gets the first page.
+     * Retrieves the first page from the current execution's desktop.
      *
-     * @return the first page
+     * @return the first page in the desktop
      */
     public static Page getFirstPage() {
         Desktop desktop = Executions.getCurrent().getDesktop();
@@ -571,13 +655,13 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Show popup.
+     * Displays a popup component next to a reference component.
      *
-     * @param refComponent     the ref component
-     * @param contentComponent the content component
-     * @param width            the width
-     * @param height           the height
-     * @return the popup
+     * @param refComponent     the reference component to position the popup near
+     * @param contentComponent the component to display inside the popup
+     * @param width            the popup width (e.g., "300px"), can be null
+     * @param height           the popup height (e.g., "200px"), can be null
+     * @return the created popup component
      */
     public static Popup showPopup(Component refComponent, Component contentComponent, String width, String height) {
         Popup popup = new Popup();
@@ -596,20 +680,20 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Show popup.
+     * Displays a popup component next to a reference component with automatic sizing.
      *
-     * @param refComponent     the ref component
-     * @param contentComponent the content component
-     * @return the popup
+     * @param refComponent     the reference component to position the popup near
+     * @param contentComponent the component to display inside the popup
+     * @return the created popup component
      */
     public static Popup showPopup(Component refComponent, Component contentComponent) {
         return showPopup(refComponent, contentComponent, null, null);
     }
 
     /**
-     * Gets the session id.
+     * Retrieves the current HTTP session ID.
      *
-     * @return the session id
+     * @return the session ID string
      */
     public static String getSessionID() {
         HttpSession session = (HttpSession) Executions.getCurrent().getSession().getNativeSession();
@@ -617,11 +701,12 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Creates the ajax loader.
+     * Creates an Ajax loader component with custom message and image.
+     * The loader is centered and styled with the "ajax-loader" CSS class.
      *
-     * @param message   the message
-     * @param imagePath the image path
-     * @return the component
+     * @param message   the loading message to display
+     * @param imagePath the path to the loading image (null uses default)
+     * @return a VBox component containing the loader
      */
     public static Component createAjaxLoader(String message, String imagePath) {
         Vbox div = new Vbox();
@@ -650,19 +735,19 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Creates the ajax loader.
+     * Creates an Ajax loader component with default settings (empty message and default image).
      *
-     * @return the component
+     * @return a VBox component containing the loader
      */
     public static Component createAjaxLoader() {
         return createAjaxLoader("", null);
     }
 
     /**
-     * Creates the ajax loader.
+     * Creates an Ajax loader component with a custom message and default image.
      *
-     * @param message the message
-     * @return the component
+     * @param message the loading message to display
+     * @return a VBox component containing the loader
      */
     public static Component createAjaxLoader(String message) {
         return createAjaxLoader(message, null);
@@ -700,12 +785,12 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Configure the component icon, its takes care of IMAGE and FONT type
-     * icons.
+     * Configures an icon for a ZK component, supporting both IMAGE and FONT icon types.
+     * Automatically handles different component types (LabelImageElement, AbstractTag, Image).
      *
-     * @param icon      the icon
-     * @param component the component
-     * @param size      the size
+     * @param icon      the icon to configure
+     * @param component the component to apply the icon to
+     * @param size      the desired icon size
      */
     public static void configureComponentIcon(Icon icon, Component component, IconSize size) {
 
@@ -735,23 +820,27 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Configure the component icon for the Action, its takes care of IMAGE and
-     * FONT type icons.
+     * Configures an icon for a component using an icon name from the current theme.
+     * Resolves the icon from {@link IconsTheme} and applies it to the component.
      *
-     * @param image     the action
-     * @param component the component
-     * @param size      the size
+     * @param image     the icon name or identifier
+     * @param component the component to apply the icon to
+     * @param size      the desired icon size
      */
     public static void configureComponentIcon(String image, Component component, IconSize size) {
         configureComponentIcon(IconsTheme.get().getIcon(image), component, size);
     }
 
     /**
-     * Creates the component.
+     * Creates a ZK component from a URI with optional arguments.
+     * Supports both resource URIs (classpath:, file:, http:) and regular paths.
+     * For resource URIs, creates components directly; for regular paths, uses Include.
      *
-     * @param uri    the uri
-     * @param parent the parent
-     * @param args   the args
+     * @param uri    the URI of the component definition (ZUL file or resource)
+     * @param parent the parent component to attach to
+     * @param args   map of arguments to pass to the component
+     * @return the created component
+     * @throws UiException if the resource is not found or cannot be loaded
      */
     public static Component createComponent(String uri, Component parent, Map<?, ?> args) {
         if (isResourceURI(uri)) {
@@ -784,6 +873,14 @@ public abstract class ZKUtil {
         }
     }
 
+    /**
+     * Retrieves a resource from a URI, with device-specific variant support.
+     * Attempts to load a device-specific version first (e.g., myfile.smartphone.zul)
+     * before falling back to the standard version.
+     *
+     * @param uri the resource URI
+     * @return the resource, or null if not found
+     */
     private static Resource getDeviceResource(String uri) {
         Resource resource = null;
         String device = HttpUtils.detectDevice();
@@ -808,39 +905,84 @@ public abstract class ZKUtil {
         return resource;
     }
 
+    /**
+     * Checks if a URI represents a resource URI (starts with classpath:, file:, or http:).
+     *
+     * @param uri the URI to check
+     * @return true if the URI is a resource URI, false otherwise
+     */
     private static boolean isResourceURI(String uri) {
         return uri.startsWith("classpath:") || uri.startsWith("file:") || uri.startsWith("http:");
     }
 
-    public static void initEventQueueSubscribers(Object target) {
+    /**
+     * Initializes event queue subscribers for a target object by loading annotations.
+     * This method scans for event queue subscription annotations on the target object.
+     * <p>
+     * Call this method to set up event queue listeners defined via {@link tools.dynamia.zk.Subscribe} annotation.
+     *
+     * @param target the object to initialize event queue subscriptions for
+     */
+    public static void subscribeEventQueues(Object target) {
         new EventQueueSubscriber(target).loadAnnotations();
     }
 
-    public static void eventQueuePublish(String name, String scope, boolean autocreate, Event evt) {
+    /**
+     * Publishes an event to a named event queue with specific scope.
+     *
+     * @param name       the name of the event queue
+     * @param scope      the scope of the event queue (DESKTOP, SESSION, APPLICATION)
+     * @param autocreate whether to create the queue if it doesn't exist
+     * @param evt        the event to publish
+     */
+    public static void publishToEventQueue(String name, String scope, boolean autocreate, Event evt) {
         EventQueues.lookup(name, scope, autocreate).publish(evt);
     }
 
-    public static void eventQueuePublish(String name, Event evt) {
-        eventQueuePublish(name, EventQueues.DESKTOP, true, evt);
+    /**
+     * Publishes an event to a desktop-scoped event queue.
+     * The queue is automatically created if it doesn't exist.
+     *
+     * @param name the name of the event queue
+     * @param evt  the event to publish
+     */
+    public static void publishToEventQueue(String name, Event evt) {
+        publishToEventQueue(name, EventQueues.DESKTOP, true, evt);
     }
 
     /**
-     * Return true if the current caller Execution is in a ZK Event Listener thread
+     * Publishes an event to a session-scoped event queue.
+     * The queue is automatically created if it doesn't exist.
      *
-     * @return
+     * @param name the name of the event queue
+     * @param evt  the event to publish
+     */
+    public static void publishToSessionEventQueue(String name, Event evt) {
+        publishToEventQueue(name, EventQueues.SESSION, true, evt);
+    }
+
+    /**
+     * Checks if the current execution is within a ZK event listener thread.
+     *
+     * @return true if within an event listener context, false otherwise
      */
     public static boolean isInEventListener() {
         return Executions.getCurrent() != null;
     }
 
+    /**
+     * Checks if the current execution is within a desktop scope.
+     *
+     * @return true if within desktop scope, false otherwise
+     */
     public static boolean isInDesktopScope() {
         return isInEventListener() && Executions.getCurrent().getDesktop() != null;
     }
 
     /**
-     * Get current execution Desktop or null if is not in Desktop Scope
+     * Retrieves the current execution's desktop.
      *
-     * @return
+     * @return the current desktop, or null if not in desktop scope
      */
     public static Desktop getCurrentDesktop() {
         if (isInDesktopScope()) {
@@ -849,6 +991,15 @@ public abstract class ZKUtil {
         return null;
     }
 
+    /**
+     * Displays a modal dialog with a listbox for selecting a single item.
+     * When an item is selected, the dialog closes and the listener is invoked.
+     *
+     * @param title    the dialog title
+     * @param model    the list of items to display
+     * @param onSelect the listener to handle item selection
+     * @return the created modal window
+     */
     public static Window showListboxSelector(String title, List model, EventListener<SelectEvent> onSelect) {
         Listbox listbox = new Listbox();
         listbox.setVflex("1");
@@ -864,6 +1015,16 @@ public abstract class ZKUtil {
         return win;
     }
 
+    /**
+     * Displays a modal dialog with a listbox for selecting multiple items.
+     * Shows checkmarks for multi-selection and a button to confirm the selection.
+     *
+     * @param title    the dialog title
+     * @param label    the text for the confirmation button
+     * @param model    the list of items to display
+     * @param onSelect the listener to handle selection (receives list of selected items)
+     * @return the created modal window
+     */
     public static Window showListboxMultiSelector(String title, String label, List model,
                                                   EventListener<Event> onSelect) {
         Listbox listbox = new Listbox();
@@ -890,6 +1051,14 @@ public abstract class ZKUtil {
         return win;
     }
 
+    /**
+     * Displays a dialog with a multiline text input field and a confirmation button.
+     * The dialog closes automatically when the button is clicked unless the event propagation is stopped.
+     *
+     * @param title       the dialog title
+     * @param buttonLabel the text for the confirmation button
+     * @param evt         the listener to handle the text input (receives the text value)
+     */
     public static void showTextInputDialog(String title, String buttonLabel, EventListener<Event> evt) {
         Vlayout vlayout = new Vlayout();
 
@@ -920,7 +1089,11 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Make easy select a combobox item
+     * Selects an item in a combobox programmatically.
+     * Works with comboboxes that have a ListModelList as their model.
+     *
+     * @param combobox the combobox to update
+     * @param value    the value to select (null to clear selection)
      */
     public static void setSelected(Combobox combobox, Object value) {
         if (combobox != null) {
@@ -933,8 +1106,12 @@ public abstract class ZKUtil {
         }
     }
 
-    /***
-     * Make easy selecte a listbox item
+    /**
+     * Selects an item in a listbox programmatically.
+     * Works with listboxes that have a ListModelList as their model.
+     *
+     * @param listbox the listbox to update
+     * @param value   the value to select (null to clear selection)
      */
     public static void setSelected(Listbox listbox, Object value) {
         if (listbox != null) {
@@ -947,28 +1124,40 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Return and argument from current execution
+     * Retrieves an argument from the current ZK execution context.
+     *
+     * @param name the name of the argument
+     * @return the argument value, or null if not found
      */
     public static Object getExecutionArg(String name) {
         return Executions.getCurrent().getArg().get(name);
     }
 
     /**
-     * Return entity binding to current zk execution (or event)
+     * Retrieves the entity object bound to the current ZK execution.
+     * This is commonly used to pass entity data to dialogs and views.
+     *
+     * @return the entity object, or null if not present
      */
     public static Object getExecutionEntity() {
         return getExecutionArg(ENTITY);
     }
 
     /**
-     * Return parent {@link Window} binding to current zk execution (or event)
+     * Retrieves the parent window bound to the current ZK execution.
+     * This is useful for accessing the dialog window that opened the current view.
+     *
+     * @return the parent window, or null if not present
      */
     public static Window getExecutionParentWindow() {
         return (Window) getExecutionArg(PARENT_WINDOW);
     }
 
     /**
-     * Return current navigation {@link tools.dynamia.navigation.Page} binded to current execution or currentPage from {@link tools.dynamia.navigation.NavigationManager}
+     * Retrieves the current navigation page from the execution context.
+     * Falls back to the current page from the NavigationManager if not in execution args.
+     *
+     * @return the navigation page, or null if not available
      */
     public static tools.dynamia.navigation.Page getExecutionNavigationPage() {
         var page = (tools.dynamia.navigation.Page) getExecutionArg(NAVIGATION_PAGE);
@@ -979,7 +1168,11 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Automatic change component to read only or disabled. Include children component
+     * Recursively changes the readonly/disabled state of a component and its children.
+     * Handles various component types including inputs, buttons, checkboxes, dateboxes, comboboxes, and bandboxes.
+     *
+     * @param comp     the component to modify
+     * @param readOnly true to make readonly/disabled, false to make editable/enabled
      */
     public static void changeReadOnly(Component comp, boolean readOnly) {
 
@@ -1015,7 +1208,17 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Show Dialog with custom properties
+     * Displays a modal dialog window with custom icon.
+     * Extends the standard showDialog functionality by allowing custom icon configuration.
+     *
+     * @param uri             the URI of the content to load
+     * @param title           the dialog title
+     * @param icon            the icon CSS class for the caption
+     * @param data            optional data to pass to the dialog
+     * @param width           the dialog width
+     * @param height          the dialog height
+     * @param onCloseListener optional close event listener
+     * @return the created modal window
      */
     public static Window showDialog(String uri, String title, String icon, Object data, String width, String height,
                                     EventListener onCloseListener) {
@@ -1027,18 +1230,36 @@ public abstract class ZKUtil {
     }
 
     /**
-     * Invoke a Javascript util method to update browser uri and page title
+     * Updates the browser's URI and page title using client-side JavaScript.
+     * This allows changing the URL displayed in the browser without reloading the page.
+     *
+     * @param pagetitle the new page title to display in the browser
+     * @param uri       the new URI to display in the browser address bar
      */
     public static void updateClientURI(String pagetitle, String uri) {
         Clients.evalJavaScript(String.format("changeURI('%s','%s');", pagetitle, uri));
     }
 
+    /**
+     * Configures a textbox to use the HTML5 search input type.
+     * This provides native browser search styling and behavior.
+     *
+     * @param textbox the textbox to configure (null-safe)
+     */
     public static void typeSearch(Textbox textbox) {
         if (textbox != null) {
             textbox.setClientAttribute("type", "search");
         }
     }
 
+    /**
+     * Flattens a tree model into a single collection containing all nodes.
+     * Recursively traverses the tree structure and extracts all entities or nodes.
+     * Null values are automatically filtered out.
+     *
+     * @param treeModel the tree model to flatten
+     * @return a collection containing all entities/nodes from the tree
+     */
     public static Collection flatTreeModel(TreeModel treeModel) {
         var result = new ArrayList<>();
 
@@ -1048,6 +1269,14 @@ public abstract class ZKUtil {
         return result;
     }
 
+    /**
+     * Recursive helper method to flatten a tree model.
+     * Extracts entities from EntityTreeNode instances or adds nodes directly.
+     *
+     * @param treeModel the tree model being flattened
+     * @param result    the result list to accumulate items
+     * @param parent    the current parent node being processed
+     */
     private static void flat(TreeModel treeModel, ArrayList<Object> result, Object parent) {
         for (int i = 0; i < treeModel.getChildCount(parent); i++) {
             var child = treeModel.getChild(parent, i);

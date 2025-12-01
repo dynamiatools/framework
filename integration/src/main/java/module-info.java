@@ -5,6 +5,7 @@ open module tools.dynamia.integration {
     requires spring.core;
     requires spring.tx;
     requires spring.beans;
+    requires com.fasterxml.jackson.annotation;
     exports tools.dynamia.integration;
     exports tools.dynamia.integration.ms;
     exports tools.dynamia.integration.scheduling;

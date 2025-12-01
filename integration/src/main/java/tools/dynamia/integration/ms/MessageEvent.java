@@ -16,18 +16,60 @@
  */
 package tools.dynamia.integration.ms;
 
+import java.time.Instant;
+
 /**
  * Represent a message event
  *
  * @param <T>
  */
-public record MessageEvent<T extends Message>(T message, String topic, String callback) {
+public class MessageEvent<T extends Message> {
+
+    private final T message;
+    private final String topic;
+    private final String callback;
+    private final Instant createdAt;
+
+    public MessageEvent(T message) {
+        this(message, null, null);
+    }
+
+    public MessageEvent(T message, String topic, String callback) {
+        this(message, topic, callback, Instant.now());
+    }
+
+    public MessageEvent(T message, String topic, String callback, Instant createdAt) {
+        if (message == null) {
+            throw new IllegalArgumentException("Message cannot be null");
+        }
+
+        this.message = message;
+        this.topic = topic;
+        this.callback = callback;
+        this.createdAt = createdAt != null ? createdAt : Instant.now();
+    }
+
+    public T message() {
+        return message;
+    }
 
     /**
      * Shortcut to getMessage().getContent()
      */
     public Object getContent() {
         return message().getContent();
+    }
+
+    public boolean hasCallback() {
+        return callback != null && !callback.isBlank();
+    }
+
+    public boolean hasTopic() {
+        return topic != null && !topic.isBlank();
+    }
+
+    public boolean hasContent() {
+        return message != null && message.getContent() != null;
     }
 
     @Override
@@ -49,8 +91,23 @@ public record MessageEvent<T extends Message>(T message, String topic, String ca
         return topic;
     }
 
+    public String topic() {
+        return topic;
+    }
 
     public String getCallback() {
         return callback;
+    }
+
+    public String callback() {
+        return callback;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant createdAt() {
+        return createdAt;
     }
 }

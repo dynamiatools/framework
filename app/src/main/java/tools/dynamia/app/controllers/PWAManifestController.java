@@ -27,6 +27,7 @@ public class PWAManifestController {
 
     /**
      * Constructs a new {@code PWAManifestController} with the given manifest.
+     *
      * @param manifest the PWA manifest instance
      */
     public PWAManifestController(PWAManifest manifest) {
@@ -35,9 +36,10 @@ public class PWAManifestController {
 
     /**
      * Returns the PWA manifest as JSON.
+     *
      * @return the {@link PWAManifest} object
      */
-    @GetMapping(value = "/manifest.json", produces = "application/manifest+json")
+    @GetMapping(value = "/manifest.json", produces = "application/json")
     public PWAManifest getManifest() {
         return manifest;
     }

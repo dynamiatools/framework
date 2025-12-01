@@ -25,7 +25,7 @@ public class WebSocketAuService implements AuService {
     @Override
     public boolean service(AuRequest request, boolean everError) {
 
-        if ("fireGlobalCommand".equalsIgnoreCase(request.getCommand())) {
+        if ("onGlobalCommand".equalsIgnoreCase(request.getCommand())) {
             String globalCommand = (String) request.getData().get("command");
             if (globalCommand != null) {
                 ZKBindingUtil.postGlobalCommand(globalCommand, request.getData());

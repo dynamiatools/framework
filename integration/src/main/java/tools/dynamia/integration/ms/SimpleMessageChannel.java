@@ -16,10 +16,14 @@
  */
 package tools.dynamia.integration.ms;
 
+import tools.dynamia.commons.StringUtils;
 import tools.dynamia.integration.scheduling.SchedulerUtil;
 import tools.dynamia.integration.scheduling.Task;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The Class SimpleMessageChannel.
@@ -29,6 +33,7 @@ public class SimpleMessageChannel implements MessageChannel {
 
     private final String name;
     private boolean async = false;
+    private final Map<String, BaseMessageChannelSubscription> subscriptions = new ConcurrentHashMap<>();
 
     /**
      * Instantiates a new simple message channel.
@@ -79,8 +84,9 @@ public class SimpleMessageChannel implements MessageChannel {
     @SuppressWarnings("unchecked")
     public void publish(Message message, String topic, String callback) {
         MessageEvent event = new MessageEvent(message, topic, callback);
-        List<MessageListener> listeners = MessageChannels.lookupListeners(getName(), topic);
+        List<MessageListener> listeners = getMessageListeners(topic);
         message.addHeader(Message.HEADER_LISTENER_COUNT, 0);
+
         for (MessageListener messageListener : listeners) {
             if (!isAsync()) {
                 fireListener(event, messageListener);
@@ -95,13 +101,37 @@ public class SimpleMessageChannel implements MessageChannel {
         }
     }
 
-    private boolean fireListener(MessageEvent event, MessageListener messageListener) {
+    /**
+     * Find and filter message listeners for topic.
+     *
+     * @param topic the topic
+     * @return the list of message listeners
+     */
+    private List<MessageListener> getMessageListeners(String topic) {
+        List<MessageListener> listeners = new ArrayList<>();
+
+        var subscriptionListeners = subscriptions.values()
+                .stream().map(BaseMessageChannelSubscription::getListener)
+                .toList();
+
+        listeners.addAll(MessageChannels.filterListeners(getName(), topic, subscriptionListeners));
+        listeners.addAll(MessageChannels.lookupListeners(getName(), topic));
+
+        return listeners;
+    }
+
+    /**
+     * Fire listener.
+     *
+     * @param event           the event
+     * @param messageListener the message listener
+     */
+    private void fireListener(MessageEvent event, MessageListener messageListener) {
         try {
             //noinspection unchecked
             messageListener.onMessage(event);
             event.message().addHeader(Message.HEADER_LISTENER_COUNT,
                     (Integer) event.message().getHeader(Message.HEADER_LISTENER_COUNT) + 1);
-            return true;
         } catch (ClassCastException e) {
             // No generic type, nothing to do
         } catch (Throwable e) {
@@ -112,8 +142,25 @@ public class SimpleMessageChannel implements MessageChannel {
             } else {
                 throw new MessageException(msg, e);
             }
-
         }
-        return false;
+    }
+
+    @Override
+    public <T extends Message> MessageChannelSubscription subscribe(MessageListener<T> listener) {
+        return subscribe(MessageChannels.ALL_TOPICS, listener);
+    }
+
+    @Override
+    public <T extends Message> MessageChannelSubscription subscribe(String topic, MessageListener<T> listener) {
+        String subscriptionId = StringUtils.randomString();
+        var subcription = new BaseMessageChannelSubscription<>(getName(), subscriptionId, topic, listener) {
+            @Override
+            public void unsubscribe() {
+                subscriptions.remove(subscriptionId);
+            }
+        };
+        subscriptions.put(subscriptionId, subcription);
+
+        return subcription;
     }
 }
