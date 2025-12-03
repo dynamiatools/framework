@@ -57,7 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * }
  * }</pre>
  *
- * @see WebSocketGlobalCommandConfig
+ * @see ZKWebSocketConfigurer
  * @see WebSocketPushSender
  */
 public class WebSocketGlobalCommandHandler extends TextWebSocketHandler implements Loggable {
@@ -116,6 +116,7 @@ public class WebSocketGlobalCommandHandler extends TextWebSocketHandler implemen
     public void afterConnectionEstablished(WebSocketSession session) {
         log("WebSocket connection established: " + session.getId());
         sessions.put(session.getId(), session);
+        session.get
     }
 
     /**
