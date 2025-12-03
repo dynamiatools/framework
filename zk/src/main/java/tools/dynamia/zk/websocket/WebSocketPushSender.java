@@ -17,6 +17,7 @@
 
 package tools.dynamia.zk.websocket;
 
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.zkoss.zk.ui.Desktop;
@@ -31,6 +32,7 @@ import tools.dynamia.zk.util.ZKUtil;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Helper class to send push command to desktop client using web socket
@@ -66,21 +68,23 @@ public abstract class WebSocketPushSender {
                     data.putAll(payload);
                 }
                 data.put("command", command);
-                WebSocketSession session = handler.findSession(desktop);
+                var session = handler.findSession(desktop);
                 if (session != null) {
                     String textData = StringPojoParser.convertMapToJson(data);
-                    session.sendMessage(new TextMessage(textData));
+                    session.sendMessage(textData);
                     return true;
                 } else {
                     LOGGER.warn("No websocket session found for desktop " + desktop);
                 }
+            } catch (IOException e) {
+                LOGGER.error("IO Error sending push command '" + command + "' to Dekstop: " + desktop, e);
+                handler.closeSession(desktop);
             } catch (Exception e) {
                 LOGGER.error("Error sending push command '" + command + "' to Dekstop: " + desktop, e);
             }
         } else {
             LOGGER.warn("No websocket handler found");
         }
-
         return false;
     }
 
@@ -101,17 +105,31 @@ public abstract class WebSocketPushSender {
     public static void broadcastCommand(String command) {
         WebSocketGlobalCommandHandler handler = getHandler();
         if (handler != null) {
-            handler.getAllSessions().forEach(s -> {
+            AtomicInteger count = new AtomicInteger();
+            handler.getSessions().values().forEach(s -> {
                 try {
-                    s.sendMessage(new TextMessage(command));
+                    s.sendMessage(command);
+                    count.incrementAndGet();
                 } catch (IOException e) {
-                    LOGGER.error("Error sending command " + command + " to WS Session: " + s);
+                    LOGGER.error("IO Error sending command " + command + " to WS Session: " + s, e);
+                    s.close(CloseStatus.NORMAL);
+                } catch (Exception e) {
+                    LOGGER.error("Error sending command " + command + " to WS Session: " + s, e);
                 }
             });
+            LOGGER.info("Broadcasted command '" + command + "' to " + count.get() + " WS sessions.");
         }
     }
 
-    private static WebSocketGlobalCommandHandler getHandler() {
+    /**
+     * Broadcast a heartbeat PING command to all connected sessions
+     */
+    public static void broadcastHeartbeat() {
+        broadcastCommand("PING");
+    }
+
+
+    public static WebSocketGlobalCommandHandler getHandler() {
         return Containers.get().findObject(WebSocketGlobalCommandHandler.class);
     }
 

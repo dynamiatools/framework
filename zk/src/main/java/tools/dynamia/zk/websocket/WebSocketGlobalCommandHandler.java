@@ -24,7 +24,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.zkoss.zk.ui.Desktop;
 import tools.dynamia.commons.logger.Loggable;
 
-import java.util.Collection;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -62,8 +62,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class WebSocketGlobalCommandHandler extends TextWebSocketHandler implements Loggable {
 
-    private final Map<String, String> desktops = new ConcurrentHashMap<>();
-    private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+    // Map of active WebSocket sessions by session ID
+    private final Map<String, DeskstopWebSocketSession> sessions = new ConcurrentHashMap<>();
 
     /**
      * Handles incoming text messages from WebSocket clients.
@@ -91,17 +91,18 @@ public class WebSocketGlobalCommandHandler extends TextWebSocketHandler implemen
             return;
         }
 
-        // Handle desktop ID registration
-        String desktopId = payload;
-        String oldSessionId = desktops.get(desktopId);
-        if (oldSessionId != null) {
-            WebSocketSession oldSession = sessions.get(oldSessionId);
-            if (oldSession != null) {
-                oldSession.close(CloseStatus.NORMAL);
-            }
+        if ("PONG".equals(payload)) {
+            // Ignore PONG messages
+            return;
         }
-        log("Associating desktop " + desktopId + " with ws session " + session.getId());
-        desktops.put(desktopId, session.getId());
+
+        // Handle desktop ID registration
+        var oldSession = sessions.get(payload);
+        if (oldSession != null) {
+            oldSession.close(CloseStatus.NORMAL);
+        }
+        log("Associating desktop " + payload + " with ws session " + session.getId());
+        sessions.put(session.getId(), new DeskstopWebSocketSession(payload, session));
     }
 
     /**
@@ -114,8 +115,7 @@ public class WebSocketGlobalCommandHandler extends TextWebSocketHandler implemen
      */
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        log("WebSocket connection established: " + session.getId());
-        sessions.put(session.getId(), session);
+        log("New webSocket connection established: " + session.getId() + " waiting for desktop ID...");
     }
 
     /**
@@ -125,16 +125,11 @@ public class WebSocketGlobalCommandHandler extends TextWebSocketHandler implemen
      * the internal maps. This ensures that closed connections don't accumulate in memory.</p>
      *
      * @param session the closed WebSocket session
-     * @param status the status code indicating why the connection was closed
+     * @param status  the status code indicating why the connection was closed
      */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         log("WebSocket connection closed: " + session.getId() + " with status " + status);
-
-        String desktopId = desktops.entrySet().stream().filter(e -> e.getValue().equals(session.getId())).map(Map.Entry::getKey).findFirst().orElse(null);
-        if (desktopId != null) {
-            desktops.remove(desktopId);
-        }
         sessions.remove(session.getId());
     }
 
@@ -147,15 +142,11 @@ public class WebSocketGlobalCommandHandler extends TextWebSocketHandler implemen
      * @param desktop the ZK Desktop to find the session for
      * @return the associated WebSocket session, or {@code null} if not found or desktop is null
      */
-    WebSocketSession findSession(Desktop desktop) {
-        WebSocketSession session = null;
-        if (desktop != null && desktop.getId() != null) {
-            String sessionID = desktops.get(desktop.getId());
-            if (sessionID != null) {
-                session = sessions.get(sessionID);
-            }
-        }
-        return session;
+    public DeskstopWebSocketSession findSession(Desktop desktop) {
+        return sessions.values().stream()
+                .filter(ds -> ds.matchesDesktop(desktop))
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -166,7 +157,61 @@ public class WebSocketGlobalCommandHandler extends TextWebSocketHandler implemen
      *
      * @return a collection of all active WebSocket sessions
      */
-    Collection<WebSocketSession> getAllSessions() {
-        return sessions.values();
+    public Map<String, DeskstopWebSocketSession> getSessions() {
+        return sessions;
+    }
+
+    /**
+     * Closes the WebSocket session associated with a specific ZK Desktop.
+     *
+     * <p>This method safely closes the session and removes it from the internal
+     * session map to prevent resource leaks.</p>
+     *
+     * @param desktop the ZK Desktop whose session should be closed
+     */
+    public void closeSession(Desktop desktop) {
+        var session = findSession(desktop);
+        if (session != null) {
+            try {
+                session.close(CloseStatus.NORMAL);
+            } finally {
+                sessions.remove(session.session.getId());
+            }
+        } else {
+            log("No websocket session found for desktop " + desktop.getId());
+        }
+    }
+
+
+    /**
+     * Represents a WebSocket session associated with a specific ZK Desktop.
+     *
+     * <p>This record encapsulates the desktop ID and the WebSocket session,
+     * providing utility methods for session management and message sending.</p>
+     */
+    public record DeskstopWebSocketSession(String desktopId, WebSocketSession session) {
+        boolean isOpen() {
+            return session.isOpen();
+        }
+
+        boolean matchesDesktop(Desktop desktop) {
+            return desktop != null && desktopId.equals(desktop.getId());
+        }
+
+        boolean matchesSession(WebSocketSession otherSession) {
+            return session.getId().equals(otherSession.getId());
+        }
+
+        void close(CloseStatus closeStatus) {
+            try {
+                session.close(closeStatus);
+            } catch (Exception e) {
+                //ignore
+            }
+        }
+
+        void sendMessage(String message) throws IOException {
+            session.sendMessage(new TextMessage(message));
+        }
     }
 }
