@@ -307,14 +307,14 @@ public class SchedulerUtil {
     }
 
     /**
-     * Schedule a task with fixed delay using Spring TaskScheduler
+     * Schedule a task at fixed rate using Spring TaskScheduler for repeated execution.
      *
-     * @param delay the delay
-     * @param task  the task
+     * @param rate the rate
+     * @param task the task to repeat each period
      * @return the scheduled future
      */
-    public static ScheduledFuture<?> scheduleWithFixedDelay(Duration delay, Runnable task) {
-        return getTaskScheduler().scheduleAtFixedRate(task, delay);
+    public static ScheduledFuture<?> scheduleAtFixedRate(Duration rate, Runnable task) {
+        return getTaskScheduler().scheduleAtFixedRate(task, rate);
     }
 
     /**
