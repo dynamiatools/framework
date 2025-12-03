@@ -57,7 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * }
  * }</pre>
  *
- * @see WebSocketGlobalCommandConfig
+ * @see ZKWebSocketConfigurer
  * @see WebSocketPushSender
  */
 public class WebSocketGlobalCommandHandler extends TextWebSocketHandler implements Loggable {

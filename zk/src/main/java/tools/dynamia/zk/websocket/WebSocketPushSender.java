@@ -122,7 +122,9 @@ public abstract class WebSocketPushSender {
         if (ZKUtil.isInEventListener()) {
             try {
                 LOGGER.info("Requesting to initialize Websocket connection");
-                Clients.evalJavaScript("DynamiaToolsWS.init('/ws-commands');");
+                var config = Containers.get().findObject(ZKWebSocketConfigurer.class);
+                var endpoint = config != null ? config.getEndpoint() : "/ws-commands";
+                Clients.evalJavaScript("DynamiaToolsWS.init('" + endpoint + "');");
             } catch (Exception e) {
                 //
             }
