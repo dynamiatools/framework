@@ -118,7 +118,7 @@
     // Keep-alive configuration
     var keepAliveConfig = {
         enabled: true,
-        interval: 30000 // Send ping every 30 seconds
+        interval: 60000 // Send ping every 60 seconds
     };
 
     var wsManager = {
@@ -298,6 +298,17 @@
 
                 // Ignore server heartbeats
                 if (e.data === 'PONG') {
+                    return;
+                }
+
+                if (e.data === 'PING') {
+                    // Respond to server ping
+                    try {
+                        wsManager.socket.send('PONG');
+                        console.debug('DynamiaTools WebSocket: pong sent in response to server ping');
+                    } catch (error) {
+                        console.warn('DynamiaTools WebSocket: error sending pong', error);
+                    }
                     return;
                 }
 
