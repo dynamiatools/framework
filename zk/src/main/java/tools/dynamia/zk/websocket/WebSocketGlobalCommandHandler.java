@@ -116,7 +116,6 @@ public class WebSocketGlobalCommandHandler extends TextWebSocketHandler implemen
     public void afterConnectionEstablished(WebSocketSession session) {
         log("WebSocket connection established: " + session.getId());
         sessions.put(session.getId(), session);
-        session.get
     }
 
     /**

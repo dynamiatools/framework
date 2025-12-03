@@ -21,8 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
-import tools.dynamia.commons.logger.LoggingService;
-import tools.dynamia.commons.logger.SLF4JLoggingService;
+import tools.dynamia.commons.logger.Loggable;
 
 
 /**
@@ -34,7 +33,7 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
  *     <li>{@link WebSocketGlobalCommandHandler}</li>
  *     <li>{@link DefaultHandshakeHandler}</li>
  * </ul>
- *
+ * <p>
  * Usage:
  * <ul>
  *     <li>Extend this class in your own {@code @Configuration} to customize endpoint,
@@ -42,7 +41,7 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
  *     <li>Or import it from another {@code @Configuration} class using
  *         {@code @Import(ZKWebSocketConfigurer.class)} to reuse the default configuration.</li>
  * </ul>
- *
+ * <p>
  * Important: When using this class as a Spring configuration (either by extending it
  * or importing it), the hosting configuration must enable WebSocket support by being
  * annotated with {@code @EnableWebSocket}. Without {@code @EnableWebSocket} Spring
@@ -63,25 +62,24 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
  * @Import(ZKWebSocketConfigurer.class)
  * public class AppConfig { }
  * }</pre>
- *
+ * <p>
  * This class is intentionally lightweight and provides sensible defaults. Override
  * or extend behaviour when a project needs different endpoint paths, CORS rules
  * or a custom handshake handler.
  */
-public class ZKWebSocketConfigurer implements WebSocketConfigurer {
+public class ZKWebSocketConfigurer implements WebSocketConfigurer, Loggable {
 
     private String endpoint = "/ws-commands";
     private String[] allowedOrigins = new String[]{"*"};
     private String[] allowedOriginPatterns = null;
 
-    private final LoggingService logger = new SLF4JLoggingService(ZKWebSocketConfigurer.class);
 
     /**
      * Creates a new ZKWebSocketConfigurer with default configuration values.
      * A startup message is logged when an instance is created.
      */
     public ZKWebSocketConfigurer() {
-        logger.info("Starting " + getClass());
+        log("Starting " + getClass());
     }
 
     /**
@@ -93,7 +91,7 @@ public class ZKWebSocketConfigurer implements WebSocketConfigurer {
      */
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        logger.info("Registering WS Handler for ZK Commands");
+        log("Registering WS Handler for ZK Commands");
         var reg = registry.addHandler(globalCommandHandler(), endpoint != null ? endpoint : "/ws-commands");
         if (allowedOrigins != null) {
             reg.setAllowedOrigins(allowedOrigins);
