@@ -53,29 +53,22 @@ public class SchedulerUtil {
      * Execute a task asynchronously using a Virtual Thread executor from {@link VT} helper class.
      *
      * @param task the runnable
+     * @return a completable future
      */
-    public static void run(Runnable task) {
+    public static CompletableFuture<Void> run(Runnable task) {
         Runnable runnableWithContext = getWithContext(task);
-        VT.executor().execute(runnableWithContext);
+        return CompletableFuture.runAsync(runnableWithContext, VT.executor());
     }
 
     /**
      * Execute a task using a Virtual Thread executor from {@link VT} helper class and wait for its completion
-     * or timeout.
+     * or timeout. This is a shorthand for run(task).get(timeout).
      *
      * @param task    the runnable
      * @param timeout the timeout
      */
     public static void runAndWait(Runnable task, Duration timeout) {
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        run(() -> {
-            try {
-                task.run();
-                future.complete(null);
-            } catch (Exception e) {
-                future.completeExceptionally(e);
-            }
-        });
+        CompletableFuture<Void> future = run(task);
 
         try {
             future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
@@ -90,6 +83,7 @@ public class SchedulerUtil {
      *
      * @param firstTask the first task
      * @param others    the tasks
+     * @return the completable future
      */
     public static CompletableFuture<Void> run(Runnable firstTask, Runnable... others) {
 
