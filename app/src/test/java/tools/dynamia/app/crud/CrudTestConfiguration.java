@@ -1,7 +1,6 @@
 package tools.dynamia.app.crud;
 
 import jakarta.persistence.EntityManagerFactory;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -20,7 +19,6 @@ import tools.dynamia.integration.SpringObjectContainer;
 import javax.sql.DataSource;
 
 @Configuration
-@EntityScan(basePackageClasses = {CrudTestConfiguration.class})
 public class CrudTestConfiguration {
 
     @Bean
