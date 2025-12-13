@@ -99,8 +99,8 @@
         <slf4j.version>2.0.17</slf4j.version>
 
 
-        <java.version>25</java.version>
-        <target.version>25</target.version>
+        <java.version>21</java.version>
+        <target.version>21</target.version>
         <maven.compiler>3.14.0</maven.compiler>
         <source.encoding>UTF-8</source.encoding>
         <timestamp>${maven.build.timestamp}</timestamp>

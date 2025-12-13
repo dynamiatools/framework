@@ -1,6 +1,6 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia/tools.dynamia.app)](https://search.maven.org/search?q=tools.dynamia)
-![Java Version Required](https://img.shields.io/badge/java-25-blue)
+![Java Version Required](https://img.shields.io/badge/java-21-blue)
 [![Java CI with Maven](https://github.com/dynamiatools/framework/actions/workflows/maven.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/maven.yml)
 [![Release and Deploy](https://github.com/dynamiatools/framework/actions/workflows/release.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/release.yml)
 [![DynamiaTools Documentation](https://img.shields.io/badge/DynamiaTools-Documentation-orange)](https://dynamia.tools/getting-started/)

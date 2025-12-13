@@ -53,7 +53,7 @@ public class ModularPersistenceUnitManager extends DefaultPersistenceUnitManager
         // Invoke normal post processing
         super.postProcessPersistenceUnitInfo(pui);
 
-        PersistenceUnitInfo oldPui = getPersistenceUnitInfo(pui.getPersistenceUnitName());
+        MutablePersistenceUnitInfo oldPui = getPersistenceUnitInfo(pui.getPersistenceUnitName());
 
         if (oldPui != null) {
             postProcessPersistenceUnitInfo(pui, oldPui);
@@ -66,7 +66,7 @@ public class ModularPersistenceUnitManager extends DefaultPersistenceUnitManager
      * @param pui the pui
      * @param oldPui the old pui
      */
-    void postProcessPersistenceUnitInfo(MutablePersistenceUnitInfo pui, PersistenceUnitInfo oldPui) {
+    void postProcessPersistenceUnitInfo(MutablePersistenceUnitInfo pui, MutablePersistenceUnitInfo oldPui) {
 
         for (URL url : oldPui.getJarFileUrls()) {
 
