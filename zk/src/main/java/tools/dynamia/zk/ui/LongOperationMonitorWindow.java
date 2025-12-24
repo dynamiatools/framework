@@ -19,13 +19,17 @@ package tools.dynamia.zk.ui;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.*;
 import tools.dynamia.commons.ClassMessages;
+import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.commons.Messages;
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.integration.ProgressEvent;
 import tools.dynamia.integration.ProgressMonitor;
 import tools.dynamia.ui.MessageType;
 import tools.dynamia.ui.UIMessages;
 import tools.dynamia.zk.util.LongOperation;
 import tools.dynamia.zk.util.ZKUtil;
+
+import java.util.Date;
 
 public class LongOperationMonitorWindow extends Window {
 
@@ -40,6 +44,8 @@ public class LongOperationMonitorWindow extends Window {
     private Label messageLabel;
 
     private String messageTemplate = messages.get("DefaultProgressMessage");
+    private Listbox logListbox;
+    private boolean showLog;
 
     public LongOperationMonitorWindow(LongOperation longOperation, ProgressMonitor monitor) {
         this.longOperation = longOperation;
@@ -56,6 +62,7 @@ public class LongOperationMonitorWindow extends Window {
         win.setTitle(title);
         win.setPosition("center");
         win.doModal();
+        longOperation.onException(e -> win.detach());
         return win;
     }
 
@@ -104,6 +111,10 @@ public class LongOperationMonitorWindow extends Window {
         progress.setValue(evt.getPercent());
         progress.setTooltiptext(evt.getPercent() + "%");
         messageLabel.setValue(evt.getMessage());
+        if (isShowLog()) {
+            var item = logListbox.appendItem(DateTimeUtils.formatTime(new Date()) + " - " + evt.getMessage(), "");
+            logListbox.scrollToIndex(item.getIndex());
+        }
 
         String title = Messages.format(messageTemplate,
                 evt.getCurrent(), evt.getMax(), evt.getPercent());
@@ -127,6 +138,11 @@ public class LongOperationMonitorWindow extends Window {
         layout.setHflex("1");
         layout.setParent(this);
 
+        logListbox = new Listbox();
+        logListbox.setVisible(false);
+        logListbox.setHeight("150px");
+        logListbox.setParent(layout);
+
         progress = new Progressmeter();
         progress.setHflex("2");
         progress.setValue(0);
@@ -137,6 +153,43 @@ public class LongOperationMonitorWindow extends Window {
         messageLabel = new Label();
         messageLabel.setParent(msg);
         msg.setParent(layout);
+
+        Hlayout hlayout = new Hlayout();
+        hlayout.setHflex("1");
+        hlayout.setParent(layout);
+        hlayout.setVisible(false);
+
+        Label confirmStopLabel = new Label(messages.get("ConfirmStopProcess"));
+        confirmStopLabel.setStyle("font-weight:bold");
+        confirmStopLabel.setParent(hlayout);
+
+        Button yesBtn = new Button(messages.get("yes"));
+        yesBtn.setZclass("btn btn-success  btn-sm");
+        yesBtn.setParent(hlayout);
+        yesBtn.addEventListener(Events.ON_CLICK, evt -> stop());
+
+        Button noBtn = new Button(messages.get("no"));
+        noBtn.setZclass("btn btn-danger btn-sm");
+        noBtn.setParent(hlayout);
+        noBtn.addEventListener(Events.ON_CLICK, evt -> hlayout.setVisible(false));
+
+        addEventListener(Events.ON_CLOSE, evt -> {
+            evt.stopPropagation();
+            hlayout.setVisible(true);
+        });
+
+    }
+
+    protected void stop() {
+        try {
+            longOperation.onFinish(null);
+            monitor.stop();
+        } catch (Exception e) {
+            LoggingService.get(LongOperationMonitorWindow.class).error("Error stopping long operation", e);
+        } finally {
+            finish();
+        }
+
     }
 
     @Override
@@ -146,5 +199,14 @@ public class LongOperationMonitorWindow extends Window {
 
     public void setMessageTemplate(String messageTemplate) {
         this.messageTemplate = messageTemplate;
+    }
+
+    public boolean isShowLog() {
+        return showLog;
+    }
+
+    public void setShowLog(boolean showLog) {
+        this.showLog = showLog;
+        logListbox.setVisible(showLog);
     }
 }

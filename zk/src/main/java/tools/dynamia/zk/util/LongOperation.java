@@ -25,6 +25,8 @@ import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.integration.ProgressEvent;
 import tools.dynamia.integration.scheduling.SchedulerUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -51,6 +53,7 @@ import java.util.function.Consumer;
 public class LongOperation implements Runnable {
 
     private static final LoggingService LOGGER = LoggingService.get(LongOperation.class);
+    private EventQueue<LongOpEvent> opQueue;
 
     /**
      * Types of UI events triggered by a running LongOperation.
@@ -99,8 +102,8 @@ public class LongOperation implements Runnable {
     private Callback onFinishCallback;
     private Callback onCancelCallback;
     private Callback onCleanupCallback;
-    private Consumer<Exception> onExceptionConsumer;
-    private Consumer<ProgressEvent> onProgressConsumer;
+    private List<Consumer<Exception>> onExceptionConsumer;
+    private List<Consumer<ProgressEvent>> onProgressConsumer;
 
     private CompletableFuture<Void> future;
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
@@ -153,10 +156,13 @@ public class LongOperation implements Runnable {
     }
 
     /**
-     * Register callback when an uncaught exception occurs.
+     * Register callback when an uncaught exception occurs. Supports multiple consumers.
      */
     public LongOperation onException(Consumer<Exception> cb) {
-        this.onExceptionConsumer = cb;
+        if (onExceptionConsumer == null) {
+            onExceptionConsumer = new ArrayList<>();
+        }
+        this.onExceptionConsumer.add(cb);
         return this;
     }
 
@@ -169,10 +175,13 @@ public class LongOperation implements Runnable {
     }
 
     /**
-     * Register callback to receive UI progress reports (0-100).
+     * Register callback to receive UI progress reports (0-100). Sopports multiple consumers.
      */
     public LongOperation onProgress(Consumer<ProgressEvent> cb) {
-        this.onProgressConsumer = cb;
+        if (onProgressConsumer == null) {
+            onProgressConsumer = new ArrayList<>();
+        }
+        this.onProgressConsumer.add(cb);
         return this;
     }
 
@@ -239,7 +248,10 @@ public class LongOperation implements Runnable {
     // ========================
 
     private EventQueue<LongOpEvent> queue() {
-        return EventQueues.lookup(name + "-" + taskId, EventQueues.SESSION, true);
+        if (opQueue == null) {
+            opQueue = EventQueues.lookup(name + "-" + taskId, EventQueues.SESSION, true);
+        }
+        return opQueue;
     }
 
     private void postEvent(LongOpEventType type, ProgressEvent progress, Exception ex) {
@@ -268,12 +280,12 @@ public class LongOperation implements Runnable {
     }
 
     private void safeException(Exception e) {
-        if (onExceptionConsumer != null) onExceptionConsumer.accept(e);
+        if (onExceptionConsumer != null) onExceptionConsumer.forEach(c -> c.accept(e));
         LOGGER.error("Unhandled exception in task {}", name, e);
     }
 
     private void safeProgress(ProgressEvent p) {
-        if (onProgressConsumer != null && p != null) onProgressConsumer.accept(p);
+        if (onProgressConsumer != null && p != null) onProgressConsumer.forEach(c -> c.accept(p));
     }
 
     private void cleanup() {
