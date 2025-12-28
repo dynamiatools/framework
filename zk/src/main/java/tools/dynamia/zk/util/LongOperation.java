@@ -16,245 +16,296 @@
  */
 package tools.dynamia.zk.util;
 
-import org.springframework.core.task.TaskExecutor;
-import org.zkoss.zk.ui.Desktop;
-import org.zkoss.zk.ui.DesktopUnavailableException;
-import org.zkoss.zk.ui.Executions;
-import org.zkoss.zk.ui.Sessions;
-import org.zkoss.zk.ui.WebApps;
-import org.zkoss.zk.ui.sys.DesktopCache;
-import org.zkoss.zk.ui.sys.DesktopCtrl;
-import org.zkoss.zk.ui.sys.WebAppCtrl;
+import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.event.EventQueue;
+import org.zkoss.zk.ui.event.EventQueues;
 import tools.dynamia.commons.Callback;
 import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.integration.ProgressEvent;
+import tools.dynamia.integration.scheduling.SchedulerUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+/**
+ * Executes a long-running operation asynchronously while safely notifying
+ * the UI through a session-scoped EventQueue.
+ * <p>
+ * This class provides callback hooks for start, execution, finish,
+ * cancel, cleanup and exception handling without requiring
+ * manual server push or desktop activation.
+ *
+ * <p>Usage example:</p>
+ * <pre>{@code
+ * LongOperation.create()
+ *     .onStart(() -> showBusyIndicator())
+ *     .execute(() -> runHeavyTask())
+ *     .onFinish(() -> showSuccess())
+ *     .onCleanup(() -> hideBusyIndicator())
+ *     .start();
+ * }</pre>
+ */
 public class LongOperation implements Runnable {
 
-    private String desktopId;
-    private DesktopCache desktopCache;
-    private Thread thread;
-    private TaskExecutor taskExecutor;
-    private final AtomicBoolean cancelled = new AtomicBoolean(false);
-    private Callback onFinishCallbak;
-    private Callback onCancelCallback;
-    private Consumer<Exception> onExceptionConsumer;
-    private Callback onCleanupCallback;
-    private Callback executeCallback;
-    private Callback onStartCallback;
+    private static final LoggingService LOGGER = LoggingService.get(LongOperation.class);
+    private EventQueue<LongOpEvent> opQueue;
 
-    public LongOperation() {
-
-    }
-
-    public LongOperation(TaskExecutor taskExecutor) {
-        super();
-        this.taskExecutor = taskExecutor;
-    }
-
-    public LongOperation onStart(Callback onStart) {
-        this.onStartCallback = onStart;
-        return this;
+    /**
+     * Types of UI events triggered by a running LongOperation.
+     */
+    public enum LongOpEventType {
+        START, FINISH, CANCEL, EXCEPTION, CLEANUP, PROGRESS
     }
 
     /**
-     * asynchronous callback for your long operation code
+     * Simple UI event payload for queue notifications.
      */
-    public LongOperation execute(Callback executeCallback) {
-        this.executeCallback = executeCallback;
-        return this;
-    }
+    public static class LongOpEvent extends Event {
+        private LongOpEventType type;
+        private ProgressEvent progress;
+        private Exception error;
 
-    /**
-     * optional callback method when the task has completed successfully
-     */
-    public LongOperation onFinish(Callback onFinishCallback) {
-        this.onFinishCallbak = onFinishCallback;
-        return this;
-    }
+        public LongOpEvent(String name) {
+            super(name);
+        }
 
-    /**
-     * optional callback method when the task has been cancelled or was
-     * interrupted otherwise
-     */
-    public LongOperation onCancel(Callback onCancelCallback) {
-        this.onCancelCallback = onCancelCallback;
-        return this;
-    }
+        public LongOpEvent(LongOpEventType type, ProgressEvent progress, Exception error) {
+            super(type.name());
+            this.type = type;
+            this.progress = progress;
+            this.error = error;
+        }
 
-    /**
-     * optional callback method when the task has completed with an uncaught
-     * Excepion
-     */
-    public LongOperation onException(Consumer<Exception> onExceptionConsumer) {
-        this.onExceptionConsumer = onExceptionConsumer;
-        return this;
-    }
+        public LongOpEventType getType() {
+            return type;
+        }
 
-    /**
-     * optional callback method when the task has completed (always called)
-     */
-    public LongOperation onCleanup(Callback onCleanupCallback) {
-        this.onCleanupCallback = onCleanupCallback;
-        return this;
-    }
+        public ProgressEvent getProgress() {
+            return progress;
+        }
 
-    /**
-     * set the cancelled flag and try to interrupt the thread
-     */
-    public final void cancel() {
-        cancelled.set(true);
-        if (thread != null) {
-            thread.interrupt();
+        public Exception getError() {
+            return error;
         }
     }
 
+    private final UUID taskId = UUID.randomUUID();
+    private String name;
+
+    private Callback onStartCallback;
+    private Callback executeCallback;
+    private Callback onFinishCallback;
+    private Callback onCancelCallback;
+    private Callback onCleanupCallback;
+    private List<Consumer<Exception>> onExceptionConsumer;
+    private List<Consumer<ProgressEvent>> onProgressConsumer;
+
+    private CompletableFuture<Void> future;
+    private final AtomicBoolean cancelled = new AtomicBoolean(false);
+
     /**
-     * check the cancelled flag
+     * Create a new LongOperation instance.
      */
-    public final boolean isCancelled() {
+    public LongOperation() {
+        this.name = "LongOperation-" + taskId;
+    }
+
+    /**
+     * Assign a human-readable name used for logs and debugging.
+     */
+    public LongOperation name(String name) {
+        this.name = name;
+        return this;
+    }
+
+    /**
+     * Register callback executed before the long task begins.
+     */
+    public LongOperation onStart(Callback cb) {
+        this.onStartCallback = cb;
+        return this;
+    }
+
+    /**
+     * Register long-running asynchronous operation code.
+     */
+    public LongOperation execute(Callback cb) {
+        this.executeCallback = cb;
+        return this;
+    }
+
+    /**
+     * Register callback when task completes successfully.
+     */
+    public LongOperation onFinish(Callback cb) {
+        this.onFinishCallback = cb;
+        return this;
+    }
+
+    /**
+     * Register callback when task is cancelled.
+     */
+    public LongOperation onCancel(Callback cb) {
+        this.onCancelCallback = cb;
+        return this;
+    }
+
+    /**
+     * Register callback when an uncaught exception occurs. Supports multiple consumers.
+     */
+    public LongOperation onException(Consumer<Exception> cb) {
+        if (onExceptionConsumer == null) {
+            onExceptionConsumer = new ArrayList<>();
+        }
+        this.onExceptionConsumer.add(cb);
+        return this;
+    }
+
+    /**
+     * Register callback always executed at the end.
+     */
+    public LongOperation onCleanup(Callback cb) {
+        this.onCleanupCallback = cb;
+        return this;
+    }
+
+    /**
+     * Register callback to receive UI progress reports (0-100). Sopports multiple consumers.
+     */
+    public LongOperation onProgress(Consumer<ProgressEvent> cb) {
+        if (onProgressConsumer == null) {
+            onProgressConsumer = new ArrayList<>();
+        }
+        this.onProgressConsumer.add(cb);
+        return this;
+    }
+
+    /**
+     * Notify the UI of current progress.
+     * Safe to call from background execution.
+     */
+    public void progress(ProgressEvent progress) {
+        postEvent(LongOpEventType.PROGRESS, progress, null);
+    }
+
+    /**
+     * Cancel the running task.
+     * It will trigger a CANCEL event on the UI.
+     */
+    public void cancel() {
+        cancelled.set(true);
+        if (future != null) future.cancel(true);
+        postEvent(LongOpEventType.CANCEL, null, null);
+        LOGGER.warn("Task {} cancelled", name);
+    }
+
+    /**
+     * @return whether this operation has been cancelled
+     */
+    public boolean isCancelled() {
         return cancelled.get();
     }
 
     /**
-     * activate the thread (and cached desktop) for UI updates call
-     * {@link #deactivate()} once done updating the UI
+     * Launch the long-running operation.
+     * Registers internal UI event listeners automatically.
      */
-    protected final void activate() throws InterruptedException {
-        Executions.activate(getDesktop());
-    }
-
-    /**
-     * deactivate the current active (see: {@link #activate()}) thread/desktop
-     * after updates are done
-     */
-    protected final void deactivate() {
-        Executions.deactivate(getDesktop());
-    }
-
-    /**
-     * Checks if the task thread has been interrupted. Use this to check whether
-     * or not to exit a busy operation in case.
-     *
-     * @throws InterruptedException when the current task has been
-     *                              cancelled/interrupted
-     */
-    protected final void checkCancelled() throws InterruptedException {
-        if (Thread.currentThread() != this.thread && taskExecutor == null) {
-            throw new IllegalStateException("this method can only be called in the worker thread (i.e. during execute)");
-        }
-        boolean interrupted = Thread.interrupted();
-        if (interrupted || cancelled.get()) {
-            cancelled.set(true);
-            throw new InterruptedException();
-        }
-    }
-
-    /**
-     * launch the long operation
-     */
-    public final LongOperation start() {
-        // not caching the desktop directly to enable garbage collection, in
-        // case the desktop destroyed during the long operation
-        this.desktopId = Executions.getCurrent().getDesktop().getId();
-        this.desktopCache = ((WebAppCtrl) WebApps.getCurrent()).getDesktopCache(Sessions.getCurrent());
-        enableServerPushForThisTask();
-        if (taskExecutor == null) {
-            thread = new Thread(this);
-            thread.start();
-        } else {
-            taskExecutor.execute(this);
-        }
+    public LongOperation start() {
+        registerQueueListener();
+        postEvent(LongOpEventType.START, null, null);
+        LOGGER.info("Starting task: {}", name);
+        future = SchedulerUtil.run(this);
         return this;
     }
 
     @Override
-    public final void run() {
+    public void run() {
         try {
-            try {
-                runCallback(onStartCallback);
-                checkCancelled(); // avoid unnecessary execution
-                execute();
-                checkCancelled(); // final cancelled check before calling
-                // onFinish
-                activate();
-                finish();
-                deactivate();
-            } catch (InterruptedException e) {
-                try {
-                    cancelled.set(true);
-                    activate();
-                    runCallback(onCancelCallback);
-                    deactivate();
-                } catch (InterruptedException e1) {
-                    throw new RuntimeException("interrupted onCancel handling", e1);
-                }
-            } catch (Exception rte) {
-                try {
-                    activate();
-                    if (onExceptionConsumer != null) {
-                        onExceptionConsumer.accept(rte);
-                    }
-                    deactivate();
-                } catch (InterruptedException e1) {
-                    throw new RuntimeException("interrupted onException handling", e1);
-                }
-                throw rte;
-            }
+            if (!cancelled.get()) safeExecute(executeCallback);
+            if (!cancelled.get()) postEvent(LongOpEventType.FINISH, null, null);
+        } catch (Exception ex) {
+            postEvent(LongOpEventType.EXCEPTION, null, cast(ex));
         } finally {
-            updateUI(onCleanupCallback);
-            disableServerPushForThisTask();
+            postEvent(LongOpEventType.CLEANUP, null, null);
         }
     }
 
-    protected void finish() {
-        runCallback(onFinishCallbak);
+    private Exception cast(Throwable t) {
+        return (t instanceof Exception e) ? e : new Exception(t);
     }
 
-    protected void execute() {
-        runCallback(executeCallback);
+    private void safeExecute(Callback cb) {
+        if (cb != null) cb.doSomething();
     }
 
-    protected void runCallback(Callback callback) {
-        if (callback != null) {
-            callback.doSomething();
+    // ========================
+    //   UI Notification Layer
+    // ========================
+
+    private EventQueue<LongOpEvent> queue() {
+        if (opQueue == null) {
+            opQueue = EventQueues.lookup(name + "-" + taskId, EventQueues.SESSION, true);
         }
-
+        return opQueue;
     }
 
-    private final UUID taskId = UUID.randomUUID();
-
-    private void enableServerPushForThisTask() {
-        ((DesktopCtrl) getDesktop()).enableServerPush(true, taskId);
+    private void postEvent(LongOpEventType type, ProgressEvent progress, Exception ex) {
+        queue().publish(new LongOpEvent(type, progress, ex));
     }
 
-    private void disableServerPushForThisTask() {
-        ((DesktopCtrl) getDesktop()).enableServerPush(false, taskId);
+    private void registerQueueListener() {
+        queue().subscribe(event -> {
+            try {
+                switch (event.getType()) {
+                    case START -> safeExecute(onStartCallback);
+                    case FINISH -> safeExecute(onFinishCallback);
+                    case CANCEL -> safeExecute(onCancelCallback);
+                    case EXCEPTION -> safeException(event.getError());
+                    case PROGRESS -> safeProgress(event.getProgress());
+                    case CLEANUP -> cleanup();
+                }
+            } catch (Exception e) {
+                LOGGER.error("Error during UI callback for {}", name, e);
+            }
+        });
     }
 
-    private Desktop getDesktop() {
-        return desktopCache.getDesktop(desktopId);
+    public void onEvent(EventListener<LongOpEvent> listener) {
+        queue().subscribe(listener);
     }
 
-    public void updateUI(Callback callback) {
+    private void safeException(Exception e) {
+        if (onExceptionConsumer != null) onExceptionConsumer.forEach(c -> c.accept(e));
+        LOGGER.error("Unhandled exception in task {}", name, e);
+    }
+
+    private void safeProgress(ProgressEvent p) {
+        if (onProgressConsumer != null && p != null) onProgressConsumer.forEach(c -> c.accept(p));
+    }
+
+    private void cleanup() {
+        safeExecute(onCleanupCallback);
+        removeQueue();
+        LOGGER.info("Task {} finished and cleaned", name);
+    }
+
+    private void removeQueue() {
         try {
-            activate();
-            runCallback(callback);
-            deactivate();
-        } catch (DesktopUnavailableException | InterruptedException e) {
-            LoggingService.get(getClass()).error("Error updating UI", e);
+            EventQueues.remove(name + "-" + taskId, EventQueues.SESSION);
+        } catch (Exception e) {
+            LOGGER.warn("Failed cleaning queue for task {}", name, e);
         }
     }
 
+    /**
+     * Factory shortcut
+     */
     public static LongOperation create() {
         return new LongOperation();
     }
-
-    public static LongOperation create(TaskExecutor taskExecutor) {
-        return new LongOperation(taskExecutor);
-    }
-
 }

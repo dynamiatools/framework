@@ -19,8 +19,6 @@ package tools.dynamia.web.navigation;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -276,7 +274,7 @@ public class RestNavigationController extends AbstractLoggable {
         }
         ViewDescriptor descriptor = getJsonFormDescriptor(entityClass, true);
 
-        ObjectMapper mapper = new ObjectMapper();
+        var mapper = StringPojoParser.createJsonMapper();
         try {
             final ViewDescriptor desc = descriptor;
             JsonNode node = mapper.readTree(jsonData);
@@ -338,10 +336,7 @@ public class RestNavigationController extends AbstractLoggable {
 
     public static ResponseEntity<String> getMetadata(HttpServletRequest request, ViewDescriptor viewDescriptor) {
         if (viewDescriptor != null && request.getParameter("_metadata") != null) {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-
+            var mapper = StringPojoParser.createJsonMapper();
 
             try {
                 return new ResponseEntity<>(mapper.writeValueAsString(viewDescriptor), HttpStatus.OK);

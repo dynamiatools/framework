@@ -20,7 +20,6 @@ package tools.dynamia.commons;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -53,7 +52,7 @@ public class StringPojoParser {
             if (map == null || map.isEmpty()) {
                 return "";
             }
-            ObjectMapper jsonMapper = createJsonMapper();
+            var jsonMapper = createJsonMapper();
             return jsonMapper.writeValueAsString(map);
         } catch (JsonProcessingException e) {
             throw new JsonParsingException(e);
@@ -61,11 +60,11 @@ public class StringPojoParser {
     }
 
     /**
-     * Creates a configured JSON {@link ObjectMapper} with indentation, disabled empty beans, and JavaTimeModule support.
+     * Creates a configured JSON {@link JsonMapper} with indentation, disabled empty beans, and JavaTimeModule support.
      *
      * @return the configured JSON ObjectMapper
      */
-    public static ObjectMapper createJsonMapper() {
+    public static JsonMapper createJsonMapper() {
         return JsonMapper.builder()
                 .enable(SerializationFeature.INDENT_OUTPUT)
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
@@ -85,7 +84,7 @@ public class StringPojoParser {
             if (pojo == null) {
                 return "";
             }
-            ObjectMapper jsonMapper = createJsonMapper();
+            var jsonMapper = createJsonMapper();
             return jsonMapper.writeValueAsString(pojo);
         } catch (JsonProcessingException e) {
             throw new JsonParsingException(e);
@@ -141,7 +140,7 @@ public class StringPojoParser {
                 return null;
             }
 
-            ObjectMapper jsonMapper = createJsonMapper();
+            var jsonMapper = createJsonMapper();
             return jsonMapper.readerFor(pojoType).readValue(json);
         } catch (IOException e) {
             throw new JsonParsingException(e);
@@ -161,7 +160,7 @@ public class StringPojoParser {
                 return null;
             }
 
-            ObjectMapper jsonMapper = createJsonMapper();
+            var jsonMapper = createJsonMapper();
             return jsonMapper.convertValue(map, pojoType);
         } catch (IllegalArgumentException e) {
             throw new JsonParsingException(e);
@@ -184,12 +183,12 @@ public class StringPojoParser {
     }
 
     /**
-     * Create a xml {@link ObjectMapper} with enable IDENT_OUTPUT and disabled FAIL_ON_EMPTY_BEANS. Also add support
+     * Create a xml {@link XmlMapper} with enable IDENT_OUTPUT and disabled FAIL_ON_EMPTY_BEANS. Also add support
      * to {@link JavaTimeModule} from JSR310 dependency
      *
-     * @return xml ObjectMapper
+     * @return xml mapper
      */
-    public static ObjectMapper createXmlMapper() {
+    public static XmlMapper createXmlMapper() {
         return XmlMapper.builder()
                 .enable(SerializationFeature.INDENT_OUTPUT)
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
@@ -244,7 +243,7 @@ public class StringPojoParser {
             if (list == null || list.isEmpty()) {
                 return "";
             }
-            ObjectMapper jsonMapper = createJsonMapper();
+            var jsonMapper = createJsonMapper();
             return jsonMapper.writeValueAsString(list);
         } catch (JsonProcessingException e) {
             throw new JsonParsingException(e);

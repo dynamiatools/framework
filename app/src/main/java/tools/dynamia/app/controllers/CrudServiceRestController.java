@@ -1,7 +1,7 @@
 package tools.dynamia.app.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +43,7 @@ public class CrudServiceRestController {
     /**
      * JSON object mapper for entity serialization/deserialization.
      */
-    private final ObjectMapper mapper = StringPojoParser.createJsonMapper();
+    private final JsonMapper mapper = StringPojoParser.createJsonMapper();
 
     /**
      * Constructs a new {@code CrudServiceRestController} with the given CRUD service.

@@ -23,6 +23,7 @@ import org.zkoss.zk.ui.event.*;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.*;
+import org.zkoss.zul.Timer;
 import org.zkoss.zul.ext.Paginal;
 import org.zkoss.zul.impl.InputElement;
 import org.zkoss.zul.impl.LabelImageElement;
@@ -52,6 +53,7 @@ import tools.dynamia.zk.ui.SimpleListItemRenderer;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.Duration;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -1291,4 +1293,104 @@ public abstract class ZKUtil {
         }
     }
 
+    /**
+     * Schedules a runnable to execute after a specified duration within a given page context.
+     * Uses a ZK Timer component to delay execution. If not in desktop scope, runs immediately.
+     *
+     * @param duration the duration to wait before executing the runnable
+     * @param page     the ZK page context to associate the timer with
+     * @param runnable the runnable task to execute
+     */
+    public static void runLater(Duration duration, Page page, Runnable runnable) {
+        if (ZKUtil.isInDesktopScope()) {
+            buildTimer(duration, page, false, runnable);
+        } else {
+            //If not in desktop scope, run immediately
+            runnable.run();
+        }
+    }
+
+    /**
+     * Schedules a runnable to execute after a specified duration within the first page context.
+     * Uses a ZK Timer component to delay execution.
+     *
+     * @param duration the duration to wait before executing the runnable
+     * @param runnable the runnable task to execute
+     */
+    public static void runLater(Duration duration, Runnable runnable) {
+        runLater(duration, getFirstPage(), runnable);
+    }
+
+    /**
+     * Schedules a runnable to execute after 500ms within a given page context.
+     * Uses a ZK Timer component to delay execution.
+     *
+     * @param runnable the runnable task to execute
+     */
+    public static void runLater(Runnable runnable) {
+        runLater(Duration.ofMillis(500), getFirstPage(), runnable);
+    }
+
+    /**
+     * Schedules a runnable to execute at regular intervals within a given page context.
+     * Uses a ZK Timer component to repeatedly execute the task. If not in desktop scope, runs immediately.
+     *
+     * @param interval the interval duration between executions
+     * @param page     the ZK page context to associate the timer with
+     * @param runnable the runnable task to execute
+     */
+    public static void runAtIntervals(Duration interval, Page page, Runnable runnable) {
+        if (ZKUtil.isInDesktopScope()) {
+            buildTimer(interval, page, true, runnable);
+        } else {
+            //If not in desktop scope, run immediately
+            runnable.run();
+        }
+    }
+
+    /**
+     * Schedules a runnable to execute at regular intervals within the first page context.
+     * Uses a ZK Timer component to repeatedly execute the task.
+     *
+     * @param interval the interval duration between executions
+     * @param runnable the runnable task to execute
+     */
+    public static void runAtIntervals(Duration interval, Runnable runnable) {
+        runAtIntervals(interval, getFirstPage(), runnable);
+    }
+
+    /**
+     * Builds a ZK Timer component with specified delay, runnable task, and repeat behavior.
+     *
+     * @param delay    the delay duration before executing the task
+     * @param repeats  true to repeat execution at intervals, false for single execution
+     * @param runnable the runnable task to execute
+     * @return the configured Timer component
+     */
+    public static Timer buildTimer(Duration delay, boolean repeats, Runnable runnable) {
+        Timer timer = new Timer();
+        timer.setDelay((int) delay.toMillis());
+        timer.addEventListener(Events.ON_TIMER, e -> {
+            runnable.run();
+            if (!repeats) {
+                timer.detach();
+            }
+        });
+        return timer;
+    }
+
+    /**
+     * Builds a ZK Timer component with specified delay, page context, runnable task, and repeat behavior.
+     *
+     * @param delay    the delay duration before executing the task
+     * @param page     the ZK page context to associate the timer with
+     * @param repeats  true to repeat execution at intervals, false for single execution
+     * @param runnable the runnable task to execute
+     * @return the configured Timer component
+     */
+    public static Timer buildTimer(Duration delay, Page page, boolean repeats, Runnable runnable) {
+        var timer = buildTimer(delay, repeats, runnable);
+        timer.setPage(page);
+        return timer;
+    }
 }

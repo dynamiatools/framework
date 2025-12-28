@@ -17,141 +17,142 @@
 package tools.dynamia.zk.ui;
 
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.Button;
-import org.zkoss.zul.Caption;
-import org.zkoss.zul.Div;
-import org.zkoss.zul.Hlayout;
-import org.zkoss.zul.Label;
-import org.zkoss.zul.Progressmeter;
-import org.zkoss.zul.Vlayout;
-import org.zkoss.zul.Window;
-import tools.dynamia.commons.Callback;
+import org.zkoss.zul.*;
 import tools.dynamia.commons.ClassMessages;
+import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.commons.Messages;
-import tools.dynamia.commons.StopWatch;
 import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.integration.ProgressEvent;
 import tools.dynamia.integration.ProgressMonitor;
+import tools.dynamia.ui.MessageType;
 import tools.dynamia.ui.UIMessages;
 import tools.dynamia.zk.util.LongOperation;
 import tools.dynamia.zk.util.ZKUtil;
 
-import java.util.function.Consumer;
+import java.util.Date;
 
 public class LongOperationMonitorWindow extends Window {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = -2630380982547205553L;
-    public static final int DEFAULT_REFRESH_RATE = 2000;
+    private static final long serialVersionUID = 1L;
+
     private final ClassMessages messages = ClassMessages.get(LongOperationMonitorWindow.class);
     private final ProgressMonitor monitor;
+    private final LongOperation longOperation;
 
     private Progressmeter progress;
-    private String messageTemplate = messages.get("DefaultProgressMessage");
-    private int refreshRate;
-    private final LongOperation longOperation;
     private Caption titleCaption;
     private Label messageLabel;
 
-    public LongOperationMonitorWindow(LongOperation longOperation, ProgressMonitor monitor) {
-        this(longOperation, monitor, DEFAULT_REFRESH_RATE);
-    }
+    private String messageTemplate = messages.get("DefaultProgressMessage");
+    private Listbox logListbox;
+    private boolean showLog;
 
-    public LongOperationMonitorWindow(LongOperation longOperation, ProgressMonitor monitor, int refreshRate) {
+    public LongOperationMonitorWindow(LongOperation longOperation, ProgressMonitor monitor) {
         this.longOperation = longOperation;
         this.monitor = monitor;
-        this.refreshRate = refreshRate;
         initUI();
-        initMonitor();
+        bindEventListeners();
         setPage(ZKUtil.getFirstPage());
     }
 
-    public static LongOperationMonitorWindow show(String title, LongOperation longOperation, ProgressMonitor monitor) {
-        return show(title, longOperation, monitor, DEFAULT_REFRESH_RATE);
+    public static LongOperationMonitorWindow show(String title,
+                                                  LongOperation longOperation,
+                                                  ProgressMonitor monitor) {
+        LongOperationMonitorWindow win = new LongOperationMonitorWindow(longOperation, monitor);
+        win.setTitle(title);
+        win.setPosition("center");
+        win.doModal();
+        longOperation.onException(e -> win.detach());
+        return win;
     }
 
-    public static LongOperationMonitorWindow show(String title, LongOperation longOperation, ProgressMonitor monitor, int refreshRate) {
-        LongOperationMonitorWindow wind = new LongOperationMonitorWindow(longOperation, monitor, refreshRate);
-        wind.setTitle(title);
-        wind.setPosition("center");
-        wind.doModal();
-        return wind;
-    }
-
-    /**
-     * Run and show a progress window for a long-running operation
-     */
-    public static LongOperationMonitorWindow start(String title, Consumer<ProgressMonitor> operation, Callback onFinish) {
+    public static LongOperationMonitorWindow start(String title,
+                                                   String finishMessage,
+                                                   java.util.function.Consumer<ProgressMonitor> op) {
         var monitor = new ProgressMonitor();
-        var longOp = LongOperation.create()
-                .execute(() -> operation.accept(monitor))
-                .onFinish(onFinish);
+        LongOperation longOp = LongOperation.create()
+                .execute(() -> op.accept(monitor))
+                .onFinish(() -> UIMessages.showMessage(finishMessage));
 
         longOp.start();
-
         return show(title, longOp, monitor);
     }
 
-    /**
-     * Run and show a progress window for a long-running operation
-     */
-    public static LongOperationMonitorWindow start(String title, String finishMessage, Consumer<ProgressMonitor> operation) {
-        return start(title, operation, () -> UIMessages.showMessage(finishMessage));
-    }
-
-    private void initMonitor() {
+    private void bindEventListeners() {
         if (monitor != null) {
-            StopWatch stopWatch = new StopWatch(refreshRate);
-            monitor.onProgressChanged(evt -> {
-                if ((stopWatch.now() && !monitor.isStopped()) || monitor.getCurrent() >= monitor.getMax()) {
-                    longOperation.updateUI(() -> {
-                        progress.setValue(evt.getPercent());
-                        progress.setTooltiptext(evt.getPercent() + "%");
-                        messageLabel.setValue(evt.getMessage());
-                        setTitle(Messages.format(messageTemplate, evt.getCurrent(), evt.getMax(), evt.getPercent()));
-                    });
-                }
-            });
-
-            longOperation.onCleanup(this::finish);
+            monitor.onProgressChanged(longOperation::progress);
         }
 
+        longOperation.onEvent(event -> {
+            switch (event.getType()) {
+                case START -> showStartUI();
+                case PROGRESS -> updateProgress(event.getProgress());
+                case FINISH, CANCEL -> finish();
+                case EXCEPTION -> {
+                    UIMessages.showMessageDialog(messages.get("OperationErrorMessage") + ": " + event.getError().getMessage(),
+                            messages.get("OperationErrorTitle"), MessageType.ERROR);
+                    finish();
+                }
+            }
+        });
+
+        // Cleanup on window close → cancel op
+        addEventListener(Events.ON_CLOSE, evt -> {
+            evt.stopPropagation();
+            longOperation.cancel();
+        });
+    }
+
+    private void showStartUI() {
+        titleCaption.setIconSclass("fa fa-refresh fa-spin fa-2x");
+    }
+
+    private void updateProgress(ProgressEvent evt) {
+        progress.setValue(evt.getPercent());
+        progress.setTooltiptext(evt.getPercent() + "%");
+        messageLabel.setValue(evt.getMessage());
+        if (isShowLog()) {
+            var item = logListbox.appendItem(DateTimeUtils.formatTime(new Date()) + " - " + evt.getMessage(), "");
+            logListbox.scrollToIndex(item.getIndex());
+        }
+
+        String title = Messages.format(messageTemplate,
+                evt.getCurrent(), evt.getMax(), evt.getPercent());
+        setTitle(title);
     }
 
     private void finish() {
-        if (ZKUtil.isInEventListener()) {
-            detach();
-        } else {
-            longOperation.updateUI(this::detach);
-        }
-
+        titleCaption.setIconSclass("fa fa-check");
+        detach(); // UI thread safe — EventQueue guarantees it
     }
 
     private void initUI() {
-
         setWidth("500px");
         setClosable(true);
-        setStyle("padding: 10px");
+        setStyle("padding:10px");
+
         titleCaption = new Caption("");
-        titleCaption.setIconSclass("fa fa-refresh fa-spin fa-2x");
         titleCaption.setParent(this);
 
         Vlayout layout = new Vlayout();
         layout.setHflex("1");
         layout.setParent(this);
 
+        logListbox = new Listbox();
+        logListbox.setVisible(false);
+        logListbox.setHeight("150px");
+        logListbox.setParent(layout);
+
         progress = new Progressmeter();
         progress.setHflex("2");
-        progress.setParent(layout);
         progress.setValue(0);
+        progress.setParent(layout);
 
-        Div messageContainer = new Div();
-        messageContainer.setStyle("text-align: center");
+        Div msg = new Div();
+        msg.setStyle("text-align:center");
         messageLabel = new Label();
-        messageLabel.setParent(messageContainer);
-        messageContainer.setParent(layout);
-
+        messageLabel.setParent(msg);
+        msg.setParent(layout);
 
         Hlayout hlayout = new Hlayout();
         hlayout.setHflex("1");
@@ -179,32 +180,16 @@ public class LongOperationMonitorWindow extends Window {
 
     }
 
-    private void stop() {
+    protected void stop() {
         try {
             longOperation.onFinish(null);
             monitor.stop();
         } catch (Exception e) {
-            LoggingService.get(getClass()).error("Error stopping long operation", e);
+            LoggingService.get(LongOperationMonitorWindow.class).error("Error stopping long operation", e);
         } finally {
             finish();
         }
 
-    }
-
-    public String getMessageTemplate() {
-        return messageTemplate;
-    }
-
-    public void setMessageTemplate(String messageTemplate) {
-        this.messageTemplate = messageTemplate;
-    }
-
-    public int getRefreshRate() {
-        return refreshRate;
-    }
-
-    public void setRefreshRate(int refreshRate) {
-        this.refreshRate = refreshRate;
     }
 
     @Override
@@ -212,4 +197,16 @@ public class LongOperationMonitorWindow extends Window {
         titleCaption.setLabel(title);
     }
 
+    public void setMessageTemplate(String messageTemplate) {
+        this.messageTemplate = messageTemplate;
+    }
+
+    public boolean isShowLog() {
+        return showLog;
+    }
+
+    public void setShowLog(boolean showLog) {
+        this.showLog = showLog;
+        logListbox.setVisible(showLog);
+    }
 }
