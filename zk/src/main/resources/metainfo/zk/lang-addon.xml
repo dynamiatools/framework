@@ -40,7 +40,7 @@
     <stylesheet href="/static/dynamia-tools/css/zk-listbox-colors.css?v=${project.version}" type="text/css"/>
 
 
-    <javascript src="/static/dynamia-tools/js/dynamia-tools.js?v=${project.version}"/>
+    <javascript src="/static/dynamia-tools/js/zk/dynamia-tools.js?v=${project.version}"/>
 
 
 
