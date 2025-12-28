@@ -18,9 +18,9 @@
 package tools.dynamia.viewers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import tools.dynamia.commons.StringPojoParser;
 
 import java.io.IOException;
 
@@ -31,7 +31,7 @@ public class JsonView<T> implements View<T> {
     private T value;
     private View parentView;
     private ViewDescriptor viewDescriptor;
-    private ObjectMapper mapper;
+    private JsonMapper mapper;
 
     public JsonView() {
 
@@ -80,7 +80,7 @@ public class JsonView<T> implements View<T> {
     public String renderJson() {
 
         try {
-            ObjectMapper mapper = getObjectMapper();
+            var mapper = getJsonMapper();
             return mapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {
             throw new ViewRendererException("Exception rendering json view of " + value + " with descriptor " + viewDescriptor, e);
@@ -94,18 +94,16 @@ public class JsonView<T> implements View<T> {
         }
         try {
             //noinspection unchecked
-            value = (T) getObjectMapper().readValue(json, viewDescriptor.getBeanClass());
+            value = (T) getJsonMapper().readValue(json, viewDescriptor.getBeanClass());
         } catch (IOException e) {
             throw new ViewRendererException("Error parsing json to object", e);
         }
 
     }
 
-    private ObjectMapper getObjectMapper() {
+    private JsonMapper getJsonMapper() {
         if (mapper == null) {
-            mapper = new ObjectMapper();
-            mapper.enable(SerializationFeature.INDENT_OUTPUT);
-            mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+            mapper = StringPojoParser.createJsonMapper();
             SimpleModule module = new SimpleModule();
             module.addSerializer(viewDescriptor.getBeanClass(), new JsonViewDescriptorSerializer(viewDescriptor));
             //noinspection unchecked
