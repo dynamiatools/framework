@@ -22,7 +22,6 @@
 
     <artifactId>tools.dynamia.commons</artifactId>
     <packaging>jar</packaging>
-    <version>5.4.12</version>
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
