@@ -26,11 +26,11 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>5.4.12</version>
+        <version>5.4.13</version>
     </parent>
 
     <name>DynamiaTools - Reports</name>
-    <version>5.4.12</version>
+    <version>5.4.13</version>
     <description>A set of classes and interfaces that help building Reports</description>
     <url>https://dynamia.tools/docs/reports</url>
 
