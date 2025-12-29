@@ -18,6 +18,7 @@ package tools.dynamia.zk.ui;
 
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.*;
+import tools.dynamia.commons.Callback;
 import tools.dynamia.commons.ClassMessages;
 import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.commons.Messages;
@@ -31,6 +32,9 @@ import tools.dynamia.zk.util.ZKUtil;
 
 import java.util.Date;
 
+/**
+ * A ZK Window that monitors the progress of a long operation.
+ */
 public class LongOperationMonitorWindow extends Window {
 
     private static final long serialVersionUID = 1L;
@@ -47,6 +51,7 @@ public class LongOperationMonitorWindow extends Window {
     private Listbox logListbox;
     private boolean showLog;
 
+
     public LongOperationMonitorWindow(LongOperation longOperation, ProgressMonitor monitor) {
         this.longOperation = longOperation;
         this.monitor = monitor;
@@ -55,6 +60,14 @@ public class LongOperationMonitorWindow extends Window {
         setPage(ZKUtil.getFirstPage());
     }
 
+    /**
+     * Shows a long operation monitor window.
+     *
+     * @param title         The title of the monitor window.
+     * @param longOperation The long operation to monitor.
+     * @param monitor       The progress monitor.
+     * @return The LongOperationMonitorWindow instance.
+     */
     public static LongOperationMonitorWindow show(String title,
                                                   LongOperation longOperation,
                                                   ProgressMonitor monitor) {
@@ -66,17 +79,41 @@ public class LongOperationMonitorWindow extends Window {
         return win;
     }
 
+    /**
+     * Starts a long operation with a progress monitor and shows the monitor window.
+     *
+     * @param title         The title of the monitor window.
+     * @param finishMessage The message to display when the operation finishes.
+     * @param op            A consumer that accepts a ProgressMonitor to perform the long operation.
+     * @return The LongOperationMonitorWindow instance.
+     */
     public static LongOperationMonitorWindow start(String title,
                                                    String finishMessage,
                                                    java.util.function.Consumer<ProgressMonitor> op) {
+
+        return start(title, op, () -> UIMessages.showMessage(finishMessage));
+    }
+
+    /**
+     * Starts a long operation with a progress monitor and shows the monitor window.
+     *
+     * @param title    The title of the monitor window.
+     * @param op       A consumer that accepts a ProgressMonitor to perform the long operation.
+     * @param onFinish A callback to execute when the operation finishes.
+     * @return The LongOperationMonitorWindow instance.
+     */
+    public static LongOperationMonitorWindow start(String title,
+                                                   java.util.function.Consumer<ProgressMonitor> op,
+                                                   Callback onFinish) {
         var monitor = new ProgressMonitor();
         LongOperation longOp = LongOperation.create()
                 .execute(() -> op.accept(monitor))
-                .onFinish(() -> UIMessages.showMessage(finishMessage));
+                .onFinish(onFinish);
 
         longOp.start();
         return show(title, longOp, monitor);
     }
+
 
     private void bindEventListeners() {
         if (monitor != null) {
