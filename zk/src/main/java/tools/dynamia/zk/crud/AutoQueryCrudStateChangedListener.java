@@ -17,11 +17,15 @@
 package tools.dynamia.zk.crud;
 
 import org.springframework.stereotype.Component;
+import org.zkoss.zk.ui.util.Clients;
 import tools.dynamia.crud.ChangedStateEvent;
 import tools.dynamia.crud.CrudState;
 import tools.dynamia.crud.CrudStateChangedListener;
 import tools.dynamia.crud.CrudViewComponent;
 import tools.dynamia.viewers.util.Viewers;
+import tools.dynamia.zk.util.ZKUtil;
+
+import java.time.Duration;
 
 @Component
 public class AutoQueryCrudStateChangedListener implements CrudStateChangedListener {
@@ -34,7 +38,12 @@ public class AutoQueryCrudStateChangedListener implements CrudStateChangedListen
 
                 if (crudView.getViewDescriptor().getParams().get(Viewers.PARAM_AUTOQUERY) != Boolean.FALSE
                         && crudView.getController().isQueryResultEmpty()) {
-                    crudView.getController().doQuery();
+                    var cvComp = (org.zkoss.zk.ui.Component)crudView;
+                    Clients.showBusy(cvComp, "");
+                    ZKUtil.runLater(Duration.ofMillis(100), () -> {
+                        Clients.clearBusy(cvComp);
+                        crudView.getController().doQuery();
+                    });
                 }
             } catch (Exception e) {
                 e.printStackTrace();
