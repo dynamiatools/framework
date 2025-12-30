@@ -16,6 +16,8 @@
  */
 package tools.dynamia.commons.reflect;
 
+import tools.dynamia.commons.Alias;
+import tools.dynamia.commons.AliasResolver;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.StringUtils;
 
@@ -24,6 +26,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -89,6 +93,8 @@ public class PropertyInfo implements Serializable {
      */
     private Method writeMethod;
 
+    private List<Alias> aliases;
+
     /**
      * Constructs a new PropertyInfo instance with the specified metadata.
      *
@@ -102,6 +108,17 @@ public class PropertyInfo implements Serializable {
         this.type = type;
         this.ownerClass = ownerClass;
         this.accessMode = accessMode;
+        this.aliases = AliasResolver.extractAliases(type);
+    }
+
+    /**
+     * Retrieves a list of PropertyInfo objects for all properties of the specified class.
+     *
+     * @param aClass the class to inspect
+     * @return a list of PropertyInfo objects
+     */
+    public static List<PropertyInfo> getProperties(Class<?> aClass) {
+        return BeanUtils.getPropertiesInfo(aClass);
     }
 
     /**
@@ -303,7 +320,7 @@ public class PropertyInfo implements Serializable {
      * Returns the annotation of the specified type present on the property or its getter method, or null if not found.
      *
      * @param annotationClass the annotation class to retrieve
-     * @param <A> the annotation type
+     * @param <A>             the annotation type
      * @return the annotation instance, or null if not present
      */
     public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
@@ -331,5 +348,34 @@ public class PropertyInfo implements Serializable {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Returns the list of {@link Alias} annotations associated with this property.
+     *
+     * @return the list of aliases
+     */
+    public List<Alias> getAliases() {
+        return aliases;
+    }
+
+    /**
+     * Retrieves the value of this property from the given source object.
+     *
+     * @param source the object from which to retrieve the property value
+     * @return the value of the property
+     */
+    public Object getValue(Object source) {
+        return BeanUtils.getFieldValue(name, source);
+    }
+
+    /**
+     * Sets the value of this property on the given target object.
+     *
+     * @param target the object on which to set the property value
+     * @param value  the value to set
+     */
+    public void setValue(Object target, Object value) {
+        BeanUtils.setFieldValue(name, target, value);
     }
 }
