@@ -16,9 +16,18 @@
  */
 package my.company;
 
+import tools.dynamia.commons.Alias;
+import tools.dynamia.commons.AliasSet;
+
+@Alias(value = "dummy_entity", scope = "test")
 public class Dummy {
 
+    @Alias("nombre")
     private String name;
+    @AliasSet({
+            @Alias(value = "edad", locale = "es"),
+            @Alias(value = "dummy_age", scope = "dto")
+    })
     private int age;
 
     public Dummy() {
