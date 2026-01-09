@@ -34,6 +34,10 @@ public class MessageEvent<T extends Message> {
         this(message, null, null);
     }
 
+    public MessageEvent(T message, String topic) {
+        this(message, topic, null);
+    }
+
     public MessageEvent(T message, String topic, String callback) {
         this(message, topic, callback, Instant.now());
     }
