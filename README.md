@@ -6,11 +6,6 @@
 [![DynamiaTools Documentation](https://img.shields.io/badge/DynamiaTools-Documentation-orange)](https://dynamia.tools/getting-started/)
 
 
-
-<p align="center">
-  <img src="https://dynamia.tools/_astro/dynamia-tools-splash.B183ReOk_Z1w9UUh.webp" alt="Dynamia Tools Logo" width="100"/>
-</p>
-
 <h1 align="center">DynamiaTools</h1>
 DynamiaTools is a cutting-edge full-stack Java 17+ framework designed for building powerful enterprise web applications, harnessing the strength of Spring Boot 3 and the elegance of ZK 10. 
 
