@@ -16,7 +16,6 @@
  */
 package tools.dynamia.integration.ms;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import tools.dynamia.commons.StringUtils;
@@ -54,7 +53,7 @@ public class SpringApplicationEventsMessageService implements MessageService {
     private final Map<String, MessageChannel> channels = new ConcurrentHashMap<>();
     private final Map<String, Map<String, List<MessageListener<?>>>> listeners = new ConcurrentHashMap<>();
 
-    @Autowired
+
     public SpringApplicationEventsMessageService(ApplicationEventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
     }
