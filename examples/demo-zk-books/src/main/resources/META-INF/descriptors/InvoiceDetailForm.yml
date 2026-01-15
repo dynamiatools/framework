@@ -1,0 +1,12 @@
+view: form
+beanClass: mybookstore.domain.InvoiceDetail
+autofields: false
+
+fields:
+  book:
+  book.price:
+    label: Price
+    component: label
+    params:
+      converter: converters.Currency
+  quantity:

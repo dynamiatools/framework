@@ -1,0 +1,20 @@
+view: form
+beanClass: mybookstore.domain.Category
+autofields: false
+
+fields:
+  name:
+  description:
+  parent:
+    params:
+      placeholder: (optional)
+  tags:
+    component: crudview
+    params:
+      height: 200px
+      inplace: true
+
+
+
+layout:
+  columns: 1

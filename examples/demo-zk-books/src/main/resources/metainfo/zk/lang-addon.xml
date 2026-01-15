@@ -1,0 +1,13 @@
+<language-addon>
+    <addon-name>mybooks</addon-name>
+    <language-name>xul/html</language-name>
+
+    <stylesheet href="/static/css/books.css" type="text/css"/>
+
+    <!-- Include Dynamia Tools WebSocket JS -->
+    <javascript src="/static/dynamia-tools/js/zk/dynamia-tools-ws.js"/>
+
+
+
+
+</language-addon>

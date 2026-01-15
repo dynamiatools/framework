@@ -1,0 +1,10 @@
+<zk>
+    <config-name>DynamiaTools</config-name>
+    <desktop-config>
+
+    </desktop-config>
+
+    <session-config>
+        <timeout-uri>/</timeout-uri>
+    </session-config>
+</zk>

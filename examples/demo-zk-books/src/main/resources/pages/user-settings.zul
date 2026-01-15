@@ -1,0 +1,30 @@
+<zk xmlns:n="native">
+
+    <div sclass="container-fluid" viewModel="@id('vm') @init('mybookstore.viewmodel.UserSettingsViewModel')">
+
+
+        <n:h1>User Settings</n:h1>
+
+
+        <div>
+            <div>
+                <label value="Locale"/>
+                <localebox selected="@bind(vm.locale)"/>
+                <button label="Apply" onClick="@command('applyLocale')"/>
+            </div>
+            <div>
+                <label value="TimeZone"/>
+                <timezonebox selected="@bind(vm.timeZone)"/>
+                <button label="Apply" onClick="@command('applyTimeZone')"/>
+            </div>
+            <div>
+                <label value="Select new Skin"/>
+                <skincombobox selected="@bind(vm.skin)"/>
+                <button label="Apply" onClick="@command('apply')"/>
+            </div>
+        </div>
+
+
+    </div>
+
+</zk>

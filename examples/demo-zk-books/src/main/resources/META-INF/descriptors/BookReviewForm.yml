@@ -1,0 +1,17 @@
+view: form
+beanClass: mybookstore.domain.BookReview
+autofields: false
+
+fields:
+  user:
+    params:
+      span: 4
+  comment:
+    params:
+      height: 100px
+      multiline: true
+      span: 4
+  stars:
+
+layout:
+  columns: 4

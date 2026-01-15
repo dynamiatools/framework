@@ -1,0 +1,33 @@
+view: table
+beanClass: mybookstore.domain.InvoiceDetail
+autofields: false
+
+fields:
+  book:
+    component: coollabel
+    params:
+      showImage: false
+      bindings:
+        title: book.title
+        subtitle: book.category
+
+
+  book.price:
+    label: Price
+    params:
+      converter: converters.Currency
+      header:
+        align: right
+  quantity:
+    params:
+      footer:
+        function: sum
+
+
+  subtotal:
+    params:
+      converter: converters.Currency
+      header:
+        align: right
+      footer:
+        function: sum

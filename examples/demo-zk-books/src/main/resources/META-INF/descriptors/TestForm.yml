@@ -1,0 +1,24 @@
+view: form
+device: tablet
+
+fields:
+  add:
+    label: adsdad
+    component: textbox
+
+
+params:
+  enumColors:
+    name: estado
+    colors:
+      dasasd: asdas
+      asdas: asdas
+
+
+
+
+
+
+
+
+

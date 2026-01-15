@@ -1,0 +1,53 @@
+view: form
+beanClass: mybookstore.domain.Book
+autofields: false
+customizer: mybookstore.customizers.BookFormViewCustomizer
+
+fields:
+  title:
+    params:
+      span: 2
+  category:
+  isbn:
+  year:
+  publishDate:
+    component: dateselector
+  onSale:
+  buyDate:
+  price:
+    params:
+      format: $###,###
+  sinopsys:
+    params:
+      span: 4
+      multiline: true
+      height: 80px
+  discount:
+    params:
+      constraint: "min 0 max 100"
+
+  bookCover:
+    params:
+      imageOnly: true
+  preview:
+    component: entityfileImage
+    params:
+      thumbnail: true
+      bindings:
+        value: bookCover
+
+  reviews:
+    component: crudview
+
+
+  salePrice:
+    params:
+      format: $###,###
+
+groups:
+  details:
+    label: Book Details
+    fields: [ buyDate, price, reviews, salePrice ]
+
+layout:
+  columns: 4

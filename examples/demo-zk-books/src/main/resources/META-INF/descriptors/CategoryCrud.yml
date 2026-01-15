@@ -1,0 +1,4 @@
+view: crud
+beanClass: mybookstore.domain.Category
+dataSetView: tree
+parentName: parent
