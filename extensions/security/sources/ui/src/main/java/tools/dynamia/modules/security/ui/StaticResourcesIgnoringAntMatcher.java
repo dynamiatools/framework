@@ -14,34 +14,25 @@
 
 package tools.dynamia.modules.security.ui;
 
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import tools.dynamia.modules.security.IgnoringSecurityMatcher;
-import tools.dynamia.modules.security.SecurityConfigurationInterceptor;
-
-import java.util.stream.Stream;
 
 /**
  * @author Mario Serrano Leones
  */
 @Component
-public class StaticResourcesIgnoringAntMatcher implements IgnoringSecurityMatcher, SecurityConfigurationInterceptor {
+public class StaticResourcesIgnoringAntMatcher implements IgnoringSecurityMatcher {
+
 
     @Override
     public String[] matchers() {
         return new String[]{
-                "/login", "/login/recovery", "/styles/**", "/css/**", "/images/**", "/fonts/**", "/img/**", "/js/**", "/assets/**", "/static/**",
-                "/storage/**", "/*.ico", "/favicon.ico", "/ws-commands/**", "/ws-commands", "/*.png", "/*.svg", "/root/**", "/zkcomet/**", "/zkwm/**",
-                "/*.manifest", "/*.webmanifest", "/static/*.png", "/static/*.ico", "/web/**", "/zkau/**", "/zkau"
+                "/zkau/**", "/zkau", "/static/**", "/storage/**",
+                "/styles/**", "/css/**", "/images/**", "/fonts/**", "/img/**", "/js/**", "/assets/**",
+                "/*.ico", "/favicon.ico", "/ws-commands/**", "/ws-commands", "*.png", "*.svg", "/root/**",
+                "/*.manifest", "/*.webmanifest", "*.css", "*.js", "/static/*.ico", "*.jpg", "*.jpeg", "*.ttf", "*.woff", "*.woff2"
         };
     }
 
-    @Override
-    public void configure(WebSecurity web) {
-        RequestMatcher[] ignoreMatches = Stream.of("/zkau", "/zkau/**", "/zkcomet/**", "/zkwm/**", "/web/**", "/upload", "/static/**")
-                .map(AntPathRequestMatcher::antMatcher).toArray(RequestMatcher[]::new);
-        web.ignoring().requestMatchers(ignoreMatches);
-    }
+
 }
