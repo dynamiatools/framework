@@ -18,15 +18,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import jakarta.persistence.Cacheable;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Index;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.BatchSize;
@@ -40,11 +32,16 @@ import tools.dynamia.domain.util.BasicEntityJsonDeserializer;
 import tools.dynamia.domain.util.BasicEntityJsonSerializer;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.domain.util.QueryBuilder;
+import tools.dynamia.integration.Containers;
 import tools.dynamia.modules.entityfile.domain.EntityFile;
 import tools.dynamia.modules.saas.api.AccountAware;
+import tools.dynamia.modules.security.services.JWTService;
+import tools.dynamia.modules.security.services.UserService;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -99,6 +96,11 @@ public class User extends BaseEntity implements UserDetails, AccountAware {
 
     @Transient
     private List<GrantedAuthority> grantedAuthorities;
+
+    public static User load(Long accountId, Long userId) {
+        UserService service = Containers.get().findObject(UserService.class);
+        return service.getUsuarioById(accountId, userId);
+    }
 
     private void initProfilesCache() {
         if (grantedAuthorities == null && getId() != null) {
@@ -363,5 +365,15 @@ public class User extends BaseEntity implements UserDetails, AccountAware {
     @Override
     public void setAccountId(Long accountId) {
         this.accountId = accountId;
+    }
+
+    public String generateJWTToken(Duration expiration) {
+        JWTService jwtService = Containers.get().findObject(JWTService.class);
+        if (jwtService != null) {
+            return jwtService.generateToken(getUsername(), null,
+                    Map.of("act_id", getAccountId(),
+                            "usr_id", getId()), expiration);
+        }
+        return null;
     }
 }
