@@ -17,7 +17,6 @@
 package tools.dynamia.app.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,13 +36,12 @@ import java.util.Map;
  * Provides handlers for navigation errors, general exceptions, and error endpoints.
  * Returns appropriate views and error information for UI clients.
  * <p>
- * Implements {@link ErrorController} for integration with Spring Boot error handling.
- *
+
  * @author Mario A. Serrano Leones
  * @since 2023
  */
 @Controller
-public class GlobalExceptionController implements ErrorController {
+public class GlobalExceptionController  {
 
     /**
      * Logger for error and exception handling.

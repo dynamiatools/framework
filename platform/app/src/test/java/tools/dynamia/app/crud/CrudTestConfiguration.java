@@ -1,7 +1,7 @@
 package tools.dynamia.app.crud;
 
 import jakarta.persistence.EntityManagerFactory;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
