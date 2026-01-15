@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+
+
+<!--
+  ~ Copyright (c) 2009 - 2021 Dynamia Soluciones IT SAS  All Rights Reserved
+  ~
+  ~ Todos los Derechos Reservados  2009 - 2021
+  ~
+  ~ Este archivo es propiedad de Dynamia Soluciones IT NIT 900302344-1 en Colombia / Sur America,
+  ~ esta estrictamente prohibida su copia o distribución sin previa autorización del propietario.
+  ~ Puede contactarnos a info@dynamiasoluciones.com o visitar nuestro sitio web
+  ~ https://www.dynamiasoluciones.com
+  ~
+  ~ Autor: Ing. Mario Serrano Leones <mario@dynamiasoluciones.com>
+  -->
+<zk>
+    <window vflex="1"
+            viewModel="@id('vm') @init('tools.dynamia.modules.security.ui.vm.AsignedUserProfileVM')">
+
+        <tabbox vflex="1">
+            <tabs>
+                <tab label="Profiles"/>
+                <tab label="Added"/>
+            </tabs>
+            <tabpanels>
+                <tabpanel>
+                    <listbox vflex="1" hflex="1" model="@load(vm.profiles)">
+                        <listhead>
+                            <listheader/>
+                            <listheader width="40px" align="center"/>
+                        </listhead>
+                        <template name="model" var="p">
+                            <listitem>
+                                <listcell label="@load(p.name)"/>
+
+                                <listcell>
+                                    <a onClick="@command('addProfile', profile=p)" tooltiptext="Add"
+                                       iconSclass="fa fa-angle-right" sclass="btn btn-primary btn-sm"/>
+                                </listcell>
+                            </listitem>
+                        </template>
+                    </listbox>
+                </tabpanel>
+                <tabpanel>
+                    <listbox vflex="1" hflex="1" model="@load(vm.model.profiles)">
+                        <listhead>
+                            <listheader/>
+                            <listheader width="40px" align="center"/>
+                        </listhead>
+                        <template name="model" var="p">
+                            <listitem>
+                                <listcell label="@load(p.profile.name)"/>
+
+                                <listcell>
+                                    <a onClick="@command('removeProfile', profile=p)" tooltiptext="Remove"
+                                       iconSclass="fa fa-angle-left" sclass="btn btn-danger btn-sm"/>
+                                </listcell>
+                            </listitem>
+                        </template>
+                    </listbox>
+                </tabpanel>
+            </tabpanels>
+        </tabbox>
+
+        <a label="Save" onClick="@command('save')" sclass="btn btn-success"/>
+
+    </window>
+</zk>

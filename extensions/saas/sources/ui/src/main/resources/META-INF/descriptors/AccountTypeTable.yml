@@ -1,0 +1,37 @@
+view: table
+beanClass: tools.dynamia.modules.saas.domain.AccountType
+autofields: false
+
+fields:
+  reference:
+  name:
+  publicName:
+  description:
+  internalDescription:
+  periodicity:
+  price:
+    params:
+      header:
+        align: right
+      converter: converters.Currency
+  additionalUserPrice:
+    label: User Price
+    params:
+      header:
+        align: right
+      converter: converters.Currency
+  maxUsers:
+  active:
+  paymentRequired:
+    label: Pay
+  allowAdditionalUsers:
+    label: Add User
+  allowedOverdueDays:
+  publicType:
+    label: Public
+  printingSupport:
+  trial:
+  trialDays:
+params:
+  orderBy: name
+

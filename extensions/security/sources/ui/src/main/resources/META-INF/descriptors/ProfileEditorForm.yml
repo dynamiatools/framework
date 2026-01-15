@@ -1,0 +1,6 @@
+view: form
+id: profilelEditorForm
+autofields: false
+
+params:
+  customView: classpath:/zk/security/profiles/new.zul

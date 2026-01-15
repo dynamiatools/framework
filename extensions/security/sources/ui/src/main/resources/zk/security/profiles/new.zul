@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2009 - 2021 Dynamia Soluciones IT SAS  All Rights Reserved
+  ~
+  ~ Todos los Derechos Reservados  2009 - 2021
+  ~
+  ~ Este archivo es propiedad de Dynamia Soluciones IT NIT 900302344-1 en Colombia / Sur America,
+  ~ esta estrictamente prohibida su copia o distribución sin previa autorización del propietario.
+  ~ Puede contactarnos a info@dynamiasoluciones.com o visitar nuestro sitio web
+  ~ https://www.dynamiasoluciones.com
+  ~
+  ~ Autor: Ing. Mario Serrano Leones <mario@dynamiasoluciones.com>
+  -->
+
+<zk>
+
+    <window xmlns="http://www.zkoss.org/2005/zul"
+            viewModel="@id('vm') @init('tools.dynamia.modules.security.ui.vm.ProfileCrudVM')" vflex="1">
+
+        <borderlayout vflex="1">
+            <north>
+                <div>
+                    <grid>
+                        <columns>
+                            <column width="90px"/>
+                            <column/>
+                            <column width="90px"/>
+                            <column/>
+                        </columns>
+                        <rows>
+                            <row>
+                                <label value="Name"/>
+                                <textbox value="@bind(vm.model.name)" hflex="1"/>
+                                <label value="Description"/>
+                                <textbox value="@bind(vm.model.description)" hflex="1"/>
+                            </row>
+                        </rows>
+                    </grid>
+                </div>
+            </north>
+
+            <west width="400px" splittable="true" title="Permissions">
+                <tree vflex="true" hflex="true" model="@load(vm.treeModel)"
+                      selectedItem="@bind(vm.selectedItem)">
+
+                    <template name="model" var="p">
+                        <treeitem>
+                            <treerow>
+                                <treecell>
+                                    <iconimage src="@load(p.data.icon)"/>
+                                    <label value="@load(p)"/>
+                                </treecell>
+
+                            </treerow>
+                        </treeitem>
+                    </template>
+                </tree>
+
+            </west>
+            <center title="Asigned Permissions">
+                <listbox id="permisos" vflex="true" width="100%" model="@load(vm.permissions)"
+                         selectedItem="@bind(vm.selectedPermission)">
+                    <listhead>
+                        <listheader label="Description"/>
+                        <listheader label="Value"/>
+                        <listheader label="Type" width="200px"/>
+                        <listheader width="40px"/>
+                    </listhead>
+                    <template name="model" var="p">
+                        <listitem>
+                            <listcell label="@load(p.description)" style="@load(p.levelStyle)"/>
+                            <listcell label="@load(p.value)"/>
+                            <listcell label="@load(p.type)"/>
+                            <listcell>
+                                <button onClick="@command('removeAccessPermission', permission=p)"
+                                        iconSclass="fa fa-times"
+                                        zclass="btn btn-danger btn-sm"/>
+                            </listcell>
+                        </listitem>
+                    </template>
+                </listbox>
+            </center>
+            <south>
+                <div style="padding: 10px">
+                    <hlayout style="float:left">
+                        <button label=" Add Permission" onClick="@command('addAccessPermission')"
+                                zclass="btn btn-primary"/>
+                    </hlayout>
+                    <hlayout style="float:right">
+                        <button label="Save" zclass="btn btn-success" onClick="@command('save')"/>
+                        <button label="Exit" zclass="btn btn-danger" onClick="@command('close')"/>
+                    </hlayout>
+                </div>
+            </south>
+
+        </borderlayout>
+
+    </window>
+</zk>

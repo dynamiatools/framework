@@ -1,0 +1,20 @@
+view: table
+beanClass: tools.dynamia.modules.saas.domain.AccountTypeRestriction
+autofields: false
+
+fields:
+  name:
+  key:
+  active:
+  values:
+    params:
+      span: 4
+      multiline: true
+      height: 80px
+
+  description:
+    params:
+      span: 4
+
+layout:
+  columns: 4

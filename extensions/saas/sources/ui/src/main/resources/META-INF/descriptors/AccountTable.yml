@@ -1,0 +1,138 @@
+view: table
+beanClass: tools.dynamia.modules.saas.domain.Account
+autofields: false
+
+fields:
+
+  account:
+    component: coollabel
+    params:
+      header:
+        width: 300px
+      bindings:
+        title: name
+        subtitle: email
+        description: type
+        imageURL: logoURL
+        tooltiptext: customerInfo
+
+  profile:
+
+  status:
+    component: enumlabel
+    params:
+      sclassPrefix: account
+      header:
+        align: center
+        width: 80px
+
+  balance:
+    params:
+      converter: converters.Currency
+      header:
+        align: right
+        sclass: green color-white
+      cell:
+        sclass: green lighten-5
+      footer:
+        function: sum
+  subdomain:
+  parentAccount:
+    label: Parent
+  category:
+  reseller:
+  channel:
+  freeTrialLeft:
+    label: Free Trial
+  remote:
+    params:
+      header:
+        width: 60px
+
+  statusDate:
+    params:
+      converter: converters.Date
+
+  creationDate:
+    label: Created
+    params:
+      converter: converters.Date
+      header:
+        width: 80px
+  users:
+    params:
+      header:
+        align: center
+  activedUsers:
+    params:
+      header:
+        align: center
+  paymentDay:
+    params:
+      header:
+        align: center
+  lastInvoiceDate:
+    params:
+      converter: converters.Date
+  lastPaymentDate:
+    params:
+      converter: converters.Date
+
+  lastChargeDate:
+    params:
+      converter: converters.Date
+
+
+  expirationDate:
+    label: Expire
+    params:
+      converter: converters.Date
+
+  type.price:
+    label: Base Payment
+    params:
+      converter: converters.Currency
+      header:
+        align: right
+      footer:
+        function: sum
+        functionConverter: converters.Currency
+  paymentValue:
+    params:
+      converter: converters.Currency
+      header:
+        align: right
+      footer:
+        function: sum
+        functionConverter: converters.Currency
+
+  fixedPaymentValue:
+    params:
+      converter: converters.Currency
+      header:
+        align: right
+      footer:
+        function: sum
+        functionConverter: converters.Currency
+  discount:
+    params:
+      converter: converters.Currency
+      header:
+        align: right
+  discountExpire:
+    params:
+      converter: converters.Date
+  globalMessage:
+    params:
+      header:
+        width: 200px
+  showGlobalMessage:
+    label: Show GM
+  id:
+    params:
+      header:
+        width: 30px
+
+
+params:
+  pageSize: 50

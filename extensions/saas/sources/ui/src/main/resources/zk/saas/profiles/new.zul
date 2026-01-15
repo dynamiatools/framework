@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver" ?>
+
+<!--
+  ~ Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+  ~ Colombia / South America
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<zk>
+    <window id="per" apply="${accountProfile}" hflex="1" vflex="1">
+
+        <borderlayout>
+            <north>
+                <div>
+                    <grid>
+                        <columns>
+                            <column width="90px"/>
+                            <column/>
+                            <column width="90px"/>
+                            <column/>
+                        </columns>
+                        <rows>
+                            <row>
+                                <label value="Nombre"/>
+                                <textbox id="name" hflex="1"/>
+                                <label value="Descripcion"/>
+                                <textbox id="description" hflex="1"/>
+                            </row>
+                        </rows>
+                    </grid>
+                </div>
+            </north>
+            <west width="300px" splittable="true" title="Modulos">
+                <listbox id="modules" vflex="1" hflex="1"/>
+            </west>
+            <center title="Modulos Asignados">
+                <listbox id="restrictions" vflex="true" width="100%" emptyMessage="No modules added">
+                    <listhead>
+                        <listheader label="Nombre"/>
+                        <listheader label="Valor"/>
+                        <listheader label="Tipo" width="200px"/>
+                    </listhead>
+                    <template name="model">
+                        <listitem>
+                            <listcell label="${each.name}"/>
+                            <listcell label="${each.value}"/>
+                            <listcell label="${each.type}"/>
+                        </listitem>
+                    </template>
+                </listbox>
+            </center>
+            <south>
+                <div style="margin-top: 4px">
+                    <hlayout style="float:left">
+                        <a id="add" label="Asignar Permiso" sclass="btn btn-primary" iconSclass="fa fa-arrow-right"/>
+                        <a id="remove" label=" Remover Permiso" sclass="btn btn-danger" iconSclass="fa fa-times"/>
+                    </hlayout>
+                    <a style="float:right" id="save" label="Save" sclass="btn btn-success" iconSclass="fa fa-check"/>
+                </div>
+            </south>
+
+        </borderlayout>
+
+    </window>
+</zk>

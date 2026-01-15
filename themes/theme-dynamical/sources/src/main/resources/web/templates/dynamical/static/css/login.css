@@ -1,0 +1,29 @@
+.login-page {
+	background-color: #f9f9f9;
+}
+
+.login-page .logo {
+	padding: 4px;
+	margin: 10px;
+}
+
+.login-page .logo .imglogo {
+	max-height: 45px;
+}
+
+.login-page .login-logo a {
+	color: silver;
+}
+
+input[type=checkbox]:hover {
+	border: 1px solid blue;
+}
+
+input[type=checkbox]:checked+label:before {
+	content: "\2713";
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, .2);
+	font-size: 15px;
+	color: #f3f3f3;
+	text-align: center;
+	line-height: 15px;
+}

@@ -1,0 +1,62 @@
+view: entityfilters
+beanClass: tools.dynamia.modules.saas.domain.Account
+autofields: false
+
+fields:
+  name:
+  identification:
+  subdomain:
+  customDomain:
+  type:
+  accountRegion:
+    label: Region
+  email:
+  adminUsername:
+  status:
+  profile:
+  reseller:
+  channel:
+  type.paymentRequired:
+    label: Payment Required
+  creationDate:
+  category:
+  type.periodicity:
+    label: Periodicity
+  locale:
+    component: localebox
+  timeZone:
+    component: timezonebox
+
+  skin:
+    component: skincombobox
+
+  paymentDay:
+  paymentValue:
+  balance:
+  statusDescription:
+    params:
+      span: 2
+  contact:
+    params:
+      span: 2
+  phoneNumber:
+  mobileNumber:
+  city:
+  country:
+  address:
+    params:
+      span: 2
+  uuid:
+  instanceUuid:
+  requiredInstanceUuid:
+  stats:
+    component: crudview
+  remote:
+  globalMessage:
+    label: Message
+    span: 4
+  showGlobalMessage:
+    label: Show
+
+
+     

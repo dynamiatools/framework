@@ -1,0 +1,3 @@
+view: crud
+beanClass: tools.dynamia.modules.saas.domain.AccountProfile
+formView: accountProfileEditorForm

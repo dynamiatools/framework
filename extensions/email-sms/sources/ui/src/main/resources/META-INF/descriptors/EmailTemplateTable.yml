@@ -1,0 +1,15 @@
+view: table
+beanClass: tools.dynamia.modules.email.domain.EmailTemplate
+autofields: false
+
+
+fields:
+  name:
+  enabled:
+  description:
+  to:
+  replyTo:
+  cc:
+  bcc:
+  sendSMS:
+    label: Send SMS

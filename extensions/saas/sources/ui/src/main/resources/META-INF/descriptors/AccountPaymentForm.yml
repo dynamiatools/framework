@@ -1,0 +1,48 @@
+view: form
+beanClass: tools.dynamia.modules.saas.domain.AccountPayment
+autofields: false
+
+fields:
+  creationDate:
+  creationTime:
+    component: timebox
+  account:
+    params:
+      popupWidth: 200%
+  type:
+    component: label
+  paymentValue:
+    component: label
+    params:
+      converter: converters.Currency
+  paymentMethod:
+    component: combobox
+    params:
+      automodel: true
+  reference:
+  value:
+    params:
+      format: $###,###
+
+  description:
+    params:
+      span: 2
+      multiline: true
+      height: 60px
+
+  paymentMethodDescription:
+    params:
+      span: 2
+      multiline: true
+      height: 60px
+  couponCode:
+  finished:
+
+
+layout:
+  columns: 4
+
+
+
+
+

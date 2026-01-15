@@ -1,0 +1,38 @@
+view: table
+beanClass: tools.dynamia.modules.security.domain.User
+autofields: false
+
+fields:
+
+  users:
+    component: coollabel
+    params:
+      noImagePath: /static/dynamia-tools/images/no-user-photo.jpg
+
+      bindings:
+        title: username
+        subtitle: fullname
+        description: email
+        imageURL: photo.storedEntityFile.thumbnailUrl
+
+  enabled:
+    params:
+      header:
+        align: center
+        width: 60px
+
+
+  creationDate:
+    params:
+      converter: converters.Date
+
+  lastUpdate:
+    params:
+      converter: converters.Date
+
+params:
+  orderBy: enabled desc,username
+  showRowNumber: true
+
+
+

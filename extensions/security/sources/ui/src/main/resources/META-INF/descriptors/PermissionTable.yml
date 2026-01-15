@@ -1,0 +1,15 @@
+view: table
+beanClass: tools.dynamia.modules.security.domain.Permission
+autofields: false
+
+fields:
+  permissions:
+    params:
+      bindings:
+        value: description
+        style: levelStyle
+  value:
+  type:
+    params:
+      header:
+        width: 100px

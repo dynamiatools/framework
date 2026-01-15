@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+
+
+<!--
+  ~ Copyright (c) 2009 - 2021 Dynamia Soluciones IT SAS  All Rights Reserved
+  ~
+  ~ Todos los Derechos Reservados  2009 - 2021
+  ~
+  ~ Este archivo es propiedad de Dynamia Soluciones IT NIT 900302344-1 en Colombia / Sur America,
+  ~ esta estrictamente prohibida su copia o distribución sin previa autorización del propietario.
+  ~ Puede contactarnos a info@dynamiasoluciones.com o visitar nuestro sitio web
+  ~ https://www.dynamiasoluciones.com
+  ~
+  ~ Autor: Ing. Mario Serrano Leones <mario@dynamiasoluciones.com>
+  -->
+
+<window id="user" viewModel="@id('vm') @init('tools.dynamia.modules.security.ui.vm.UserProfileVM')">
+
+    <div sclass="container">
+
+        <card title="${vm.user.fullname} (${vm.user.username})" color="primary" collapsable="true">
+            <viewer descriptorId="userProfile" value="@load(vm.user)"/>
+        </card>
+
+
+        <card title="Credentials" color="primary" collapsable="true">
+            <div sclass="col-md-12 form-group">
+                <checkbox checked="@bind(vm.resetPassword)" label="Reset Password"/>
+            </div>
+
+            <div sclass="col-md-12 form-group">
+                <label value="Current Password"/>
+                <textbox zclass="form-control" value="@bind(vm.currentPassword)"
+                         readonly="@bind(not vm.resetPassword)" type="password"/>
+            </div>
+
+            <div sclass="col-md-12 form-group">
+                <label value="New Password"/>
+                <textbox zclass="form-control" value="@bind(vm.newPassword)" type="password"
+                         readonly="@bind(not vm.resetPassword)"/>
+            </div>
+
+            <div sclass="col-md-12 form-group">
+                <label value="Confirm New Password"/>
+                <textbox zclass="form-control" value="@bind(vm.newPassword2)" type="password"
+                         readonly="@bind(not vm.resetPassword)"/>
+            </div>
+        </card>
+
+
+        <card title="Assigned Profiles" color="primary" collapsable="true">
+            <viewer descriptorId="profilesSimple" value="@load(vm.profiles)" height="300px"/>
+        </card>
+
+        <div id="acciones" sclass="col-md-12" style="margin-top: 10px">
+            <button zclass="btn btn-success" label="Save" iconSclass="fa fa-user"
+                    onClick="@command('save')"/>
+        </div>
+    </div>
+</window>

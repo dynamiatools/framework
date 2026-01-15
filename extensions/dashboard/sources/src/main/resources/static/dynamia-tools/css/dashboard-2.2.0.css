@@ -1,0 +1,115 @@
+/*
+ * Copyright (C)  2020. Dynamia Soluciones IT S.A.S - NIT 900302344-1
+ * Colombia - South America
+ *  All Rights Reserved.
+ *
+ * This file is free software: you can redistribute it and/or modify it  under the terms of the
+ *  GNU Lesser General Public License (LGPL v3) as published by the Free Software Foundation,
+ *   either version 3 of the License, or (at your option) any later version.
+ *
+ *  This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ *   without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *   See the GNU Lesser General Public License for more details. You should have received a copy of the
+ *   GNU Lesser General Public License along with this file.
+ *   If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
+
+
+/* 
+    Created on : 15/06/2016, 01:50:45 PM
+    Author     : mario
+*/
+.dashboard {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.dashboard .dashboard-widget {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+}
+
+.dashboard .dashboard-widget .z-window {
+    background-color: transparent;
+}
+
+.dashboard .dashboard-widget .z-window-header {
+    background: white;
+    text-align: left;
+}
+
+.dashboard .dashboard-widget .z-window-header .z-caption-content {
+    padding-left: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    color: #053b5a;
+}
+
+.dashboard .dashboard-widget .z-window-content {
+    background: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dashboard .dashboard-widget .z-progressmeter {
+    height: 7px;
+}
+
+.dashboard .dashboard-widget .default-border {
+    background-color: white;
+    border: 1px solid #ececec;
+    border-radius: 4px;
+}
+
+.dashboard .dashboard-widget .padding10 {
+    padding: 10px;
+}
+
+.dashboard .dashboard-widget .default-height {
+    height: 300px;
+    overflow: auto;
+}
+
+.dashboard .dashboard-widget .date {
+    color: #999;
+    font-style: italic;
+}
+
+.dashboard .dashboard-widget .panel {
+    margin-bottom: 0 !important;
+}
+
+.dashboard .dashboard-widget .panel-body {
+    padding: 3px;
+}
+
+.dashboard .dashboard-widget .panel-heading {
+    color: white !important;
+    font-weight: 700;
+    border-radius: 0;
+    border: none !important;
+    padding: 6px 10px;
+}
+
+.dashboard .dashboard-widget .panel-primary > .panel-heading {
+    background-color: #3bafda;
+}
+
+.dashboard .dashboard-widget .panel-inverse > .panel-heading {
+    background-color: #4c5667;
+}
+
+.dashboard .dashboard-widget .panel-danger > .panel-heading {
+    background-color: #ef5350;
+}
+
+.dashboard .dashboard-widget .panel-success > .panel-heading {
+    background-color: #00C851;
+}
+
+.dashboard .dashboard-widget .panel-warning > .panel-heading {
+    background-color: #ffaa00;
+}

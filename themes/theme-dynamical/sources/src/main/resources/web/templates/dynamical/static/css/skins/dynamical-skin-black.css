@@ -1,0 +1,46 @@
+/*
+background-color: #808080
+color: 
+*/
+
+.skin-black .bg-body{
+    background: #808080 !important;
+}
+
+.skin-black .z-listitem.z-listitem-selected > .z-listcell,
+.skin-black .z-listitem.z-listitem-selected:hover > .z-listcell,
+.skin-black .z-comboitem-selected,
+.skin-black .z-calendar-selected,
+.skin-black .z-progressmeter-image {
+    border-color: #808080 !important;
+    background: #808080 !important;
+}
+
+.baseBackgroundColor {
+    background-color: #808080
+}
+
+.baseColor {
+    color: #808080
+}
+
+.skin-black .content-wrapper {
+    background: #dedede !important;
+}
+
+.skin-black .table-view .z-listheader,
+.skin-black .table-view .z-listbox-header,
+.skin-black .tree-view .z-treecol,
+.skin-black .tree-view .z-tree-header {
+    background: #324348 !important;
+}
+
+.skin-black .table-view .z-listheader-hover,
+.skin-black .tree-view .z-treecol-hover {
+    background: #343434 !important;
+}
+
+.skin-black .table-view .z-listheader-content,
+.skin-black .tree-view .z-treecol-content {
+    color: white !important;
+}

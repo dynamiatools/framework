@@ -1,0 +1,10 @@
+view: table
+beanClass: tools.dynamia.modules.saas.domain.AccountRegion
+autofields: false
+
+fields:
+  name:
+  code:
+  currency:
+  timeZone:
+  locale:

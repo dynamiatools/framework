@@ -1,0 +1,27 @@
+view: table
+beanClass: tools.dynamia.modules.email.domain.EmailAccount
+autofields: false
+
+fields:
+  preferred:
+    label: P
+    description: Preferred Account
+    component: iconimage
+    params:
+      trueIcon: star
+      falseIcon: staroff
+      width: 32px
+
+  name:
+  serverAddress:
+  fromAddress:
+
+  useTTLS:
+    label: TTLS
+
+  useSSL:
+    label: SSL
+  notifications:
+
+  smsRegion:
+    label: Region

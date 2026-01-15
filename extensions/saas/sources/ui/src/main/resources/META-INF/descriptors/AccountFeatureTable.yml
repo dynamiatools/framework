@@ -1,0 +1,15 @@
+view: table
+beanClass: tools.dynamia.modules.saas.domain.AccountFeature
+autofields: false
+
+fields:
+  name:
+    params:
+      header:
+        width: 200px
+  enabled:
+    params:
+      writable: true
+
+params:
+  writable: true

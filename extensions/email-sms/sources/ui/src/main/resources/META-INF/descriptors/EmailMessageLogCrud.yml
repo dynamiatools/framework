@@ -1,0 +1,6 @@
+view: crud
+beanClass: tools.dynamia.modules.email.domain.EmailMessageLog
+autofields: false
+
+params:
+  readOnly: true

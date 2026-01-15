@@ -1,0 +1,51 @@
+view: tree
+beanClass: tools.dynamia.modules.entityfile.domain.EntityFile
+messages: tools.dynamia.modules.entityfile
+autofields: false
+
+sortFields: [ name,creationDate,creationTime,creator,sizeAsString,description ]
+
+fields:
+
+  name:
+    label: Nombre
+    params:
+      header:
+        width: 460px
+
+  creationDate:
+    label: Fecha
+    params:
+      converter: converters.Date
+      header:
+        width: 100px
+
+
+  creationTime:
+    label: Hora
+    params:
+      converter: converters.Time
+      header:
+        width: 100px
+
+  creator:
+    label: Autor
+
+  sizeAsString:
+    label: Tam
+    params:
+
+      header:
+        align: right
+        width: 100px
+
+  description:
+    label: Descripcion
+    params:
+      header:
+        width: 400px
+
+
+
+
+

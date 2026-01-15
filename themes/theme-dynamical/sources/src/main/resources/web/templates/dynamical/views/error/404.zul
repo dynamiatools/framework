@@ -1,0 +1,70 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+
+<?page title="${applicationInfo.name} - Page Not found"?>
+
+<?meta charset="utf-8"?>
+<?meta http-equiv="X-UA-Compatible" content="IE=edge"?>
+<?meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"?>
+<?meta name="name" content="${applicationInfo.name}"?>
+<?meta name="description" content="${applicationInfo.description}"?>
+<?meta name="author" content="${applicationInfo.author}"?>
+<?meta name="version" content="${applicationInfo.version}"?>
+<?meta name="build" content="${applicationInfo.build}"?>
+<?meta name="skin" content="${appTemplate.skin.id}"?>
+
+<?link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"?>
+
+<?link href="${contextPath}/static/css/adminlte.min.css?v=5.1.0" rel="stylesheet" type="text/css"?>
+<?link href="${contextPath}/static/css/skins/${appTemplate.skin.filename}?v=5.1.0" rel="stylesheet" type="text/css"?>
+<?link href="${contextPath}/static/css/skins/dynamical-${appTemplate.skin.id}.css?v=5.1.0" rel="stylesheet" type="text/css"?>
+<?link href="${contextPath}/static/css/dynamical.css?v=5.1.0" rel="stylesheet" type="text/css"?>
+<?link href="${contextPath}/static/css/dynamical-mobile.css?v=5.1.0" rel="stylesheet" type="text/css"?>
+<?link href="${contextPath}/static/fonts/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css"?>
+
+<?link rel="shortcut icon" href="${contextPath}/static/favicon.ico"?>
+<?link rel="apple-touch-icon" sizes="180x180" href="${contextPath}/static/apple-touch-icon.png"?>
+<?link rel="icon" type="image/png" sizes="32x32" href="${contextPath}/static/favicon-32x32.png"?>
+<?link rel="icon" type="image/png" sizes="16x16" href="${contextPath}/static/favicon-16x16.png"?>
+
+
+<z:zk xmlns="native" xmlns:z="http://www.zkoss.org/2005/zul">
+
+    <div class="logo">
+        <img src="${appTemplate.logoURL}" class="imglogo img-responsive"
+             title="${applicationInfo.name} - ${accountContext.account.name}"/>
+    </div>
+
+    <div class="login-box m-auto mt-5" style="width: 50%">
+        <div class="login-logo">
+            <a href="${contextPath}">
+                <b>${applicationInfo.name}</b>
+                ${accountContext.account.name}
+            </a>
+        </div>
+        <!-- /.login-logo -->
+        <div class="login-box-body text-center">
+            <div class="card">
+                <div class="card-body">
+
+
+                    <h2>404</h2>
+                    <h3>Pagina No Encontrada</h3>
+                </div>
+            </div>
+        </div>
+        <!-- /.login-box-body -->
+
+    </div>
+    <!-- /.login-box -->
+
+    <script src="${contextPath}/static/js/jquery.min.js"/>
+    <script src="${contextPath}/static/js/bootstrap.min.js"/>
+    <script src="${contextPath}/static/js/adminlte.min.js"/>
+
+
+    <script>
+        $(document).ready(function () {
+            $("body").attr("class", "login-page");
+        });
+    </script>
+</z:zk>

@@ -1,0 +1,24 @@
+view: table
+beanClass: tools.dynamia.modules.importer.ImportStatus
+autofields: false
+
+fields:
+  row:
+    label: Fila
+    params:
+      header:
+        width: 50px
+  message:
+    label: Mensaje
+    params:
+      header:
+        width: "50%"
+  imported:
+    label: Importado
+    params:
+      header:
+        align: center
+  entityName:
+    label: Nombre / Codigo
+  entityId:
+    label: id

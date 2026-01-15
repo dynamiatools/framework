@@ -1,0 +1,11 @@
+view: entitypicker
+beanClass: tools.dynamia.modules.saas.domain.Account
+autofields: false
+
+fields:
+  name:
+  contact:
+  identification:
+  type:
+    params:
+      searcheable: false

@@ -1,0 +1,43 @@
+view: form
+beanClass: tools.dynamia.modules.security.domain.User
+autofields: false
+customizer: tools.dynamia.modules.security.ui.customizer.UserFormViewCustomizer
+
+fields:
+
+  username:
+  password:
+    params:
+      type: password
+
+  fullname:
+  email:
+  phoneNumber:
+  mobileNumber:
+  comments:
+
+  enabled:
+  passwordExpired:
+
+  photo:
+    params:
+      imageOnly: true
+      shared: true
+
+
+
+groups:
+  credentials:
+    fields: [ username,password,enabled,passwordExpired ]
+    icon: lock
+
+  personalInfo:
+    fields: [ fullname, email,phoneNumber, mobileNumber, photo, comments ]
+    icon: user
+
+
+layout:
+  columns: 3
+
+
+

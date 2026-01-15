@@ -1,0 +1,65 @@
+view: config
+id: EntityFileCFG
+messages: tools.dynamia.modules.entityfile
+fields:
+  entityFileStorage:
+    label: Storage
+    component: storagebox
+    params:
+      parameterName: DEFAULT_STORAGE_ID
+      cacheable: true
+  filesLocation:
+    label: Files Location
+    description: Server directory in wich will be saved
+    component: directorybox
+    params:
+      parameterName: LOCAL_FILES_LOCATION
+      cacheable: true
+  reportsLocation:
+    label: Reports Location
+    description: Server directory in wich will loaded
+    component: directorybox
+    params:
+      parameterName: GLOBAL_REPORTS_LOCATION
+      cacheable: true
+  contextPath:
+    component: textbox
+    params:
+      parameterName: LOCAL_CONTEXT_PATH
+      cacheable: true
+  useHttps:
+    label: Use HTTPS for Local Storage
+    component: checkbox
+    params:
+      parameterName: LOCAL_USE_HTTPS
+      cacheable: true
+
+  s3BucketName:
+    label: Bucket Name
+    params:
+      parameterName: AWS_S3_BUCKET
+      cacheable: true
+  s3Region:
+    label: Region
+    params:
+      parameterName: AWS_S3_REGION
+      defaultValue: us-east-1
+      cacheable: true
+  s3User:
+    label: Identity
+    params:
+      parameterName: AWS_ACCESS_KEY_ID
+      cacheable: true
+  s3Secret:
+    label: Secret
+    params:
+      parameterName: AWS_SECRET_KEY
+      cacheable: true
+
+groups:
+  s3:
+    label: Amazon Web Service (S3)
+    fields: [ s3BucketName,s3Region,s3User,s3Secret ]
+
+layout:
+  columns: 4

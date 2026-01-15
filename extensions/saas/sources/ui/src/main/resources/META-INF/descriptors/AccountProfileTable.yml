@@ -1,0 +1,15 @@
+view: table
+beanClass: tools.dynamia.modules.saas.domain.AccountProfile
+autofields: false
+
+fields:
+  name:
+  description:
+  creationDate:
+    params:
+      converter: converters.Date
+  creator:
+
+
+params:
+  orderBy: name

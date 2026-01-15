@@ -1,0 +1,6 @@
+view: form
+id: accountProfileEditorForm
+autofields: false
+
+params:
+  customView: classpath:/zk/saas/profiles/form.zul

@@ -1,0 +1,8 @@
+view: entitypicker
+beanClass: tools.dynamia.modules.security.domain.User
+autofields: false
+
+fields:
+  username:
+  fullname:
+  email:

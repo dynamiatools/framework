@@ -1,0 +1,29 @@
+.baseBackgroundColor {
+    background-color: #367fa9
+}
+
+.baseColor {
+    color: #367fa9
+}
+
+.skin-blue .bg-body{
+    background: #335e86 !important;
+}
+
+.skin-blue .table-view .z-listheader,
+.skin-blue .table-view .z-listbox-header,
+.skin-blue .tree-view .z-treecol,
+.skin-blue .tree-view .z-tree-header {
+    background: #335e86 !important;
+}
+
+.skin-blue .table-view .z-listheader-hover,
+.skin-blue .tree-view .z-treecol-hover {
+    background: #367fa9 !important;
+}
+
+.skin-blue .table-view .z-listheader-content,
+.skin-blue .tree-view .z-treecol-content {
+    color: white !important;
+}
+

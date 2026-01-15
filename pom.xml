@@ -24,13 +24,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>tools.dynamia</groupId>
     <artifactId>tools.dynamia.parent</artifactId>
-    <version>5.4.14</version>
+    <version>26.1</version>
     <packaging>pom</packaging>
     <organization>
         <name>Dynamia Soluciones IT SAS</name>
         <url>https://www.dynamiasoluciones.com</url>
     </organization>
-    <inceptionYear>2009</inceptionYear>
+    <inceptionYear>2026</inceptionYear>
     <url>https://www.dynamia.tools</url>
     <description>Fullstack web framework for java web applicacions</description>
 
@@ -56,26 +56,36 @@
     </scm>
 
     <modules>
-        <module>commons</module>
-        <module>integration</module>
-        <module>navigation</module>
-        <module>actions</module>
-        <module>io</module>
-        <module>templates</module>
+        <!-- Core modules -->
+        <module>platform/core/commons</module>
+        <module>platform/core/integration</module>
+        <module>platform/core/navigation</module>
+        <module>platform/core/actions</module>
+        <module>platform/core/io</module>
+        <module>platform/core/templates</module>
+        <module>platform/core/domain</module>
+        <module>platform/core/domain-jpa</module>
+        <module>platform/core/web</module>
+        <module>platform/core/crud</module>
+        <module>platform/core/reports</module>
+        <module>platform/core/viewers</module>
 
-        <module>domain</module>
-        <module>domain-jpa</module>
+        <!-- Application modules -->
+        <module>platform/app</module>
 
-        <module>crud</module>
-        <module>ui</module>
-        <module>viewers</module>
-        <module>reports</module>
-        <module>web</module>
-        <module>app</module>
+        <!-- UI Modules -->
+        <module>platform/ui/ui-shared</module>
+        <module>platform/ui/zk</module>
 
-        <!-- ZK UI Backend  https://www.zkoss.org -->
-        <module>zk</module>
-        <module>starter</module>
+        <!-- Starters -->
+        <module>platform/starters/zk-starter</module>
+
+        <!-- Extensions -->
+        <module>extensions</module>
+
+        <!-- Themes -->
+        <module>themes</module>
+
     </modules>
 
     <properties>
@@ -87,6 +97,7 @@
         <!-- Web -->
         <zk.version>10.1.0-jakarta</zk.version>
         <dynamia.zk.version>1.1.0</dynamia.zk.version>
+        <aws.version>2.39.5</aws.version>
 
         <!--Reports -->
         <jasperreports.version>6.21.4</jasperreports.version>
@@ -97,6 +108,10 @@
 
         <!--Logging -->
         <slf4j.version>2.0.17</slf4j.version>
+        <junit.version>4.13.2</junit.version>
+        <hsqldb.version>1.8.0.10</hsqldb.version>
+        <oshi.version>6.5.0</oshi.version>
+        <jna.version>5.14.0</jna.version>
 
 
         <java.version>21</java.version>

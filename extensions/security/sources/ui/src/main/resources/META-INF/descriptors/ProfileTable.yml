@@ -1,0 +1,27 @@
+view: table
+beanClass: tools.dynamia.modules.security.domain.Profile
+autofields: false
+
+fields:
+  name:
+  description:
+  internalName:
+
+  creationDate:
+    params:
+      converter: converters.Date
+
+  creationTime:
+    params:
+      converter: converters.Time
+
+
+  lastUpdate:
+  creator:
+  lastUpdater:
+
+params:
+  orderBy: name
+
+
+

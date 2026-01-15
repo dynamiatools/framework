@@ -1,0 +1,5 @@
+view: crud
+beanClass: tools.dynamia.modules.security.domain.UserAccessToken
+controller: tools.dynamia.modules.security.ui.controllers.UserAccessTokenController
+
+

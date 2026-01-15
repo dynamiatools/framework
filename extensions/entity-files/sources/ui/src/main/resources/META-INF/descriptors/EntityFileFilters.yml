@@ -1,0 +1,11 @@
+view: entityfilters
+beanClass: tools.dynamia.modules.entityfile.domain.EntityFile
+messages: tools.dynamia.modules.entityfile
+autofields: false
+
+
+fields:
+    
+    name:
+
+    

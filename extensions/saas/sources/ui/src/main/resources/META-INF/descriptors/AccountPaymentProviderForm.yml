@@ -1,0 +1,22 @@
+view: form
+beanClass: tools.dynamia.modules.saas.domain.AccountPaymentProvider
+autofields: false
+
+fields:
+  name:
+  paymentProcessor:
+    label: Processor
+    component: providerpickerbox
+    params:
+      className: tools.dynamia.modules.saas.AccountPaymentProcessor
+      nameField: name
+      idField: id
+  merchantId:
+  apiKey:
+  apiSecret:
+  serviceURL:
+  testMode:
+  active:
+
+layout:
+  columns: 1

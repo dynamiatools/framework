@@ -1,0 +1,11 @@
+view: form
+beanClass: tools.dynamia.modules.saas.domain.AccountResellerAgent
+fields:
+  name:
+  identification:
+  email:
+  phone:
+
+
+layout:
+  columns: 2

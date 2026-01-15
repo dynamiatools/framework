@@ -1,0 +1,9 @@
+view: form
+beanClass: tools.dynamia.modules.security.domain.UserAccessToken
+autofields: false
+
+fields:
+  tokenName:
+  user:
+  expirationDate:
+  tokenSource:

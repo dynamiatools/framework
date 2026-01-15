@@ -1,0 +1,42 @@
+view: form
+beanClass: tools.dynamia.modules.email.domain.EmailAccount
+autofields: false
+
+fields:
+  name:
+  username:
+
+  password:
+  serverAddress:
+  port:
+  fromAddress:
+  enconding:
+  loginRequired:
+  useTTLS:
+    label: TTLS
+  useSSL:
+    label: SSL
+  notifications:
+
+
+
+  smsEnabled:
+    label: Enabled
+  smsUsername:
+    label: Username
+  smsPassword:
+    label: Password
+  smsRegion:
+    label: Region
+  smsDefaultPrefix:
+    label: Default Prefix
+  smsSenderID:
+    label: Sender ID
+
+groups:
+  sms:
+    label: SMS
+    fields: [smsUsername,smsPassword,smsRegion,smsDefaultPrefix,smsSenderID,smsEnabled]
+
+layout:
+  columns: 4

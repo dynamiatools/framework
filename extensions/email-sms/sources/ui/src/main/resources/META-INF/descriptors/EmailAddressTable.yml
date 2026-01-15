@@ -1,0 +1,17 @@
+view: table
+beanClass: tools.dynamia.modules.email.domain.EmailAddress
+autofields: false
+
+fields:
+  email:
+  tag:
+  sendCount:
+  active:
+  blacklisted:
+  creationDate:
+    params:
+      converter: converters.Date
+  creationTime:
+    params:
+      converter: converters.Time
+  creator:

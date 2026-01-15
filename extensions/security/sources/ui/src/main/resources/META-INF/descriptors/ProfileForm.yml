@@ -1,0 +1,16 @@
+view: form
+beanClass: tools.dynamia.modules.security.domain.Profile
+autofields: false
+
+fields:
+  name:
+  description:
+  permissions:
+    component: crudview
+    params:
+      inplace: true
+      height: 400px
+      span: 2
+
+layout:
+  columns: 2

@@ -1,0 +1,30 @@
+view: table
+beanClass: tools.dynamia.modules.security.domain.UserAccessToken
+autofields: false
+
+fields:
+  tokenName:
+  user:
+    params:
+      header:
+        width: 200px
+  automatic:
+  otp:
+  creationTimestamp:
+    label: Fecha Creacion
+    params:
+      header:
+        width: 150px
+  expirationDate:
+    params:
+      header:
+        width: 150px
+  lastAccess:
+    params:
+      header:
+        width: 150px
+  hits:
+  tokenSource:
+
+
+

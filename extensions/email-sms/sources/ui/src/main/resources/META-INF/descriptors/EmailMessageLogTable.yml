@@ -1,0 +1,39 @@
+view: table
+beanClass: tools.dynamia.modules.email.domain.EmailMessageLog
+autofields: false
+
+fields:
+  to:
+    params:
+      header:
+        width: 200px
+  subject:
+  sended:
+    params:
+      header:
+        width: 100px
+        align: center
+  from:
+    params:
+      header:
+        width: 200px
+  result:
+    params:
+      header:
+        width: 200px
+  notification:
+  additionalAddress:
+    params:
+      header:
+        width: 200px
+  creationDate:
+    params:
+      converter: converters.Date
+      header:
+        width: 120px
+  creationTime:
+    params:
+      converter: converters.Time
+      header:
+        width: 120px
+  creator:

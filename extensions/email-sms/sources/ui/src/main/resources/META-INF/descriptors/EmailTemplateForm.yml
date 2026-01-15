@@ -1,0 +1,36 @@
+view: form
+beanClass: tools.dynamia.modules.email.domain.EmailTemplate
+autofields: false
+
+fields:
+  name:
+  parent:
+  description:
+  enabled:
+
+  to:
+  replyTo:
+  cc:
+  bcc:
+  subject:
+    params:
+      span: 4
+  content:
+    component: aceditor
+    params:
+      mode: velocity
+      height: 400px;
+      span: 4
+  sendSMS:
+    label: Send SMS
+  smsNumber:
+    label: SMS Number
+
+  smsText:
+    label: SMS Text
+    params:
+      span: 2
+
+
+layout:
+  columns: 4
