@@ -55,6 +55,41 @@
         <url>https://github.com/dynamiatools/framework</url>
     </scm>
 
+    <properties>
+        <main.baseUri>${project.baseUri}</main.baseUri>
+        <springboot.version>4.0.1</springboot.version>
+        <swagger.version>2.2.38</swagger.version>
+        <mongodb.version>1</mongodb.version>
+
+        <!-- Web -->
+        <zk.version>10.1.0-jakarta</zk.version>
+        <dynamia.zk.version>1.1.0</dynamia.zk.version>
+        <aws.version>2.39.5</aws.version>
+
+        <!--Reports -->
+        <jasperreports.version>6.21.4</jasperreports.version>
+        <poi.version>5.4.1</poi.version>
+        <snakeyaml.version>2.5</snakeyaml.version>
+        <zxing.version>3.5.3</zxing.version>
+        <velocity.version>2.4.1</velocity.version>
+
+        <!--Logging -->
+        <slf4j.version>2.0.17</slf4j.version>
+        <junit.version>4.13.2</junit.version>
+        <hsqldb.version>1.8.0.10</hsqldb.version>
+        <oshi.version>6.5.0</oshi.version>
+        <jna.version>5.14.0</jna.version>
+
+
+        <java.version>21</java.version>
+        <target.version>21</target.version>
+        <maven.compiler>3.14.0</maven.compiler>
+        <source.encoding>UTF-8</source.encoding>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyyMMddhhmm</maven.build.timestamp.format>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <modules>
         <!-- Core modules -->
         <module>platform/core/commons</module>
@@ -88,40 +123,7 @@
 
     </modules>
 
-    <properties>
-        <main.baseUri>${project.baseUri}</main.baseUri>
-        <springboot.version>3.5.9</springboot.version>
-        <swagger.version>2.2.38</swagger.version>
-        <mongodb.version>1</mongodb.version>
 
-        <!-- Web -->
-        <zk.version>10.1.0-jakarta</zk.version>
-        <dynamia.zk.version>1.1.0</dynamia.zk.version>
-        <aws.version>2.39.5</aws.version>
-
-        <!--Reports -->
-        <jasperreports.version>6.21.4</jasperreports.version>
-        <poi.version>5.4.1</poi.version>
-        <snakeyaml.version>2.5</snakeyaml.version>
-        <zxing.version>3.5.3</zxing.version>
-        <velocity.version>2.4.1</velocity.version>
-
-        <!--Logging -->
-        <slf4j.version>2.0.17</slf4j.version>
-        <junit.version>4.13.2</junit.version>
-        <hsqldb.version>1.8.0.10</hsqldb.version>
-        <oshi.version>6.5.0</oshi.version>
-        <jna.version>5.14.0</jna.version>
-
-
-        <java.version>21</java.version>
-        <target.version>21</target.version>
-        <maven.compiler>3.14.0</maven.compiler>
-        <source.encoding>UTF-8</source.encoding>
-        <timestamp>${maven.build.timestamp}</timestamp>
-        <maven.build.timestamp.format>yyyyMMddhhmm</maven.build.timestamp.format>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <build>
         <plugins>
