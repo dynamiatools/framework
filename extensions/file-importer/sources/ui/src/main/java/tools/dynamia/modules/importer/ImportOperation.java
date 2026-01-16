@@ -81,11 +81,11 @@ public abstract class ImportOperation extends LongOperation implements ProgressM
 
                 long estimatedRemaining = (long) (elapsedTime / position * (total - position));
 
-                activate();
+
                 monitor.setMessage(monitor.getMessage() + " - Faltan <b>"
                         + StringUtils.formatDuration(estimatedRemaining) + "</b> (h:m:s)");
                 importer.updateProgress(monitor);
-                deactivate();
+
             }
         } catch (Exception e) {
             // Ignore
@@ -113,10 +113,10 @@ public abstract class ImportOperation extends LongOperation implements ProgressM
             throw new ImportOperationException(e);
         } catch (ValidationError e) {
             try {
-                activate();
+
                 UIMessages.showMessage(e.getMessage(), MessageType.ERROR);
                 importer.setOperationStatus(false);
-                deactivate();
+
             } catch (Exception e2) {
                 // TODO: handle exception
             }
@@ -150,14 +150,7 @@ public abstract class ImportOperation extends LongOperation implements ProgressM
     }
 
     private void setOperationStatus(boolean b) {
-        try {
-            activate();
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
         importer.setOperationStatus(b);
-        deactivate();
     }
 
     public String getName() {
