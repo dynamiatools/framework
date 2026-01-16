@@ -23,6 +23,7 @@
         <module>saas/sources</module>
         <module>email-sms/sources</module>
         <module>security/sources</module>
+        <module>file-importer/sources</module>
     </modules>
 
 
