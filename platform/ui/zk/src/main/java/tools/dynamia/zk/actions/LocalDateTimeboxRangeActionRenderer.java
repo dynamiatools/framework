@@ -21,38 +21,38 @@ import org.zkoss.zk.ui.event.Events;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionEventBuilder;
 import tools.dynamia.actions.Actions;
-import tools.dynamia.commons.DateRange;
+import tools.dynamia.commons.LocalDateTimeRange;
 import tools.dynamia.commons.Messages;
-import tools.dynamia.zk.ui.DateRangebox;
+import tools.dynamia.zk.ui.LocalDateRangebox;
+import tools.dynamia.zk.ui.LocalDateTimeRangebox;
 
-import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Map;
 
 /**
  * @author Mario A. Serrano Leones
  */
-public class DateboxRangeActionRenderer extends ZKActionRenderer<Component> {
+public class LocalDateTimeboxRangeActionRenderer extends ZKActionRenderer<Component> {
 
-    private Date startDate;
-    private Date endDate;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     private String format;
     private Locale locale;
 
-    public DateboxRangeActionRenderer() {
+    public LocalDateTimeboxRangeActionRenderer() {
     }
 
-    public DateboxRangeActionRenderer(Date startDate, Date endDate) {
+    public LocalDateTimeboxRangeActionRenderer(LocalDateTime startDate, LocalDateTime endDate) {
         this.startDate = startDate;
         this.endDate = endDate;
     }
 
     @Override
     public Component render(final Action action, final ActionEventBuilder actionEventBuilder) {
-        final DateRangebox dateRangebox = new DateRangebox();
+        final LocalDateTimeRangebox dateRangebox = new LocalDateTimeRangebox();
         if (startDate != null && endDate != null) {
-            dateRangebox.setValue(new DateRange(startDate, endDate));
+            dateRangebox.setValue(new LocalDateTimeRange(startDate, endDate));
         }
         dateRangebox.setTooltiptext(action.getLocalizedDescription(Messages.getDefaultLocale()));
         dateRangebox.addEventListener(Events.ON_CHANGE, event -> fireActionEvent(dateRangebox, action, actionEventBuilder));
@@ -70,14 +70,18 @@ public class DateboxRangeActionRenderer extends ZKActionRenderer<Component> {
         return dateRangebox;
     }
 
-    private void fireActionEvent(DateRangebox dateRangebox, Action action, ActionEventBuilder
+    private void fireActionEvent(LocalDateTimeRangebox dateRangebox, Action action, ActionEventBuilder
             actionEventBuilder) {
-        DateRange dateRange = dateRangebox.getValue();
+        var dateRange = dateRangebox.getValue();
 
-        Actions.run(action, actionEventBuilder, this, dateRange,
-                Map.of("minDate", dateRange.getStartDate(),
-                        "maxDate", dateRange.getEndDate(),
-                        "action", action));
+        if (!dateRange.isNull()) {
+            Actions.run(action, actionEventBuilder, this, dateRange,
+                    Map.of("minDate", dateRange.getStartDateTime(),
+                            "maxDate", dateRange.getEndDateTime(),
+                            "startDateTime", dateRange.getStartDateTime(),
+                            "endDateTime", dateRange.getEndDateTime(),
+                            "action", action));
+        }
     }
 
     public String getFormat() {

@@ -243,6 +243,13 @@ public final class DateTimeUtils {
         return localDate1.until(localDate2, ChronoUnit.MONTHS);
     }
 
+    public static long monthsBetween(LocalDate date1, LocalDate date2) {
+        if (date1 == null || date2 == null) {
+            throw new IllegalArgumentException("Dates must not be null");
+        }
+        return date1.until(date2, ChronoUnit.MONTHS);
+    }
+
     /**
      * Calculates the number of days between two {@link Date} instances.
      *
@@ -285,6 +292,13 @@ public final class DateTimeUtils {
         return toInstant(date1).until(toInstant(date2), ChronoUnit.HOURS);
     }
 
+    public static long hoursBetween(LocalDateTime date1, LocalDateTime date2) {
+        if (date1 == null || date2 == null) {
+            throw new IllegalArgumentException("Dates must not be null");
+        }
+        return date1.until(date2, ChronoUnit.HOURS);
+    }
+
     /**
      * Calculates the number of minutes between two {@link Date} instances.
      *
@@ -297,6 +311,12 @@ public final class DateTimeUtils {
             throw new IllegalArgumentException("Dates must not be null");
         }
         return toInstant(date1).until(toInstant(date2), ChronoUnit.MINUTES);
+    }
+    public static long minutesBetween(LocalDateTime date1, LocalDateTime date2) {
+        if (date1 == null || date2 == null) {
+            throw new IllegalArgumentException("Dates must not be null");
+        }
+        return date1.until(date2, ChronoUnit.MINUTES);
     }
 
     /**
@@ -311,6 +331,13 @@ public final class DateTimeUtils {
             throw new IllegalArgumentException("Dates must not be null");
         }
         return toInstant(date1).until(toInstant(date2), ChronoUnit.SECONDS);
+    }
+
+    public static  long secondsBetween(LocalDateTime date1, LocalDateTime date2) {
+        if (date1 == null || date2 == null) {
+            throw new IllegalArgumentException("Dates must not be null");
+        }
+        return date1.until(date2, ChronoUnit.SECONDS);
     }
 
     /**
@@ -1451,4 +1478,10 @@ public final class DateTimeUtils {
     }
 
 
+    public static long yearsBetween(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null) {
+            return 0;
+        }
+        return ChronoUnit.YEARS.between(startDate, endDate);
+    }
 }

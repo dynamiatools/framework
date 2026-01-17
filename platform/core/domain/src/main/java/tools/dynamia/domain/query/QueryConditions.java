@@ -17,6 +17,8 @@
 package tools.dynamia.domain.query;
 
 import tools.dynamia.commons.DateRange;
+import tools.dynamia.commons.LocalDateRange;
+import tools.dynamia.commons.LocalDateTimeRange;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -553,6 +555,8 @@ public abstract class QueryConditions {
 		return new Between(dateRange.getStartDate(), dateRange.getEndDate());
 	}
 
+
+
 	/**
 	 * Between.
 	 *
@@ -566,6 +570,53 @@ public abstract class QueryConditions {
 		return new Between(dateRange.getStartDate(), dateRange.getStartDate(), booleanOp);
 	}
 
+	/**
+	 * Between.
+	 *
+	 * @param dateRange
+	 *            the date range
+	 * @return the query condition
+	 */
+	public static QueryCondition between(LocalDateRange dateRange) {
+		return new Between(dateRange.getStartDate(), dateRange.getEndDate());
+	}
+
+	/**
+	 * Between.
+	 *
+	 * @param dateRange
+	 *            the date range
+	 * @param booleanOp
+	 *            the boolean op
+	 * @return the query condition
+	 */
+	public static QueryCondition between(LocalDateRange dateRange, BooleanOp booleanOp) {
+		return new Between(dateRange.getStartDate(), dateRange.getEndDate(), booleanOp);
+	}
+
+	/**
+	 * Between.
+	 *
+	 * @param dateRange
+	 *            the date range
+	 * @return the query condition
+	 */
+	public static  QueryCondition between(LocalDateTimeRange dateRange) {
+		return new Between(dateRange.getStartDateTime(), dateRange.getEndDateTime());
+	}
+
+	/**
+	 * Between.
+	 *
+	 * @param dateRange
+	 *            the date range
+	 * @param booleanOp
+	 *            the boolean op
+	 * @return the query condition
+	 */
+	public static  QueryCondition between(LocalDateTimeRange dateRange, BooleanOp booleanOp) {
+		return new Between(dateRange.getStartDateTime(), dateRange.getEndDateTime(), booleanOp);
+	}
 	/**
 	 * Create an in condition.
 	 *

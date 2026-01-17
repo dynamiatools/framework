@@ -21,13 +21,12 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
  * Represent a date range from start date to end date. Its provide usefull method to work with dates
  */
-public class DateRange implements Serializable {
+public class LocalDateRange implements Serializable {
 
     /**
      * The Constant serialVersionUID.
@@ -38,17 +37,17 @@ public class DateRange implements Serializable {
     /**
      * The end date.
      */
-    private Date endDate;
+    private LocalDate endDate;
 
     /**
      * The start date.
      */
-    private Date startDate;
+    private LocalDate startDate;
 
     /**
      * Instantiates a new date range.
      */
-    public DateRange() {
+    public LocalDateRange() {
 
     }
 
@@ -58,22 +57,17 @@ public class DateRange implements Serializable {
      * @param startDate the end date
      * @param endDate   the start date
      */
-    public DateRange(Date startDate, Date endDate) {
+    public LocalDateRange(LocalDate startDate, LocalDate endDate) {
         super();
         this.startDate = startDate;
         this.endDate = endDate;
     }
 
-    public DateRange(LocalDate startDate, LocalDate endDate) {
-        super();
-        this.startDate = DateTimeUtils.toDate(startDate);
-        this.endDate = DateTimeUtils.toDate(endDate);
-    }
 
-    public DateRange(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+    public LocalDateRange(LocalDateTime startDateTime, LocalDateTime endDateTime) {
         super();
-        this.startDate = DateTimeUtils.toDate(startDateTime);
-        this.endDate = DateTimeUtils.toDate(endDateTime);
+        this.startDate = startDateTime != null ? startDateTime.toLocalDate() : null;
+        this.endDate = endDateTime!=null? endDateTime.toLocalDate():null;
     }
 
     /**
@@ -81,18 +75,10 @@ public class DateRange implements Serializable {
      *
      * @return the end date
      */
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    /**
-     * Gets the end local date.
-     *
-     * @return the end local date
-     */
-    public LocalDate getEndLocalDate() {
-        return DateTimeUtils.toLocalDate(endDate);
-    }
 
 
     /**
@@ -100,30 +86,18 @@ public class DateRange implements Serializable {
      *
      * @return the start date
      */
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    /**
-     * Gets the start local date.
-     *
-     * @return the start local date
-     */
-    public LocalDate getStartLocalDate() {
-        return DateTimeUtils.toLocalDate(startDate);
-    }
 
     /**
      * Sets the end date.
      *
      * @param endDate the new end date
      */
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
-    }
-
-    public void setEndLocalDate(LocalDate endLocalDate) {
-        this.endDate = DateTimeUtils.toDate(endLocalDate);
     }
 
     /**
@@ -131,29 +105,15 @@ public class DateRange implements Serializable {
      *
      * @param startDate the new start date
      */
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
-    }
-
-    public void setStartLocalDate(LocalDate startLocalDate) {
-        this.startDate = DateTimeUtils.toDate(startLocalDate);
     }
 
     public long getDaysBetween() {
         return DateTimeUtils.daysBetween(startDate, endDate);
     }
 
-    public long getHoursBetween() {
-        return DateTimeUtils.hoursBetween(startDate, endDate);
-    }
 
-    public long getMinutesBetween() {
-        return DateTimeUtils.minutesBetween(startDate, endDate);
-    }
-
-    public long getSecondsBetween() {
-        return DateTimeUtils.secondsBetween(startDate, endDate);
-    }
 
     public long getMonthsBetween() {
         return DateTimeUtils.monthsBetween(startDate, endDate);
@@ -163,8 +123,8 @@ public class DateRange implements Serializable {
         return DateTimeUtils.yearsBetween(startDate, endDate);
     }
 
-    List<Date> getDaysBetweenList() {
-        List<Date> dates = new ArrayList<>();
+    List<LocalDate> getDaysBetweenList() {
+        List<LocalDate> dates = new ArrayList<>();
         long days = getDaysBetween();
         for (int i = 0; i < days; i++) {
             dates.add(DateTimeUtils.addDays(startDate, i));
