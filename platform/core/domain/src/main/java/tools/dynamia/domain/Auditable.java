@@ -16,78 +16,11 @@
  */
 package tools.dynamia.domain;
 
-import java.util.Date;
-
-public interface Auditable {
-
-    /**
-     * Gets the creation date.
-     *
-     * @return the creation date
-     */
-    Date getCreationDate();
-
-    /**
-     * Gets the creation time.
-     *
-     * @return the creation time
-     */
-    Date getCreationTime();
-
-    /**
-     * Sets the creation date.
-     *
-     * @param creationDate the new creation date
-     */
-    void setCreationDate(Date creationDate);
-
-    /**
-     * Sets the creation time.
-     *
-     * @param creationTime the new creation time
-     */
-    void setCreationTime(Date creationTime);
-
-    /**
-     * Gets the creator.
-     *
-     * @return the creator
-     */
-    String getCreator();
-
-    /**
-     * Sets the creator.
-     *
-     * @param creator the new creator
-     */
-    void setCreator(String creator);
-
-    /**
-     * Gets the last update.
-     *
-     * @return the last update
-     */
-    Date getLastUpdate();
-
-    /**
-     * Sets the last update.
-     *
-     * @param lastUpdate the new last update
-     */
-    void setLastUpdate(Date lastUpdate);
-
-    /**
-     * Gets the last updater.
-     *
-     * @return the last updater
-     */
-    String getLastUpdater();
-
-    /**
-     * Sets the last updater.
-     *
-     * @param lastUpdater the new last updater
-     */
-    void setLastUpdater(String lastUpdater);
+/**
+ * The Interface Auditable.
+ *
+ * @author Mario Serrano Leones
+ */
+public interface Auditable extends AuditableWithJavaTimes {
 
 }

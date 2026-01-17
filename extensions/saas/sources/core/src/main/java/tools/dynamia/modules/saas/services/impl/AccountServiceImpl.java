@@ -17,6 +17,7 @@
 
 package tools.dynamia.modules.saas.services.impl;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationListener;
@@ -46,10 +47,10 @@ import tools.dynamia.modules.saas.domain.*;
 import tools.dynamia.modules.saas.services.AccountService;
 import tools.dynamia.web.util.HttpUtils;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -166,7 +167,7 @@ public class AccountServiceImpl implements AccountService, ApplicationListener<C
         account.setSubdomain("admin");
         account.setEmail("admin@dynamiasoluciones.com");
         account.setStatus(AccountStatus.ACTIVE);
-        account.setStatusDate(new Date());
+        account.setStatusDate(LocalDateTime.now());
         account.setIdentification(System.currentTimeMillis() + "");
         account.setAutoInit(false);
         account = crudService.save(account);
@@ -294,14 +295,14 @@ public class AccountServiceImpl implements AccountService, ApplicationListener<C
         } else if (account.getBalance().longValue() >= 0) {
             return false;
         }
-        return account.getExpirationDate() != null && account.getExpirationDate().before(new Date());
+        return account.getExpirationDate() != null && account.getExpirationDate().isBefore(LocalDate.now());
     }
 
     @Override
     public boolean shouldBeSuspended(Account account) {
         if (isOverdue(account)) {
             int allowedOverdueDays = account.getType().getAllowedOverdueDays();
-            return DateTimeUtils.daysBetween(account.getLastChargeDate(), new Date()) >= allowedOverdueDays;
+            return DateTimeUtils.daysBetween(account.getLastChargeDate(), LocalDate.now()) >= allowedOverdueDays;
 
         }
         return false;
@@ -323,8 +324,8 @@ public class AccountServiceImpl implements AccountService, ApplicationListener<C
             }
 
 
-            if (account.getLastChargeDate() == null || DateTimeUtils.daysBetween(account.getLastChargeDate(), new Date()) > days) {
-                Date chargeDate = DateTimeUtils.createDate(account.getPaymentDay());
+            if (account.getLastChargeDate() == null || DateTimeUtils.daysBetween(account.getLastChargeDate(), LocalDate.now()) > days) {
+                var chargeDate = DateTimeUtils.createLocalDate(account.getPaymentDay());
                 AccountCharge charge = new AccountCharge(account);
                 charge.setCreationDate(chargeDate);
                 charge.setValue(getPaymentValue(account));
@@ -342,7 +343,7 @@ public class AccountServiceImpl implements AccountService, ApplicationListener<C
         AccountPeriodicity periodicity = account.getType().getPeriodicity();
         if (periodicity != AccountPeriodicity.UNLIMITED) {
             int incr = 1;
-            Date startDate = account.getStartDate();
+            var startDate = account.getStartDate();
             if (account.getLastChargeDate() != null) {
                 startDate = account.getLastChargeDate();
             }
@@ -410,11 +411,11 @@ public class AccountServiceImpl implements AccountService, ApplicationListener<C
     public boolean isAboutToExpire(Account account) {
 
         if (account.getLastPaymentDate() != null && account.getExpirationDate() != null) {
-            if (account.getLastPaymentDate().after(account.getExpirationDate())) {
+            if (account.getLastPaymentDate().isAfter(account.getExpirationDate())) {
                 return false;
-            } else if (account.getExpirationDate().after(account.getLastChargeDate())) {
+            } else if (account.getExpirationDate().isAfter(account.getLastChargeDate())) {
                 final int MAX_DAYS = Integer.parseInt(ApplicationParameters.get().getValue("ACCOUNTS_ABOUT_TO_EXPIRE_MAX_DAYS", "4"));
-                long daysBetween = DateTimeUtils.daysBetween(new Date(), account.getExpirationDate());
+                long daysBetween = DateTimeUtils.daysBetween(LocalDate.now(), account.getExpirationDate());
                 return daysBetween < MAX_DAYS;
             } else if (DateTimeUtils.daysBetween(account.getLastPaymentDate(), account.getExpirationDate()) < 30 && account.getBalance().longValue() == 0) {
                 return false;
@@ -432,7 +433,7 @@ public class AccountServiceImpl implements AccountService, ApplicationListener<C
             value = account.getFixedPaymentValue();
         }
 
-        if (account.getDiscount() != null && (account.getDiscountExpire() == null || account.getDiscountExpire().after(new Date()))) {
+        if (account.getDiscount() != null && (account.getDiscountExpire() == null || account.getDiscountExpire().isAfter(LocalDate.now()))) {
             value = value.subtract(account.getDiscount());
         }
 

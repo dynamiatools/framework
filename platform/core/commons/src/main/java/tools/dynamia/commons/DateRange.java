@@ -18,6 +18,7 @@ package tools.dynamia.commons;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -65,6 +66,12 @@ public class DateRange implements Serializable {
         super();
         this.startDate = DateTimeUtils.toDate(startDate);
         this.endDate = DateTimeUtils.toDate(endDate);
+    }
+
+    public DateRange(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        super();
+        this.startDate = DateTimeUtils.toDate(startDateTime);
+        this.endDate = DateTimeUtils.toDate(endDateTime);
     }
 
     /**

@@ -26,6 +26,8 @@ import tools.dynamia.modules.saas.api.dto.AccountPaymentDTO;
 import tools.dynamia.modules.saas.api.dto.AccountTypeDTO;
 import tools.dynamia.modules.saas.api.enums.AccountStatus;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -46,7 +48,7 @@ public class NoOpAccountServiceAPI implements AccountServiceAPI {
         CURRENT_ACCOUNT.setStatus(AccountStatus.ACTIVE);
         CURRENT_ACCOUNT.setTimeZone(TimeZone.getDefault().getID());
         CURRENT_ACCOUNT.setLocale(Locale.getDefault().toString());
-        CURRENT_ACCOUNT.setCreationDate(new Date());
+        CURRENT_ACCOUNT.setCreationDate(LocalDateTime.now());
         CURRENT_ACCOUNT.setIdentification("111111111");
         CURRENT_ACCOUNT.setAdminUsername("admin");
         CURRENT_ACCOUNT.setMaxUsers(1000);

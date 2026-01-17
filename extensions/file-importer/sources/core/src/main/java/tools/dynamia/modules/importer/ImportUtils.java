@@ -27,6 +27,8 @@ import tools.dynamia.integration.ProgressMonitor;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -94,6 +96,30 @@ public class ImportUtils {
             Cell cell = row.getCell(cellIndex);
             if (cell != null) {
                 return cell.getDateCellValue();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static LocalDate getCellValueLocalDate(Row row, int cellIndex) {
+        try {
+            Cell cell = row.getCell(cellIndex);
+            if (cell != null) {
+                return cell.getLocalDateTimeCellValue().toLocalDate();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static LocalDateTime getCellValueLocalDateTime(Row row, int cellIndex) {
+        try {
+            Cell cell = row.getCell(cellIndex);
+            if (cell != null) {
+                return cell.getLocalDateTimeCellValue();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -285,6 +311,15 @@ public class ImportUtils {
         Cell cell = findFirstRowCellByName(row.getSheet(), columnName);
         if (cell != null) {
             return getCellValueDate(row, cell.getColumnIndex());
+        } else {
+            return null;
+        }
+    }
+
+    public static LocalDate getCellValueLocalDate(Row row, String columnName) {
+        Cell cell = findFirstRowCellByName(row.getSheet(), columnName);
+        if (cell != null) {
+            return getCellValueLocalDate(row, cell.getColumnIndex());
         } else {
             return null;
         }

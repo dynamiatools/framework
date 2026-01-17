@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 
-public interface Auditable2 {
+public interface AuditableWithJavaTimes {
 
     /**
      * Gets the creation date.

@@ -16,18 +16,11 @@
  */
 package tools.dynamia.domain.jpa;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import jakarta.persistence.Transient;
-import tools.dynamia.commons.DateTimeUtils;
-import tools.dynamia.commons.Messages;
 import tools.dynamia.domain.Auditable;
 
 import java.io.Serializable;
-import java.time.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 
 /**
@@ -36,205 +29,23 @@ import java.util.Date;
  * @author Ing. Mario Serrano Leones
  */
 @MappedSuperclass
-public abstract class BaseEntity extends SimpleEntity implements Serializable, Auditable {
+public abstract class BaseEntity extends BaseEntityWithJavaTimes implements Serializable, Auditable {
+
+
+    public void resetCreationDate() {
+        resetCreationDate(LocalDateTime.now());
+    }
 
     /**
-     * The Constant serialVersionUID.
-     */
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * The creation date.
-     */
-    @Temporal(TemporalType.DATE)
-    @JsonFormat(pattern = "dd-MM-yyyy")
-    private Date creationDate = new Date();
-
-    /**
-     * The creation time.
-     */
-    @Temporal(TemporalType.TIME)
-    @JsonFormat(pattern = "hh:mm:ss")
-    private Date creationTime = new Date();
-
-
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date creationTimestamp = new Date();
-    /**
-     * The creator.
-     */
-    private String creator;
-
-    /**
-     * The last update.
-     */
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastUpdate = new Date();
-
-    /**
-     * The last updater.
-     */
-    private String lastUpdater;
-
-    /*
-     * (non-Javadoc)
+     * Reset creation date.
      *
-     * @see Auditable#getCreationDate()
+     * @param date the date
      */
-    @Override
-    public Date getCreationDate() {
-        return creationDate;
+    public void resetCreationDate(LocalDateTime date) {
+        if (date == null) date = LocalDateTime.now();
+        setCreationDate(date.toLocalDate());
+        setCreationTime(date.toLocalTime());
+        setCreationTimestamp(date);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see Auditable#getCreationTime()
-     */
-    @Override
-    public Date getCreationTime() {
-        return creationTime;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see Auditable#setCreationDate(java.util.Date)
-     */
-    @Override
-    public void setCreationDate(Date creationDate) {
-        Date oldCreationDate = this.creationDate;
-        this.creationDate = creationDate;
-        this.creationTimestamp = creationDate;
-        notifyChange("creationDate", oldCreationDate, creationDate);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see Auditable#setCreationTime(java.util.Date)
-     */
-    @Override
-    public void setCreationTime(Date creationTime) {
-        Date oldCreationTime = this.creationTime;
-        this.creationTime = creationTime;
-        notifyChange("creationTime", oldCreationTime, creationTime);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see Auditable#getCreator()
-     */
-    @Override
-    public String getCreator() {
-        return creator;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see Auditable#setCreator(java.lang.String)
-     */
-    @Override
-    public void setCreator(String creator) {
-        String oldCreator = this.creator;
-        this.creator = creator;
-        notifyChange("creator", oldCreator, creator);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see Auditable#getLastUpdate()
-     */
-    @Override
-    public Date getLastUpdate() {
-        return lastUpdate;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see Auditable#setLastUpdate(java.util.Date)
-     */
-    @Override
-    public void setLastUpdate(Date lastUpdate) {
-        Date oldLastUpdate = this.lastUpdate;
-        this.lastUpdate = lastUpdate;
-        notifyChange("lastUpdate", oldLastUpdate, lastUpdate);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see Auditable#getLastUpdater()
-     */
-    @Override
-    public String getLastUpdater() {
-        return lastUpdater;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see Auditable#setLastUpdater(java.lang.String)
-     */
-    @Override
-    public void setLastUpdater(String lastUpdater) {
-        String oldLastUpdater = this.lastUpdater;
-        this.lastUpdater = lastUpdater;
-        notifyChange("lastUpdater", oldLastUpdater, lastUpdater);
-    }
-
-    public Date getCreationTimestamp() {
-        return creationTimestamp;
-    }
-
-    public void setCreationTimestamp(Date creationTimestamp) {
-        this.creationTimestamp = creationTimestamp;
-    }
-
-    @Transient
-    public Instant getCreationInstant() {
-        if (creationTimestamp != null) {
-            return DateTimeUtils.toInstant(creationTimestamp);
-        }
-        if (creationDate != null && creationTime != null) {
-            return DateTimeUtils.toLocalDateTime(creationDate, creationTime, ZoneId.systemDefault())
-                    .atZone(ZoneId.systemDefault()).toInstant();
-
-        }
-        return null;
-    }
-
-    @Transient
-    public Instant getLastUpdateInstant() {
-        if (lastUpdate != null) {
-            return DateTimeUtils.toInstant(lastUpdate);
-        }
-        return null;
-    }
-
-    @Transient
-    public ZonedDateTime getCreationDateZoned(ZoneId zone) {
-        Instant instant = getCreationInstant();
-        return instant != null ? instant.atZone(zone) : null;
-    }
-
-    @Transient
-    public ZonedDateTime getCreationDateZoned() {
-        return getCreationDateZoned(Messages.getDefaultTimeZone());
-    }
-
-    @Transient
-    public ZonedDateTime getLastUpdateZoned(ZoneId zone) {
-        Instant instant = getLastUpdateInstant();
-        return instant != null ? instant.atZone(zone) : null;
-    }
-
-    @Transient
-    public ZonedDateTime getLastUpdateZoned() {
-        return getLastUpdateZoned(Messages.getDefaultTimeZone());
-    }
 }

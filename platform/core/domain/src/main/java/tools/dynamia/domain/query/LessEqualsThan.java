@@ -76,6 +76,22 @@ public class LessEqualsThan extends AbstractQueryCondition<Object> {
         super(value);
     }
 
+    public LessEqualsThan(LocalDateTime value, BooleanOp booleanOp) {
+        super(value, booleanOp);
+    }
+
+    public LessEqualsThan(LocalDateTime value) {
+        super(value);
+    }
+
+    public LessEqualsThan(LocalDate value, BooleanOp booleanOp) {
+        super(value, booleanOp);
+    }
+
+    public LessEqualsThan(LocalDate value) {
+        super(value);
+    }
+
     /* (non-Javadoc)
      * @see com.dynamia.tools.domain.query.AbstractQueryCondition#getOperator()
      */
@@ -87,7 +103,7 @@ public class LessEqualsThan extends AbstractQueryCondition<Object> {
     public boolean match(Object otherValue) {
         if (getValue() instanceof Number num && otherValue instanceof Number other) {
             return num.doubleValue() <= other.doubleValue();
-        }else if (getValue() instanceof Date date && otherValue instanceof Date other) {
+        } else if (getValue() instanceof Date date && otherValue instanceof Date other) {
             return DateTimeUtils.isBeforeOrEquals(date, other);
         } else if (getValue() instanceof LocalDate date && otherValue instanceof LocalDate other) {
             return DateTimeUtils.isBeforeOrEquals(date, other);

@@ -23,6 +23,8 @@ import tools.dynamia.modules.saas.api.enums.AccountStatus;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -42,13 +44,13 @@ public class AccountDTO implements Serializable {
     private String email;
     private AccountTypeDTO type = new AccountTypeDTO();
 
-    private Date expirationDate;
+    private LocalDate expirationDate;
     private AccountStatus status = AccountStatus.NEW;
 
-    private Date statusDate;
+    private LocalDateTime statusDate;
     private String statusDescription;
 
-    private Date creationDate = new Date();
+    private LocalDateTime creationDate;
     private boolean defaultAccount;
     private String skin;
     private String logo;
@@ -367,13 +369,7 @@ public class AccountDTO implements Serializable {
         this.customDomain = customDomain;
     }
 
-    public Date getCreationDate() {
-        return creationDate;
-    }
 
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
 
     public String getName() {
         return name;
@@ -409,29 +405,6 @@ public class AccountDTO implements Serializable {
         }
     }
 
-    public Date getExpirationDate() {
-        return expirationDate;
-    }
-
-    public void setExpirationDate(Date expirationDate) {
-        this.expirationDate = expirationDate;
-    }
-
-    public AccountStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(AccountStatus status) {
-        this.status = status;
-    }
-
-    public Date getStatusDate() {
-        return statusDate;
-    }
-
-    public void setStatusDate(Date statusDate) {
-        this.statusDate = statusDate;
-    }
 
     public String getStatusDescription() {
         return statusDescription;
@@ -641,5 +614,37 @@ public class AccountDTO implements Serializable {
 
     public void setRedirect(String redirect) {
         this.redirect = redirect;
+    }
+
+    public LocalDate getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(LocalDate expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    public AccountStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AccountStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getStatusDate() {
+        return statusDate;
+    }
+
+    public void setStatusDate(LocalDateTime statusDate) {
+        this.statusDate = statusDate;
+    }
+
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
     }
 }

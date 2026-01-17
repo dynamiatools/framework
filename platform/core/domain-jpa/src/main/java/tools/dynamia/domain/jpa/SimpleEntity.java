@@ -23,6 +23,8 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Version;
 import tools.dynamia.domain.AbstractEntity;
 
+import java.io.Serial;
+
 /**
  * The Class SimpleEntity.
  */
@@ -40,7 +42,8 @@ public abstract class SimpleEntity extends AbstractEntity<Long> {
     /**
      * The Constant serialVersionUID.
      */
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 2L;
 
     /**
      * The version.

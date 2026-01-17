@@ -76,6 +76,44 @@ public class GreaterThan extends AbstractQueryCondition<Object> {
         super(value);
     }
 
+    /**
+     * Instantiates a new greater than.
+     *
+     * @param value     the value
+     * @param booleanOp the boolean op
+     */
+    public GreaterThan(LocalDate value, BooleanOp booleanOp) {
+        super(value, booleanOp);
+    }
+
+    /**
+     * Instantiates a new greater than.
+     *
+     * @param value the value
+     */
+    public GreaterThan(LocalDate value) {
+        super(value);
+    }
+
+    /**
+     * Instantiates a new greater than.
+     *
+     * @param value     the value
+     * @param booleanOp the boolean op
+     */
+    public GreaterThan(LocalDateTime value, BooleanOp booleanOp) {
+        super(value, booleanOp);
+    }
+
+    /**
+     * Instantiates a new greater than.
+     *
+     * @param value the value
+     */
+    public GreaterThan(LocalDateTime value) {
+        super(value);
+    }
+
 
     /* (non-Javadoc)
      * @see AbstractQueryCondition#getOperator()

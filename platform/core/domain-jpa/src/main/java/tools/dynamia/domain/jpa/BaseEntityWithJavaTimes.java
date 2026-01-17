@@ -18,17 +18,13 @@ package tools.dynamia.domain.jpa;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
-import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.commons.Messages;
-import tools.dynamia.domain.Auditable;
-import tools.dynamia.domain.Auditable2;
+import tools.dynamia.domain.AuditableWithJavaTimes;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.*;
-import java.util.Date;
 
 
 /**
@@ -37,12 +33,13 @@ import java.util.Date;
  * @author Ing. Mario Serrano Leones
  */
 @MappedSuperclass
-public abstract class BaseEntity2 extends SimpleEntity implements Serializable, Auditable2 {
+public abstract class BaseEntityWithJavaTimes extends SimpleEntity implements Serializable, AuditableWithJavaTimes {
 
     /**
      * The Constant serialVersionUID.
      */
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 2L;
 
     /**
      * The creation date.

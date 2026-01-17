@@ -22,6 +22,7 @@ import tools.dynamia.domain.contraints.EmailValidator;
 import tools.dynamia.domain.services.ValidatorService;
 import tools.dynamia.integration.Containers;
 
+import java.time.temporal.TemporalAccessor;
 import java.util.Collection;
 import java.util.Date;
 
@@ -135,10 +136,30 @@ public class ValidatorUtil {
     }
 
     /**
+     * Validate if date is past and throw {@link ValidationError} with message
+     *
+     */
+    public static void validatePastDate(TemporalAccessor date, String message) {
+        if (date != null && DateTimeUtils.isPast(date)) {
+            throw new ValidationError(message);
+        }
+    }
+
+    /**
      * Validate if date is future and throw {@link ValidationError} with message
      *
      */
     public static void validateFutureDate(Date date, String message) {
+        if (date != null && DateTimeUtils.isFuture(date)) {
+            throw new ValidationError(message);
+        }
+    }
+
+    /**
+     * Validate if date is future and throw {@link ValidationError} with message
+     *
+     */
+    public static void validateFutureDate(TemporalAccessor date, String message) {
         if (date != null && DateTimeUtils.isFuture(date)) {
             throw new ValidationError(message);
         }

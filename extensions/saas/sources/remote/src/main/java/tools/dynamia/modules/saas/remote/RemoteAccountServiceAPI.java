@@ -42,6 +42,7 @@ import tools.dynamia.modules.saas.api.dto.AccountPaymentDTO;
 import tools.dynamia.modules.saas.api.enums.AccountStatus;
 import tools.dynamia.modules.saas.jpa.AccountParameter;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -212,7 +213,7 @@ public class RemoteAccountServiceAPI extends CrudServiceListenerAdapter<AccountA
         AccountDTO temp = new AccountDTO();
         temp.setId(id);
         temp.setName("Temporary Account");
-        temp.setCreationDate(new Date());
+        temp.setCreationDate(LocalDateTime.now());
         temp.setAllowAdditionalUsers(false);
         temp.setRemote(true);
         temp.setIdentification("0000");

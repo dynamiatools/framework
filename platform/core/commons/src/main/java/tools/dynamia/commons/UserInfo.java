@@ -22,7 +22,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -49,7 +48,7 @@ public class UserInfo implements Serializable {
     private String uid;
     private String image;
     private Long id;
-    private Date date;
+    private LocalDate date;
     private Locale locale;
     private ZoneId zoneId;
     private LocalDate creationDate;
@@ -63,7 +62,7 @@ public class UserInfo implements Serializable {
      *
      * @return the date
      */
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
@@ -72,7 +71,7 @@ public class UserInfo implements Serializable {
      *
      * @param date the date to set
      */
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

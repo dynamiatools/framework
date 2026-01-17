@@ -52,6 +52,7 @@ import tools.dynamia.web.util.HttpUtils;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -278,7 +279,7 @@ public class AccountServiceAPIImpl extends AbstractService implements AccountSer
 
         var accountStatus = result.stream().findFirst().
                 orElse(new AccountStatusDTO(accountId, "unknow",
-                        AccountStatus.CANCELED, new Date(),
+                        AccountStatus.CANCELED, LocalDateTime.now(),
                         null, null,
                         false, null, BigDecimal.ZERO));
 

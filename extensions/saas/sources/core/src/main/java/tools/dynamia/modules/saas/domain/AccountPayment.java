@@ -36,6 +36,7 @@ import tools.dynamia.modules.saas.services.AccountService;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -172,7 +173,7 @@ public class AccountPayment extends BaseEntity implements Transferable<AccountPa
             type = account.getType();
             value = paymentValue;
             reseller = account.getReseller();
-            if (account.getDiscount() != null && account.getDiscountExpire() != null && account.getDiscountExpire().after(new Date())) {
+            if (account.getDiscount() != null && account.getDiscountExpire() != null && account.getDiscountExpire().isAfter(LocalDate.now())) {
                 description = "Discount: " + DecimalFormat.getCurrencyInstance().format(account.getDiscount()) + " - " + DateTimeUtils.formatDate(account.getDiscountExpire());
             }
 

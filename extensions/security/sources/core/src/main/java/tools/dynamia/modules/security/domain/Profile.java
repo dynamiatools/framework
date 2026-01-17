@@ -31,6 +31,7 @@ import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.jpa.BaseEntity;
 import tools.dynamia.modules.saas.api.AccountAware;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -158,8 +159,9 @@ public class Profile extends BaseEntity implements GrantedAuthority, Cloneable, 
     @Override
     public Profile clone() {
         Profile clon = BeanUtils.clone(this, "id", "accountId", "permisos", "usuarios");
-        clon.setCreationDate(new Date());
-        clon.setCreationTime(new Date());
+        var now = LocalDateTime.now();
+        clon.setCreationDate(now.toLocalDate());
+        clon.setCreationTime(now.toLocalTime()  );
         clon.setCreator(null);
         clon.setLastUpdate(null);
         clon.setLastUpdater(null);

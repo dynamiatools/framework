@@ -17,105 +17,12 @@
 package tools.dynamia.domain.jpa;
 
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import tools.dynamia.domain.Auditable;
 
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Date;
 
 @MappedSuperclass
-public abstract class BaseEntityUuid extends SimpleEntityUuid implements Serializable, Auditable {
+public abstract class BaseEntityUuid extends BaseEntityUuidWithJavaTimes implements Serializable, Auditable {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1047814464634611550L;
-
-    /**
-     * The creation date.
-     */
-    @Temporal(TemporalType.DATE)
-    private Date creationDate = new Date();
-
-    /**
-     * The creation time.
-     */
-    @Temporal(TemporalType.TIME)
-    private Date creationTime = new Date();
-
-    /**
-     * The creator.
-     */
-    private String creator;
-
-    /**
-     * The last update.
-     */
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastUpdate = new Date();
-
-    /**
-     * The last updater.
-     */
-    private String lastUpdater;
-
-    @Override
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    @Override
-    public void setCreationDate(Date creationDate) {
-        notifyChange("creationDate", this.creationDate, creationDate);
-        this.creationDate = creationDate;
-    }
-
-    @Override
-    public Date getCreationTime() {
-        return creationTime;
-    }
-
-    @Override
-    public void setCreationTime(Date creationTime) {
-        notifyChange("creationTime", this.creationTime, creationTime);
-        this.creationTime = creationTime;
-    }
-
-    @Override
-    public String getCreator() {
-        return creator;
-    }
-
-    @Override
-    public void setCreator(String creator) {
-        notifyChange("creator", this.creator, creator);
-        this.creator = creator;
-    }
-
-    @Override
-    public Date getLastUpdate() {
-        return lastUpdate;
-    }
-
-    @Override
-    public void setLastUpdate(Date lastUpdate) {
-        notifyChange("lastUpdate", this.lastUpdate, lastUpdate);
-        this.lastUpdate = lastUpdate;
-    }
-
-    @Override
-    public String getLastUpdater() {
-        return lastUpdater;
-    }
-
-    @Override
-    public void setLastUpdater(String lastUpdater) {
-        notifyChange("lastUpdater", this.lastUpdater, lastUpdater);
-        this.lastUpdater = lastUpdater;
-    }
 
 }

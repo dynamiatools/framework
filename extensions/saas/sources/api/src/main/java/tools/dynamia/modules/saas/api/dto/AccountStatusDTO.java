@@ -22,6 +22,7 @@ import tools.dynamia.modules.saas.api.enums.AccountStatus;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -31,7 +32,7 @@ public class AccountStatusDTO implements Serializable {
     private final Long id;
     private final String name;
     private final AccountStatus status;
-    private final Date statusDate;
+    private final LocalDateTime statusDate;
     private String statusDescription;
     private final String globalMessage;
     private final boolean showGlobalMessage;
@@ -39,7 +40,7 @@ public class AccountStatusDTO implements Serializable {
     private final BigDecimal balance;
 
 
-    public AccountStatusDTO(Long id, String name, AccountStatus status, Date statusDate, String statusDescription,
+    public AccountStatusDTO(Long id, String name, AccountStatus status, LocalDateTime statusDate, String statusDescription,
                             String globalMessage, boolean showGlobalMessage, String globalMessageType, BigDecimal balance) {
         this.id = id;
         this.name = name;
@@ -64,7 +65,7 @@ public class AccountStatusDTO implements Serializable {
         return status;
     }
 
-    public Date getStatusDate() {
+    public LocalDateTime getStatusDate() {
         return statusDate;
     }
 

@@ -17,20 +17,22 @@
 package tools.dynamia.domain.jpa;
 
 import jakarta.persistence.MappedSuperclass;
-import tools.dynamia.domain.Auditable2;
+import tools.dynamia.domain.AuditableWithJavaTimes;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @MappedSuperclass
-public abstract class BaseEntityUuid2 extends SimpleEntityUuid implements Serializable, Auditable2 {
+public abstract class BaseEntityUuidWithJavaTimes extends SimpleEntityUuid implements Serializable, AuditableWithJavaTimes {
 
     /**
      *
      */
-    private static final long serialVersionUID = 1047814464634611550L;
+    @Serial
+    private static final long serialVersionUID = 2;
 
     /**
      * The creation date.

@@ -34,6 +34,8 @@ import tools.dynamia.modules.saas.services.AccountService;
 import tools.dynamia.web.util.HttpUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @RestController
@@ -46,7 +48,7 @@ public class AccountApiController extends AbstractService {
         NO_ACCOUNT = new AccountDTO();
         NO_ACCOUNT.setId(1L);
         NO_ACCOUNT.setStatus(AccountStatus.CANCELED);
-        NO_ACCOUNT.setStatusDate(new Date());
+        NO_ACCOUNT.setStatusDate(LocalDateTime.now());
         NO_ACCOUNT.setStatusDescription("Invalid License");
     }
 

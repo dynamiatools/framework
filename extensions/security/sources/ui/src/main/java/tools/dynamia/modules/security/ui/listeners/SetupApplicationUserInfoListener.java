@@ -18,6 +18,7 @@ public class SetupApplicationUserInfoListener implements LoginListener {
             userInfo.setId(user.getId());
             userInfo.setUid(user.getUuid());
             userInfo.setDate(user.getCreationDate());
+            userInfo.setCreationDate(user.getCreationDate());
             userInfo.setEmail(user.getEmail());
             userInfo.setFullName(user.getFullname());
             userInfo.setUsername(user.getUsername());

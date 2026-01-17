@@ -18,6 +18,8 @@ package tools.dynamia.domain.query;
 
 import tools.dynamia.commons.DateRange;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -194,6 +196,54 @@ public abstract class QueryConditions {
 	}
 
 	/**
+	 * Create a greate than condition '>'.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the query condition
+	 */
+	public static QueryCondition gt(LocalDate value) {
+		return new GreaterThan(value);
+	}
+
+	/**
+	 * Create a greate than condition '>'.
+	 *
+	 * @param value
+	 *            the value
+	 * @param booleanOp
+	 *            the boolean op
+	 * @return the query condition
+	 */
+	public static QueryCondition gt(LocalDate value, BooleanOp booleanOp) {
+		return new GreaterThan(value, booleanOp);
+	}
+
+	/**
+	 * Create a greate than condition '>'.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the query condition
+	 */
+	public static QueryCondition gt(LocalDateTime value) {
+		return new GreaterThan(value);
+	}
+
+	/**
+	 * Create a greate than condition '>'.
+	 *
+	 * @param value
+	 *            the value
+	 * @param booleanOp
+	 *            the boolean op
+	 * @return the query condition
+	 */
+	public static QueryCondition gt(LocalDateTime value, BooleanOp booleanOp) {
+		return new GreaterThan(value, booleanOp);
+	}
+
+	/**
 	 * Create a greate equals than condition '>='.
 	 *
 	 * @param value
@@ -242,6 +292,54 @@ public abstract class QueryConditions {
 	}
 
 	/**
+	 * Create a greate equals than condition '>='.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the query condition
+	 */
+	public static QueryCondition geqt(LocalDate value) {
+		return new GreaterEqualsThan(value);
+	}
+
+	/**
+	 * Create a greate equals than condition '>='.
+	 *
+	 * @param value
+	 *            the value
+	 * @param booleanOp
+	 *            the boolean op
+	 * @return the query condition
+	 */
+	public static QueryCondition geqt(LocalDate value, BooleanOp booleanOp) {
+		return new GreaterEqualsThan(value, booleanOp);
+	}
+
+	/**
+	 * Create a greate equals than condition '>='.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the query condition
+	 */
+	public static QueryCondition geqt(LocalDateTime value) {
+		return new GreaterEqualsThan(value);
+	}
+
+	/**
+	 * Create a greate equals than condition '>='.
+	 *
+	 * @param value
+	 *            the value
+	 * @param booleanOp
+	 *            the boolean op
+	 * @return the query condition
+	 */
+	public static QueryCondition geqt(LocalDateTime value, BooleanOp booleanOp) {
+		return new GreaterEqualsThan(value, booleanOp);
+	}
+
+	/**
 	 * Create a less than condition '<'.
 	 *
 	 * @param value
@@ -276,6 +374,21 @@ public abstract class QueryConditions {
 		return new LessThan(value);
 	}
 
+	public static QueryCondition lt(LocalDate value) {
+		return new LessThan(value);
+	}
+
+	/**
+	 * Create a less than condition '<'.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the query condition
+	 */
+	public static QueryCondition lt(LocalDateTime value) {
+		return new LessThan(value);
+	}
+
 	/**
 	 * Create a less than condition '<'.
 	 *
@@ -286,6 +399,23 @@ public abstract class QueryConditions {
 	 * @return the query condition
 	 */
 	public static QueryCondition lt(Date value, BooleanOp booleanOp) {
+		return new LessThan(value, booleanOp);
+	}
+
+	public static QueryCondition lt(LocalDate value, BooleanOp booleanOp) {
+		return new LessThan(value, booleanOp);
+	}
+
+	/**
+	 * Create a less than condition '<'.
+	 *
+	 * @param value
+	 *            the value
+	 * @param booleanOp
+	 *            the boolean op
+	 * @return the query condition
+	 */
+	public static QueryCondition lt(LocalDateTime value, BooleanOp booleanOp) {
 		return new LessThan(value, booleanOp);
 	}
 
@@ -322,6 +452,53 @@ public abstract class QueryConditions {
 	 */
 	public static QueryCondition leqt(Date value) {
 		return new LessEqualsThan(value);
+	}
+
+	/**
+	 * Create a less equals than condition '<='.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the query condition
+	 */
+	public static QueryCondition leqt(LocalDate value) {
+		return new LessEqualsThan(value);
+	}
+
+	/**
+	 * Create a less equals than condition '<='.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the query condition
+	 */
+	public static QueryCondition leqt(LocalDateTime value) {
+		return new LessEqualsThan(value);
+	}
+
+	/**
+	 * Create a less equals than condition '<='.
+	 *
+	 * @param value
+	 *            the value
+	 * @param booleanOp
+	 *            the boolean op
+	 * @return the query condition
+	 */	public static QueryCondition leqt(LocalDate value, BooleanOp booleanOp) {
+		return new LessEqualsThan(value, booleanOp);
+	}
+
+	/**
+	 * Create a less equals than condition '<='.
+	 *
+	 * @param value
+	 *            the value
+	 * @param booleanOp
+	 *            the boolean op
+	 * @return the query condition
+	 */
+	public static QueryCondition leqt(LocalDateTime value, BooleanOp booleanOp) {
+		return new LessEqualsThan(value, booleanOp);
 	}
 
 	/**

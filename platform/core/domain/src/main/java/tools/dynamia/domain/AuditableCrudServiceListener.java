@@ -19,6 +19,7 @@ package tools.dynamia.domain;
 import tools.dynamia.domain.util.CrudServiceListenerAdapter;
 import tools.dynamia.integration.sterotypes.Listener;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Listener
@@ -33,15 +34,15 @@ public class AuditableCrudServiceListener extends CrudServiceListenerAdapter<Aud
      */
     @Override
     public void beforeUpdate(Auditable entity) {
-        entity.setLastUpdate(new Date());
+        entity.setLastUpdate(LocalDateTime.now());
     }
 
     @Override
     public void beforeCreate(Auditable entity) {
         if (entity.getCreationDate() == null || entity.getCreationTime() == null) {
-            Date now = new Date();
-            entity.setCreationDate(now);
-            entity.setCreationTime(now);
+            var now = LocalDateTime.now();
+            entity.setCreationDate(now.toLocalDate());
+            entity.setCreationTime(now.toLocalTime());
         }
     }
 }

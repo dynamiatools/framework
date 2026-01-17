@@ -76,6 +76,22 @@ public class LessThan extends AbstractQueryCondition<Object> {
         super(value);
     }
 
+    public LessThan(LocalDateTime value, BooleanOp booleanOp) {
+        super(value, booleanOp);
+    }
+
+    public LessThan(LocalDateTime value) {
+        super(value);
+    }
+
+    public LessThan(LocalDate value, BooleanOp booleanOp) {
+        super(value, booleanOp);
+    }
+
+    public LessThan(LocalDate value) {
+        super(value);
+    }
+
     /* (non-Javadoc)
      * @see com.dynamia.tools.domain.query.AbstractQueryCondition#getOperator()
      */

@@ -40,6 +40,8 @@ import tools.dynamia.web.util.HttpUtils;
 
 import java.io.Serial;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -81,17 +83,13 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     @ManyToOne
     @NotNull
     private AccountType type;
-    @Temporal(jakarta.persistence.TemporalType.DATE)
-    private Date expirationDate;
-    private AccountStatus status = AccountStatus.NEW;
-    @Temporal(jakarta.persistence.TemporalType.TIMESTAMP)
-    private Date statusDate;
-    @Temporal(jakarta.persistence.TemporalType.TIMESTAMP)
-    private Date oldStatusDate;
 
+    private LocalDate expirationDate;
+    private AccountStatus status = AccountStatus.NEW;
+    private LocalDateTime statusDate;
+    private LocalDateTime oldStatusDate;
     private String statusDescription;
-    @Temporal(jakarta.persistence.TemporalType.TIMESTAMP)
-    private Date creationDate = new Date();
+    private LocalDateTime creationDate = LocalDateTime.now();
     private boolean defaultAccount;
     private String skin;
     @ManyToOne
@@ -111,10 +109,9 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     @Max(value = 31, message = "Enter valid day")
     private int paymentDay = 1;
     private BigDecimal paymentValue;
-    @Temporal(jakarta.persistence.TemporalType.DATE)
-    private Date lastPaymentDate;
-    @Temporal(jakarta.persistence.TemporalType.DATE)
-    private Date lastChargeDate;
+
+    private LocalDate lastPaymentDate;
+    private LocalDate lastChargeDate;
     private String phoneNumber;
     private String mobileNumber;
     private String address;
@@ -145,16 +142,15 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     private BigDecimal balance = BigDecimal.ZERO;
     private BigDecimal fixedPaymentValue;
     private BigDecimal discount;
-    @Temporal(TemporalType.DATE)
-    private Date discountExpire;
+
+    private LocalDate discountExpire;
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<AccountAdditionalService> additionalServices = new ArrayList<>();
     @Column(length = 2000)
     private String customerInfo;
 
-    @Temporal(TemporalType.DATE)
-    private Date lastInvoiceDate;
+    private LocalDate lastInvoiceDate;
 
 
     @Transient
@@ -327,11 +323,11 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
         this.identification = identification;
     }
 
-    public Date getLastPaymentDate() {
+    public LocalDate getLastPaymentDate() {
         return lastPaymentDate;
     }
 
-    public void setLastPaymentDate(Date lastPaymentDate) {
+    public void setLastPaymentDate(LocalDate lastPaymentDate) {
         this.lastPaymentDate = lastPaymentDate;
     }
 
@@ -439,11 +435,11 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
         this.customDomain = customDomain;
     }
 
-    public Date getCreationDate() {
+    public LocalDateTime getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Date creationDate) {
+    public void setCreationDate(LocalDateTime creationDate) {
         this.creationDate = creationDate;
     }
 
@@ -479,11 +475,11 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
         this.type = type;
     }
 
-    public Date getExpirationDate() {
+    public LocalDate getExpirationDate() {
         return expirationDate;
     }
 
-    public void setExpirationDate(Date expirationDate) {
+    public void setExpirationDate(LocalDate expirationDate) {
         this.expirationDate = expirationDate;
     }
 
@@ -495,7 +491,7 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
 
         if (status != this.status) {
             this.oldStatusDate = statusDate;
-            this.statusDate = new Date();
+            this.statusDate = LocalDateTime.now();
             this.oldStatus = this.status;
             AccountStatusCache.statusChanged(this);
         }
@@ -503,11 +499,11 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
 
     }
 
-    public Date getStatusDate() {
+    public LocalDateTime getStatusDate() {
         return statusDate;
     }
 
-    public void setStatusDate(Date statusDate) {
+    public void setStatusDate(LocalDateTime statusDate) {
         this.statusDate = statusDate;
     }
 
@@ -635,18 +631,16 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
         this.fixedPaymentValue = fixedPaymentValue;
     }
 
-    public Date getStartDate() {
-        int day = getPaymentDay();
-        int month = DateTimeUtils.getMonth(getCreationDate());
-        int year = DateTimeUtils.getYear(getCreationDate());
-        return DateTimeUtils.createDate(year, month, day);
+    public LocalDate getStartDate() {
+        return getCreationDate().withDayOfMonth(getPaymentDay()).toLocalDate();
+
     }
 
-    public Date getLastChargeDate() {
+    public LocalDate getLastChargeDate() {
         return lastChargeDate;
     }
 
-    public void setLastChargeDate(Date lastChargeDate) {
+    public void setLastChargeDate(LocalDate lastChargeDate) {
         this.lastChargeDate = lastChargeDate;
     }
 
@@ -666,11 +660,11 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
         this.discount = discount;
     }
 
-    public Date getDiscountExpire() {
+    public LocalDate getDiscountExpire() {
         return discountExpire;
     }
 
-    public void setDiscountExpire(Date discountExpire) {
+    public void setDiscountExpire(LocalDate discountExpire) {
         this.discountExpire = discountExpire;
     }
 
@@ -709,11 +703,11 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
         this.customerInfo = customerInfo;
     }
 
-    public Date getLastInvoiceDate() {
+    public LocalDate getLastInvoiceDate() {
         return lastInvoiceDate;
     }
 
-    public void setLastInvoiceDate(Date lastInvoiceDate) {
+    public void setLastInvoiceDate(LocalDate lastInvoiceDate) {
         this.lastInvoiceDate = lastInvoiceDate;
     }
 
@@ -729,14 +723,14 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     }
 
 
-    public Date getOldStatusDate() {
+    public LocalDateTime getOldStatusDate() {
         if (oldStatusDate == null) {
             oldStatusDate = statusDate;
         }
         return oldStatusDate;
     }
 
-    public void setOldStatusDate(Date oldStatusDate) {
+    public void setOldStatusDate(LocalDateTime oldStatusDate) {
         this.oldStatusDate = oldStatusDate;
     }
 
@@ -834,13 +828,13 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     public int getFreeTrialLeft() {
         int left = 0;
         if (isFreeTrial()) {
-            left = computeTrialLeft(freeTrial, new Date());
+            left = computeTrialLeft(freeTrial, LocalDate.now());
         }
         return left;
     }
 
-    public int computeTrialLeft(int trial, Date date) {
-        long diff = DateTimeUtils.daysBetween(creationDate, date);
+    public int computeTrialLeft(int trial, LocalDate date) {
+        long diff = DateTimeUtils.daysBetween(creationDate.toLocalDate(), date);
         var left = trial - (int) diff;
         if (left < 0) {
             left = 0;
