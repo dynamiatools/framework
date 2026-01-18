@@ -279,6 +279,20 @@ public final class DateTimeUtils {
     }
 
     /**
+     * Calculates the number of days between two {@link LocalDateTime} instances.
+     *
+     * @param date1 the start date
+     * @param date2 the end date
+     * @return the number of days between date1 and date2
+     */
+    public static long daysBetween(LocalDateTime date1, LocalDateTime date2) {
+        if (date1 == null || date2 == null) {
+            throw new IllegalArgumentException("Dates must not be null");
+        }
+        return date1.until(date2, ChronoUnit.DAYS);
+    }
+
+    /**
      * Calculates the number of hours between two {@link Date} instances.
      *
      * @param date1 the start date

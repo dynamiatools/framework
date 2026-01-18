@@ -20,6 +20,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,8 +55,8 @@ public class LocalDateTimeRange implements Serializable {
     /**
      * Instantiates a new date range.
      *
-     * @param startDate the end date
-     * @param endDateTime   the start date
+     * @param startDate   the end date
+     * @param endDateTime the start date
      */
     public LocalDateTimeRange(LocalDateTime startDate, LocalDateTime endDateTime) {
         super();
@@ -63,6 +64,34 @@ public class LocalDateTimeRange implements Serializable {
         this.endDateTime = endDateTime;
     }
 
+    /**
+     * Today date range from start of day to end of day
+     *
+     * @return the local date range
+     */
+    public static LocalDateTimeRange today() {
+        return new LocalDateTimeRange(LocalDate.now().atStartOfDay(), LocalDate.now().atTime(LocalTime.MAX));
+    }
+
+    /**
+     * Yesterday date range from start of day to end of day
+     *
+     * @return the local date range
+     */
+    public static LocalDateTimeRange yesterday() {
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        return new LocalDateTimeRange(yesterday.atStartOfDay(), yesterday.atTime(LocalTime.MAX));
+    }
+
+    /**
+     * Tomorrow date range from start of day to end of day
+     *
+     * @return the local date range
+     */
+    public static LocalDateTimeRange tomorrow() {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        return new LocalDateTimeRange(tomorrow.atStartOfDay(), tomorrow.atTime(LocalTime.MAX));
+    }
 
     /**
      * Gets the end date.
@@ -72,7 +101,6 @@ public class LocalDateTimeRange implements Serializable {
     public LocalDateTime getEndDateTime() {
         return endDateTime;
     }
-
 
 
     /**
@@ -105,7 +133,8 @@ public class LocalDateTimeRange implements Serializable {
 
     public long getDaysBetween() {
 
-        return DateTimeUtils.daysBetween(startDateTime.toLocalDate(), endDateTime.toLocalDate());    }
+        return DateTimeUtils.daysBetween(startDateTime.toLocalDate(), endDateTime.toLocalDate());
+    }
 
 
     public long getMonthsBetween() {
