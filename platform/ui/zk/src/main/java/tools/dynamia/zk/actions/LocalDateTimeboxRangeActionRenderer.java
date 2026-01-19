@@ -56,6 +56,7 @@ public class LocalDateTimeboxRangeActionRenderer extends ZKActionRenderer<Compon
         }
         dateRangebox.setTooltiptext(action.getLocalizedDescription(Messages.getDefaultLocale()));
         dateRangebox.addEventListener(Events.ON_CHANGE, event -> fireActionEvent(dateRangebox, action, actionEventBuilder));
+        dateRangebox.addEventListener(Events.ON_OK, event -> fireActionEvent(dateRangebox, action, actionEventBuilder));
 
         super.configureProperties(dateRangebox, action);
 

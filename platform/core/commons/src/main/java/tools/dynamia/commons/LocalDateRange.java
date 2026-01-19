@@ -103,6 +103,46 @@ public class LocalDateRange implements Serializable {
     }
 
     /**
+     * Creates a LocalDateRange for the entire last month.
+     * The range spans from the first day to the last day of the previous month.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * // If today is 2026-01-18
+     * LocalDateRange range = LocalDateRange.lastMonth();
+     * // Returns: range from 2025-12-01 to 2025-12-31
+     * }</pre>
+     *
+     * @return a LocalDateRange covering the entire last month
+     */
+    public static LocalDateRange lastMonth() {
+        LocalDate now = LocalDate.now();
+        LocalDate firstDayOfLastMonth = now.minusMonths(1).withDayOfMonth(1);
+        LocalDate lastDayOfLastMonth = firstDayOfLastMonth.withDayOfMonth(firstDayOfLastMonth.lengthOfMonth());
+        return new LocalDateRange(firstDayOfLastMonth, lastDayOfLastMonth);
+    }
+
+    /**
+     * Creates a LocalDateRange for the entire next month.
+     * The range spans from the first day to the last day of the next month.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * // If today is 2026-01-18
+     * LocalDateRange range = LocalDateRange.nextMonth();
+     * // Returns: range from 2026-02-01 to 2026-02-28
+     * }</pre>
+     *
+     * @return a LocalDateRange covering the entire next month
+     */
+    public static LocalDateRange nextMonth() {
+        LocalDate now = LocalDate.now();
+        LocalDate firstDayOfNextMonth = now.plusMonths(1).withDayOfMonth(1);
+        LocalDate lastDayOfNextMonth = firstDayOfNextMonth.withDayOfMonth(firstDayOfNextMonth.lengthOfMonth());
+        return new LocalDateRange(firstDayOfNextMonth, lastDayOfNextMonth);
+    }
+
+    /**
      * Gets the end date.
      *
      * @return the end date

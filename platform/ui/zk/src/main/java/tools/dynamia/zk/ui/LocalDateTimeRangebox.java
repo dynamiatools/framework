@@ -43,17 +43,27 @@ public class LocalDateTimeRangebox extends Span {
         super.setStyle("display: inline");
         this.value = value;
         this.start = new Datebox();
+        this.start.setWidth("140px");
         this.end = new Datebox();
+        this.end.setWidth("140px");
         appendChild(start);
         appendChild(end);
-        start.addEventListener(Events.ON_CHANGE, this::fireEvent);
-        end.addEventListener(Events.ON_CHANGE, this::fireEvent);
+        start.addEventListener(Events.ON_CHANGE, this::fireChangeEvent);
+        end.addEventListener(Events.ON_CHANGE, this::fireChangeEvent);
+        start.addEventListener(Events.ON_OK, this::fireOkEvent);
+        end.addEventListener(Events.ON_OK, this::fireOkEvent);
         setShowTodayLink(true);
     }
 
-    private void fireEvent(Event e) {
+    private void fireChangeEvent(Event e) {
         if (start.getValue() != null && end.getValue() != null) {
             Events.postEvent(Events.ON_CHANGE, this, getValue());
+        }
+    }
+
+    private void fireOkEvent(Event e) {
+        if (start.getValue() != null && end.getValue() != null) {
+            Events.postEvent(Events.ON_OK, this, getValue());
         }
     }
 
