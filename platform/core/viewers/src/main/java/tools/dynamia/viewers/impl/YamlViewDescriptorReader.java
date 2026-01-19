@@ -29,6 +29,7 @@ import tools.dynamia.viewers.util.Viewers;
 
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -104,6 +105,10 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
         TYPE_MAP.put(FIELD_CLASS, Class.class);
         TYPE_MAP.put("string", String.class);
         TYPE_MAP.put("bigdecimal", BigDecimal.class);
+        TYPE_MAP.put("localdate", java.time.LocalDate.class);
+        TYPE_MAP.put("localdatetime", LocalDateTime.class);
+        TYPE_MAP.put("localtime", java.time.LocalTime.class);
+
     }
 
     /*
@@ -399,11 +404,15 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
      * @param field      the field
      */
     protected void parseFieldClassAlias(Map<?, ?> fieldProps, Field field) {
-        if (fieldProps != null && fieldProps.get(FIELD_CLASS) != null
+        if (field.getFieldClass()==null && fieldProps != null && fieldProps.get(FIELD_CLASS) != null
                 && fieldProps.get(FIELD_CLASS) instanceof String) {
             try {
                 String className = fieldProps.get(FIELD_CLASS).toString();
-                field.setFieldClass(Class.forName(className.trim()));
+                Class<?> fieldClass = TYPE_MAP.get(className.toLowerCase().trim());
+                if (fieldClass == null) {
+                    fieldClass = Class.forName(className.trim());
+                }
+                field.setFieldClass(fieldClass);
             } catch (Exception e) {
                 logger.warn("Cannot parse Class name for field " + field.getName() + ". Exception: " + e.getMessage());
             }

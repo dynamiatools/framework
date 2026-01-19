@@ -496,7 +496,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     }
 
     public boolean hasParameter(String param) {
-        return getParams().get(param) == null;
+        return getParams().get(param) != null;
     }
 
     /*
