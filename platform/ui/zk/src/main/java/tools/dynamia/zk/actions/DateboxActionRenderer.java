@@ -16,6 +16,7 @@
  */
 package tools.dynamia.zk.actions;
 
+import org.jspecify.annotations.NonNull;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Datebox;
 import tools.dynamia.actions.Action;
@@ -26,6 +27,7 @@ import tools.dynamia.web.util.HttpUtils;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * @author Mario A. Serrano Leones
@@ -36,13 +38,23 @@ public class DateboxActionRenderer extends ZKActionRenderer<Datebox> {
     public Datebox render(final Action action, final ActionEventBuilder actionEventBuilder) {
         final Datebox box = new Datebox(new Date());
         box.setTooltiptext(action.getLocalizedDescription(Messages.getDefaultLocale()));
-        box.addEventListener(Events.ON_CHANGE, event -> Actions.run(action,actionEventBuilder,box,box.getValue(), Map.of("date",box.getValue())));
+        box.addEventListener(Events.ON_CHANGE, event -> Actions.run(action,actionEventBuilder,box, getValue(box), Map.of("date", getValue(box))));
 
         if (HttpUtils.isSmartphone()) {
             box.setWidth("100%");
         }
+        box.setTimeZone(TimeZone.getTimeZone(Messages.getDefaultTimeZone()));
+        box.setFormat(getFormat());
         super.configureProperties(box, action);
         return box;
+    }
+
+    protected   @NonNull String getFormat() {
+        return Datebox.DEFAULT_FORMAT;
+    }
+
+    protected Object getValue(Datebox box) {
+        return box.getValue();
     }
 
 }

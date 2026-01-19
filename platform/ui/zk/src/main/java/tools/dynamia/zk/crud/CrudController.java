@@ -463,6 +463,9 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
      */
     @Override
     public QueryParameters getParams() {
+        if (params == null) {
+            params = new QueryParameters();
+        }
         return params;
     }
 
@@ -492,6 +495,10 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
         return getParams().get(param);
     }
 
+    public boolean hasParameter(String param) {
+        return getParams().get(param) == null;
+    }
+
     /*
      * (non-Javadoc)
      *
@@ -502,11 +509,12 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     @Override
     public void setParemeter(String key, Object value) {
         if (value != null) {
-            params.put(key, value);
+            params.add(key, value);
         } else {
             params.remove(key);
         }
     }
+
 
     @Override
     public DataSet getQueryResult() {

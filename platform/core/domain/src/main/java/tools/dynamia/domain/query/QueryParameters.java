@@ -19,6 +19,7 @@ package tools.dynamia.domain.query;
 import tools.dynamia.commons.BeanSorter;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -483,5 +484,66 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
         }
         return clone;
     }
+
+    //Typed add methods
+    public QueryParameters addLocalDate(String key, LocalDate value) {
+        put(key, value);
+        return this;
+    }
+
+    public QueryParameters addLocalDateTime(String key, java.time.LocalDateTime value) {
+        put(key, value);
+        return this;
+    }
+
+    public QueryParameters addLocalTime(String key, java.time.LocalTime value) {
+        put(key, value);
+        return this;
+    }
+
+    public QueryParameters addBoolean(String key, Boolean value) {
+        put(key, value);
+        return this;
+    }
+
+    public QueryParameters addDouble(String key, Double value) {
+        put(key, value);
+        return this;
+    }
+
+    public QueryParameters addString(String key, String value) {
+        put(key, value);
+        return this;
+    }
+
+    public QueryParameters addInteger(String key, Integer value) {
+        put(key, value);
+        return this;
+    }
+
+    public QueryParameters addLong(String key, Long value) {
+        put(key, value);
+        return this;
+    }
+
+    public QueryParameters addFloat(String key, Float value) {
+        put(key, value);
+        return this;
+    }
+
+    public QueryParameters addDate(String key, Date value) {
+        put(key, value);
+        return this;
+    }
+
+    public <T> QueryParameters add(String key, Class<T> clazz, T value) {
+        if (value.getClass().isAssignableFrom(clazz)) {
+            put(key, value);
+            return this;
+        }else{
+            throw new IllegalArgumentException("Value is not of type " + clazz.getName());
+        }
+    }
+
 
 }
