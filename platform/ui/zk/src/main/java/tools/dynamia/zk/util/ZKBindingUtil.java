@@ -125,6 +125,9 @@ public class ZKBindingUtil {
 
         if (bindingAttribute == null) {
             bindingAttribute = BindingComponentIndex.getInstance().getAttribute(component.getClass());
+            if (bindingAttribute == null) {
+                throw new IllegalArgumentException("Binding attribute  for component " + component.getClass() + " is null");
+            }
         }
 
         if (converterExpression != null) {
@@ -146,11 +149,8 @@ public class ZKBindingUtil {
 
         }
 
-        binder.addPropertyLoadBindings(component, bindingAttribute, expression, null, null, null, converterExpression,
-                null);
-
+        binder.addPropertyLoadBindings(component, bindingAttribute, expression, null, null, null, converterExpression, null);
         if (!(component instanceof Label) && !(component instanceof Image) && !(component instanceof LoadableOnly) && !(component instanceof A)) {
-
             binder.addPropertySaveBindings(component, bindingAttribute, expression, null, saveAfterCmds, null,
                     converterExpression, null, null, null);
         }

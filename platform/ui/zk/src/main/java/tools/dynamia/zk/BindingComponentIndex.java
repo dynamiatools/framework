@@ -42,7 +42,9 @@ public class BindingComponentIndex extends HashSetMultiMap<String, String> {
                 DateRangebox.class,
                 DecimalboxCalculator.class,
                 Calculator.class,
-                Colorbox.class);
+                Colorbox.class,
+                LocalDateRangebox.class,
+                LocalDateTimeRangebox.class);
 
         instance.put("selectedItem", Combobox.class, Listbox.class, Radiogroup.class);
         instance.put("checked", Checkbox.class);
