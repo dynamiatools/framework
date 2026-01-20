@@ -20,6 +20,10 @@ import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.Containers;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
 /**
  * @author Mario A. Serrano Leones
  */
@@ -27,16 +31,20 @@ public class ReportFiller {
 
     private static final LoggingService logger = new SLF4JLoggingService(ReportFiller.class);
 
+    private static final List<Consumer<ReportDescriptor>> preFillConsumers = new ArrayList<>();
+
     /**
      *
      */
     public static Report fill(ReportDescriptor reportDescriptor) {
         ReportCompiler compiler = getReportCompiler(reportDescriptor);
+        preFillConsumers.forEach(c -> c.accept(reportDescriptor));
         return compiler.fill(reportDescriptor);
     }
 
     public static Report fill(ReportDescriptor reportDescriptor, boolean inMemory) {
         ReportCompiler compiler = getReportCompiler(reportDescriptor);
+        preFillConsumers.forEach(c -> c.accept(reportDescriptor));
         return compiler.fill(reportDescriptor, inMemory);
     }
 
@@ -60,6 +68,10 @@ public class ReportFiller {
                     + ReportCompiler.class.getName() + " interface like tools.dynamia.app.JasperReportCompiler ");
         }
         return compiler;
+    }
+
+    public static void beforeFill(Consumer<ReportDescriptor> consumer) {
+        preFillConsumers.add(consumer);
     }
 
 

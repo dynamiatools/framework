@@ -18,6 +18,10 @@ package tools.dynamia.reports;
 
 import tools.dynamia.integration.ms.GenericMessage;
 
+/**
+ * Report Descriptor Message
+ * @author Mario A. Serrano Leones
+ */
 public class ReportDescriptorMessage extends GenericMessage<ReportDescriptor> {
 
 	private static final String THROW_EXCEPTIONS = "throwExceptions";

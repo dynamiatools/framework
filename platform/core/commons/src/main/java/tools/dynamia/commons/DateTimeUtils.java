@@ -854,7 +854,7 @@ public final class DateTimeUtils {
             return ((java.sql.Date) input).toLocalDate();
         } else {
             Instant instant = input.toInstant();
-            ZonedDateTime zdt = instant.atZone(ZoneId.systemDefault());
+            ZonedDateTime zdt = instant.atZone(Messages.getDefaultTimeZone());
             return zdt.toLocalDate();
         }
     }
@@ -948,11 +948,11 @@ public final class DateTimeUtils {
         if (input instanceof java.sql.Date) {
             instant = Instant.ofEpochMilli(input.getTime());
         } else if (input instanceof Time) {
-            instant = ((Time) input).toLocalTime().atDate(LocalDate.of(1970, 1, 1)).atZone(ZoneId.systemDefault()).toInstant();
+            instant = ((Time) input).toLocalTime().atDate(LocalDate.of(1970, 1, 1)).atZone(Messages.getDefaultTimeZone()).toInstant();
         } else {
             instant = input.toInstant();
         }
-        ZonedDateTime zdt = instant.atZone(ZoneId.systemDefault());
+        ZonedDateTime zdt = instant.atZone(Messages.getDefaultTimeZone());
         return zdt.toLocalDateTime();
     }
 
@@ -1002,7 +1002,7 @@ public final class DateTimeUtils {
         } else {
             instant = input.toInstant();
         }
-        ZonedDateTime zdt = instant.atZone(ZoneId.systemDefault());
+        ZonedDateTime zdt = instant.atZone(Messages.getDefaultTimeZone());
         return zdt.toLocalTime();
     }
 
@@ -1038,7 +1038,7 @@ public final class DateTimeUtils {
         if (input == null) {
             return null;
         }
-        return toInstant(input, ZoneId.systemDefault());
+        return toInstant(input, Messages.getDefaultTimeZone());
     }
 
     /**
@@ -1083,7 +1083,7 @@ public final class DateTimeUtils {
         if (localDate == null) {
             return null;
         }
-        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        return Date.from(localDate.atStartOfDay(Messages.getDefaultTimeZone()).toInstant());
     }
 
     /**
@@ -1093,7 +1093,14 @@ public final class DateTimeUtils {
         if (localDateTime == null) {
             return null;
         }
-        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        return Date.from(localDateTime.atZone(Messages.getDefaultTimeZone()).toInstant());
+    }
+
+    public static Date toDate(LocalTime input) {
+        if (input == null) {
+            return null;
+        }
+        return Date.from(input.atDate(LocalDate.of(1970, 1, 1)).atZone(Messages.getDefaultTimeZone()).toInstant());
     }
 
     /**
@@ -1103,7 +1110,7 @@ public final class DateTimeUtils {
         if (date == null) {
             return null;
         }
-        return Date.from(toLocalDate(date).atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
+        return Date.from(toLocalDate(date).atTime(23, 59, 59).atZone(Messages.getDefaultTimeZone()).toInstant());
     }
 
     /**
@@ -1113,7 +1120,7 @@ public final class DateTimeUtils {
         if (date == null) {
             return null;
         }
-        return Date.from(toLocalDate(date).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        return Date.from(toLocalDate(date).atStartOfDay().atZone(Messages.getDefaultTimeZone()).toInstant());
     }
 
     public static LocalDateTime getStartOfDay(LocalDate date) {

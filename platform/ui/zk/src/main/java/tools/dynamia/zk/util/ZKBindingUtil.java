@@ -125,9 +125,7 @@ public class ZKBindingUtil {
 
         if (bindingAttribute == null) {
             bindingAttribute = BindingComponentIndex.getInstance().getAttribute(component.getClass());
-            if (bindingAttribute == null) {
-                throw new IllegalArgumentException("Binding attribute  for component " + component.getClass() + " is null");
-            }
+
         }
 
         if (converterExpression != null) {

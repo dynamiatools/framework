@@ -963,7 +963,7 @@ public final class BeanUtils {
         }
 
         String name = type.getName();
-        return name.startsWith("java.lang") || name.startsWith("java.util") || name.startsWith("java.math") || name.startsWith("java.sql");
+        return name.startsWith("java.lang") || name.startsWith("java.util") || name.startsWith("java.math") || name.startsWith("java.sql") || name.startsWith("java.time");
 
     }
 
