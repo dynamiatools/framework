@@ -9,7 +9,7 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
-import tools.dynamia.app.controllers.CrudServiceRestController;
+import tools.dynamia.app.controllers.AbstractCrudServiceRestController;
 import tools.dynamia.domain.EntityUtilsProvider;
 import tools.dynamia.domain.jpa.JpaCrudService;
 import tools.dynamia.domain.jpa.JpaEntityUtilsProvider;
@@ -62,10 +62,6 @@ public class CrudTestConfiguration {
         return new JpaCrudService(null);
     }
 
-    @Bean
-    public CrudServiceRestController crudServiceRestController(CrudService crudService) {
-        return new CrudServiceRestController(crudService);
-    }
 
     @Bean
     public EntityUtilsProvider entityUtilsProvider() {

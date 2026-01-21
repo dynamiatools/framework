@@ -20,17 +20,16 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 public class DynamiaToolsAutoConfiguration {
 
     /**
-     * Logger instance using SLF4J for this auto-configuration class.
-     */
-    private LoggingService logger = new SLF4JLoggingService(DynamiaToolsAutoConfiguration.class);
-
-    /**
      * Constructs a new {@code DynamiaToolsAutoConfiguration} and logs the startup message.
      * <p>
      * This constructor is called by the Spring container during application context initialization.
      * </p>
      */
     public DynamiaToolsAutoConfiguration() {
+        /**
+         * Logger instance using SLF4J for this auto-configuration class.
+         */
+        LoggingService logger = new SLF4JLoggingService(DynamiaToolsAutoConfiguration.class);
         logger.info("Starting DynamiaTools auto configuration");
     }
 

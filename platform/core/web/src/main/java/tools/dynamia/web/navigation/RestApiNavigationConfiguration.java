@@ -17,7 +17,7 @@ import tools.dynamia.navigation.Page;
 import java.lang.reflect.Method;
 import java.util.List;
 
-@Configuration
+
 public class RestApiNavigationConfiguration {
 
 

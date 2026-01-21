@@ -15,7 +15,7 @@ import tools.dynamia.navigation.ModuleContainer;
 import java.lang.reflect.Method;
 import java.util.List;
 
-@Configuration
+
 public class PageNavigationConfiguration {
 
     public static final String PAGE_URI = "/page/";
@@ -38,7 +38,7 @@ public class PageNavigationConfiguration {
         container.getModules().forEach(module ->
                 module.forEachPage(p -> {
                     var route = PAGE_URI + p.getPrettyVirtualPath();
-                    logger.info("Register route for " + route);
+                    logger.info("Register PAGE route for " + route);
 
                     var info = RequestMappingInfo.paths(route)
                             .methods(RequestMethod.GET)

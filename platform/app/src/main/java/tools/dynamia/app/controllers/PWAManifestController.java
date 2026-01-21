@@ -1,6 +1,7 @@
 package tools.dynamia.app.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import tools.dynamia.web.pwa.PWAManifest;
 
@@ -14,10 +15,12 @@ import tools.dynamia.web.pwa.PWAManifest;
  *   <li>GET /manifest.json - Returns the PWA manifest</li>
  * </ul>
  *
+ * When needed register using @Bean in a configuration class:
+ *
  * @author Mario A. Serrano Leones
  * @since 2023
  */
-@RestController
+@ResponseBody
 public class PWAManifestController {
 
     /**

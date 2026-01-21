@@ -32,13 +32,10 @@ import tools.dynamia.io.IOUtils;
 import tools.dynamia.io.Resource;
 import tools.dynamia.navigation.Module;
 import tools.dynamia.navigation.ModuleProvider;
-import tools.dynamia.templates.ApplicationTemplate;
-import tools.dynamia.templates.ApplicationTemplates;
 import tools.dynamia.web.pwa.PWAIcon;
 import tools.dynamia.web.pwa.PWAManifest;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -53,13 +50,8 @@ import java.util.Properties;
 public class RootAppConfiguration {
 
     @Autowired
-    private List<ApplicationTemplate> templates;
-
-    @Autowired
     private Environment environment;
 
-    @Autowired(required = false)
-    private ApplicationConfigurationProperties appCfgProps;
 
     private final LoggingService logger = new SLF4JLoggingService();
 
@@ -95,7 +87,7 @@ public class RootAppConfiguration {
      * @return the default LoggingService implementation
      */
     @Bean
-    @Primary
+    @ConditionalOnMissingBean(LoggingService.class)
     public LoggingService defaultLoggingService() {
         return logger;
     }
@@ -118,7 +110,7 @@ public class RootAppConfiguration {
      * @return the ApplicationInfo instance for the application
      */
     @Bean
-    public ApplicationInfo applicationInfo() {
+    public ApplicationInfo applicationInfo(ApplicationConfigurationProperties appCfgProps) {
         try {
             logger.info("Initializing Application Info");
             ApplicationInfo applicationInfo = null;
@@ -130,14 +122,12 @@ public class RootAppConfiguration {
             }
 
             if (applicationInfo.getName() == null) {
-                applicationInfo.setName(environment.getProperty("spring.application.name"));
+                applicationInfo.setName(getEnvProperty("spring.application.name"));
             }
             if (applicationInfo.getName() == null || applicationInfo.getName().isEmpty()) {
                 applicationInfo.setName("DynamiaTools App");
             }
 
-            ApplicationTemplate template = ApplicationTemplates.findTemplate(applicationInfo.getTemplate(), templates);
-            template.init();
 
             logger.info("Application Info Loaded: " + applicationInfo);
             return applicationInfo;
@@ -147,16 +137,7 @@ public class RootAppConfiguration {
         }
     }
 
-    /**
-     * Provides an empty {@link ModuleProvider} bean if none is registered.
-     *
-     * @return a ModuleProvider that returns a dummy module with a random name and message
-     */
-    @Bean
-    @ConditionalOnMissingBean(ModuleProvider.class)
-    public ModuleProvider emptyModuleProvider() {
-        return () -> new Module(StringUtils.randomString(), "No modules registered");
-    }
+
 
     /**
      * Provides the primary {@link LocaleProvider} bean using the system locale.
@@ -180,33 +161,18 @@ public class RootAppConfiguration {
         return new SystemTimeZoneProvider();
     }
 
-    /**
-     * Provides a session-scoped {@link UserInfo} bean if none is registered.
-     *
-     * @return a new UserInfo instance for the session
-     */
-    @Bean("userInfo")
-    @SessionScope
-    @ConditionalOnMissingBean(UserInfo.class)
-    public UserInfo userInfo() {
-        return new UserInfo();
-    }
 
 
-    @Bean
-    @ConditionalOnMissingBean(PWAManifest.class)
-    public PWAManifest defaultManifest(ApplicationInfo applicationInfo) {
-        return PWAManifest.builder()
-                .name(applicationInfo.getName())
-                .shortName(applicationInfo.getShortName())
-                .startUrl("/")
-                .display("standalone")
-                .description(applicationInfo.getDescription())
-                .addIcon(PWAIcon.builder()
-                        .src(applicationInfo.getDefaultIcon())
-                        .build()
-                )
-                .build();
+    public String getEnvProperty(String key) {
+        if(environment!=null) {
+            return environment.getProperty(key);
+        }else{
+            var property = System.getProperty(key);
+            if(property==null){
+                property=System.getenv(key);
+            }
+            return property;
+        }
     }
 
 }

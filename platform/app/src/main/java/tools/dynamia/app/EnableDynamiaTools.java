@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  * <p>
  * {@code EnableDynamiaTools} is a meta-annotation for Spring Boot applications that enables and configures the DynamiaTools framework,
  * including integration with ZK (ZKoss) UI components and other core features. When placed on a configuration class, this annotation
- * automatically imports the {@link DynamiaAppConfiguration}, which sets up beans, services, and infrastructure required for DynamiaTools.
+ * automatically imports the {@link DynamiaBaseConfiguration}, which sets up beans, services, and infrastructure required for DynamiaTools.
  * </p>
  *
  * <p>
@@ -61,7 +61,7 @@ import java.lang.annotation.Target;
  * <b>How it works:</b>
  * <ul>
  *   <li>At runtime, Spring detects this annotation on a {@code @Configuration} or {@code @SpringBootApplication} class.</li>
- *   <li>Spring imports {@link DynamiaAppConfiguration}, which registers all necessary beans and configuration for DynamiaTools.</li>
+ *   <li>Spring imports {@link DynamiaBaseConfiguration}, which registers all necessary beans and configuration for DynamiaTools.</li>
  *   <li>No additional configuration is required; simply annotate your main class.</li>
  * </ul>
  * </p>
@@ -87,7 +87,7 @@ import java.lang.annotation.Target;
  * <p>
  * <b>See Also:</b>
  * <ul>
- *   <li>{@link DynamiaAppConfiguration}</li>
+ *   <li>{@link DynamiaBaseConfiguration}</li>
  *   <li><a href="https://github.com/dynamia/tools">DynamiaTools GitHub</a></li>
  *   <li><a href="https://dynamia.tools">DynamiaTools Documentation</a></li>
  * </ul>
@@ -110,7 +110,7 @@ import java.lang.annotation.Target;
  * </ul>
  * </p>
  *
- * @see DynamiaAppConfiguration
+ * @see DynamiaToolsWebApplication
  * @see org.springframework.context.annotation.Import
  * @see org.springframework.boot.SpringApplication
  * @see org.springframework.boot.autoconfigure.SpringBootApplication
@@ -120,6 +120,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Import(DynamiaAppConfiguration.class)
+@Import(DynamiaToolsWebApplication.class)
 public @interface EnableDynamiaTools {
 }

@@ -31,10 +31,10 @@ import java.util.List;
  * @author Mario A. Serrano Leones
  * @since 2023
  */
-@RestController
+
 @RequestMapping(value = "/crud-service/{className}", consumes = "application/json", produces = "application/json")
 @Tag(name = "DynamiaCrudService")
-public class CrudServiceRestController {
+public abstract class AbstractCrudServiceRestController {
 
     /**
      * Service for CRUD operations.
@@ -49,7 +49,7 @@ public class CrudServiceRestController {
      * Constructs a new {@code CrudServiceRestController} with the given CRUD service.
      * @param crudService the CRUD service to use
      */
-    public CrudServiceRestController(CrudService crudService) {
+    public AbstractCrudServiceRestController(CrudService crudService) {
         this.crudService = crudService;
     }
 

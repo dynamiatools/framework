@@ -21,6 +21,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
+import tools.dynamia.app.reports.JasperReportCompiler;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.services.impl.NoOpCrudService;
 import tools.dynamia.integration.ms.MessageService;
@@ -29,15 +30,17 @@ import tools.dynamia.integration.search.DefaultSearchService;
 import tools.dynamia.integration.search.NoOpSearchProvider;
 import tools.dynamia.integration.search.SearchResultProvider;
 import tools.dynamia.integration.search.SearchService;
+import tools.dynamia.reports.ReportCompiler;
 import tools.dynamia.templates.TemplateEngine;
+import tools.dynamia.web.navigation.RestApiNavigationConfiguration;
 
 /**
  * @author Mario A. Serrano Leones
  */
 @ComponentScan(value = {"tools.dynamia", "com.dynamia", "com.dynamiasoluciones"})
 @EnableConfigurationProperties(ApplicationConfigurationProperties.class)
-@Import({RootAppConfiguration.class, MvcConfiguration.class})
-public class DynamiaAppConfiguration {
+@Import(RestApiNavigationConfiguration.class)
+public class DynamiaBaseConfiguration extends RootAppConfiguration {
 
 
     @Bean
@@ -68,6 +71,25 @@ public class DynamiaAppConfiguration {
     @ConditionalOnMissingBean(SearchResultProvider.class)
     public SearchResultProvider defaultSearchProvider() {
         return new NoOpSearchProvider();
+    }
+
+
+    @Bean
+    @ConditionalOnMissingBean(ReportCompiler.class)
+    public ReportCompiler reportCompiler() {
+        return new JasperReportCompiler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(TemplateEngine.class)
+    public TemplateEngine templateEngine() {
+        return new VelocityTemplateEngine();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(SearchResultProvider.class)
+    public SearchService searchService() {
+        return new DefaultSearchService();
     }
 
 }
