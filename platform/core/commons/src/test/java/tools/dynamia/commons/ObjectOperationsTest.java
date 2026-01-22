@@ -552,12 +552,12 @@ public class ObjectOperationsTest {
      */
     @Test
     public void testIsStandardClass() {
-        assertTrue(ObjectOperations.isStantardClass(String.class));
-        assertTrue(ObjectOperations.isStantardClass(Integer.class));
-        assertTrue(ObjectOperations.isStantardClass(Date.class));
-        assertTrue(ObjectOperations.isStantardClass(int.class));
-        assertFalse(ObjectOperations.isStantardClass(DummyClass.class));
-        assertFalse(ObjectOperations.isStantardClass(null));
+        assertTrue(ObjectOperations.isStandardClass(String.class));
+        assertTrue(ObjectOperations.isStandardClass(Integer.class));
+        assertTrue(ObjectOperations.isStandardClass(Date.class));
+        assertTrue(ObjectOperations.isStandardClass(int.class));
+        assertFalse(ObjectOperations.isStandardClass(DummyClass.class));
+        assertFalse(ObjectOperations.isStandardClass(null));
     }
 
     /**

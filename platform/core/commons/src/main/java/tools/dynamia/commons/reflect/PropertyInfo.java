@@ -153,7 +153,7 @@ public class PropertyInfo implements Serializable {
      * @return true if the property is a standard Java class
      */
     public boolean isStandardClass() {
-        return ObjectOperations.isStantardClass(getType());
+        return ObjectOperations.isStandardClass(getType());
     }
 
     /**

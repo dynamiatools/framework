@@ -215,7 +215,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                 cellValue = ObjectOperations.invokeBooleanGetMethod(data, field.getName());
             } else {
                 cellValue = ObjectOperations.invokeGetMethod(data, field.getName());
-                if (cellValue != null && !ObjectOperations.isStantardClass(cellValue.getClass())) {
+                if (cellValue != null && !ObjectOperations.isStandardClass(cellValue.getClass())) {
                     cellValue = ObjectOperations.getInstanceName(cellValue);
                 }
             }

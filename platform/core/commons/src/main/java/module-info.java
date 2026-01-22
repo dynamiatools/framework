@@ -14,6 +14,7 @@ open module tools.dynamia.commons {
     requires java.sql;
     requires com.fasterxml.jackson.datatype.jsr310;
     requires spring.beans;
+    requires spring.core;
 
 
 }

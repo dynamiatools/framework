@@ -19,6 +19,7 @@ package tools.dynamia.commons;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.util.ClassUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.AccessMode;
@@ -144,7 +145,7 @@ public final class ObjectOperations {
      */
     public static <T> T newInstance(final Class<T> clazz) {
         try {
-            return clazz.getDeclaredConstructor().newInstance();
+            return BeanUtils.instantiateClass(clazz);
         } catch (Exception e) {
             throw new ReflectionException(e);
         }
@@ -155,15 +156,16 @@ public final class ObjectOperations {
      *
      * @param <T>   the generic type
      * @param clazz the clazz
+     * @param args  the constructor arguments
      * @return the t
      */
     public static <T> T newInstance(final Class<T> clazz, Object... args) {
         try {
-            Class[] argClass = new Class[args.length];
+            Class<?>[] argClass = new Class<?>[args.length];
             for (int i = 0; i < args.length; i++) {
                 argClass[i] = args[i].getClass();
             }
-            return clazz.getDeclaredConstructor(argClass).newInstance(args);
+            return BeanUtils.instantiateClass(clazz.getDeclaredConstructor(argClass), args);
         } catch (Exception e) {
             throw new ReflectionException(e);
         }
@@ -241,20 +243,16 @@ public final class ObjectOperations {
      * @return the object
      */
     public static Object invokeGetMethod(final Object bean, final String propertyName) {
-        Object result = null;
-
         if (bean instanceof BeanMap) {
-            result = ((BeanMap) bean).get(propertyName);
-        } else if (propertyName.contains(".")) {
-            final int dotIndex = propertyName.indexOf('.');
-            final String subProperty = propertyName.substring(0, dotIndex);
-            final Object subBean = invokeMethod(bean, formatGetMethod(subProperty));
-            final String rest = propertyName.substring(dotIndex + 1);
-            result = invokeGetMethod(subBean, rest);
-        } else {
-            result = invokeMethod(bean, formatGetMethod(propertyName));
+            return ((BeanMap) bean).get(propertyName);
         }
-        return result;
+
+        try {
+            BeanWrapper wrapper = new BeanWrapperImpl(bean);
+            return wrapper.getPropertyValue(propertyName);
+        } catch (Exception e) {
+            throw new ReflectionException(e);
+        }
     }
 
     /**
@@ -273,18 +271,8 @@ public final class ObjectOperations {
      * @return the object
      */
     public static Object invokeBooleanGetMethod(final Object bean, final String propertyName) {
-        Object result = null;
-        if (propertyName.contains(".")) {
-            final int dotIndex = propertyName.indexOf('.');
-            final String subProperty = propertyName.substring(0, dotIndex);
-            final Object subBean = invokeMethod(bean, formatGetMethod(subProperty));
-            final String rest = propertyName.substring(dotIndex + 1);
-            result = invokeBooleanGetMethod(subBean, rest);
-        } else {
-            result = invokeMethod(bean, formatBooleanGetMethod(propertyName));
-        }
-
-        return result;
+        // BeanWrapper handles both isXXX and getXXX methods automatically
+        return invokeGetMethod(bean, propertyName);
     }
 
     /**
@@ -320,59 +308,21 @@ public final class ObjectOperations {
      * @param name  the name
      * @param value the value
      */
-    @SuppressWarnings("unchecked")
     public static void invokeSetMethod(final Object bean, final String name, final Object value) {
         if (bean instanceof BeanMap) {
             ((BeanMap) bean).set(name, value);
             return;
         }
 
-
-        String realName = name;
-        Object realBean = bean;
-
-        if (name.contains(".")) {
-            final String path = name.substring(0, name.lastIndexOf('.'));
-            realBean = invokeGetMethod(bean, path);
-            realName = name.substring(name.lastIndexOf('.') + 1);
-        }
-
-        final String methodName = formatSetMethod(realName);
-        final Class beanClass = realBean.getClass();
-        Class valueClass = null;
-        Object realValue = null;
-        Method method = null;
-
-        if (value instanceof ValueWrapper valueWrapper) {
-            valueClass = valueWrapper.valueClass();
-            realValue = valueWrapper.value();
-        } else {
-            valueClass = value.getClass();
-            realValue = value;
-        }
-
         try {
-            method = beanClass.getMethod(methodName, valueClass);
-        } catch (NoSuchMethodException e) {
-            if (isPrimitiveWrapper(valueClass)) {
-                valueClass = getWrappedPrimitiveType(valueClass);
-                try {
-                    method = beanClass.getMethod(methodName, valueClass);
-                } catch (Exception e1) {
-                    throw new ReflectionException(e1);
-                }
+            BeanWrapper wrapper = new BeanWrapperImpl(bean);
+
+            // Handle ValueWrapper for explicit type specification
+            if (value instanceof ValueWrapper valueWrapper) {
+                wrapper.setPropertyValue(name, valueWrapper.value());
             } else {
-                try {
-                    method = beanClass.getMethod(methodName, valueClass.getSuperclass());
-                } catch (Exception e1) {
-                    throw new ReflectionException(e1);
-                }
+                wrapper.setPropertyValue(name, value);
             }
-        }
-
-        method.setAccessible(true);
-        try {
-            method.invoke(realBean, realValue);
         } catch (Exception e) {
             throw new ReflectionException(e);
         }
@@ -868,14 +818,11 @@ public final class ObjectOperations {
         @SuppressWarnings("unchecked") Class<T> sourceClass = (Class<T>) source.getClass();
         T clon = newInstance(sourceClass);
 
-        Map<String, Object> values = getValuesMaps("", source);
-        if (excludedProperties != null) {
-            for (String property : excludedProperties) {
-                values.remove(property);
-            }
+        if (excludedProperties != null && excludedProperties.length > 0) {
+            BeanUtils.copyProperties(source, clon, excludedProperties);
+        } else {
+            BeanUtils.copyProperties(source, clon);
         }
-
-        setupBean(clon, values);
 
         return clon;
     }
@@ -890,8 +837,7 @@ public final class ObjectOperations {
             //noinspection unchecked
             setupBean(bean, (Map) source);
         } else {
-            Map<String, Object> values = getValuesMaps("", source);
-            setupBean(bean, values);
+            BeanUtils.copyProperties(source, bean);
         }
     }
 
@@ -955,7 +901,7 @@ public final class ObjectOperations {
     /**
      * Return if class type is primitive or from standard java packaage
      */
-    public static boolean isStantardClass(Class<?> type) {
+    public static boolean isStandardClass(Class<?> type) {
         if (type == null) {
             return false;
         }
@@ -973,24 +919,40 @@ public final class ObjectOperations {
      * Check if class name is valid. It must be not null, not empty and match with
      * regex [a-zA-Z0-9.]+
      *
-     * @param className
-     * @return
+     * @param className the fully qualified class name to validate
+     * @return true if the class name is valid, false otherwise
      */
     public static boolean isValidClassName(String className) {
         return className != null && !className.isBlank() && className.matches("[a-zA-Z0-9\\\\.]+");
     }
 
     /**
-     * Find class by name. If class is not found or is invalid return null
+     * Find class by name using Spring's ClassUtils for better primitive and array handling.
+     * If class is not found or is invalid return null.
+     *
+     * @param className the fully qualified class name to find
+     * @param classLoader the class loader to use, can be null to use default
+     * @return the Class object, or null if not found or invalid
      */
-    public static Class<?> findClass(String className) {
+    public static Class<?> findClass(String className, ClassLoader classLoader) {
         try {
             if (isValidClassName(className)) {
-                return Class.forName(className);
+                return ClassUtils.forName(className, classLoader);
             }
         } catch (ClassNotFoundException e) {
             return null;
         }
         return null;
+    }
+
+    /**
+     * Find class by name using Spring's ClassUtils for better primitive and array handling.
+     * If class is not found or is invalid return null.
+     *
+     * @param className the fully qualified class name to find
+     * @return the Class object, or null if not found or invalid
+     */
+    public static Class<?> findClass(String className) {
+        return  findClass(className,null);
     }
 }

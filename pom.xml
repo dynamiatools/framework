@@ -57,18 +57,18 @@
 
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
-        <springboot.version>4.0.1</springboot.version>
+        <springboot.version>4.0.2</springboot.version>
         <swagger.version>2.2.38</swagger.version>
         <mongodb.version>1</mongodb.version>
 
         <!-- Web -->
         <zk.version>10.1.0-jakarta</zk.version>
         <dynamia.zk.version>1.1.0</dynamia.zk.version>
-        <aws.version>2.39.5</aws.version>
+        <aws.version>2.41.10</aws.version>
 
         <!--Reports -->
         <jasperreports.version>6.21.4</jasperreports.version>
-        <poi.version>5.4.1</poi.version>
+        <poi.version>5.5.1</poi.version>
         <snakeyaml.version>2.5</snakeyaml.version>
         <zxing.version>3.5.3</zxing.version>
         <velocity.version>2.4.1</velocity.version>
