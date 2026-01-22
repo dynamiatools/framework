@@ -38,9 +38,14 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -953,6 +958,809 @@ public final class ObjectOperations {
      * @return the Class object, or null if not found or invalid
      */
     public static Class<?> findClass(String className) {
-        return  findClass(className,null);
+        return findClass(className, null);
+    }
+
+    // ============================================================================
+    // FUNCTIONAL-STYLE UTILITY METHODS
+    // ============================================================================
+
+    /**
+     * Extracts a property value from each object in a collection.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * List<Person> persons = getPersons();
+     * List<String> names = ObjectOperations.mapProperty(persons, "name");
+     * // Result: ["John", "Jane", "Bob"]
+     * }</pre>
+     *
+     * @param <T>          the type of objects in the collection
+     * @param <R>          the type of the property values
+     * @param collection   the collection of objects
+     * @param propertyName the property name to extract
+     * @return a list of property values
+     */
+    @SuppressWarnings("unchecked")
+    public static <T, R> List<R> mapProperty(Collection<T> collection, String propertyName) {
+        if (collection == null || propertyName == null) {
+            return new ArrayList<>();
+        }
+        return collection.stream()
+                .map(obj -> {
+                    try {
+                        return (R) invokeGetMethod(obj, propertyName);
+                    } catch (Exception e) {
+                        return null;
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Extracts only the specified properties from a bean into a Map.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Person person = getPerson();
+     * Map<String, Object> data = ObjectOperations.mapToMap(person, "name", "email", "age");
+     * // Result: {"name": "John", "email": "john@mail.com", "age": 30}
+     * }</pre>
+     *
+     * @param bean       the source bean
+     * @param properties the property names to extract
+     * @return a map with property names as keys and their values
+     */
+    public static Map<String, Object> mapToMap(Object bean, String... properties) {
+        Map<String, Object> result = new HashMap<>();
+        if (bean == null || properties == null) {
+            return result;
+        }
+
+        for (String property : properties) {
+            try {
+                Object value = invokeGetMethod(bean, property);
+                result.put(property, value);
+            } catch (Exception e) {
+                result.put(property, null);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Transforms a source object to a target class by copying properties.
+     * Creates a new instance of the target class and copies all matching properties.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Person person = getPerson();
+     * PersonDTO dto = ObjectOperations.transform(person, PersonDTO.class);
+     * }</pre>
+     *
+     * @param <S>         the source type
+     * @param <T>         the target type
+     * @param source      the source object
+     * @param targetClass the target class
+     * @return a new instance of target class with copied properties
+     */
+    public static <S, T> T transform(S source, Class<T> targetClass) {
+        if (source == null || targetClass == null) {
+            return null;
+        }
+        T target = newInstance(targetClass);
+        BeanUtils.copyProperties(source, target);
+        return target;
+    }
+
+    /**
+     * Transforms a collection of objects to another type by copying properties.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * List<Person> persons = getPersons();
+     * List<PersonDTO> dtos = ObjectOperations.transformAll(persons, PersonDTO.class);
+     * }</pre>
+     *
+     * @param <S>         the source type
+     * @param <T>         the target type
+     * @param collection  the source collection
+     * @param targetClass the target class
+     * @return a list of transformed objects
+     */
+    public static <S, T> List<T> transformAll(Collection<S> collection, Class<T> targetClass) {
+        if (collection == null || targetClass == null) {
+            return new ArrayList<>();
+        }
+        return collection.stream()
+                .map(source -> transform(source, targetClass))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Finds the first object in a collection where the property matches the given value.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Optional<Person> person = ObjectOperations.findByProperty(persons, "email", "john@mail.com");
+     * }</pre>
+     *
+     * @param <T>          the type of objects in the collection
+     * @param collection   the collection to search
+     * @param propertyName the property name to match
+     * @param value        the value to match
+     * @return an Optional containing the first matching object, or empty if not found
+     */
+    public static <T> Optional<T> findByProperty(Collection<T> collection, String propertyName, Object value) {
+        if (collection == null || propertyName == null) {
+            return Optional.empty();
+        }
+        return collection.stream()
+                .filter(obj -> {
+                    try {
+                        Object propValue = invokeGetMethod(obj, propertyName);
+                        return value == null ? propValue == null : value.equals(propValue);
+                    } catch (Exception e) {
+                        return false;
+                    }
+                })
+                .findFirst();
+    }
+
+    /**
+     * Filters a collection by a property value using a custom predicate.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * List<Person> adults = ObjectOperations.filterByProperty(persons, "age",
+     *     age -> age != null && ((Number)age).intValue() >= 18);
+     * }</pre>
+     *
+     * @param <T>          the type of objects in the collection
+     * @param collection   the collection to filter
+     * @param propertyName the property name to test
+     * @param predicate    the predicate to test property values
+     * @return a filtered list
+     */
+    public static <T> List<T> filterByProperty(Collection<T> collection, String propertyName,
+                                                Predicate<Object> predicate) {
+        if (collection == null || propertyName == null || predicate == null) {
+            return new ArrayList<>();
+        }
+        return collection.stream()
+                .filter(obj -> {
+                    try {
+                        Object propValue = invokeGetMethod(obj, propertyName);
+                        return predicate.test(propValue);
+                    } catch (Exception e) {
+                        return false;
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Filters a collection by matching a property value.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * List<Person> activeUsers = ObjectOperations.filterByProperty(persons, "status", "ACTIVE");
+     * }</pre>
+     *
+     * @param <T>          the type of objects in the collection
+     * @param collection   the collection to filter
+     * @param propertyName the property name to match
+     * @param value        the value to match
+     * @return a filtered list
+     */
+    public static <T> List<T> filterByProperty(Collection<T> collection, String propertyName, Object value) {
+        return filterByProperty(collection, propertyName,
+                propValue -> value == null ? propValue == null : value.equals(propValue));
+    }
+
+    /**
+     * Checks if a bean has a property with a non-null value.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * boolean hasEmail = ObjectOperations.hasProperty(person, "email");
+     * }</pre>
+     *
+     * @param bean         the bean to check
+     * @param propertyName the property name
+     * @return true if property exists and is not null
+     */
+    public static boolean hasProperty(Object bean, String propertyName) {
+        if (bean == null || propertyName == null) {
+            return false;
+        }
+        try {
+            Object value = invokeGetMethod(bean, propertyName);
+            return value != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks if a property value is null.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * boolean isEmailNull = ObjectOperations.isPropertyNull(person, "email");
+     * }</pre>
+     *
+     * @param bean         the bean to check
+     * @param propertyName the property name
+     * @return true if property is null or doesn't exist
+     */
+    public static boolean isPropertyNull(Object bean, String propertyName) {
+        return !hasProperty(bean, propertyName);
+    }
+
+    /**
+     * Checks if a bean matches all property criteria in the map.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * boolean matches = ObjectOperations.matchesProperties(person,
+     *     Map.of("status", "active", "country", "USA"));
+     * }</pre>
+     *
+     * @param bean     the bean to test
+     * @param criteria map of property names to expected values
+     * @return true if all criteria match
+     */
+    public static boolean matchesProperties(Object bean, Map<String, Object> criteria) {
+        if (bean == null || criteria == null || criteria.isEmpty()) {
+            return false;
+        }
+        return criteria.entrySet().stream()
+                .allMatch(entry -> {
+                    try {
+                        Object value = invokeGetMethod(bean, entry.getKey());
+                        Object expected = entry.getValue();
+                        return expected == null ? value == null : expected.equals(value);
+                    } catch (Exception e) {
+                        return false;
+                    }
+                });
+    }
+
+    /**
+     * Checks if specific properties are equal between two beans.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * boolean sameBasicInfo = ObjectOperations.arePropertiesEqual(person1, person2, "name", "email");
+     * }</pre>
+     *
+     * @param bean1      the first bean
+     * @param bean2      the second bean
+     * @param properties the properties to compare
+     * @return true if all specified properties are equal
+     */
+    public static boolean arePropertiesEqual(Object bean1, Object bean2, String... properties) {
+        if (bean1 == null || bean2 == null || properties == null) {
+            return false;
+        }
+        return Stream.of(properties)
+                .allMatch(prop -> {
+                    try {
+                        Object value1 = invokeGetMethod(bean1, prop);
+                        Object value2 = invokeGetMethod(bean2, prop);
+                        return value1 == null ? value2 == null : value1.equals(value2);
+                    } catch (Exception e) {
+                        return false;
+                    }
+                });
+    }
+
+    /**
+     * Groups a collection of objects by a property value.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Map<String, List<Person>> byCountry = ObjectOperations.groupBy(persons, "country");
+     * // Result: {"USA": [person1, person2], "Canada": [person3]}
+     * }</pre>
+     *
+     * @param <T>          the type of objects in the collection
+     * @param collection   the collection to group
+     * @param propertyName the property name to group by
+     * @return a map with property values as keys and lists of objects as values
+     */
+    public static <T> Map<Object, List<T>> groupBy(Collection<T> collection, String propertyName) {
+        if (collection == null || propertyName == null) {
+            return new HashMap<>();
+        }
+        return collection.stream()
+                .collect(Collectors.groupingBy(obj -> {
+                    try {
+                        Object value = invokeGetMethod(obj, propertyName);
+                        return value != null ? value : "null";
+                    } catch (Exception e) {
+                        return "error";
+                    }
+                }));
+    }
+
+    /**
+     * Counts objects grouped by a property value.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Map<String, Long> countByStatus = ObjectOperations.countByProperty(persons, "status");
+     * // Result: {"active": 10, "inactive": 5}
+     * }</pre>
+     *
+     * @param <T>          the type of objects in the collection
+     * @param collection   the collection to count
+     * @param propertyName the property name to group by
+     * @return a map with property values as keys and counts as values
+     */
+    public static <T> Map<Object, Long> countByProperty(Collection<T> collection, String propertyName) {
+        if (collection == null || propertyName == null) {
+            return new HashMap<>();
+        }
+        return collection.stream()
+                .collect(Collectors.groupingBy(obj -> {
+                    try {
+                        Object value = invokeGetMethod(obj, propertyName);
+                        return value != null ? value : "null";
+                    } catch (Exception e) {
+                        return "error";
+                    }
+                }, Collectors.counting()));
+    }
+
+    /**
+     * Sums numeric property values from a collection.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Number totalAge = ObjectOperations.sumProperty(persons, "age");
+     * }</pre>
+     *
+     * @param <T>          the type of objects in the collection
+     * @param collection   the collection to sum
+     * @param propertyName the numeric property name
+     * @return the sum as a Number
+     */
+    public static <T> Number sumProperty(Collection<T> collection, String propertyName) {
+        if (collection == null || propertyName == null) {
+            return 0;
+        }
+        return collection.stream()
+                .mapToDouble(obj -> {
+                    try {
+                        Object value = invokeGetMethod(obj, propertyName);
+                        if (value instanceof Number) {
+                            return ((Number) value).doubleValue();
+                        }
+                    } catch (Exception e) {
+                        // ignore
+                    }
+                    return 0.0;
+                })
+                .sum();
+    }
+
+    /**
+     * Compares two objects by a specific property.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * persons.sort((p1, p2) -> ObjectOperations.compareByProperty(p1, p2, "age"));
+     * }</pre>
+     *
+     * @param obj1         the first object
+     * @param obj2         the second object
+     * @param propertyName the property name to compare
+     * @return negative if obj1 < obj2, zero if equal, positive if obj1 > obj2
+     */
+    @SuppressWarnings("unchecked")
+    public static int compareByProperty(Object obj1, Object obj2, String propertyName) {
+        if (obj1 == null && obj2 == null) return 0;
+        if (obj1 == null) return -1;
+        if (obj2 == null) return 1;
+
+        try {
+            Object value1 = invokeGetMethod(obj1, propertyName);
+            Object value2 = invokeGetMethod(obj2, propertyName);
+
+            if (value1 == null && value2 == null) return 0;
+            if (value1 == null) return -1;
+            if (value2 == null) return 1;
+
+            if (value1 instanceof Comparable) {
+                return ((Comparable<Object>) value1).compareTo(value2);
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return 0;
+    }
+
+    /**
+     * Creates a Comparator for sorting objects by a property.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * persons.sort(ObjectOperations.getComparator("name"));
+     * }</pre>
+     *
+     * @param <T>          the type of objects to compare
+     * @param propertyName the property name to sort by
+     * @return a Comparator for the specified property
+     */
+    public static <T> Comparator<T> getComparator(String propertyName) {
+        return (obj1, obj2) -> compareByProperty(obj1, obj2, propertyName);
+    }
+
+    /**
+     * Creates a Comparator for sorting objects by a property in descending order.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * persons.sort(ObjectOperations.getComparatorDesc("age"));
+     * }</pre>
+     *
+     * @param <T>          the type of objects to compare
+     * @param propertyName the property name to sort by
+     * @return a Comparator for the specified property in descending order
+     */
+    public static <T> Comparator<T> getComparatorDesc(String propertyName) {
+        return (obj1, obj2) -> compareByProperty(obj2, obj1, propertyName);
+    }
+
+    /**
+     * Executes an action if a property exists and is not null.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * ObjectOperations.ifPropertyPresent(person, "email",
+     *     email -> sendEmail(email.toString()));
+     * }</pre>
+     *
+     * @param bean         the bean to check
+     * @param propertyName the property name
+     * @param action       the action to execute with the property value
+     */
+    public static void ifPropertyPresent(Object bean, String propertyName, Consumer<Object> action) {
+        if (bean == null || propertyName == null || action == null) {
+            return;
+        }
+        try {
+            Object value = invokeGetMethod(bean, propertyName);
+            if (value != null) {
+                action.accept(value);
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    /**
+     * Converts a bean to a flat Map including nested properties with dot notation.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Map<String, Object> flat = ObjectOperations.toFlatMap(person);
+     * // Result: {"name": "John", "address.city": "NY", "address.country": "USA"}
+     * }</pre>
+     *
+     * @param bean the bean to flatten
+     * @return a flat map with dot notation for nested properties
+     */
+    public static Map<String, Object> toFlatMap(Object bean) {
+        return toFlatMap(bean, "", new HashMap<>());
+    }
+
+    /**
+     * Helper method for recursive flattening of bean properties.
+     *
+     * @param bean   the current bean
+     * @param prefix the current prefix for nested properties
+     * @param result the accumulator map
+     * @return the flat map
+     */
+    private static Map<String, Object> toFlatMap(Object bean, String prefix, Map<String, Object> result) {
+        if (bean == null) {
+            return result;
+        }
+
+        List<PropertyInfo> properties = getPropertiesInfo(bean.getClass());
+        for (PropertyInfo prop : properties) {
+            try {
+                Object value = invokeGetMethod(bean, prop);
+                String key = prefix.isEmpty() ? prop.getName() : prefix + "." + prop.getName();
+
+                if (value == null || prop.isStandardClass() || prop.isEnum()) {
+                    result.put(key, value);
+                } else if (!prop.isCollection() && !prop.isArray()) {
+                    // Recursively flatten nested objects
+                    toFlatMap(value, key, result);
+                }
+            } catch (Exception e) {
+                // ignore properties that can't be read
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Creates a bean from a flat Map with dot notation for nested properties.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Map<String, Object> flat = Map.of("name", "John", "address.city", "NY");
+     * Person person = ObjectOperations.fromFlatMap(flat, Person.class);
+     * }</pre>
+     *
+     * @param <T>         the target type
+     * @param flatMap     the flat map with dot notation
+     * @param targetClass the target class
+     * @return a new instance with properties set from the flat map
+     */
+    public static <T> T fromFlatMap(Map<String, Object> flatMap, Class<T> targetClass) {
+        if (flatMap == null || targetClass == null) {
+            return null;
+        }
+
+        T instance = newInstance(targetClass);
+
+        // Group properties by root and nested
+        Map<String, Object> directProps = new HashMap<>();
+        Map<String, Map<String, Object>> nestedProps = new HashMap<>();
+
+        for (Map.Entry<String, Object> entry : flatMap.entrySet()) {
+            String key = entry.getKey();
+            if (key.contains(".")) {
+                String root = key.substring(0, key.indexOf('.'));
+                String rest = key.substring(key.indexOf('.') + 1);
+                nestedProps.computeIfAbsent(root, k -> new HashMap<>()).put(rest, entry.getValue());
+            } else {
+                directProps.put(key, entry.getValue());
+            }
+        }
+
+        // Set direct properties
+        setupBean(instance, directProps);
+
+        // Set nested properties
+        for (Map.Entry<String, Map<String, Object>> entry : nestedProps.entrySet()) {
+            try {
+                Object nestedBean = invokeGetMethod(instance, entry.getKey());
+                if (nestedBean == null) {
+                    PropertyInfo propInfo = getPropertyInfo(targetClass, entry.getKey());
+                    if (propInfo != null) {
+                        nestedBean = newInstance(propInfo.getType());
+                        invokeSetMethod(instance, entry.getKey(), nestedBean);
+                    }
+                }
+                if (nestedBean != null) {
+                    setupBean(nestedBean, entry.getValue());
+                }
+            } catch (Exception e) {
+                // ignore properties that can't be set
+            }
+        }
+
+        return instance;
+    }
+
+    /**
+     * Returns a Stream of PropertyValue objects for all properties of a bean.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * ObjectOperations.streamProperties(person)
+     *     .filter(PropertyValue::isPresent)
+     *     .forEach(pv -> System.out.println(pv.name() + ": " + pv.value()));
+     * }</pre>
+     *
+     * @param bean the bean to stream properties from
+     * @return a Stream of PropertyValue objects
+     */
+    public static Stream<PropertyValue> streamProperties(Object bean) {
+        if (bean == null) {
+            return Stream.empty();
+        }
+        return getPropertiesInfo(bean.getClass()).stream()
+                .map(prop -> {
+                    try {
+                        Object value = invokeGetMethod(bean, prop);
+                        return new PropertyValue(prop.getName(), value, prop.getType());
+                    } catch (Exception e) {
+                        return new PropertyValue(prop.getName(), null, prop.getType());
+                    }
+                });
+    }
+
+    /**
+     * Returns a Stream of property names for a class.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * List<String> propertyNames = ObjectOperations.streamPropertyNames(Person.class)
+     *     .filter(name -> !name.equals("class"))
+     *     .collect(Collectors.toList());
+     * }</pre>
+     *
+     * @param clazz the class to get property names from
+     * @return a Stream of property names
+     */
+    public static Stream<String> streamPropertyNames(Class<?> clazz) {
+        if (clazz == null) {
+            return Stream.empty();
+        }
+        return getPropertiesInfo(clazz).stream()
+                .map(PropertyInfo::getName);
+    }
+
+    /**
+     * Invokes a method only if it exists, returning an Optional result.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Optional<Object> result = ObjectOperations.invokeIfExists(bean, "customMethod", param1);
+     * }</pre>
+     *
+     * @param bean       the bean object
+     * @param methodName the method name
+     * @param args       the method arguments
+     * @return an Optional containing the result, or empty if method doesn't exist
+     */
+    public static Optional<Object> invokeIfExists(Object bean, String methodName, Object... args) {
+        if (bean == null || methodName == null) {
+            return Optional.empty();
+        }
+        try {
+            Object result = invokeMethod(bean, methodName, args);
+            return Optional.ofNullable(result);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Checks if a bean has a method with the specified name and parameter types.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * if (ObjectOperations.hasMethod(person, "setActive", boolean.class)) {
+     *     // method exists
+     * }
+     * }</pre>
+     *
+     * @param bean       the bean object
+     * @param methodName the method name
+     * @param paramTypes the parameter types
+     * @return true if the method exists
+     */
+    public static boolean hasMethod(Object bean, String methodName, Class<?>... paramTypes) {
+        if (bean == null || methodName == null) {
+            return false;
+        }
+        try {
+            bean.getClass().getMethod(methodName, paramTypes);
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Gets the type of a property safely wrapped in an Optional.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Optional<Class<?>> type = ObjectOperations.getPropertyType(Person.class, "email");
+     * }</pre>
+     *
+     * @param clazz        the class to inspect
+     * @param propertyName the property name
+     * @return an Optional containing the property type, or empty if not found
+     */
+    public static Optional<Class<?>> getPropertyType(Class<?> clazz, String propertyName) {
+        if (clazz == null || propertyName == null) {
+            return Optional.empty();
+        }
+        try {
+            PropertyInfo info = getPropertyInfo(clazz, propertyName);
+            return Optional.ofNullable(info != null ? info.getType() : null);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Validates multiple properties using predicates.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Map<String, Boolean> validation = ObjectOperations.validateProperties(person, Map.of(
+     *     "email", email -> email != null && email.toString().contains("@"),
+     *     "age", age -> age != null && ((Number)age).intValue() >= 18
+     * ));
+     * }</pre>
+     *
+     * @param bean       the bean to validate
+     * @param validators map of property names to validation predicates
+     * @return a map of property names to validation results (true = valid)
+     */
+    public static Map<String, Boolean> validateProperties(Object bean, Map<String, Predicate<Object>> validators) {
+        Map<String, Boolean> results = new HashMap<>();
+        if (bean == null || validators == null) {
+            return results;
+        }
+
+        validators.forEach((property, predicate) -> {
+            try {
+                Object value = invokeGetMethod(bean, property);
+                results.put(property, predicate.test(value));
+            } catch (Exception e) {
+                results.put(property, false);
+            }
+        });
+
+        return results;
+    }
+
+    /**
+     * Sets a property and returns the bean for fluent API usage.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Person person = new Person();
+     * ObjectOperations.with(person, "name", "John");
+     * ObjectOperations.with(person, "email", "john@mail.com");
+     * ObjectOperations.with(person, "age", 30);
+     * }</pre>
+     *
+     * @param <T>      the bean type
+     * @param bean     the bean object
+     * @param property the property name
+     * @param value    the value to set
+     * @return the bean object for chaining
+     */
+    public static <T> T with(T bean, String property, Object value) {
+        if (bean != null && property != null) {
+            try {
+                invokeSetMethod(bean, property, value);
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        return bean;
+    }
+
+    /**
+     * Creates a copy of an object and applies modifications.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Person modified = ObjectOperations.copyWith(person, p -> {
+     *     p.setName("Jane");
+     *     p.setEmail("jane@mail.com");
+     * });
+     * }</pre>
+     *
+     * @param <T>      the bean type
+     * @param source   the source object
+     * @param modifier the consumer to modify the copy
+     * @return a modified copy of the source
+     */
+    public static <T> T copyWith(T source, Consumer<T> modifier) {
+        if (source == null) {
+            return null;
+        }
+        T copy = clone(source);
+        if (modifier != null) {
+            modifier.accept(copy);
+        }
+        return copy;
     }
 }
+
