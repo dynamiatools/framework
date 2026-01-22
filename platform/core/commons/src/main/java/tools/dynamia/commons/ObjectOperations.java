@@ -20,6 +20,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.AccessMode;
@@ -36,7 +37,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -385,40 +385,63 @@ public final class ObjectOperations {
     }
 
     /**
-     * Invoke an arbirtrary method from bean object pass as parameter.
+     * Invokes a method on the specified bean object by name, supporting variable arguments.
+     * This method uses Spring's {@link ReflectionUtils} for improved AOT compatibility.
      *
-     * @param bean       the bean
-     * @param methodName the method name
-     * @param args       the args
-     * @return the object
+     * <p>
+     * The method automatically determines parameter types from the provided arguments
+     * and handles method accessibility. If the method is not found or invocation fails,
+     * a {@link ReflectionException} is thrown.
+     * </p>
+     *
+     * Example:
+     * <pre>{@code
+     * Customer customer = new Customer();
+     * // Invoke setter
+     * ObjectOperations.invokeMethod(customer, "setName", "John Doe");
+     * // Invoke getter
+     * String name = (String) ObjectOperations.invokeMethod(customer, "getName");
+     * }</pre>
+     *
+     * @param bean the target object on which to invoke the method
+     * @param methodName the name of the method to invoke
+     * @param args optional arguments to pass to the method
+     * @return the result of the method invocation, or null if the method returns void
+     * @throws ReflectionException if the method is not found or invocation fails
      */
     public static Object invokeMethod(final Object bean, final String methodName, final Object... args) {
-        Object value = null;
-
-        if (bean != null && methodName != null) {
-            try {
-                Method method = null;
-
-                if (args != null && args.length > 0) {
-                    Class[] argClass = new Class[args.length];
-                    for (int i = 0; i < args.length; i++) {
-                        argClass[i] = args[i].getClass();
-                    }
-                    method = bean.getClass().getMethod(methodName, argClass);
-                    method.setAccessible(true);
-                    value = method.invoke(bean, args);
-                } else {
-                    method = bean.getClass().getMethod(methodName);
-                    method.setAccessible(true);
-                    value = method.invoke(bean);
-                }
-            } catch (Exception ex) {
-                throw new ReflectionException(ex);
-            }
+        if (bean == null || methodName == null) {
+            return null;
         }
 
-        return value;
+        try {
+            Method method;
+
+            if (args != null && args.length > 0) {
+                // Determine parameter types from arguments
+                Class<?>[] argClasses = new Class[args.length];
+                for (int i = 0; i < args.length; i++) {
+                    argClasses[i] = args[i].getClass();
+                }
+                // Use Spring ReflectionUtils for better AOT compatibility
+                method = ReflectionUtils.findMethod(bean.getClass(), methodName, argClasses);
+            } else {
+                method = ReflectionUtils.findMethod(bean.getClass(), methodName);
+            }
+
+            if (method == null) {
+                throw new NoSuchMethodException("Method '" + methodName + "' not found in class " + bean.getClass().getName());
+            }
+
+            // Make method accessible and invoke
+            ReflectionUtils.makeAccessible(method);
+            return ReflectionUtils.invokeMethod(method, bean, args != null ? args : new Object[0]);
+
+        } catch (Exception ex) {
+            throw new ReflectionException(ex);
+        }
     }
+
 
     /**
      * Invoke an accessor method that follow the JavaBean convention Example:
@@ -699,10 +722,28 @@ public final class ObjectOperations {
     }
 
     /**
-     * Gets the property info.
+     * Converts a JavaBeans PropertyDescriptor into a PropertyInfo object containing
+     * detailed metadata about the property.
      *
-     * @param prop the prop
-     * @return the property info
+     * <p>
+     * This helper method extracts and analyzes property characteristics including:
+     * <ul>
+     *   <li>Property name and type</li>
+     *   <li>Access mode (read-only, write-only, or read-write)</li>
+     *   <li>Owner class (where the property is declared)</li>
+     *   <li>Generic type information (for collections and parameterized types)</li>
+     *   <li>Collection detection</li>
+     * </ul>
+     * </p>
+     *
+     * <p>
+     * The 'class' property is automatically filtered out and will return null.
+     * Properties without a defined type are also excluded.
+     * </p>
+     *
+     * @param prop the PropertyDescriptor from JavaBeans introspection
+     * @return a PropertyInfo object with complete metadata, or null if the property
+     *         should be filtered (e.g., 'class' property or properties without a type)
      */
     private static PropertyInfo getPropertyInfo(final PropertyDescriptor prop) {
         PropertyInfo info = null;
@@ -747,10 +788,35 @@ public final class ObjectOperations {
     }
 
     /**
-     * Gets the properties info.
+     * Retrieves comprehensive metadata for all JavaBean properties of the specified class.
+     * This method introspects the class using Java's Introspector API and returns a list
+     * of {@link PropertyInfo} objects containing details about each property (name, type,
+     * access mode, generic type information, etc.).
      *
-     * @param clazz the clazz
-     * @return the properties info
+     * <p>
+     * Properties are discovered through getter and setter methods following JavaBeans conventions.
+     * The 'class' property is automatically excluded. Results are cached internally to optimize
+     * performance on repeated calls for the same class.
+     * </p>
+     *
+     * <p>
+     * This method is thread-safe and can be called concurrently for different classes.
+     * </p>
+     *
+     * Example:
+     * <pre>{@code
+     * List<PropertyInfo> properties = ObjectOperations.getPropertiesInfo(Customer.class);
+     * for (PropertyInfo prop : properties) {
+     *     System.out.println("Property: " + prop.name() + ", Type: " + prop.type());
+     * }
+     * }</pre>
+     *
+     * @param clazz the target class to introspect for property information
+     * @return an unmodifiable list of {@link PropertyInfo} objects representing all discovered properties,
+     *         never null but may be empty if the class has no properties
+     * @throws ReflectionException if an error occurs during introspection of the class
+     * @see PropertyInfo
+     * @see ClassReflectionInfo
      */
     public static List<PropertyInfo> getPropertiesInfo(final Class clazz) {
         var cached = ClassReflectionInfo.getFromCache(clazz);
@@ -776,50 +842,86 @@ public final class ObjectOperations {
     }
 
     /**
-     * Get the field object from the specified clazz, including all field declared
-     * in the Class clazz or super classes. Field name support navegation, its means
-     * you can get a field from subfieled, ex: getField(employee,"company.name");
+     * Retrieves a Field object from the specified class, including fields declared
+     * in the class itself or any of its superclasses. This method supports nested field
+     * navigation using dot notation.
      *
-     * @param clazz     the clazz
-     * @param fieldName the field name
-     * @return the field
-     * @throws NoSuchFieldException the no such field exception
+     * <p>
+     * This implementation uses Spring's {@link ReflectionUtils} for improved compatibility
+     * with AOT (Ahead-of-Time) compilation and GraalVM native image generation. The field
+     * search traverses the entire class hierarchy automatically.
+     * </p>
+     *
+     * <p>
+     * <strong>Nested field navigation:</strong> You can access nested fields using dot notation.
+     * For example, to get the "name" field from a "company" field in an Employee class:
+     * {@code getField(Employee.class, "company.name")}
+     * </p>
+     *
+     * Example:
+     * <pre>{@code
+     * // Simple field access
+     * Field nameField = ObjectOperations.getField(Customer.class, "name");
+     *
+     * // Nested field access
+     * Field cityField = ObjectOperations.getField(Employee.class, "address.city");
+     * }</pre>
+     *
+     * @param clazz the class to search for the field
+     * @param fieldName the name of the field, supports dot notation for nested fields
+     * @return the Field object matching the specified name
+     * @throws NoSuchFieldException if the field is not found in the class hierarchy
      */
     public static Field getField(final Class clazz, final String fieldName) throws NoSuchFieldException {
-        Field field = null;
-        try {
+        if (fieldName.contains(".")) {
+            // Handle nested field navigation
+            final int dotIndex = fieldName.indexOf('.');
+            final String parentField = fieldName.substring(0, dotIndex);
+            final String childField = fieldName.substring(dotIndex + 1);
 
-            if (fieldName.contains(".")) {
-                final String childField = fieldName.substring(fieldName.indexOf('.') + 1);
-                final String parentField = fieldName.substring(0, fieldName.indexOf('.'));
-                final Class parentFieldClazz = clazz.getDeclaredField(parentField).getType();
-                field = getField(parentFieldClazz, childField);
-            } else {
-                field = clazz.getDeclaredField(fieldName);
+            Field parentFieldObj = ReflectionUtils.findField(clazz, parentField);
+            if (parentFieldObj == null) {
+                throw new NoSuchFieldException("Field '" + parentField + "' not found in class " + clazz.getName());
             }
-        } catch (NoSuchFieldException noSuchFieldException) {
-            Class superClass = clazz.getSuperclass();
-            if (superClass == null) {
-                throw noSuchFieldException;
+
+            return getField(parentFieldObj.getType(), childField);
+        } else {
+            // Use Spring ReflectionUtils for better AOT compatibility
+            Field field = ReflectionUtils.findField(clazz, fieldName);
+            if (field == null) {
+                throw new NoSuchFieldException("Field '" + fieldName + "' not found in class " + clazz.getName());
             }
-            field = getField(superClass, fieldName);
+            return field;
         }
-
-        return field;
     }
 
     /**
-     * Gets the all fields.
+     * Retrieves all fields declared in the specified class and its superclasses.
+     * This method traverses the entire class hierarchy and collects all fields,
+     * with superclass fields appearing first in the returned list.
      *
-     * @param clazz the clazz
-     * @return the all fields
+     * <p>
+     * This implementation uses Spring's {@link ReflectionUtils} for improved compatibility
+     * with AOT (Ahead-of-Time) compilation and GraalVM native image generation.
+     * </p>
+     *
+     * Example:
+     * <pre>{@code
+     * List<Field> fields = ObjectOperations.getAllFields(Customer.class);
+     * for (Field field : fields) {
+     *     System.out.println("Field: " + field.getName() + ", Type: " + field.getType());
+     * }
+     * }</pre>
+     *
+     * @param clazz the class to retrieve fields from
+     * @return a list containing all fields from the class and its superclasses,
+     *         with superclass fields appearing first
      */
     public static List<Field> getAllFields(final Class clazz) {
-        List<Field> allFields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
+        List<Field> allFields = new ArrayList<>();
 
-        if (clazz.getSuperclass() != null) {
-            allFields.addAll(0, getAllFields(clazz.getSuperclass()));
-        }
+        // Use Spring ReflectionUtils to traverse class hierarchy and collect all fields
+        ReflectionUtils.doWithFields(clazz, allFields::add);
 
         return allFields;
 

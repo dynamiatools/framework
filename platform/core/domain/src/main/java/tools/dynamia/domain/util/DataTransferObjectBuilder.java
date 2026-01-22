@@ -79,15 +79,27 @@ public class DataTransferObjectBuilder {
         //empty
     }
 
-    static <D> D buildDTO(Object target, Class<D> dtoClass) {
+    /**
+     * Builds a DTO (Data Transfer Object) from a source entity object.
+     * Automatically transfers all standard properties and handles entity relationships
+     * by converting them to IDs and/or String representations.
+     *
+     * @param <D>       the DTO type
+     * @param target    the source entity object
+     * @param dtoClass  the DTO class to instantiate
+     * @return a new DTO instance with properties copied from the source
+     */
+    public static <D> D buildDTO(Object target, Class<D> dtoClass) {
+        // Create new instance and copy properties (equivalent to transform but available in all versions)
         D dto = ObjectOperations.newInstance(dtoClass);
         ObjectOperations.setupBean(dto, target);
+
+        // Process entity properties that need special handling
         List<PropertyInfo> properties = ObjectOperations.getPropertiesInfo(target.getClass());
         for (PropertyInfo p : properties) {
-            Object value = null;
-            if (p.getField() != null) {
-                value = ObjectOperations.getFieldValue(p.getName(), target);
-            }
+            // Use invokeGetMethod instead of getFieldValue for better performance (uses BeanWrapper)
+            Object value = ObjectOperations.invokeGetMethod(target, p);
+
             if (value != null && DomainUtils.isEntity(value)) {
                 autoTransferIdProperty(dtoClass, dto, p, value);
                 autoTransferStringProperty(dtoClass, dto, p, value);
@@ -99,8 +111,11 @@ public class DataTransferObjectBuilder {
 
     private static <D> void autoTransferUnknowProperty(D dto, PropertyInfo p, Object value) {
         try {
+            // Use invokeGetMethod instead of getFieldValue for better performance with BeanWrapper
+            boolean shouldTransfer = p.getField() == null ||
+                                    ObjectOperations.invokeGetMethod(dto, p) == null;
 
-            if (p.getField() == null || ObjectOperations.getFieldValue(p.getName(), dto) == null) {
+            if (shouldTransfer) {
                 //Find all instances of DataTransferObjectPropertyProvider to auto convert target property value to DTO value
                 Collection<DataTransferObjectPropertyProvider> instances = Containers.get().findObjects(DataTransferObjectPropertyProvider.class);
                 for (DataTransferObjectPropertyProvider atp : instances) {
@@ -110,14 +125,15 @@ public class DataTransferObjectBuilder {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Cannot auto transfer Unknow  property " + dto + " -- >" + p);
+            LOGGER.error("Cannot auto transfer Unknown property " + dto + " --> " + p);
         }
     }
 
     private static <D> void autoTransferStringProperty(Class<D> dtoClass, D dto, PropertyInfo p, Object value) {
         PropertyInfo dtoStringPro = ObjectOperations.getPropertyInfo(dtoClass, p.getName());
         if (dtoStringPro != null && dtoStringPro.is(String.class)) {
-            ObjectOperations.setFieldValue(dtoStringPro, dto, value.toString());
+            // Use invokeSetMethod instead of setFieldValue for better performance with BeanWrapper
+            ObjectOperations.invokeSetMethod(dto, dtoStringPro, value.toString());
         }
     }
 
@@ -131,7 +147,8 @@ public class DataTransferObjectBuilder {
         }
 
         if (dtoIdPro != null && dtoIdPro.is(Serializable.class)) {
-            ObjectOperations.setFieldValue(dtoIdPro, dto, DomainUtils.findEntityId(value));
+            // Use invokeSetMethod instead of setFieldValue for better performance with BeanWrapper
+            ObjectOperations.invokeSetMethod(dto, dtoIdPro, DomainUtils.findEntityId(value));
         }
     }
 }
