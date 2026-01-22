@@ -17,7 +17,7 @@
 
 package tools.dynamia.domain.util;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.PropertyInfo;
@@ -80,13 +80,13 @@ public class DataTransferObjectBuilder {
     }
 
     static <D> D buildDTO(Object target, Class<D> dtoClass) {
-        D dto = BeanUtils.newInstance(dtoClass);
-        BeanUtils.setupBean(dto, target);
-        List<PropertyInfo> properties = BeanUtils.getPropertiesInfo(target.getClass());
+        D dto = ObjectOperations.newInstance(dtoClass);
+        ObjectOperations.setupBean(dto, target);
+        List<PropertyInfo> properties = ObjectOperations.getPropertiesInfo(target.getClass());
         for (PropertyInfo p : properties) {
             Object value = null;
             if (p.getField() != null) {
-                value = BeanUtils.getFieldValue(p.getName(), target);
+                value = ObjectOperations.getFieldValue(p.getName(), target);
             }
             if (value != null && DomainUtils.isEntity(value)) {
                 autoTransferIdProperty(dtoClass, dto, p, value);
@@ -100,7 +100,7 @@ public class DataTransferObjectBuilder {
     private static <D> void autoTransferUnknowProperty(D dto, PropertyInfo p, Object value) {
         try {
 
-            if (p.getField() == null || BeanUtils.getFieldValue(p.getName(), dto) == null) {
+            if (p.getField() == null || ObjectOperations.getFieldValue(p.getName(), dto) == null) {
                 //Find all instances of DataTransferObjectPropertyProvider to auto convert target property value to DTO value
                 Collection<DataTransferObjectPropertyProvider> instances = Containers.get().findObjects(DataTransferObjectPropertyProvider.class);
                 for (DataTransferObjectPropertyProvider atp : instances) {
@@ -115,23 +115,23 @@ public class DataTransferObjectBuilder {
     }
 
     private static <D> void autoTransferStringProperty(Class<D> dtoClass, D dto, PropertyInfo p, Object value) {
-        PropertyInfo dtoStringPro = BeanUtils.getPropertyInfo(dtoClass, p.getName());
+        PropertyInfo dtoStringPro = ObjectOperations.getPropertyInfo(dtoClass, p.getName());
         if (dtoStringPro != null && dtoStringPro.is(String.class)) {
-            BeanUtils.setFieldValue(dtoStringPro, dto, value.toString());
+            ObjectOperations.setFieldValue(dtoStringPro, dto, value.toString());
         }
     }
 
     private static <D> void autoTransferIdProperty(Class<D> dtoClass, D dto, PropertyInfo p, Object value) {
-        PropertyInfo dtoIdPro = BeanUtils.getPropertyInfo(dtoClass, p.getName() + "Id");
+        PropertyInfo dtoIdPro = ObjectOperations.getPropertyInfo(dtoClass, p.getName() + "Id");
         if (dtoIdPro == null) {
-            dtoIdPro = BeanUtils.getPropertyInfo(dtoClass, p.getName() + "_id");
+            dtoIdPro = ObjectOperations.getPropertyInfo(dtoClass, p.getName() + "_id");
         }
         if (dtoIdPro == null) {
-            dtoIdPro = BeanUtils.getPropertyInfo(dtoClass, p.getName() + "ID");
+            dtoIdPro = ObjectOperations.getPropertyInfo(dtoClass, p.getName() + "ID");
         }
 
         if (dtoIdPro != null && dtoIdPro.is(Serializable.class)) {
-            BeanUtils.setFieldValue(dtoIdPro, dto, DomainUtils.findEntityId(value));
+            ObjectOperations.setFieldValue(dtoIdPro, dto, DomainUtils.findEntityId(value));
         }
     }
 }

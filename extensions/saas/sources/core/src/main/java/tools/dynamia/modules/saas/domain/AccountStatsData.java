@@ -17,7 +17,7 @@
 
 package tools.dynamia.modules.saas.domain;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.Descriptor;
 import tools.dynamia.domain.OrderBy;
 import tools.dynamia.domain.jpa.SimpleEntity;
@@ -105,7 +105,7 @@ public class AccountStatsData extends SimpleEntity {
 
     public void load(AccountStats stats) {
         this.lastUpdate = new Date();
-        BeanUtils.setupBean(this, stats);
+        ObjectOperations.setupBean(this, stats);
     }
 
     public String getModule() {

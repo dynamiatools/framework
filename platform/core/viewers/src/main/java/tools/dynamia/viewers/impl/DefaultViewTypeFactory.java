@@ -16,7 +16,7 @@
  */
 package tools.dynamia.viewers.impl;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.SimpleCache;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Component;
@@ -94,7 +94,7 @@ public class DefaultViewTypeFactory implements ViewTypeFactory {
         Class<? extends ViewRenderer> viewRendererClass = viewRenderers.get(viewType.getName());
 
         if (viewRendererClass != null) {
-            return BeanUtils.newInstance(viewRendererClass);
+            return ObjectOperations.newInstance(viewRendererClass);
         } else {
             return viewType.getViewRenderer();
         }

@@ -16,7 +16,7 @@
  */
 package tools.dynamia.commons.collect;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.commons.reflect.ReflectionException;
 
@@ -48,7 +48,7 @@ public class CollectionsUtils {
         Collection<CollectionWrapper> groups = null;
         try {
             //noinspection unchecked
-            groups = BeanUtils.newInstance(collectionClass);
+            groups = ObjectOperations.newInstance(collectionClass);
         } catch (ReflectionException e) {
             groups = new ArrayList<>();
             collectionClass = ArrayList.class;
@@ -62,7 +62,7 @@ public class CollectionsUtils {
 
             if (i == 0) {
                 //noinspection unchecked
-                wrapper = new CollectionWrapper(BeanUtils.newInstance(collectionClass));
+                wrapper = new CollectionWrapper(ObjectOperations.newInstance(collectionClass));
                 groups.add(wrapper);
             }
 
@@ -82,10 +82,10 @@ public class CollectionsUtils {
         Class<? extends Collection> collectionClass = collection.getClass();
 
         Collection<CollectionWrapper> groups = null;
-        PropertyInfo property = BeanUtils.getPropertyInfo(elementClass, fieldToGroup);
+        PropertyInfo property = ObjectOperations.getPropertyInfo(elementClass, fieldToGroup);
         try {
             //noinspection unchecked
-            groups = BeanUtils.newInstance(collectionClass);
+            groups = ObjectOperations.newInstance(collectionClass);
         } catch (ReflectionException e) {
             groups = new ArrayList<>();
             collectionClass = ArrayList.class;
@@ -96,9 +96,9 @@ public class CollectionsUtils {
         for (Object object : collection) {
             Object grouperTarget = null;
             if (property.is(Boolean.class)) {
-                grouperTarget = BeanUtils.invokeBooleanGetMethod(object, fieldToGroup);
+                grouperTarget = ObjectOperations.invokeBooleanGetMethod(object, fieldToGroup);
             } else {
-                grouperTarget = BeanUtils.invokeGetMethod(object, fieldToGroup);
+                grouperTarget = ObjectOperations.invokeGetMethod(object, fieldToGroup);
             }
 
             if (grouper != null && !grouper.equals(grouperTarget)) {
@@ -108,7 +108,7 @@ public class CollectionsUtils {
             if (grouper == null && grouperTarget != null) {
                 grouper = grouperTarget;
                 //noinspection unchecked
-                wrapper = new CollectionWrapper(BeanUtils.newInstance(collectionClass));
+                wrapper = new CollectionWrapper(ObjectOperations.newInstance(collectionClass));
                 wrapper.setName(grouperTarget.toString());
                 wrapper.setValue(grouperTarget);
                 groups.add(wrapper);

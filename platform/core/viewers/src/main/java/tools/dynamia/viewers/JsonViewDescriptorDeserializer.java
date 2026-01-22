@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.PropertyInfo;
@@ -63,7 +63,7 @@ public class JsonViewDescriptorDeserializer extends StdDeserializer<Object> {
     }
 
     private Object parseNode(Class type, JsonNode node, ViewDescriptor viewDescriptor) {
-        @SuppressWarnings("unchecked") Object object = BeanUtils.newInstance(type);
+        @SuppressWarnings("unchecked") Object object = ObjectOperations.newInstance(type);
         for (Field field : Viewers.getFields(viewDescriptor)) {
             PropertyInfo fieldInfo = field.getPropertyInfo();
             String fieldName = field.getName();
@@ -73,29 +73,29 @@ public class JsonViewDescriptorDeserializer extends StdDeserializer<Object> {
             }
 
             if (fieldInfo.isCollection()) {
-                Collection collection = (Collection) BeanUtils.invokeGetMethod(object, fieldInfo);
+                Collection collection = (Collection) ObjectOperations.invokeGetMethod(object, fieldInfo);
                 if (collection == null) {
                     if (fieldInfo.getType() == List.class) {
                         collection = new ArrayList();
                     } else if (fieldInfo.getType() == Set.class) {
                         collection = new HashSet();
                     } else {
-                        collection = (Collection) BeanUtils.newInstance(fieldInfo.getType());
+                        collection = (Collection) ObjectOperations.newInstance(fieldInfo.getType());
                     }
-                    BeanUtils.setFieldValue(fieldInfo, object, collection);
+                    ObjectOperations.setFieldValue(fieldInfo, object, collection);
                 }
 
                 ViewDescriptor collectionDescriptor = Viewers.findViewDescriptor(fieldInfo.getGenericType(), "json-form");
                 if (collectionDescriptor == null) {
                     collectionDescriptor = Viewers.getViewDescriptor(fieldInfo.getGenericType(), "form");
                 }
-                String parentName = BeanUtils.findParentPropertyName(type, fieldInfo.getGenericType());
+                String parentName = ObjectOperations.findParentPropertyName(type, fieldInfo.getGenericType());
                 if (field.getParams().get("parentName") != null) {
                     parentName = field.getParams().get("parentName").toString();
                 }
                 for (JsonNode child : fieldNode) {
                     Object item = parseNode(fieldInfo.getGenericType(), child, collectionDescriptor);
-                    BeanUtils.invokeSetMethod(item, parentName, object);
+                    ObjectOperations.invokeSetMethod(item, parentName, object);
                     //noinspection unchecked
                     collection.add(item);
                 }
@@ -103,7 +103,7 @@ public class JsonViewDescriptorDeserializer extends StdDeserializer<Object> {
             } else {
                 Object fieldValue = getNodeValue(fieldInfo, fieldNode);
                 try {
-                    BeanUtils.invokeSetMethod(object, fieldName, fieldValue);
+                    ObjectOperations.invokeSetMethod(object, fieldName, fieldValue);
                 } catch (ReflectionException e) {
                     LOGGER.warn("Cannot parse json to field " + fieldName + " = " + fieldValue + ": " + e.getMessage());
                 }

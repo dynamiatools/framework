@@ -23,7 +23,7 @@ import org.zkoss.bind.annotation.NotifyChange;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventQueue;
 import org.zkoss.zk.ui.event.EventQueues;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -38,7 +38,7 @@ public class EventQueueSubscriber {
     }
 
     public void loadAnnotations() {
-        Method[] methods = BeanUtils.getMethodsWithAnnotation(target.getClass(), Subscribe.class);
+        Method[] methods = ObjectOperations.getMethodsWithAnnotation(target.getClass(), Subscribe.class);
         for (Method method : methods) {
             loadAnnotation(method);
         }

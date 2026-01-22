@@ -21,7 +21,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.URLable;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
@@ -77,11 +77,11 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
             if (field.isCollection() && fieldInfo != null) {
                 Collection collection = null;
                 try {
-                    collection = (Collection) BeanUtils.invokeGetMethod(value, field.getName());
+                    collection = (Collection) ObjectOperations.invokeGetMethod(value, field.getName());
                     collection.isEmpty();
                 } catch (Throwable e) {
                     if (field.isEntity()) {
-                        String parentName = BeanUtils.findParentPropertyName(viewDescriptor.getBeanClass(), fieldInfo.getGenericType());
+                        String parentName = ObjectOperations.findParentPropertyName(viewDescriptor.getBeanClass(), fieldInfo.getGenericType());
                         if (parentName != null) {
                             collection = DomainUtils.lookupCrudService().find(fieldInfo.getGenericType(), parentName, value);
                         }
@@ -104,7 +104,7 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
 
                 String fieldName = field.getName();
                 try {
-                    Object fieldValue = field.getPropertyInfo() != null && field.getPropertyInfo().is(boolean.class) ? BeanUtils.invokeBooleanGetMethod(value, field.getName()) : BeanUtils.invokeGetMethod(value, fieldName);
+                    Object fieldValue = field.getPropertyInfo() != null && field.getPropertyInfo().is(boolean.class) ? ObjectOperations.invokeBooleanGetMethod(value, field.getName()) : ObjectOperations.invokeGetMethod(value, fieldName);
                     if (fieldInfo != null && fieldInfo.isAnnotationPresent(Reference.class)) {
                         Reference reference = fieldInfo.getAnnotation(Reference.class);
                         EntityReferenceRepository repository = DomainUtils.getEntityReferenceRepositoryByAlias(reference.value());

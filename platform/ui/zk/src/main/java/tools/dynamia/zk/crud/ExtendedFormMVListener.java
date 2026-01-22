@@ -16,7 +16,7 @@
  */
 package tools.dynamia.zk.crud;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.AbstractEntity;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.integration.Containers;
@@ -52,10 +52,10 @@ public class ExtendedFormMVListener extends AbstractExtendedMVListener {
         }
 
         if (extention == null) {
-            extention = BeanUtils.newInstance(beanClass);
+            extention = ObjectOperations.newInstance(beanClass);
         }
 
-        BeanUtils.invokeSetMethod(extention, beanProperty, parentEntity);
+        ObjectOperations.invokeSetMethod(extention, beanProperty, parentEntity);
         return extention;
     }
 

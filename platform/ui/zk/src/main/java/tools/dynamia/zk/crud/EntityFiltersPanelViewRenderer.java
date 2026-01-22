@@ -16,7 +16,7 @@
  */
 package tools.dynamia.zk.crud;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.viewers.View;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.ViewRenderer;
@@ -33,7 +33,7 @@ public class EntityFiltersPanelViewRenderer implements ViewRenderer {
         EntityFiltersPanel filterPanel = new EntityFiltersPanel(descriptor.getBeanClass());
 
         try {
-            BeanUtils.setupBean(filterPanel, descriptor.getParams());
+            ObjectOperations.setupBean(filterPanel, descriptor.getParams());
         } catch (Exception ignored) {
         }
         filterPanel.setValue(value);

@@ -20,7 +20,7 @@ import tools.dynamia.actions.AbstractAction;
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionLoader;
 import tools.dynamia.actions.ApplicationGlobalAction;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.PropertiesContainer;
 import tools.dynamia.commons.reflect.PropertyInfo;
 
@@ -181,7 +181,7 @@ public class ApplicationInfo implements Serializable, PropertiesContainer {
     }
 
     public static ApplicationInfo load(Properties prop) {
-        List<PropertyInfo> propsInfo = BeanUtils.getPropertiesInfo(ApplicationInfo.class);
+        List<PropertyInfo> propsInfo = ObjectOperations.getPropertiesInfo(ApplicationInfo.class);
         ApplicationInfo app = new ApplicationInfo();
         for (PropertyInfo propertyInfo : propsInfo) {
             String value = prop.getProperty(propertyInfo.getName());
@@ -218,7 +218,7 @@ public class ApplicationInfo implements Serializable, PropertiesContainer {
         String customizerClass = getProperty("customizerClass");
         if (customizerClass != null && !customizerClass.isEmpty()) {
             try {
-                ApplicationCustomizer customizer = BeanUtils.newInstance(customizerClass);
+                ApplicationCustomizer customizer = ObjectOperations.newInstance(customizerClass);
                 customizer.customize(this);
             } catch (Exception e) {
                 throw new ApplicationException("Error customizing app", e);
@@ -241,7 +241,7 @@ public class ApplicationInfo implements Serializable, PropertiesContainer {
     public static ApplicationInfo load(ApplicationConfigurationProperties props) {
         var info = new ApplicationInfo();
         if (props != null) {
-            BeanUtils.getValuesMaps(props).forEach((key, value) -> {
+            ObjectOperations.getValuesMaps(props).forEach((key, value) -> {
                 if (value != null) {
                     info.addProperty(key, String.valueOf(value));
                 }

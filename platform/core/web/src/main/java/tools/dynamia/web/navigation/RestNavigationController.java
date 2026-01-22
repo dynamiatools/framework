@@ -28,7 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringPojoParser;
 import tools.dynamia.commons.collect.PagedList;
 import tools.dynamia.commons.logger.AbstractLoggable;
@@ -283,7 +283,7 @@ public class RestNavigationController extends AbstractLoggable {
                 Field field = desc.getField(entry.getKey());
                 if (field != null) {
                     Object fieldValue = JsonViewDescriptorDeserializer.getNodeValue(field.getPropertyInfo(), entry.getValue());
-                    BeanUtils.invokeSetMethod(entity, field.getPropertyInfo(), fieldValue);
+                    ObjectOperations.invokeSetMethod(entity, field.getPropertyInfo(), fieldValue);
                 }
             });
         } catch (IOException e) {

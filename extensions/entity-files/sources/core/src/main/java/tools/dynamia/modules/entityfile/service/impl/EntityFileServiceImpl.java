@@ -28,7 +28,7 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
@@ -246,7 +246,7 @@ public class EntityFileServiceImpl implements EntityFileService {
             for (final String entityClassName : targetEntities) {
                 if (!entityClassName.equals("temporal")) {
                     try {
-                        Object object = BeanUtils.newInstance(entityClassName);
+                        Object object = ObjectOperations.newInstance(entityClassName);
                         if (object instanceof EntityFileAware) {
                             crudService.executeWithinTransaction(() -> {
 

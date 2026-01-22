@@ -28,7 +28,7 @@ import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Span;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.logger.LoggingService;
@@ -184,7 +184,7 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
             resultTable.setItemRenderer((ListitemRenderer<Object>) (item, data, index) -> {
                 String noneLabel = defaultItemLabel != null ? defaultItemLabel : noneText;
                 item.setValue(data);
-                item.setLabel(data != null ? BeanUtils.getInstanceName(data) : noneLabel);
+                item.setLabel(data != null ? ObjectOperations.getInstanceName(data) : noneLabel);
             });
         } else {
             DefaultViewDescriptor resultDescriptor = new DefaultViewDescriptor(entityClass, "table", false);
@@ -375,7 +375,7 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
 
         if (descriptor.getViewCustomizerClass() != null) {
             try {
-                ViewCustomizer customizer = BeanUtils.newInstance(descriptor.getViewCustomizerClass());
+                ViewCustomizer customizer = ObjectOperations.newInstance(descriptor.getViewCustomizerClass());
                 //noinspection unchecked
                 customizer.customize(new ZKWrapperView(this));
             } catch (Exception ignored) {
@@ -424,7 +424,7 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
 
     private void autoboxSelected() {
         if (!autoboxed && entityProperty != null && selected != null) {
-            selected = BeanUtils.invokeGetMethod(selected, BeanUtils.getPropertyInfo(entityClass, entityProperty));
+            selected = ObjectOperations.invokeGetMethod(selected, ObjectOperations.getPropertyInfo(entityClass, entityProperty));
             autoboxed = true;
         }
     }

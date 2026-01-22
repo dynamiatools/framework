@@ -19,7 +19,7 @@ package tools.dynamia.modules.dashboard;
 
 import org.zkoss.zul.Div;
 import tools.dynamia.actions.ActionLoader;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.Containers;
@@ -57,7 +57,7 @@ public class DashboardViewRenderer implements ViewRenderer<List<DashboardWidgetW
         renderFields(dashboard, descriptor, value, columns);
         loadActions(dashboard);
         dashboard.setValue(value);
-        BeanUtils.setupBean(dashboard, descriptor.getParams());
+        ObjectOperations.setupBean(dashboard, descriptor.getParams());
         dashboard.initWidgets();
         loadAccountId(dashboard);
 
@@ -95,7 +95,7 @@ public class DashboardViewRenderer implements ViewRenderer<List<DashboardWidgetW
 
             DashboardWidget widget = getWidget(field);
             DashboardWidgetWindow window = new DashboardWidgetWindow(widget, field);
-            BeanUtils.setupBean(window, field.getParams());
+            ObjectOperations.setupBean(window, field.getParams());
             window.showLoading();
             value.add(window);
             if (field.getParams().containsKey(Viewers.PARAM_SPAN)) {

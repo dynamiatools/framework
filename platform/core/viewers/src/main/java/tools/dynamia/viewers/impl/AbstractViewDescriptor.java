@@ -19,7 +19,7 @@ package tools.dynamia.viewers.impl;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import tools.dynamia.actions.ActionReference;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
@@ -387,7 +387,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
         if (field.getFieldClass() == null) {
             try {
                 logger.debug("Trying to find Field class for field " + field);
-                PropertyInfo info = BeanUtils.getPropertyInfo(beanClass, field.getName());
+                PropertyInfo info = ObjectOperations.getPropertyInfo(beanClass, field.getName());
                 if (info != null) {
                     logger.debug("Field class found: " + info);
                     field.setFieldClass(info.getType());
@@ -596,7 +596,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
      */
     private void createFieldsFromClass() {
         fields.clear();
-        List<PropertyInfo> properties = BeanUtils.getPropertiesInfo(beanClass);
+        List<PropertyInfo> properties = ObjectOperations.getPropertiesInfo(beanClass);
         for (PropertyInfo property : properties) {
             createField(property);
         }
@@ -673,7 +673,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
         fields.clear();
 
         if (classDescriptor != null) {
-            Stream.of(classDescriptor.fields()).map(f -> BeanUtils.getPropertyInfo(beanClass, f)).forEach(this::createField);
+            Stream.of(classDescriptor.fields()).map(f -> ObjectOperations.getPropertyInfo(beanClass, f)).forEach(this::createField);
 
         }
     }

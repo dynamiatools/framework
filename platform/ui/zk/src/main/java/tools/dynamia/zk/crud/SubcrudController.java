@@ -16,7 +16,7 @@
  */
 package tools.dynamia.zk.crud;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.ValueWrapper;
 import tools.dynamia.commons.reflect.ReflectionException;
 import tools.dynamia.crud.CrudControllerException;
@@ -72,7 +72,7 @@ public class SubcrudController<E> extends CrudController<E> implements SubcrudCo
 
     private void inspectParentChildrens() {
         if (parent != null && DomainUtils.findEntityId(parent) == null && childrenName != null) {
-            @SuppressWarnings("unchecked") Collection<E> children = (Collection<E>) BeanUtils.invokeGetMethod(parent, childrenName);
+            @SuppressWarnings("unchecked") Collection<E> children = (Collection<E>) ObjectOperations.invokeGetMethod(parent, childrenName);
             if (children != null) {
                 for (E child : children) {
                     if (DomainUtils.findEntityId(child) == null) {
@@ -166,7 +166,7 @@ public class SubcrudController<E> extends CrudController<E> implements SubcrudCo
     protected void relateParentChild(E newChild, Object parent) {
         try {
 
-            Object object = BeanUtils.invokeGetMethod(parent, childrenName);
+            Object object = ObjectOperations.invokeGetMethod(parent, childrenName);
             if (object != null && object instanceof Collection children) {
                 //noinspection unchecked
                 children.add(newChild);
@@ -187,7 +187,7 @@ public class SubcrudController<E> extends CrudController<E> implements SubcrudCo
      */
     protected void relateChildParent(E newChild, Object parent) {
         try {
-            BeanUtils.invokeSetMethod(newChild, parentName, parent);
+            ObjectOperations.invokeSetMethod(newChild, parentName, parent);
         } catch (ReflectionException e) {
             if (e.getCause().getClass() == NoSuchMethodException.class) {
                 if (parent instanceof ValueWrapper) {

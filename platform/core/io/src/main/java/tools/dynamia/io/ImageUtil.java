@@ -17,7 +17,7 @@
 package tools.dynamia.io;
 
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.io.qr.QRCode;
 import tools.dynamia.io.qr.QRGenerationException;
@@ -170,7 +170,7 @@ public class ImageUtil {
             return Color.decode(colorStr);
         } else {
             try {
-                return (Color) BeanUtils.getField(Color.class, colorStr).get(null);
+                return (Color) ObjectOperations.getField(Color.class, colorStr).get(null);
             } catch (Exception ignored) {
             }
         }

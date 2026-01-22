@@ -31,26 +31,26 @@ public class PolymorphicReflectionTest {
         ParentBean pbean = new ParentBean();
         ParentBean cBean = new ChildBean();
 
-        String result = (String) BeanUtils.invokeGetMethod(pbean, "name");
+        String result = (String) ObjectOperations.invokeGetMethod(pbean, "name");
         Assert.assertEquals("mario", result);
 
-        result = (String) BeanUtils.invokeGetMethod(cBean, "name");
+        result = (String) ObjectOperations.invokeGetMethod(cBean, "name");
         Assert.assertEquals("alejandro", result);
 
-        result = (String) BeanUtils.invokeGetMethod(cBean, "lastName");
+        result = (String) ObjectOperations.invokeGetMethod(cBean, "lastName");
         Assert.assertEquals("serrano", result);
 
     }
 
     @Test
     public void testPolymorphicFieldFromChildToParent() throws NoSuchFieldException {
-        Field field = BeanUtils.getField(ChildBean.class, "name");
+        Field field = ObjectOperations.getField(ChildBean.class, "name");
         Assert.assertNotNull(field);
     }
 
     @Test(expected = NoSuchFieldException.class)
     public void testPolymorphicFieldFromParentToChield() throws NoSuchFieldException {
-        BeanUtils.getField(ParentBean.class, "age");
+        ObjectOperations.getField(ParentBean.class, "age");
     }
 
     @Test

@@ -18,7 +18,7 @@ package tools.dynamia.domain.jpa;
 
 import jakarta.persistence.*;
 import org.hibernate.Hibernate;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.Identifiable;
 import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.domain.query.DataPaginator;
@@ -121,7 +121,7 @@ public abstract class JpaUtils {
         }
 
         if (isJPAEntity(entity)) {
-            for (Field field : BeanUtils.getAllFields(entity.getClass())) {
+            for (Field field : ObjectOperations.getAllFields(entity.getClass())) {
                 if (field.isAnnotationPresent(Id.class)) {
                     try {
                         field.setAccessible(true);
@@ -155,7 +155,7 @@ public abstract class JpaUtils {
             }
 
             //check id type and convert
-            var field = BeanUtils.getFirstFieldWithAnnotation(type, Id.class);
+            var field = ObjectOperations.getFirstFieldWithAnnotation(type, Id.class);
             if (field != null && field.getType() != String.class) {
                 var converter = Converters.getConverter(field.getType());
                 if (converter != null) {
@@ -179,7 +179,7 @@ public abstract class JpaUtils {
      */
     public static <T> EntityGraph<T> createEntityGraph(Class<T> type, EntityManager em) {
         var graph = em.createEntityGraph(type);
-        var properties = BeanUtils.getPropertiesInfo(type);
+        var properties = ObjectOperations.getPropertiesInfo(type);
 
         properties.forEach(p -> {
             if (isToOne(p)) {
@@ -196,7 +196,7 @@ public abstract class JpaUtils {
 
     private static void loadSubgraph(Subgraph<Object> subgraph, PropertyInfo collection) {
         if (collection.getGenericType() != null) {
-            var subproperties = BeanUtils.getPropertiesInfo(collection.getGenericType());
+            var subproperties = ObjectOperations.getPropertiesInfo(collection.getGenericType());
 
             subproperties.forEach(p -> {
                 if (isToOne(p)) {
@@ -229,18 +229,18 @@ public abstract class JpaUtils {
         }
 
         Hibernate.initialize(entity);
-        var properties = BeanUtils.getPropertiesInfo(entity.getClass());
+        var properties = ObjectOperations.getPropertiesInfo(entity.getClass());
 
         properties.forEach(p -> {
             if (isToOne(p)) {
-                var property = BeanUtils.invokeGetMethod(entity, p);
+                var property = ObjectOperations.invokeGetMethod(entity, p);
                 if (property != null) {
                     Hibernate.initialize(property);
                 }
             }
 
             if (isToMany(p)) {
-                var collection = BeanUtils.invokeGetMethod(entity, p);
+                var collection = ObjectOperations.invokeGetMethod(entity, p);
                 if (collection != null) {
                     Hibernate.initialize(collection);
                 }

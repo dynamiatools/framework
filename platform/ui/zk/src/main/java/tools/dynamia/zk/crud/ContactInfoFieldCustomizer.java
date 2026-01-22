@@ -16,7 +16,7 @@
  */
 package tools.dynamia.zk.crud;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.domain.util.AbstractContactInfo;
 import tools.dynamia.integration.sterotypes.Provider;
@@ -43,7 +43,7 @@ public class ContactInfoFieldCustomizer extends DefaultFieldCustomizer {
             FieldGroup group = field.getGroup();
             field.getViewDescriptor().removeField(field.getName());
 
-            List<PropertyInfo> info = BeanUtils.getPropertiesInfo(AbstractContactInfo.class);
+            List<PropertyInfo> info = ObjectOperations.getPropertiesInfo(AbstractContactInfo.class);
 
             for (PropertyInfo pi : info) {
                 if (!"phones".equals(pi.getName())) {
@@ -65,6 +65,6 @@ public class ContactInfoFieldCustomizer extends DefaultFieldCustomizer {
     }
 
     private boolean isContactInfo(Field field) {
-        return BeanUtils.isAssignable(field.getFieldClass(), AbstractContactInfo.class);
+        return ObjectOperations.isAssignable(field.getFieldClass(), AbstractContactInfo.class);
     }
 }

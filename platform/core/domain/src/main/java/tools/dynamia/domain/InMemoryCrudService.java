@@ -1,6 +1,6 @@
 package tools.dynamia.domain;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.Callback;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
@@ -78,10 +78,10 @@ public class InMemoryCrudService extends AbstractCrudService {
                 Object beanPropertyValue = null;
 
                 try {
-                    beanPropertyValue = BeanUtils.invokeGetMethod(bean, property);
+                    beanPropertyValue = ObjectOperations.invokeGetMethod(bean, property);
                 } catch (ReflectionException e) {
                     try {
-                        beanPropertyValue = BeanUtils.invokeBooleanGetMethod(bean, property);
+                        beanPropertyValue = ObjectOperations.invokeBooleanGetMethod(bean, property);
                     } catch (Exception ex) {
                         LOGGER.warn("Cannot filter: " + ex.getMessage());
                     }
@@ -147,7 +147,7 @@ public class InMemoryCrudService extends AbstractCrudService {
         id = DomainUtils.findEntityId(result);
         if (id == null) {
             try {
-                id = (Serializable) BeanUtils.getFieldValue("id", result);
+                id = (Serializable) ObjectOperations.getFieldValue("id", result);
             } catch (Exception e) {
                 LOGGER.error("Error find by id ", e);
             }
@@ -164,7 +164,7 @@ public class InMemoryCrudService extends AbstractCrudService {
             var entities = getEntities(t.getClass());
             entities.add(t);
             try {
-                BeanUtils.setFieldValue("id", t, Long.valueOf(entities.size()));
+                ObjectOperations.setFieldValue("id", t, Long.valueOf(entities.size()));
             } catch (Exception e) {
                 //ignore
             }
@@ -216,7 +216,7 @@ public class InMemoryCrudService extends AbstractCrudService {
     public void updateField(Object entity, String field, Object value) {
         try {
             LOGGER.info("Updating entity: " + entity + " field: " + field + " value: " + value);
-            BeanUtils.setFieldValue(field, entity, value);
+            ObjectOperations.setFieldValue(field, entity, value);
         } catch (Exception e) {
             LOGGER.error("Error updating field  [" + field + "] of entity " + entity + " with value [" + value + "]");
         }
@@ -289,7 +289,7 @@ public class InMemoryCrudService extends AbstractCrudService {
     @Override
     public List getPropertyValues(Class<?> entityClass, String property) {
         try {
-            return getEntities(entityClass).stream().map(o -> BeanUtils.getFieldValue(property, o))
+            return getEntities(entityClass).stream().map(o -> ObjectOperations.getFieldValue(property, o))
                     .toList();
         } catch (Exception e) {
             LOGGER.error("Error getting property values for " + entityClass + " [" + property + "]", e);
@@ -302,7 +302,7 @@ public class InMemoryCrudService extends AbstractCrudService {
         try {
             return filter(params, getEntities(entityClass), entityClass)
                     .stream()
-                    .map(o -> BeanUtils.getFieldValue(property, o))
+                    .map(o -> ObjectOperations.getFieldValue(property, o))
                     .toList();
         } catch (Exception e) {
             LOGGER.error("Error getting property values for " + entityClass + " [" + property + "]", e);
@@ -341,32 +341,32 @@ public class InMemoryCrudService extends AbstractCrudService {
 
     @Override
     public void increaseCounter(Object entity, String counterName) {
-        Object counterValue = BeanUtils.getFieldValue(counterName, entity);
+        Object counterValue = ObjectOperations.getFieldValue(counterName, entity);
         if (counterValue instanceof Long number) {
             number = number + 1;
-            BeanUtils.setFieldValue(counterName, entity, number);
+            ObjectOperations.setFieldValue(counterName, entity, number);
         } else if (counterValue instanceof Integer number) {
             number = number + 1;
-            BeanUtils.setFieldValue(counterName, entity, number);
+            ObjectOperations.setFieldValue(counterName, entity, number);
         }
     }
 
     @Override
     public void deacreaseCounter(Object entity, String counterName) {
-        Object counterValue = BeanUtils.getFieldValue(counterName, entity);
+        Object counterValue = ObjectOperations.getFieldValue(counterName, entity);
         if (counterValue instanceof Long number) {
             number = number - 1;
-            BeanUtils.setFieldValue(counterName, entity, number);
+            ObjectOperations.setFieldValue(counterName, entity, number);
         } else if (counterValue instanceof Integer number) {
             number = number - 1;
-            BeanUtils.setFieldValue(counterName, entity, number);
+            ObjectOperations.setFieldValue(counterName, entity, number);
         }
     }
 
 
     @Override
     public <T> T getFieldValue(Object entity, String fieldName, Class<T> fieldClass) {
-        return (T) BeanUtils.getFieldValue(fieldName, entity);
+        return (T) ObjectOperations.getFieldValue(fieldName, entity);
     }
 
     @Override

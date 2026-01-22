@@ -19,7 +19,7 @@ package tools.dynamia.crud;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionLoader;
 import tools.dynamia.commons.ApplicableClass;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.ObjectMatcher;
@@ -70,7 +70,7 @@ public class CrudPage extends AbstractCrudPage<Object> {
 
 
         loadObjectClass();
-        Object value = BeanUtils.newInstance(getEntityClass());
+        Object value = ObjectOperations.newInstance(getEntityClass());
 
         ViewDescriptor descriptor = Viewers.getViewDescriptor(getEntityClass(), "crud");
         if (crudServiceName != null && !crudServiceName.isEmpty()) {

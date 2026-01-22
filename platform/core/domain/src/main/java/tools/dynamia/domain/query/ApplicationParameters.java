@@ -19,7 +19,7 @@ package tools.dynamia.domain.query;
 
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.SimpleCache;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.util.DomainUtils;
@@ -104,7 +104,7 @@ public class ApplicationParameters implements Parameters {
     }
 
     private String getIdentifier(Class<? extends Parameter> parameterClass) {
-        Parameter pid = BeanUtils.newInstance(parameterClass);
+        Parameter pid = ObjectOperations.newInstance(parameterClass);
         return pid.identifier();
     }
 
@@ -176,7 +176,7 @@ public class ApplicationParameters implements Parameters {
         if (p != null) {
             value = p.getValue();
         } else {
-            p = BeanUtils.newInstance(parameterClass);
+            p = ObjectOperations.newInstance(parameterClass);
             p.setName(parameter);
             p.setValue(defaultValue);
             save(p);
@@ -194,7 +194,7 @@ public class ApplicationParameters implements Parameters {
         Parameter p = getParameter(parameterClass, name);
 
         if (p == null) {
-            p = BeanUtils.newInstance(parameterClass);
+            p = ObjectOperations.newInstance(parameterClass);
             p.setName(name);
             p.setValue(value.toString());
             p.setValueType(value.getClass().getName());

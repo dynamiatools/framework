@@ -22,7 +22,7 @@ import org.zkoss.bind.annotation.Command;
 import org.zkoss.bind.annotation.Init;
 import org.zkoss.bind.annotation.NotifyChange;
 import org.zkoss.zk.ui.Executions;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.navigation.NavigationManager;
@@ -101,7 +101,7 @@ public class CrudViewModel<T> extends AbstractViewModel<T> {
     @Command
     @NotifyChange("result")
     public void create() {
-        T model = BeanUtils.newInstance(modelClass);
+        T model = ObjectOperations.newInstance(modelClass);
         this.result.add(model);
     }
 
@@ -143,7 +143,7 @@ public class CrudViewModel<T> extends AbstractViewModel<T> {
 
     private void createRelationship(T model) {
         if (model != null && parent != null && parentName != null && !parentName.isEmpty()) {
-            BeanUtils.setFieldValue(parentName, model, parent);
+            ObjectOperations.setFieldValue(parentName, model, parent);
         }
 
     }

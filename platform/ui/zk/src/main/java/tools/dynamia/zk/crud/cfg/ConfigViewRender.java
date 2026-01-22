@@ -21,7 +21,7 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Textbox;
 import tools.dynamia.actions.ActionEvent;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.domain.query.ApplicationParameters;
@@ -155,7 +155,7 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
         LOGGER.info("Loading config parameter: " + name + " - " + parameterClass);
         Parameter par = ApplicationParameters.get().getParameter(parameterClass, name);
         if (par == null) {
-            par = BeanUtils.newInstance(parameterClass);
+            par = ObjectOperations.newInstance(parameterClass);
             par.setName(name);
             par.setValue(field.getParams().get(PARAM_DEFAULT_VALUE) != null ? field.getParams().get(PARAM_DEFAULT_VALUE).toString() : "");
         }

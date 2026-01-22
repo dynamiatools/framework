@@ -16,7 +16,7 @@
  */
 package tools.dynamia.actions;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.ObjectMatcher;
@@ -139,7 +139,7 @@ public class ActionLoader<T extends Action> {
         if (actionAttributes != null) {
             @SuppressWarnings("unchecked") Map<String, Object> params = (Map<String, Object>) actionAttributes.get(action.getId());
             if (params != null) {
-                BeanUtils.setupBean(action, params);
+                ObjectOperations.setupBean(action, params);
                 if (params.get("attributes") != null && params.get("attributes") instanceof Map) {
                     //noinspection unchecked
                     action.getAttributes().putAll((Map) params.get("attributes"));
@@ -213,7 +213,7 @@ public class ActionLoader<T extends Action> {
         List<Action> actionsCommands = new ArrayList<>();
 
         if (object != null) {
-            Method[] methods = BeanUtils.getMethodsWithAnnotation(object.getClass(), ActionCommand.class);
+            Method[] methods = ObjectOperations.getMethodsWithAnnotation(object.getClass(), ActionCommand.class);
             final var localizer = findDefaultLocalizedMessagesProvider();
             for (Method method : methods) {
                 ActionCommand actionCommand = method.getAnnotation(ActionCommand.class);

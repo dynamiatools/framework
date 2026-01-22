@@ -19,7 +19,7 @@ package tools.dynamia.zk.crud.ui;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Listhead;
 import org.zkoss.zul.Listheader;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.domain.query.DataPaginator;
 import tools.dynamia.domain.query.QueryParameters;
@@ -84,7 +84,7 @@ public class EntityPickerPanel<E> extends Div {
         }
         if (descriptor.getViewCustomizerClass() != null) {
             try {
-                ViewCustomizer customizer = BeanUtils.newInstance(descriptor.getViewCustomizerClass());
+                ViewCustomizer customizer = ObjectOperations.newInstance(descriptor.getViewCustomizerClass());
                 //noinspection unchecked
                 customizer.customize(new ZKWrapperView(this));
             } catch (Exception ignored) {

@@ -16,7 +16,7 @@
  */
 package tools.dynamia.zk.crud;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.AbstractLoggable;
 import tools.dynamia.crud.CrudAction;
 import tools.dynamia.crud.CrudDataSetViewBuilder;
@@ -48,7 +48,7 @@ public class CrudViewRenderer<T> extends AbstractLoggable implements ViewRendere
             if (crudController == null) {
                 if (crudView.getControllerClass() == null) {
                     crudView.setControllerClass(preferredController);
-                } else if (!BeanUtils.isAssignable(crudView.getControllerClass(), preferredController)) {
+                } else if (!ObjectOperations.isAssignable(crudView.getControllerClass(), preferredController)) {
                     throw new ViewRendererException("CrudView: Controller class should be type or extended " + preferredController);
                 }
             }
@@ -61,7 +61,7 @@ public class CrudViewRenderer<T> extends AbstractLoggable implements ViewRendere
         } else if (crudView.getControllerClass() == null) {
             controller = new CrudController(crudView.getBeanClass());
         } else {
-            controller = (CrudController) BeanUtils.newInstance(crudView.getControllerClass());
+            controller = (CrudController) ObjectOperations.newInstance(crudView.getControllerClass());
             controller.setEntityClass(crudView.getBeanClass());
         }
 
@@ -83,7 +83,7 @@ public class CrudViewRenderer<T> extends AbstractLoggable implements ViewRendere
                 throw new ViewRendererException("Error configuring Controller class: " + ex.getMessage(), ex);
             }
         }
-        BeanUtils.setupBean(crudView, descriptor.getParams());
+        ObjectOperations.setupBean(crudView, descriptor.getParams());
         configure(crudView, crudController);
         loadDescriptorActions(descriptor, crudView);
         crudView.setState(CrudState.READ);
@@ -100,7 +100,7 @@ public class CrudViewRenderer<T> extends AbstractLoggable implements ViewRendere
                 Map actionDefinition = (Map) actions.get(actionKey);
                 if (actionDefinition.containsKey(Viewers.ATTRIBUTE_CLASS)) {
                     String className = (String) actionDefinition.get(Viewers.ATTRIBUTE_CLASS);
-                    CrudAction crudAction = BeanUtils.newInstance(className);
+                    CrudAction crudAction = ObjectOperations.newInstance(className);
                     crudView.addAction(crudAction);
                 }
             }

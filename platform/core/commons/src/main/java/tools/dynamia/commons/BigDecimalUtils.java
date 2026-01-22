@@ -46,7 +46,7 @@ public class BigDecimalUtils {
         try {
             if (data != null && !data.isEmpty()) {
                 for (Object object : data) {
-                    Object value = BeanUtils.invokeGetMethod(object, field);
+                    Object value = ObjectOperations.invokeGetMethod(object, field);
                     if (value instanceof Number) {
                         if (value instanceof BigDecimal) {
                             total = total.add((BigDecimal) value);

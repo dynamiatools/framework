@@ -17,7 +17,7 @@
 package tools.dynamia.domain;
 
 import org.springframework.cache.Cache;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.Identifiable;
 import tools.dynamia.commons.Mappable;
 import tools.dynamia.commons.collect.PagedList;
@@ -228,7 +228,7 @@ public class DefaultEntityReferenceRepository<ID extends Serializable> extends C
                     ref.getAttributes().putAll(((Mappable) entity).toMap());
                 } else {
                     //noinspection unchecked
-                    ref.getAttributes().putAll(BeanUtils.getValuesMaps(entity));
+                    ref.getAttributes().putAll(ObjectOperations.getValuesMaps(entity));
                 }
             }
             //noinspection unchecked

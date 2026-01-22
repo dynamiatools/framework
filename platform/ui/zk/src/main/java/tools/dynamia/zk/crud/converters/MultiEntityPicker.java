@@ -18,7 +18,7 @@
 package tools.dynamia.zk.crud.converters;
 
 import org.zkoss.zk.ui.Component;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.zk.viewers.form.FormConverter;
@@ -55,7 +55,7 @@ public class MultiEntityPicker extends FormConverter<List, List> {
         Class uiValueClass = mep.getEntityClass();
         Class beanValueClass = field.getClass();
 
-        List values = (List) BeanUtils.invokeGetMethod(formValue, field.getName());
+        List values = (List) ObjectOperations.invokeGetMethod(formValue, field.getName());
         for (Object uiv : uiValue) {
 
         }
@@ -64,10 +64,10 @@ public class MultiEntityPicker extends FormConverter<List, List> {
     }
 
     private Object findDep(Object bean, Class beanValueClass, Class uiValueClass) {
-        List<PropertyInfo> info = BeanUtils.getPropertiesInfo(beanValueClass);
+        List<PropertyInfo> info = ObjectOperations.getPropertiesInfo(beanValueClass);
         for (PropertyInfo prop : info) {
             if (prop.getType() == uiValueClass) {
-                return BeanUtils.invokeGetMethod(bean, prop.getName());
+                return ObjectOperations.invokeGetMethod(bean, prop.getName());
             }
         }
         return null;

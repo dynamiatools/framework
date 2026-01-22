@@ -21,7 +21,7 @@ import org.zkoss.zul.Combobox;
 import org.zkoss.zul.GroupsModel;
 import org.zkoss.zul.ListModel;
 import org.zkoss.zul.Listbox;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.util.ModelProvider;
 import tools.dynamia.integration.sterotypes.Provider;
 import tools.dynamia.viewers.ComponentCustomizer;
@@ -41,7 +41,7 @@ public class ModelProviderComponentCustomizer implements ComponentCustomizer {
         try {
             String modelProviderClass = (String) field.getParams().get(Viewers.PARAMS_MODEL_PROVIDER);
             if (modelProviderClass != null) {
-                ModelProvider provider = BeanUtils.newInstance(modelProviderClass);
+                ModelProvider provider = ObjectOperations.newInstance(modelProviderClass);
                 Object model = provider.getModel();
                 if (model != null) {
 
@@ -51,7 +51,7 @@ public class ModelProviderComponentCustomizer implements ComponentCustomizer {
                         fillListbox((Listbox) component, model);
                     } else {
                         if (component.getClass().getMethod("setModel", model.getClass()) != null) {
-                            BeanUtils.invokeSetMethod(component, "model", model);
+                            ObjectOperations.invokeSetMethod(component, "model", model);
                         }
                     }
 

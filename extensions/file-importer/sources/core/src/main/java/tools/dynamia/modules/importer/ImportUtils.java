@@ -19,7 +19,7 @@ package tools.dynamia.modules.importer;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellReference;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.domain.ValidationError;
@@ -229,7 +229,7 @@ public class ImportUtils {
                     if (fieldName != null && !fieldName.isEmpty()) {
                         var value = getCellValueObject(row, i);
                         if (value instanceof Double) {
-                            var field = BeanUtils.getPropertyInfo(bean.getClass(), fieldName);
+                            var field = ObjectOperations.getPropertyInfo(bean.getClass(), fieldName);
                             if (field.is(BigDecimal.class)) {
                                 value = BigDecimal.valueOf(((Number) value).doubleValue());
                             } else if (field.is(Integer.class) || field.is(int.class)) {
@@ -238,7 +238,7 @@ public class ImportUtils {
                                 value = ((Double) value).longValue();
                             }
                         }
-                        BeanUtils.setFieldValue(fieldName, bean, value);
+                        ObjectOperations.setFieldValue(fieldName, bean, value);
                     }
                 } catch (Exception e) {
                     // TODO: handle exception

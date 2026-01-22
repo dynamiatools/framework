@@ -18,7 +18,7 @@
 
 package tools.dynamia.modules.saas.listeners;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.util.CrudServiceListenerAdapter;
 import tools.dynamia.integration.sterotypes.Listener;
@@ -52,7 +52,7 @@ public class AccountAwareCrudServiceListener extends CrudServiceListenerAdapter<
     public void beforeQuery(QueryParameters params) {
         if (params != null && (!params.containsKey(ACCOUNT_ID) || params.get(ACCOUNT_ID) == null || params.get(ACCOUNT_ID).equals(0L))) {
             Class paramsType = params.getType();
-            if (paramsType != null && BeanUtils.isAssignable(paramsType, AccountAware.class)) {
+            if (paramsType != null && ObjectOperations.isAssignable(paramsType, AccountAware.class)) {
                 var accountId = serviceAPI.getCurrentAccountId();
                 if (accountId != null) {
                     params.add(ACCOUNT_ID, accountId);

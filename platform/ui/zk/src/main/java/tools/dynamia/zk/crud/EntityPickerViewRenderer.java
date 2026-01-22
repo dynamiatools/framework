@@ -16,7 +16,7 @@
  */
 package tools.dynamia.zk.crud;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.viewers.View;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.ViewRenderer;
@@ -34,7 +34,7 @@ public class EntityPickerViewRenderer implements ViewRenderer {
         EntityPickerBox entityPickerBox = new EntityPickerBox(descriptor.getBeanClass(), value);
 
         try {
-            BeanUtils.setupBean(entityPickerBox, descriptor.getParams());
+            ObjectOperations.setupBean(entityPickerBox, descriptor.getParams());
         } catch (Exception ignored) {
         }
         customize(entityPickerBox);

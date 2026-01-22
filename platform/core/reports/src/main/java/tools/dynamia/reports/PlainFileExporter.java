@@ -17,7 +17,7 @@
 
 package tools.dynamia.reports;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.integration.ObjectMatcher;
 import tools.dynamia.integration.ProgressMonitor;
 
@@ -110,9 +110,9 @@ public class PlainFileExporter<T> {
 								value = col.getFieldLoader().load(col.getName(), bean);
 							} else {
 								if (col.getColumnClass() != null && col.getColumnClass().equals(boolean.class)) {
-									value = BeanUtils.invokeBooleanGetMethod(bean, col.getName());
+									value = ObjectOperations.invokeBooleanGetMethod(bean, col.getName());
 								} else {
-									value = BeanUtils.invokeGetMethod(bean, col.getName());
+									value = ObjectOperations.invokeGetMethod(bean, col.getName());
 
 									value = ExporterUtils.checkAndLoadEntityReferenceValue(col, value);
 								}

@@ -18,7 +18,7 @@ package tools.dynamia.app.reports;
 
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.data.JRAbstractBeanDataSource;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.EntityReference;
 import tools.dynamia.domain.EntityReferenceRepository;
@@ -56,9 +56,9 @@ public class JasperReportViewDescriptorDataSource extends JRAbstractBeanDataSour
 
         Object value = null;
         if (field.getFieldClass() != null && field.getFieldClass().equals(boolean.class)) {
-            value = BeanUtils.invokeBooleanGetMethod(currentBean, field.getName());
+            value = ObjectOperations.invokeBooleanGetMethod(currentBean, field.getName());
         } else {
-            value = BeanUtils.invokeGetMethod(currentBean, field.getName());
+            value = ObjectOperations.invokeGetMethod(currentBean, field.getName());
 
             value = checkAndLoadEntityReferenceValue(field, value);
         }

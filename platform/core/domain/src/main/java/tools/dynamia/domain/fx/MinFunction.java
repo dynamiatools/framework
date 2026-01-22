@@ -16,7 +16,7 @@
  */
 package tools.dynamia.domain.fx;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.collect.PagedList;
 import tools.dynamia.domain.query.DataPaginatorPagedListDataSource;
 import tools.dynamia.domain.services.CrudService;
@@ -68,7 +68,7 @@ public class MinFunction<T> implements Function<List<T>, Object> {
         } else {
             try {
                 for (T t : data) {
-                    Object field = BeanUtils.invokeGetMethod(t, args.get("property").toString());
+                    Object field = ObjectOperations.invokeGetMethod(t, args.get("property").toString());
                     if (min == null) {
                         min = field;
                     } else if (field instanceof Comparable comparable) {

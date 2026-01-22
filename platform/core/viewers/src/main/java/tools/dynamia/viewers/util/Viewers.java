@@ -16,7 +16,7 @@
  */
 package tools.dynamia.viewers.util;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.domain.Descriptor;
@@ -286,7 +286,7 @@ public class Viewers {
     }
 
     public static void setupView(View view, Map<String, Object> params) {
-        BeanUtils.setupBean(view, params);
+        ObjectOperations.setupBean(view, params);
 
     }
 

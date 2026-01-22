@@ -16,8 +16,7 @@
  */
 package tools.dynamia.integration.ms;
 
-import tools.dynamia.commons.BeanUtils;
-import tools.dynamia.commons.StringUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.integration.Containers;
 
 import java.util.ArrayList;
@@ -69,7 +68,7 @@ public class MessageChannels {
 
     public static MessageChannelExchange getMessageChannelExchange(MessageListener messageListener) {
         MessageChannelExchange exchange = null;
-        if (BeanUtils.isAnnotated(MessageChannelExchange.class, messageListener.getClass())) {
+        if (ObjectOperations.isAnnotated(MessageChannelExchange.class, messageListener.getClass())) {
             exchange = messageListener.getClass().getAnnotation(MessageChannelExchange.class);
 
         }

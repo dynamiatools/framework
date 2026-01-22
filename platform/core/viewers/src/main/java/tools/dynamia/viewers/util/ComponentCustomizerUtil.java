@@ -16,7 +16,7 @@
  */
 package tools.dynamia.viewers.util;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.viewers.ComponentCustomizationException;
 import tools.dynamia.viewers.ComponentCustomizer;
@@ -43,7 +43,7 @@ public abstract class ComponentCustomizerUtil {
 
         if (componentCustomizer != null) {
             try {
-                ComponentCustomizer customizer = (ComponentCustomizer) BeanUtils.newInstance(Class.forName(componentCustomizer));
+                ComponentCustomizer customizer = (ComponentCustomizer) ObjectOperations.newInstance(Class.forName(componentCustomizer));
                 customizer.cutomize(field, component);
             } catch (ClassCastException e) {
                 // ignore, this is beacuse generics

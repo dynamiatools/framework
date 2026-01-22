@@ -20,7 +20,7 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zul.TreeModel;
 import org.zkoss.zul.Treeitem;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.domain.query.DataSet;
 import tools.dynamia.domain.util.DomainUtils;
@@ -104,7 +104,7 @@ public class TreeCrudController<E> extends CrudController<E> implements Children
         String label = rootLabel;
         String icon = rootIcon;
         try {
-            rootEntity = BeanUtils.newInstance(getEntityClass());
+            rootEntity = ObjectOperations.newInstance(getEntityClass());
         } catch (Exception e) {
             // ignore
         }
@@ -122,7 +122,7 @@ public class TreeCrudController<E> extends CrudController<E> implements Children
         }
 
         if (rootLabelField != null && rootEntity != null) {
-            BeanUtils.invokeSetMethod(rootEntity, rootLabelField, label);
+            ObjectOperations.invokeSetMethod(rootEntity, rootLabelField, label);
         }
         return new RootTreeNode(rootEntity, icon, label);
     }
@@ -144,7 +144,7 @@ public class TreeCrudController<E> extends CrudController<E> implements Children
     public void newEntity() {
         super.newEntity();
         if (getSelected() != null && DomainUtils.findEntityId(getSelected()) != null) {
-            BeanUtils.invokeSetMethod(getEntity(), parentName, getSelected());
+            ObjectOperations.invokeSetMethod(getEntity(), parentName, getSelected());
         }
     }
 

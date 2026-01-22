@@ -22,7 +22,7 @@ import java.util.Map;
  * Interface to allow POJO classes to be converted to a {@link Map} representation.
  * <p>
  * Implementing this interface enables automatic conversion of an object's properties to a map, typically for serialization,
- * logging, debugging, or dynamic property access. The default implementation uses {@link BeanUtils#getValuesMaps(Object)}
+ * logging, debugging, or dynamic property access. The default implementation uses {@link ObjectOperations#getValuesMaps(Object)}
  * to extract all standard properties and their values.
  * <p>
  * Example usage:
@@ -46,12 +46,12 @@ public interface Mappable {
     /**
      * Converts the current object to a {@link Map} of property names and values.
      * <p>
-     * Uses {@link BeanUtils#getValuesMaps(Object)} to extract all standard properties.
+     * Uses {@link ObjectOperations#getValuesMaps(Object)} to extract all standard properties.
      *
      * @return a map containing property names as keys and their corresponding values
      */
     default Map<String, Object> toMap() {
-        return BeanUtils.getValuesMaps(this);
+        return ObjectOperations.getValuesMaps(this);
     }
 
 }

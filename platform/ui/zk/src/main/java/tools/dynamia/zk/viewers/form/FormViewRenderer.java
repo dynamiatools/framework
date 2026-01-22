@@ -29,7 +29,7 @@ import org.zkoss.zul.*;
 import org.zkoss.zul.impl.InputElement;
 import org.zkoss.zul.impl.NumberInputElement;
 import tools.dynamia.actions.ActionLoader;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.ui.icons.IconSize;
@@ -243,7 +243,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         title.appendChild(new Text(label));
 
         if (fieldGroup.getParams() != null) {
-            BeanUtils.setupBean(box, fieldGroup.getParams());
+            ObjectOperations.setupBean(box, fieldGroup.getParams());
         }
 
         return new FormFieldGroupComponent(fieldGroup.getName(), box);
@@ -313,7 +313,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
             form.setParent(column);
             Object config = field.getParams().get("config");
             if (config instanceof java.util.Map) {
-                BeanUtils.invokeSetMethod(component, "config", config);
+                ObjectOperations.invokeSetMethod(component, "config", config);
             }
         } else {
             applyComponentCSS(component, labelText, field);
@@ -356,7 +356,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         if (field.getComponentClass() == null) {
             component = new Label();
         } else {
-            component = (Component) BeanUtils.newInstance(field.getComponentClass());
+            component = (Component) ObjectOperations.newInstance(field.getComponentClass());
         }
         ComponentCustomizerUtil.customizeComponent(field, component, field.getComponentCustomizer());
         component.setAttribute(Viewers.ATTRIBUTE_FORM_VIEW, view);
@@ -365,7 +365,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
             importComp.setValue(value);
             importComp.addArgs(field.getParams());
         }
-        BeanUtils.setupBean(component, params);
+        ObjectOperations.setupBean(component, params);
         applyFieldConstraints(component, field);
 
         if (FieldRestrictions.isFieldReadOnly(FieldRestrictions.findRestrictions(), view, field)) {
@@ -407,7 +407,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
     private static Constraint tryToCreateConstraint(String name, Constraint fieldConstraint) {
         try {
-            Object object = BeanUtils.newInstance(Class.forName(name));
+            Object object = ObjectOperations.newInstance(Class.forName(name));
             if (object instanceof Constraint constraint) {
                 fieldConstraint = constraint;
             }
@@ -467,7 +467,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
             return false;
         }
 
-        if (BeanUtils.isAssignable(field.getFieldClass(), Collection.class)) {
+        if (ObjectOperations.isAssignable(field.getFieldClass(), Collection.class)) {
             return false;
         }
 

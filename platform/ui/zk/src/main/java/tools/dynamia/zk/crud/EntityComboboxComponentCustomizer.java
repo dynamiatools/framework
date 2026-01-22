@@ -17,7 +17,7 @@
 package tools.dynamia.zk.crud;
 
 import org.zkoss.zul.Combobox;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.AbstractEntity;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.integration.Containers;
@@ -38,7 +38,7 @@ public class EntityComboboxComponentCustomizer implements ComponentCustomizer<Co
     @Override
     public void cutomize(Field field, Combobox component) {
         if (field != null && field.isVisible() && field.getComponentClass() == Combobox.class) {
-            if (BeanUtils.isAssignable(field.getFieldClass(), AbstractEntity.class)) {
+            if (ObjectOperations.isAssignable(field.getFieldClass(), AbstractEntity.class)) {
                 if (field.getParams().get(Viewers.PARAM_AUTOMODEL) == Boolean.TRUE) {
                     String orderBy = (String) field.getParams().get(Viewers.PARAM_ORDER_BY);
 

@@ -72,7 +72,7 @@ public record ApplicableClass(Class targetClass) {
             if (applicableClass.targetClass() != null && applicableClass.targetClass().equals(objectClass)) {
                 return true;
             } else if (includeParents && applicableClass.targetClass() != null) {
-                if (BeanUtils.isAssignable(objectClass, applicableClass.targetClass())) {
+                if (ObjectOperations.isAssignable(objectClass, applicableClass.targetClass())) {
                     return true;
                 }
             }

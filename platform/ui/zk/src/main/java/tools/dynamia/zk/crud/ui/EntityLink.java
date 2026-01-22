@@ -19,7 +19,7 @@ package tools.dynamia.zk.crud.ui;
 
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.A;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.Callback;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.integration.Containers;
@@ -68,7 +68,7 @@ public class EntityLink extends A  implements LoadableOnly {
     private void renderLabel() {
         if (entity != null) {
             if (labelField != null) {
-                setLabel(String.valueOf(BeanUtils.getFieldValue(labelField, entity)));
+                setLabel(String.valueOf(ObjectOperations.getFieldValue(labelField, entity)));
             } else {
                 setLabel(entity.toString());
             }

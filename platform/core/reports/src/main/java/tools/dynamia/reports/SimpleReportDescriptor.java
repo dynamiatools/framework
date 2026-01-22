@@ -16,7 +16,7 @@
  */
 package tools.dynamia.reports;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.integration.Containers;
 
 import java.util.HashMap;
@@ -147,7 +147,7 @@ public class SimpleReportDescriptor implements ReportDescriptor {
         if (object == null) {
             return;
         }
-        getParameters().putAll(BeanUtils.getValuesMaps(prefix, object));
+        getParameters().putAll(ObjectOperations.getValuesMaps(prefix, object));
     }
 
     public void loadParameterFromProviders(Object object) {

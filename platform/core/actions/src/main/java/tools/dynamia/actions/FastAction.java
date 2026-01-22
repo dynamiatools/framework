@@ -16,7 +16,7 @@
  */
 package tools.dynamia.actions;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 
 /**
  * Helper class to quickly create an {@link Action} instance without extending classes or implementing methods.
@@ -182,7 +182,7 @@ public class FastAction extends AbstractAction {
      */
     public void setActionRendererClass(Class<? extends ActionRenderer<?>> actionRendererClass) {
         if (actionRendererClass != DefaultActionRenderer.class) {
-            setRenderer(BeanUtils.newInstance(actionRendererClass));
+            setRenderer(ObjectOperations.newInstance(actionRendererClass));
         }
     }
 

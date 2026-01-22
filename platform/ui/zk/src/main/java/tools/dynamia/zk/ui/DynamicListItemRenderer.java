@@ -19,7 +19,7 @@ package tools.dynamia.zk.ui;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.AbstractEntity;
 
 /**
@@ -42,13 +42,13 @@ public class DynamicListItemRenderer implements ListitemRenderer<Object> {
         }
 
         if (fields == null || fields.length == 0) {
-            Listcell cell = new Listcell(BeanUtils.getInstanceName(data));
+            Listcell cell = new Listcell(ObjectOperations.getInstanceName(data));
             cell.setParent(item);
         } else {
             for (String field : fields) {
                 Object value = "";
                 try {
-                    value = BeanUtils.invokeGetMethod(data, field.trim());
+                    value = ObjectOperations.invokeGetMethod(data, field.trim());
                 } catch (Exception ignored) {
                 }
                 String cellValue = null;

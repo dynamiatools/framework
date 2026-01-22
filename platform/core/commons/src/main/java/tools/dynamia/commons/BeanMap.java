@@ -85,7 +85,7 @@ public class BeanMap extends HashMap<String, Object> implements Serializable {
         if (bean instanceof Mappable mappable) {
             putAll(mappable.toMap());
         } else {
-            putAll(BeanUtils.getValuesMaps("", bean));
+            putAll(ObjectOperations.getValuesMaps("", bean));
         }
     }
 

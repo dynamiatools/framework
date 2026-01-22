@@ -20,7 +20,7 @@ package tools.dynamia.zk.viewers;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.ListModel;
 import org.zkoss.zul.ListModelArray;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.viewers.ComponentCustomizer;
 import tools.dynamia.viewers.Field;
 
@@ -34,7 +34,7 @@ public class EnumComponentCustomizer implements ComponentCustomizer<Combobox> {
             component.setModel(model);
             component.setReadonly(true);
             component.setItemRenderer((item, data, index) -> {
-                String name = BeanUtils.getInstanceName(data);
+                String name = ObjectOperations.getInstanceName(data);
                 item.setLabel(name.replace("_", " "));
                 item.setValue(data);
             });

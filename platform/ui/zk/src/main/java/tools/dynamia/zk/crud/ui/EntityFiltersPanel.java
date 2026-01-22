@@ -22,7 +22,7 @@ import org.zkoss.zk.ui.HtmlBasedComponent;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.*;
 import org.zkoss.zul.impl.InputElement;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.logger.LoggingService;
@@ -39,7 +39,6 @@ import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.View;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.ViewDescriptorBuilder;
-import tools.dynamia.viewers.impl.DefaultViewDescriptor;
 import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.ComponentAliasIndex;
@@ -53,7 +52,6 @@ import tools.dynamia.zk.viewers.DefaultFieldCustomizer;
 import tools.dynamia.zk.viewers.form.FormFieldComponent;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.function.Predicate.not;
@@ -147,7 +145,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
             EntityFilterCustomizer filterCustomizer = null;
             try {
                 String customizerClass = (String) field.getParams().get(Viewers.PARAM_FILTER_CUSTOMIZER);
-                filterCustomizer = BeanUtils.newInstance(customizerClass);
+                filterCustomizer = ObjectOperations.newInstance(customizerClass);
                 filterCustomizer.init(entityClass, field);
             } catch (Exception ignored) {
             }
@@ -219,7 +217,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
         DefaultFieldCustomizer.customizeDateSelectorBinding(field);
         DefaultFieldCustomizer.customizeTimeboxBindings(field);
 
-        QueryCondition qc = BeanUtils.newInstance(filterCondition.getConditionClass());
+        QueryCondition qc = ObjectOperations.newInstance(filterCondition.getConditionClass());
         Vlayout filterGroup = new Vlayout();
 
         Binder binder = ZKBindingUtil.createBinder();
@@ -357,7 +355,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
                 if (enumVal instanceof String) {
                     //noinspection unchecked
                     enumValues.add(Enum.valueOf((Class<Enum>) prop.getType(), enumVal.toString()));
-                } else if (BeanUtils.isAssignable(enumVal.getClass(), prop.getType())) {
+                } else if (ObjectOperations.isAssignable(enumVal.getClass(), prop.getType())) {
                     //noinspection unchecked
                     enumValues.add(enumVal);
                 }
@@ -369,9 +367,9 @@ public class EntityFiltersPanel extends Borderlayout implements View {
     private Component buildFieldComponent(Field field) {
         @SuppressWarnings("unchecked") Class<Component> compClass = (Class<Component>) ComponentAliasIndex.getInstance().get(field.getComponent());
         if (compClass != null) {
-            Component comp = BeanUtils.newInstance(compClass);
+            Component comp = ObjectOperations.newInstance(compClass);
             if (comp != null) {
-                BeanUtils.setupBean(comp, field.getParams());
+                ObjectOperations.setupBean(comp, field.getParams());
                 return comp;
             }
         }
@@ -388,7 +386,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
 
     private boolean isEntityReference(Field field) {
         Reference reference = getReferenceField(field);
-        return BeanUtils.isAssignable(field.getFieldClass(), EntityReference.class) || reference != null;
+        return ObjectOperations.isAssignable(field.getFieldClass(), EntityReference.class) || reference != null;
     }
 
     private Reference getReferenceField(Field field) {
@@ -396,7 +394,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
             Class beanClass = field.getViewDescriptor().getBeanClass();
             if (beanClass != null) {
                 try {
-                    java.lang.reflect.Field classField = BeanUtils.getField(beanClass, field.getName());
+                    java.lang.reflect.Field classField = ObjectOperations.getField(beanClass, field.getName());
                     return classField.getAnnotation(Reference.class);
                 } catch (NoSuchFieldException ignored) {
 
@@ -430,8 +428,8 @@ public class EntityFiltersPanel extends Borderlayout implements View {
     }
 
     private Component buildDefaultComponent(Field field, PropertyInfo prop) {
-        Component comp = (Component) BeanUtils.newInstance(field.getComponentClass());
-        BeanUtils.setupBean(comp, field.getParams());
+        Component comp = (Component) ObjectOperations.newInstance(field.getComponentClass());
+        ObjectOperations.setupBean(comp, field.getParams());
         return comp;
     }
 
@@ -490,7 +488,7 @@ public class EntityFiltersPanel extends Borderlayout implements View {
     }
 
     private FilterCondition getFilterCondition(Class<?> fieldClass) {
-        if (fieldClass == Date.class || BeanUtils.isAssignable(fieldClass, Number.class)
+        if (fieldClass == Date.class || ObjectOperations.isAssignable(fieldClass, Number.class)
                 || fieldClass == double.class
                 || fieldClass == long.class
                 || fieldClass == float.class
@@ -574,6 +572,6 @@ public class EntityFiltersPanel extends Borderlayout implements View {
     }
 
     public void setMessagesProvider(String messagesProvider) {
-        this.messagesProvider = BeanUtils.newInstance(messagesProvider);
+        this.messagesProvider = ObjectOperations.newInstance(messagesProvider);
     }
 }

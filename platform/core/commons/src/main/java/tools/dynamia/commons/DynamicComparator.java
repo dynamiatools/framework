@@ -172,7 +172,7 @@ public class DynamicComparator<T> implements Comparator<T> {
         Comparable value = null;
         if (obj != null && field != null) {
             try {
-                Object result = BeanUtils.invokeGetMethod(obj, field);
+                Object result = ObjectOperations.invokeGetMethod(obj, field);
                 if (result instanceof Comparable) {
                     value = (Comparable) result;
                 }

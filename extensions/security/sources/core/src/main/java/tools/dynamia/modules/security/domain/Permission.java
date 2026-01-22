@@ -20,7 +20,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.BatchSize;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.jpa.SimpleEntity;
 import tools.dynamia.modules.saas.api.AccountAware;
 
@@ -99,7 +99,7 @@ public class Permission extends SimpleEntity implements  Cloneable, AccountAware
     }
 
     public Permission clone() {
-        return BeanUtils.clone(this, "id", "accountId", "perfil");
+        return ObjectOperations.clone(this, "id", "accountId", "perfil");
     }
 
     public int getLevel() {

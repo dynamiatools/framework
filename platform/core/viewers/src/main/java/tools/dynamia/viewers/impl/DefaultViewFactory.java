@@ -16,7 +16,7 @@
  */
 package tools.dynamia.viewers.impl;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.Containers;
@@ -137,7 +137,7 @@ public class DefaultViewFactory implements ViewFactory {
             viewRenderer = viewTypeFactory.getViewRenderer(viewType);
 
             if (viewDescriptor.getCustomViewRenderer() != null) {
-                viewRenderer = BeanUtils.newInstance(viewDescriptor.getCustomViewRenderer());
+                viewRenderer = ObjectOperations.newInstance(viewDescriptor.getCustomViewRenderer());
             }
 
             if (viewDescriptor.getParams().containsKey(Viewers.PARAM_DEFAULT_VIEW_RENDERER)) {
@@ -153,7 +153,7 @@ public class DefaultViewFactory implements ViewFactory {
 
         if (viewDescriptor.getViewCustomizerClass() != null) {
             try {
-                ViewCustomizer viewCustomizer = BeanUtils.newInstance(viewDescriptor.getViewCustomizerClass());
+                ViewCustomizer viewCustomizer = ObjectOperations.newInstance(viewDescriptor.getViewCustomizerClass());
                 viewCustomizer.customize(view);
             } catch (Exception e) {
                 String name = viewDescriptor.getBeanClass() != null ? view.getViewDescriptor().getBeanClass().toString() : " ID: " + viewDescriptor.getId();

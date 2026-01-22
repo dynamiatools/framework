@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.PropertyInfo;
@@ -61,7 +61,7 @@ public class TemporalEntityFileCrudListener extends CrudServiceListenerAdapter<O
 
 	private void checkEntityFiles(Object entity) {
 		if (DomainUtils.isEntity(entity) && !(entity instanceof EntityFile)) {
-			List<PropertyInfo> properties = BeanUtils.getPropertiesInfo(entity.getClass());
+			List<PropertyInfo> properties = ObjectOperations.getPropertiesInfo(entity.getClass());
 			for (PropertyInfo propertyInfo : properties) {
 				if (propertyInfo.is(EntityFile.class)) {
 					updateEntityFile(entity, propertyInfo);
@@ -73,7 +73,7 @@ public class TemporalEntityFileCrudListener extends CrudServiceListenerAdapter<O
 	private void updateEntityFile(Object entity, PropertyInfo propertyInfo) {
 		try {
 
-			EntityFile entityFile = (EntityFile) BeanUtils.invokeGetMethod(entity, propertyInfo);
+			EntityFile entityFile = (EntityFile) ObjectOperations.invokeGetMethod(entity, propertyInfo);
 			if (entityFile != null && entityFile.getTargetEntity() != null && entityFile.getTargetEntity().equals("temporal")) {
 				service.configureEntityFile(entity, entityFile);
 				crudService.update(entityFile);

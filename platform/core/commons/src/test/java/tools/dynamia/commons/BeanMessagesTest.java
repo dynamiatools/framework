@@ -46,7 +46,7 @@ public class BeanMessagesTest {
     @Test
     public void testChild() {
         BeanMessages msg = new BeanMessages(ChildDummy.class, Locale.of("es"));
-        List<PropertyInfo> info = BeanUtils.getPropertiesInfo(ChildDummy.class);
+        List<PropertyInfo> info = ObjectOperations.getPropertiesInfo(ChildDummy.class);
 
         for (PropertyInfo propertyInfo : info) {
             System.out.println(propertyInfo);

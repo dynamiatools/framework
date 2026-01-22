@@ -27,7 +27,7 @@ import org.zkoss.zul.Treecell;
 import org.zkoss.zul.Treeitem;
 import org.zkoss.zul.TreeitemRenderer;
 import org.zkoss.zul.Treerow;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.PropertyChangeListenerContainer;
 import tools.dynamia.commons.reflect.ReflectionException;
 import tools.dynamia.ui.icons.IconSize;
@@ -149,9 +149,9 @@ public class TreeViewRowRenderer<E> implements TreeitemRenderer<TreeViewNode<E>>
             try {
 
                 if (field.getFieldClass() != null && field.getFieldClass().equals(boolean.class)) {
-                    cellValue = BeanUtils.invokeBooleanGetMethod(data, field.getName());
+                    cellValue = ObjectOperations.invokeBooleanGetMethod(data, field.getName());
                 } else {
-                    cellValue = BeanUtils.invokeGetMethod(data, field.getName());
+                    cellValue = ObjectOperations.invokeGetMethod(data, field.getName());
                 }
             } catch (ReflectionException e) {
                 // Suertee
@@ -164,7 +164,7 @@ public class TreeViewRowRenderer<E> implements TreeitemRenderer<TreeViewNode<E>>
                 nullValue.setParent(cell);
             } else {
                 Component comp = createFieldComponent(node, cellValue, field, cell, colIndex);
-                BeanUtils.setupBean(comp, field.getParams());
+                ObjectOperations.setupBean(comp, field.getParams());
 
                 if (node.getStyle() != null && comp instanceof HtmlBasedComponent) {
                     ((HtmlBasedComponent) comp).setStyle(node.getStyle());
@@ -189,7 +189,7 @@ public class TreeViewRowRenderer<E> implements TreeitemRenderer<TreeViewNode<E>>
     }
 
     protected Component createFieldComponent(TreeViewNode<E> node, Object cellValue, Field field, Treecell cell, int colIndex) {
-        Component comp = (Component) BeanUtils.newInstance(field.getComponentClass());
+        Component comp = (Component) ObjectOperations.newInstance(field.getComponentClass());
         comp.setParent(cell);
 
         if (colIndex == 0 && node.getIcon() != null) {

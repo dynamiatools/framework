@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.URLable;
 import tools.dynamia.domain.AbstractEntity;
 
@@ -36,7 +36,7 @@ public class BasicEntityJsonDeserializer extends StdDeserializer<AbstractEntity>
             url = urlNode.asText();
         }
 
-        var result = BeanUtils.newInstance(className);
+        var result = ObjectOperations.newInstance(className);
         if (result instanceof AbstractEntity entity) {
             //noinspection unchecked
             entity.setId(id);

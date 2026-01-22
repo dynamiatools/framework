@@ -28,7 +28,7 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vbox;
 import org.zkoss.zul.Window;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.Loggable;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.viewers.ComponentCustomizer;
@@ -140,16 +140,16 @@ public class InputPanel extends Div implements Loggable {
             componClass = Textbox.class;
         }
 
-        Component comp = (Component) BeanUtils.newInstance(componClass);
+        Component comp = (Component) ObjectOperations.newInstance(componClass);
         if (field.getComponentCustomizer() != null) {
             try {
-                ComponentCustomizer customizer = BeanUtils.newInstance(field.getComponentCustomizer());
+                ComponentCustomizer customizer = ObjectOperations.newInstance(field.getComponentCustomizer());
                 customizer.cutomize(field, comp);
             } catch (Exception e) {
                 log("Cannot create component customizer", e);
             }
         }
-        BeanUtils.setupBean(comp, field.getParams());
+        ObjectOperations.setupBean(comp, field.getParams());
         return comp;
     }
 

@@ -23,7 +23,6 @@ import org.zkoss.zk.ui.IdSpace;
 import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Borderlayout;
-import org.zkoss.zul.Box;
 import org.zkoss.zul.Center;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Menupopup;
@@ -34,7 +33,7 @@ import org.zkoss.zul.impl.XulElement;
 import tools.dynamia.actions.*;
 import tools.dynamia.commons.ApplicableClass;
 import tools.dynamia.commons.BeanMap;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.Callback;
 import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
@@ -260,7 +259,7 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         formViewContainer.setVflex("1");
         var multiViewParams = formView.getViewDescriptor().getParams().get(Viewers.PARAM_MULTIVIEW);
         if (multiViewParams instanceof Map) {
-            BeanUtils.setupBean(formViewContainer, multiViewParams);
+            ObjectOperations.setupBean(formViewContainer, multiViewParams);
         }
         addFormViewToContainer(formViewTitle);
         formViewContainer.setParentView(this);
@@ -407,7 +406,7 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
 
     public void setControllerClass(String className) throws ClassNotFoundException {
         Class clazz = Class.forName(className.trim());
-        if (BeanUtils.isAssignable(clazz, CrudController.class)) {
+        if (ObjectOperations.isAssignable(clazz, CrudController.class)) {
             setControllerClass(clazz);
         } else {
             throw new ViewRendererException("CrudView controllers class is not a CrudController");
@@ -618,15 +617,15 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
 
             MultiViewListener listener = null;
             if (field.getParams().get(Viewers.PARAM_MULTIVIEW_LISTENER) != null) {
-                listener = BeanUtils.newInstance(field.getParams().get(Viewers.PARAM_MULTIVIEW_LISTENER).toString());
+                listener = ObjectOperations.newInstance(field.getParams().get(Viewers.PARAM_MULTIVIEW_LISTENER).toString());
                 if (listener != null) {
-                    BeanUtils.setupBean(listener, field.getParams());
+                    ObjectOperations.setupBean(listener, field.getParams());
                 }
             }
 
             formViewContainer.addView(field.getLabel(), listener, parentView -> {
                 Viewer viewer = new Viewer();
-                BeanUtils.setupBean(viewer, field.getParams());
+                ObjectOperations.setupBean(viewer, field.getParams());
                 return viewer.getView();
             });
         }
@@ -705,7 +704,7 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         }
 
         Object parent = formView.getValue();
-        String parentName = BeanUtils.findParentPropertyName(getViewDescriptor().getBeanClass(), subentityClass);
+        String parentName = ObjectOperations.findParentPropertyName(getViewDescriptor().getBeanClass(), subentityClass);
         if (field.getParams().get("parentName") != null) {
             parentName = field.getParams().get("parentName").toString();
         }

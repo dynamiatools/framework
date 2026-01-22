@@ -189,7 +189,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                 Map cfg = (Map) viewDescriptor.getParams().get(Viewers.PARAM_ENUM_COLORS);
                 String name = (String) cfg.get(Viewers.PARAM_NAME);
                 Map colors = (Map) cfg.get(Viewers.PARAM_COLORS);
-                Enum enumValue = (Enum) BeanUtils.invokeGetMethod(data, name);
+                Enum enumValue = (Enum) ObjectOperations.invokeGetMethod(data, name);
                 String color = (String) colors.get(enumValue.name());
                 if (color != null) {
                     item.addSclass("e_" + enumValue);
@@ -206,17 +206,17 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
 
         Listcell cell = new Listcell();
         cell.setParent(item);
-        BeanUtils.setupBean(cell, (Map) field.getParam("cell"));
+        ObjectOperations.setupBean(cell, (Map) field.getParam("cell"));
         Object cellValue = "";
 
         try {
 
             if (field.getFieldClass() != null && field.getFieldClass().equals(boolean.class)) {
-                cellValue = BeanUtils.invokeBooleanGetMethod(data, field.getName());
+                cellValue = ObjectOperations.invokeBooleanGetMethod(data, field.getName());
             } else {
-                cellValue = BeanUtils.invokeGetMethod(data, field.getName());
-                if (cellValue != null && !BeanUtils.isStantardClass(cellValue.getClass())) {
-                    cellValue = BeanUtils.getInstanceName(cellValue);
+                cellValue = ObjectOperations.invokeGetMethod(data, field.getName());
+                if (cellValue != null && !ObjectOperations.isStantardClass(cellValue.getClass())) {
+                    cellValue = ObjectOperations.getInstanceName(cellValue);
                 }
             }
         } catch (ReflectionException e) {
@@ -238,7 +238,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                 importComp.addArgs(field.getParams());
                 importComp.addArg("index", index);
             }
-            BeanUtils.setupBean(comp, field.getParams());
+            ObjectOperations.setupBean(comp, field.getParams());
 
             if (field.containsParam(Viewers.PARAMS_ATTRIBUTES)) {
                 Map attributes = (Map) field.getParam(Viewers.PARAMS_ATTRIBUTES);
@@ -288,7 +288,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
 
     protected Component createFieldComponent(Object data, Object cellValue, Field field, Listcell cell) {
         Class<?> componentClass = field.getComponentClass() != null ? field.getComponentClass() : Label.class;
-        Component component = (Component) BeanUtils.newInstance(componentClass);
+        Component component = (Component) ObjectOperations.newInstance(componentClass);
         if (component != null) {
             ZKUtil.changeReadOnly(component, tableView.isReadonly());
         }

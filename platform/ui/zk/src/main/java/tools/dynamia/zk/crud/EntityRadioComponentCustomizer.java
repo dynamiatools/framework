@@ -18,7 +18,7 @@ package tools.dynamia.zk.crud;
 
 import org.zkoss.zul.ListModelList;
 import org.zkoss.zul.Radiogroup;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.AbstractEntity;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.integration.Containers;
@@ -38,7 +38,7 @@ public class EntityRadioComponentCustomizer implements ComponentCustomizer<Radio
     @Override
     public void cutomize(Field field, Radiogroup component) {
         if (field != null && field.isVisible() && field.getComponentClass() == Radiogroup.class) {
-            if (BeanUtils.isAssignable(field.getFieldClass(), AbstractEntity.class)) {
+            if (ObjectOperations.isAssignable(field.getFieldClass(), AbstractEntity.class)) {
                 if (field.getParams().get("automodel") == Boolean.TRUE) {
                     CrudService crudService = Containers.get().findObject(CrudService.class);
                     List entities = crudService.findAll(field.getFieldClass());

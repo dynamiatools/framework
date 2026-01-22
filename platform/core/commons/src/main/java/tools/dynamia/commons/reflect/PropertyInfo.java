@@ -18,7 +18,7 @@ package tools.dynamia.commons.reflect;
 
 import tools.dynamia.commons.Alias;
 import tools.dynamia.commons.AliasResolver;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringUtils;
 
 import java.io.Serializable;
@@ -26,7 +26,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -118,7 +117,7 @@ public class PropertyInfo implements Serializable {
      * @return a list of PropertyInfo objects
      */
     public static List<PropertyInfo> getProperties(Class<?> aClass) {
-        return BeanUtils.getPropertiesInfo(aClass);
+        return ObjectOperations.getPropertiesInfo(aClass);
     }
 
     /**
@@ -154,7 +153,7 @@ public class PropertyInfo implements Serializable {
      * @return true if the property is a standard Java class
      */
     public boolean isStandardClass() {
-        return BeanUtils.isStantardClass(getType());
+        return ObjectOperations.isStantardClass(getType());
     }
 
     /**
@@ -164,7 +163,7 @@ public class PropertyInfo implements Serializable {
      * @return true if the property type is assignable from clazz
      */
     public boolean is(Class<?> clazz) {
-        return BeanUtils.isAssignable(getType(), clazz);
+        return ObjectOperations.isAssignable(getType(), clazz);
     }
 
     /**
@@ -284,7 +283,7 @@ public class PropertyInfo implements Serializable {
     public Field getField() {
         if (ownerClass != null) {
             try {
-                return BeanUtils.getField(ownerClass, getName());
+                return ObjectOperations.getField(ownerClass, getName());
             } catch (NoSuchFieldException ignored) {
 
             }
@@ -366,7 +365,7 @@ public class PropertyInfo implements Serializable {
      * @return the value of the property
      */
     public Object getValue(Object source) {
-        return BeanUtils.getFieldValue(name, source);
+        return ObjectOperations.getFieldValue(name, source);
     }
 
     /**
@@ -376,6 +375,6 @@ public class PropertyInfo implements Serializable {
      * @param value  the value to set
      */
     public void setValue(Object target, Object value) {
-        BeanUtils.setFieldValue(name, target, value);
+        ObjectOperations.setFieldValue(name, target, value);
     }
 }

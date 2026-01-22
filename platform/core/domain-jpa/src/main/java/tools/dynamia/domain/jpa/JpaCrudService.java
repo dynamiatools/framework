@@ -24,7 +24,6 @@ import jakarta.persistence.Tuple;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -638,7 +637,7 @@ public class JpaCrudService extends AbstractCrudService {
      */
     private <T> QueryCondition createQueryCondition(Class<T> entityClass, String fieldName, String value) {
         QueryCondition qc = null;
-        PropertyInfo pinfo = BeanUtils.getPropertyInfo(entityClass, fieldName);
+        PropertyInfo pinfo = ObjectOperations.getPropertyInfo(entityClass, fieldName);
         if (pinfo != null) {
             if (pinfo.getType().isEnum()) {
                 try {

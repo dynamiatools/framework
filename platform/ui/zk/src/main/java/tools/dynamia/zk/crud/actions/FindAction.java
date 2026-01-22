@@ -17,7 +17,7 @@
 package tools.dynamia.zk.crud.actions;
 
 import tools.dynamia.actions.*;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.reflect.AccessMode;
 import tools.dynamia.crud.AbstractCrudAction;
@@ -103,8 +103,8 @@ public class FindAction extends AbstractCrudAction implements CrudControllerAwar
 
 
         List result = null;
-        if (BeanUtils.isAssignable(entityClass, QueryExecuter.class)) {
-            QueryExecuter queryExecuter = (QueryExecuter) BeanUtils.newInstance(entityClass);
+        if (ObjectOperations.isAssignable(entityClass, QueryExecuter.class)) {
+            QueryExecuter queryExecuter = (QueryExecuter) ObjectOperations.newInstance(entityClass);
             QueryParameters params = new QueryParameters();
             params.setHint(QueryParameters.HINT_TEXT_SEARCH, txt);
             result = queryExecuter.executeQuery(crudService, params);
@@ -144,7 +144,7 @@ public class FindAction extends AbstractCrudAction implements CrudControllerAwar
     public ActionExecutionResponse execute(ActionExecutionRequest request) {
         List result = null;
         if (request.getData() instanceof String text && request.getDataType() != null) {
-            Class entityClass = BeanUtils.findClass(request.getDataType());
+            Class entityClass = ObjectOperations.findClass(request.getDataType());
             ViewDescriptor descriptor = Viewers.getViewDescriptor(entityClass, "table");
             result = search(text, new QueryParameters(), entityClass, crudService(), loadFields(descriptor));
         }

@@ -17,7 +17,7 @@
 package tools.dynamia.domain.util;
 
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 
 import java.util.Map;
 
@@ -205,7 +205,7 @@ public abstract class AbstractContactInfo implements java.io.Serializable {
 
 
     public Map<String, Object> toMap(String prefix) {
-        return BeanUtils.getValuesMaps(prefix, this);
+        return ObjectOperations.getValuesMaps(prefix, this);
     }
 }
 

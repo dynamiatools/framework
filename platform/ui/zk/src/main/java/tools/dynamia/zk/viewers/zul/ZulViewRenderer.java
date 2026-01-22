@@ -18,7 +18,7 @@
 
 package tools.dynamia.zk.viewers.zul;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.viewers.View;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.ViewRenderer;
@@ -34,7 +34,7 @@ public class ZulViewRenderer implements ViewRenderer<String> {
         ZulView zul = new ZulView(value);
         zul.setViewDescriptor(descriptor);
 
-        BeanUtils.setupBean(zul, descriptor.getParams());
+        ObjectOperations.setupBean(zul, descriptor.getParams());
 
         return zul;
     }

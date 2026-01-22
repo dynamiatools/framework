@@ -20,7 +20,7 @@ import org.zkoss.zk.ui.UiException;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.ListModelList;
 import tools.dynamia.commons.BeanSorter;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.reflect.ReflectionException;
 import tools.dynamia.integration.Containers;
@@ -61,19 +61,19 @@ public class ProviderPickerBox extends Combobox {
             String id, name, icon;
 
             try {
-                id = BeanUtils.invokeGetMethod(data, idField).toString();
+                id = ObjectOperations.invokeGetMethod(data, idField).toString();
             } catch (ReflectionException | NullPointerException e) {
                 throw new UiException("Error loading ID field for " + data, e);
             }
 
             try {
-                name = BeanUtils.invokeGetMethod(data, nameField).toString();
+                name = ObjectOperations.invokeGetMethod(data, nameField).toString();
             } catch (ReflectionException | NullPointerException e) {
                 name = id;
             }
 
             try {
-                icon = BeanUtils.invokeGetMethod(data, iconField).toString();
+                icon = ObjectOperations.invokeGetMethod(data, iconField).toString();
             } catch (ReflectionException | NullPointerException e) {
                 icon = null;
             }
@@ -167,7 +167,7 @@ public class ProviderPickerBox extends Combobox {
             try {
                 Optional provider = Containers.get().findObjects(providerClass)
                         .stream()
-                        .filter(p -> selected.equals(BeanUtils.invokeGetMethod(p, idField)))
+                        .filter(p -> selected.equals(ObjectOperations.invokeGetMethod(p, idField)))
                         .findFirst();
                 if (provider.isPresent()) {
                     ListModelList model = (ListModelList) getModel();

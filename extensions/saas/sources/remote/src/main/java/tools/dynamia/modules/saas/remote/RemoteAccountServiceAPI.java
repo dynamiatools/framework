@@ -25,7 +25,7 @@ import org.springframework.web.client.RestTemplate;
 import oshi.SystemInfo;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.NetworkIF;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.StringUtils;
@@ -265,7 +265,7 @@ public class RemoteAccountServiceAPI extends CrudServiceListenerAdapter<AccountA
         if (!params.containsKey(ACCOUNT_ID) || params.get(ACCOUNT_ID) == null) {
             Class paramsType = params.getType();
             if (paramsType != null) {
-                Object obj = BeanUtils.newInstance(paramsType);
+                Object obj = ObjectOperations.newInstance(paramsType);
                 if (obj instanceof AccountAware) {
                     if (defaultID != null) {
                         params.add(ACCOUNT_ID, defaultID);

@@ -17,7 +17,7 @@
 package tools.dynamia.domain.util;
 
 import tools.dynamia.commons.BeanSorter;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.Identifiable;
 import tools.dynamia.domain.CurrencyExchangeProvider;
 import tools.dynamia.domain.EntityReferenceRepository;
@@ -240,7 +240,7 @@ public abstract class DomainUtils {
     public static BigDecimal sumField(Collection data, Class clazz, String fieldName) {
         BigDecimal result = BigDecimal.ZERO;
         try {
-            Method getField = clazz.getMethod(BeanUtils.formatGetMethod(fieldName));
+            Method getField = clazz.getMethod(ObjectOperations.formatGetMethod(fieldName));
             for (Object obj : data) {
                 BigDecimal num = (BigDecimal) getField.invoke(obj);
                 result = result.add(num);

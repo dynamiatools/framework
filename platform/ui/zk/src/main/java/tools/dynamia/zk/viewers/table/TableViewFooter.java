@@ -21,7 +21,7 @@ package tools.dynamia.zk.viewers.table;
 import org.zkoss.bind.Converter;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listfooter;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.fx.FunctionProvider;
 import tools.dynamia.io.converters.Converters;
 import tools.dynamia.viewers.Field;
@@ -71,7 +71,7 @@ public class TableViewFooter extends Listfooter implements TableViewFooterCompon
         if (value != null) {
             String resultText = Converters.convert(value);
             if (functionConverter != null) {
-                Converter converter = BeanUtils.newInstance(functionConverter);
+                Converter converter = ObjectOperations.newInstance(functionConverter);
                 //noinspection unchecked
                 resultText = (String) converter.coerceToUi(value, label, null);
             }

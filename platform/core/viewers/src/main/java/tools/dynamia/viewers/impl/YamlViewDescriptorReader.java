@@ -18,7 +18,7 @@ package tools.dynamia.viewers.impl;
 
 import org.yaml.snakeyaml.Yaml;
 import tools.dynamia.actions.ActionReference;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.sterotypes.Provider;
@@ -471,7 +471,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
                     value = Converters.convert(clazz, value.toString());
                 }
                 try {
-                    BeanUtils.invokeSetMethod(obj, property, value);
+                    ObjectOperations.invokeSetMethod(obj, property, value);
                 } catch (Exception e) {
                     throw new ViewDescriptorReaderException(e.getClass().getName() + " : " + e.getMessage());
                 }

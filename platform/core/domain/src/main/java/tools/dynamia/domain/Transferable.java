@@ -17,7 +17,7 @@
 
 package tools.dynamia.domain;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.util.DomainUtils;
 
 /**
@@ -62,10 +62,10 @@ public interface Transferable<DTO> {
     default DTO toDTO() {
         DTO dto = null;
         try {
-            @SuppressWarnings("unchecked") Class<DTO> dtoClass = BeanUtils.getGenericTypeClass(this);
+            @SuppressWarnings("unchecked") Class<DTO> dtoClass = ObjectOperations.getGenericTypeClass(this);
             if (dtoClass == null) {
                 //noinspection unchecked
-                dtoClass = BeanUtils.getGenericTypeInterface(this, Transferable.class);
+                dtoClass = ObjectOperations.getGenericTypeInterface(this, Transferable.class);
             }
             dto = DomainUtils.autoDataTransferObject(this, dtoClass);
         } catch (Exception e) {

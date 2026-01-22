@@ -3,7 +3,7 @@ package tools.dynamia.app.metadata;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionExecutionRequest;
 import tools.dynamia.actions.ActionFilter;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringPojoParser;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
@@ -66,9 +66,9 @@ public class ActionRequestAutoconvertDataFilter implements ActionFilter {
     @Override
     public void beforeActionExecution(Action action, ActionExecutionRequest request) {
 
-        if (request.getDataType() != null && !BeanUtils.isValidClassName(request.getDataType())) {
+        if (request.getDataType() != null && !ObjectOperations.isValidClassName(request.getDataType())) {
             try {
-                Class dataClass = BeanUtils.findClass(request.getDataType());
+                Class dataClass = ObjectOperations.findClass(request.getDataType());
                 Object convertedData = null;
                 if (request.getData() instanceof Map<?, ?> jsonMap) {
                     logger.info("Auto converting data Map to POJO from action execution request");

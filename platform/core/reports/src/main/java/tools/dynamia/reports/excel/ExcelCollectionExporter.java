@@ -16,7 +16,7 @@
  */
 package tools.dynamia.reports.excel;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.ReflectionException;
@@ -57,10 +57,10 @@ public class ExcelCollectionExporter<T> extends AbstractExcelExporter<T, Collect
                         value = ((Map) object).get(col.getName());
                     } else {
                         if (col.getColumnClass() != null && col.getColumnClass().equals(boolean.class)) {
-                            value = BeanUtils.invokeBooleanGetMethod(object, col.getName());
+                            value = ObjectOperations.invokeBooleanGetMethod(object, col.getName());
                         } else {
                             try {
-                                value = BeanUtils.invokeGetMethod(object, col.getName());
+                                value = ObjectOperations.invokeGetMethod(object, col.getName());
                                 value = ExporterUtils.checkAndLoadEntityReferenceValue(col, value);
                             } catch (ReflectionException e) {
                                 if (col.getDefaultValue() != null) {

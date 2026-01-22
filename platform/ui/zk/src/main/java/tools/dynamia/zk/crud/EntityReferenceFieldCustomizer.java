@@ -16,7 +16,7 @@
  */
 package tools.dynamia.zk.crud;
 
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.EntityReference;
 import tools.dynamia.domain.Reference;
 import tools.dynamia.domain.util.DomainUtils;
@@ -39,7 +39,7 @@ public class EntityReferenceFieldCustomizer implements FieldCustomizer {
 		}
 
 		Reference reference = getReferenceField(field);
-		if (!BeanUtils.isAssignable(field.getFieldClass(), EntityReference.class) && reference == null) {
+		if (!ObjectOperations.isAssignable(field.getFieldClass(), EntityReference.class) && reference == null) {
 			return;
 		}
 
@@ -61,7 +61,7 @@ public class EntityReferenceFieldCustomizer implements FieldCustomizer {
 			Class beanClass = field.getViewDescriptor().getBeanClass();
 			if (beanClass != null) {
 				try {
-					java.lang.reflect.Field classField = BeanUtils.getField(beanClass, field.getName());
+					java.lang.reflect.Field classField = ObjectOperations.getField(beanClass, field.getName());
 					return classField.getAnnotation(Reference.class);
 				} catch (NoSuchFieldException ignored) {
 

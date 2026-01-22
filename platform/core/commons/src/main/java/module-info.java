@@ -13,6 +13,7 @@ open module tools.dynamia.commons {
     requires java.desktop;
     requires java.sql;
     requires com.fasterxml.jackson.datatype.jsr310;
+    requires spring.beans;
 
 
 }

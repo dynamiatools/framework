@@ -20,7 +20,7 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.SortEvent;
 import org.zkoss.zul.FieldComparator;
 import tools.dynamia.commons.BeanSorter;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.reflect.AccessMode;
 import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.crud.CrudActionEvent;
@@ -122,7 +122,7 @@ public class CrudTableViewBuilder implements CrudDataSetViewBuilder {
 
                 for (Object value : bindings.values()) {
                     if (value instanceof String) {
-                        PropertyInfo info = BeanUtils.getPropertyInfo(beanClass, (String) value);
+                        PropertyInfo info = ObjectOperations.getPropertyInfo(beanClass, (String) value);
                         if (info != null && info.getAccessMode() == AccessMode.READ_WRITE) {
                             joiner.add(value + " " + (sortEvent.isAscending() ? "ASC" : "DESC"));
                         }

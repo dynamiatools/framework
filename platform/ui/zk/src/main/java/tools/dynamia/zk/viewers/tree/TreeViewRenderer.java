@@ -23,7 +23,7 @@ import org.zkoss.zul.TreeModel;
 import org.zkoss.zul.Treecol;
 import org.zkoss.zul.Treecols;
 import org.zkoss.zul.TreeitemRenderer;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.logger.LoggingService;
@@ -49,7 +49,7 @@ public class TreeViewRenderer<T> implements ViewRenderer<TreeModel<TreeViewNode<
 
         TreeView<T> tree = new TreeView<>(descriptor);
         if (descriptor.getParams().get("itemRenderer") != null) {
-            tree.setItemRenderer((TreeitemRenderer) BeanUtils.newInstance(descriptor.getParams().get("itemRenderer").toString()));
+            tree.setItemRenderer((TreeitemRenderer) ObjectOperations.newInstance(descriptor.getParams().get("itemRenderer").toString()));
         } else {
             tree.setItemRenderer(new TreeViewRowRenderer(descriptor, tree));
         }
@@ -64,7 +64,7 @@ public class TreeViewRenderer<T> implements ViewRenderer<TreeModel<TreeViewNode<
         tree.setMold("paging");
         tree.getPagingChild().setMold("os");
 
-        BeanUtils.setupBean(tree, descriptor.getParams());
+        ObjectOperations.setupBean(tree, descriptor.getParams());
         renderHeaders(tree, descriptor);
         return tree;
     }
@@ -98,7 +98,7 @@ public class TreeViewRenderer<T> implements ViewRenderer<TreeModel<TreeViewNode<
                 Map headerParams = (Map) field.getParams().get("header");
                 if (headerParams != null) {
                     //noinspection unchecked
-                    BeanUtils.setupBean(header, headerParams);
+                    ObjectOperations.setupBean(header, headerParams);
                 }
             } catch (Exception e) {
                 LoggingService.get(TreeViewRenderer.class).error("Error setting header for field " + field.getName(), e);

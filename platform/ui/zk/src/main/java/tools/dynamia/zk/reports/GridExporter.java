@@ -21,7 +21,7 @@ import org.zkoss.zul.Column;
 import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.Grid;
 import org.zkoss.zul.Row;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.reports.excel.ExcelFileWriter;
 
 import java.io.File;
@@ -56,10 +56,10 @@ public class GridExporter {
 
     private static Object getValue(Component rowcell) {
         try {
-            return BeanUtils.invokeGetMethod(rowcell, "value");
+            return ObjectOperations.invokeGetMethod(rowcell, "value");
         } catch (Exception e) {
             try {
-                return BeanUtils.invokeGetMethod(rowcell, "label");
+                return ObjectOperations.invokeGetMethod(rowcell, "label");
             } catch (Exception ignored) {
             }
 

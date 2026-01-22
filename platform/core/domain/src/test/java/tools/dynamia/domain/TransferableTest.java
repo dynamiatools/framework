@@ -19,7 +19,7 @@ package tools.dynamia.domain;
 
 import org.junit.Assert;
 import org.junit.Test;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.query.Parameter;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
@@ -68,7 +68,7 @@ public class TransferableTest {
 
         @Override
         public Serializable findId(Object entity) {
-            return (Serializable) BeanUtils.invokeGetMethod(entity, "id");
+            return (Serializable) ObjectOperations.invokeGetMethod(entity, "id");
         }
 
         @Override

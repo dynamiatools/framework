@@ -23,7 +23,6 @@ import org.zkoss.zk.ui.WrongValuesException;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
-import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Window;
 import org.zkoss.zul.ext.Paginal;
 import tools.dynamia.commons.*;
@@ -46,8 +45,6 @@ import tools.dynamia.integration.Containers;
 import tools.dynamia.ui.MessageType;
 import tools.dynamia.ui.UIMessages;
 import tools.dynamia.viewers.DataSetView;
-import tools.dynamia.viewers.Field;
-import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.util.ZKUtil;
 import tools.dynamia.zk.viewers.table.TableView;
 
@@ -57,7 +54,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * This class works as crud controllers for ZK web applications
@@ -218,8 +214,8 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     public void query() {
 
         try {
-            if (BeanUtils.isAssignable(entityClass, QueryExecuter.class)) {
-                QueryExecuter queryExecutor = (QueryExecuter) BeanUtils.newInstance(entityClass);
+            if (ObjectOperations.isAssignable(entityClass, QueryExecuter.class)) {
+                QueryExecuter queryExecutor = (QueryExecuter) ObjectOperations.newInstance(entityClass);
                 setQueryResult(new ListDataSet(queryExecutor.executeQuery(crudService, getParams())));
             } else if (alwaysFindByExample) {
                 setQueryResult(new ListDataSet(crudService.findByExample(getExample(), getParams())));
@@ -281,8 +277,8 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     public void newEntity() {
         if (entityClass != null) {
             try {
-                entity = BeanUtils.newInstance(entityClass);
-                BeanUtils.setupBean(entity, getDefaultEntityValues());
+                entity = ObjectOperations.newInstance(entityClass);
+                ObjectOperations.setupBean(entity, getDefaultEntityValues());
             } catch (Exception ex) {
                 logger.error("Error creating new entity", ex);
             }
@@ -298,7 +294,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     public void newExample() {
         if (entityClass != null) {
             try {
-                example = BeanUtils.newInstance(entityClass);
+                example = ObjectOperations.newInstance(entityClass);
             } catch (Exception ex) {
                 logger.error("Error creating new example object", ex);
             }
@@ -641,7 +637,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
         params = new QueryParameters();
         if (entityClass == null) {
             try {
-                setEntityClass(BeanUtils.getGenericTypeClass(this));
+                setEntityClass(ObjectOperations.getGenericTypeClass(this));
 
             } catch (Exception e) {
                 logger.warn("Cannot get generic class for EntityClass, you should invoke setEntityClass or use the constructor");

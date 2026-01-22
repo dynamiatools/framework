@@ -17,10 +17,8 @@
 package tools.dynamia.domain.jdbc;
 
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.AbstractLoggable;
-import tools.dynamia.commons.logger.LoggingService;
-import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.commons.reflect.ReflectionException;
 
@@ -429,8 +427,8 @@ public class JdbcHelper extends AbstractLoggable {
 	}
 
 	public <T> T mapRow(Class<T> classType, ResultSet rs, ObjectMapper<T> mapper) {
-		T object = BeanUtils.newInstance(classType);
-		List<PropertyInfo> properties = BeanUtils.getPropertiesInfo(classType);
+		T object = ObjectOperations.newInstance(classType);
+		List<PropertyInfo> properties = ObjectOperations.getPropertiesInfo(classType);
 
 		for (PropertyInfo property : properties) {
 			if (!property.isCollection()) {
@@ -458,7 +456,7 @@ public class JdbcHelper extends AbstractLoggable {
 							value = value.toString();
 						}
 
-						BeanUtils.setFieldValue(property, object, value);
+						ObjectOperations.setFieldValue(property, object, value);
 					} catch (ReflectionException e) {
 						// ignore
 					}

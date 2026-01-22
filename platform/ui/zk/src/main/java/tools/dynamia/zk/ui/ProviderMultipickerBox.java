@@ -25,7 +25,7 @@ import org.zkoss.zul.Bandpopup;
 import org.zkoss.zul.ListModelList;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listitem;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.zk.BindingComponentIndex;
@@ -70,8 +70,8 @@ public class ProviderMultipickerBox extends Bandbox {
         itemsList.setItemRenderer((item, data, index) -> {
 
             try {
-                String id = BeanUtils.invokeGetMethod(data, idField).toString();
-                String name = BeanUtils.invokeGetMethod(data, nameField).toString();
+                String id = ObjectOperations.invokeGetMethod(data, idField).toString();
+                String name = ObjectOperations.invokeGetMethod(data, nameField).toString();
 
                 item.setLabel(StringUtils.capitalize(name));
                 item.setValue(id);
@@ -189,7 +189,7 @@ public class ProviderMultipickerBox extends Bandbox {
                     for (String value : values) {
                         Optional provider = Containers.get().findObjects(providerClass)
                                 .stream()
-                                .filter(p -> value.trim().equals(BeanUtils.invokeGetMethod(p, idField)))
+                                .filter(p -> value.trim().equals(ObjectOperations.invokeGetMethod(p, idField)))
                                 .findFirst();
 
                         if (provider.isPresent()) {

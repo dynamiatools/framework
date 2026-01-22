@@ -16,6 +16,9 @@
  */
 package tools.dynamia.commons;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.AccessMode;
@@ -37,7 +40,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -51,7 +53,7 @@ import java.util.stream.Stream;
  * @author Ing. Mario Serrano Leones
  */
 @SuppressWarnings("rawtypes")
-public final class BeanUtils {
+public final class ObjectOperations {
 
     /**
      * Mapping of primitive types to their wrapper classes.
@@ -61,7 +63,7 @@ public final class BeanUtils {
     /**
      * Logger for internal error and debug messages.
      */
-    private static final LoggingService LOGGER = new SLF4JLoggingService(BeanUtils.class);
+    private static final LoggingService LOGGER = new SLF4JLoggingService(ObjectOperations.class);
 
     static {
         WRAPPERS.put(byte.class, Byte.class);
@@ -129,7 +131,7 @@ public final class BeanUtils {
     /**
      * Instantiates a new bean utils.
      */
-    private BeanUtils() {
+    private ObjectOperations() {
         throw new IllegalAccessError("Hey this is private");
     }
 
@@ -585,7 +587,7 @@ public final class BeanUtils {
             } catch (Exception e) {
                 info.setGenericType(null);
             }
-            if (BeanUtils.isAssignable(type, Collection.class)) {
+            if (ObjectOperations.isAssignable(type, Collection.class)) {
                 info.setCollection(true);
             }
         }
@@ -786,7 +788,7 @@ public final class BeanUtils {
      * @return the Fields with annotation
      */
     public static Field[] getFieldsWithAnnotation(Class<?> targetClass, Class<? extends Annotation> annotationClass) {
-        return BeanUtils.getAllFields(targetClass).stream().filter(f -> f.isAnnotationPresent(annotationClass))
+        return ObjectOperations.getAllFields(targetClass).stream().filter(f -> f.isAnnotationPresent(annotationClass))
                 .toList()
                 .toArray(Field[]::new);
     }
@@ -795,7 +797,7 @@ public final class BeanUtils {
      * Find and return the first field annotated with annotationClass
      */
     public static Field getFirstFieldWithAnnotation(Class<?> targetClass, Class<? extends Annotation> annotationClass) {
-        return BeanUtils.getAllFields(targetClass).stream()
+        return ObjectOperations.getAllFields(targetClass).stream()
                 .filter(f -> f.isAnnotationPresent(annotationClass))
                 .findFirst().orElse(null);
     }
@@ -837,7 +839,7 @@ public final class BeanUtils {
                 getPropertiesInfo(bean.getClass()).stream()
                         .filter(p -> (p.isStandardClass() || p.isEnum()) && !p.isArray() && !p.isCollection()).forEach(p -> {
                             try {
-                                Object value = BeanUtils.invokeGetMethod(bean, p);
+                                Object value = ObjectOperations.invokeGetMethod(bean, p);
                                 if (value == null) {
                                     value = defaultValue;
                                 }
@@ -906,7 +908,7 @@ public final class BeanUtils {
      * Find the name of property parent
      */
     public static String findParentPropertyName(Class<?> parentClass, Class subentityClass) {
-        List<PropertyInfo> infos = BeanUtils.getPropertiesInfo(subentityClass);
+        List<PropertyInfo> infos = ObjectOperations.getPropertiesInfo(subentityClass);
         for (PropertyInfo propertyInfo : infos) {
             if (isAssignable(propertyInfo.getType(), parentClass)) {
                 return propertyInfo.getName();

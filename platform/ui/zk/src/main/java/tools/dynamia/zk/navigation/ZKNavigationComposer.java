@@ -26,7 +26,7 @@ import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.impl.LabelElement;
 import org.zkoss.zul.impl.XulElement;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.Containers;
@@ -250,7 +250,7 @@ public class ZKNavigationComposer extends SelectorComposer<org.zkoss.zk.ui.Compo
                 builder = TabPanel.class;
             }
             //noinspection unchecked
-            workspaceViewBuilder = (WorkspaceViewBuilder) BeanUtils.newInstance(builder);
+            workspaceViewBuilder = (WorkspaceViewBuilder) ObjectOperations.newInstance(builder);
             workspaceViewBuilder.init(workspace);
             workspaceViewBuilder.build(desktopCurrentPage);
         }

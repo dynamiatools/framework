@@ -26,14 +26,13 @@ import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.springframework.security.core.GrantedAuthority;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.jpa.BaseEntity;
 import tools.dynamia.modules.saas.api.AccountAware;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -158,7 +157,7 @@ public class Profile extends BaseEntity implements GrantedAuthority, Cloneable, 
 
     @Override
     public Profile clone() {
-        Profile clon = BeanUtils.clone(this, "id", "accountId", "permisos", "usuarios");
+        Profile clon = ObjectOperations.clone(this, "id", "accountId", "permisos", "usuarios");
         var now = LocalDateTime.now();
         clon.setCreationDate(now.toLocalDate());
         clon.setCreationTime(now.toLocalTime()  );

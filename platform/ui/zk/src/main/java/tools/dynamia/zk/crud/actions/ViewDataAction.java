@@ -23,7 +23,7 @@ import org.zkoss.zul.Div;
 import tools.dynamia.actions.ActionGroup;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.actions.ReadableOnly;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
@@ -126,7 +126,7 @@ public class ViewDataAction extends AbstractCrudAction implements ReadableOnly {
                     .filter(f -> "crudview".equals(f.getComponent()))
                     .forEach(f -> {
 
-                        Collection subviewValue = (Collection) BeanUtils.invokeGetMethod(entity, f.getPropertyInfo());
+                        Collection subviewValue = (Collection) ObjectOperations.invokeGetMethod(entity, f.getPropertyInfo());
                         if (subviewValue != null && !subviewValue.isEmpty()) {
                             Viewer subview = new Viewer("table", f.getPropertyInfo().getGenericType(), subviewValue);
                             subview.setContentVflex(null);
@@ -165,7 +165,7 @@ public class ViewDataAction extends AbstractCrudAction implements ReadableOnly {
             }
 
 
-            ZKUtil.showDialog(BeanUtils.getInstanceName(data), content, width, height);
+            ZKUtil.showDialog(ObjectOperations.getInstanceName(data), content, width, height);
         } else {
             UIMessages.showMessage(Messages.get(ViewDataAction.class, "select_row"), MessageType.ERROR);
         }

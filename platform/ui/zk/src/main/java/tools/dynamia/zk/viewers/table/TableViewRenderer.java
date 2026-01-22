@@ -22,7 +22,7 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.SortEvent;
 import org.zkoss.zul.*;
 import tools.dynamia.commons.BeanSorter;
-import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.logger.LoggingService;
@@ -55,7 +55,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
         TableView<T> table = new TableView<>(descriptor);
 
         if (descriptor.getParams().get(Viewers.PARAM_ITEM_RENDERER) != null) {
-            table.setItemRenderer((ListitemRenderer) BeanUtils.newInstance(descriptor.getParams().get(Viewers.PARAM_ITEM_RENDERER).toString()));
+            table.setItemRenderer((ListitemRenderer) ObjectOperations.newInstance(descriptor.getParams().get(Viewers.PARAM_ITEM_RENDERER).toString()));
         } else {
             table.setItemRenderer(new TableViewRowRenderer(descriptor, table));
         }
@@ -114,7 +114,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
                 String grplabel = grp.getLocalizedLabel(Messages.getDefaultLocale());
                 grplabel = filterFieldGroupLabel(grp, grplabel);
                 Auxheader auxheader = new Auxheader(grplabel);
-                BeanUtils.setupBean(auxheader, grp.getParams());
+                ObjectOperations.setupBean(auxheader, grp.getParams());
                 if (auxheader.getColspan() == 1 && grp.getFields().size() > 1) {
                     auxheader.setColspan(grp.getFields().size());
                 }
@@ -166,7 +166,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
                 Map headerParams = (Map) field.getParams().get("header");
                 if (headerParams != null) {
                     //noinspection unchecked
-                    BeanUtils.setupBean(header, headerParams);
+                    ObjectOperations.setupBean(header, headerParams);
 
                     if (headerParams.containsKey(Viewers.PARAM_BINDINGS)) {
 
@@ -216,7 +216,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
             header.setLabel(actionRef.getLabel());
             header.setWidth(actionRef.getWidth());
             if (actionRef.getAttributes() != null) {
-                BeanUtils.setupBean(header, actionRef.getAttributes());
+                ObjectOperations.setupBean(header, actionRef.getAttributes());
             }
 
         });
@@ -255,7 +255,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
                     if (footerParams != null) {
                         footRequired = true;
                         //noinspection unchecked
-                        BeanUtils.setupBean(footer, footerParams);
+                        ObjectOperations.setupBean(footer, footerParams);
                         if (footer.getFunctionConverter() == null && field.getParams().containsKey(Viewers.PARAM_CONVERTER)) {
                             footer.setFunctionConverter((String) field.getParams().get(Viewers.PARAM_CONVERTER));
                         }
@@ -287,7 +287,7 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
                 if (processorName.equals("crud") || processorName.equals("auto")) {
                     processor = new CrudServiceMultiFunctionProcessor();
                 } else {
-                    processor = BeanUtils.newInstance(processorName);
+                    processor = ObjectOperations.newInstance(processorName);
                 }
             }
 
