@@ -23,6 +23,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
+import tools.dynamia.commons.ops.ObjectCloner;
+import tools.dynamia.commons.ops.PropertyAccessor;
 import tools.dynamia.commons.reflect.AccessMode;
 import tools.dynamia.commons.reflect.ClassReflectionInfo;
 import tools.dynamia.commons.reflect.PropertyInfo;
@@ -274,54 +276,47 @@ public final class ObjectOperations {
 
     /**
      * Returns the value of a field from the given object using reflection.
+     * <p>
+     * This method delegates to {@link PropertyAccessor#getFieldValue(String, Object)}.
+     * </p>
      *
      * @param fieldName the name of the field
      * @param object    the object instance
      * @return the value of the field, or null if not found or inaccessible
+     * @see PropertyAccessor#getFieldValue(String, Object)
      */
     public static Object getFieldValue(final String fieldName, final Object object) {
-        Object value = null;
-        try {
-            final Field field = getField(object.getClass(), fieldName);
-            field.setAccessible(true);
-            value = field.get(object);
-        } catch (NoSuchFieldException e) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Cannot find field " + fieldName + " in " + object.getClass() + ". Returning null value");
-            }
-        } catch (Exception e) {
-            LOGGER.error(e);
-        }
-        return value;
+        return PropertyAccessor.getFieldValue(fieldName, object);
     }
 
     /**
      * Sets the value of a field in the given object using reflection.
+     * <p>
+     * This method delegates to {@link PropertyAccessor#setFieldValue(PropertyInfo, Object, Object)}.
+     * </p>
      *
      * @param propertyInfo the property info descriptor
      * @param object       the object instance
      * @param value        the value to set
+     * @see PropertyAccessor#setFieldValue(PropertyInfo, Object, Object)
      */
     public static void setFieldValue(PropertyInfo propertyInfo, Object object, Object value) {
-        setFieldValue(propertyInfo.getName(), object, value);
+        PropertyAccessor.setFieldValue(propertyInfo, object, value);
     }
 
     /**
      * Sets the value of a field in the given object using reflection.
+     * <p>
+     * This method delegates to {@link PropertyAccessor#setFieldValue(String, Object, Object)}.
+     * </p>
      *
      * @param fieldName the name of the field
      * @param object    the object instance
      * @param value     the value to set
+     * @see PropertyAccessor#setFieldValue(String, Object, Object)
      */
     public static void setFieldValue(String fieldName, Object object, Object value) {
-
-        try {
-            final Field field = getField(object.getClass(), fieldName);
-            field.setAccessible(true);
-            field.set(object, value);
-        } catch (Exception e) {
-            LOGGER.error(e);
-        }
+        PropertyAccessor.setFieldValue(fieldName, object, value);
     }
 
     /**
@@ -389,14 +384,11 @@ public final class ObjectOperations {
 
     /**
      * Invokes a method on the specified bean object by name, supporting variable arguments.
-     * This method uses Spring's {@link ReflectionUtils} for improved AOT compatibility.
-     *
      * <p>
-     * The method automatically determines parameter types from the provided arguments
-     * and handles method accessibility. If the method is not found or invocation fails,
-     * a {@link ReflectionException} is thrown.
+     * This method delegates to {@link PropertyAccessor#invokeMethod(Object, String, Object...)}.
+     * Uses Spring's {@link ReflectionUtils} for improved AOT compatibility.
      * </p>
-     * <p>
+     *
      * Example:
      * <pre>{@code
      * Customer customer = new Customer();
@@ -411,38 +403,10 @@ public final class ObjectOperations {
      * @param args       optional arguments to pass to the method
      * @return the result of the method invocation, or null if the method returns void
      * @throws ReflectionException if the method is not found or invocation fails
+     * @see PropertyAccessor#invokeMethod(Object, String, Object...)
      */
     public static Object invokeMethod(final Object bean, final String methodName, final Object... args) {
-        if (bean == null || methodName == null) {
-            return null;
-        }
-
-        try {
-            Method method;
-
-            if (args != null && args.length > 0) {
-                // Determine parameter types from arguments
-                Class<?>[] argClasses = new Class[args.length];
-                for (int i = 0; i < args.length; i++) {
-                    argClasses[i] = args[i].getClass();
-                }
-                // Use Spring ReflectionUtils for better AOT compatibility
-                method = ReflectionUtils.findMethod(bean.getClass(), methodName, argClasses);
-            } else {
-                method = ReflectionUtils.findMethod(bean.getClass(), methodName);
-            }
-
-            if (method == null) {
-                throw new NoSuchMethodException("Method '" + methodName + "' not found in class " + bean.getClass().getName());
-            }
-
-            // Make method accessible and invoke
-            ReflectionUtils.makeAccessible(method);
-            return ReflectionUtils.invokeMethod(method, bean, args != null ? args : new Object[0]);
-
-        } catch (Exception ex) {
-            throw new ReflectionException(ex);
-        }
+        return PropertyAccessor.invokeMethod(bean, methodName, args);
     }
 
 
@@ -455,26 +419,20 @@ public final class ObjectOperations {
      * <p>
      * <code>BeanUtil.invokeGetMetho(person,"country.name");</code> invoke:
      * <code>person.getCountry().getName();</code>
+     * <p>
+     * This method delegates to {@link PropertyAccessor#invokeGetMethod(Object, String)}.
+     * </p>
      *
      * @param bean         the bean
      * @param propertyName the property name
      * @return the object
+     * @see PropertyAccessor#invokeGetMethod(Object, String)
      */
     public static Object invokeGetMethod(final Object bean, final String propertyName) {
         if (bean instanceof BeanMap) {
             return ((BeanMap) bean).get(propertyName);
         }
-
-        try {
-            // Note: BeanWrapperImpl does not need to be cached. Spring Framework internally
-            // caches bean introspection results via CachedIntrospectionResults, making
-            // BeanWrapper creation very lightweight. Additionally, BeanWrapper is stateful
-            // (holds reference to specific bean instance) and cannot be safely shared.
-            BeanWrapper wrapper = new BeanWrapperImpl(bean);
-            return wrapper.getPropertyValue(propertyName);
-        } catch (Exception e) {
-            throw new ReflectionException(e);
-        }
+        return PropertyAccessor.invokeGetMethod(bean, propertyName);
     }
 
     /**
@@ -487,31 +445,35 @@ public final class ObjectOperations {
      * <p>
      * <code>BeanUtil.invokeBooleanGetMethod(person,"country.active");</code>
      * invoke: <code>person.getCountry().isActive();</code>
+     * <p>
+     * This method delegates to {@link PropertyAccessor#invokeBooleanGetMethod(Object, String)}.
+     * </p>
      *
      * @param bean         the bean
      * @param propertyName the property name
      * @return the object
+     * @see PropertyAccessor#invokeBooleanGetMethod(Object, String)
      */
     public static Object invokeBooleanGetMethod(final Object bean, final String propertyName) {
-        // BeanWrapper handles both isXXX and getXXX methods automatically
-        return invokeGetMethod(bean, propertyName);
+        return PropertyAccessor.invokeBooleanGetMethod(bean, propertyName);
     }
 
     /**
      * Invoker a getXXX or isXXX using PropertyInfo.
+     * <p>
+     * This method delegates to {@link PropertyAccessor#invokeGetMethod(Object, PropertyInfo)}.
+     * </p>
      *
      * @param bean     the bean
      * @param property the property
      * @return the object
+     * @see PropertyAccessor#invokeGetMethod(Object, PropertyInfo)
      */
     public static Object invokeGetMethod(final Object bean, final PropertyInfo property) {
         if (bean instanceof BeanMap) {
             return ((BeanMap) bean).get(property.getName());
-        } else if (property.is(boolean.class)) {
-            return invokeBooleanGetMethod(bean, property.getName());
-        } else {
-            return invokeGetMethod(bean, property.getName());
         }
+        return PropertyAccessor.invokeGetMethod(bean, property);
     }
 
     /**
@@ -525,10 +487,14 @@ public final class ObjectOperations {
      * is translate like this:<br/>
      * <br/>
      * <code>bean.getSubBean().getOtherBean().setName("MyBean");</code><br/>
+     * <p>
+     * This method delegates to {@link PropertyAccessor#invokeSetMethod(Object, String, Object)}.
+     * </p>
      *
      * @param bean  the bean
      * @param name  the name
      * @param value the value
+     * @see PropertyAccessor#invokeSetMethod(Object, String, Object)
      */
     public static void invokeSetMethod(final Object bean, final String name, final Object value) {
         if (bean instanceof BeanMap) {
@@ -536,33 +502,24 @@ public final class ObjectOperations {
             return;
         }
 
-        try {
-            // Note: BeanWrapperImpl does not need to be cached. Spring Framework internally
-            // caches bean introspection results via CachedIntrospectionResults, making
-            // BeanWrapper creation very lightweight. Additionally, BeanWrapper is stateful
-            // (holds reference to specific bean instance) and cannot be safely shared.
-            BeanWrapper wrapper = new BeanWrapperImpl(bean);
-
-            // Handle ValueWrapper for explicit type specification
-            if (value instanceof ValueWrapper valueWrapper) {
-                wrapper.setPropertyValue(name, valueWrapper.value());
-            } else {
-                wrapper.setPropertyValue(name, value);
-            }
-        } catch (Exception e) {
-            throw new ReflectionException(e);
-        }
+        // Handle ValueWrapper for explicit type specification
+        Object actualValue = value instanceof ValueWrapper valueWrapper ? valueWrapper.value() : value;
+        PropertyAccessor.invokeSetMethod(bean, name, actualValue);
     }
 
     /**
      * Invoker setXXX using property.
+     * <p>
+     * This method delegates to {@link PropertyAccessor#invokeSetMethod(Object, PropertyInfo, Object)}.
+     * </p>
      *
      * @param bean     the bean
      * @param property the property
      * @param value    the value
+     * @see PropertyAccessor#invokeSetMethod(Object, PropertyInfo, Object)
      */
     public static void invokeSetMethod(final Object bean, final PropertyInfo property, final Object value) {
-        invokeSetMethod(bean, property.getName(), value);
+        PropertyAccessor.invokeSetMethod(bean, property, value);
     }
 
     /**
@@ -1172,18 +1129,10 @@ public final class ObjectOperations {
 
     /**
      * Creates a deep clone of the source object, including all properties, collections, and maps.
+     * <p>
+     * This method delegates to {@link ObjectCloner#deepClone(Object, String...)}.
      * Unlike the simple {@link #clone(Object, String...)} method, this performs a recursive deep copy
      * where collections and maps are cloned by creating new instances and cloning each element.
-     * <p>
-     * This method handles:
-     * <ul>
-     *   <li>Primitive types and wrappers (copied by value)</li>
-     *   <li>Strings and other immutable types (shared reference, safe)</li>
-     *   <li>Collections (List, Set, etc.) - creates new collection and clones each element</li>
-     *   <li>Maps - creates new map and clones both keys and values</li>
-     *   <li>Arrays - creates new array and clones each element</li>
-     *   <li>Custom objects - recursively cloned</li>
-     * </ul>
      * </p>
      *
      * @param <T>                the type of the source object
@@ -1192,185 +1141,10 @@ public final class ObjectOperations {
      * @return a deep clone of the source object
      * @throws ReflectionException if the object cannot be cloned
      *
-     * Example:
-     * <pre>{@code
-     * class Person {
-     *     String name;
-     *     List<Address> addresses;
-     * }
-     *
-     * Person original = new Person();
-     * original.setName("John");
-     * original.setAddresses(List.of(new Address("Street 1")));
-     *
-     * Person deepCopy = ObjectOperations.deepClone(original);
-     * // deepCopy.addresses is a new list with cloned Address objects
-     * }</pre>
+     * @see ObjectCloner#deepClone(Object, String...)
      */
     public static <T> T deepClone(T source, String... excludedProperties) {
-        if (source == null) {
-            return null;
-        }
-
-        @SuppressWarnings("unchecked")
-        Class<T> sourceClass = (Class<T>) source.getClass();
-
-        // Handle immutable and primitive types
-        if (isImmutableType(sourceClass)) {
-            return source;
-        }
-
-        T cloned = newInstance(sourceClass);
-
-        Set<String> propsToExclude = new HashSet<>();
-        if (excludedProperties != null) {
-            propsToExclude.addAll(Arrays.asList(excludedProperties));
-        }
-
-        // Get all properties and clone them recursively
-        List<PropertyInfo> properties = getPropertiesInfo(sourceClass);
-        for (PropertyInfo property : properties) {
-            if (propsToExclude.contains(property.getName())) {
-                continue;
-            }
-
-            try {
-                Object value = property.getValue(source);
-                if (value == null) {
-                    continue;
-                }
-
-                Object clonedValue = deepCloneValue(value, property.getType());
-                property.setValue(cloned, clonedValue);
-            } catch (Exception e) {
-                LOGGER.warn("Cannot deep clone property: " + property.getName() + " of class " + sourceClass.getName(), e);
-            }
-        }
-
-        return cloned;
-    }
-
-    /**
-     * Deep clones a value based on its type, handling collections, maps, arrays, and objects.
-     *
-     * @param value        the value to clone
-     * @param expectedType the expected type of the value
-     * @return the cloned value
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Object deepCloneValue(Object value, Class<?> expectedType) {
-        if (value == null) {
-            return null;
-        }
-
-        Class<?> valueClass = value.getClass();
-
-        // Handle immutable types (String, primitives wrappers, etc.)
-        if (isImmutableType(valueClass)) {
-            return value;
-        }
-
-        // Handle Collections
-        if (value instanceof Collection) {
-            Collection<?> sourceCollection = (Collection<?>) value;
-            Collection clonedCollection;
-
-            // Try to create the same type of collection
-            if (value instanceof List) {
-                clonedCollection = new ArrayList<>(sourceCollection.size());
-            } else if (value instanceof Set) {
-                clonedCollection = new HashSet<>(sourceCollection.size());
-            } else {
-                // Try to create instance of the same collection type
-                try {
-                    clonedCollection = (Collection) valueClass.getDeclaredConstructor().newInstance();
-                } catch (Exception e) {
-                    clonedCollection = new ArrayList<>(sourceCollection.size());
-                }
-            }
-
-            // Clone each element
-            for (Object item : sourceCollection) {
-                if (item == null) {
-                    clonedCollection.add(null);
-                } else {
-                    clonedCollection.add(deepCloneValue(item, item.getClass()));
-                }
-            }
-
-            return clonedCollection;
-        }
-
-        // Handle Maps
-        if (value instanceof Map) {
-            Map<?, ?> sourceMap = (Map<?, ?>) value;
-            Map clonedMap;
-
-            // Try to create the same type of map
-            try {
-                clonedMap = (Map) valueClass.getDeclaredConstructor().newInstance();
-            } catch (Exception e) {
-                clonedMap = new HashMap<>(sourceMap.size());
-            }
-
-            // Clone each key-value pair
-            for (Map.Entry<?, ?> entry : sourceMap.entrySet()) {
-                Object clonedKey = entry.getKey() == null ? null :
-                        deepCloneValue(entry.getKey(), entry.getKey().getClass());
-                Object clonedValue = entry.getValue() == null ? null :
-                        deepCloneValue(entry.getValue(), entry.getValue().getClass());
-                clonedMap.put(clonedKey, clonedValue);
-            }
-
-            return clonedMap;
-        }
-
-        // Handle Arrays
-        if (valueClass.isArray()) {
-            int length = java.lang.reflect.Array.getLength(value);
-            Class<?> componentType = valueClass.getComponentType();
-            Object clonedArray = java.lang.reflect.Array.newInstance(componentType, length);
-
-            for (int i = 0; i < length; i++) {
-                Object item = java.lang.reflect.Array.get(value, i);
-                if (item != null) {
-                    Object clonedItem = deepCloneValue(item, componentType);
-                    java.lang.reflect.Array.set(clonedArray, i, clonedItem);
-                }
-            }
-
-            return clonedArray;
-        }
-
-        // Handle custom objects recursively
-        try {
-            return deepClone(value);
-        } catch (Exception e) {
-            LOGGER.warn("Cannot deep clone object of type: " + valueClass.getName() + ", returning original reference", e);
-            return value;
-        }
-    }
-
-    /**
-     * Checks if a type is immutable and can be safely shared between clones.
-     *
-     * @param type the type to check
-     * @return true if the type is immutable
-     */
-    private static boolean isImmutableType(Class<?> type) {
-        return type.isPrimitive() ||
-                type == String.class ||
-                type == Boolean.class ||
-                type == Byte.class ||
-                type == Character.class ||
-                type == Short.class ||
-                type == Integer.class ||
-                type == Long.class ||
-                type == Float.class ||
-                type == Double.class ||
-                type.isEnum() ||
-                java.time.temporal.Temporal.class.isAssignableFrom(type) ||
-                java.util.Date.class.isAssignableFrom(type);
+        return ObjectCloner.deepClone(source, excludedProperties);
     }
 
     /**
