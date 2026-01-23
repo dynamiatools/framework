@@ -110,6 +110,11 @@ public final class PropertyAccessor {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Cannot find field " + fieldName + " in " + object.getClass() + ". Returning null value");
             }
+        } catch (java.lang.reflect.InaccessibleObjectException e) {
+            // Java 9+ module system prevents access to certain internal fields
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Cannot access field " + fieldName + " in " + object.getClass() + " due to module restrictions. Returning null value");
+            }
         } catch (Exception e) {
             LOGGER.error(e);
         }
@@ -156,6 +161,11 @@ public final class PropertyAccessor {
             final Field field = tools.dynamia.commons.ObjectOperations.getField(object.getClass(), fieldName);
             field.setAccessible(true);
             field.set(object, value);
+        } catch (java.lang.reflect.InaccessibleObjectException e) {
+            // Java 9+ module system prevents access to certain internal fields
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Cannot access field " + fieldName + " in " + object.getClass() + " due to module restrictions");
+            }
         } catch (Exception e) {
             LOGGER.error(e);
         }
