@@ -17,12 +17,11 @@
 package tools.dynamia.commons;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
+import tools.dynamia.commons.ops.BeanTransformer;
 import tools.dynamia.commons.ops.CollectionOperations;
 import tools.dynamia.commons.ops.ObjectCloner;
 import tools.dynamia.commons.ops.PropertyAccessor;
@@ -39,16 +38,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -890,20 +880,16 @@ public final class ObjectOperations {
 
     /**
      * Setup bean.
+     * <p>
+     * This method delegates to {@link BeanTransformer#setupBean(Object, Map)}.
+     * </p>
      *
      * @param bean   the bean
      * @param values the values
+     * @see BeanTransformer#setupBean(Object, Map)
      */
     public static void setupBean(final Object bean, final Map<String, Object> values) {
-        if (bean != null && values != null) {
-            for (String key : values.keySet()) {
-                try {
-                    invokeSetMethod(bean, key, values.get(key));
-                } catch (Exception e) {
-                    LOGGER.debug("WARN: Setting up bean " + e.getMessage());
-                }
-            }
-        }
+        BeanTransformer.setupBean(bean, values);
     }
 
     /**
@@ -1152,14 +1138,16 @@ public final class ObjectOperations {
      * Setup bean properties using another bean properties. Source object can be of
      * any type, this method extract source object properties values and names and
      * create a Map to setup bean.
+     * <p>
+     * This method delegates to {@link BeanTransformer#setupBean(Object, Object)}.
+     * </p>
+     *
+     * @param bean   the target bean
+     * @param source the source object (can be a Map or another bean)
+     * @see BeanTransformer#setupBean(Object, Object)
      */
     public static void setupBean(Object bean, Object source) {
-        if (source instanceof Map) {
-            //noinspection unchecked
-            setupBean(bean, (Map) source);
-        } else {
-            BeanUtils.copyProperties(source, bean);
-        }
+        BeanTransformer.setupBean(bean, source);
     }
 
     /**
@@ -1316,81 +1304,50 @@ public final class ObjectOperations {
     /**
      * Extracts only the specified properties from a bean into a Map.
      * <p>
-     * Example:
-     * <pre>{@code
-     * Person person = getPerson();
-     * Map<String, Object> data = ObjectOperations.mapToMap(person, "name", "email", "age");
-     * // Result: {"name": "John", "email": "john@mail.com", "age": 30}
-     * }</pre>
+     * This method delegates to {@link BeanTransformer#mapToMap(Object, String...)}.
+     * </p>
      *
      * @param bean       the source bean
      * @param properties the property names to extract
      * @return a map with property names as keys and their values
+     * @see BeanTransformer#mapToMap(Object, String...)
      */
     public static Map<String, Object> mapToMap(Object bean, String... properties) {
-        Map<String, Object> result = new HashMap<>();
-        if (bean == null || properties == null) {
-            return result;
-        }
-
-        for (String property : properties) {
-            try {
-                Object value = invokeGetMethod(bean, property);
-                result.put(property, value);
-            } catch (Exception e) {
-                result.put(property, null);
-            }
-        }
-        return result;
+        return BeanTransformer.mapToMap(bean, properties);
     }
 
     /**
      * Transforms a source object to a target class by copying properties.
-     * Creates a new instance of the target class and copies all matching properties.
      * <p>
-     * Example:
-     * <pre>{@code
-     * Person person = getPerson();
-     * PersonDTO dto = ObjectOperations.transform(person, PersonDTO.class);
-     * }</pre>
+     * This method delegates to {@link BeanTransformer#transform(Object, Class)}.
+     * </p>
      *
      * @param <S>         the source type
      * @param <T>         the target type
      * @param source      the source object
      * @param targetClass the target class
      * @return a new instance of target class with copied properties
+     * @see BeanTransformer#transform(Object, Class)
      */
     public static <S, T> T transform(S source, Class<T> targetClass) {
-        if (source == null || targetClass == null) {
-            return null;
-        }
-        T target = newInstance(targetClass);
-        BeanUtils.copyProperties(source, target);
-        return target;
+        return BeanTransformer.transform(source, targetClass);
     }
 
     /**
      * Transforms a collection of objects to another type by copying properties.
      * <p>
-     * Example:
-     * <pre>{@code
-     * List<Person> persons = getPersons();
-     * List<PersonDTO> dtos = ObjectOperations.transformAll(persons, PersonDTO.class);
-     * }</pre>
+     * This method delegates to {@link BeanTransformer#transformAll(Collection, Class)}.
+     * </p>
      *
      * @param <S>         the source type
      * @param <T>         the target type
      * @param collection  the source collection
      * @param targetClass the target class
      * @return a list of transformed objects
+     * @see BeanTransformer#transformAll(Collection, Class)
      */
     public static <S, T> List<T> transformAll(Collection<S> collection, Class<T> targetClass) {
-        if (collection == null || targetClass == null) {
-            return new ArrayList<>();
-        }
-        return collection.stream()
-                .map(source -> transform(source, targetClass))
-                .collect(Collectors.toList());
+        return BeanTransformer.transformAll(collection, targetClass);
     }
 
     /**
@@ -2046,16 +2003,10 @@ public final class ObjectOperations {
      * @param source   the source object
      * @param modifier the consumer to modify the copy
      * @return a modified copy of the source
+     * @see BeanTransformer#copyWith(Object, Consumer)
      */
     public static <T> T copyWith(T source, Consumer<T> modifier) {
-        if (source == null) {
-            return null;
-        }
-        T copy = clone(source);
-        if (modifier != null) {
-            modifier.accept(copy);
-        }
-        return copy;
+        return BeanTransformer.copyWith(source, modifier);
     }
 }
 
