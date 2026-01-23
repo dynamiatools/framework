@@ -22,6 +22,7 @@ import org.springframework.util.ReflectionUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.ops.BeanTransformer;
+import tools.dynamia.commons.ops.BeanValidator;
 import tools.dynamia.commons.ops.CollectionOperations;
 import tools.dynamia.commons.ops.ObjectCloner;
 import tools.dynamia.commons.ops.PropertyAccessor;
@@ -1434,99 +1435,62 @@ public final class ObjectOperations {
     /**
      * Checks if a bean has a property with a non-null value.
      * <p>
-     * Example:
-     * <pre>{@code
-     * boolean hasEmail = ObjectOperations.hasProperty(person, "email");
-     * }</pre>
+     * This method delegates to {@link BeanValidator#hasProperty(Object, String)}.
+     * </p>
      *
      * @param bean         the bean to check
      * @param propertyName the property name
      * @return true if property exists and is not null
+     * @see BeanValidator#hasProperty(Object, String)
      */
     public static boolean hasProperty(Object bean, String propertyName) {
-        if (bean == null || propertyName == null) {
-            return false;
-        }
-        try {
-            Object value = invokeGetMethod(bean, propertyName);
-            return value != null;
-        } catch (Exception e) {
-            return false;
-        }
+        return BeanValidator.hasProperty(bean, propertyName);
     }
 
     /**
      * Checks if a property value is null.
      * <p>
-     * Example:
-     * <pre>{@code
-     * boolean isEmailNull = ObjectOperations.isPropertyNull(person, "email");
-     * }</pre>
+     * This method delegates to {@link BeanValidator#isPropertyNull(Object, String)}.
+     * </p>
      *
      * @param bean         the bean to check
      * @param propertyName the property name
      * @return true if property is null or doesn't exist
+     * @see BeanValidator#isPropertyNull(Object, String)
      */
     public static boolean isPropertyNull(Object bean, String propertyName) {
-        return !hasProperty(bean, propertyName);
+        return BeanValidator.isPropertyNull(bean, propertyName);
     }
 
     /**
      * Checks if a bean matches all property criteria in the map.
      * <p>
-     * Example:
-     * <pre>{@code
-     * boolean matches = ObjectOperations.matchesProperties(person,
-     *     Map.of("status", "active", "country", "USA"));
-     * }</pre>
+     * This method delegates to {@link BeanValidator#matchesProperties(Object, Map)}.
+     * </p>
      *
      * @param bean     the bean to test
      * @param criteria map of property names to expected values
      * @return true if all criteria match
+     * @see BeanValidator#matchesProperties(Object, Map)
      */
     public static boolean matchesProperties(Object bean, Map<String, Object> criteria) {
-        if (bean == null || criteria == null || criteria.isEmpty()) {
-            return false;
-        }
-        return criteria.entrySet().stream()
-                .allMatch(entry -> {
-                    try {
-                        Object value = invokeGetMethod(bean, entry.getKey());
-                        Object expected = entry.getValue();
-                        return expected == null ? value == null : expected.equals(value);
-                    } catch (Exception e) {
-                        return false;
-                    }
-                });
+        return BeanValidator.matchesProperties(bean, criteria);
     }
 
     /**
      * Checks if specific properties are equal between two beans.
      * <p>
-     * Example:
-     * <pre>{@code
-     * boolean sameBasicInfo = ObjectOperations.arePropertiesEqual(person1, person2, "name", "email");
-     * }</pre>
+     * This method delegates to {@link BeanValidator#arePropertiesEqual(Object, Object, String...)}.
+     * </p>
      *
      * @param bean1      the first bean
      * @param bean2      the second bean
      * @param properties the properties to compare
      * @return true if all specified properties are equal
+     * @see BeanValidator#arePropertiesEqual(Object, Object, String...)
      */
     public static boolean arePropertiesEqual(Object bean1, Object bean2, String... properties) {
-        if (bean1 == null || bean2 == null || properties == null) {
-            return false;
-        }
-        return Stream.of(properties)
-                .allMatch(prop -> {
-                    try {
-                        Object value1 = invokeGetMethod(bean1, prop);
-                        Object value2 = invokeGetMethod(bean2, prop);
-                        return value1 == null ? value2 == null : value1.equals(value2);
-                    } catch (Exception e) {
-                        return false;
-                    }
-                });
+        return BeanValidator.arePropertiesEqual(bean1, bean2, properties);
     }
 
     /**
