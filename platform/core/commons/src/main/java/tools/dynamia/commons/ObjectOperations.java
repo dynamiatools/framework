@@ -23,6 +23,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
+import tools.dynamia.commons.ops.CollectionOperations;
 import tools.dynamia.commons.ops.ObjectCloner;
 import tools.dynamia.commons.ops.PropertyAccessor;
 import tools.dynamia.commons.reflect.AccessMode;
@@ -1664,69 +1665,48 @@ public final class ObjectOperations {
     /**
      * Compares two objects by a specific property.
      * <p>
-     * Example:
-     * <pre>{@code
-     * persons.sort((p1, p2) -> ObjectOperations.compareByProperty(p1, p2, "age"));
-     * }</pre>
+     * This method delegates to {@link CollectionOperations#compareByProperty(Object, Object, String)}.
+     * </p>
      *
      * @param obj1         the first object
      * @param obj2         the second object
      * @param propertyName the property name to compare
      * @return negative if obj1 < obj2, zero if equal, positive if obj1 > obj2
+     * @see CollectionOperations#compareByProperty(Object, Object, String)
      */
     @SuppressWarnings("unchecked")
     public static int compareByProperty(Object obj1, Object obj2, String propertyName) {
-        if (obj1 == null && obj2 == null) return 0;
-        if (obj1 == null) return -1;
-        if (obj2 == null) return 1;
-
-        try {
-            Object value1 = invokeGetMethod(obj1, propertyName);
-            Object value2 = invokeGetMethod(obj2, propertyName);
-
-            if (value1 == null && value2 == null) return 0;
-            if (value1 == null) return -1;
-            if (value2 == null) return 1;
-
-            if (value1 instanceof Comparable) {
-                return ((Comparable<Object>) value1).compareTo(value2);
-            }
-        } catch (Exception e) {
-            // ignore
-        }
-        return 0;
+        return CollectionOperations.compareByProperty(obj1, obj2, propertyName);
     }
 
     /**
      * Creates a Comparator for sorting objects by a property.
      * <p>
-     * Example:
-     * <pre>{@code
-     * persons.sort(ObjectOperations.getComparator("name"));
-     * }</pre>
+     * This method delegates to {@link CollectionOperations#getComparator(String)}.
+     * </p>
      *
      * @param <T>          the type of objects to compare
      * @param propertyName the property name to sort by
      * @return a Comparator for the specified property
+     * @see CollectionOperations#getComparator(String)
      */
     public static <T> Comparator<T> getComparator(String propertyName) {
-        return (obj1, obj2) -> compareByProperty(obj1, obj2, propertyName);
+        return CollectionOperations.getComparator(propertyName);
     }
 
     /**
      * Creates a Comparator for sorting objects by a property in descending order.
      * <p>
-     * Example:
-     * <pre>{@code
-     * persons.sort(ObjectOperations.getComparatorDesc("age"));
-     * }</pre>
+     * This method delegates to {@link CollectionOperations#getComparatorDesc(String)}.
+     * </p>
      *
      * @param <T>          the type of objects to compare
      * @param propertyName the property name to sort by
      * @return a Comparator for the specified property in descending order
+     * @see CollectionOperations#getComparatorDesc(String)
      */
     public static <T> Comparator<T> getComparatorDesc(String propertyName) {
-        return (obj1, obj2) -> compareByProperty(obj2, obj1, propertyName);
+        return CollectionOperations.getComparatorDesc(propertyName);
     }
 
     /**
