@@ -40,11 +40,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -113,12 +109,14 @@ public class ObjectOperationsTest {
         Class result = testGeneriClass.getGenericType();
         assertEquals(expResult, result);
     }
+
     @Test
     public void testGetFieldGenericType() throws NoSuchFieldException {
         Class expResult = String.class;
         Class result = ObjectOperations.getFieldGenericType(SomeBean.class, "names");
         assertEquals(expResult, result);
     }
+
     @Test
     public void testTemplateParse() {
         Map<String, Object> vars = new HashMap();
@@ -128,11 +126,13 @@ public class ObjectOperationsTest {
         assertEquals("probando el parser muahahah xD", parsed);
 
     }
+
     @Test
     public void testGetField() throws NoSuchFieldException {
         Field field = ObjectOperations.getField(DummyClass.class, "name");
         assertNotNull(field);
     }
+
     @Test
     public void testGetField_Subfield() throws NoSuchFieldException {
         Field field = ObjectOperations.getField(SomeBean.class, "dummy.name");
@@ -141,6 +141,7 @@ public class ObjectOperationsTest {
         assertEquals(DummyClass.class, field.getDeclaringClass());
         assertEquals(String.class, field.getType());
     }
+
     @Test
     public void testGetPropertyInfo() {
         PropertyInfo expected = new PropertyInfo("name", String.class, DummyClass.class, AccessMode.READ_WRITE);
@@ -151,6 +152,7 @@ public class ObjectOperationsTest {
         assertEquals(expected.getOwnerClass(), result.getOwnerClass());
         assertEquals(expected.getType(), result.getType());
     }
+
     @Test
     public void testGetPropertyInfo_SubProperty() {
         PropertyInfo pinfo = ObjectOperations.getPropertyInfo(SomeBean.class, "dummy.name");
@@ -159,6 +161,7 @@ public class ObjectOperationsTest {
         assertEquals(DummyClass.class, pinfo.getOwnerClass());
         assertEquals(String.class, pinfo.getType());
     }
+
     @Test
     public void testGetPropertiesInfo() {
         List<PropertyInfo> infos = ObjectOperations.getPropertiesInfo(ChildClass.class);
@@ -167,6 +170,7 @@ public class ObjectOperationsTest {
         }
         assertEquals(8, infos.size());
     }
+
     @Test
     public void testSetMethod() {
         ChildClass child = new ChildClass();
@@ -500,6 +504,47 @@ public class ObjectOperationsTest {
         assertNull(cloned.getDate());
     }
 
+
+    @Test
+    public void testCloneShouldIgnoreCollectionsAndArraysMapsAndNonStandardClass() {
+        TestPerson original = new TestPerson();
+        original.setName("Original");
+        original.setAge(20);
+        original.setAddress(new TestAddress("City", "Country"));
+        original.setTags(List.of("tag1", "tag2"));
+
+
+        TestPerson cloned = ObjectOperations.clone(original);
+        assertNotNull(cloned);
+        assertEquals(original.getName(), cloned.getName());
+        assertEquals(original.getAge(), cloned.getAge());
+        assertNull(cloned.getAddress());
+        assertNull(cloned.getTags());
+    }
+
+    @Test
+    public void testDeepClone() {
+        TestPerson original = new TestPerson();
+        original.setName("Original");
+        original.setAge(20);
+
+        original.setAddress(new TestAddress("City", "Country"));
+        original.setTags(List.of("tag1", "tag2"));
+
+
+        TestPerson cloned = ObjectOperations.deepClone(original);
+        assertNotNull(cloned);
+        assertEquals(original.getName(), cloned.getName());
+        assertEquals(original.getAge(), cloned.getAge());
+        assertNotNull(cloned.getAddress());
+        assertNotEquals(original.getAddress(), cloned.getAddress());
+        assertEquals(original.getAddress().getCity(), cloned.getAddress().getCity());
+
+        assertNotNull(cloned.getTags());
+        assertFalse(cloned.getTags().isEmpty());
+        assertTrue(cloned.getTags().containsAll(original.getTags()));
+    }
+
     /**
      * Test newBeanMap
      */
@@ -765,6 +810,7 @@ public class ObjectOperationsTest {
         private String country;
         private boolean active;
         private TestAddress address;
+        private List<String> tags;
 
         public TestPerson() {
         }
@@ -778,43 +824,111 @@ public class ObjectOperationsTest {
         }
 
         // Getters and setters
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public Integer getAge() { return age; }
-        public void setAge(Integer age) { this.age = age; }
-        public String getCountry() { return country; }
-        public void setCountry(String country) { this.country = country; }
-        public boolean isActive() { return active; }
-        public void setActive(boolean active) { this.active = active; }
-        public TestAddress getAddress() { return address; }
-        public void setAddress(TestAddress address) { this.address = address; }
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public Integer getAge() {
+            return age;
+        }
+
+        public void setAge(Integer age) {
+            this.age = age;
+        }
+
+        public String getCountry() {
+            return country;
+        }
+
+        public void setCountry(String country) {
+            this.country = country;
+        }
+
+        public boolean isActive() {
+            return active;
+        }
+
+        public void setActive(boolean active) {
+            this.active = active;
+        }
+
+        public TestAddress getAddress() {
+            return address;
+        }
+
+        public void setAddress(TestAddress address) {
+            this.address = address;
+        }
+
+        public List<String> getTags() {
+            return tags;
+        }
+
+        public void setTags(List<String> tags) {
+            this.tags = tags;
+        }
     }
 
     static class TestAddress {
         private String city;
         private String country;
 
+        public TestAddress() {
+        }
+
         public TestAddress(String city, String country) {
             this.city = city;
             this.country = country;
         }
 
-        public String getCity() { return city; }
-        public void setCity(String city) { this.city = city; }
-        public String getCountry() { return country; }
-        public void setCountry(String country) { this.country = country; }
+        public String getCity() {
+            return city;
+        }
+
+        public void setCity(String city) {
+            this.city = city;
+        }
+
+        public String getCountry() {
+            return country;
+        }
+
+        public void setCountry(String country) {
+            this.country = country;
+        }
     }
 
     static class TestPersonDTO {
         private String name;
         private String email;
 
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
     }
 
     private List<TestPerson> createTestPersons() {

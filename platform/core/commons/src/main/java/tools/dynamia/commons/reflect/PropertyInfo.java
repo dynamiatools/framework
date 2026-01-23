@@ -21,12 +21,14 @@ import tools.dynamia.commons.AliasResolver;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringUtils;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -50,6 +52,7 @@ public class PropertyInfo implements Serializable {
     /**
      * Serial version UID for serialization compatibility.
      */
+    @Serial
     private static final long serialVersionUID = -7216416220508812001L;
 
     /**
@@ -376,5 +379,23 @@ public class PropertyInfo implements Serializable {
      */
     public void setValue(Object target, Object value) {
         ObjectOperations.setFieldValue(name, target, value);
+    }
+
+    /**
+     * Returns true if the property type is shallow clonable (standard class or enum, not array, collection, or map).
+     *
+     * @return true if the property is shallow clonable
+     */
+    public boolean isShallowClonable(){
+        return (isStandardClass() || isEnum()) && !isArray() && !isCollection() && !isMap();
+    }
+
+    /**
+     * Returns true if the property type is a Map.
+     *
+     * @return true if the property is a Map
+     */
+    public boolean isMap(){
+        return is(Map.class);
     }
 }
