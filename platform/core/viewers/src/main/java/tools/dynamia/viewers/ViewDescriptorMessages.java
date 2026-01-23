@@ -80,16 +80,6 @@ public class ViewDescriptorMessages {
     /**
      * Gets the message.
      *
-     * @param key the key
-     * @return the message
-     */
-    public final String getMessage(String key) {
-        return getMessage(key, null);
-    }
-
-    /**
-     * Gets the message.
-     *
      * @param key    the key
      * @param params the params
      * @return the message
