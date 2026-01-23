@@ -21,19 +21,12 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
-import tools.dynamia.commons.ops.BeanTransformer;
-import tools.dynamia.commons.ops.BeanValidator;
-import tools.dynamia.commons.ops.CollectionOperations;
-import tools.dynamia.commons.ops.ObjectCloner;
-import tools.dynamia.commons.ops.PropertyAccessor;
-import tools.dynamia.commons.reflect.AccessMode;
+import tools.dynamia.commons.ops.*;
 import tools.dynamia.commons.reflect.ClassReflectionInfo;
 import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.commons.reflect.ReflectionException;
+import tools.dynamia.commons.reflect.ReflectionHelper;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -326,11 +319,7 @@ public final class ObjectOperations {
      * @return the t
      */
     public static <T> T newInstance(final Class<T> clazz) {
-        try {
-            return BeanUtils.instantiateClass(clazz);
-        } catch (Exception e) {
-            throw new ReflectionException(e);
-        }
+        return ObjectCloner.newInstance(clazz);
     }
 
     /**
@@ -342,15 +331,7 @@ public final class ObjectOperations {
      * @return the t
      */
     public static <T> T newInstance(final Class<T> clazz, Object... args) {
-        try {
-            Class<?>[] argClass = new Class<?>[args.length];
-            for (int i = 0; i < args.length; i++) {
-                argClass[i] = args[i].getClass();
-            }
-            return BeanUtils.instantiateClass(clazz.getDeclaredConstructor(argClass), args);
-        } catch (Exception e) {
-            throw new ReflectionException(e);
-        }
+        return ObjectCloner.newInstance(clazz, args);
     }
 
 
@@ -380,7 +361,7 @@ public final class ObjectOperations {
      * This method delegates to {@link PropertyAccessor#invokeMethod(Object, String, Object...)}.
      * Uses Spring's {@link ReflectionUtils} for improved AOT compatibility.
      * </p>
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Customer customer = new Customer();
@@ -521,7 +502,7 @@ public final class ObjectOperations {
      * @return the string
      */
     public static String formatGetMethod(final String propertyName) {
-        return "get" + StringUtils.capitalize(propertyName);
+        return ReflectionHelper.formatGetMethod(propertyName);
     }
 
     /**
@@ -532,7 +513,7 @@ public final class ObjectOperations {
      * @return the string
      */
     public static String formatBooleanGetMethod(final String propertyName) {
-        return "is" + StringUtils.capitalize(propertyName);
+        return ReflectionHelper.formatBooleanGetMethod(propertyName);
     }
 
     /**
@@ -542,7 +523,7 @@ public final class ObjectOperations {
      * @return the string
      */
     public static String formatSetMethod(final String propertyName) {
-        return "set" + StringUtils.capitalize(propertyName);
+        return ReflectionHelper.formatSetMethod(propertyName);
     }
 
     /**
@@ -650,94 +631,9 @@ public final class ObjectOperations {
      */
     @SuppressWarnings("unchecked")
     public static PropertyInfo getPropertyInfo(final Class clazz, final String propertyName) {
-        PropertyInfo info = null;
-
-        try {
-            if (propertyName.contains(".")) {
-                final String child = propertyName.substring(propertyName.indexOf('.') + 1);
-                final String parent = propertyName.substring(0, propertyName.indexOf('.'));
-                final Class parentClass = clazz.getMethod(formatGetMethod(parent)).getReturnType();
-                info = getPropertyInfo(parentClass, child);
-            } else {
-                final BeanInfo beanInfo = java.beans.Introspector.getBeanInfo(clazz);
-                for (PropertyDescriptor prp : beanInfo.getPropertyDescriptors()) {
-                    if (prp.getName().equals(propertyName)) {
-                        info = getPropertyInfo(prp);
-                        break;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new ReflectionException(e);
-        }
-        return info;
+        return ReflectionHelper.getPropertyInfo(clazz, propertyName);
     }
 
-    /**
-     * Converts a JavaBeans PropertyDescriptor into a PropertyInfo object containing
-     * detailed metadata about the property.
-     *
-     * <p>
-     * This helper method extracts and analyzes property characteristics including:
-     * <ul>
-     *   <li>Property name and type</li>
-     *   <li>Access mode (read-only, write-only, or read-write)</li>
-     *   <li>Owner class (where the property is declared)</li>
-     *   <li>Generic type information (for collections and parameterized types)</li>
-     *   <li>Collection detection</li>
-     * </ul>
-     * </p>
-     *
-     * <p>
-     * The 'class' property is automatically filtered out and will return null.
-     * Properties without a defined type are also excluded.
-     * </p>
-     *
-     * @param prop the PropertyDescriptor from JavaBeans introspection
-     * @return a PropertyInfo object with complete metadata, or null if the property
-     * should be filtered (e.g., 'class' property or properties without a type)
-     */
-    private static PropertyInfo getPropertyInfo(final PropertyDescriptor prop) {
-        PropertyInfo info = null;
-        String name = prop.getName();
-
-        if (!name.equals("class") && prop.getPropertyType() != null) {
-            Class type = prop.getPropertyType();
-            Class ownerClass = null;
-            AccessMode accessMode = null;
-
-            boolean readable = prop.getReadMethod() != null;
-            boolean writable = prop.getWriteMethod() != null;
-
-            if (readable && writable) {
-                accessMode = AccessMode.READ_WRITE;
-            } else if (readable) {
-                accessMode = AccessMode.READ_ONLY;
-            } else if (writable) {
-                accessMode = AccessMode.WRITE_ONLY;
-            }
-
-            if (readable) {
-                ownerClass = prop.getReadMethod().getDeclaringClass();
-            } else if (writable) {
-                ownerClass = prop.getWriteMethod().getDeclaringClass();
-            }
-
-            info = new PropertyInfo(name, type, ownerClass, accessMode);
-
-            try {
-                info.setGenericType(getMethodGenericType(prop.getReadMethod()));
-            } catch (Exception e) {
-                info.setGenericType(null);
-            }
-            if (ObjectOperations.isAssignable(type, Collection.class)) {
-                info.setCollection(true);
-            }
-        }
-
-        return info;
-
-    }
 
     /**
      * Retrieves comprehensive metadata for all JavaBean properties of the specified class.
@@ -771,26 +667,7 @@ public final class ObjectOperations {
      * @see ClassReflectionInfo
      */
     public static List<PropertyInfo> getPropertiesInfo(final Class clazz) {
-        var cached = ClassReflectionInfo.getFromCache(clazz);
-
-        if (cached == null) {
-            try {
-                List<PropertyInfo> infos = new ArrayList<>();
-                BeanInfo beanInfo = java.beans.Introspector.getBeanInfo(clazz);
-                for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
-
-                    final PropertyInfo pi = getPropertyInfo(descriptor);
-                    if (pi != null) {
-                        infos.add(pi);
-                    }
-                }
-                cached = new ClassReflectionInfo(clazz, infos);
-                ClassReflectionInfo.addToCache(cached);
-            } catch (IntrospectionException e1) {
-                throw new ReflectionException(e1);
-            }
-        }
-        return cached.properties();
+        return ReflectionHelper.getPropertiesInfo(clazz);
     }
 
     /**
@@ -823,28 +700,10 @@ public final class ObjectOperations {
      * @param fieldName the name of the field, supports dot notation for nested fields
      * @return the Field object matching the specified name
      * @throws NoSuchFieldException if the field is not found in the class hierarchy
+     * @see ReflectionHelper#getField(Class, String)
      */
     public static Field getField(final Class clazz, final String fieldName) throws NoSuchFieldException {
-        if (fieldName.contains(".")) {
-            // Handle nested field navigation
-            final int dotIndex = fieldName.indexOf('.');
-            final String parentField = fieldName.substring(0, dotIndex);
-            final String childField = fieldName.substring(dotIndex + 1);
-
-            Field parentFieldObj = ReflectionUtils.findField(clazz, parentField);
-            if (parentFieldObj == null) {
-                throw new NoSuchFieldException("Field '" + parentField + "' not found in class " + clazz.getName());
-            }
-
-            return getField(parentFieldObj.getType(), childField);
-        } else {
-            // Use Spring ReflectionUtils for better AOT compatibility
-            Field field = ReflectionUtils.findField(clazz, fieldName);
-            if (field == null) {
-                throw new NoSuchFieldException("Field '" + fieldName + "' not found in class " + clazz.getName());
-            }
-            return field;
-        }
+        return ReflectionHelper.getField(clazz, fieldName);
     }
 
     /**
@@ -903,11 +762,7 @@ public final class ObjectOperations {
      */
     @SuppressWarnings("unchecked")
     public static boolean isAssignable(final Class a, final Class b) {
-        boolean assignable = false;
-        if (a != null && b != null) {
-            assignable = b.isAssignableFrom(a);
-        }
-        return assignable;
+        return ReflectionHelper.isAssignable(a, b);
     }
 
     /**
@@ -1072,9 +927,8 @@ public final class ObjectOperations {
      * @param source             the object to clone
      * @param excludedProperties optional additional property names to exclude from cloning
      * @return a shallow clone of the source object
-     *
      * @see #deepClone(Object, String...) for deep cloning including collections and nested objects
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * class Person {
@@ -1094,25 +948,7 @@ public final class ObjectOperations {
      * }</pre>
      */
     public static <T> T clone(T source, String... excludedProperties) {
-        @SuppressWarnings("unchecked") Class<T> sourceClass = (Class<T>) source.getClass();
-        T clon = newInstance(sourceClass);
-
-        // Build list of properties to exclude (collections, arrays, and user-specified)
-        Set<String> propsToExclude = new HashSet<>();
-        if (excludedProperties != null) {
-            propsToExclude.addAll(Arrays.asList(excludedProperties));
-        }
-
-        // Identify and exclude collection and array properties
-        getPropertiesInfo(sourceClass)
-                .stream().filter(Predicate.not(PropertyInfo::isShallowClonable))
-                .forEach(p->propsToExclude.add(p.getName()));
-
-
-        // Copy properties excluding collections, arrays, and user-specified properties
-        BeanUtils.copyProperties(source, clon, propsToExclude.toArray(new String[0]));
-
-        return clon;
+        return ObjectCloner.clone(source, excludedProperties);
     }
 
     /**
@@ -1128,7 +964,6 @@ public final class ObjectOperations {
      * @param excludedProperties optional property names to exclude from cloning
      * @return a deep clone of the source object
      * @throws ReflectionException if the object cannot be cloned
-     *
      * @see ObjectCloner#deepClone(Object, String...)
      */
     public static <T> T deepClone(T source, String... excludedProperties) {
@@ -1660,110 +1495,31 @@ public final class ObjectOperations {
     /**
      * Converts a bean to a flat Map including nested properties with dot notation.
      * <p>
-     * Example:
-     * <pre>{@code
-     * Map<String, Object> flat = ObjectOperations.toFlatMap(person);
-     * // Result: {"name": "John", "address.city": "NY", "address.country": "USA"}
-     * }</pre>
+     * This method delegates to {@link FlatMapConverter#toFlatMap(Object)}.
+     * </p>
      *
      * @param bean the bean to flatten
      * @return a flat map with dot notation for nested properties
+     * @see FlatMapConverter#toFlatMap(Object)
      */
     public static Map<String, Object> toFlatMap(Object bean) {
-        return toFlatMap(bean, "", new HashMap<>());
-    }
-
-    /**
-     * Helper method for recursive flattening of bean properties.
-     *
-     * @param bean   the current bean
-     * @param prefix the current prefix for nested properties
-     * @param result the accumulator map
-     * @return the flat map
-     */
-    private static Map<String, Object> toFlatMap(Object bean, String prefix, Map<String, Object> result) {
-        if (bean == null) {
-            return result;
-        }
-
-        List<PropertyInfo> properties = getPropertiesInfo(bean.getClass());
-        for (PropertyInfo prop : properties) {
-            try {
-                Object value = invokeGetMethod(bean, prop);
-                String key = prefix.isEmpty() ? prop.getName() : prefix + "." + prop.getName();
-
-                if (value == null || prop.isStandardClass() || prop.isEnum()) {
-                    result.put(key, value);
-                } else if (!prop.isCollection() && !prop.isArray()) {
-                    // Recursively flatten nested objects
-                    toFlatMap(value, key, result);
-                }
-            } catch (Exception e) {
-                // ignore properties that can't be read
-            }
-        }
-        return result;
+        return FlatMapConverter.toFlatMap(bean);
     }
 
     /**
      * Creates a bean from a flat Map with dot notation for nested properties.
      * <p>
-     * Example:
-     * <pre>{@code
-     * Map<String, Object> flat = Map.of("name", "John", "address.city", "NY");
-     * Person person = ObjectOperations.fromFlatMap(flat, Person.class);
-     * }</pre>
+     * This method delegates to {@link FlatMapConverter#fromFlatMap(Map, Class)}.
+     * </p>
      *
      * @param <T>         the target type
      * @param flatMap     the flat map with dot notation
      * @param targetClass the target class
      * @return a new instance with properties set from the flat map
+     * @see FlatMapConverter#fromFlatMap(Map, Class)
      */
     public static <T> T fromFlatMap(Map<String, Object> flatMap, Class<T> targetClass) {
-        if (flatMap == null || targetClass == null) {
-            return null;
-        }
-
-        T instance = newInstance(targetClass);
-
-        // Group properties by root and nested
-        Map<String, Object> directProps = new HashMap<>();
-        Map<String, Map<String, Object>> nestedProps = new HashMap<>();
-
-        for (Map.Entry<String, Object> entry : flatMap.entrySet()) {
-            String key = entry.getKey();
-            if (key.contains(".")) {
-                String root = key.substring(0, key.indexOf('.'));
-                String rest = key.substring(key.indexOf('.') + 1);
-                nestedProps.computeIfAbsent(root, k -> new HashMap<>()).put(rest, entry.getValue());
-            } else {
-                directProps.put(key, entry.getValue());
-            }
-        }
-
-        // Set direct properties
-        setupBean(instance, directProps);
-
-        // Set nested properties
-        for (Map.Entry<String, Map<String, Object>> entry : nestedProps.entrySet()) {
-            try {
-                Object nestedBean = invokeGetMethod(instance, entry.getKey());
-                if (nestedBean == null) {
-                    PropertyInfo propInfo = getPropertyInfo(targetClass, entry.getKey());
-                    if (propInfo != null) {
-                        nestedBean = newInstance(propInfo.getType());
-                        invokeSetMethod(instance, entry.getKey(), nestedBean);
-                    }
-                }
-                if (nestedBean != null) {
-                    setupBean(nestedBean, entry.getValue());
-                }
-            } catch (Exception e) {
-                // ignore properties that can't be set
-            }
-        }
-
-        return instance;
+        return FlatMapConverter.fromFlatMap(flatMap, targetClass);
     }
 
     /**
