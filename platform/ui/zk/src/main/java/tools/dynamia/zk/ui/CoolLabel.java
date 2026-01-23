@@ -20,21 +20,16 @@ import org.zkoss.image.AImage;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.Div;
-import org.zkoss.zul.Hlayout;
-import org.zkoss.zul.Image;
-import org.zkoss.zul.Label;
-import org.zkoss.zul.Progressmeter;
+import org.zkoss.zul.*;
 import tools.dynamia.commons.URLable;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.io.IOUtils;
 import tools.dynamia.io.Resource;
-import tools.dynamia.zk.BindingComponentIndex;
-import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.ImageCache;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.util.Objects;
 
 
@@ -44,6 +39,7 @@ public class CoolLabel extends Div implements LoadableOnly {
     /**
      *
      */
+    @Serial
     private static final long serialVersionUID = 8628833708100482613L;
 
 

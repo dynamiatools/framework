@@ -684,4 +684,6 @@ public class Field implements Serializable, Indexable, Cloneable {
     public void setTemporal(boolean temporal) {
         this.temporal = temporal;
     }
+
+
 }

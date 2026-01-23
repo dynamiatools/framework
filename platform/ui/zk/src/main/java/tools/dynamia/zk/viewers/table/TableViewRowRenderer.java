@@ -223,9 +223,10 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
             // nothing to do
         }
 
+        boolean customBindings = field.getParam(Viewers.PARAM_IGNORE_BINDINGS) != Boolean.TRUE;
         boolean renderWhenNull = field.getParam(Viewers.PARAM_RENDER_WHEN_NULL) == Boolean.TRUE;
 
-        if (cellValue == null && !renderWhenNull) {
+        if (cellValue == null && !renderWhenNull && !customBindings) {
             cellValue = field.getParam(Viewers.PARAM_NULLVALUE);
             Label nullValue = new Label((String) cellValue);
             nullValue.setSclass(Viewers.PARAM_NULLVALUE);
@@ -252,7 +253,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
 
             ComponentCustomizerUtil.customizeComponent(field, comp, field.getComponentCustomizer());
             fieldsComponentsMap.put(field.getName(), new TableFieldComponent(field.getName(), comp));
-            if (field.getParam(Viewers.PARAM_IGNORE_BINDINGS) != Boolean.TRUE) {
+            if (customBindings) {
                 if (isBindiable(field, comp)) {
                     Object bmapObject = field.getParam(Viewers.PARAM_BINDINGS);
                     if (bmapObject instanceof Map bindingMap) {

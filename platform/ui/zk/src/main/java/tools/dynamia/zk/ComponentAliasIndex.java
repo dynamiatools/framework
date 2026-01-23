@@ -18,6 +18,7 @@ package tools.dynamia.zk;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zul.*;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.io.IOUtils;
@@ -100,8 +101,10 @@ public class ComponentAliasIndex extends HashMap<String, Class<? extends Compone
                 aliases.load(resource.getInputStream());
                 for (String alias : aliases.stringPropertyNames()) {
                     try {
-                        Class clazz = Class.forName(aliases.getProperty(alias));
-                        getInstance().add(alias, clazz);
+                        Class clazz = ObjectOperations.findClass(aliases.getProperty(alias));
+                        if(clazz!=null) {
+                            getInstance().add(alias, clazz);
+                        }
                     } catch (Exception ex) {
                         logger.error(
                                 "Error loading alias from " + resource.getFile().getAbsolutePath() + " ALIAS: " + alias + ". "

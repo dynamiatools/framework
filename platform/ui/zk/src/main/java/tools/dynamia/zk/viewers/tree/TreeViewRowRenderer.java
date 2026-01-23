@@ -157,7 +157,10 @@ public class TreeViewRowRenderer<E> implements TreeitemRenderer<TreeViewNode<E>>
                 // Suertee
             }
 
-            if (cellValue == null) {
+            boolean customBindings = field.getParam(Viewers.PARAM_IGNORE_BINDINGS) != Boolean.TRUE;
+            boolean renderWhenNull = field.getParam(Viewers.PARAM_RENDER_WHEN_NULL) == Boolean.TRUE;
+
+            if (cellValue == null && !renderWhenNull && !customBindings)  {
                 cellValue = field.getParam(Viewers.PARAM_NULLVALUE);
                 Label nullValue = new Label((String) cellValue);
                 nullValue.setSclass(Viewers.PARAM_NULLVALUE);
