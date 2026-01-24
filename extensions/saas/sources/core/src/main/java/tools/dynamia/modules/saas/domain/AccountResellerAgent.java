@@ -3,6 +3,7 @@ package tools.dynamia.modules.saas.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import tools.dynamia.domain.contraints.Email;
 import tools.dynamia.domain.contraints.NotEmpty;
 import tools.dynamia.domain.jpa.SimpleEntity;
@@ -24,6 +25,7 @@ import java.io.Serializable;
  * </ul>
  */
 @Entity
+@Table(name = "saas_reseller_agents")
 public class AccountResellerAgent extends SimpleEntity implements Serializable {
 
 

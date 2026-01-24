@@ -17,14 +17,17 @@
 
 package tools.dynamia.modules.saas.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.Descriptor;
 import tools.dynamia.domain.OrderBy;
 import tools.dynamia.domain.jpa.SimpleEntity;
 import tools.dynamia.modules.saas.api.AccountStats;
 
-import jakarta.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "saas_stats")
@@ -34,10 +37,8 @@ public class AccountStatsData extends SimpleEntity {
 
     @ManyToOne
     private Account account;
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date creationDate = new Date();
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastUpdate;
+    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime lastUpdate;
 
     private String name;
     @Column(length = 1000)
@@ -55,19 +56,19 @@ public class AccountStatsData extends SimpleEntity {
         this.account = account;
     }
 
-    public Date getCreationDate() {
+    public LocalDateTime getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Date creationDate) {
+    public void setCreationDate(LocalDateTime creationDate) {
         this.creationDate = creationDate;
     }
 
-    public Date getLastUpdate() {
+    public LocalDateTime getLastUpdate() {
         return lastUpdate;
     }
 
-    public void setLastUpdate(Date lastUpdate) {
+    public void setLastUpdate(LocalDateTime lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 
@@ -104,7 +105,7 @@ public class AccountStatsData extends SimpleEntity {
     }
 
     public void load(AccountStats stats) {
-        this.lastUpdate = new Date();
+        this.lastUpdate = LocalDateTime.now();
         ObjectOperations.setupBean(this, stats);
     }
 

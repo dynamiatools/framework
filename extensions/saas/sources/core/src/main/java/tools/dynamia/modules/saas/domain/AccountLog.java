@@ -17,22 +17,24 @@
 
 package tools.dynamia.modules.saas.domain;
 
-import tools.dynamia.domain.jpa.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import tools.dynamia.domain.Transferable;
+import tools.dynamia.domain.jpa.BaseEntity;
 import tools.dynamia.modules.saas.api.dto.AccountLogDTO;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "saas_logs")
 public class AccountLog extends BaseEntity implements Transferable<AccountLogDTO> {
 
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "logDate")
-    private Date date = new Date();
+    private LocalDateTime date = LocalDateTime.now();
 
     @ManyToOne
     @NotNull
@@ -93,11 +95,11 @@ public class AccountLog extends BaseEntity implements Transferable<AccountLogDTO
         }
     }
 
-    public Date getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 
