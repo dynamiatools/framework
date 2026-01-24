@@ -16,6 +16,8 @@
  */
 package tools.dynamia.commons;
 
+import org.jspecify.annotations.NonNull;
+
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -74,6 +76,8 @@ public final class DateTimeUtils {
     public static int getLastDayOfMonth(Month month) {
         return month.length(LocalDate.now().isLeapYear());
     }
+
+    private final static SimpleCache<String, DateTimeFormatter> FORMATTER_CACHE = new SimpleCache<>();
 
     /**
      * Private constructor to prevent instantiation of utility class.
@@ -326,6 +330,7 @@ public final class DateTimeUtils {
         }
         return toInstant(date1).until(toInstant(date2), ChronoUnit.MINUTES);
     }
+
     public static long minutesBetween(LocalDateTime date1, LocalDateTime date2) {
         if (date1 == null || date2 == null) {
             throw new IllegalArgumentException("Dates must not be null");
@@ -347,7 +352,7 @@ public final class DateTimeUtils {
         return toInstant(date1).until(toInstant(date2), ChronoUnit.SECONDS);
     }
 
-    public static  long secondsBetween(LocalDateTime date1, LocalDateTime date2) {
+    public static long secondsBetween(LocalDateTime date1, LocalDateTime date2) {
         if (date1 == null || date2 == null) {
             throw new IllegalArgumentException("Dates must not be null");
         }
@@ -635,8 +640,18 @@ public final class DateTimeUtils {
         if (temporalAccessor == null) {
             return null;
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern, Messages.getDefaultLocale());
+
+        DateTimeFormatter formatter = getFormatter(pattern);
         return formatter.format(temporalAccessor);
+    }
+
+    public static @NonNull DateTimeFormatter getFormatter(String pattern) {
+        String key = pattern + "_" + Messages.getDefaultLocale().toLanguageTag() + "_"
+                + Messages.getDefaultTimeZone().getId();
+        return FORMATTER_CACHE.getOrLoad(key, k -> DateTimeFormatter.ofPattern(pattern)
+                .withLocale(Messages.getDefaultLocale())
+                .withZone(Messages.getDefaultTimeZone())
+        );
     }
 
     /**
