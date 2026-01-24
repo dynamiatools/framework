@@ -24,6 +24,8 @@ import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
+import java.io.Serial;
+
 /**
  * Represents an email account.
  */
@@ -34,6 +36,7 @@ public class EmailAccount extends SimpleEntitySaaS {
     /**
      *
      */
+    @Serial
     private static final long serialVersionUID = 3769420109733883374L;
     @NotEmpty(message = "Enter account's name")
     private String name;

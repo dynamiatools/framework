@@ -28,6 +28,8 @@ import jakarta.persistence.Table;
 import tools.dynamia.domain.contraints.NotEmpty;
 import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS;
 
+import java.io.Serial;
+
 /**
  * Class representing an email template.
  */
@@ -38,7 +40,8 @@ public class EmailTemplate extends SimpleEntitySaaS {
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = -4639771745251094987L;
+	@Serial
+    private static final long serialVersionUID = -4639771745251094987L;
 	@NotEmpty(message = "Enter template name")
 	private String name;
 	private String description;
