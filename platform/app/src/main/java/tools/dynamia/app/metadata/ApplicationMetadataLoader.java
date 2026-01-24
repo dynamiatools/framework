@@ -1,5 +1,6 @@
 package tools.dynamia.app.metadata;
 
+import org.springframework.context.annotation.DependsOn;
 import tools.dynamia.actions.ActionLoader;
 import tools.dynamia.actions.ApplicationGlobalAction;
 import tools.dynamia.app.ApplicationInfo;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
  * @since 2023
  */
 @Service
+@DependsOn({"applicationInfo"})
 public class ApplicationMetadataLoader {
 
     /**
@@ -41,7 +43,7 @@ public class ApplicationMetadataLoader {
      * @param applicationInfo the application information source
      * @param viewDescriptorFactory the factory for view descriptors
      */
-    public ApplicationMetadataLoader(ApplicationInfo applicationInfo, ViewDescriptorFactory viewDescriptorFactory) {
+    public ApplicationMetadataLoader( ApplicationInfo applicationInfo, ViewDescriptorFactory viewDescriptorFactory) {
         this.applicationInfo = applicationInfo;
         this.viewDescriptorFactory = viewDescriptorFactory;
     }

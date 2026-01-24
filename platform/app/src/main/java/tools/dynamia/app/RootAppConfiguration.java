@@ -16,13 +16,13 @@
  */
 package tools.dynamia.app;
 
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
-import org.springframework.web.context.annotation.SessionScope;
 import tools.dynamia.commons.*;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
@@ -30,10 +30,6 @@ import tools.dynamia.domain.services.ValidatorService;
 import tools.dynamia.domain.services.impl.DefaultValidatorService;
 import tools.dynamia.io.IOUtils;
 import tools.dynamia.io.Resource;
-import tools.dynamia.navigation.Module;
-import tools.dynamia.navigation.ModuleProvider;
-import tools.dynamia.web.pwa.PWAIcon;
-import tools.dynamia.web.pwa.PWAManifest;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -106,18 +102,27 @@ public class RootAppConfiguration {
 
     /**
      * Provides the primary {@link ApplicationInfo} bean.
+     * <p>
+     * This method creates an {@link ApplicationInfo} instance from the {@link ApplicationConfigurationProperties}
+     * if available. If not, it attempts to load from applicationInfo.properties files.
+     * Falls back to using spring.application.name property or a default name if no configuration is found.
+     * </p>
      *
+     * @param appCfgProps the application configuration properties (nullable, auto-injected by Spring)
      * @return the ApplicationInfo instance for the application
      */
-    @Bean
-    public ApplicationInfo applicationInfo(ApplicationConfigurationProperties appCfgProps) {
+    @Bean("applicationInfo")
+    @Primary
+    public ApplicationInfo applicationInfo(@Autowired(required = false) @Nullable ApplicationConfigurationProperties appCfgProps) {
         try {
             logger.info("Initializing Application Info");
-            ApplicationInfo applicationInfo = null;
+            ApplicationInfo applicationInfo;
 
             if (appCfgProps != null) {
+                logger.info("Loading ApplicationInfo from ApplicationConfigurationProperties");
                 applicationInfo = ApplicationInfo.load(appCfgProps);
             } else {
+                logger.info("ApplicationConfigurationProperties not available, loading from properties files");
                 applicationInfo = loadApplicationInfo();
             }
 
@@ -173,6 +178,23 @@ public class RootAppConfiguration {
             }
             return property;
         }
+    }
+
+    /**
+     * Simple logging methods for the configuration class.
+     */
+    public void log(String message) {
+        logger.info(message);
+    }
+
+    /**
+     * Logs an error message with an associated throwable.
+     *
+     * @param message the error message to log
+     * @param t       the throwable associated with the error
+     */
+    public void log(String message, Throwable t) {
+        logger.error(message, t);
     }
 
 }

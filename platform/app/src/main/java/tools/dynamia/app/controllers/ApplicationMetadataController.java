@@ -1,6 +1,7 @@
 package tools.dynamia.app.controllers;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import tools.dynamia.actions.ActionExecutionRequest;
@@ -37,6 +38,7 @@ import java.util.List;
 @RestController
 @RequestMapping(value = ApplicationMetadataController.PATH, produces = "application/json")
 @Tag(name = "DynamiaApplicationMetadata")
+@DependsOn({"applicationInfo"})
 public class ApplicationMetadataController {
     /**
      * Base path for all metadata endpoints.

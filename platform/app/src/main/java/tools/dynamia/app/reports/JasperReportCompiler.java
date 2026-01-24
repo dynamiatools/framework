@@ -72,6 +72,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * JasperReportCompiler is a ReportCompiler implementation for compiling and filling JasperReports.
+ * It supports compiling .jrxml files to .jasper files and filling reports with various data sources.
+ */
 public class JasperReportCompiler implements ReportCompiler {
 
     private LoggingService logger = new SLF4JLoggingService(JasperReportCompiler.class);
