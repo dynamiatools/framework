@@ -24,6 +24,7 @@
         <module>email-sms/sources</module>
         <module>security/sources</module>
         <module>file-importer/sources</module>
+        <module>reports/sources</module>
     </modules>
 
 
