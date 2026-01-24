@@ -45,7 +45,7 @@ import java.util.List;
 public class MyBookStoreApplication { //<1>
 
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         SpringApplication.run(MyBookStoreApplication.class, args); //<2>
     }
 
