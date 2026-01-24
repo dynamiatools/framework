@@ -16,7 +16,7 @@
 
 <zk xmlns:n="native">
 
-    <div viewModel="@id('vm') @init('tools.dynamia.reports.ui.ReportListViewModel')" sclass="pd20">
+    <div viewModel="@id('vm') @init('tools.dynamia.modules.reports.ui.ReportListViewModel')" sclass="pd20">
 
 
         <div forEach="${vm.reports}">
