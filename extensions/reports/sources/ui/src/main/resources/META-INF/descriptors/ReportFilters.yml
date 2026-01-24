@@ -1,0 +1,16 @@
+view: entityfilters
+beanClass: tools.dynamia.modules.reports.core.domain.Report
+autofields: false
+
+fields:
+  name:
+  group:
+  description:
+  autofields:
+  active:
+  accountId:
+    label: Account
+    component: entityrefpicker
+    params:
+      entityAlias: Account
+      forceVisible: true

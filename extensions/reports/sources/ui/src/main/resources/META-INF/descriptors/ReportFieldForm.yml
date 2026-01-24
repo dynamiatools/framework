@@ -1,0 +1,19 @@
+view: form
+beanClass: tools.dynamia.modules.reports.core.domain.ReportField
+autofields: false
+
+fields:
+  name:
+  label:
+  dataType:
+  align:
+  width:
+  cellStyle:
+  columnStyle:
+  format:
+  description:
+  upperCase:
+  order:
+
+layout:
+  columns: 4
