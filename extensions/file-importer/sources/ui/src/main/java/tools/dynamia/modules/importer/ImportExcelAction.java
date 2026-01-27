@@ -25,6 +25,7 @@ import org.zkoss.util.media.Media;
 import org.zkoss.zul.Fileupload;
 
 import tools.dynamia.actions.ActionRenderer;
+import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.ProgressMonitor;
@@ -106,8 +107,10 @@ public abstract class ImportExcelAction<T> extends ImportAction {
     protected void doImport(Importer win, Media media) {
         try {
             data = importFromExcel(media.getStreamData(), getMonitor());
+        } catch (ValidationError ve) {
+            UIMessages.showMessageDialog( ve.getMessage(),"Importacion", MessageType.ERROR);
         } catch (Exception e) {
-            e.printStackTrace();
+            log("Error importing from excel", e);
         }
     }
 

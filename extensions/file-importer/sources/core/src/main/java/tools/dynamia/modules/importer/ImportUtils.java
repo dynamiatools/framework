@@ -98,7 +98,7 @@ public class ImportUtils {
                 return cell.getDateCellValue();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.warn("Error getting date from cell at row " + row.getRowNum() + " and cell " + cellIndex, e);
         }
         return null;
     }
@@ -110,7 +110,7 @@ public class ImportUtils {
                 return cell.getLocalDateTimeCellValue().toLocalDate();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.warn("Error getting LocalDate from cell at row " + row.getRowNum() + " and cell " + cellIndex, e);
         }
         return null;
     }
@@ -122,7 +122,26 @@ public class ImportUtils {
                 return cell.getLocalDateTimeCellValue();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.warn("Error getting LocalDateTime from cell at row " + row.getRowNum() + " and cell " + cellIndex, e);
+        }
+        return null;
+    }
+
+    public static BigDecimal getCellValueBigDecimal(Row row, int cellIndex) {
+        try {
+            Cell cell = row.getCell(cellIndex);
+            if (cell != null) {
+                if (cell.getCellType() == CellType.NUMERIC) {
+                    return BigDecimal.valueOf(cell.getNumericCellValue());
+                } else if (cell.getCellType() == CellType.STRING) {
+                    String val = cell.getStringCellValue();
+                    if (val != null && !val.isEmpty()) {
+                        return new BigDecimal(val);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Error getting BigDecimal from cell at row " + row.getRowNum() + " and cell " + cellIndex, e);
         }
         return null;
     }
