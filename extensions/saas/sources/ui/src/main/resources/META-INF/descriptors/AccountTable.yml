@@ -136,3 +136,4 @@ fields:
 
 params:
   pageSize: 50
+  showRowNumber: true
