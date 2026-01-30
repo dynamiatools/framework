@@ -72,10 +72,12 @@ public class EntityFileDownloadlink extends Toolbarbutton {
     }
 
     private void rendererLabel() {
-        if (showLabel) {
-            setLabel(entityFile.getName());
+        if(entityFile!=null) {
+            if (showLabel) {
+                setLabel(entityFile.getName());
+            }
+            setTooltiptext(entityFile.getName());
         }
-        setTooltiptext(entityFile.getName());
     }
 
     public boolean isShowLabel() {
