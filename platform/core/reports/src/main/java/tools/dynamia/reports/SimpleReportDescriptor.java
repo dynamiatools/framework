@@ -151,16 +151,11 @@ public class SimpleReportDescriptor implements ReportDescriptor {
     }
 
     public void loadParameterFromProviders(Object object) {
-        Containers.get().findObjects(ReportParametersProvider.class).forEach(p -> {
-            try {
-                @SuppressWarnings("unchecked") Map<String, Object> params = p.getParams(object);
-                if (params != null) {
-                    getParameters().putAll(params);
-                }
-            } catch (ClassCastException e) {
-                // ignore
-            }
-        });
+
+        var params = ReportParametersProvider.loadParameters(object);
+        if (params != null) {
+            getParameters().putAll(params);
+        }
     }
 
     @Override
