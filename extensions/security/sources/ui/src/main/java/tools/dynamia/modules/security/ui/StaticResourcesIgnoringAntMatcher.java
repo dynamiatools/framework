@@ -29,8 +29,8 @@ public class StaticResourcesIgnoringAntMatcher implements IgnoringSecurityMatche
         return new String[]{
                 "/zkau/**", "/zkau", "/static/**", "/storage/**",
                 "/styles/**", "/css/**", "/images/**", "/fonts/**", "/img/**", "/js/**", "/assets/**",
-                "/*.ico", "/favicon.ico", "/ws-commands/**", "/ws-commands", "*.png", "*.svg", "/root/**",
-                "/*.manifest", "/*.webmanifest", "*.css", "*.js", "/static/*.ico", "*.jpg", "*.jpeg", "*.ttf", "*.woff", "*.woff2"
+                "/*.ico", "/favicon.ico", "/ws-commands/**", "/ws-commands", "/*.png", "/*.svg", "/root/**",
+                "/*.manifest", "/*.webmanifest", "/*.css", "/*.js", "/static/*.ico", "/*.jpg", "/*.jpeg", "/*.ttf", "/*.woff", "/*.woff2"
         };
     }
 
