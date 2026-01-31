@@ -60,7 +60,7 @@ public class YamlViewDescriptorReader implements ViewDescriptorReader {
     private static final String FIELD_COMPONENT = "component";
     private static final String FIELD_DESCRIPTION = "description";
     private static final String FIELD_LABEL = "label";
-    private static final String FIELD_ID = "label";
+    private static final String FIELD_ID = "id";
     private static final String FIELD_COLLAPSE = "collapse";
     private static final String FIELD_ACTION = "action";
     private static final String VD_FIELDS = "fields";
