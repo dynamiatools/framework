@@ -19,6 +19,8 @@ package tools.dynamia.commons.ops;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.util.ReflectionUtils;
+import tools.dynamia.commons.BeanMap;
+import tools.dynamia.commons.ValueWrapper;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.PropertyInfo;
@@ -118,7 +120,7 @@ public final class PropertyAccessor {
         } catch (Exception e) {
             LOGGER.error(e);
         }
-        return value;
+        return value instanceof ValueWrapper valueWrapper ? valueWrapper.getValue() : value;
     }
 
     /**
@@ -158,9 +160,10 @@ public final class PropertyAccessor {
      */
     public static void setFieldValue(String fieldName, Object object, Object value) {
         try {
+            Object actualValue = value instanceof ValueWrapper valueWrapper ? valueWrapper.value() : value;
             final Field field = tools.dynamia.commons.ObjectOperations.getField(object.getClass(), fieldName);
             field.setAccessible(true);
-            field.set(object, value);
+            field.set(object, actualValue);
         } catch (java.lang.reflect.InaccessibleObjectException e) {
             // Java 9+ module system prevents access to certain internal fields
             if (LOGGER.isDebugEnabled()) {
@@ -336,12 +339,22 @@ public final class PropertyAccessor {
      * }</pre>
      */
     public static void invokeSetMethod(final Object bean, final String name, final Object value) {
+        // Handle ValueWrapper for explicit type specification
+        Object actualValue = value instanceof ValueWrapper valueWrapper ? valueWrapper.value() : value;
+
+
+        if (bean instanceof BeanMap) {
+            ((BeanMap) bean).set(name, actualValue);
+            return;
+        }
+
+
         try {
             BeanWrapper wrapper = new BeanWrapperImpl(bean);
-            wrapper.setPropertyValue(name, value);
+            wrapper.setPropertyValue(name, actualValue);
         } catch (Exception e) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Error setting property " + name + " on " + bean.getClass() + " with value " + value + ": " + e.getMessage());
+                LOGGER.debug("Error setting property " + name + " on " + bean.getClass() + " with value " + actualValue + ": " + e.getMessage());
             }
         }
     }

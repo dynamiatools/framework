@@ -272,6 +272,7 @@ public final class ObjectOperations {
      */
     public static Object getFieldValue(final String fieldName, final Object object) {
         return PropertyAccessor.getFieldValue(fieldName, object);
+
     }
 
     /**
@@ -470,14 +471,8 @@ public final class ObjectOperations {
      * @see PropertyAccessor#invokeSetMethod(Object, String, Object)
      */
     public static void invokeSetMethod(final Object bean, final String name, final Object value) {
-        if (bean instanceof BeanMap) {
-            ((BeanMap) bean).set(name, value);
-            return;
-        }
 
-        // Handle ValueWrapper for explicit type specification
-        Object actualValue = value instanceof ValueWrapper valueWrapper ? valueWrapper.value() : value;
-        PropertyAccessor.invokeSetMethod(bean, name, actualValue);
+        PropertyAccessor.invokeSetMethod(bean, name, value);
     }
 
     /**
