@@ -101,7 +101,6 @@ public class ReportFilter extends SimpleEntitySaaS {
     private List<ReportFilterOption> queryAndLoadOptions(ReportDataSource dataSource) {
         List<ReportFilterOption> options = new ArrayList<>();
         if ("sql".equals(report.getQueryLang())) {
-            ;
             try (Connection connection = ReportsUtils.getJdbcConnection(dataSource)) {
                 JdbcHelper jdbc = new JdbcHelper(connection);
                 JdbcDataSet result = jdbc.query(ReportsUtils.checkQuery(queryValues));
