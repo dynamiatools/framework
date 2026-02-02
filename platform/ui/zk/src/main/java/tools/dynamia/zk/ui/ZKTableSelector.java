@@ -9,6 +9,7 @@ import tools.dynamia.ui.SelectEventCallback;
 import tools.dynamia.ui.SelectionEventCallback;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.ViewDescriptorBuilder;
+import tools.dynamia.zk.viewers.DefaultFieldCustomizer;
 import tools.dynamia.zk.viewers.table.TableView;
 import tools.dynamia.zk.viewers.ui.Viewer;
 
@@ -70,6 +71,7 @@ public class ZKTableSelector<T> extends Div {
         if (data != null && !data.isEmpty() && columns != null && !columns.isEmpty()) {
             data.stream().findFirst().ifPresent(t -> type = (Class<T>) t.getClass());
             if (type != null) {
+
                 var descriptor = ViewDescriptorBuilder.viewDescriptor("table", type)
                         .autofields(false)
                         .fields(() -> columns.stream().map(Field::new).toList())

@@ -17,6 +17,7 @@
 package tools.dynamia.commons;
 
 import org.jspecify.annotations.NonNull;
+import tools.dynamia.commons.logger.LoggingService;
 
 import java.sql.Time;
 import java.text.DateFormat;
@@ -42,6 +43,8 @@ import java.util.Date;
  */
 public final class DateTimeUtils {
 
+
+    private static final LoggingService LOGGER = LoggingService.get(DateTimeUtils.class);
     /**
      * Constant for short date format.
      */
@@ -641,17 +644,28 @@ public final class DateTimeUtils {
             return null;
         }
 
-        DateTimeFormatter formatter = getFormatter(pattern);
-        return formatter.format(temporalAccessor);
+        try {
+            DateTimeFormatter formatter = getFormatter(pattern);
+            return formatter.format(temporalAccessor);
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn("Error formatting date/time with pattern " + pattern + ": " + e.getMessage());
+            return null;
+        }
     }
 
+
     public static @NonNull DateTimeFormatter getFormatter(String pattern) {
-        String key = pattern + "_" + Messages.getDefaultLocale().toLanguageTag() + "_"
-                + Messages.getDefaultTimeZone().getId();
-        return FORMATTER_CACHE.getOrLoad(key, k -> DateTimeFormatter.ofPattern(pattern)
-                .withLocale(Messages.getDefaultLocale())
-                .withZone(Messages.getDefaultTimeZone())
-        );
+        try {
+            String key = pattern + "_" + Messages.getDefaultLocale().toLanguageTag() + "_"
+                    + Messages.getDefaultTimeZone().getId();
+            return FORMATTER_CACHE.getOrLoad(key, k -> DateTimeFormatter.ofPattern(pattern)
+                    .withLocale(Messages.getDefaultLocale())
+                    .withZone(Messages.getDefaultTimeZone())
+            );
+        } catch (Exception e) {
+            LOGGER.warn("Error creating DateTimeFormatter with pattern " + pattern + ": " + e.getMessage() + ". Using ISO_LOCAL_DATE_TIME as fallback.");
+            return DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        }
     }
 
     /**
