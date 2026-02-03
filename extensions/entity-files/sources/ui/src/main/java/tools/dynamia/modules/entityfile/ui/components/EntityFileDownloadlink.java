@@ -20,6 +20,7 @@ package tools.dynamia.modules.entityfile.ui.components;
 import org.zkoss.util.media.AMedia;
 import org.zkoss.util.media.Media;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.Toolbarbutton;
 import tools.dynamia.modules.entityfile.StoredEntityFile;
@@ -57,7 +58,8 @@ public class EntityFileDownloadlink extends Toolbarbutton {
                 } else {
                     EntityFileUtils.showDownloadDialog(entityFile.getStoredEntityFile());
                 }
-
+            }else{
+                Clients.showNotification("No file",this);
             }
         });
     }
