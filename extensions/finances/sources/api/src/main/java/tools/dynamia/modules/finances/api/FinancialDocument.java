@@ -333,6 +333,162 @@ public class FinancialDocument implements Serializable {
         this.notes = notes;
     }
 
+    // Fluent API methods for method chaining
+
+    /**
+     * Sets the id and returns this instance for chaining.
+     *
+     * @param id the document id
+     * @return this FinancialDocument instance
+     */
+    public FinancialDocument id(String id) {
+        this.id = id;
+        return this;
+    }
+
+    /**
+     * Sets the document type and returns this instance for chaining.
+     *
+     * @param type the document type
+     * @return this FinancialDocument instance
+     */
+    public FinancialDocument type(DocumentType type) {
+        this.type = type;
+        return this;
+    }
+
+    /**
+     * Sets the document status and returns this instance for chaining.
+     *
+     * @param status the document status
+     * @return this FinancialDocument instance
+     */
+    public FinancialDocument status(DocumentStatus status) {
+        this.status = status;
+        return this;
+    }
+
+    /**
+     * Sets the issue date and returns this instance for chaining.
+     *
+     * @param issueDate the issue date
+     * @return this FinancialDocument instance
+     */
+    public FinancialDocument issueDate(LocalDate issueDate) {
+        this.issueDate = issueDate;
+        return this;
+    }
+
+    /**
+     * Sets the due date and returns this instance for chaining.
+     *
+     * @param dueDate the due date
+     * @return this FinancialDocument instance
+     */
+    public FinancialDocument dueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
+        return this;
+    }
+
+    /**
+     * Sets the party and returns this instance for chaining.
+     *
+     * @param party the party (customer/supplier)
+     * @return this FinancialDocument instance
+     */
+    public FinancialDocument party(String party) {
+        this.party = party;
+        return this;
+    }
+
+    /**
+     * Sets the currency and returns this instance for chaining.
+     *
+     * @param currency the currency code
+     * @return this FinancialDocument instance
+     */
+    public FinancialDocument currency(String currency) {
+        this.currency = currency;
+        return this;
+    }
+
+    /**
+     * Sets the exchange rate and returns this instance for chaining.
+     *
+     * @param exchangeRate the exchange rate
+     * @return this FinancialDocument instance
+     */
+    public FinancialDocument exchangeRate(ExchangeRate exchangeRate) {
+        this.exchangeRate = exchangeRate;
+        return this;
+    }
+
+    /**
+     * Adds a line and returns this instance for chaining.
+     *
+     * @param line the line to add
+     * @return this FinancialDocument instance
+     */
+    public FinancialDocument line(DocumentLine line) {
+        addLine(line);
+        return this;
+    }
+
+    /**
+     * Adds a charge and returns this instance for chaining.
+     *
+     * @param charge the charge to add
+     * @return this FinancialDocument instance
+     */
+    public FinancialDocument charge(Charge charge) {
+        addCharge(charge);
+        return this;
+    }
+
+    /**
+     * Sets the document number and returns this instance for chaining.
+     *
+     * @param documentNumber the document number
+     * @return this FinancialDocument instance
+     */
+    public FinancialDocument documentNumber(String documentNumber) {
+        this.documentNumber = documentNumber;
+        return this;
+    }
+
+    /**
+     * Sets the reference and returns this instance for chaining.
+     *
+     * @param reference the reference
+     * @return this FinancialDocument instance
+     */
+    public FinancialDocument reference(String reference) {
+        this.reference = reference;
+        return this;
+    }
+
+    /**
+     * Sets the notes and returns this instance for chaining.
+     *
+     * @param notes the notes
+     * @return this FinancialDocument instance
+     */
+    public FinancialDocument notes(String notes) {
+        this.notes = notes;
+        return this;
+    }
+
+    /**
+     * Sets the totals and returns this instance for chaining.
+     *
+     * @param totals the document totals
+     * @return this FinancialDocument instance
+     */
+    public FinancialDocument totals(DocumentTotals totals) {
+        this.totals = totals;
+        return this;
+    }
+
     @Override
     public String toString() {
         return type + " #" + documentNumber + " (" + status + ") - " + currency;

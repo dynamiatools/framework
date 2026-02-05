@@ -238,6 +238,129 @@ public class Charge implements Serializable {
         this.description = description;
     }
 
+    // Fluent API methods for method chaining
+
+    /**
+     * Sets the id and returns this instance for chaining.
+     *
+     * @param id the charge id
+     * @return this Charge instance
+     */
+    public Charge id(String id) {
+        this.id = id;
+        return this;
+    }
+
+    /**
+     * Sets the code and returns this instance for chaining.
+     *
+     * @param code the charge code
+     * @return this Charge instance
+     */
+    public Charge code(String code) {
+        this.code = code;
+        return this;
+    }
+
+    /**
+     * Sets the name and returns this instance for chaining.
+     *
+     * @param name the charge name
+     * @return this Charge instance
+     */
+    public Charge name(String name) {
+        this.name = name;
+        return this;
+    }
+
+    /**
+     * Sets the type and returns this instance for chaining.
+     *
+     * @param type the charge type
+     * @return this Charge instance
+     */
+    public Charge type(ChargeType type) {
+        this.type = type;
+        return this;
+    }
+
+    /**
+     * Sets the rate type and returns this instance for chaining.
+     *
+     * @param rateType the rate type
+     * @return this Charge instance
+     */
+    public Charge rateType(RateType rateType) {
+        this.rateType = rateType;
+        return this;
+    }
+
+    /**
+     * Sets the value and returns this instance for chaining.
+     *
+     * @param value the charge value
+     * @return this Charge instance
+     */
+    public Charge value(BigDecimal value) {
+        this.value = value;
+        return this;
+    }
+
+    /**
+     * Sets the appliesTo and returns this instance for chaining.
+     *
+     * @param appliesTo where the charge applies to
+     * @return this Charge instance
+     */
+    public Charge appliesTo(ChargeAppliesTo appliesTo) {
+        this.appliesTo = appliesTo;
+        return this;
+    }
+
+    /**
+     * Sets the base and returns this instance for chaining.
+     *
+     * @param base the charge base
+     * @return this Charge instance
+     */
+    public Charge base(ChargeBase base) {
+        this.base = base;
+        return this;
+    }
+
+    /**
+     * Sets the refundable flag and returns this instance for chaining.
+     *
+     * @param refundable whether the charge is refundable
+     * @return this Charge instance
+     */
+    public Charge refundable(Boolean refundable) {
+        this.refundable = refundable;
+        return this;
+    }
+
+    /**
+     * Sets the priority and returns this instance for chaining.
+     *
+     * @param priority the application priority
+     * @return this Charge instance
+     */
+    public Charge priority(Integer priority) {
+        this.priority = priority;
+        return this;
+    }
+
+    /**
+     * Sets the description and returns this instance for chaining.
+     *
+     * @param description the charge description
+     * @return this Charge instance
+     */
+    public Charge description(String description) {
+        this.description = description;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

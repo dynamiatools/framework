@@ -220,6 +220,96 @@ public class DocumentLine implements Serializable {
         this.itemName = itemName;
     }
 
+    // Fluent API methods for method chaining
+
+    /**
+     * Sets the line description and returns this instance for chaining.
+     *
+     * @param description the line description
+     * @return this DocumentLine instance
+     */
+    public DocumentLine description(String description) {
+        this.description = description;
+        return this;
+    }
+
+    /**
+     * Sets the quantity and returns this instance for chaining.
+     *
+     * @param quantity the quantity
+     * @return this DocumentLine instance
+     */
+    public DocumentLine quantity(BigDecimal quantity) {
+        this.quantity = quantity;
+        return this;
+    }
+
+    /**
+     * Sets the unit price and returns this instance for chaining.
+     *
+     * @param unitPrice the unit price
+     * @return this DocumentLine instance
+     */
+    public DocumentLine unitPrice(Money unitPrice) {
+        this.unitPrice = unitPrice;
+        return this;
+    }
+
+    /**
+     * Sets the item code and returns this instance for chaining.
+     *
+     * @param itemCode the item code
+     * @return this DocumentLine instance
+     */
+    public DocumentLine itemCode(String itemCode) {
+        this.itemCode = itemCode;
+        return this;
+    }
+
+    /**
+     * Sets the item name and returns this instance for chaining.
+     *
+     * @param itemName the item name
+     * @return this DocumentLine instance
+     */
+    public DocumentLine itemName(String itemName) {
+        this.itemName = itemName;
+        return this;
+    }
+
+    /**
+     * Sets the line number and returns this instance for chaining.
+     *
+     * @param lineNumber the line number
+     * @return this DocumentLine instance
+     */
+    public DocumentLine lineNumber(Integer lineNumber) {
+        this.lineNumber = lineNumber;
+        return this;
+    }
+
+    /**
+     * Adds a charge and returns this instance for chaining.
+     *
+     * @param charge the charge to add
+     * @return this DocumentLine instance
+     */
+    public DocumentLine charge(Charge charge) {
+        addCharge(charge);
+        return this;
+    }
+
+    /**
+     * Sets the id and returns this instance for chaining.
+     *
+     * @param id the line id
+     * @return this DocumentLine instance
+     */
+    public DocumentLine id(String id) {
+        this.id = id;
+        return this;
+    }
+
     @Override
     public String toString() {
         return description + " (" + quantity + " × " + unitPrice + ")";

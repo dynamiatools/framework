@@ -139,10 +139,10 @@ class FinancialDocumentTest {
     @Test
     @DisplayName("Should set exchange rate")
     void testSetExchangeRate() {
-        FinancialDocument doc = FinancialDocument.of(DocumentType.SALE, "EUR");
-
         ExchangeRate rate = ExchangeRate.of("EUR", "USD", new BigDecimal("1.10"), LocalDate.now());
-        doc.setExchangeRate(rate);
+
+        FinancialDocument doc = FinancialDocument.of(DocumentType.SALE, "EUR")
+                .exchangeRate(rate);
 
         assertNotNull(doc.getExchangeRate());
         assertEquals(rate, doc.getExchangeRate());
@@ -162,5 +162,62 @@ class FinancialDocumentTest {
         assertEquals(DocumentType.CREDIT_NOTE, creditNote.getType());
         assertEquals(DocumentType.DEBIT_NOTE, debitNote.getType());
         assertEquals(DocumentType.QUOTE, quote.getType());
+    }
+
+    @Test
+    @DisplayName("Should create complete document using fluent API")
+    void testCompleteDocumentWithFluentAPI() {
+        // Create a complete invoice using fluent API
+        FinancialDocument invoice = FinancialDocument.of(DocumentType.SALE, "USD")
+                .id("INV-001")
+                .documentNumber("FAC-2026-001")
+                .issueDate(LocalDate.now())
+                .dueDate(LocalDate.now().plusDays(30))
+                .party("CUST-12345")
+                .reference("ORDER-5678")
+                .notes("Urgent delivery required")
+                .line(new DocumentLine()
+                        .description("Premium Product A")
+                        .itemCode("PROD-A")
+                        .itemName("Product A")
+                        .quantity(new BigDecimal("10"))
+                        .unitPrice(Money.of("100", "USD"))
+                        .charge(new Charge()
+                                .code("VAT19")
+                                .name("Value Added Tax 19%")
+                                .type(ChargeType.TAX)
+                                .rateType(RateType.PERCENTAGE)
+                                .value(new BigDecimal("19"))
+                                .priority(20)))
+                .line(new DocumentLine()
+                        .description("Premium Product B")
+                        .itemCode("PROD-B")
+                        .itemName("Product B")
+                        .quantity(new BigDecimal("5"))
+                        .unitPrice(Money.of("200", "USD")))
+                .charge(new Charge()
+                        .code("DISC10")
+                        .name("Special Discount 10%")
+                        .type(ChargeType.DISCOUNT)
+                        .rateType(RateType.PERCENTAGE)
+                        .value(new BigDecimal("10"))
+                        .appliesTo(ChargeAppliesTo.DOCUMENT)
+                        .priority(10));
+
+        // Assertions
+        assertEquals("INV-001", invoice.getId());
+        assertEquals("FAC-2026-001", invoice.getDocumentNumber());
+        assertEquals("CUST-12345", invoice.getParty());
+        assertEquals("ORDER-5678", invoice.getReference());
+        assertEquals("Urgent delivery required", invoice.getNotes());
+        assertEquals(2, invoice.getLines().size());
+        assertEquals(1, invoice.getCharges().size());
+        assertEquals("Premium Product A", invoice.getLines().get(0).getDescription());
+        assertEquals("PROD-A", invoice.getLines().get(0).getItemCode());
+        assertEquals(1, invoice.getLines().get(0).getCharges().size());
+        assertEquals("Premium Product B", invoice.getLines().get(1).getDescription());
+        assertEquals("DISC10", invoice.getCharges().get(0).getCode());
+        assertEquals(DocumentStatus.DRAFT, invoice.getStatus());
+        assertTrue(invoice.isDraft());
     }
 }
