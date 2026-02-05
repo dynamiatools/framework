@@ -25,6 +25,7 @@
         <module>security/sources</module>
         <module>file-importer/sources</module>
         <module>reports/sources</module>
+        <module>finances/sources</module>
     </modules>
 
 
