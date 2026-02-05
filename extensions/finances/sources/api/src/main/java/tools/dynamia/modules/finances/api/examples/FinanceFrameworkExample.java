@@ -39,22 +39,22 @@ public class FinanceFrameworkExample {
         FinancialDocument invoice = FinancialDocument.of(DocumentType.SALE, "USD");
         invoice.setDocumentNumber("INV-001");
         invoice.setIssueDate(LocalDate.now());
-        invoice.setParty("Customer ABC");
+        invoice.setParty(DocumentParty.of("Customer"));
 
         // Add a product line
         DocumentLine line = DocumentLine.of(
-            "Product A - Premium Widget",
-            new BigDecimal("10"),
-            Money.of("100.00", "USD")
+                "Product A - Premium Widget",
+                new BigDecimal("10"),
+                Money.of("100.00", "USD")
         );
 
         // Add VAT 19%
         Charge vat = Charge.percentage(
-            "VAT19",
-            "Value Added Tax 19%",
-            ChargeType.TAX,
-            new BigDecimal("19"),
-            20
+                "VAT19",
+                "Value Added Tax 19%",
+                ChargeType.TAX,
+                new BigDecimal("19"),
+                20
         );
         vat.setAppliesTo(ChargeAppliesTo.LINE);
         vat.setBase(ChargeBase.NET);
@@ -83,40 +83,40 @@ public class FinanceFrameworkExample {
 
         // Line 1: Product with discount, tax, and withholding
         DocumentLine line1 = DocumentLine.of(
-            "Enterprise Software License",
-            new BigDecimal("1"),
-            Money.of("5000.00", "USD")
+                "Enterprise Software License",
+                new BigDecimal("1"),
+                Money.of("5000.00", "USD")
         );
 
         // Commercial discount 10% (priority 10 - applied first)
         Charge discount = Charge.percentage(
-            "DISC10",
-            "Commercial Discount 10%",
-            ChargeType.DISCOUNT,
-            new BigDecimal("10"),
-            10
+                "DISC10",
+                "Commercial Discount 10%",
+                ChargeType.DISCOUNT,
+                new BigDecimal("10"),
+                10
         );
         discount.setAppliesTo(ChargeAppliesTo.LINE);
         discount.setBase(ChargeBase.NET);
 
         // VAT 19% (priority 20 - applied after discount)
         Charge vat = Charge.percentage(
-            "VAT19",
-            "Value Added Tax 19%",
-            ChargeType.TAX,
-            new BigDecimal("19"),
-            20
+                "VAT19",
+                "Value Added Tax 19%",
+                ChargeType.TAX,
+                new BigDecimal("19"),
+                20
         );
         vat.setAppliesTo(ChargeAppliesTo.LINE);
         vat.setBase(ChargeBase.PREVIOUS_TOTAL);
 
         // Income withholding 2.5% (priority 30 - applied last)
         Charge withholding = Charge.percentage(
-            "WHOLD25",
-            "Income Tax Withholding 2.5%",
-            ChargeType.WITHHOLDING,
-            new BigDecimal("2.5"),
-            30
+                "WHOLD25",
+                "Income Tax Withholding 2.5%",
+                ChargeType.WITHHOLDING,
+                new BigDecimal("2.5"),
+                30
         );
         withholding.setAppliesTo(ChargeAppliesTo.LINE);
         withholding.setBase(ChargeBase.PREVIOUS_TOTAL);
@@ -128,9 +128,9 @@ public class FinanceFrameworkExample {
 
         // Line 2: Consulting services
         DocumentLine line2 = DocumentLine.of(
-            "Professional Consulting Services",
-            new BigDecimal("20"),
-            Money.of("150.00", "USD")
+                "Professional Consulting Services",
+                new BigDecimal("20"),
+                Money.of("150.00", "USD")
         );
 
         // Same charges apply
@@ -160,37 +160,37 @@ public class FinanceFrameworkExample {
 
         // Add product lines
         DocumentLine line1 = DocumentLine.of(
-            "Product A",
-            new BigDecimal("5"),
-            Money.of("50.00", "USD")
+                "Product A",
+                new BigDecimal("5"),
+                Money.of("50.00", "USD")
         );
         invoice.addLine(line1);
 
         DocumentLine line2 = DocumentLine.of(
-            "Product B",
-            new BigDecimal("3"),
-            Money.of("75.00", "USD")
+                "Product B",
+                new BigDecimal("3"),
+                Money.of("75.00", "USD")
         );
         invoice.addLine(line2);
 
         // Add VAT at line level
         Charge vat = Charge.percentage(
-            "VAT19",
-            "VAT 19%",
-            ChargeType.TAX,
-            new BigDecimal("19"),
-            20
+                "VAT19",
+                "VAT 19%",
+                ChargeType.TAX,
+                new BigDecimal("19"),
+                20
         );
         vat.setAppliesTo(ChargeAppliesTo.LINE);
         invoice.addCharge(vat);
 
         // Add shipping fee at document level
         Charge shipping = Charge.fixed(
-            "SHIP",
-            "Shipping Cost",
-            ChargeType.FEE,
-            new BigDecimal("50.00"),
-            100
+                "SHIP",
+                "Shipping Cost",
+                ChargeType.FEE,
+                new BigDecimal("50.00"),
+                100
         );
         shipping.setAppliesTo(ChargeAppliesTo.DOCUMENT);
         invoice.addCharge(shipping);
@@ -221,18 +221,18 @@ public class FinanceFrameworkExample {
 
         // Add product
         DocumentLine line = DocumentLine.of(
-            "International Product",
-            new BigDecimal("10"),
-            Money.of("100.00", "EUR")
+                "International Product",
+                new BigDecimal("10"),
+                Money.of("100.00", "EUR")
         );
 
         // Add VAT
         Charge vat = Charge.percentage(
-            "VAT21",
-            "VAT 21%",
-            ChargeType.TAX,
-            new BigDecimal("21"),
-            20
+                "VAT21",
+                "VAT 21%",
+                ChargeType.TAX,
+                new BigDecimal("21"),
+                20
         );
         vat.setAppliesTo(ChargeAppliesTo.LINE);
         line.addCharge(vat);

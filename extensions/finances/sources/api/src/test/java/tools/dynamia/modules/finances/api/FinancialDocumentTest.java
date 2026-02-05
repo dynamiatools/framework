@@ -207,16 +207,16 @@ class FinancialDocumentTest {
         // Assertions
         assertEquals("INV-001", invoice.getId());
         assertEquals("FAC-2026-001", invoice.getDocumentNumber());
-        assertEquals("CUST-12345", invoice.getParty());
+        assertEquals("CUST-12345", invoice.getParty().getName());
         assertEquals("ORDER-5678", invoice.getReference());
         assertEquals("Urgent delivery required", invoice.getNotes());
         assertEquals(2, invoice.getLines().size());
         assertEquals(1, invoice.getCharges().size());
-        assertEquals("Premium Product A", invoice.getLines().get(0).getDescription());
-        assertEquals("PROD-A", invoice.getLines().get(0).getItemCode());
-        assertEquals(1, invoice.getLines().get(0).getCharges().size());
+        assertEquals("Premium Product A", invoice.getLines().getFirst().getDescription());
+        assertEquals("PROD-A", invoice.getLines().getFirst().getItemCode());
+        assertEquals(1, invoice.getLines().getFirst().getCharges().size());
         assertEquals("Premium Product B", invoice.getLines().get(1).getDescription());
-        assertEquals("DISC10", invoice.getCharges().get(0).getCode());
+        assertEquals("DISC10", invoice.getCharges().getFirst().getCode());
         assertEquals(DocumentStatus.DRAFT, invoice.getStatus());
         assertTrue(invoice.isDraft());
     }
@@ -278,7 +278,7 @@ class FinancialDocumentTest {
         // Assertions - Document structure
         assertEquals("INV-2026-002", invoice.getId());
         assertEquals("FAC-2026-002", invoice.getDocumentNumber());
-        assertEquals("ACME Corp - Customer 001", invoice.getParty());
+        assertEquals("ACME Corp - Customer 001", invoice.getParty().getName());
         assertEquals("PO-9876", invoice.getReference());
         assertEquals(5, invoice.getLines().size());
         assertEquals(3, invoice.getCharges().size());
@@ -390,7 +390,7 @@ class FinancialDocumentTest {
         // Assertions - Copy has same basic properties
         assertEquals(original.getType(), copy.getType());
         assertEquals(original.getCurrency(), copy.getCurrency());
-        assertEquals(original.getParty(), copy.getParty());
+        assertEquals(original.getParty().getName(), copy.getParty().getName());
         assertEquals(original.getReference(), copy.getReference());
         assertEquals(original.getNotes(), copy.getNotes());
         assertEquals(original.getDocumentNumber(), copy.getDocumentNumber());
@@ -421,7 +421,7 @@ class FinancialDocumentTest {
 
         // Assertions - Charges are deep copied
         assertEquals(2, copy.getCharges().size());
-        assertNotSame(original.getCharges().get(0), copy.getCharges().get(0), "Charges should be new instances");
+        assertNotSame(original.getCharges().getFirst(), copy.getCharges().getFirst(), "Charges should be new instances");
 
         // Assertions - Totals are reset
         assertNull(copy.getTotals(), "Copy should have null totals");
@@ -449,7 +449,7 @@ class FinancialDocumentTest {
         assertEquals("INV-200", copy.getDocumentNumber());
         assertEquals("INV-100", original.getDocumentNumber());
         assertTrue(copy.isDraft());
-        assertEquals(original.getParty(), copy.getParty());
+        assertEquals(original.getParty().getName(), copy.getParty().getName());
         assertEquals(1, copy.getLines().size());
     }
 }

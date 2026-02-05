@@ -53,7 +53,7 @@ public class FinancialDocument implements Serializable {
     private DocumentStatus status;
     private LocalDate issueDate;
     private LocalDate dueDate;
-    private String party;
+    private DocumentParty party;
     private String currency;
     private ExchangeRate exchangeRate;
     private List<DocumentLine> lines;
@@ -76,7 +76,7 @@ public class FinancialDocument implements Serializable {
     /**
      * Creates a financial document with the specified type.
      *
-     * @param type the document type
+     * @param type     the document type
      * @param currency the currency code
      * @return a new FinancialDocument instance
      */
@@ -149,8 +149,8 @@ public class FinancialDocument implements Serializable {
     /**
      * Adds a tax charge to this document with simplified parameters.
      *
-     * @param code the tax code (e.g., "VAT19")
-     * @param name the tax name (e.g., "Value Added Tax 19%")
+     * @param code       the tax code (e.g., "VAT19")
+     * @param name       the tax name (e.g., "Value Added Tax 19%")
      * @param percentage the tax percentage
      * @return the created Charge instance
      */
@@ -163,10 +163,10 @@ public class FinancialDocument implements Serializable {
     /**
      * Adds a tax charge with custom priority.
      *
-     * @param code the tax code
-     * @param name the tax name
+     * @param code       the tax code
+     * @param name       the tax name
      * @param percentage the tax percentage
-     * @param priority the application priority
+     * @param priority   the application priority
      * @return the created Charge instance
      */
     public Charge addTax(String code, String name, BigDecimal percentage, int priority) {
@@ -192,8 +192,8 @@ public class FinancialDocument implements Serializable {
     /**
      * Adds a discount charge to this document with simplified parameters.
      *
-     * @param code the discount code (e.g., "DISC10")
-     * @param name the discount name (e.g., "10% Volume Discount")
+     * @param code       the discount code (e.g., "DISC10")
+     * @param name       the discount name (e.g., "10% Volume Discount")
      * @param percentage the discount percentage
      * @return the created Charge instance
      */
@@ -206,10 +206,10 @@ public class FinancialDocument implements Serializable {
     /**
      * Adds a discount charge with custom priority.
      *
-     * @param code the discount code
-     * @param name the discount name
+     * @param code       the discount code
+     * @param name       the discount name
      * @param percentage the discount percentage
-     * @param priority the application priority
+     * @param priority   the application priority
      * @return the created Charge instance
      */
     public Charge addDiscount(String code, String name, BigDecimal percentage, int priority) {
@@ -221,8 +221,8 @@ public class FinancialDocument implements Serializable {
     /**
      * Adds a fixed amount discount.
      *
-     * @param code the discount code
-     * @param name the discount name
+     * @param code   the discount code
+     * @param name   the discount name
      * @param amount the fixed discount amount
      * @return the created Charge instance
      */
@@ -249,8 +249,8 @@ public class FinancialDocument implements Serializable {
     /**
      * Adds a withholding charge to this document with simplified parameters.
      *
-     * @param code the withholding code (e.g., "RET_IVA")
-     * @param name the withholding name (e.g., "IVA Withholding")
+     * @param code       the withholding code (e.g., "RET_IVA")
+     * @param name       the withholding name (e.g., "IVA Withholding")
      * @param percentage the withholding percentage
      * @return the created Charge instance
      */
@@ -263,10 +263,10 @@ public class FinancialDocument implements Serializable {
     /**
      * Adds a withholding charge with custom priority.
      *
-     * @param code the withholding code
-     * @param name the withholding name
+     * @param code       the withholding code
+     * @param name       the withholding name
      * @param percentage the withholding percentage
-     * @param priority the application priority
+     * @param priority   the application priority
      * @return the created Charge instance
      */
     public Charge addWithholding(String code, String name, BigDecimal percentage, int priority) {
@@ -292,8 +292,8 @@ public class FinancialDocument implements Serializable {
     /**
      * Adds a fee charge to this document with simplified parameters.
      *
-     * @param code the fee code (e.g., "SHIP")
-     * @param name the fee name (e.g., "Shipping Fee")
+     * @param code   the fee code (e.g., "SHIP")
+     * @param name   the fee name (e.g., "Shipping Fee")
      * @param amount the fixed fee amount
      * @return the created Charge instance
      */
@@ -306,8 +306,8 @@ public class FinancialDocument implements Serializable {
     /**
      * Adds a percentage-based fee charge.
      *
-     * @param code the fee code
-     * @param name the fee name
+     * @param code       the fee code
+     * @param name       the fee name
      * @param percentage the fee percentage
      * @return the created Charge instance
      */
@@ -391,7 +391,7 @@ public class FinancialDocument implements Serializable {
     public void post() {
         if (!isDraft()) {
             throw new InvalidDocumentStateException(
-                "Only DRAFT documents can be posted. Current status: " + status
+                    "Only DRAFT documents can be posted. Current status: " + status
             );
         }
         this.status = DocumentStatus.POSTED;
@@ -422,7 +422,7 @@ public class FinancialDocument implements Serializable {
      * - All other properties copied as-is
      *
      * @return a new FinancialDocument instance with copied data
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * FinancialDocument original = // ... existing document
@@ -443,11 +443,15 @@ public class FinancialDocument implements Serializable {
         // Copy basic properties
         copy.type = this.type;
         copy.dueDate = this.dueDate;
-        copy.party = this.party;
         copy.currency = this.currency;
         copy.documentNumber = this.documentNumber;
         copy.reference = this.reference;
         copy.notes = this.notes;
+
+        // Copy party if present
+        if (this.party != null) {
+            copy.party = this.party.copy();
+        }
 
         // Copy exchange rate if present
         if (this.exchangeRate != null) {
@@ -533,12 +537,16 @@ public class FinancialDocument implements Serializable {
         this.dueDate = dueDate;
     }
 
-    public String getParty() {
+    public DocumentParty getParty() {
         return party;
     }
 
-    public void setParty(String party) {
+    public void setParty(DocumentParty party) {
         this.party = party;
+    }
+
+    public void setParty(String customerDefLtd) {
+        setParty(DocumentParty.of(customerDefLtd));
     }
 
     public String getCurrency() {
@@ -676,8 +684,19 @@ public class FinancialDocument implements Serializable {
      * @param party the party (customer/supplier)
      * @return this FinancialDocument instance
      */
-    public FinancialDocument party(String party) {
+    public FinancialDocument party(DocumentParty party) {
         this.party = party;
+        return this;
+    }
+
+    /**
+     * Sets the party by ID and returns this instance for chaining.
+     *
+     * @param partyId the party identifier
+     * @return this FinancialDocument instance
+     */
+    public FinancialDocument party(String partyId) {
+        this.party = DocumentParty.of(partyId);
         return this;
     }
 
