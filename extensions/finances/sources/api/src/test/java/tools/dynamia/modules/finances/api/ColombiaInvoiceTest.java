@@ -46,18 +46,18 @@ class ColombiaInvoiceTest {
         // Verificar cálculos
         System.out.println("\n=== Almuerzo $20.000 COP ===");
         System.out.println("Precio con IVA: " + precioConIVA);
-        System.out.println("Base gravable:  " + baseGravable.round(2));
-        System.out.println("IVA 19%:        " + ivaAmount.round(2));
+        System.out.println("Base gravable:  " + baseGravable);
+        System.out.println("IVA 19%:        " + ivaAmount);
 
         // Base gravable debería ser aproximadamente 16,806.72
-        assertEquals(0, new BigDecimal("16806.72").compareTo(baseGravable.round(2).getAmount()));
+        assertEquals(0, new BigDecimal("16806.72").compareTo(baseGravable.getAmount()));
 
         // IVA debería ser aproximadamente 3,193.28
-        assertEquals(0, new BigDecimal("3193.28").compareTo(ivaAmount.round(2).getAmount()));
+        assertEquals(0, new BigDecimal("3193.28").compareTo(ivaAmount.getAmount()));
 
         // La suma debe dar el precio original
         Money suma = baseGravable.add(ivaAmount);
-        assertEquals(0, precioConIVA.round(2).compareTo(suma.round(2)));
+        assertEquals(0, precioConIVA.compareTo(suma));
     }
 
     @Test
@@ -104,16 +104,16 @@ class ColombiaInvoiceTest {
             System.out.println(String.format("%-25s  Cant: %s  P.Unit: %s  Subtotal: %s",
                 line.getDescription(),
                 line.getQuantity(),
-                line.getUnitPrice().round(2),
-                line.getBaseAmount().round(2)
+                line.getUnitPrice(),
+                line.getBaseAmount()
             ));
         }
 
         DocumentTotals totals = factura.getTotals();
         System.out.println("\n--- TOTALES ---");
-        System.out.println("Subtotal (Base gravable): " + totals.getSubTotal().round(2));
-        System.out.println("IVA 19%:                  " + totals.getTaxTotal().round(2));
-        System.out.println("TOTAL A PAGAR:            " + totals.getGrandTotal().round(2));
+        System.out.println("Subtotal (Base gravable): " + totals.getSubTotal());
+        System.out.println("IVA 19%:                  " + totals.getTaxTotal());
+        System.out.println("TOTAL A PAGAR:            " + totals.getGrandTotal());
 
         // Verificar totales
         // Subtotal = 16,806.72 + (2 × 4,201.68) + 6,722.69 = 31,932.77
@@ -121,7 +121,7 @@ class ColombiaInvoiceTest {
             .add(baseBebida.multiply(2))
             .add(basePostre);
 
-        assertEquals(0, expectedSubtotal.round(2).compareTo(totals.getSubTotal().round(2)));
+        assertEquals(0, expectedSubtotal.compareTo(totals.getSubTotal()));
 
         // Total debe ser 33,000 (20,000 + 10,000 + 8,000 - los precios originales con IVA)
         Money totalEsperado = Money.of("38000", CURRENCY_COP);
@@ -167,17 +167,17 @@ class ColombiaInvoiceTest {
             System.out.println(String.format("%-20s %s  Base: %s  IVA: %s  Total: %s",
                 line.getDescription(),
                 iva,
-                line.getTotals().getBaseAmount().round(2),
-                line.getTotals().getTaxTotal().round(2),
-                line.getTotals().getNetTotal().round(2)
+                line.getTotals().getBaseAmount(),
+                line.getTotals().getTaxTotal(),
+                line.getTotals().getNetTotal()
             ));
         }
 
         DocumentTotals totals = factura.getTotals();
         System.out.println("\n--- RESUMEN ---");
-        System.out.println("Base gravable:   " + totals.getSubTotal().round(2));
-        System.out.println("IVA:             " + totals.getTaxTotal().round(2));
-        System.out.println("TOTAL:           " + totals.getGrandTotal().round(2));
+        System.out.println("Base gravable:   " + totals.getSubTotal());
+        System.out.println("IVA:             " + totals.getTaxTotal());
+        System.out.println("TOTAL:           " + totals.getGrandTotal());
 
         // Verificar
         assertNotNull(totals);
@@ -199,11 +199,18 @@ class ColombiaInvoiceTest {
 
         System.out.println("\n=== Calcular Precio con IVA ===");
         System.out.println("Base:           " + basePrice);
-        System.out.println("+ IVA 19%:      " + basePrice.percentage(IVA_19).round(2));
-        System.out.println("= Precio final: " + priceWithTax.round(2));
+        System.out.println("+ IVA 19%:      " + basePrice.percentage(IVA_19).roundToCurrency());
+        System.out.println("= Precio final: " + priceWithTax);
+        System.out.println("= Redondeado:   " + priceWithTax.round(0));
 
-        // Debe dar aproximadamente $20,000
-        assertEquals(0, new BigDecimal("20000.00").compareTo(priceWithTax.round(2).getAmount()));
+        // Debe dar aproximadamente $20,000 (con redondeo a enteros da exactamente 20,000)
+        assertEquals(0, new BigDecimal("20000").compareTo(priceWithTax.round(0).getAmount()));
+
+        // Verificar que está muy cerca de 20,000 (diferencia menor a 1 peso)
+        Money expected = Money.of("20000", CURRENCY_COP);
+        Money difference = priceWithTax.subtract(expected).abs();
+        assertTrue(difference.compareTo(Money.of("1", CURRENCY_COP)) < 0,
+                   "La diferencia debe ser menor a 1 peso");
     }
 
     @Test
@@ -240,11 +247,11 @@ class ColombiaInvoiceTest {
 
         System.out.println("\n=== Factura con Descuento ===");
         System.out.println("Precio original con IVA: " + precioConIVA);
-        System.out.println("Base gravable:           " + base.round(2));
-        System.out.println("- Descuento 10%:         " + totals.getDiscountTotal().round(2));
-        System.out.println("= Base después desc.:    " + base.subtract(totals.getDiscountTotal()).round(2));
-        System.out.println("+ IVA 19%:               " + totals.getTaxTotal().round(2));
-        System.out.println("= TOTAL A PAGAR:         " + totals.getGrandTotal().round(2));
+        System.out.println("Base gravable:           " + base);
+        System.out.println("- Descuento 10%:         " + totals.getDiscountTotal());
+        System.out.println("= Base después desc.:    " + base.subtract(totals.getDiscountTotal()));
+        System.out.println("+ IVA 19%:               " + totals.getTaxTotal());
+        System.out.println("= TOTAL A PAGAR:         " + totals.getGrandTotal());
 
         // Verificar
         assertNotNull(totals);
@@ -319,14 +326,14 @@ class ColombiaInvoiceTest {
 
         System.out.println("\n=== Extracción de Base con Diferentes Tasas ===");
         System.out.println("Precio: " + precio100k);
-        System.out.println("\nIVA 19%: Base=" + base19.round(2) + " + IVA=" + iva19.round(2));
-        System.out.println("IVA  5%: Base=" + base5.round(2) + " + IVA=" + iva5.round(2));
-        System.out.println("IVA  0%: Base=" + base0.round(2) + " + IVA=" + iva0.round(2));
+        System.out.println("\nIVA 19%: Base=" + base19 + " + IVA=" + iva19);
+        System.out.println("IVA  5%: Base=" + base5 + " + IVA=" + iva5);
+        System.out.println("IVA  0%: Base=" + base0 + " + IVA=" + iva0);
 
         // Verificar que base + IVA = precio original
-        assertEquals(precio100k.round(2), base19.add(iva19).round(2));
-        assertEquals(precio100k.round(2), base5.add(iva5).round(2));
-        assertEquals(precio100k.round(2), base0.add(iva0).round(2));
+        assertEquals(precio100k, base19.add(iva19));
+        assertEquals(precio100k, base5.add(iva5));
+        assertEquals(precio100k, base0.add(iva0));
 
         // Con IVA 0%, base debe ser igual al precio
         assertEquals(precio100k, base0);

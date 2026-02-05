@@ -3,6 +3,7 @@ package tools.dynamia.modules.finances.api;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
  */
 public final class Money implements Serializable, Comparable<Money> {
 
+    public static final int DEFAULT_ROUND_SCALE = 2;
     private final BigDecimal amount;
     private final String currencyCode;
 
@@ -214,6 +216,7 @@ public final class Money implements Serializable, Comparable<Money> {
     /**
      * Calculates the base amount from a price that includes tax.
      * This is useful in countries like Colombia where prices are displayed with tax included.
+     * The result is rounded to 2 decimal places by default.
      *
      * <p>Formula: baseAmount = priceWithTax / (1 + taxRate/100)</p>
      *
@@ -221,55 +224,57 @@ public final class Money implements Serializable, Comparable<Money> {
      * <pre>{@code
      * Money priceWithTax = Money.of("20000", "COP"); // Lunch price with 19% VAT
      * Money baseAmount = priceWithTax.extractBase(new BigDecimal("19"));
-     * // baseAmount = COP 16806.72 (base price before VAT)
+     * // baseAmount = COP 16806.72 (base price before VAT, rounded to 2 decimals)
      * }</pre>
      *
      * @param taxPercentage the tax percentage included in the price (e.g., 19 for 19%)
-     * @return the base amount without tax
+     * @return the base amount without tax, rounded to 2 decimal places
      */
     public Money extractBase(BigDecimal taxPercentage) {
         // baseAmount = priceWithTax / (1 + taxRate/100)
         BigDecimal divisor = BigDecimal.ONE.add(
-            taxPercentage.divide(new BigDecimal("100"), 10, RoundingMode.HALF_UP)
+                taxPercentage.divide(new BigDecimal("100"), 10, RoundingMode.HALF_UP)
         );
         BigDecimal baseAmount = this.amount.divide(divisor, 10, RoundingMode.HALF_UP);
-        return new Money(baseAmount, this.currencyCode);
+        return new Money(baseAmount, this.currencyCode).roundToCurrency();
     }
 
     /**
      * Calculates the tax amount from a price that includes tax.
+     * The result is rounded to 2 decimal places by default.
      *
      * <p>Example usage:</p>
      * <pre>{@code
      * Money priceWithTax = Money.of("20000", "COP");
      * Money taxAmount = priceWithTax.extractTax(new BigDecimal("19"));
-     * // taxAmount = COP 3193.28 (the VAT portion)
+     * // taxAmount = COP 3193.28 (the VAT portion, rounded to 2 decimals)
      * }</pre>
      *
      * @param taxPercentage the tax percentage included in the price
-     * @return the tax amount
+     * @return the tax amount, rounded to 2 decimal places
      */
     public Money extractTax(BigDecimal taxPercentage) {
         Money baseAmount = extractBase(taxPercentage);
-        return this.subtract(baseAmount);
+        return this.subtract(baseAmount).roundToCurrency();
     }
 
     /**
      * Calculates price with tax from a base amount.
+     * The result is rounded to 2 decimal places by default for practical financial calculations.
      *
      * <p>Example usage:</p>
      * <pre>{@code
      * Money basePrice = Money.of("16806.72", "COP");
      * Money priceWithTax = basePrice.addTax(new BigDecimal("19"));
-     * // priceWithTax = COP 20000.00
+     * // priceWithTax = COP 20000.00 (rounded to 2 decimals)
      * }</pre>
      *
      * @param taxPercentage the tax percentage to add
-     * @return the price including tax
+     * @return the price including tax, rounded to 2 decimal places
      */
     public Money addTax(BigDecimal taxPercentage) {
         Money taxAmount = this.percentage(taxPercentage);
-        return this.add(taxAmount);
+        return this.add(taxAmount).roundToCurrency();
     }
 
 
@@ -361,7 +366,7 @@ public final class Money implements Serializable, Comparable<Money> {
             Currency currency = Currency.getInstance(currencyCode);
             return round(currency.getDefaultFractionDigits());
         } catch (IllegalArgumentException e) {
-            return round(2); // Default to 2 decimal places
+            return round(DEFAULT_ROUND_SCALE); // Default to 2 decimal places
         }
     }
 
