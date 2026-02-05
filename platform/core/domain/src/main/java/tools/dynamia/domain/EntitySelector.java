@@ -16,10 +16,20 @@
  */
 package tools.dynamia.domain;
 
+/**
+ * Entity selector that allows setting a listener to handle entity selection events.
+ *
+ * @param <T> the type of entity to be selected
+ */
 public class EntitySelector<T> {
 
     private EntitySelectionListener<T> currentListener;
 
+    /**
+     * Selects an entity and notifies the current listener if one is set.
+     *
+     * @param entity the entity that has been selected
+     */
     public void select(T entity) {
         if (currentListener != null) {
             currentListener.entitySelected(entity);
@@ -27,6 +37,11 @@ public class EntitySelector<T> {
         }
     }
 
+    /**
+     * Sets the listener to be notified when an entity is selected.
+     *
+     * @param listener the listener to set
+     */
     public void setListener(EntitySelectionListener<T> listener) {
         this.currentListener = listener;
     }

@@ -17,6 +17,11 @@
 
 package tools.dynamia.domain.util;
 
+/**
+ * Interface for providing a model instance.
+ *
+ * @param <E> the type of the model
+ */
 public interface ModelProvider<E> {
 
     E getModel();

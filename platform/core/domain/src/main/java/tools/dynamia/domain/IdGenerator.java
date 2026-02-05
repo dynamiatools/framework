@@ -18,6 +18,11 @@ package tools.dynamia.domain;
 
 import java.io.Serializable;
 
+/**
+ * Interface for generating unique identifiers of a specific type.
+ *
+ * @param <T> the type of the identifier to be generated, must be Serializable
+ */
 public interface IdGenerator<T extends Serializable> {
 
     /**

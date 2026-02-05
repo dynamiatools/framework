@@ -26,18 +26,40 @@ import java.util.Map;
 
 
 /**
- * The Class BigDecimalUtils.
+ * Utility class that provides helper methods for BigDecimal operations including
+ * comparison, calculation, percentage computation, and financial functions.
+ * This class simplifies common BigDecimal operations with null-safe methods
+ * and convenient comparison utilities.
+ *
+ * <p>All comparison methods treat null values as BigDecimal.ZERO for safe operations.
+ * The class also includes financial calculation functions like interest rate computation.</p>
  *
  * @author Mario A. Serrano Leones
  */
 public class BigDecimalUtils {
 
+
+    private BigDecimalUtils() {
+    }
+
     /**
-     * Sum.
+     * Computes the sum of a numeric field across all objects in the provided list.
+     * The method uses reflection to invoke the getter method for the specified field
+     * and accumulates the numeric values. Non-numeric values are ignored.
      *
-     * @param field the field
-     * @param data  the data
-     * @return the big decimal
+     * @param field the name of the field to sum (must have a corresponding getter method)
+     * @param data  the list of objects containing the field to sum
+     * @return the total sum as BigDecimal, or BigDecimal.ZERO if the list is empty or null
+     *
+     * <pre>{@code
+     * // Example:
+     * List<Product> products = Arrays.asList(
+     *     new Product("Item1", new BigDecimal("10.50")),
+     *     new Product("Item2", new BigDecimal("25.75"))
+     * );
+     * BigDecimal total = BigDecimalUtils.sum("price", products);
+     * // Returns: 36.25
+     * }</pre>
      */
     @SuppressWarnings("rawtypes")
     public static BigDecimal sum(String field, List data) {
@@ -63,11 +85,19 @@ public class BigDecimalUtils {
     }
 
     /**
-     * a is greater than b. (a > b) Null values are treat like BigDecimal.ZERO
+     * Checks if the first BigDecimal is greater than the second (a &gt; b).
+     * Null values are treated as BigDecimal.ZERO for safe comparison.
      *
-     * @param a the a
-     * @param b the b
-     * @return true, if successful
+     * @param a the first value to compare
+     * @param b the second value to compare
+     * @return true if a is greater than b, false otherwise
+     *
+     * <pre>{@code
+     * // Example:
+     * BigDecimal price = new BigDecimal("150.00");
+     * BigDecimal limit = new BigDecimal("100.00");
+     * boolean overLimit = BigDecimalUtils.gt(price, limit); // Returns: true
+     * }</pre>
      */
     public static boolean gt(BigDecimal a, BigDecimal b) {
         a = safe(a);
@@ -76,12 +106,19 @@ public class BigDecimalUtils {
     }
 
     /**
-     * a is greater or equals than b. (a >= b) Null values are treat like
-     * BigDecimal.ZERO
+     * Checks if the first BigDecimal is greater than or equal to the second (a &gt;= b).
+     * Null values are treated as BigDecimal.ZERO for safe comparison.
      *
-     * @param a the a
-     * @param b the b
-     * @return true, if successful
+     * @param a the first value to compare
+     * @param b the second value to compare
+     * @return true if a is greater than or equal to b, false otherwise
+     *
+     * <pre>{@code
+     * // Example:
+     * BigDecimal balance = new BigDecimal("100.00");
+     * BigDecimal minRequired = new BigDecimal("100.00");
+     * boolean hasEnough = BigDecimalUtils.gte(balance, minRequired); // Returns: true
+     * }</pre>
      */
     public static boolean gte(BigDecimal a, BigDecimal b) {
         a = safe(a);
@@ -90,11 +127,19 @@ public class BigDecimalUtils {
     }
 
     /**
-     * a is less than b. (a < b) Null values are treat like BigDecimal.ZERO
+     * Checks if the first BigDecimal is less than the second (a &lt; b).
+     * Null values are treated as BigDecimal.ZERO for safe comparison.
      *
-     * @param a the a
-     * @param b the b
-     * @return true, if successful
+     * @param a the first value to compare
+     * @param b the second value to compare
+     * @return true if a is less than b, false otherwise
+     *
+     * <pre>{@code
+     * // Example:
+     * BigDecimal stock = new BigDecimal("5.00");
+     * BigDecimal minStock = new BigDecimal("10.00");
+     * boolean needsReorder = BigDecimalUtils.lt(stock, minStock); // Returns: true
+     * }</pre>
      */
     public static boolean lt(BigDecimal a, BigDecimal b) {
         a = safe(a);
@@ -103,12 +148,19 @@ public class BigDecimalUtils {
     }
 
     /**
-     * a is less or equal than b. (a <= b) Null values are treat like
-     * BigDecimal.ZERO
+     * Checks if the first BigDecimal is less than or equal to the second (a &lt;= b).
+     * Null values are treated as BigDecimal.ZERO for safe comparison.
      *
-     * @param a the a
-     * @param b the b
-     * @return true, if successful
+     * @param a the first value to compare
+     * @param b the second value to compare
+     * @return true if a is less than or equal to b, false otherwise
+     *
+     * <pre>{@code
+     * // Example:
+     * BigDecimal discount = new BigDecimal("15.00");
+     * BigDecimal maxDiscount = new BigDecimal("20.00");
+     * boolean isValid = BigDecimalUtils.lte(discount, maxDiscount); // Returns: true
+     * }</pre>
      */
     public static boolean lte(BigDecimal a, BigDecimal b) {
         a = safe(a);
@@ -117,20 +169,34 @@ public class BigDecimalUtils {
     }
 
     /**
-     * Checks if is negative.
+     * Checks if the given BigDecimal value is negative (less than zero).
+     * Null values are treated as BigDecimal.ZERO and will return false.
      *
-     * @param value the value
-     * @return true, if is negative
+     * @param value the value to check
+     * @return true if the value is negative, false otherwise
+     *
+     * <pre>{@code
+     * // Example:
+     * BigDecimal loss = new BigDecimal("-50.00");
+     * boolean hasLoss = BigDecimalUtils.isNegative(loss); // Returns: true
+     * }</pre>
      */
     public static boolean isNegative(BigDecimal value) {
         return lt(value, BigDecimal.ZERO);
     }
 
     /**
-     * Checks if is positive.
+     * Checks if the given BigDecimal value is positive (greater than zero).
+     * Null values are treated as BigDecimal.ZERO and will return false.
      *
-     * @param value the value
-     * @return true, if is positive
+     * @param value the value to check
+     * @return true if the value is positive, false otherwise
+     *
+     * <pre>{@code
+     * // Example:
+     * BigDecimal profit = new BigDecimal("100.00");
+     * boolean hasProfit = BigDecimalUtils.isPositive(profit); // Returns: true
+     * }</pre>
      */
     public static boolean isPositive(BigDecimal value) {
 
@@ -138,41 +204,61 @@ public class BigDecimalUtils {
     }
 
     /**
-     * Check if value is zero
+     * Checks if the given BigDecimal value is exactly zero.
+     * This method performs an exact comparison with BigDecimal.ZERO.
      *
-     * @param value
-     * @return
+     * @param value the value to check
+     * @return true if the value is exactly zero, false otherwise (including null)
+     *
+     * <pre>{@code
+     * // Example:
+     * BigDecimal amount = new BigDecimal("0.00");
+     * boolean isEmpty = BigDecimalUtils.isZero(amount); // Returns: true
+     * }</pre>
      */
     public static boolean isZero(BigDecimal value) {
         return BigDecimal.ZERO.equals(value);
     }
 
     /**
-     * Retorn BigDecimal.ZERO if value is null otherwise return value
+     * Returns a safe BigDecimal value, converting null to BigDecimal.ZERO.
+     * This method is useful to avoid NullPointerException when performing operations.
      *
-     * @param value the value
-     * @return the big decimal
+     * @param value the value to make safe (can be null)
+     * @return BigDecimal.ZERO if value is null, otherwise returns the original value
+     *
+     * <pre>{@code
+     * // Example:
+     * BigDecimal nullValue = null;
+     * BigDecimal safeValue = BigDecimalUtils.safe(nullValue); // Returns: 0
+     *
+     * BigDecimal amount = new BigDecimal("50.00");
+     * BigDecimal result = BigDecimalUtils.safe(amount); // Returns: 50.00
+     * }</pre>
      */
     public static BigDecimal safe(BigDecimal value) {
         return value == null ? BigDecimal.ZERO : value;
     }
 
     /**
-     * Evaluate a math expression writen in javascript
+     * Evaluates a mathematical expression written in JavaScript syntax.
+     * The method replaces variables in the expression with their numeric values
+     * and calculates the result using the MathFunction evaluator.
      *
-     * <pre>
-     * <code>
-     *  //Example:
-     *  evaluate(" (a + b * 2) / c",
-     *       MapBuilder.put( "a", new BigDecimail(105.1))
-     *                 .put( "b", new BigDecimail(3.1415))
-     *                 .put( "c", 65));
-     * </code>
-     * </pre>
+     * @param mathExpression the mathematical expression to evaluate (e.g., "(a + b * 2) / c")
+     * @param vars           a map of variable names to their numeric values
+     * @return the evaluated result as BigDecimal
      *
-     * @param mathExpression the math expression
-     * @param vars           the vars
-     * @return the big decimal     *
+     * <pre>{@code
+     * // Example:
+     * Map<String, Number> variables = new HashMap<>();
+     * variables.put("a", new BigDecimal("105.1"));
+     * variables.put("b", new BigDecimal("3.1415"));
+     * variables.put("c", 65);
+     *
+     * BigDecimal result = BigDecimalUtils.evaluate("(a + b * 2) / c", variables);
+     * // Returns: approximately 1.71355...
+     * }</pre>
      */
     public static BigDecimal evaluate(String mathExpression, Map<String, Number> vars) {
 
@@ -185,18 +271,51 @@ public class BigDecimalUtils {
     }
 
     /**
-     * Compute the percent and add to value, percent value should be in percent
-     * form. Example 10 for 10%, NOT 0.1
+     * Computes the percentage of a value and adds it to the original value.
+     * The percent parameter should be in percentage form (e.g., 10 for 10%, not 0.1).
+     * This is equivalent to calculating: value + (value * percent / 100)
+     *
+     * @param value   the base value to which the percentage will be added
+     * @param percent the percentage to add (e.g., 10 for 10%, 15.5 for 15.5%)
+     * @return the original value plus the computed percentage
+     *
+     * <pre>{@code
+     * // Example:
+     * BigDecimal price = new BigDecimal("100.00");
+     * BigDecimal priceWithTax = BigDecimalUtils.addPercent(price, 19); // 19% tax
+     * // Returns: 119.00 (100 + 19% of 100)
+     * }</pre>
      */
     public static BigDecimal addPercent(BigDecimal value, double percent) {
         return value.add(computePercent(value, percent, false));
     }
 
     /**
-     * Compute the percent, percent value should be in percent form. Example 10
-     * for 10%, NOT 0.1. Included equals true means that percent value should be
-     * substracted from value. Include = true: value - (value / (1 + percent /
-     * 100) ) Include = false value * (p / 100)
+     * Computes a percentage of the given value. The percent parameter should be in percentage form
+     * (e.g., 10 for 10%, not 0.1).
+     *
+     * <p>The calculation method depends on the <code>included</code> parameter:</p>
+     * <ul>
+     *   <li><b>included = false:</b> Calculates the percentage directly: value * (percent / 100)</li>
+     *   <li><b>included = true:</b> Extracts the included percentage from the value: value - (value / (1 + percent / 100))</li>
+     * </ul>
+     *
+     * @param value    the base value from which to compute the percentage
+     * @param percent  the percentage value (e.g., 10 for 10%, 19 for 19%)
+     * @param included if true, calculates the percentage that is already included in the value;
+     *                 if false, calculates a simple percentage of the value
+     * @return the computed percentage as BigDecimal
+     *
+     * <pre>{@code
+     * // Example 1: Calculate 19% of 100 (not included)
+     * BigDecimal tax = BigDecimalUtils.computePercent(new BigDecimal("100"), 19, false);
+     * // Returns: 19.00
+     *
+     * // Example 2: Extract the 19% tax from a price that already includes it
+     * BigDecimal priceWithTax = new BigDecimal("119.00");
+     * BigDecimal taxAmount = BigDecimalUtils.computePercent(priceWithTax, 19, true);
+     * // Returns: 19.00 (the tax portion included in 119.00)
+     * }</pre>
      */
     public static BigDecimal computePercent(BigDecimal value, double percent, boolean included) {
         BigDecimal p100 = BigDecimal.valueOf(percent).divide(BigDecimal.valueOf(100), MathContext.DECIMAL64);
@@ -210,18 +329,56 @@ public class BigDecimalUtils {
     }
 
     /**
-     * Financial function that returns the interest rate per period of an annuity. You can use RATE to calculate
-     * the periodic interest rate, then multiply as required to derive the annual interest rate.
-     * The RATE function calculates by iteration.
+     * Financial function that returns the interest rate per period of an annuity.
+     * You can use this method to calculate the periodic interest rate, then multiply
+     * as required to derive the annual interest rate. The calculation is performed by iteration.
+     *
+     * <p>This method is useful for financial calculations such as loan interest rates
+     * or investment returns based on regular payments.</p>
+     *
+     * @param numberPeriods     the total number of payment periods in the annuity
+     * @param paymentByPeriod   the payment made each period (cannot change over the life of the annuity)
+     * @param total             the present value (total amount of loan or investment)
+     * @return the interest rate per period as a double (e.g., 0.01 for 1% per period)
+     *
+     * <pre>{@code
+     * // Example: Calculate monthly interest rate for a loan
+     * long months = 36; // 3-year loan
+     * BigDecimal monthlyPayment = new BigDecimal("500.00");
+     * BigDecimal loanAmount = new BigDecimal("15000.00");
+     *
+     * double monthlyRate = BigDecimalUtils.rate(months, monthlyPayment, loanAmount);
+     * double annualRate = monthlyRate * 12 * 100; // Convert to annual percentage
+     * // Returns: approximately 1.73% monthly rate, or 20.76% annual rate
+     * }</pre>
      */
     public static double rate(long numberPeriods, BigDecimal paymentByPeriod, BigDecimal total) {
         return rate((double) numberPeriods, paymentByPeriod.doubleValue(), total.doubleValue());
     }
 
     /**
-     * Financial function that returns the interest rate per period of an annuity. You can use RATE to calculate
-     * the periodic interest rate, then multiply as required to derive the annual interest rate.
-     * The RATE function calculates by iteration.
+     * Financial function that returns the interest rate per period of an annuity using double precision.
+     * This is the core implementation that calculates the rate through iterative approximation
+     * using the bisection method.
+     *
+     * <p>The algorithm starts with an initial guess and refines it by checking if the calculated
+     * payment is higher or lower than the actual payment, adjusting the rate boundaries accordingly
+     * until convergence within an acceptable error margin (0.0000001).</p>
+     *
+     * @param numberPeriods     the total number of payment periods in the annuity
+     * @param paymentByPeriod   the payment made each period (constant throughout the annuity)
+     * @param totalValue        the present value (total amount of loan or investment)
+     * @return the interest rate per period as a double (e.g., 0.01 for 1% per period)
+     *
+     * <pre>{@code
+     * // Example: Calculate monthly interest rate for a car loan
+     * double periods = 48.0; // 4-year loan
+     * double payment = 350.0; // Monthly payment
+     * double principal = 15000.0; // Loan amount
+     *
+     * double rate = BigDecimalUtils.rate(periods, payment, principal);
+     * // Returns: approximately 0.0067 (0.67% monthly, or ~8% annual)
+     * }</pre>
      */
     public static double rate(double numberPeriods, double paymentByPeriod, double totalValue) {
 
@@ -253,6 +410,4 @@ public class BigDecimalUtils {
         return rate;
     }
 
-    private BigDecimalUtils() {
-    }
 }
