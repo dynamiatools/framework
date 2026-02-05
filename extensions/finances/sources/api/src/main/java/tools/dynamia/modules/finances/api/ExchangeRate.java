@@ -18,7 +18,7 @@ import java.util.Objects;
  * }</pre>
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public final class ExchangeRate implements Serializable {
 
@@ -147,5 +147,15 @@ public final class ExchangeRate implements Serializable {
     @Override
     public String toString() {
         return fromCurrency + "/" + toCurrency + " = " + rate.toPlainString() + " (" + date + ")";
+    }
+
+    /**
+     * Creates a copy of this ExchangeRate.
+     * Since ExchangeRate is immutable, this returns a new instance with the same values.
+     *
+     * @return a new ExchangeRate instance with the same values
+     */
+    public ExchangeRate copy() {
+        return new ExchangeRate(this.fromCurrency, this.toCurrency, this.rate, this.date);
     }
 }

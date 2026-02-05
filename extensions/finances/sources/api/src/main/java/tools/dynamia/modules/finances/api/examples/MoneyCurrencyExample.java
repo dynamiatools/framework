@@ -10,7 +10,7 @@ import java.util.Locale;
  * Example demonstrating the new currency utility methods in Money class.
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public class MoneyCurrencyExample {
 

@@ -5,7 +5,7 @@ package tools.dynamia.modules.finances.api;
  * Controls the state transitions and calculation behavior.
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public enum DocumentStatus {
     /**

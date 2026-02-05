@@ -25,7 +25,7 @@ import java.util.Objects;
  * }</pre>
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public class Charge implements Serializable {
 
@@ -359,6 +359,28 @@ public class Charge implements Serializable {
     public Charge description(String description) {
         this.description = description;
         return this;
+    }
+
+    /**
+     * Creates a copy of this charge.
+     * All properties are copied to a new instance.
+     *
+     * @return a new Charge instance with copied data
+     */
+    public Charge copy() {
+        Charge copy = new Charge();
+        copy.id = null; // Reset ID for new charge
+        copy.code = this.code;
+        copy.name = this.name;
+        copy.type = this.type;
+        copy.rateType = this.rateType;
+        copy.value = this.value;
+        copy.appliesTo = this.appliesTo;
+        copy.base = this.base;
+        copy.refundable = this.refundable;
+        copy.priority = this.priority;
+        copy.description = this.description;
+        return copy;
     }
 
     @Override

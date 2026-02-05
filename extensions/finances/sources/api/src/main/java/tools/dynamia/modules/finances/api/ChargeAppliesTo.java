@@ -4,7 +4,7 @@ package tools.dynamia.modules.finances.api;
  * Enumeration defining where a charge can be applied in the document structure.
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public enum ChargeAppliesTo {
     /**

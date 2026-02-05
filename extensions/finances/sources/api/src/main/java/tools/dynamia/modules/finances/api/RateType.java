@@ -5,7 +5,7 @@ package tools.dynamia.modules.finances.api;
  * Defines how the charge value should be interpreted and applied.
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public enum RateType {
     /**

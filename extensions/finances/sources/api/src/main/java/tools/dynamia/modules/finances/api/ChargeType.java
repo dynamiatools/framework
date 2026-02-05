@@ -5,7 +5,7 @@ package tools.dynamia.modules.finances.api;
  * This unified charge system handles taxes, discounts, withholdings, and fees.
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public enum ChargeType {
     /**

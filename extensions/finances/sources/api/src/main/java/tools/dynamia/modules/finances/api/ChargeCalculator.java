@@ -16,7 +16,7 @@ import java.util.Map;
  * }</pre>
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public class ChargeCalculator {
 

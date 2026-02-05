@@ -13,20 +13,27 @@ import java.util.Objects;
  *
  * <p>Lines are calculated independently and their totals are aggregated at the document level.</p>
  *
- * <p>Example usage:</p>
+ * <p>Basic example usage:</p>
  * <pre>{@code
  * DocumentLine line = new DocumentLine();
  * line.setDescription("Product A");
  * line.setQuantity(new BigDecimal("10"));
  * line.setUnitPrice(Money.of("100", "USD"));
  *
- * Charge vat = Charge.percentage("VAT19", "VAT 19%", ChargeType.TAX,
- *                                 new BigDecimal("19"), 20);
- * line.addCharge(vat);
+ * // Simplified methods for charges
+ * line.addTax("VAT19", "VAT 19%", new BigDecimal("19"));
+ * line.addDiscount("DISC5", "Line Discount", new BigDecimal("5"));
+ * line.addFee("HANDLING", "Handling Fee", new BigDecimal("10.00"));
+ *
+ * // Using fluent API for method chaining
+ * DocumentLine line2 = DocumentLine.of("Product B", new BigDecimal("5"), Money.of("200", "USD"))
+ *     .tax("VAT19", "VAT 19%", new BigDecimal("19"))
+ *     .discount("DISC10", "Volume Discount", new BigDecimal("10"))
+ *     .itemCode("PROD-B");
  * }</pre>
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public class DocumentLine implements Serializable {
 
@@ -99,6 +106,193 @@ public class DocumentLine implements Serializable {
         if (this.charges != null) {
             this.charges.remove(charge);
         }
+    }
+
+    // Convenience methods for specific charge types
+
+    /**
+     * Adds a tax charge to this line with simplified parameters.
+     *
+     * @param code the tax code (e.g., "VAT19")
+     * @param name the tax name (e.g., "Value Added Tax 19%")
+     * @param percentage the tax percentage
+     * @return the created Charge instance
+     */
+    public Charge addTax(String code, String name, BigDecimal percentage) {
+        Charge tax = Charge.percentage(code, name, ChargeType.TAX, percentage, 20);
+        addCharge(tax);
+        return tax;
+    }
+
+    /**
+     * Adds a tax charge with custom priority.
+     *
+     * @param code the tax code
+     * @param name the tax name
+     * @param percentage the tax percentage
+     * @param priority the application priority
+     * @return the created Charge instance
+     */
+    public Charge addTax(String code, String name, BigDecimal percentage, int priority) {
+        Charge tax = Charge.percentage(code, name, ChargeType.TAX, percentage, priority);
+        addCharge(tax);
+        return tax;
+    }
+
+    /**
+     * Gets all tax charges from this line (line-specific only, not document-level).
+     *
+     * @return list of tax charges
+     */
+    public List<Charge> getTaxes() {
+        if (charges == null) {
+            return Collections.emptyList();
+        }
+        return charges.stream()
+                .filter(c -> c.getType() == ChargeType.TAX)
+                .toList();
+    }
+
+    /**
+     * Adds a discount charge to this line with simplified parameters.
+     *
+     * @param code the discount code (e.g., "DISC10")
+     * @param name the discount name (e.g., "10% Volume Discount")
+     * @param percentage the discount percentage
+     * @return the created Charge instance
+     */
+    public Charge addDiscount(String code, String name, BigDecimal percentage) {
+        Charge discount = Charge.percentage(code, name, ChargeType.DISCOUNT, percentage, 10);
+        addCharge(discount);
+        return discount;
+    }
+
+    /**
+     * Adds a discount charge with custom priority.
+     *
+     * @param code the discount code
+     * @param name the discount name
+     * @param percentage the discount percentage
+     * @param priority the application priority
+     * @return the created Charge instance
+     */
+    public Charge addDiscount(String code, String name, BigDecimal percentage, int priority) {
+        Charge discount = Charge.percentage(code, name, ChargeType.DISCOUNT, percentage, priority);
+        addCharge(discount);
+        return discount;
+    }
+
+    /**
+     * Adds a fixed amount discount.
+     *
+     * @param code the discount code
+     * @param name the discount name
+     * @param amount the fixed discount amount
+     * @return the created Charge instance
+     */
+    public Charge addFixedDiscount(String code, String name, BigDecimal amount) {
+        Charge discount = Charge.fixed(code, name, ChargeType.DISCOUNT, amount, 10);
+        addCharge(discount);
+        return discount;
+    }
+
+    /**
+     * Gets all discount charges from this line (line-specific only, not document-level).
+     *
+     * @return list of discount charges
+     */
+    public List<Charge> getDiscounts() {
+        if (charges == null) {
+            return Collections.emptyList();
+        }
+        return charges.stream()
+                .filter(c -> c.getType() == ChargeType.DISCOUNT)
+                .toList();
+    }
+
+    /**
+     * Adds a withholding charge to this line with simplified parameters.
+     *
+     * @param code the withholding code (e.g., "RET_IVA")
+     * @param name the withholding name (e.g., "IVA Withholding")
+     * @param percentage the withholding percentage
+     * @return the created Charge instance
+     */
+    public Charge addWithholding(String code, String name, BigDecimal percentage) {
+        Charge withholding = Charge.percentage(code, name, ChargeType.WITHHOLDING, percentage, 30);
+        addCharge(withholding);
+        return withholding;
+    }
+
+    /**
+     * Adds a withholding charge with custom priority.
+     *
+     * @param code the withholding code
+     * @param name the withholding name
+     * @param percentage the withholding percentage
+     * @param priority the application priority
+     * @return the created Charge instance
+     */
+    public Charge addWithholding(String code, String name, BigDecimal percentage, int priority) {
+        Charge withholding = Charge.percentage(code, name, ChargeType.WITHHOLDING, percentage, priority);
+        addCharge(withholding);
+        return withholding;
+    }
+
+    /**
+     * Gets all withholding charges from this line (line-specific only, not document-level).
+     *
+     * @return list of withholding charges
+     */
+    public List<Charge> getWithholdings() {
+        if (charges == null) {
+            return Collections.emptyList();
+        }
+        return charges.stream()
+                .filter(c -> c.getType() == ChargeType.WITHHOLDING)
+                .toList();
+    }
+
+    /**
+     * Adds a fee charge to this line with simplified parameters.
+     *
+     * @param code the fee code (e.g., "SHIP")
+     * @param name the fee name (e.g., "Shipping Fee")
+     * @param amount the fixed fee amount
+     * @return the created Charge instance
+     */
+    public Charge addFee(String code, String name, BigDecimal amount) {
+        Charge fee = Charge.fixed(code, name, ChargeType.FEE, amount, 5);
+        addCharge(fee);
+        return fee;
+    }
+
+    /**
+     * Adds a percentage-based fee charge.
+     *
+     * @param code the fee code
+     * @param name the fee name
+     * @param percentage the fee percentage
+     * @return the created Charge instance
+     */
+    public Charge addPercentageFee(String code, String name, BigDecimal percentage) {
+        Charge fee = Charge.percentage(code, name, ChargeType.FEE, percentage, 5);
+        addCharge(fee);
+        return fee;
+    }
+
+    /**
+     * Gets all fee charges from this line (line-specific only, not document-level).
+     *
+     * @return list of fee charges
+     */
+    public List<Charge> getFees() {
+        if (charges == null) {
+            return Collections.emptyList();
+        }
+        return charges.stream()
+                .filter(c -> c.getType() == ChargeType.FEE)
+                .toList();
     }
 
     /**
@@ -300,6 +494,58 @@ public class DocumentLine implements Serializable {
     }
 
     /**
+     * Adds a tax and returns this instance for chaining.
+     *
+     * @param code the tax code
+     * @param name the tax name
+     * @param percentage the tax percentage
+     * @return this DocumentLine instance
+     */
+    public DocumentLine tax(String code, String name, BigDecimal percentage) {
+        addTax(code, name, percentage);
+        return this;
+    }
+
+    /**
+     * Adds a discount and returns this instance for chaining.
+     *
+     * @param code the discount code
+     * @param name the discount name
+     * @param percentage the discount percentage
+     * @return this DocumentLine instance
+     */
+    public DocumentLine discount(String code, String name, BigDecimal percentage) {
+        addDiscount(code, name, percentage);
+        return this;
+    }
+
+    /**
+     * Adds a withholding and returns this instance for chaining.
+     *
+     * @param code the withholding code
+     * @param name the withholding name
+     * @param percentage the withholding percentage
+     * @return this DocumentLine instance
+     */
+    public DocumentLine withholding(String code, String name, BigDecimal percentage) {
+        addWithholding(code, name, percentage);
+        return this;
+    }
+
+    /**
+     * Adds a fee and returns this instance for chaining.
+     *
+     * @param code the fee code
+     * @param name the fee name
+     * @param amount the fee amount
+     * @return this DocumentLine instance
+     */
+    public DocumentLine fee(String code, String name, BigDecimal amount) {
+        addFee(code, name, amount);
+        return this;
+    }
+
+    /**
      * Sets the id and returns this instance for chaining.
      *
      * @param id the line id
@@ -308,6 +554,44 @@ public class DocumentLine implements Serializable {
     public DocumentLine id(String id) {
         this.id = id;
         return this;
+    }
+
+    /**
+     * Creates a deep copy of this line.
+     * The copy will have:
+     * - A new null ID (must be set by the caller)
+     * - All basic properties copied
+     * - All charges copied (deep copy)
+     * - Totals reset to null (must be recalculated)
+     * - Document reference set to null (must be set when adding to document)
+     *
+     * @return a new DocumentLine instance with copied data
+     */
+    public DocumentLine copy() {
+        DocumentLine copy = new DocumentLine();
+
+        // Copy basic properties
+        copy.description = this.description;
+        copy.quantity = this.quantity;
+        copy.unitPrice = this.unitPrice != null ? this.unitPrice.copy() : null;
+        copy.itemCode = this.itemCode;
+        copy.itemName = this.itemName;
+        copy.lineNumber = this.lineNumber;
+
+        // Deep copy charges
+        if (this.charges != null) {
+            copy.charges = new ArrayList<>();
+            for (Charge charge : this.charges) {
+                copy.charges.add(charge.copy());
+            }
+        }
+
+        // Reset references
+        copy.id = null;
+        copy.document = null;
+        copy.totals = null;
+
+        return copy;
     }
 
     @Override

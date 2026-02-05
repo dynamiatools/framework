@@ -18,7 +18,7 @@ import java.util.Objects;
  * }</pre>
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public final class LineTotals implements Serializable {
 

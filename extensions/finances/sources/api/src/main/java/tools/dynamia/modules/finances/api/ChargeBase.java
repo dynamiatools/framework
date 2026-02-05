@@ -5,7 +5,7 @@ package tools.dynamia.modules.finances.api;
  * Determines which amount to use when calculating percentage-based charges.
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public enum ChargeBase {
     /**

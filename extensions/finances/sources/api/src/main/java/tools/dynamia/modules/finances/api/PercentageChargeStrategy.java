@@ -10,7 +10,7 @@ import java.math.RoundingMode;
  * <p>Example: A 19% VAT on $100 results in $19</p>
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public class PercentageChargeStrategy implements ChargeStrategy {
 

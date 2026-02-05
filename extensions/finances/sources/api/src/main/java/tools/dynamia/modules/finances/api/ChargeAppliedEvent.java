@@ -19,7 +19,7 @@ import java.util.Objects;
  * }</pre>
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public class ChargeAppliedEvent implements Serializable {
 

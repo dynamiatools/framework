@@ -5,7 +5,7 @@ package tools.dynamia.modules.finances.api;
  * Each type represents a different kind of financial transaction or document.
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public enum DocumentType {
     /**
@@ -36,5 +36,40 @@ public enum DocumentType {
     /**
      * Quote - Pre-sale estimate or proposal
      */
-    QUOTE
+    QUOTE,
+
+    /**
+     * Receipt - Proof of payment document
+     */
+    RECEIPT,
+
+    /**
+     * Refund - Document for returning funds to a customer
+     */
+    REFUND,
+
+    /**
+     * Delivery Note - Document confirming the delivery of goods
+     */
+    DELIVERY_NOTE,
+
+    /**
+     * Proforma Invoice - Preliminary bill of sale
+     */
+    PROFORMA_INVOICE,
+
+    /**
+     * Work Order - Document authorizing work to be performed
+     */
+    WORK_ORDER,
+
+    /**
+     * Support Document - Document supporting a transaction (common in electronic invoicing)
+     */
+    SUPPORT_DOCUMENT,
+
+    /**
+     * POS Equivalent Document - Point of Sale equivalent document for electronic invoicing
+     */
+    POS_EQUIVALENT_DOCUMENT
 }

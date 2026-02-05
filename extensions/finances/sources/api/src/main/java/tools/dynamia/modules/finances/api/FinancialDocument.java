@@ -1,6 +1,7 @@
 package tools.dynamia.modules.finances.api;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,7 +16,7 @@ import java.util.Objects;
  * an external {@link FinancialCalculator} to maintain separation of concerns
  * and enable different calculation strategies.</p>
  *
- * <p>Example usage:</p>
+ * <p>Basic example usage:</p>
  * <pre>{@code
  * FinancialDocument invoice = new FinancialDocument();
  * invoice.setType(DocumentType.SALE);
@@ -28,12 +29,22 @@ import java.util.Objects;
  *                                     Money.of("100", "USD"));
  * invoice.addLine(line);
  *
+ * // Simplified methods for taxes, discounts, and withholdings
+ * invoice.addTax("VAT19", "Value Added Tax 19%", new BigDecimal("19"));
+ * invoice.addDiscount("DISC10", "Volume Discount", new BigDecimal("10"));
+ * invoice.addWithholding("RET_IVA", "IVA Retention", new BigDecimal("15"));
+ * invoice.addFee("SHIP", "Shipping Fee", new BigDecimal("25.00"));
+ *
+ * // Retrieve specific charge types
+ * List<Charge> taxes = invoice.getTaxes();
+ * List<Charge> discounts = invoice.getDiscounts();
+ *
  * FinancialCalculator calculator = new DefaultFinancialCalculator();
  * calculator.calculateDocument(invoice);
  * }</pre>
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public class FinancialDocument implements Serializable {
 
@@ -133,6 +144,193 @@ public class FinancialDocument implements Serializable {
         }
     }
 
+    // Convenience methods for specific charge types
+
+    /**
+     * Adds a tax charge to this document with simplified parameters.
+     *
+     * @param code the tax code (e.g., "VAT19")
+     * @param name the tax name (e.g., "Value Added Tax 19%")
+     * @param percentage the tax percentage
+     * @return the created Charge instance
+     */
+    public Charge addTax(String code, String name, BigDecimal percentage) {
+        Charge tax = Charge.percentage(code, name, ChargeType.TAX, percentage, 20);
+        addCharge(tax);
+        return tax;
+    }
+
+    /**
+     * Adds a tax charge with custom priority.
+     *
+     * @param code the tax code
+     * @param name the tax name
+     * @param percentage the tax percentage
+     * @param priority the application priority
+     * @return the created Charge instance
+     */
+    public Charge addTax(String code, String name, BigDecimal percentage, int priority) {
+        Charge tax = Charge.percentage(code, name, ChargeType.TAX, percentage, priority);
+        addCharge(tax);
+        return tax;
+    }
+
+    /**
+     * Gets all tax charges from this document.
+     *
+     * @return list of tax charges
+     */
+    public List<Charge> getTaxes() {
+        if (charges == null) {
+            return Collections.emptyList();
+        }
+        return charges.stream()
+                .filter(c -> c.getType() == ChargeType.TAX)
+                .toList();
+    }
+
+    /**
+     * Adds a discount charge to this document with simplified parameters.
+     *
+     * @param code the discount code (e.g., "DISC10")
+     * @param name the discount name (e.g., "10% Volume Discount")
+     * @param percentage the discount percentage
+     * @return the created Charge instance
+     */
+    public Charge addDiscount(String code, String name, BigDecimal percentage) {
+        Charge discount = Charge.percentage(code, name, ChargeType.DISCOUNT, percentage, 10);
+        addCharge(discount);
+        return discount;
+    }
+
+    /**
+     * Adds a discount charge with custom priority.
+     *
+     * @param code the discount code
+     * @param name the discount name
+     * @param percentage the discount percentage
+     * @param priority the application priority
+     * @return the created Charge instance
+     */
+    public Charge addDiscount(String code, String name, BigDecimal percentage, int priority) {
+        Charge discount = Charge.percentage(code, name, ChargeType.DISCOUNT, percentage, priority);
+        addCharge(discount);
+        return discount;
+    }
+
+    /**
+     * Adds a fixed amount discount.
+     *
+     * @param code the discount code
+     * @param name the discount name
+     * @param amount the fixed discount amount
+     * @return the created Charge instance
+     */
+    public Charge addFixedDiscount(String code, String name, BigDecimal amount) {
+        Charge discount = Charge.fixed(code, name, ChargeType.DISCOUNT, amount, 10);
+        addCharge(discount);
+        return discount;
+    }
+
+    /**
+     * Gets all discount charges from this document.
+     *
+     * @return list of discount charges
+     */
+    public List<Charge> getDiscounts() {
+        if (charges == null) {
+            return Collections.emptyList();
+        }
+        return charges.stream()
+                .filter(c -> c.getType() == ChargeType.DISCOUNT)
+                .toList();
+    }
+
+    /**
+     * Adds a withholding charge to this document with simplified parameters.
+     *
+     * @param code the withholding code (e.g., "RET_IVA")
+     * @param name the withholding name (e.g., "IVA Withholding")
+     * @param percentage the withholding percentage
+     * @return the created Charge instance
+     */
+    public Charge addWithholding(String code, String name, BigDecimal percentage) {
+        Charge withholding = Charge.percentage(code, name, ChargeType.WITHHOLDING, percentage, 30);
+        addCharge(withholding);
+        return withholding;
+    }
+
+    /**
+     * Adds a withholding charge with custom priority.
+     *
+     * @param code the withholding code
+     * @param name the withholding name
+     * @param percentage the withholding percentage
+     * @param priority the application priority
+     * @return the created Charge instance
+     */
+    public Charge addWithholding(String code, String name, BigDecimal percentage, int priority) {
+        Charge withholding = Charge.percentage(code, name, ChargeType.WITHHOLDING, percentage, priority);
+        addCharge(withholding);
+        return withholding;
+    }
+
+    /**
+     * Gets all withholding charges from this document.
+     *
+     * @return list of withholding charges
+     */
+    public List<Charge> getWithholdings() {
+        if (charges == null) {
+            return Collections.emptyList();
+        }
+        return charges.stream()
+                .filter(c -> c.getType() == ChargeType.WITHHOLDING)
+                .toList();
+    }
+
+    /**
+     * Adds a fee charge to this document with simplified parameters.
+     *
+     * @param code the fee code (e.g., "SHIP")
+     * @param name the fee name (e.g., "Shipping Fee")
+     * @param amount the fixed fee amount
+     * @return the created Charge instance
+     */
+    public Charge addFee(String code, String name, BigDecimal amount) {
+        Charge fee = Charge.fixed(code, name, ChargeType.FEE, amount, 5);
+        addCharge(fee);
+        return fee;
+    }
+
+    /**
+     * Adds a percentage-based fee charge.
+     *
+     * @param code the fee code
+     * @param name the fee name
+     * @param percentage the fee percentage
+     * @return the created Charge instance
+     */
+    public Charge addPercentageFee(String code, String name, BigDecimal percentage) {
+        Charge fee = Charge.percentage(code, name, ChargeType.FEE, percentage, 5);
+        addCharge(fee);
+        return fee;
+    }
+
+    /**
+     * Gets all fee charges from this document.
+     *
+     * @return list of fee charges
+     */
+    public List<Charge> getFees() {
+        if (charges == null) {
+            return Collections.emptyList();
+        }
+        return charges.stream()
+                .filter(c -> c.getType() == ChargeType.FEE)
+                .toList();
+    }
+
     /**
      * Validates that this document has all required fields.
      *
@@ -209,6 +407,88 @@ public class FinancialDocument implements Serializable {
             throw new InvalidDocumentStateException("Document is already cancelled");
         }
         this.status = DocumentStatus.CANCELLED;
+    }
+
+    /**
+     * Creates a deep copy of this document.
+     * The copy will have:
+     * - A new null ID (must be set by the caller)
+     * - DRAFT status
+     * - Current date as issue date
+     * - All lines copied (deep copy)
+     * - All charges copied (deep copy)
+     * - Totals reset to null (must be recalculated)
+     * - Same document number (caller should change it)
+     * - All other properties copied as-is
+     *
+     * @return a new FinancialDocument instance with copied data
+     *
+     * Example:
+     * <pre>{@code
+     * FinancialDocument original = // ... existing document
+     * FinancialDocument copy = original.copy();
+     * copy.setId("NEW-ID");
+     * copy.setDocumentNumber("NEW-NUMBER");
+     * copy.setIssueDate(LocalDate.now());
+     * }</pre>
+     */
+    public FinancialDocument copy() {
+        FinancialDocument copy = new FinancialDocument();
+
+        // Reset ID and status for new document
+        copy.id = null;
+        copy.status = DocumentStatus.DRAFT;
+        copy.issueDate = LocalDate.now();
+
+        // Copy basic properties
+        copy.type = this.type;
+        copy.dueDate = this.dueDate;
+        copy.party = this.party;
+        copy.currency = this.currency;
+        copy.documentNumber = this.documentNumber;
+        copy.reference = this.reference;
+        copy.notes = this.notes;
+
+        // Copy exchange rate if present
+        if (this.exchangeRate != null) {
+            copy.exchangeRate = this.exchangeRate.copy();
+        }
+
+        // Deep copy lines
+        if (this.lines != null) {
+            copy.lines = new ArrayList<>();
+            for (DocumentLine line : this.lines) {
+                DocumentLine lineCopy = line.copy();
+                copy.addLine(lineCopy);
+            }
+        }
+
+        // Deep copy charges
+        if (this.charges != null) {
+            copy.charges = new ArrayList<>();
+            for (Charge charge : this.charges) {
+                Charge chargeCopy = charge.copy();
+                copy.charges.add(chargeCopy);
+            }
+        }
+
+        // Totals must be recalculated
+        copy.totals = null;
+
+        return copy;
+    }
+
+    /**
+     * Creates a copy of this document with a new document number.
+     * Convenience method that calls {@link #copy()} and sets the new document number.
+     *
+     * @param newDocumentNumber the new document number
+     * @return a new FinancialDocument instance with the specified document number
+     */
+    public FinancialDocument copyWithNumber(String newDocumentNumber) {
+        FinancialDocument copy = copy();
+        copy.setDocumentNumber(newDocumentNumber);
+        return copy;
     }
 
     // Getters and Setters
@@ -493,4 +773,6 @@ public class FinancialDocument implements Serializable {
     public String toString() {
         return type + " #" + documentNumber + " (" + status + ") - " + currency;
     }
+
+
 }

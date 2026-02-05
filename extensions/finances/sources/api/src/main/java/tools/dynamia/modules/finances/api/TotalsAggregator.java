@@ -8,7 +8,7 @@ import java.util.List;
  * Sums up all line amounts and applies document-level charges.
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public class TotalsAggregator {
 

@@ -12,7 +12,7 @@ import java.util.Objects;
  * but does not require Spring as a dependency.</p>
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public abstract class DocumentEvent implements Serializable {
 

@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * }</pre>
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public final class Money implements Serializable, Comparable<Money> {
 
@@ -200,8 +200,8 @@ public final class Money implements Serializable, Comparable<Money> {
      *
      * <p>Example usage:</p>
      * <pre>{@code
-     * String currentCurrency = Money.getCurrentCurrency();
-     * // Returns currency code based on system locale (e.g., "USD", "EUR")
+     * String currency = Money.getCurrentCurrency();
+     * // Returns "USD" in US locale, "EUR" in European locales, etc.
      * }</pre>
      *
      * @return the currency code for the current default locale
@@ -466,5 +466,14 @@ public final class Money implements Serializable, Comparable<Money> {
     public String format() {
         Currency currency = Currency.getInstance(currencyCode);
         return String.format("%s %.2f", currency.getSymbol(), amount);
+    }
+
+    /**
+     * Creates a copy of this Money instance.
+     *
+     * @return a new Money instance with the same amount and currency
+     */
+    public Money copy() {
+        return new Money(this.amount, this.currencyCode);
     }
 }

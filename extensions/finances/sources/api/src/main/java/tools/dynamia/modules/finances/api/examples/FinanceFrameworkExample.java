@@ -11,7 +11,7 @@ import java.time.LocalDate;
  * and calculates the final totals.
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public class FinanceFrameworkExample {
 

@@ -7,7 +7,7 @@ package tools.dynamia.modules.finances.api;
  * <p>Example: A $50 shipping fee is always $50</p>
  *
  * @author Dynamia Finance Framework
- * @since 1.0.0
+ * @since 26.1
  */
 public class FixedChargeStrategy implements ChargeStrategy {
 
