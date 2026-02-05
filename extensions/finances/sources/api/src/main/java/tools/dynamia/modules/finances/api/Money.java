@@ -211,6 +211,67 @@ public final class Money implements Serializable, Comparable<Money> {
         return getCurrencyForLocale(Locale.getDefault());
     }
 
+    /**
+     * Calculates the base amount from a price that includes tax.
+     * This is useful in countries like Colombia where prices are displayed with tax included.
+     *
+     * <p>Formula: baseAmount = priceWithTax / (1 + taxRate/100)</p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Money priceWithTax = Money.of("20000", "COP"); // Lunch price with 19% VAT
+     * Money baseAmount = priceWithTax.extractBase(new BigDecimal("19"));
+     * // baseAmount = COP 16806.72 (base price before VAT)
+     * }</pre>
+     *
+     * @param taxPercentage the tax percentage included in the price (e.g., 19 for 19%)
+     * @return the base amount without tax
+     */
+    public Money extractBase(BigDecimal taxPercentage) {
+        // baseAmount = priceWithTax / (1 + taxRate/100)
+        BigDecimal divisor = BigDecimal.ONE.add(
+            taxPercentage.divide(new BigDecimal("100"), 10, RoundingMode.HALF_UP)
+        );
+        BigDecimal baseAmount = this.amount.divide(divisor, 10, RoundingMode.HALF_UP);
+        return new Money(baseAmount, this.currencyCode);
+    }
+
+    /**
+     * Calculates the tax amount from a price that includes tax.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Money priceWithTax = Money.of("20000", "COP");
+     * Money taxAmount = priceWithTax.extractTax(new BigDecimal("19"));
+     * // taxAmount = COP 3193.28 (the VAT portion)
+     * }</pre>
+     *
+     * @param taxPercentage the tax percentage included in the price
+     * @return the tax amount
+     */
+    public Money extractTax(BigDecimal taxPercentage) {
+        Money baseAmount = extractBase(taxPercentage);
+        return this.subtract(baseAmount);
+    }
+
+    /**
+     * Calculates price with tax from a base amount.
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Money basePrice = Money.of("16806.72", "COP");
+     * Money priceWithTax = basePrice.addTax(new BigDecimal("19"));
+     * // priceWithTax = COP 20000.00
+     * }</pre>
+     *
+     * @param taxPercentage the tax percentage to add
+     * @return the price including tax
+     */
+    public Money addTax(BigDecimal taxPercentage) {
+        Money taxAmount = this.percentage(taxPercentage);
+        return this.add(taxAmount);
+    }
+
 
     /**
      * Adds another Money to this Money.
