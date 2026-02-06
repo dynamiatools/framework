@@ -16,12 +16,12 @@
  */
 package tools.dynamia.zk.ui;
 
+import org.springframework.beans.BeanUtils;
 import org.zkoss.zk.ui.UiException;
 import org.zkoss.zul.ListModelList;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.integration.Containers;
-import tools.dynamia.zk.ComponentAliasIndex;
 
 import java.util.Collection;
 import java.util.Set;
@@ -45,10 +45,6 @@ import java.util.Set;
 public class ProviderMultipickerBox extends MultipickerBox {
 
     private static final long serialVersionUID = 4710970528102748639L;
-
-    static {
-        ComponentAliasIndex.getInstance().add("providermultipickerbox", ProviderMultipickerBox.class);
-    }
 
     private String className;
     private String idField = "id";
@@ -74,6 +70,7 @@ public class ProviderMultipickerBox extends MultipickerBox {
         });
 
     }
+
     /**
      * Initializes the model by loading provider implementations from the Spring container.
      * This method is called when the provider class is set or configuration changes.
@@ -96,12 +93,9 @@ public class ProviderMultipickerBox extends MultipickerBox {
 
     public void setClassName(String className) {
         this.className = className;
-        try {
-            this.providerClass = Class.forName(className);
-            initModel();
-        } catch (ClassNotFoundException e) {
-            throw new UiException("Invalid class name for " + this, e);
-        }
+        this.providerClass = ObjectOperations.findClass(className);
+        initModel();
+
     }
 
     public String getIdField() {

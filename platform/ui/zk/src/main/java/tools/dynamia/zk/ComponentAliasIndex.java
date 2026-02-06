@@ -89,7 +89,8 @@ public class ComponentAliasIndex extends HashMap<String, Class<? extends Compone
         getInstance().add("localebox", LocaleCombobox.class);
         getInstance().add("timezonebox", TimeZoneCombobox.class);
         getInstance().add("simplecombobox", SimpleCombobox.class);
-
+        getInstance().add("multipickerbox", MultipickerBox.class);
+        getInstance().add("providermultipickerbox", ProviderMultipickerBox.class);
 
 
         LoggingService logger = new SLF4JLoggingService(ComponentAliasIndex.class);
@@ -102,7 +103,7 @@ public class ComponentAliasIndex extends HashMap<String, Class<? extends Compone
                 for (String alias : aliases.stringPropertyNames()) {
                     try {
                         Class clazz = ObjectOperations.findClass(aliases.getProperty(alias));
-                        if(clazz!=null) {
+                        if (clazz != null) {
                             getInstance().add(alias, clazz);
                         }
                     } catch (Exception ex) {

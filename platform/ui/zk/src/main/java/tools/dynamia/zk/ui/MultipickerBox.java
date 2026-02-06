@@ -29,6 +29,7 @@ import org.zkoss.zul.ListitemRenderer;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -58,13 +59,9 @@ import java.util.stream.Collectors;
  */
 public class MultipickerBox extends Bandbox {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     private static final String SEPARATOR = ",";
-
-    static {
-        ComponentAliasIndex.getInstance().add("multipickerbox", MultipickerBox.class);
-        BindingComponentIndex.getInstance().put("selected", MultipickerBox.class);
-    }
 
     private String selected;
     private final Listbox itemsList;

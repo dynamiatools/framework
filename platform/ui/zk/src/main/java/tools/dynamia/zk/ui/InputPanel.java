@@ -34,6 +34,7 @@ import tools.dynamia.integration.Containers;
 import tools.dynamia.viewers.ComponentCustomizer;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.FieldCustomizer;
+import tools.dynamia.viewers.util.ComponentCustomizerUtil;
 import tools.dynamia.web.util.HttpUtils;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
@@ -143,8 +144,7 @@ public class InputPanel extends Div implements Loggable {
         Component comp = (Component) ObjectOperations.newInstance(componClass);
         if (field.getComponentCustomizer() != null) {
             try {
-                ComponentCustomizer customizer = ObjectOperations.newInstance(field.getComponentCustomizer());
-                customizer.cutomize(field, comp);
+                ComponentCustomizerUtil.customizeComponent(field, comp, field.getComponentCustomizer());
             } catch (Exception e) {
                 log("Cannot create component customizer", e);
             }

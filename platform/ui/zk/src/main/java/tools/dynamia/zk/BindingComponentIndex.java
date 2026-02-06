@@ -70,7 +70,7 @@ public class BindingComponentIndex extends HashSetMultiMap<String, String> {
 
     public void put(String key, Class value) {
         if (getKey(value.getName()) != null) {
-            throw new RuntimeException(value + " is already indexed");
+            return;
         }
         super.put(key, value.getName());
     }
