@@ -17,110 +17,72 @@
 package tools.dynamia.zk.ui;
 
 import org.zkoss.zk.ui.UiException;
-import org.zkoss.zk.ui.event.Event;
-import org.zkoss.zk.ui.event.EventListener;
-import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.Bandbox;
-import org.zkoss.zul.Bandpopup;
 import org.zkoss.zul.ListModelList;
-import org.zkoss.zul.Listbox;
-import org.zkoss.zul.Listitem;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.integration.Containers;
-import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
 
 import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 
-public class ProviderMultipickerBox extends Bandbox {
+/**
+ * A specialized MultipickerBox that dynamically loads items from Spring container providers.
+ * This component allows selecting multiple provider implementations based on a specified class.
+ *
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * ProviderMultipickerBox picker = new ProviderMultipickerBox();
+ * picker.setClassName("com.example.MyProvider");
+ * picker.setIdField("id");
+ * picker.setNameField("name");
+ * picker.setSelected("provider1,provider2");
+ * }</pre>
+ *
+ * @author Mario Serrano
+ * @since 5.0.0
+ */
+public class ProviderMultipickerBox extends MultipickerBox {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 4710970528102748639L;
 
     static {
         ComponentAliasIndex.getInstance().add("providermultipickerbox", ProviderMultipickerBox.class);
-        BindingComponentIndex.getInstance().put("selected", ProviderMultipickerBox.class);
     }
 
-    private String selected;
     private String className;
     private String idField = "id";
     private String nameField = "name";
     private Class<?> providerClass;
-    private final Listbox itemsList;
 
+    /**
+     * Creates a new ProviderMultipickerBox component.
+     * Initializes the item renderer to display provider instances.
+     */
     public ProviderMultipickerBox() {
-        setReadonly(true);
-        setButtonVisible(true);
-        Bandpopup bandpopup = new Bandpopup();
-        bandpopup.setHflex("min");
-        bandpopup.setVflex("min");
-
-        itemsList = new Listbox();
-
-        itemsList.setHeight("200px");
-        itemsList.setMultiple(true);
-        itemsList.setCheckmark(true);
-
-        itemsList.setItemRenderer((item, data, index) -> {
-
+        super();
+        setItemRenderer((item, data, index) -> {
             try {
                 String id = ObjectOperations.invokeGetMethod(data, idField).toString();
                 String name = ObjectOperations.invokeGetMethod(data, nameField).toString();
 
                 item.setLabel(StringUtils.capitalize(name));
                 item.setValue(id);
-
             } catch (Exception e) {
                 throw new UiException("Error rendering item for " + this, e);
             }
         });
-        itemsList.addEventListener(Events.ON_SELECT, e -> updateLabel());
-
-
-        bandpopup.appendChild(itemsList);
-        appendChild(bandpopup);
-
-        addEventListener(Events.ON_FULFILL, e -> updateLabel());
-
 
     }
-
-
-    private void updateLabel() {
-
-        if (itemsList.getSelectedItems().isEmpty()) {
-            setValue("");
-        } else {
-            String label = itemsList.getSelectedItems().stream().map(Listitem::getLabel).collect(Collectors.joining(", "));
-            setValue(label);
-        }
-    }
-
-    @Override
-    public boolean addEventListener(String evtnm, EventListener<? extends Event> listener) {
-        if (Events.ON_SELECT.equals(evtnm)) {
-            return itemsList.addEventListener(evtnm, listener);
-        } else {
-            return super.addEventListener(evtnm, listener);
-        }
-    }
-
-    private void initModel() {
+    /**
+     * Initializes the model by loading provider implementations from the Spring container.
+     * This method is called when the provider class is set or configuration changes.
+     */
+    protected void initModel() {
         if (providerClass != null) {
             try {
                 Collection<?> implementations = Containers.get().findObjects(providerClass);
-                ListModelList model = new ListModelList<>(implementations);
-                model.setMultiple(true);
-                itemsList.setModel(model);
-
-                itemsList.setMultiple(true);
-
+                setModel(implementations);
             } catch (Exception e) {
                 throw new UiException("Cannot init model for " + this + ". Provider class name: " + className, e);
             }
@@ -160,49 +122,28 @@ public class ProviderMultipickerBox extends Bandbox {
         initModel();
     }
 
-    public String getSelected() {
-        selected = null;
-        if (itemsList.getSelectedItems() != null && !itemsList.getSelectedItems().isEmpty()) {
-            selected = itemsList.getSelectedItems().stream().map(it -> it.getValue().toString()).collect(Collectors.joining(","));
+    @Override
+    protected String extractItemValue(Object item) {
+        try {
+            return ObjectOperations.invokeGetMethod(item, idField).toString();
+        } catch (Exception e) {
+            return null;
         }
-        return selected;
     }
 
-    public void setSelected(String selected) {
-        if (selected != this.selected) {
-
-            this.selected = selected;
-            try {
-
-                String[] values = null;
-
-                if (selected != null) {
-                    if (selected.contains(",")) {
-                        values = selected.split(",");
-                    } else {
-                        values = new String[]{selected};
-                    }
+    @Override
+    protected void selectItemsByValues(ListModelList<?> model, Set<String> selectedValues) {
+        try {
+            Collection<?> providers = Containers.get().findObjects(providerClass);
+            for (Object provider : providers) {
+                String value = extractItemValue(provider);
+                if (value != null && selectedValues.contains(value)) {
+                    //noinspection unchecked
+                    ((ListModelList<Object>) model).addToSelection(provider);
                 }
-
-                if (values != null) {
-                    ListModelList model = (ListModelList) itemsList.getModel();
-                    for (String value : values) {
-                        Optional provider = Containers.get().findObjects(providerClass)
-                                .stream()
-                                .filter(p -> value.trim().equals(ObjectOperations.invokeGetMethod(p, idField)))
-                                .findFirst();
-
-                        if (provider.isPresent()) {
-                            //noinspection unchecked
-                            model.addToSelection(provider.get());
-                        }
-                    }
-                }
-                itemsList.renderAll();
-                updateLabel();
-            } catch (Exception ignored) {
-
             }
+        } catch (Exception e) {
+            // Silently ignore errors during selection
         }
     }
 
