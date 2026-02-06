@@ -55,10 +55,13 @@ public class BindingComponentIndex extends HashSetMultiMap<String, String> {
                 EnumListbox.class,
                 LocaleCombobox.class,
                 TimeZoneCombobox.class,
-                SimpleCombobox.class);
+                SimpleCombobox.class,
+                MultipickerBox.class,
+                ProviderMultipickerBox.class);
         instance.put("title", CoolLabel.class);
         instance.put("enum", EnumLabel.class);
         instance.put("number", Infobox.class);
+
     }
 
     public static BindingComponentIndex getInstance() {
