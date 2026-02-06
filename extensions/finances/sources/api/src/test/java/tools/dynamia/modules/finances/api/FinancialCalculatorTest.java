@@ -32,7 +32,7 @@ class FinancialCalculatorTest {
         invoice.setDocumentNumber("INV-001");
         invoice.setIssueDate(LocalDate.now());
 
-        DocumentLine line = DocumentLine.of("Product A", new BigDecimal("10"), Money.of("100", "USD"));
+        DocumentLine line = DocumentLine.of("Product A", 10, Money.of("100", "USD"));
         invoice.addLine(line);
 
         calculator.calculateDocument(invoice);
@@ -51,9 +51,9 @@ class FinancialCalculatorTest {
         invoice.setDocumentNumber("INV-002");
         invoice.setIssueDate(LocalDate.now());
 
-        invoice.addLine(DocumentLine.of("Product A", new BigDecimal("5"), Money.of("100", "USD")));
-        invoice.addLine(DocumentLine.of("Product B", new BigDecimal("3"), Money.of("200", "USD")));
-        invoice.addLine(DocumentLine.of("Product C", new BigDecimal("2"), Money.of("150", "USD")));
+        invoice.addLine(DocumentLine.of("Product A", 5, Money.of("100", "USD")));
+        invoice.addLine(DocumentLine.of("Product B", 3, Money.of("200", "USD")));
+        invoice.addLine(DocumentLine.of("Product C", 2, Money.of("150", "USD")));
 
         calculator.calculateDocument(invoice);
 
@@ -75,8 +75,8 @@ class FinancialCalculatorTest {
         vat.setBase(ChargeBase.NET);
         invoice.addCharge(vat);
 
-        invoice.addLine(DocumentLine.of("Product A", new BigDecimal("10"), Money.of("100", "USD")));
-        invoice.addLine(DocumentLine.of("Product B", new BigDecimal("5"), Money.of("200", "USD")));
+        invoice.addLine(DocumentLine.of("Product A", 10, Money.of("100", "USD")));
+        invoice.addLine(DocumentLine.of("Product B", 5, Money.of("200", "USD")));
 
         calculator.calculateDocument(invoice);
 
@@ -93,8 +93,8 @@ class FinancialCalculatorTest {
         invoice.setDocumentNumber("INV-004");
         invoice.setIssueDate(LocalDate.now());
 
-        invoice.addLine(DocumentLine.of("Product A", new BigDecimal("5"), Money.of("50", "USD")));
-        invoice.addLine(DocumentLine.of("Product B", new BigDecimal("3"), Money.of("75", "USD")));
+        invoice.addLine(DocumentLine.of("Product A", 5, Money.of("50", "USD")));
+        invoice.addLine(DocumentLine.of("Product B", 3, Money.of("75", "USD")));
 
         // Line-level VAT
         Charge vat = Charge.percentage("VAT19", "VAT 19%", ChargeType.TAX, new BigDecimal("19"), 20);
@@ -134,7 +134,7 @@ class FinancialCalculatorTest {
         vat.setBase(ChargeBase.PREVIOUS_TOTAL);
         invoice.addCharge(vat);
 
-        invoice.addLine(DocumentLine.of("Product A", new BigDecimal("10"), Money.of("100", "USD")));
+        invoice.addLine(DocumentLine.of("Product A", 10, Money.of("100", "USD")));
 
         calculator.calculateDocument(invoice);
 
@@ -163,7 +163,7 @@ class FinancialCalculatorTest {
         withholding.setBase(ChargeBase.PREVIOUS_TOTAL);
         invoice.addCharge(withholding);
 
-        invoice.addLine(DocumentLine.of("Service", new BigDecimal("1"), Money.of("1000", "USD")));
+        invoice.addLine(DocumentLine.of("Service", 1, Money.of("1000", "USD")));
 
         calculator.calculateDocument(invoice);
 
@@ -204,8 +204,8 @@ class FinancialCalculatorTest {
         shipping.setAppliesTo(ChargeAppliesTo.DOCUMENT);
         invoice.addCharge(shipping);
 
-        invoice.addLine(DocumentLine.of("Product A", new BigDecimal("10"), Money.of("100", "USD")));
-        invoice.addLine(DocumentLine.of("Product B", new BigDecimal("5"), Money.of("200", "USD")));
+        invoice.addLine(DocumentLine.of("Product A", 10, Money.of("100", "USD")));
+        invoice.addLine(DocumentLine.of("Product B", 5, Money.of("200", "USD")));
 
         calculator.calculateDocument(invoice);
 
@@ -222,7 +222,7 @@ class FinancialCalculatorTest {
         FinancialDocument invoice = FinancialDocument.of(DocumentType.SALE, "USD");
         invoice.setDocumentNumber("INV-008");
         invoice.setIssueDate(LocalDate.now());
-        invoice.addLine(DocumentLine.of("Product A", new BigDecimal("1"), Money.of("100", "USD")));
+        invoice.addLine(DocumentLine.of("Product A", 1, Money.of("100", "USD")));
 
         // Calculate first time
         calculator.calculateDocument(invoice);
@@ -240,13 +240,13 @@ class FinancialCalculatorTest {
         FinancialDocument invoice = FinancialDocument.of(DocumentType.SALE, "USD");
         invoice.setDocumentNumber("INV-009");
         invoice.setIssueDate(LocalDate.now());
-        invoice.addLine(DocumentLine.of("Product A", new BigDecimal("10"), Money.of("100", "USD")));
+        invoice.addLine(DocumentLine.of("Product A", 10, Money.of("100", "USD")));
 
         calculator.calculateDocument(invoice);
         Money firstTotal = invoice.getTotals().getGrandTotal();
 
         // Modify document
-        invoice.addLine(DocumentLine.of("Product B", new BigDecimal("5"), Money.of("50", "USD")));
+        invoice.addLine(DocumentLine.of("Product B", 5, Money.of("50", "USD")));
 
         // Recalculate
         calculator.recalculate(invoice);
@@ -273,7 +273,7 @@ class FinancialCalculatorTest {
         creditNote.setDocumentNumber("CN-001");
         creditNote.setIssueDate(LocalDate.now());
 
-        creditNote.addLine(DocumentLine.of("Return Product A", new BigDecimal("5"), Money.of("100", "USD")));
+        creditNote.addLine(DocumentLine.of("Return Product A", 5, Money.of("100", "USD")));
 
         Charge vat = Charge.percentage("VAT19", "VAT 19%", ChargeType.TAX, new BigDecimal("19"), 20);
         vat.setAppliesTo(ChargeAppliesTo.LINE);
@@ -294,7 +294,7 @@ class FinancialCalculatorTest {
         purchaseOrder.setDocumentNumber("PO-001");
         purchaseOrder.setIssueDate(LocalDate.now());
 
-        purchaseOrder.addLine(DocumentLine.of("Raw Material A", new BigDecimal("100"), Money.of("10", "USD")));
+        purchaseOrder.addLine(DocumentLine.of("Raw Material A", 100, Money.of("10", "USD")));
 
         calculator.calculateDocument(purchaseOrder);
 

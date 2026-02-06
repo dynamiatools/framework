@@ -692,11 +692,11 @@ public class FinancialDocument implements Serializable {
     /**
      * Sets the party by ID and returns this instance for chaining.
      *
-     * @param partyId the party identifier
+     * @param partyName the party identifier
      * @return this FinancialDocument instance
      */
-    public FinancialDocument party(String partyId) {
-        this.party = DocumentParty.of(partyId);
+    public FinancialDocument party(String partyName) {
+        this.party = DocumentParty.of(partyName);
         return this;
     }
 

@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests para facturación estilo colombiano donde los precios se muestran con IVA incluido
  * pero al facturar se discrimina la base gravable y los impuestos.
- *
+ * <p>
  * En Colombia es común que los precios al público incluyan el IVA (19% actualmente),
  * pero en la factura se debe separar:
  * - Base gravable (precio sin IVA)
@@ -80,9 +80,9 @@ class ColombiaInvoiceTest {
         Money basePostre = precioPostre.extractBase(IVA_19);
 
         // Agregar líneas con la base gravable (sin IVA)
-        factura.addLine(DocumentLine.of("Almuerzo Ejecutivo", BigDecimal.ONE, baseAlmuerzo));
-        factura.addLine(DocumentLine.of("Bebida Natural", new BigDecimal("2"), baseBebida));
-        factura.addLine(DocumentLine.of("Postre del Día", BigDecimal.ONE, basePostre));
+        factura.addLine(DocumentLine.of("Almuerzo Ejecutivo", 1, baseAlmuerzo));
+        factura.addLine(DocumentLine.of("Bebida Natural", 2, baseBebida));
+        factura.addLine(DocumentLine.of("Postre del Día", 1, basePostre));
 
         // Configurar IVA 19% que se aplicará sobre la base
         Charge iva = Charge.percentage("IVA19", "IVA 19%", ChargeType.TAX, IVA_19, 20);
@@ -102,10 +102,10 @@ class ColombiaInvoiceTest {
 
         for (DocumentLine line : factura.getLines()) {
             System.out.println(String.format("%-25s  Cant: %s  P.Unit: %s  Subtotal: %s",
-                line.getDescription(),
-                line.getQuantity(),
-                line.getUnitPrice(),
-                line.getBaseAmount()
+                    line.getDescription(),
+                    line.getQuantity(),
+                    line.getUnitPrice(),
+                    line.getBaseAmount()
             ));
         }
 
@@ -118,8 +118,8 @@ class ColombiaInvoiceTest {
         // Verificar totales
         // Subtotal = 16,806.72 + (2 × 4,201.68) + 6,722.69 = 31,932.77
         Money expectedSubtotal = baseAlmuerzo
-            .add(baseBebida.multiply(2))
-            .add(basePostre);
+                .add(baseBebida.multiply(2))
+                .add(basePostre);
 
         assertEquals(0, expectedSubtotal.compareTo(totals.getSubTotal()));
 
@@ -144,15 +144,15 @@ class ColombiaInvoiceTest {
         Money precioPan = Money.of("3000", CURRENCY_COP);
 
         // Líneas con IVA
-        DocumentLine lineaJabon = DocumentLine.of("Jabón", new BigDecimal("2"), baseJabon);
+        DocumentLine lineaJabon = DocumentLine.of("Jabón", 2, baseJabon);
         Charge ivaJabon = Charge.percentage("IVA19", "IVA 19%", ChargeType.TAX, IVA_19, 20);
         ivaJabon.setAppliesTo(ChargeAppliesTo.LINE);
         lineaJabon.addCharge(ivaJabon);
         factura.addLine(lineaJabon);
 
         // Líneas sin IVA (productos exentos)
-        factura.addLine(DocumentLine.of("Leche (exento)", BigDecimal.ONE, precioLeche));
-        factura.addLine(DocumentLine.of("Pan (exento)", new BigDecimal("2"), precioPan));
+        factura.addLine(DocumentLine.of("Leche (exento)", 1, precioLeche));
+        factura.addLine(DocumentLine.of("Pan (exento)", 2, precioPan));
 
         // Calcular
         calculator.calculateDocument(factura);
@@ -165,11 +165,11 @@ class ColombiaInvoiceTest {
         for (DocumentLine line : factura.getLines()) {
             String iva = line.getTotals().getTaxTotal().isZero() ? "EXENTO" : "IVA 19%";
             System.out.println(String.format("%-20s %s  Base: %s  IVA: %s  Total: %s",
-                line.getDescription(),
-                iva,
-                line.getTotals().getBaseAmount(),
-                line.getTotals().getTaxTotal(),
-                line.getTotals().getNetTotal()
+                    line.getDescription(),
+                    iva,
+                    line.getTotals().getBaseAmount(),
+                    line.getTotals().getTaxTotal(),
+                    line.getTotals().getNetTotal()
             ));
         }
 
@@ -210,7 +210,7 @@ class ColombiaInvoiceTest {
         Money expected = Money.of("20000", CURRENCY_COP);
         Money difference = priceWithTax.subtract(expected).abs();
         assertTrue(difference.compareTo(Money.of("1", CURRENCY_COP)) < 0,
-                   "La diferencia debe ser menor a 1 peso");
+                "La diferencia debe ser menor a 1 peso");
     }
 
     @Test
@@ -225,11 +225,11 @@ class ColombiaInvoiceTest {
         Money base = precioConIVA.extractBase(IVA_19);
 
         // Agregar línea con base
-        factura.addLine(DocumentLine.of("Producto Premium", BigDecimal.ONE, base));
+        factura.addLine(DocumentLine.of("Producto Premium", 1, base));
 
         // Descuento 10% sobre la base
         Charge descuento = Charge.percentage("DESC10", "Descuento 10%",
-                                             ChargeType.DISCOUNT, new BigDecimal("10"), 10);
+                ChargeType.DISCOUNT, new BigDecimal("10"), 10);
         descuento.setAppliesTo(ChargeAppliesTo.LINE);
         descuento.setBase(ChargeBase.NET);
         factura.addCharge(descuento);
@@ -272,7 +272,7 @@ class ColombiaInvoiceTest {
 
         // Servicio profesional: $5'000,000 (precio base sin IVA para servicios)
         Money baseServicio = Money.of("5000000", CURRENCY_COP);
-        factura.addLine(DocumentLine.of("Consultoría Empresarial", BigDecimal.ONE, baseServicio));
+        factura.addLine(DocumentLine.of("Consultoría Empresarial", 1, baseServicio));
 
         // IVA 19%
         Charge iva = Charge.percentage("IVA19", "IVA 19%", ChargeType.TAX, IVA_19, 20);
@@ -281,7 +281,7 @@ class ColombiaInvoiceTest {
 
         // Retención en la fuente 11% (sobre base gravable)
         Charge retencion = Charge.percentage("RETEFTE", "Retención en la Fuente 11%",
-                                            ChargeType.WITHHOLDING, new BigDecimal("11"), 30);
+                ChargeType.WITHHOLDING, BigDecimal.valueOf(11), 30);
         retencion.setAppliesTo(ChargeAppliesTo.LINE);
         retencion.setBase(ChargeBase.NET); // Sobre la base, no sobre el total con IVA
         factura.addCharge(retencion);

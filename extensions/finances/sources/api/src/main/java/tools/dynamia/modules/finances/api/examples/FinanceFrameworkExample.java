@@ -44,7 +44,7 @@ public class FinanceFrameworkExample {
         // Add a product line
         DocumentLine line = DocumentLine.of(
                 "Product A - Premium Widget",
-                new BigDecimal("10"),
+                10,
                 Money.of("100.00", "USD")
         );
 
@@ -84,7 +84,7 @@ public class FinanceFrameworkExample {
         // Line 1: Product with discount, tax, and withholding
         DocumentLine line1 = DocumentLine.of(
                 "Enterprise Software License",
-                new BigDecimal("1"),
+                1,
                 Money.of("5000.00", "USD")
         );
 
@@ -129,7 +129,7 @@ public class FinanceFrameworkExample {
         // Line 2: Consulting services
         DocumentLine line2 = DocumentLine.of(
                 "Professional Consulting Services",
-                new BigDecimal("20"),
+                20,
                 Money.of("150.00", "USD")
         );
 
@@ -161,14 +161,14 @@ public class FinanceFrameworkExample {
         // Add product lines
         DocumentLine line1 = DocumentLine.of(
                 "Product A",
-                new BigDecimal("5"),
+                5,
                 Money.of("50.00", "USD")
         );
         invoice.addLine(line1);
 
         DocumentLine line2 = DocumentLine.of(
                 "Product B",
-                new BigDecimal("3"),
+                3,
                 Money.of("75.00", "USD")
         );
         invoice.addLine(line2);
@@ -222,7 +222,7 @@ public class FinanceFrameworkExample {
         // Add product
         DocumentLine line = DocumentLine.of(
                 "International Product",
-                new BigDecimal("10"),
+                10,
                 Money.of("100.00", "EUR")
         );
 

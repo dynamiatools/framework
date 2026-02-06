@@ -21,10 +21,11 @@ import java.util.Objects;
  * <p>Example usage:</p>
  * <pre>{@code
  * DocumentParty customer = DocumentParty.of("12345", "ACME Corp", "TAX-123456")
+ *     .type(PartyType.CUSTOMER)
  *     .email("contact@acme.com")
  *     .phone("+1-555-0100")
  *     .address("123 Main St, New York, NY 10001")
- *     .addGlobalDiscount(new BigDecimal("5.0")) // 5% discount on all purchases
+ *     .addGlobalDiscount(BigDecimal.valueOf(5)) // 5% discount on all purchases
  *     .withTaxExemption("VAT19")
  *     .autoWithholder(true)
  *     .withAutoWithholding("RET_IVA");
@@ -72,8 +73,8 @@ public class DocumentParty implements Serializable {
     /**
      * Creates a document party with basic identification.
      *
-     * @param id the party unique identifier
-     * @param name the party name
+     * @param id    the party unique identifier
+     * @param name  the party name
      * @param taxId the tax identification number
      * @return a new DocumentParty instance
      */

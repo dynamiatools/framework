@@ -39,7 +39,7 @@ public class DocumentLine implements Serializable {
 
     private String id;
     private String description;
-    private BigDecimal quantity;
+    private double quantity;
     private Money unitPrice;
     private List<Charge> charges;
     private LineTotals totals;
@@ -53,18 +53,18 @@ public class DocumentLine implements Serializable {
      */
     public DocumentLine() {
         this.charges = new ArrayList<>();
-        this.quantity = BigDecimal.ONE;
+        this.quantity = 1;
     }
 
     /**
      * Creates a document line with description, quantity and unit price.
      *
      * @param description the line description
-     * @param quantity the quantity
-     * @param unitPrice the unit price
+     * @param quantity    the quantity
+     * @param unitPrice   the unit price
      * @return a new DocumentLine instance
      */
-    public static DocumentLine of(String description, BigDecimal quantity, Money unitPrice) {
+    public static DocumentLine of(String description, double quantity, Money unitPrice) {
         DocumentLine line = new DocumentLine();
         line.setDescription(description);
         line.setQuantity(quantity);
@@ -78,7 +78,7 @@ public class DocumentLine implements Serializable {
      * @return the base amount
      */
     public Money getBaseAmount() {
-        if (unitPrice == null || quantity == null) {
+        if (unitPrice == null || quantity == 0.00) {
             return Money.zero(unitPrice != null ? unitPrice.getCurrencyCode() : "USD");
         }
         return unitPrice.multiply(quantity);
@@ -113,8 +113,8 @@ public class DocumentLine implements Serializable {
     /**
      * Adds a tax charge to this line with simplified parameters.
      *
-     * @param code the tax code (e.g., "VAT19")
-     * @param name the tax name (e.g., "Value Added Tax 19%")
+     * @param code       the tax code (e.g., "VAT19")
+     * @param name       the tax name (e.g., "Value Added Tax 19%")
      * @param percentage the tax percentage
      * @return the created Charge instance
      */
@@ -127,10 +127,10 @@ public class DocumentLine implements Serializable {
     /**
      * Adds a tax charge with custom priority.
      *
-     * @param code the tax code
-     * @param name the tax name
+     * @param code       the tax code
+     * @param name       the tax name
      * @param percentage the tax percentage
-     * @param priority the application priority
+     * @param priority   the application priority
      * @return the created Charge instance
      */
     public Charge addTax(String code, String name, BigDecimal percentage, int priority) {
@@ -156,8 +156,8 @@ public class DocumentLine implements Serializable {
     /**
      * Adds a discount charge to this line with simplified parameters.
      *
-     * @param code the discount code (e.g., "DISC10")
-     * @param name the discount name (e.g., "10% Volume Discount")
+     * @param code       the discount code (e.g., "DISC10")
+     * @param name       the discount name (e.g., "10% Volume Discount")
      * @param percentage the discount percentage
      * @return the created Charge instance
      */
@@ -170,10 +170,10 @@ public class DocumentLine implements Serializable {
     /**
      * Adds a discount charge with custom priority.
      *
-     * @param code the discount code
-     * @param name the discount name
+     * @param code       the discount code
+     * @param name       the discount name
      * @param percentage the discount percentage
-     * @param priority the application priority
+     * @param priority   the application priority
      * @return the created Charge instance
      */
     public Charge addDiscount(String code, String name, BigDecimal percentage, int priority) {
@@ -185,8 +185,8 @@ public class DocumentLine implements Serializable {
     /**
      * Adds a fixed amount discount.
      *
-     * @param code the discount code
-     * @param name the discount name
+     * @param code   the discount code
+     * @param name   the discount name
      * @param amount the fixed discount amount
      * @return the created Charge instance
      */
@@ -213,8 +213,8 @@ public class DocumentLine implements Serializable {
     /**
      * Adds a withholding charge to this line with simplified parameters.
      *
-     * @param code the withholding code (e.g., "RET_IVA")
-     * @param name the withholding name (e.g., "IVA Withholding")
+     * @param code       the withholding code (e.g., "RET_IVA")
+     * @param name       the withholding name (e.g., "IVA Withholding")
      * @param percentage the withholding percentage
      * @return the created Charge instance
      */
@@ -227,10 +227,10 @@ public class DocumentLine implements Serializable {
     /**
      * Adds a withholding charge with custom priority.
      *
-     * @param code the withholding code
-     * @param name the withholding name
+     * @param code       the withholding code
+     * @param name       the withholding name
      * @param percentage the withholding percentage
-     * @param priority the application priority
+     * @param priority   the application priority
      * @return the created Charge instance
      */
     public Charge addWithholding(String code, String name, BigDecimal percentage, int priority) {
@@ -256,8 +256,8 @@ public class DocumentLine implements Serializable {
     /**
      * Adds a fee charge to this line with simplified parameters.
      *
-     * @param code the fee code (e.g., "SHIP")
-     * @param name the fee name (e.g., "Shipping Fee")
+     * @param code   the fee code (e.g., "SHIP")
+     * @param name   the fee name (e.g., "Shipping Fee")
      * @param amount the fixed fee amount
      * @return the created Charge instance
      */
@@ -270,8 +270,8 @@ public class DocumentLine implements Serializable {
     /**
      * Adds a percentage-based fee charge.
      *
-     * @param code the fee code
-     * @param name the fee name
+     * @param code       the fee code
+     * @param name       the fee name
      * @param percentage the fee percentage
      * @return the created Charge instance
      */
@@ -310,8 +310,8 @@ public class DocumentLine implements Serializable {
         // Add document-level charges that apply to lines
         if (this.document != null && this.document.getCharges() != null) {
             this.document.getCharges().stream()
-                .filter(c -> c.getAppliesTo() == ChargeAppliesTo.LINE)
-                .forEach(allCharges::add);
+                    .filter(c -> c.getAppliesTo() == ChargeAppliesTo.LINE)
+                    .forEach(allCharges::add);
         }
 
         return Collections.unmodifiableList(allCharges);
@@ -324,10 +324,9 @@ public class DocumentLine implements Serializable {
      */
     public void validate() {
         Objects.requireNonNull(description, "Line description is required");
-        Objects.requireNonNull(quantity, "Line quantity is required");
         Objects.requireNonNull(unitPrice, "Line unit price is required");
 
-        if (quantity.compareTo(BigDecimal.ZERO) < 0) {
+        if (quantity < 0) {
             throw new IllegalStateException("Line quantity cannot be negative");
         }
     }
@@ -350,11 +349,11 @@ public class DocumentLine implements Serializable {
         this.description = description;
     }
 
-    public BigDecimal getQuantity() {
+    public double getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(BigDecimal quantity) {
+    public void setQuantity(double quantity) {
         this.quantity = quantity;
     }
 
@@ -433,7 +432,7 @@ public class DocumentLine implements Serializable {
      * @param quantity the quantity
      * @return this DocumentLine instance
      */
-    public DocumentLine quantity(BigDecimal quantity) {
+    public DocumentLine quantity(double quantity) {
         this.quantity = quantity;
         return this;
     }
@@ -496,8 +495,8 @@ public class DocumentLine implements Serializable {
     /**
      * Adds a tax and returns this instance for chaining.
      *
-     * @param code the tax code
-     * @param name the tax name
+     * @param code       the tax code
+     * @param name       the tax name
      * @param percentage the tax percentage
      * @return this DocumentLine instance
      */
@@ -509,8 +508,8 @@ public class DocumentLine implements Serializable {
     /**
      * Adds a discount and returns this instance for chaining.
      *
-     * @param code the discount code
-     * @param name the discount name
+     * @param code       the discount code
+     * @param name       the discount name
      * @param percentage the discount percentage
      * @return this DocumentLine instance
      */
@@ -522,8 +521,8 @@ public class DocumentLine implements Serializable {
     /**
      * Adds a withholding and returns this instance for chaining.
      *
-     * @param code the withholding code
-     * @param name the withholding name
+     * @param code       the withholding code
+     * @param name       the withholding name
      * @param percentage the withholding percentage
      * @return this DocumentLine instance
      */
@@ -535,8 +534,8 @@ public class DocumentLine implements Serializable {
     /**
      * Adds a fee and returns this instance for chaining.
      *
-     * @param code the fee code
-     * @param name the fee name
+     * @param code   the fee code
+     * @param name   the fee name
      * @param amount the fee amount
      * @return this DocumentLine instance
      */

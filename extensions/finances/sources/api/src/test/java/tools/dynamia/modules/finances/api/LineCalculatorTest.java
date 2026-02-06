@@ -27,7 +27,7 @@ class LineCalculatorTest {
     @Test
     @DisplayName("Should calculate simple line without charges")
     void testSimpleLine() {
-        DocumentLine line = DocumentLine.of("Product A", new BigDecimal("10"), Money.of("100", "USD"));
+        DocumentLine line = DocumentLine.of("Product A", 10, Money.of("100", "USD"));
 
         calculator.calculate(line);
 
@@ -42,7 +42,7 @@ class LineCalculatorTest {
     @Test
     @DisplayName("Should calculate line with VAT")
     void testLineWithTax() {
-        DocumentLine line = DocumentLine.of("Product A", new BigDecimal("10"), Money.of("100", "USD"));
+        DocumentLine line = DocumentLine.of("Product A", 10, Money.of("100", "USD"));
 
         Charge vat = Charge.percentage("VAT19", "VAT 19%", ChargeType.TAX, new BigDecimal("19"), 20);
         vat.setAppliesTo(ChargeAppliesTo.LINE);
@@ -60,7 +60,7 @@ class LineCalculatorTest {
     @Test
     @DisplayName("Should calculate line with discount")
     void testLineWithDiscount() {
-        DocumentLine line = DocumentLine.of("Product A", new BigDecimal("10"), Money.of("100", "USD"));
+        DocumentLine line = DocumentLine.of("Product A", 10, Money.of("100", "USD"));
 
         Charge discount = Charge.percentage("DISC10", "Discount 10%", ChargeType.DISCOUNT, new BigDecimal("10"), 10);
         discount.setAppliesTo(ChargeAppliesTo.LINE);
@@ -78,7 +78,7 @@ class LineCalculatorTest {
     @Test
     @DisplayName("Should calculate line with discount and tax")
     void testLineWithDiscountAndTax() {
-        DocumentLine line = DocumentLine.of("Product A", new BigDecimal("10"), Money.of("100", "USD"));
+        DocumentLine line = DocumentLine.of("Product A", 10, Money.of("100", "USD"));
 
         // Discount applied first (priority 10)
         Charge discount = Charge.percentage("DISC10", "Discount 10%", ChargeType.DISCOUNT, new BigDecimal("10"), 10);
@@ -106,7 +106,7 @@ class LineCalculatorTest {
     @Test
     @DisplayName("Should calculate line with withholding")
     void testLineWithWithholding() {
-        DocumentLine line = DocumentLine.of("Service", new BigDecimal("1"), Money.of("1000", "USD"));
+        DocumentLine line = DocumentLine.of("Service", 1, Money.of("1000", "USD"));
 
         Charge withholding = Charge.percentage("WHOLD", "Withholding 2.5%", ChargeType.WITHHOLDING, new BigDecimal("2.5"), 30);
         withholding.setAppliesTo(ChargeAppliesTo.LINE);
@@ -125,7 +125,7 @@ class LineCalculatorTest {
     @Test
     @DisplayName("Should calculate complex line with all charge types")
     void testComplexLine() {
-        DocumentLine line = DocumentLine.of("Premium Service", new BigDecimal("1"), Money.of("5000", "USD"));
+        DocumentLine line = DocumentLine.of("Premium Service", 1, Money.of("5000", "USD"));
 
         // Discount 10% (priority 10)
         Charge discount = Charge.percentage("DISC10", "Discount", ChargeType.DISCOUNT, new BigDecimal("10"), 10);
@@ -158,7 +158,7 @@ class LineCalculatorTest {
     @Test
     @DisplayName("Should handle fractional quantities")
     void testFractionalQuantity() {
-        DocumentLine line = DocumentLine.of("Item", new BigDecimal("2.5"), Money.of("100", "USD"));
+        DocumentLine line = DocumentLine.of("Item", 2.5, Money.of("100", "USD"));
 
         calculator.calculate(line);
 

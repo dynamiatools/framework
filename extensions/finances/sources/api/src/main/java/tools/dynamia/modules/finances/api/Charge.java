@@ -53,11 +53,11 @@ public class Charge implements Serializable {
     /**
      * Creates a percentage-based charge.
      *
-     * @param code the charge code
-     * @param name the charge name
-     * @param type the charge type
+     * @param code       the charge code
+     * @param name       the charge name
+     * @param type       the charge type
      * @param percentage the percentage value
-     * @param priority the application priority
+     * @param priority   the application priority
      * @return a new Charge instance
      */
     public static Charge percentage(String code, String name, ChargeType type,
@@ -74,17 +74,33 @@ public class Charge implements Serializable {
     }
 
     /**
+     * Creates a percentage-based charge.
+     *
+     * @param code       the charge code
+     * @param name       the charge name
+     * @param type       the charge type
+     * @param percentage the percentage value
+     * @param priority   the application priority
+     * @return a new Charge instance
+     */
+    public static Charge percentage(String code, String name, ChargeType type,
+                                    double percentage, int priority) {
+
+        return percentage(code, name, type, BigDecimal.valueOf(percentage), priority);
+    }
+
+    /**
      * Creates a fixed amount charge.
      *
-     * @param code the charge code
-     * @param name the charge name
-     * @param type the charge type
-     * @param amount the fixed amount
+     * @param code     the charge code
+     * @param name     the charge name
+     * @param type     the charge type
+     * @param amount   the fixed amount
      * @param priority the application priority
      * @return a new Charge instance
      */
     public static Charge fixed(String code, String name, ChargeType type,
-                              BigDecimal amount, int priority) {
+                               BigDecimal amount, int priority) {
         Charge charge = new Charge();
         charge.setCode(code);
         charge.setName(name);

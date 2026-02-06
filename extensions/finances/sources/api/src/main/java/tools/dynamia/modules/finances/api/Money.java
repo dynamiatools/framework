@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
@@ -337,6 +338,18 @@ public final class Money implements Serializable, Comparable<Money> {
     }
 
     /**
+     * Divides this Money by a numeric divisor.
+     *
+     * @param divisor      the division divisor
+     * @param scale        the scale for the result
+     * @param roundingMode the rounding mode to apply
+     * @return a new Money instance with the quotient
+     */
+    public Money divide(double divisor, int scale, RoundingMode roundingMode) {
+        return divide(BigDecimal.valueOf(divisor), scale, roundingMode);
+    }
+
+    /**
      * Applies a percentage to this Money.
      *
      * @param percentage the percentage to apply (e.g., 19 for 19%)
@@ -344,6 +357,16 @@ public final class Money implements Serializable, Comparable<Money> {
      */
     public Money percentage(BigDecimal percentage) {
         return multiply(percentage.divide(new BigDecimal("100"), 10, RoundingMode.HALF_UP));
+    }
+
+    /**
+     * Applies a percentage to this Money.
+     *
+     * @param percentage the percentage to apply (e.g., 19 for 19%)
+     * @return a new Money instance with the percentage amount
+     */
+    public Money percentage(double percentage) {
+        return percentage(BigDecimal.valueOf(percentage));
     }
 
     /**
@@ -471,6 +494,16 @@ public final class Money implements Serializable, Comparable<Money> {
     public String format() {
         Currency currency = Currency.getInstance(currencyCode);
         return String.format("%s %.2f", currency.getSymbol(), amount);
+    }
+
+    /**
+     * Formats the Money amount using a custom NumberFormat.
+     *
+     * @param formatter the NumberFormat to use
+     * @return formatted string of the amount
+     */
+    public String format(NumberFormat formatter) {
+        return formatter.format(amount);
     }
 
     /**

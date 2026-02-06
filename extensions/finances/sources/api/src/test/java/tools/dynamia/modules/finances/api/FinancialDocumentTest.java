@@ -32,8 +32,8 @@ class FinancialDocumentTest {
     void testAddLine() {
         FinancialDocument doc = FinancialDocument.of(DocumentType.SALE, "USD");
 
-        DocumentLine line1 = DocumentLine.of("Product A", BigDecimal.ONE, Money.of("100", "USD"));
-        DocumentLine line2 = DocumentLine.of("Product B", BigDecimal.ONE, Money.of("200", "USD"));
+        DocumentLine line1 = DocumentLine.of("Product A", 1, Money.of(100, "USD"));
+        DocumentLine line2 = DocumentLine.of("Product B", 1, Money.of(200, "USD"));
 
         doc.addLine(line1);
         doc.addLine(line2);
@@ -49,8 +49,8 @@ class FinancialDocumentTest {
     void testRemoveLine() {
         FinancialDocument doc = FinancialDocument.of(DocumentType.SALE, "USD");
 
-        DocumentLine line1 = DocumentLine.of("Product A", BigDecimal.ONE, Money.of("100", "USD"));
-        DocumentLine line2 = DocumentLine.of("Product B", BigDecimal.ONE, Money.of("200", "USD"));
+        DocumentLine line1 = DocumentLine.of("Product A", 1, Money.of("100", "USD"));
+        DocumentLine line2 = DocumentLine.of("Product B", 1, Money.of("200", "USD"));
 
         doc.addLine(line1);
         doc.addLine(line2);
@@ -78,9 +78,9 @@ class FinancialDocumentTest {
     void testValidateDocument() {
         FinancialDocument doc = FinancialDocument.of(DocumentType.SALE, "USD");
         doc.setIssueDate(LocalDate.now());
-        doc.addLine(DocumentLine.of("Product A", BigDecimal.ONE, Money.of("100", "USD")));
+        doc.addLine(DocumentLine.of("Product A", 1, Money.of("100", "USD")));
 
-        assertDoesNotThrow(() -> doc.validate());
+        assertDoesNotThrow(doc::validate);
     }
 
     @Test
@@ -89,7 +89,7 @@ class FinancialDocumentTest {
         FinancialDocument doc = FinancialDocument.of(DocumentType.SALE, "USD");
         doc.setIssueDate(LocalDate.now());
 
-        assertThrows(IllegalStateException.class, () -> doc.validate());
+        assertThrows(IllegalStateException.class, doc::validate);
     }
 
     @Test
@@ -113,7 +113,7 @@ class FinancialDocumentTest {
         FinancialDocument doc = FinancialDocument.of(DocumentType.SALE, "USD");
         doc.post();
 
-        assertThrows(InvalidDocumentStateException.class, () -> doc.post());
+        assertThrows(InvalidDocumentStateException.class, doc::post);
     }
 
     @Test
@@ -133,7 +133,7 @@ class FinancialDocumentTest {
         FinancialDocument doc = FinancialDocument.of(DocumentType.SALE, "USD");
         doc.cancel();
 
-        assertThrows(InvalidDocumentStateException.class, () -> doc.cancel());
+        assertThrows(InvalidDocumentStateException.class, doc::cancel);
     }
 
     @Test
@@ -180,8 +180,8 @@ class FinancialDocumentTest {
                         .description("Premium Product A")
                         .itemCode("PROD-A")
                         .itemName("Product A")
-                        .quantity(new BigDecimal("10"))
-                        .unitPrice(Money.of("100", "USD"))
+                        .quantity(10)
+                        .unitPrice(Money.of(100, "USD"))
                         .charge(new Charge()
                                 .code("VAT19")
                                 .name("Value Added Tax 19%")
@@ -193,8 +193,8 @@ class FinancialDocumentTest {
                         .description("Premium Product B")
                         .itemCode("PROD-B")
                         .itemName("Product B")
-                        .quantity(new BigDecimal("5"))
-                        .unitPrice(Money.of("200", "USD")))
+                        .quantity(5)
+                        .unitPrice(Money.of(200, "USD")))
                 .charge(new Charge()
                         .code("DISC10")
                         .name("Special Discount 10%")
@@ -234,30 +234,30 @@ class FinancialDocumentTest {
                 .reference("PO-9876");
 
         // Add items with 8% VAT (books, educational materials)
-        DocumentLine line1 = DocumentLine.of("Programming Book: Java Fundamentals", new BigDecimal("5"), Money.of("25.00", "USD"))
+        DocumentLine line1 = DocumentLine.of("Programming Book: Java Fundamentals",5, Money.of("25.00", "USD"))
                 .itemCode("BOOK-001")
                 .lineNumber(1);
         line1.addTax("VAT8", "Reduced VAT 8%", new BigDecimal("8"));
 
-        DocumentLine line2 = DocumentLine.of("Educational Software License", new BigDecimal("3"), Money.of("50.00", "USD"))
+        DocumentLine line2 = DocumentLine.of("Educational Software License",3, Money.of("50.00", "USD"))
                 .itemCode("EDU-002")
                 .lineNumber(2);
         line2.addTax("VAT8", "Reduced VAT 8%", new BigDecimal("8"));
         line2.addDiscount("EDU_DISC", "Educational Discount", new BigDecimal("5"));
 
         // Add items with 19% VAT (standard products)
-        DocumentLine line3 = DocumentLine.of("Laptop Computer", new BigDecimal("2"), Money.of("1200.00", "USD"))
+        DocumentLine line3 = DocumentLine.of("Laptop Computer", 2, Money.of("1200.00", "USD"))
                 .tax("VAT19", "Standard VAT 19%", new BigDecimal("19"))
                 .itemCode("COMP-003")
                 .lineNumber(3);
 
-        DocumentLine line4 = DocumentLine.of("Wireless Mouse", new BigDecimal("10"), Money.of("15.00", "USD"))
+        DocumentLine line4 = DocumentLine.of("Wireless Mouse", 10, Money.of("15.00", "USD"))
                 .tax("VAT19", "Standard VAT 19%", new BigDecimal("19"))
                 .discount("BULK10", "Bulk Discount 10%", new BigDecimal("10"))
                 .itemCode("ACC-004")
                 .lineNumber(4);
 
-        DocumentLine line5 = DocumentLine.of("USB-C Cable", new BigDecimal("15"), Money.of("8.00", "USD"))
+        DocumentLine line5 = DocumentLine.of("USB-C Cable", 15, Money.of("8.00", "USD"))
                 .tax("VAT19", "Standard VAT 19%", new BigDecimal("19"))
                 .fee("HANDLING", "Small Item Handling", new BigDecimal("2.00"))
                 .itemCode("ACC-005")
@@ -287,49 +287,49 @@ class FinancialDocumentTest {
         // Assertions - Line 1 (Book with 8% VAT)
         assertEquals("Programming Book: Java Fundamentals", line1.getDescription());
         assertEquals("BOOK-001", line1.getItemCode());
-        assertEquals(new BigDecimal("5"), line1.getQuantity());
+        assertEquals(5, line1.getQuantity());
         assertEquals(1, line1.getTaxes().size());
-        assertEquals("VAT8", line1.getTaxes().get(0).getCode());
-        assertEquals(new BigDecimal("8"), line1.getTaxes().get(0).getValue());
+        assertEquals("VAT8", line1.getTaxes().getFirst().getCode());
+        assertEquals(new BigDecimal("8"), line1.getTaxes().getFirst().getValue());
 
         // Assertions - Line 2 (Educational software with 8% VAT and discount)
         assertEquals("Educational Software License", line2.getDescription());
         assertEquals("EDU-002", line2.getItemCode());
         assertEquals(1, line2.getTaxes().size());
         assertEquals(1, line2.getDiscounts().size());
-        assertEquals("VAT8", line2.getTaxes().get(0).getCode());
-        assertEquals("EDU_DISC", line2.getDiscounts().get(0).getCode());
+        assertEquals("VAT8", line2.getTaxes().getFirst().getCode());
+        assertEquals("EDU_DISC", line2.getDiscounts().getFirst().getCode());
 
         // Assertions - Line 3 (Laptop with 19% VAT)
         assertEquals("Laptop Computer", line3.getDescription());
         assertEquals("COMP-003", line3.getItemCode());
         assertEquals(1, line3.getTaxes().size());
-        assertEquals("VAT19", line3.getTaxes().get(0).getCode());
-        assertEquals(new BigDecimal("19"), line3.getTaxes().get(0).getValue());
+        assertEquals("VAT19", line3.getTaxes().getFirst().getCode());
+        assertEquals(new BigDecimal("19"), line3.getTaxes().getFirst().getValue());
 
         // Assertions - Line 4 (Mouse with 19% VAT and discount)
         assertEquals("Wireless Mouse", line4.getDescription());
         assertEquals("ACC-004", line4.getItemCode());
         assertEquals(1, line4.getTaxes().size());
         assertEquals(1, line4.getDiscounts().size());
-        assertEquals("VAT19", line4.getTaxes().get(0).getCode());
-        assertEquals("BULK10", line4.getDiscounts().get(0).getCode());
+        assertEquals("VAT19", line4.getTaxes().getFirst().getCode());
+        assertEquals("BULK10", line4.getDiscounts().getFirst().getCode());
 
         // Assertions - Line 5 (Cable with 19% VAT and fee)
         assertEquals("USB-C Cable", line5.getDescription());
         assertEquals("ACC-005", line5.getItemCode());
         assertEquals(1, line5.getTaxes().size());
         assertEquals(1, line5.getFees().size());
-        assertEquals("VAT19", line5.getTaxes().get(0).getCode());
-        assertEquals("HANDLING", line5.getFees().get(0).getCode());
+        assertEquals("VAT19", line5.getTaxes().getFirst().getCode());
+        assertEquals("HANDLING", line5.getFees().getFirst().getCode());
 
         // Assertions - Document-level charges
         assertEquals(1, invoice.getDiscounts().size());
         assertEquals(1, invoice.getFees().size());
         assertEquals(1, invoice.getWithholdings().size());
-        assertEquals("EARLY_PAY", invoice.getDiscounts().get(0).getCode());
-        assertEquals("SHIP", invoice.getFees().get(0).getCode());
-        assertEquals("RET_IVA", invoice.getWithholdings().get(0).getCode());
+        assertEquals("EARLY_PAY", invoice.getDiscounts().getFirst().getCode());
+        assertEquals("SHIP", invoice.getFees().getFirst().getCode());
+        assertEquals("RET_IVA", invoice.getWithholdings().getFirst().getCode());
 
         // Verify all charges are properly configured
         invoice.getCharges().forEach(charge -> {
@@ -360,11 +360,11 @@ class FinancialDocumentTest {
         original.setExchangeRate(exchangeRate);
 
         // Add lines
-        DocumentLine line1 = DocumentLine.of("Product A", new BigDecimal("5"), Money.of("100", "USD"))
+        DocumentLine line1 = DocumentLine.of("Product A", 5, Money.of("100", "USD"))
                 .itemCode("PROD-A")
                 .tax("VAT19", "VAT 19%", new BigDecimal("19"));
 
-        DocumentLine line2 = DocumentLine.of("Product B", new BigDecimal("3"), Money.of("50", "USD"))
+        DocumentLine line2 = DocumentLine.of("Product B", 3, Money.of("50", "USD"))
                 .itemCode("PROD-B")
                 .tax("VAT8", "VAT 8%", new BigDecimal("8"))
                 .discount("DISC5", "Discount 5%", new BigDecimal("5"));
@@ -404,12 +404,12 @@ class FinancialDocumentTest {
 
         // Assertions - Lines are deep copied
         assertEquals(2, copy.getLines().size());
-        assertNotSame(original.getLines().get(0), copy.getLines().get(0), "Lines should be new instances");
+        assertNotSame(original.getLines().getFirst(), copy.getLines().getFirst(), "Lines should be new instances");
 
-        DocumentLine copiedLine1 = copy.getLines().get(0);
+        DocumentLine copiedLine1 = copy.getLines().getFirst();
         assertEquals("Product A", copiedLine1.getDescription());
         assertEquals("PROD-A", copiedLine1.getItemCode());
-        assertEquals(new BigDecimal("5"), copiedLine1.getQuantity());
+        assertEquals(5, copiedLine1.getQuantity());
         assertEquals(1, copiedLine1.getTaxes().size());
         assertNotSame(line1, copiedLine1, "Line should be a new instance");
 
@@ -439,7 +439,7 @@ class FinancialDocumentTest {
                 .documentNumber("INV-100")
                 .party("Customer ABC");
 
-        DocumentLine line = DocumentLine.of("Item 1", BigDecimal.ONE, Money.of("100", "USD"));
+        DocumentLine line = DocumentLine.of("Item 1", 1, Money.of(100, "USD"));
         original.addLine(line);
 
         // Create copy with new number

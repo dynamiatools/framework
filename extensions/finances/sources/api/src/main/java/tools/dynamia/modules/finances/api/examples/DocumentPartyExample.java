@@ -43,7 +43,7 @@ public class DocumentPartyExample {
                 .party(customer);
 
         // Add document lines and charges
-        invoice.addLine(DocumentLine.of("Product A", new BigDecimal("10"), Money.of("100.00", "USD")));
+        invoice.addLine(DocumentLine.of("Product A", 10, Money.of("100.00", "USD")));
         invoice.addTax("VAT19", "Value Added Tax 19%", new BigDecimal("19"));
 
         System.out.println("Created invoice for: " + customer);
@@ -73,7 +73,7 @@ public class DocumentPartyExample {
                 .party(supplier);
 
         // Add purchase line
-        purchase.addLine(DocumentLine.of("Office Supplies", new BigDecimal("50"), Money.of("20.00", "USD")));
+        purchase.addLine(DocumentLine.of("Office Supplies", 50, Money.of("20.00", "USD")));
 
         // Add tax and withholdings
         purchase.addTax("VAT19", "Value Added Tax 19%", new BigDecimal("19"));
@@ -137,7 +137,7 @@ public class DocumentPartyExample {
                 .documentNumber("INV-001")
                 .party(originalCustomer);
 
-        original.addLine(DocumentLine.of("Product", new BigDecimal("1"), Money.of("100.00", "USD")));
+        original.addLine(DocumentLine.of("Product", 1, Money.of("100.00", "USD")));
 
         // Copy the document (party is deep-copied)
         FinancialDocument copy = original.copyWithNumber("INV-002");
