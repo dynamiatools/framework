@@ -16,6 +16,7 @@
  */
 package tools.dynamia.zk;
 
+import org.springframework.util.ClassUtils;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zul.*;
 import tools.dynamia.commons.ObjectOperations;
@@ -105,6 +106,7 @@ public class ComponentAliasIndex extends HashMap<String, Class<? extends Compone
                         Class clazz = ObjectOperations.findClass(aliases.getProperty(alias));
                         if (clazz != null) {
                             getInstance().add(alias, clazz);
+                            initClass(clazz);
                         }
                     } catch (Exception ex) {
                         logger.error(
@@ -118,6 +120,13 @@ public class ComponentAliasIndex extends HashMap<String, Class<? extends Compone
             logger.error(ex);
         }
 
+    }
+
+    private static void initClass(Class clazz) {
+        try {
+            ObjectOperations.newInstance(clazz);
+        } catch (Exception ex) {
+        }
     }
 
     public static ComponentAliasIndex getInstance() {

@@ -206,7 +206,7 @@ public abstract class ZKUtil {
      * @param live     if true, the model reflects changes in the underlying collection
      */
     public static void fillCombobox(Combobox combo, Collection data, Object selected, boolean live) {
-        if (combo != null) {
+        if (combo != null && ZKUtil.isInEventListener()) {
             ListModelList model = new ListModelList<>(data);
             if (selected != null) {
                 model.addToSelection(selected);

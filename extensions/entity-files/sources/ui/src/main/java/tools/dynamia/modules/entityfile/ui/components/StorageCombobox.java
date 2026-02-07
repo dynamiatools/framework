@@ -18,6 +18,7 @@
 package tools.dynamia.modules.entityfile.ui.components;
 
 import java.io.Serial;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.zkoss.zul.Combobox;
@@ -29,6 +30,10 @@ import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.util.ZKUtil;
 
+/**
+ * Custom Combobox for EntityFileStorage selection
+ * @author Mario A. Serrano Leones
+ */
 public class StorageCombobox extends Combobox {
 
 	/**
@@ -65,7 +70,7 @@ public class StorageCombobox extends Combobox {
 	}
 
 	public void setSelected(String selected) {
-		if (selected != this.selected) {
+		if (!Objects.equals(selected, this.selected)) {
 			this.selected = selected;
 			try {
 				Optional<EntityFileStorage> selectedStorage = Containers.get().findObjects(EntityFileStorage.class)
