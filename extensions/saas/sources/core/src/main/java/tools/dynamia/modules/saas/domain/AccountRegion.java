@@ -39,6 +39,7 @@ public class AccountRegion extends SimpleEntity {
     private String invoiceType;
 
     @OneToMany(mappedBy = "region", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<AccountRegionParameter> parameters = new ArrayList<>();
 
     public String getName() {
