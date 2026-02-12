@@ -28,9 +28,63 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The Interface CrudService.
+ * Core service interface providing comprehensive CRUD (Create, Read, Update, Delete) operations for domain entities.
+ * <p>
+ * This interface defines the primary persistence layer abstraction in the Dynamia Tools framework, offering a rich set
+ * of methods for entity management, querying, batch operations, and transaction handling. It serves as the main entry
+ * point for data access operations across the application.
+ * </p>
+ *
+ * <p>
+ * <b>Key features:</b>
+ * <ul>
+ *   <li>Basic CRUD operations: create, read, update, delete, save (create or update)</li>
+ *   <li>Advanced querying with {@link QueryParameters} and {@link QueryBuilder}</li>
+ *   <li>Pagination support via {@link DataPaginator}</li>
+ *   <li>Batch operations for efficient bulk processing</li>
+ *   <li>Entity refresh, reload, and merge capabilities</li>
+ *   <li>Flexible filtering, sorting, and searching</li>
+ *   <li>Transaction management and callback support</li>
+ *   <li>Listener mechanism for monitoring CRUD operations</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * <b>Usage example:</b>
+ * <pre>{@code
+ * @Autowired
+ * private CrudService crudService;
+ *
+ * // Create a new entity
+ * User user = new User("john@example.com", "John Doe");
+ * user = crudService.create(user);
+ *
+ * // Find by ID
+ * User found = crudService.find(User.class, user.getId());
+ *
+ * // Update
+ * found.setName("John Smith");
+ * crudService.update(found);
+ *
+ * // Query with parameters
+ * List<User> activeUsers = crudService.find(User.class,
+ *     QueryParameters.with("active", true)
+ *         .orderBy("name", true));
+ *
+ * // Delete
+ * crudService.delete(found);
+ * }</pre>
+ * </p>
+ *
+ * <p>
+ * This interface is typically implemented by JPA-based or other ORM-specific services. The framework provides
+ * a default implementation that integrates with JPA/Hibernate.
+ * </p>
  *
  * @author Ing. Mario Serrano Leones
+ * @see QueryParameters
+ * @see DataPaginator
+ * @see tools.dynamia.domain.util.CrudServiceListener
  * @since 1.0
  */
 @SuppressWarnings({"rawtypes"})
@@ -484,9 +538,9 @@ public interface CrudService {
      * Execute a query projection like count, sum, max, avg, etc. It returns a
      * single value result.
      *
-     * @param <T>          the generic type
-     * @param resultClass  the result class
-     * @param query the query builder
+     * @param <T>         the generic type
+     * @param resultClass the result class
+     * @param query       the query builder
      * @return the t
      */
     default <T> T executeProjection(Class<T> resultClass, QueryBuilder query) {
@@ -516,6 +570,11 @@ public interface CrudService {
         return findSingle(type, new QueryParameters());
     }
 
+    /**
+     * Return the delegate object of this service, for example if this service is a proxy to a JPA implementation it will return the EntityManager or Session object.
+     *
+     * @return the delegate object
+     */
     Object getDelgate();
 
 

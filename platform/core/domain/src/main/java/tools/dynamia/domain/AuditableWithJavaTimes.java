@@ -20,7 +20,65 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-
+/**
+ * Interface for entities that require audit tracking using Java 8+ date/time types.
+ * <p>
+ * This interface extends the auditing capabilities by separating date and time components using
+ * {@link LocalDate} and {@link LocalTime} instead of legacy {@link java.util.Date}. It tracks
+ * when entities are created and last modified, along with optional user information.
+ * </p>
+ *
+ * <p>
+ * <b>Key features:</b>
+ * <ul>
+ *   <li>Tracks creation and last update timestamps using modern Java time API</li>
+ *   <li>Separates date and time components for flexible querying and display</li>
+ *   <li>Optional tracking of user who created or last modified the entity</li>
+ *   <li>Provides convenient method to get combined creation date-time</li>
+ *   <li>Improves upon legacy {@link Auditable} interface with modern types</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * <b>Usage example:</b>
+ * <pre>{@code
+ * @Entity
+ * public class Document implements AuditableWithJavaTimes {
+ *
+ *     @Column
+ *     private LocalDate creationDate;
+ *
+ *     @Column
+ *     private LocalTime creationTime;
+ *
+ *     @Column
+ *     private LocalDate lastUpdate;
+ *
+ *     @Column
+ *     private String creator;
+ *
+ *     // Implement getters and setters
+ *
+ *     @PrePersist
+ *     protected void onCreate() {
+ *         setCreationDate(LocalDate.now());
+ *         setCreationTime(LocalTime.now());
+ *     }
+ *
+ *     @PreUpdate
+ *     protected void onUpdate() {
+ *         setLastUpdate(LocalDate.now());
+ *     }
+ * }
+ * }</pre>
+ * </p>
+ *
+ * @author Mario A. Serrano Leones
+ * @see Auditable
+ * @see LocalDate
+ * @see LocalTime
+ * @see LocalDateTime
+ */
 public interface AuditableWithJavaTimes {
 
     /**
