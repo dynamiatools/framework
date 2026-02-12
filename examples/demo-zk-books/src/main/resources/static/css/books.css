@@ -1,0 +1,22 @@
+.stockStatus{
+    border-radius: 7px;
+    padding: 4px;
+    display: block;
+    text-align: center;
+    font-size: 90%;
+}
+
+.statusIN_STOCK{
+    color: white;
+    background: #4caf50;
+}
+
+.statusOUT_STOCK{
+    color: white;
+    background: #dd4b39;
+}
+
+.statusPREORDER{
+    color: white;
+    background: #e59e00;
+}

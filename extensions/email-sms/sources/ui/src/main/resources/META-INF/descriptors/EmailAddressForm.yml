@@ -1,0 +1,12 @@
+view: form
+beanClass: tools.dynamia.modules.email.domain.EmailAddress
+autofields: false
+
+fields:
+  email:
+  tag:
+  active:
+  blacklisted:
+
+layout:
+  columns: 2

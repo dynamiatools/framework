@@ -1,0 +1,6 @@
+view: crud
+beanClass: tools.dynamia.modules.email.domain.SMSMessageLog
+autofields: false
+
+params:
+  readOnly: true

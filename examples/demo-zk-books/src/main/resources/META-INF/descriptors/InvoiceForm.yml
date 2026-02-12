@@ -1,0 +1,17 @@
+view: form
+beanClass: mybookstore.domain.Invoice
+autofields: false
+
+fields:
+  number:
+  customer:
+  email:
+  details:
+    component: crudview
+    params:
+      inplace: true
+      height: 400px
+      span: 3
+
+layout:
+  columns: 3

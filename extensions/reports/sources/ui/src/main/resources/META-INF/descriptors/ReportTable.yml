@@ -1,0 +1,20 @@
+view: table
+beanClass: tools.dynamia.modules.reports.core.domain.Report
+autofields: false
+
+fields:
+  name:
+  group:
+  description:
+  dataSourceConfig:
+  autofields:
+  chartable:
+  exportEndpoint:
+  fullEndpoint:
+  active:
+  accountId:
+    label: Account
+    component: entityreflabel
+    params:
+      entityAlias: Account
+      forceVisible: true

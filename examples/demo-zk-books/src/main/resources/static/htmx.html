@@ -1,0 +1,50 @@
+<html data-theme="emerald">
+<head>
+    <script src="https://unpkg.com/htmx.org"></script>
+    <script type="text/javascript" src="/zkau/web/js/zk.wpd" charset="UTF-8"></script>
+    <script type="text/javascript" src="/zkau/web/js/zul.lang.wpd" charset="UTF-8"></script>
+    <script type="text/javascript" src="/zkau/web/js/zkbind.wpd" charset="UTF-8"></script>
+    <link rel="stylesheet" type="text/css" href="/zkau/web/_zkiju-iceblue_c/zul/css/zk.wcs"/>
+
+
+    <script type="text/javascript" src="/dynamia-tools/js/zk/dynamia-tools.js" charset="UTF-8"></script>
+    <link href="/zkau/web/dynamia-zk-addons/css/components.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/dynamia-tools/css/variables.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/dynamia-tools/css/zk-dynamia-tools.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/dynamia-tools/css/zk-bootstrap.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/dynamia-tools/css/zk-form-view.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/dynamia-tools/css/zk-table-view.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/dynamia-tools/css/zk-multi-view.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/dynamia-tools/css/zk-viewers.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/dynamia-tools/css/flex.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/dynamia-tools/css/flex-grid.css" rel="stylesheet" type="text/css"/>
+
+
+    <link href="/static/fonts/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css"/>
+
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.23/dist/full.min.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+<body style="height: auto; overflow: auto">
+
+<div class="navbar bg-base-300 ">
+    <div class="flex-1 p--">
+        <a class="btn btn-ghost text-xl">Htmx + daisyUI</a>
+    </div>
+    <div class="flex-none">
+        <ul class="menu menu-horizontal px-1">
+            <li><a hx-get="/components" hx-target="#content" hx-swap="innerHTML">Components</a></li>
+            <li><a hx-get="/books" hx-target="#content" hx-swap="innerHTML">Books</a></li>
+
+        </ul>
+    </div>
+</div>
+
+
+
+<div id="content">
+
+</div>
+</body>
+</html>

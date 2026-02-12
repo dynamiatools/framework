@@ -1,0 +1,10 @@
+view: crud
+beanClass: tools.dynamia.modules.security.domain.User
+controller: tools.dynamia.modules.security.ui.controllers.UserCrudController
+
+
+actions:
+
+  FindAction:
+    attributes:
+      searchFields: [ username,fullname,email ]

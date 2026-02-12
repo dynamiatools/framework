@@ -1,0 +1,85 @@
+view: table
+beanClass: tools.dynamia.modules.saas.domain.AccountPayment
+autofields: false
+
+fields:
+  id:
+  creationDate:
+    label: Date
+    params:
+      converter: converters.Date
+  creationTime:
+    label: Time
+    params:
+      converter: converters.Time
+  account:
+  type:
+  reference:
+  reference2:
+  paymentMethod:
+  paymentValue:
+    params:
+      converter: converters.Currency
+      header:
+        align: right
+
+  value:
+    params:
+      converter: converters.Currency
+      header:
+        align: right
+        sclass: green color-white
+      cell:
+        sclass: green lighten-5
+      footer:
+        function: sum
+        functionConverter: converters.Currency
+  account.reseller:
+    label: Reseller
+  comissionRate:
+    params:
+      header:
+        align: center
+  resellerComission:
+    label: Comission
+    params:
+      converter: converters.Currency
+      header:
+        align: right
+      footer:
+        function: sum
+  comissionStatus:
+    label: Coms. Status
+    header:
+      align: center
+  users:
+    params:
+      header:
+        align: center
+  activedUsers:
+    params:
+      header:
+        align: center
+
+
+
+  description:
+  paymentMethodDescription:
+  couponCode:
+  finished:
+  external:
+  externalReference:
+  externalService:
+  invoiceID:
+  invoiceNumber:
+  invoiceUUID:
+
+
+
+params:
+  orderBy: creationDate desc
+  sizedByContent: true
+
+
+
+

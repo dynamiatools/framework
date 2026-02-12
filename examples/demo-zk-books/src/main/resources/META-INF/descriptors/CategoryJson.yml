@@ -1,0 +1,12 @@
+view: json
+beanClass: mybookstore.domain.Category
+autofields: false
+
+fields:
+  name:
+  description:
+  subcategories:
+
+params:
+  conditions:
+    onlyParents: 'parent is null'

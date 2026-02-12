@@ -1,0 +1,13 @@
+view: form
+beanClass: tools.dynamia.modules.saas.domain.AccountProfileRestriction
+autofields: false
+
+fields:
+  name:
+  type:
+  value:
+    params:
+      span: 2
+
+
+layout: 2

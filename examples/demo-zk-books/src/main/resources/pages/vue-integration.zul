@@ -1,0 +1,101 @@
+<zk xmlns:n="native">
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"/>
+    <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"/>
+
+    <div id="app-vm" sclass="container" viewModel="@id('vm') @init('mybookstore.viewmodel.VueViewModel')">
+        <n:h2>Vue Example</n:h2>
+
+
+        <html id="content"><![CDATA[
+            <div id="app">
+                {{message}}
+                <br/>
+
+
+                <li v-for="b in books">
+                    <a href="#" @click="showBook(b.id)">{{ b.title}}</a>
+                </li>
+
+                <br/>
+                <div class="btn-group">
+                    <button class="btn btn-primary" @click="count++">Clicked {{ count }}</button>
+                    <button class="btn btn-success" @click="loadBooks()">Reload</button>
+                    <button class="btn btn-danger" @click="sayHello()">Test Command from Vue</button>
+                </div>
+                <br/>
+                <br/>
+
+                <foo/>
+            </div>
+            ]]>
+            </html>
+    </div>
+
+
+    <script>
+
+        zk.afterMount(function () {
+            console.log("Creating Vue example")
+            var content = zk.$("$content")
+            content.setVisible(false);
+            setTimeout(() => {
+                initApp()
+                content.setVisible(true);
+            }, 500);
+        });
+
+        function initApp() {
+            let vm = zkbind.$("$app-vm");
+
+
+            const ComponentA = {
+                template: `Hola`
+            };
+
+            const {createApp} = Vue
+            createApp({
+                data() {
+                    console.log("Returning data")
+                    return {
+                        message: 'Hello Vue!',
+                        count: 0,
+                        books: []
+                    }
+                },
+
+                methods: {
+                    async loadBooks() {
+                        console.log("Loading books")
+                        let response = await fetch("/api/library/books")
+                        let json = await response.json()
+                        this.books = json.data
+                    },
+
+                    sayHello() {
+                        console.log("calling command hello")
+                        vm.command("hello")
+                    },
+
+                    showBook(bookId) {
+                        console.log("Showing book " + bookId)
+                        vm.command("showBook", {bookId: bookId})
+                    }
+                },
+
+                created() {
+                    this.loadBooks();
+                },
+
+                component: {
+                    'foo': ComponentA
+                }
+
+
+            }).mount('#app');
+
+
+        }
+
+    </script>
+</zk>

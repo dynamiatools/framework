@@ -1,0 +1,200 @@
+<zk xmlns:n="native">
+
+    <div sclass="container-fluid">
+
+        <n:h3>Cards</n:h3>
+
+        <div sclass="dt-row">
+            <div sclass="dt-col-md-3">
+                <card title="Basic Card" iconSclass="fa fa-tag">
+                    <label value="This is the content of the card. Can be any zk component"/>
+                    <button label="Buttons"/>
+                    <combobox placeholder="Comboboxes"/>
+                </card>
+            </div>
+
+            <div sclass="dt-col-md-3">
+                <card title="Primary Card" color="primary">
+                    <label value="Use color attribute to change card color. Ex: color='primary'"/>
+                </card>
+            </div>
+
+            <div sclass="dt-col-md-3">
+                <card title="Success Card" color="success">
+                    <label value="This is the content of the card. Can be any zk component"/>
+                    <button label="Buttons"/>
+                    <combobox placeholder="Comboboxes"/>
+                </card>
+            </div>
+
+            <div sclass="dt-col-md-3">
+                <card title="Warning Card" color="warning">
+                    <label value="This is the content of the card. Can be any zk component"/>
+                    <button label="Buttons"/>
+                    <combobox placeholder="Comboboxes"/>
+                </card>
+            </div>
+        </div>
+
+        <div sclass="row">
+            <div sclass="dt-col-md-12">
+                <card title="Nested Cards" color="danger">
+
+                    <div sclass="dt-row">
+                        <div sclass="dt-col-md-4">
+                            <card title="Sub card 1" collapsable="true" expandable="true" closeable="true"/>
+                        </div>
+                        <div sclass="dt-col-md-4">
+                            <card title="Sub card 2" expandable="true"/>
+                        </div>
+                        <div sclass="dt-col-md-4">
+                            <card>
+                                <label value="Card without title"/>
+                            </card>
+                        </div>
+                    </div>
+
+                </card>
+            </div>
+        </div>
+
+
+        <n:h3>Infobox</n:h3>
+        <div sclass="dt-row">
+            <div sclass="cdt-ol-md-3">
+                <infobox text="Messages" number="120" icon="far fa-envelope" iconColor="bg-info"/>
+            </div>
+            <div sclass="dt-col-md-3">
+                <infobox text="Bookmarks" number="400" icon="far fa-flag" iconColor="bg-success"/>
+            </div>
+            <div sclass="dt-col-md-3">
+                <infobox text="Upload" number="20" icon="far fa-copy" iconColor="bg-warning"/>
+            </div>
+            <div sclass="dt-col-md-3">
+                <infobox text="Users" number="12" icon="fa fa-users" iconColor="bg-danger"/>
+            </div>
+        </div>
+
+        <div sclass="dt-row">
+            <div sclass="dt-col-md-3">
+                <infobox text="Project Tasks" number="10 / 100" icon="fa fa-tasks" sclass="bg-purple"
+                         progress="10" progressDescription="Current Status" showProgress="true"/>
+            </div>
+            <div sclass="dt-col-md-3">
+                <infobox text="Events" number="1503" icon="fa fa-calendar" sclass="bg-teal"
+                         progress="70" progressDescription="70% of progress" showProgress="true"/>
+            </div>
+            <div sclass="dt-col-md-3">
+                <infobox text="Comments" number="4000" icon="fa fa-comments" sclass="bg-maroon"
+                         progress="90" progressDescription="90% of progress" showProgress="true"/>
+            </div>
+            <div sclass="dt-col-md-3">
+                <infobox text="Notifications" number="105" icon="fa fa-bell" sclass="bg-olive"
+                         progress="70" progressDescription="70% of progress" showProgress="true"/>
+            </div>
+        </div>
+
+        <n:h3>Alerts</n:h3>
+        <div sclass="dt-row">
+            <div sclass="dt-col-md-3">
+
+                <alert title="Something happen" type="error"
+                       value="Malfunction in code 123, something explode your server"
+                       closeable="true"/>
+
+            </div>
+
+            <div sclass="dt-col-md-3">
+
+                <alert title="Process Completed"
+                       value="entities saved succesfully"
+                       closeable="true"/>
+
+            </div>
+
+            <div sclass="dt-col-md-3">
+
+                <alert title="Validations Problem" type="warning"
+                       value="check invalid fields"
+                       closeable="true"/>
+
+            </div>
+
+            <div sclass="dt-col-md-3">
+
+                <alert title="Nothing found" type="info"
+                       value="Query without result"
+                       closeable="true"/>
+
+            </div>
+        </div>
+
+
+        <n:h3>Comboboxes</n:h3>
+        <div sclass="dt-row">
+            <div sclass="dt-col-md-3">
+                <card title="Timezone Combobox">
+                    <timezonebox sclass="form-zcontrol"/>
+                </card>
+
+            </div>
+            <div sclass="dt-col-md-3">
+                <card title="Locale Combobox">
+                    <localebox sclass="form-zcontrol"/>
+                </card>
+            </div>
+
+            <div sclass="dt-col-md-3">
+                <card title="Icons Combobox">
+                    <iconbox sclass="form-zcontrol"/>
+                </card>
+            </div>
+
+            <div sclass="dt-col-md-3">
+                <card title="Colors Combobox">
+                    <colorbox sclass="form-zcontrol"/>
+                </card>
+            </div>
+        </div>
+        <div sclass="dt-row">
+            <div sclass="dt-col-md-3">
+                <card title="Date Range box">
+                    <daterangebox sclass="form-zcontrol"/>
+                </card>
+            </div>
+            <div sclass="dt-col-md-3">
+                <card title="Date Selector">
+                    <dateselector sclass="form-zcontrol"/>
+                </card>
+            </div>
+            <div sclass="dt-col-md-3">
+                <card title="Duration Selector">
+                    <durationselector sclass="form-zcontrol"/>
+                </card>
+            </div>
+        </div>
+
+    </div>
+
+    <n:h3>Keypad / calculator</n:h3>
+    <div sclass="dt-row">
+        <div sclass="dt-col">
+            <keypad width="400px" height="400px"/>
+        </div>
+        <div sclass="dt-col">
+            <keypad width="200px" height="200px"/>
+        </div>
+
+        <div sclass="dt-col">
+            <calculator width="300px" height="300px"/>
+        </div>
+
+        <div sclass="dt-col">
+            <decimalboxcalculator/>
+        </div>
+    </div>
+
+
+
+
+</zk>

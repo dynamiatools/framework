@@ -1,0 +1,18 @@
+<zk xmlns:n="native">
+    <div>
+
+
+        <n:h4>Default mode</n:h4>
+        <aceditor width="600px" height="400px"/>
+
+
+        <n:h4>Java mode with custom theme</n:h4>
+        <aceditor width="600px" height="400px" mode="java" theme="monokai"/>
+
+
+        <n:h4>SQL mode</n:h4>
+        <aceditor width="600px" height="400px" mode="sql"/>
+
+
+    </div>
+</zk>

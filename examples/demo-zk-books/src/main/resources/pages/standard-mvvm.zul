@@ -1,0 +1,65 @@
+<zk>
+
+
+    <borderlayout vflex="1" viewModel="@id('vm') @init('mybookstore.viewmodel.StandardViewModel')">
+        <north>
+            <label value="Standard MVVM Example"/>
+        </north>
+
+        <west width="30%">
+            <div>
+
+                <label value="Selected Books"/>
+                <div children="@load(vm.selectedBooks)">
+                    <template name="children" var="b">
+                        <badge value="@load(b.title)" sclass="bg-blue"/>
+                    </template>
+                </div>
+            </div>
+        </west>
+
+
+        <center>
+            <listbox vflex="1" model="@load(vm.books)" selectedItem="@bind(vm.selected)"
+                     selectedItems="@bind(vm.selectedBooks)"
+                     checkmark="true" multiple="true">
+                <listhead>
+                    <listheader label="Title"/>
+                    <listheader label="Category"/>
+                    <listheader label="Price" align="right" width="100px"/>
+                    <listheader label="Actions" width="100px"/>
+                </listhead>
+
+                <template name="model" var="b">
+                    <listitem>
+                        <listcell label="@load(b.title)"/>
+                        <listcell label="@load(b.category.name)"/>
+                        <listcell label="@load(b.price)"/>
+                        <listcell>
+                            <button iconSclass="z-icon-eye" onClick="@command('view',book=b)" tooltiptext="View Book"/>
+                            <button iconSclass="z-icon-trash" onClick="@command('delete',book=b)" sclass="red"
+                                    tooltiptext="Delete"/>
+                        </listcell>
+                    </listitem>
+                </template>
+
+                <listfoot>
+                    <listfooter label="Selected Book"/>
+                    <listfooter label="@load(vm.selected)"/>
+                </listfoot>
+            </listbox>
+
+        </center>
+
+        <south>
+            <hlayout>
+                <button label="Count Books" sclass="btn btn-success" onClick="@command('count')"/>
+                <button label="Show Selected" sclass="btn btn-warning" onClick="@command('showSelected')"/>
+                <button label="Clear Selected" sclass="btn btn-danger" onClick="@command('clearSelected')"/>
+            </hlayout>
+        </south>
+
+    </borderlayout>
+
+
+</zk>

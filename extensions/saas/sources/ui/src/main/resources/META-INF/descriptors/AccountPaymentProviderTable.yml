@@ -1,0 +1,12 @@
+view: table
+beanClass: tools.dynamia.modules.saas.domain.AccountPaymentProvider
+autofields: false
+
+fields:
+  name:
+  paymentProcessor:
+    label: Processor
+  merchantId:
+  serviceURL:
+  testMode:
+  active:

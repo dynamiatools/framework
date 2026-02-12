@@ -1,0 +1,59 @@
+view: table
+beanClass: tools.dynamia.modules.saas.domain.Account
+autofields: false
+device: smartphone
+
+fields:
+
+
+  accounts:
+    component: coollabel
+    params:
+      noImagePath: classpath:/web/tools/images/no-photo.jpg
+      header:
+        width: 250px
+      bindings:
+        title: name
+        subtitle: email
+        description: type
+        imageURL: logo.storedEntityFile.thumbnailUrl
+  status:
+    component: enumlabel
+    params:
+      sclassPrefix: account
+      header:
+        align: center
+        width: 80px
+
+  activedUsers:
+    label: Users
+    params:
+      header:
+        align: center
+  balance:
+    params:
+      converter: converters.Currency
+      header:
+        align: right
+      footer:
+        function: sum
+        functionConverter: converters.Currency
+  paymentValue:
+    params:
+      converter: converters.Currency
+      header:
+        align: right
+      footer:
+        function: sum
+        functionConverter: converters.Currency
+  lastPaymentDate:
+    params:
+      converter: converters.Date
+  remote:
+    label: RM
+  id:
+
+params:
+  sizedByContent: true
+  pageSize: 50
+     

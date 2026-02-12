@@ -1,0 +1,19 @@
+view: table
+id: profilesSimple
+autofields: false
+
+fields:
+
+  name:
+    params:
+      header:
+        width: 100px
+  description:
+
+
+
+params:
+  orderBy: name
+
+
+

@@ -1,0 +1,14 @@
+view: table
+beanClass: tools.dynamia.modules.reports.core.domain.ReportFilter
+autofields: false
+
+fields:
+  name:
+  label:
+  condition:
+  required:
+  dataType:
+
+  order:
+layout:
+  columns: 2

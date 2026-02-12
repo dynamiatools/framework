@@ -1,0 +1,3 @@
+view: crud
+beanClass: tools.dynamia.modules.security.domain.Profile
+formView: profilelEditorForm

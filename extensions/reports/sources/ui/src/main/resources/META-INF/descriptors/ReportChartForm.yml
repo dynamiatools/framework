@@ -1,0 +1,19 @@
+view: form
+beanClass: tools.dynamia.modules.reports.core.domain.ReportChart
+autofields: false
+
+fields:
+  title:
+  labelField:
+  valueField:
+  type:
+    params:
+      placeholder: pie, bar, horizontalbar, line, doughnut
+  grouped:
+  order:
+    params:
+      width: 100px
+
+
+layout:
+  columns: 3

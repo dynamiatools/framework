@@ -1,0 +1,37 @@
+view: form
+beanClass: tools.dynamia.modules.reports.core.domain.ReportFilter
+autofields: false
+
+fields:
+  name:
+  label:
+  condition:
+  required:
+
+  dataType:
+  enumClassName:
+    component: providerpickerbox
+    params:
+      className: tools.dynamia.modules.reports.api.EnumFilterProvider
+      nameField: name
+      idField: enumClassName
+  entityClassName:
+    component: providerpickerbox
+    params:
+      className: tools.dynamia.modules.reports.api.EntityFilterProvider
+      nameField: name
+      idField: entityClassName
+  hideLabel:
+  defaultValue:
+  values:
+    params:
+      span: 3
+  queryValues:
+    component: aceditor
+    params:
+      mode: sql
+      span: 4
+      height: 80px
+  order:
+layout:
+  columns: 4

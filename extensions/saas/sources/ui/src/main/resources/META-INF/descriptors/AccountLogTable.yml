@@ -1,0 +1,27 @@
+view: table
+beanClass: tools.dynamia.modules.saas.domain.AccountLog
+autofields: false
+
+fields:
+  date:
+    params:
+      header:
+        width: 140px
+  creator:
+    params:
+      header:
+        width: 80px
+  message:
+    params:
+      header:
+        width: '500px'
+  ip:
+    params:
+      header:
+        width: 90px
+  pathInfo:
+    params:
+      header:
+        width: 120px
+
+  clientInfo:

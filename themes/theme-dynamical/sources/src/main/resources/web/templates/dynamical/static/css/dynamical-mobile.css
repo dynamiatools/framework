@@ -1,0 +1,168 @@
+/*Mobile CSS */
+@media ( max-width: 767px) {
+    .crudview-header {
+        margin-top: 3px;
+    }
+
+    .ex-page-content {
+        margin-top: 10px;
+    }
+
+    .fixed .content-wrapper, .fixed .right-side {
+        padding-top: 15px;
+    }
+
+    .main-sidebar {
+        padding-top: 55px;
+    }
+
+    .z-tabpanel {
+        padding: 0;
+    }
+
+    .content {
+        margin: 0;
+        padding: 0;
+    }
+
+    .wrapper {
+        height: 100%;
+    }
+
+    .crudview-header, .actiontb {
+        height: auto !important;
+    }
+
+    .global-action{
+        font-size: 0;
+    }
+
+    .global-action i{
+        font-size: initial;
+        line-height: 1.5;
+    }
+
+    .main-footer{
+        font-size: 90%;
+    }
+
+
+    .sidebar {
+        margin-top: 0 !important;
+    }
+
+}
+
+@media ( max-width: 991px) {
+    .wrapper {
+        height: 100% !important;
+        margin: 0;
+    }
+
+    .container {
+        width: 100% !important;
+    }
+
+    .z-toolbar {
+        padding: 0 !important;
+    }
+
+    .z-tabpanel {
+        padding: 0;
+        margin: 0;
+    }
+
+    .z-toolbar-end {
+        padding-right: 32px;
+    }
+
+    .z-tab-text {
+        padding-top: 0px;
+    }
+
+    .navigation {
+        top: 40px;
+    }
+
+    #topnav .topbar-main .nav > li > a, .sucursal-actual {
+        line-height: 40px;
+    }
+
+    #topnav, #topnav .navbar-toggle {
+        min-height: 40px;
+        height: 40px;
+    }
+
+    #topnav .navbar-toggle .lines {
+        margin-top: 12px;
+    }
+
+    #topnav .topbar-main .logo {
+        margin-top: 0px;
+    }
+
+    .logo .imglogo {
+        height: 35px;
+    }
+
+    #topnav .app-search {
+        margin-top: 3px;
+        margin-bottom: 0px;
+    }
+
+    .FindAction input {
+        width: 130px !important;
+        text-align: left !important;
+    }
+
+    .actiontb .btn {
+        padding: 5px;
+    }
+
+    .crudview-header, .actiontb {
+        min-height: 30px !important;
+        height: auto !important;
+    }
+
+    .crudview-header .actiontb-container {
+        -webkit-flex-wrap: wrap;
+        -webkit-display: flex;
+
+        display: flex;
+        flex-wrap: wrap;
+
+        margin-bottom: 3px;
+    }
+
+    .crudview .tableview-mobile {
+        margin-top: 3px;
+    }
+
+    .flexit {
+        flex: 1;
+        display: flex;
+    }
+
+    .flexit .z-combobox, .flexit.z-combobox, .flexit.z-datebox, .flexit .z-datebox {
+        flex: 1;
+        display: flex;
+    }
+
+    .flexit .z-combobox input, .flexit.z-combobox input, .flexit.z-datebox input,
+    .flexit .z-datebox input {
+        flex: 1;
+    }
+
+    .btn.actions {
+        padding: 2px 10px;
+
+    }
+
+    input.flexit{
+        height: 20px
+    }
+
+    .modal-dialog .z-window-content {
+        padding: 0;
+    }
+}

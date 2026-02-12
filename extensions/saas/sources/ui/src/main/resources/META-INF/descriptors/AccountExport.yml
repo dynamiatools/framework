@@ -1,0 +1,68 @@
+view: export
+beanClass: tools.dynamia.modules.saas.domain.Account
+autofields: false
+
+fields:
+  name:
+  identification:
+  subdomain:
+  customDomain:
+  type:
+  email:
+  adminUsername:
+  locale:
+    component: localebox
+  timeZone:
+    component: timezonebox
+  logo:
+    label: Logo
+    params:
+      imageOnly: true
+      shared: true
+  skin:
+    component: skincombobox
+  status:
+  profile:
+  reseller:
+  channel:
+  paymentDay:
+  statusDescription:
+    params:
+      span: 2
+  contact:
+    params:
+      span: 2
+  phoneNumber:
+  mobileNumber:
+  city:
+  country:
+  address:
+    params:
+      span: 2
+  uuid:
+  instanceUuid:
+  requiredInstanceUuid:
+  stats:
+    component: crudview
+  remote:
+  globalMessage:
+    label: Message
+    span: 4
+  showGlobalMessage:
+    label: Show
+  id:
+
+
+groups:
+  contactInfo:
+    fields: [contact,phoneNumber,mobileNumber, city, country, address]
+
+  notification:
+    fields: [globalMessage,showGlobalMessage]
+
+
+layout:
+  columns: 4
+        
+       
+     

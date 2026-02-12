@@ -1,0 +1,33 @@
+view: table
+beanClass: mybookstore.domain.BookReview
+autofields: false
+
+fields:
+  reviews:
+    component: coollabel
+    params:
+      header:
+        width: 300px
+      showImage: false
+      bindings:
+        title: user
+        subtitle: comment
+
+  stars:
+    params:
+      header:
+        align: center
+
+  creationDate:
+    params:
+      converter: converters.Date
+      header:
+        width: 100px
+  creationTime:
+    params:
+      converter: converters.Time
+      header:
+        width: 100px
+
+layout:
+  columns: 4

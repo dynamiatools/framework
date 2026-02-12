@@ -1,0 +1,53 @@
+/*
+background-color: #dd4b39
+color: 
+*/
+.skin-red .bg-body{
+	background: #dd4b39 !important;
+}
+
+
+.skin-red .z-listitem.z-listitem-selected >.z-listcell,
+.skin-red .z-listitem.z-listitem-selected:hover >.z-listcell,
+.skin-red .z-comboitem-selected,
+.skin-red .z-calendar-selected,
+.skin-red .z-progressmeter-image,
+.skin-red .z-paging-selected{
+	border-color: #dd4b39 !important;
+	background: #dd4b39 !important;
+}
+
+
+.skin-red .z-listitem.z-listitem-selected .z-label,
+.skin-red .z-listitem.z-listitem-selected a:link {
+	color: white;
+}
+
+.skin-red .z-listitem.z-listitem-selected a:link {
+	text-decoration: underline;
+}
+
+.baseBackgroundColor{
+	background-color: #dd4b39
+}
+
+.baseColor{
+	color: #dd4b39
+}
+
+.skin-red .table-view .z-listheader,
+.skin-red .table-view .z-listbox-header,
+.skin-red .tree-view .z-treecol,
+.skin-red .tree-view .z-tree-header {
+	background: #a12700 !important;
+}
+
+.skin-red .table-view .z-listheader-hover,
+.skin-red .tree-view .z-treecol-hover {
+	background: #dd4b39 !important;
+}
+
+.skin-red .table-view .z-listheader-content,
+.skin-red .tree-view .z-treecol-content {
+	color: white !important;
+}

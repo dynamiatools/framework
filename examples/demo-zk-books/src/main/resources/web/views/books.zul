@@ -1,0 +1,3 @@
+<zk>
+    <viewer type="crud" beanClass="mybookstore.domain.Book" />
+</zk>

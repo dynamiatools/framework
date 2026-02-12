@@ -1,0 +1,20 @@
+view: crud
+beanClass: tools.dynamia.modules.saas.domain.AccountFeature
+autofields: false
+controller: tools.dynamia.modules.saas.ui.controllers.AccountFeatureCrudController
+
+actions:
+  NewAction:
+    enabled: false
+
+  EditAction:
+    enabled: false
+
+  DeleteAction:
+    enabled: false
+
+  FindAction:
+    enabled: false
+
+  FiltersAction:
+    enabled: false

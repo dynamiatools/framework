@@ -1,0 +1,9 @@
+view: crud
+beanClass: tools.dynamia.modules.saas.domain.Account
+autofields: false
+controller: tools.dynamia.modules.saas.ui.controllers.AccountCrudController
+
+actions:
+  FindAction:
+    attributes:
+      searchFields: [ name, subdomain, email, identification,contact, contactFirstName, contactLastName ]

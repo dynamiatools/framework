@@ -1,0 +1,126 @@
+<!--
+  ~ Copyright (C) 2022 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+  ~ Colombia / South America
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+
+<?page title="${applicationInfo.name}  ${accountContext.account.name}"?>
+
+<?meta charset="utf-8"?>
+<?meta http-equiv="X-UA-Compatible" content="IE=edge"?>
+<?meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"?>
+<?meta name="name" content="${applicationInfo.name}"?>
+<?meta name="description" content="${applicationInfo.description}"?>
+<?meta name="author" content="${applicationInfo.author}"?>
+<?meta name="version" content="${applicationInfo.version}"?>
+<?meta name="build" content="${applicationInfo.build}"?>
+<?meta name="skin" content="${appTemplate.skin.id}"?>
+
+
+<?link href="${contextPath}/static/css/adminlte.min.css?v=5.4.1" rel="stylesheet" type="text/css"?>
+<?link href="${contextPath}/static/css/skins/dynamical-${appTemplate.skin.id}.css?v=5.4.1" rel="stylesheet" type="text/css"?>
+<?link href="${contextPath}/static/css/dynamical.css?v=5.4.1" rel="stylesheet" type="text/css"?>
+<?link href="${contextPath}/static/css/dynamical-mobile.css?v=5.4.1" rel="stylesheet" type="text/css"?>
+<?link href="${contextPath}/static/fonts/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css"?>
+
+<?link rel="shortcut icon" href="${contextPath}/static/favicon.ico"?>
+<?link rel="apple-touch-icon" sizes="180x180" href="${contextPath}/static/apple-touch-icon.png"?>
+<?link rel="icon" type="image/png" sizes="32x32" href="${contextPath}/static/favicon-32x32.png"?>
+<?link rel="icon" type="image/png" sizes="16x16" href="${contextPath}/static/favicon-16x16.png"?>
+
+<z:zk xmlns="native" xmlns:z="http://www.zkoss.org/2005/zul">
+
+    <div class="logo m-auto" style="max-width: 50%">
+        <img src="${appTemplate.logoURL}" class="img-fluid"
+             title="${applicationInfo.name} - ${accountContext.account.name}"/>
+    </div>
+
+    <div class="login-box m-auto">
+        <div class="login-logo">
+            <a href="${contextPath}">
+
+                ${accountContext.account.name}
+            </a>
+        </div>
+        <!-- /.login-logo -->
+        <div class="card">
+            <div class="card-body login-box-body">
+                <p class="login-box-msg">${labels.loginTitle}</p>
+                <form action="${contextPath}/login" method="post">
+
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control"
+                               name="username" placeholder="${labels.username}"/>
+
+                            <span class="input-group-text">
+                                <i class="fa fa-user fa-fw"/>
+                            </span>
+
+                    </div>
+
+                    <div class="input-group  mb-3">
+                        <input type="password" class="form-control"
+                               name="password" placeholder="${labels.password}"/>
+                            <span class="input-group-text">
+                                <i class="fa fa-lock fa-fw"/>
+                            </span>
+                    </div>
+
+
+                    <div class="d-grid">
+
+                        <button type="submit"
+                                class="btn btn-primary mb-5">
+                            ${labels.login}
+                        </button>
+
+                    </div>
+                    <input type="hidden"
+                           name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                </form>
+
+                <a href="${contextPath}/login/recovery">
+                    ${labels.passwordLost}
+                </a>
+                <p>
+                    <div sclass="callout callout-danger"
+                         if="${not empty SPRING_SECURITY_LAST_EXCEPTION}">
+                        <p>
+                            ${SPRING_SECURITY_LAST_EXCEPTION.localizedMessage}
+                        </p>
+                    </div>
+                </p>
+            </div>
+        </div>
+        <!-- /.login-box-body -->
+    </div>
+    <!-- /.login-box -->
+
+
+    <script src="${contextPath}/static/js/jquery.min.js?v=5.4.1" type="text/javascript"/>    
+    <script src="${contextPath}/static/js/adminlte.min.js?v=5.4.1" type="text/javascript"/>
+    <!-- Dynamical -->
+    <script src="${contextPath}/static/js/dynamical-login.js?v=5.4.1" type="text/javascript"/>
+
+
+    <script>
+        $(document).ready(function () {
+        $("body").attr("class", "login-page");
+        });
+    </script>
+
+
+</z:zk>

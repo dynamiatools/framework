@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+
+
+<!--
+  ~ Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+  ~ Colombia / South America
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<window id="b" xmlns="http://www.zkoss.org/2005/zul" apply="${generic}" width="700px" height="500px">
+    <borderlayout >
+        <north>
+            <vbox height="50px" width="100%">
+                <!--toolbar width="100%">
+                    <toolbarbutton id="newFile" label="Nuevo Archivo" image="${icons.add}" onClick="b$composer.agregarArchivo()"/>
+                    <toolbarbutton id="newFolder" label="Nueva Carpeta" image="${icons.add}" onClick="b$composer.nuevaCarpeta()"/>
+                    <toolbarbutton id="eliminar" label="Eliminar" onClick="b$composer.eliminar()" image="${icons.delete}"/>
+                </toolbar-->
+                <toolbar id="rutaPos" width="100%"/>
+            </vbox>
+        </north>
+        <center border="none" flex="true">
+            <listbox id="resultList" vflex="true" model="@{b$composer.queryResult.data,load-after='paginator.onPaging,newFile.onClick,eliminar.onClick,newFolder.onClick'}">
+                <listhead>
+                    <listheader label="Codigo"/>
+                </listhead>
+                <listitem self="@{each='file'}" value="@{file}">
+                    <listcell onDoubleClick="b$composer.goTo(self.parent.value)">
+                        <hbox widths="32px,200px,">
+                            <image src="@{file.icon}"/>
+                            <vbox>
+                                <hbox>
+                                    <label value="@{file.name}" style="font-weight:bold"/>
+                                    <toolbarbutton id="comentar" label="Comentar" onClick="b$composer.comentar(self.parent.parent.parent.parent.parent.value)" image="${icons.add}"/>
+                                </hbox>
+                                <label value="@{file.size}"/>
+                            </vbox>
+                            <label value="@{file.description}"/>
+                        </hbox>
+                    </listcell>
+                </listitem>
+            </listbox>
+        </center>
+        <south>
+            <div>
+                <paging id="paginator" pageSize="50" detailed="true"/>
+            </div>
+        </south>
+    </borderlayout>
+</window>
+
+

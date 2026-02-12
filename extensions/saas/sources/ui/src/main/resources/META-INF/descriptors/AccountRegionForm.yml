@@ -1,0 +1,19 @@
+view: form
+beanClass: tools.dynamia.modules.saas.domain.AccountRegion
+autofields: false
+
+fields:
+  name:
+  code:
+  defaultProfile:
+  defaultType:
+  paymentProvider:
+  mainAccount:
+  currency:
+  invoiceType:
+  timeZone:
+    component: timezonebox
+  locale:
+    component: localebox
+  parameters:
+    component: crudview

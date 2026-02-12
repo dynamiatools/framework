@@ -1,0 +1,16 @@
+view: crud
+beanClass: tools.dynamia.modules.saas.domain.AccountStatsData
+autofields: false
+
+actions:
+  NewAction:
+    enabled: false
+
+  EditAction:
+    enabled: false
+
+  DeleteAction:
+    enabled: false
+
+  ViewDataAction:
+    enabled: false

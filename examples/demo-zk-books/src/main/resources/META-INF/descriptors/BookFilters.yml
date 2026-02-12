@@ -1,0 +1,47 @@
+view: entityfilters
+beanClass: mybookstore.domain.Book
+autofields: false
+
+fields:
+
+  title:
+  category:
+
+  stockStatus:
+    label: Stock
+    component: enumlabel
+    params:
+      defaultSclass: stockStatus
+      sclassPrefix: status
+      header:
+        width: 90px
+
+  sinopsys:
+    params:
+      header:
+        width: 500px
+  isbn:
+  year:
+  publishDate:
+    params:
+      converter: converters.Date
+  buyDate:
+    params:
+      converter: converters.Date
+      header:
+        width: 100px
+        align: center
+  price:
+    params:
+      converter: converters.Currency
+      header:
+        align: right
+
+
+  creationTimestamp:
+    label: Created
+    params:
+      converter: converters.LocalDateTime
+      header:
+        width: 100px
+        align: center

@@ -1,0 +1,51 @@
+view: form
+beanClass: tools.dynamia.modules.saas.domain.AccountType
+autofields: false
+
+fields:
+  reference:
+  name:
+  publicName:
+  periodicity:
+  price:
+    params:
+      format: $###,###
+  maxUsers:
+  allowedOverdueDays:
+  additionalUserPrice:
+    params:
+      format: $###,###
+  description:
+    params:
+      span: 2
+      multiline: true
+      height: 100px
+  internalDescription:
+    params:
+      span: 2
+      multiline: true
+      height: 100px
+
+  active:
+  allowAdditionalUsers:
+  paymentRequired:
+  publicType:
+    label: Public
+  printingSupport:
+  secured:
+  restrictions:
+    component: crudview
+  trial:
+    label: Active
+  trialDays:
+    label: Days
+
+groups:
+  configuration:
+    fields: [ active,paymentRequired,allowAdditionalUsers,publicType,printingSupport,secured ]
+
+  trial:
+    fields: [ trial, trialDays ]
+
+layout:
+  columns: 4

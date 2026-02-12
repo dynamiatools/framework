@@ -1,0 +1,36 @@
+
+.form-view tr.z-row td.z-row-inner {
+    border: none;
+    background: white;
+}
+
+
+.form-view {
+    border: none;
+}
+
+.form-view .form-group{
+    margin-bottom: 1rem;
+}
+
+
+.form-view-lbl {
+    font-weight: 500;
+    margin-bottom: 3px;
+    display: block;
+}
+
+
+.form-view .z-row:hover > .z-row-inner, .z-row:hover > .z-cell {
+    background: none;
+}
+
+
+.form-view tr.z-row td.z-row-inner, .form-view  tr.z-row td.z-cell {
+    border: none;
+}
+
+.form-view .form-view-actions .actionpanel-a{
+    margin-right: 4px;
+    margin-left: 2px;
+}

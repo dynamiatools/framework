@@ -1,0 +1,52 @@
+view: form
+beanClass: tools.dynamia.modules.saas.api.dto.AccountDTO
+autofields: false
+
+fields:    
+    name:
+        component: label
+        label: Nombre
+    identification:
+        component: label
+        label: Identificacion
+    type:
+        component: label
+        label: Plan
+    subdomain:
+        component: label
+        label: Subdominio
+    domain:
+        component: label
+        label: Dominio
+   
+    email:
+        component: label
+    locale:
+        component: label
+        label: Idioma
+    timeZone:        
+        component: label
+        label: Zona Horaria    
+    status:
+        component: label
+        label: Estado    
+    paymentDay:      
+        component: label
+        label: Dia de Pago
+    lastPaymentDate:
+        component: label
+        label: Ultima Fecha de Pago
+        params:
+            converter: converters.Date
+    
+        
+layout:
+    columns: 3
+
+
+        
+
+    
+        
+       
+     

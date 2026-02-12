@@ -1,0 +1,108 @@
+<!--
+  ~ Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+  ~ Colombia / South America
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<zk>
+    <window viewModel="@id('vm') @init('tools.dynamia.modules.saas.ui.vm.AccountProfileCrudVM')" vflex="1">
+
+        <borderlayout vflex="1">
+            <north>
+                <div>
+                    <grid>
+                        <columns>
+                            <column width="90px"/>
+                            <column/>
+                            <column width="90px"/>
+                            <column/>
+                        </columns>
+                        <rows>
+                            <row>
+                                <label value="Name"/>
+                                <textbox value="@bind(vm.model.name)" hflex="1"/>
+                                <label value="Description"/>
+                                <textbox value="@bind(vm.model.description)" hflex="1"/>
+                            </row>
+                        </rows>
+                    </grid>
+                </div>
+            </north>
+
+            <west width="400px" splittable="true">
+                <tree vflex="true" hflex="true" model="@load(vm.treeModel)"
+                      selectedItem="@bind(vm.selectedItem)">
+
+                    <template name="model" var="p">
+                        <treeitem>
+                            <treerow>
+                                <treecell>
+                                    <iconimage src="@load(p.data.icon)"/>
+                                    <label value="@load(p)"/>
+                                </treecell>
+
+                            </treerow>
+                        </treeitem>
+                    </template>
+                </tree>
+
+            </west>
+            <center>
+                <listbox id="permisos" vflex="true" width="100%" model="@load(vm.restrictions)"
+                         selectedItem="@bind(vm.selectedRestriction)">
+                    <listhead>
+                        <listheader label="Name"/>
+                        <listheader label="Access Control"/>
+                        <listheader label="Value"/>
+                        <listheader label="Type" width="200px"/>
+                        <listheader width="40px"/>
+                    </listhead>
+                    <template name="model" var="p">
+                        <listitem>
+                            <listcell label="@load(p.name)"/>
+                            <listcell>
+                                <combobox model="@load(vm.accessControlValues)" selectedItem="@bind(p.accessControl)"
+                                          readonly="true">
+                                    <template name="model" var="ac">
+                                        <comboitem value="@load(ac)" label="@load(ac)"/>
+                                    </template>
+                                </combobox>
+                            </listcell>
+                            <listcell label="@load(p.value)"/>
+                            <listcell label="@load(p.type)"/>
+                            <listcell>
+                                <button onClick="@command('removeRestriction', r=p)" iconSclass="fa fa-times"
+                                        zclass="btn btn-danger btn-sm"/>
+                            </listcell>
+                        </listitem>
+                    </template>
+                </listbox>
+            </center>
+            <south>
+                <div style="padding: 10px">
+                    <hlayout style="float:left">
+                        <button label="Add Restriction" onClick="@command('addRestriction')"
+                                zclass="btn btn-primary"/>
+                    </hlayout>
+                    <hlayout style="float:right">
+                        <button label="Save" zclass="btn btn-success" onClick="@command('save')"/>
+                        <button label="Close" zclass="btn btn-danger" onClick="@command('close')"/>
+                    </hlayout>
+                </div>
+            </south>
+
+        </borderlayout>
+
+    </window>
+</zk>

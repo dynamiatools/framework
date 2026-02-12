@@ -1,0 +1,30 @@
+view: form
+beanClass: tools.dynamia.modules.entityfile.domain.EntityFile
+messages: tools.dynamia.modules.entityfile
+autofields: false
+
+sortFields: [name,extension,description]
+
+fields:
+    
+    name:
+        label: Nombre
+    
+    extension:
+        label: Tipo
+        component: label
+    
+    description:
+        label: Descripcion
+        params:
+            multiline: true=boolean
+            height: 100px
+            span: 2
+        
+    
+        
+    
+        
+        
+
+    

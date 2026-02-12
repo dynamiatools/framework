@@ -1,0 +1,15 @@
+view: table
+beanClass: tools.dynamia.modules.email.domain.SMSMessageLog
+autofields: false
+
+fields:
+  phoneNumber:
+  text:
+  result:
+  creationDate:
+    params:
+      converter: converters.Date
+  creationTime:
+    params:
+      converter: converters.Time
+  creator:

@@ -1,0 +1,17 @@
+view: form
+beanClass: tools.dynamia.modules.reports.core.domain.ReportDataSourceConfig
+autofields: false
+customizer: tools.dynamia.modules.reports.ui.customizers.ReportDataSourceConfigFormCustomizer
+
+fields:
+  name:
+  driverClassName:
+    component: combobox
+  url:
+    params:
+      span: 2
+  username:
+  password:
+    params:
+      type: password
+

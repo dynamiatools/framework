@@ -1,0 +1,143 @@
+view: form
+beanClass: tools.dynamia.modules.saas.domain.Account
+customizer: tools.dynamia.modules.saas.ui.customizers.AccountFormCustomizer
+autofields: false
+
+fields:
+  name:
+  identification:
+  idType:
+  subdomain:
+  type:
+  email:
+  adminUsername:
+  locale:
+    component: localebox
+  timeZone:
+    component: timezonebox
+  logo:
+    label: Logo
+    params:
+      imageOnly: true
+      shared: true
+  skin:
+    component: skincombobox
+  accountRegion:
+    label: Region
+  profile:
+
+  channel:
+  creationDate:
+  category:
+  parentAccount:
+  paymentDay:
+  fixedPaymentValue:
+    params:
+      format: $###,###
+  discount:
+    params:
+      format: $###,###
+  discountExpire:
+  statusDescription:
+
+  contactFirstName:
+  contactLastName:
+  contactEmail:
+  phoneNumber:
+  mobileNumber:
+  city:
+  region:
+    label: Contact Region
+  country:
+  address:
+    params:
+      span: 4
+  uuid:
+  instanceUuid:
+  freeTrial:
+    component: spiner
+  status:
+  customDomain:
+  maxUsers:
+    description: Override Account Type Config
+    params:
+      placeholder: Default
+  requiredInstanceUuid:
+  remote:
+  autoInit:
+    label: Auto Init.
+  globalMessage:
+    label: Message
+    params:
+      span: 2
+  globalMessageType:
+    label: Type
+  showGlobalMessage:
+    label: Show
+
+  customerInfo:
+    params:
+      span: 4
+      multiline: true
+      height: 80px
+
+  features:
+    component: crudview
+    params:
+      controller: tools.dynamia.modules.saas.ui.controllers.AccountFeatureCrudController
+
+  additionalServices:
+    component: crudview
+
+  stats:
+    component: crudview
+
+  redirect:
+  templateAccount:
+
+
+  reseller:
+    component: combobox
+    params:
+      readonly: true
+
+  resellerAgent:
+    label: Agent
+    component: combobox
+    params:
+      readonly: true
+
+  resellerInvoice:
+    label: Invoice
+
+  resellerInvoiceDate:
+    label: Invoice Date
+
+  resellerComments:
+    label: Comments
+    params:
+      span: 4
+      multiline: true
+      height: 80px
+
+
+groups:
+  contactInfo:
+    fields: [ contactFirstName, contactLastName,phoneNumber,mobileNumber,contactEmail, city,region, country, address, customerInfo ]
+
+
+  resellerInfo:
+    fields: [ reseller, resellerAgent, resellerInvoice, resellerInvoiceDate, resellerComments ]
+
+  configuration:
+    fields: [ locale, timeZone,skin, maxUsers,statusDescription,uuid,instanceUuid,creationDate,remote,autoInit,requiredInstanceUuid,redirect,templateAccount ]
+
+  notification:
+    fields: [ globalMessage,globalMessageType,showGlobalMessage ]
+
+
+layout:
+  columns: 4
+
+
+

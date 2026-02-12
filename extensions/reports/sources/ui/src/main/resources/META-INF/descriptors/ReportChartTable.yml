@@ -1,0 +1,10 @@
+view: table
+beanClass: tools.dynamia.modules.reports.core.domain.ReportChart
+autofields: false
+
+fields:
+  title:
+  labelField:
+  valueField:
+  type:
+  grouped:

@@ -1,0 +1,9 @@
+view: table
+beanClass: tools.dynamia.modules.reports.core.domain.ReportGroup
+autofields: false
+
+fields:
+  name:
+  module:
+  endpointName:
+  active:

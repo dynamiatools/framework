@@ -1,0 +1,86 @@
+view: table
+beanClass: mybookstore.domain.Book
+autofields: false
+
+fields:
+  selected:
+    label: S
+  bookCover:
+    label: Cover
+    component: entityfileImage
+    visible: true
+    optional: true
+    variable: cov
+    path: cov.uuid
+    params:
+      thumbnail: true
+      renderWhenNull: true
+      header:
+        width: 70px
+        align: center
+
+
+  title:
+  category:
+
+  stockStatus:
+    label: Stock
+    component: enumlabel
+    params:
+      defaultSclass: stockStatus
+      sclassPrefix: status
+      header:
+        width: 90px
+
+  sinopsys:
+    params:
+      header:
+        width: 500px
+  isbn:
+  year:
+  publishDate:
+    params:
+      converter: converters.Date
+  buyDate:
+    params:
+      converter: converters.Date
+      header:
+        width: 100px
+        align: center
+  price:
+    params:
+      converter: converters.Currency
+
+      header:
+        align: right
+        sclass: orange color-white
+      cell:
+        sclass: orange lighten-5
+
+
+  creationDate:
+    label: Created
+    params:
+      converter: converters.Date
+      header:
+        width: 100px
+        align: center
+
+  creationTimestamp:
+    label: Created
+    params:
+      converter: converters.LocalDateTime
+      header:
+        width: 100px
+        align: center
+
+
+
+
+params:
+  enumColors:
+    name: stockStatus
+    colors:
+      OUT_STOCK: "#ffe8e8"
+
+  orderBy: title

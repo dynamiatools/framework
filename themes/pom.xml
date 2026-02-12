@@ -1,0 +1,25 @@
+<project
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+        xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>tools.dynamia</groupId>
+        <artifactId>tools.dynamia.parent</artifactId>
+        <version>26.2.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <name>Themes</name>
+    <groupId>tools.dynamia.themes</groupId>
+    <artifactId>tools.dynamia.themes.parent</artifactId>
+    <url>https://www.dynamia.tools</url>
+    <inceptionYear>2026</inceptionYear>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>theme-dynamical/sources</module>
+    </modules>
+
+
+</project>

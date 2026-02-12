@@ -13,3 +13,23 @@ nbactions.xml
 .idea/
 *.versionsBackup
 nb-configuration.xml
+
+# Node, vite and vue specific ignores
+node_modules/
+dist/
+.vite/
+.env
+.env.local
+.env.*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.vscode/
+.DS_Store
+*.tgz
+coverage/
+.cache/
+*.local
+*.tsbuildinfo
+.vs/

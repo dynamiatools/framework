@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C)  2020. Dynamia Soluciones IT S.A.S - NIT 900302344-1 All Rights Reserved.
+  ~ Colombia - South America
+  ~
+  ~ This file is free software: you can redistribute it and/or modify it  under the terms of the
+  ~  GNU Lesser General Public License (LGPL v3) as published by the Free Software Foundation,
+  ~   either version 3 of the License, or (at your option) any later version.
+  ~
+  ~  This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+  ~   without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  ~   See the GNU Lesser General Public License for more details. You should have received a copy of the
+  ~   GNU Lesser General Public License along with this file.
+  ~   If not, see <https://www.gnu.org/licenses/>.
+  ~
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>tools.dynamia.modules</groupId>
+        <artifactId>tools.dynamia.modules.parent</artifactId>
+        <version>26.2.0</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <name>DynamiaModules - Reports</name>
+    <packaging>pom</packaging>
+    <artifactId>tools.dynamia.modules.reports.parent</artifactId>
+    <description>DynamiaTools extension for build in app reports with queries and charts</description>
+    <inceptionYear>2018</inceptionYear>
+    <url>https://www.dynamia.tools/modules/reports</url>
+
+    <organization>
+        <name>Dynamia Soluciones IT SAS</name>
+        <url>https://www.dynamiasoluciones.com</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <name>Mario Serrano Leones</name>
+            <email>mario@dynamiasoluciones.com</email>
+            <organization>Dynamia Soluciones IT</organization>
+            <organizationUrl>https://www.dynamiasoluciones.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/dynamia-projects/dynamia-reports</url>
+    </scm>
+
+
+    <licenses>
+        <license>
+            <name>APACHE LICENSE, VERSION 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <modules>
+        <module>api</module>
+        <module>core</module>
+        <module>ui</module>
+    </modules>
+
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>${source.encoding}</encoding>
+                    <parameters>true</parameters>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+
+
+
+</project>

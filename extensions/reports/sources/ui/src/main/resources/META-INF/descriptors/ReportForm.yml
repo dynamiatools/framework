@@ -1,0 +1,50 @@
+view: form
+beanClass: tools.dynamia.modules.reports.core.domain.Report
+autofields: false
+
+fields:
+  name:
+  group:
+  accountId:
+    label: Account
+    component: entityrefpicker
+    params:
+      entityAlias: Account
+      forceVisible: true
+  description:
+  title:
+    params:
+      span: 2
+  subtitle:
+  dataSourceConfig:
+    component: combobox
+    params:
+      automodel: true
+      readonly: true
+
+  queryLang:
+    visible: false
+  chartable:
+  autofields:
+  active:
+  exportWithoutFormat:
+  queryScript:
+    component: aceditor
+    params:
+      mode: sql
+      span: 4
+      height: '400px !important'
+  exportEndpoint:
+  endpointName:
+
+  filters:
+    component: crudview
+
+  fields:
+    component: crudview
+
+  charts:
+    component: crudview
+
+layout:
+  columns: 4

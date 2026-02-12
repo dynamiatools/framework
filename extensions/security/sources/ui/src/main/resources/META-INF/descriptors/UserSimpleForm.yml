@@ -1,0 +1,39 @@
+view: form
+id: userProfile
+autofields: false
+
+fields:
+
+  fullname:
+    component: textbox
+  email:
+    component: textbox
+  phoneNumber:
+    component: textbox
+  mobileNumber:
+    component: textbox
+
+  photo:
+    label: Photo
+    component: entityfileUploadlink
+    params:
+      imageOnly: true
+      shared: true
+
+  prvPhoto:
+    label: Preview
+    component: entityfileImage
+
+    params:
+      noImagePath: /static/dynamia-tools/images/no-user-photo.jpg
+      thumbnail: true
+      thumbnailWidth: 80
+      thumbnailHeight: 80
+      bind: photo
+
+
+layout:
+  columns: 2
+
+
+
