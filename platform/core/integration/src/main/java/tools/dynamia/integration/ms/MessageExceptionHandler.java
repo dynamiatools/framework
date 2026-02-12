@@ -16,13 +16,65 @@
  */
 package tools.dynamia.integration.ms;
 
+/**
+ * Interface for handling exceptions that occur during message processing in the messaging system.
+ * <p>
+ * Implementations of this interface are responsible for managing error scenarios when a {@link MessageListener}
+ * fails to process a message. This allows for centralized exception handling, logging, retry logic, or
+ * dead-letter queue management.
+ * </p>
+ *
+ * <p>
+ * <b>Key responsibilities:</b>
+ * <ul>
+ *   <li>Handle and log message processing exceptions</li>
+ *   <li>Implement retry strategies for failed messages</li>
+ *   <li>Route failed messages to error queues or dead-letter channels</li>
+ *   <li>Send notifications or alerts on critical failures</li>
+ *   <li>Perform cleanup or rollback operations</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * <b>Usage example:</b>
+ * <pre>{@code
+ * @Component
+ * public class CustomMessageExceptionHandler implements MessageExceptionHandler<OrderMessage> {
+ *
+ *     @Override
+ *     public void onMessageException(MessageEvent<OrderMessage> evt, MessageException exception) {
+ *         logger.error("Failed to process order message: {}", evt.getData(), exception);
+ *
+ *         // Implement retry logic
+ *         if (evt.getRetryCount() < 3) {
+ *             messageService.retry(evt.getData());
+ *         } else {
+ *             // Move to dead-letter queue
+ *             deadLetterService.send(evt.getData());
+ *         }
+ *     }
+ * }
+ * }</pre>
+ * </p>
+ *
+ * @param <T> the type of message being handled, must extend {@link Message}
+ * @author Mario A. Serrano Leones
+ * @see MessageListener
+ * @see MessageEvent
+ * @see MessageException
+ */
 public interface MessageExceptionHandler<T extends Message> {
 
     /**
-     * Message exception.
+     * Invoked when an exception occurs during message processing.
+     * <p>
+     * This method is called by the messaging system when a {@link MessageListener} throws an exception
+     * while processing a message. Implementations should handle the error appropriately, such as logging,
+     * retrying, or routing to a dead-letter queue.
+     * </p>
      *
-     * @param message the message
-     * @param exception the exception
+     * @param evt the message event that was being processed when the exception occurred
+     * @param exception the exception that was thrown during message processing
      */
     void onMessageException(MessageEvent<T> evt, MessageException exception);
 

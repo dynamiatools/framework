@@ -29,6 +29,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * QRCode generator class to create QR codes from text. <br><br>
+ * <p>
+ * Example usage: <br>
+ * </p>
+ * <pre>
+ *     {@code
+ *     QRCode.from("Hello World").to(ImageType.PNG).withSize(250, 250).file();
+ *     }
+ * </pre>
+ *
+ */
 public class QRCode extends AbstractQRCode {
 
     public static final MatrixToImageConfig DEFAULT_CONFIG = new MatrixToImageConfig();

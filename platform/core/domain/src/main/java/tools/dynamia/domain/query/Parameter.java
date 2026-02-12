@@ -19,22 +19,51 @@ package tools.dynamia.domain.query;
 import java.io.Serializable;
 
 /**
- * Basic interface to implement persistence parameters.
+ * Interface representing an entity that store parameter with metadata and state. It define
+ * the contract for parameter entities that can be used to store application, users or config parameters.
+ * Parameters are identified by a unique identifier and can have a label, name, value, value type, description,
  *
+ *
+ * @param <ID> the type of the parameter identifier, must be serializable
  * @author Mario Serrano Leones
+ *
+ * @see {@link tools.dynamia.domain.jpa.JpaParameter}
+ * @see {@link tools.dynamia.modules.saas.jpa.AccountParameter}
  */
 
 public interface Parameter<ID extends Serializable> {
 
 
+    /**
+     * The parameter ID
+     * @return ID
+     */
     ID getId();
 
+    /**
+     * The parameter label, used for display purposes
+     * @return the label
+     */
     String getLabel();
 
+    /**
+     * Sets the parameter label, used for display purposes
+     * @param label the label to set
+     */
     void setLabel(String label);
 
+    /**
+     * Checks if is cacheable.
+     *
+     * @return true, if is cacheable
+     */
     boolean isCacheable();
 
+    /**
+     * Sets the cacheable.
+     *
+     * @param cacheable the new cacheable
+     */
     void setCacheable(boolean cacheable);
 
     /**

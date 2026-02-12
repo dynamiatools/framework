@@ -20,17 +20,42 @@ package tools.dynamia.viewers;
 import java.io.Serializable;
 
 /**
- * Interface for customizing components associated with a field in a view.
+ * Interface for customizing UI components associated with a {@link Field} in a view descriptor.
+ * <p>
+ * Implementations of this interface can modify component properties, behavior, or appearance
+ * based on field metadata such as field type, parameters, or custom attributes defined in
+ * the view descriptor.
+ * </p>
+ * <p>
+ * This is typically used to apply framework-specific or application-specific customizations
+ * to input components, labels, or other UI elements after they are created by the view renderer.
+ * </p>
  *
- * @param <T> the type of component to customize
+ * Example:
+ * <pre>{@code
+ * public class ReadOnlyCustomizer implements ComponentCustomizer<Textbox> {
+ *     public void cutomize(Field field, Textbox component) {
+ *         if (field.getParams().get("readonly") == Boolean.TRUE) {
+ *             component.setReadonly(true);
+ *         }
+ *     }
+ * }
+ * }</pre>
+ *
+ * @param <T> the type of component to customize (e.g., Textbox, Datebox, Combobox)
+ * @author Dynamia Soluciones IT
  */
 public interface ComponentCustomizer<T> extends Serializable {
 
     /**
-     * Customizes the given component based on the field.
+     * Customizes the given component based on the field metadata.
+     * <p>
+     * This method is invoked after the component is created by the view renderer,
+     * allowing implementations to apply additional configuration or styling.
+     * </p>
      *
-     * @param field the field to use for customization
-     * @param component the component to customize
+     * @param field the field descriptor containing metadata for customization
+     * @param component the UI component to customize
      */
     void cutomize(Field field, T component);
 

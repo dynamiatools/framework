@@ -18,20 +18,40 @@ package tools.dynamia.viewers;
 
 
 /**
- * The Interface FieldCustomizer.
+ * Interface for customizing {@link Field} instances based on the type of view being rendered.
+ * <p>
+ * Implementations of this interface can modify field properties such as visibility, label,
+ * styling, component type, or validation rules before the field is rendered in a specific view.
+ * This allows for dynamic field customization based on view context (e.g., form, table, tree).
+ * </p>
+ * <p>
+ * Field customizers are typically invoked during the view descriptor processing phase,
+ * allowing modifications to fields before UI components are created.
+ * </p>
+ *
+ * Example:
+ * <pre>{@code
+ * public class ReadOnlyFormFieldCustomizer implements FieldCustomizer {
+ *     public void customize(String viewTypeName, Field field) {
+ *         if ("form".equals(viewTypeName) && field.getName().equals("id")) {
+ *             field.addParam("readonly", true);
+ *         }
+ *     }
+ * }
+ * }</pre>
  *
  * @author Mario A. Serrano Leones
- */
-
-/**
- * Interface for customizing fields in a view, based on the view type.
  */
 public interface FieldCustomizer {
 
     /**
      * Customizes the given field for the specified view type.
+     * <p>
+     * This method is called during view descriptor processing, allowing implementations
+     * to modify field properties based on the view type name (e.g., "form", "table", "tree").
+     * </p>
      *
-     * @param viewTypeName the name of the view type
+     * @param viewTypeName the name of the view type (e.g., "form", "table", "tree")
      * @param field the field to customize
      */
     void customize(String viewTypeName, Field field);

@@ -14,15 +14,36 @@ package tools.dynamia.viewers;
  * in view descriptors.
  * </p>
  * <p>
- * Typical use cases include security, user role management, dynamic UI adaptation, and business rule enforcement
- * for field-level access in viewers.
+ * Typical use cases include security-based field restrictions, user role management, dynamic UI adaptation,
+ * and business rule enforcement for field-level access in viewers.
  * </p>
+ *
+ * Example:
+ * <pre>{@code
+ * public class SecurityFieldRestriction implements FieldRestriction {
+ *     public int getOrder() {
+ *         return 100;
+ *     }
+ *
+ *     public FieldRestrictionType evaluale(View view, Field field) {
+ *         if (field.getName().equals("salary") && !hasAdminRole()) {
+ *             return FieldRestrictionType.HIDDEN;
+ *         }
+ *         return FieldRestrictionType.VISIBLE;
+ *     }
+ * }
+ * }</pre>
+ *
+ * @author Dynamia Soluciones IT
  */
 public interface FieldRestriction {
 
     /**
      * Returns the order (priority) of this restriction. Lower values indicate higher priority.
-     * Restrictions are evaluated in ascending order.
+     * <p>
+     * Restrictions are evaluated in ascending order of their order value. A restriction with
+     * order 0 will be evaluated before a restriction with order 100.
+     * </p>
      *
      * @return the order value of this restriction
      */
@@ -30,7 +51,10 @@ public interface FieldRestriction {
 
     /**
      * Evaluates the restriction for the given {@link View} and {@link Field}.
-     * Implementations should return the appropriate {@link FieldRestrictionType} based on their logic.
+     * <p>
+     * Implementations should return the appropriate {@link FieldRestrictionType} based on their logic,
+     * which may include checking user permissions, business rules, or field metadata.
+     * </p>
      *
      * @param view the view descriptor containing the field
      * @param field the field to evaluate
