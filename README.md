@@ -44,6 +44,87 @@ Dynamia Platform represents a major evolution from DynamiaTools, bringing togeth
 - **Theme Support**: Customize look and feel with pluggable themes
 - **Seamless Integration**: Works with any Java framework or library
 
+## 🗺️ Roadmap
+
+### 📋 Short-Term Goals (2026 Q1-Q2)
+
+We're actively working on making Dynamia Platform more accessible, flexible, and developer-friendly. Here's what's coming:
+
+#### 📚 **Enhanced Documentation**
+- Comprehensive guides and tutorials
+- Real-world use cases and examples
+- API reference improvements
+- Video tutorials and screencasts
+- Interactive documentation with live code samples
+
+#### 🌐 **Website Improvements**
+- Modernized dynamia.tools website
+- Interactive playground for testing features
+- Community showcase and success stories
+- Regular blog posts with tips and best practices
+- Better search and navigation
+
+#### 📦 **TypeScript SDK**
+A complete TypeScript/JavaScript package ecosystem for frontend development:
+- **`@dynamia/client`** - Core client library for REST API interaction
+- **`@dynamia/types`** - TypeScript type definitions for all API responses
+- **`@dynamia/hooks`** - React hooks for common operations
+- **`@dynamia/composables`** - Vue composables for reactive integration
+- Full type safety and IntelliSense support
+- Automatic API client generation from backend schema
+- WebSocket support for real-time features
+
+#### 🎨 **Vue Template**
+Modern frontend template with:
+- Vue 3 + TypeScript + Vite
+- Pre-configured integration with Dynamia Platform APIs
+- Responsive design with Tailwind CSS
+- Authentication and authorization out of the box
+- CRUD components library
+- Form validation and data binding
+- Real-time updates with WebSocket
+- Dashboard and reporting components
+
+#### 🔗 **Frontend Framework Integration**
+Seamless integration with popular frameworks:
+- **React** - Components and hooks for React apps
+- **Vue** - Full Vue 3 template and composables
+- **Angular** - Services and components for Angular projects
+- **Svelte** - Stores and components for Svelte
+- **Next.js / Nuxt** - SSR support and optimizations
+- Zero-config setup with sensible defaults
+- Automatic API discovery and client generation
+- Built-in authentication flows
+
+#### ⚡ **Automation & Developer Experience**
+- CLI tool for scaffolding projects and modules
+- Code generators for entities, views, and endpoints
+- Hot reload for view descriptors
+- Development dashboard for monitoring
+- Docker Compose templates for quick setup
+- GitHub Actions templates for CI/CD
+- Automated testing utilities
+
+### 🔮 Long-Term Vision
+
+- **GraphQL Support** - Alternative to REST with automatic schema generation
+- **Microservices Toolkit** - Tools for building distributed systems
+- **Cloud-Native Features** - Enhanced Kubernetes support, service mesh integration
+- **AI-Powered Code Generation** - Generate CRUD, forms, and reports from natural language
+- **Mobile SDK** - Native iOS and Android libraries
+- **Low-Code Builder** - Visual editor for building apps without coding
+
+---
+
+### 🤝 Help Shape the Future
+
+We value community feedback! If you have ideas, suggestions, or want to contribute to any of these initiatives:
+- 💬 Join discussions on [GitHub Discussions](https://github.com/dynamiatools/framework/discussions)
+- 🐛 Report issues or request features on [GitHub Issues](https://github.com/dynamiatools/framework/issues)
+- 🌟 Star the project and spread the word!
+
+---
+
 ## 📦 Built-in Enterprise Extensions
 
 Dynamia Platform includes powerful extensions in the `/extensions` folder:
