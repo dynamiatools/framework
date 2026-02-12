@@ -137,7 +137,6 @@ We value community feedback! If you have ideas, suggestions, or want to contribu
 - 🌟 Star the project and spread the word!
 
 ---
-
 ## 📦 Built-in Enterprise Extensions
 
 Dynamia Platform includes powerful extensions in the `/extensions` folder:
