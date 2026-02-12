@@ -68,7 +68,7 @@ public class AccountConfig {
 
     @Bean
     public EntityReferenceRepository<Long> accountChannelReferenceRepository() {
-        DefaultEntityReferenceRepository<Long> repo = new DefaultEntityReferenceRepository<>(AccountChannelSale.class, "name");
+        DefaultEntityReferenceRepository<Long> repo = new DefaultEntityReferenceRepository<>(AccountSaleChannel.class, "name");
         repo.setCacheable(true);
         return repo;
     }

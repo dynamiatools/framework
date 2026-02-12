@@ -43,7 +43,7 @@ public class SaasModuleProvider implements ModuleProvider {
         module.addPage(new CrudPage("accountPaymentProviders", "Payments Providers", AccountPaymentProvider.class));
         module.addPage(new CrudPage("accountCategories", "Categories", AccountCategory.class));
         module.addPage(new CrudPage("accountResellers", "Resellers", AccountReseller.class).icon("users").featured(4));
-        module.addPage(new CrudPage("accountChannels", "Sale Channels", AccountChannelSale.class).icon("tags"));
+        module.addPage(new CrudPage("accountChannels", "Sale Channels", AccountSaleChannel.class).icon("tags"));
 
         return module;
     }

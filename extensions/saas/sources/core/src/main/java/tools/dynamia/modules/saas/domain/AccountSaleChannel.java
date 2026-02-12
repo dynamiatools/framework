@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotNull;
 @Table(name = "saas_sale_channels")
 @Descriptor(fields = {"name"})
 @BatchSize(size = 10)
-public class AccountChannelSale extends SimpleEntity {
+public class AccountSaleChannel extends SimpleEntity {
 
     @NotNull
     @Column(unique = true)

@@ -59,7 +59,7 @@
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.saas</artifactId>
-            <version>3.5.0</version>
+            <version>26.1</version>
         </dependency>
 
         <dependency>

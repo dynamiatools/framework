@@ -17,6 +17,7 @@
 
 package tools.dynamia.modules.saas.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.ManyToOne;
 import org.hibernate.annotations.BatchSize;
 import tools.dynamia.domain.Descriptor;
@@ -37,8 +38,10 @@ public class AccountCategory extends SimpleEntity {
     @Column(unique = true)
     private String name;
     @ManyToOne
+    @JsonIgnore
     private AccountType defaultAccountType;
     @ManyToOne
+    @JsonIgnore
     private AccountProfile defaultAccountProfile;
 
     public String getName() {

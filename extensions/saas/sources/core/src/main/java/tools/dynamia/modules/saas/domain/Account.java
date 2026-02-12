@@ -195,7 +195,7 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     private String activationCoupon;
     private String redirect;
     @ManyToOne
-    private AccountChannelSale channel;
+    private AccountSaleChannel channel;
 
     public Account() {
         initLocale();
@@ -874,11 +874,11 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
         this.activationCoupon = activationCoupon;
     }
 
-    public AccountChannelSale getChannel() {
+    public AccountSaleChannel getChannel() {
         return channel;
     }
 
-    public void setChannel(AccountChannelSale channel) {
+    public void setChannel(AccountSaleChannel channel) {
         this.channel = channel;
     }
 

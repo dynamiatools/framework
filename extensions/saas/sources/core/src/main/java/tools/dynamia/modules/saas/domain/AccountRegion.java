@@ -1,5 +1,6 @@
 package tools.dynamia.modules.saas.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import tools.dynamia.domain.jpa.SimpleEntity;
@@ -20,16 +21,21 @@ public class AccountRegion extends SimpleEntity {
     private String name;
     private String code;
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     private AccountProfile defaultProfile;
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     private AccountType defaultType;
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     private AccountPaymentProvider paymentProvider;
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     private Account mainAccount;
     private String currency;
     private String timeZone = TimeZone.getDefault().getDisplayName();
     private String locale = Locale.getDefault().getDisplayName();
+    @JsonIgnore
     private String invoiceType;
 
     @OneToMany(mappedBy = "region", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -19,6 +19,7 @@
 package tools.dynamia.modules.saas.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hibernate.annotations.BatchSize;
 import tools.dynamia.domain.jpa.SimpleEntity;
 import tools.dynamia.domain.Transferable;
@@ -40,6 +41,7 @@ import java.util.List;
 @Entity
 @Table(name = "saas_account_types")
 @BatchSize(size = 10)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AccountType extends SimpleEntity implements Transferable<AccountTypeDTO> {
 
     @NotNull
