@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -236,10 +237,22 @@ class MoneyTest {
     @Test
     @DisplayName("Should get current currency")
     void testGetCurrentCurrency() {
-        String currency = Money.getCurrentCurrency();
+        // Save the current default locale
+        Locale originalLocale = java.util.Locale.getDefault();
 
-        assertNotNull(currency);
-        assertFalse(currency.isEmpty());
+        try {
+            // Set a locale with a valid country code for testing
+            java.util.Locale.setDefault(java.util.Locale.US);
+
+            String currency = Money.getCurrentCurrency();
+
+            assertNotNull(currency);
+            assertFalse(currency.isEmpty());
+            assertEquals("USD", currency);
+        } finally {
+            // Restore the original locale
+            java.util.Locale.setDefault(originalLocale);
+        }
     }
 
     @Test
