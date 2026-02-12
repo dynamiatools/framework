@@ -18,18 +18,46 @@ package tools.dynamia.viewers;
 
 
 /**
- * The Interface MergeableViewDescriptor.
+ * Interface for view descriptors that can be merged with another descriptor.
+ * <p>
+ * This interface extends {@link ViewDescriptor} to provide the capability of merging
+ * descriptor configurations. This is useful when you need to combine base descriptors
+ * with overrides or extensions, allowing for descriptor composition and reuse.
+ * </p>
+ * <p>
+ * The merging process typically combines fields, layouts, and parameters from another
+ * descriptor into the current descriptor, allowing for flexible descriptor inheritance
+ * and customization patterns.
+ * </p>
+ *
+ * Example:
+ * <pre>{@code
+ * MergeableViewDescriptor baseDescriptor = ...;
+ * ViewDescriptor customDescriptor = ...;
+ *
+ * // Merge custom descriptor into base descriptor
+ * baseDescriptor.merge(customDescriptor);
+ * }</pre>
  *
  * @author Mario A. Serrano Leones
- */
-
-/**
- * Interface for view descriptors that can be merged with another descriptor.
  */
 public interface MergeableViewDescriptor extends ViewDescriptor {
 
     /**
      * Merges the current descriptor with another view descriptor.
+     * <p>
+     * This method combines the configuration from the provided descriptor into the
+     * current descriptor. The merge strategy (e.g., overwrite, append, or merge)
+     * is implementation-specific and may vary depending on the descriptor type.
+     * </p>
+     * <p>
+     * Common merging operations include:
+     * <ul>
+     *   <li>Adding or overriding fields from the source descriptor</li>
+     *   <li>Combining layout configurations</li>
+     *   <li>Merging parameters and metadata</li>
+     * </ul>
+     * </p>
      *
      * @param anotherViewDescriptor the descriptor to merge with
      */
