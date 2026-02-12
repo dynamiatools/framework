@@ -1,8 +1,8 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia/tools.dynamia.app)](https://search.maven.org/search?q=tools.dynamia)
 ![Java Version Required](https://img.shields.io/badge/java-25-blue)
-![Version](https://img.shields.io/badge/version-26.1-brightgreen)
-![CalVer](https://img.shields.io/badge/versioning-CalVer-blue)
+![Version](https://img.shields.io/badge/version-26.2.0-brightgreen)
+![CalVer](https://img.shields.io/badge/versioning-CalVer%20YY.MM.MINOR-blue)
 [![Java CI with Maven](https://github.com/dynamiatools/framework/actions/workflows/maven.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/maven.yml)
 [![Release and Deploy](https://github.com/dynamiatools/framework/actions/workflows/release.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/release.yml)
 [![DynamiaTools Documentation](https://img.shields.io/badge/DynamiaTools-Documentation-orange)](https://dynamia.tools/getting-started/)
@@ -16,11 +16,18 @@
 
 ### 📅 CalVer Versioning
 
-Starting with version **26.1**, Dynamia Platform adopts **Calendar Versioning (CalVer)** with the format `YY.MINOR`. This means:
+Starting with version **26.2.0**, Dynamia Platform adopts **Calendar Versioning (CalVer)** with the format `YY.MM.MINOR`. This means:
 - **All modules share the same version**: Core, extensions, starters, themes—everything is released together
-- **26.1** = First release of 2026 (Year 26, Minor release 1)
+- **26.2.0** = First release of February 2026 (Year 26, Month 02, Release 0)
+- **26.2.1** = Second release of February 2026
+- **26.3.0** = First release of March 2026
 - **Unified releases** ensure compatibility and simplify dependency management
 - No more version mismatches between platform components!
+
+**Examples**:
+- `26.2.0` → February 2026, first release
+- `26.2.1` → February 2026, second release (hotfix or minor update)
+- `26.12.3` → December 2026, fourth release
 
 ## 🚀 What Makes Dynamia Platform Special
 
@@ -31,6 +38,12 @@ Dynamia Platform represents a major evolution from DynamiaTools, bringing togeth
 - **Zero-Config Philosophy**: Sensible defaults with easy customization
 - **Enterprise-Grade**: Built for scalability, multi-tenancy, and security
 - **Developer Experience**: Focus on productivity and code simplicity
+
+### 🎨 Automatic Frontend Generation
+
+By default, **Dynamia Platform automatically generates full-featured web interfaces** using **ZK Framework**, a powerful server-side component framework that eliminates the need to write JavaScript, HTML, or CSS manually. Simply define your entities and view descriptors, and ZK renders responsive, interactive UIs with zero frontend code.
+
+**Coming Soon**: In upcoming releases, Dynamia Platform will support **modern frontend frameworks** like **React**, **Vue**, and **Angular**, giving you the flexibility to choose your preferred technology stack while maintaining the same automatic generation capabilities. You'll be able to leverage our **TypeScript SDK** and pre-built components to build modern, decoupled SPAs that consume Dynamia's RESTful APIs.
 
 ## ✨ Core Capabilities
 
@@ -218,19 +231,19 @@ Enterprise authentication and authorization:
        <dependency>
            <groupId>tools.dynamia</groupId>
            <artifactId>tools.dynamia.app</artifactId>
-           <version>26.1</version>
+           <version>26.2.0</version>
        </dependency>
    
        <dependency>
            <groupId>tools.dynamia</groupId>
            <artifactId>tools.dynamia.zk</artifactId>
-           <version>26.1</version>
+           <version>26.2.0</version>
        </dependency>
    
        <dependency>
            <groupId>tools.dynamia</groupId>
            <artifactId>tools.dynamia.domain.jpa</artifactId>
-           <version>26.1</version>
+           <version>26.2.0</version>
        </dependency>
    </dependencies>
    ```
@@ -238,9 +251,9 @@ Enterprise authentication and authorization:
    **Gradle** (`build.gradle`)
    ```groovy
    dependencies {
-       implementation 'tools.dynamia:tools.dynamia.app:26.1'
-       implementation 'tools.dynamia:tools.dynamia.zk:26.1'
-       implementation 'tools.dynamia:tools.dynamia.domain.jpa:26.1'
+       implementation 'tools.dynamia:tools.dynamia.app:26.2.0'
+       implementation 'tools.dynamia:tools.dynamia.zk:26.2.0'
+       implementation 'tools.dynamia:tools.dynamia.domain.jpa:26.2.0'
    }
    ```
 
@@ -279,65 +292,65 @@ Enterprise authentication and authorization:
 
 ### Adding Extensions
 
-To use any of the built-in extensions, simply add their dependencies. **All extensions now share the same version (26.1)** thanks to unified CalVer:
+To use any of the built-in extensions, simply add their dependencies. **All extensions now share the same version (26.2.0)** thanks to unified CalVer:
 
 ```xml
 <!-- Multi-tenancy / SaaS -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.saas</artifactId>
-    <version>26.1</version>
+    <version>26.2.0</version>
 </dependency>
 
 <!-- Email & SMS -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.email</artifactId>
-    <version>26.1</version>
+    <version>26.2.0</version>
 </dependency>
 
 <!-- Entity Files with S3 Support -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.entityfiles</artifactId>
-    <version>26.1</version>
+    <version>26.2.0</version>
 </dependency>
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.entityfiles.s3</artifactId>
-    <version>26.1</version>
+    <version>26.2.0</version>
 </dependency>
 
 <!-- Dashboard -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.dashboard</artifactId>
-    <version>26.1</version>
+    <version>26.2.0</version>
 </dependency>
 
 <!-- Reporting -->
 <dependency>
     <groupId>tools.dynamia.reports</groupId>
     <artifactId>tools.dynamia.reports.core</artifactId>
-    <version>26.1</version>
+    <version>26.2.0</version>
 </dependency>
 
 <!-- File Importer -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.fileimporter</artifactId>
-    <version>26.1</version>
+    <version>26.2.0</version>
 </dependency>
 
 <!-- Security -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.security</artifactId>
-    <version>26.1</version>
+    <version>26.2.0</version>
 </dependency>
 ```
 
-> **💡 Pro Tip**: With CalVer, all Dynamia Platform components use the same version. Just use `26.1` for everything!
+> **💡 Pro Tip**: With CalVer, all Dynamia Platform components use the same version. Just use `26.2.0` for everything!
 
 > **Note**: All artifacts are available on [Maven Central](https://search.maven.org/search?q=tools.dynamia)
 
@@ -455,12 +468,12 @@ Java 11+ and ecosystem update:
 
 #### **v26.x - CalVer Generation** (2026+)
 **The Modern Era** - Simplified versioning and cutting-edge technology:
-- 📅 **CalVer Versioning** (YY.MINOR) - All modules unified under same version
+- 📅 **CalVer Versioning** (YY.MM.MINOR) - All modules unified under same version (Year.Month.Release)
 - ☕ **Java 25** - Latest Java innovations and performance
 - 🚀 **Spring Boot 4** - Next-gen Spring ecosystem
 - 🎨 **ZK 10+** - Modern web UI capabilities
 - 🔄 **Synchronized Releases** - Core, extensions, starters, and themes share the same version
-- 🎯 **Simplified Dependencies** - One version to rule them all (26.1)
+- 🎯 **Simplified Dependencies** - One version to rule them all (e.g., 26.2.0 for February 2026)
 - ⚡ **Enhanced Performance** - Optimized for modern JVM and cloud environments
 - 🛡️ **Production Hardened** - Battle-tested in enterprise environments
 

@@ -24,7 +24,7 @@
     <parent>
         <groupId>tools.dynamia.themes</groupId>
         <artifactId>tools.dynamia.themes.parent</artifactId>
-        <version>26.1</version>
+        <version>26.2.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -102,7 +102,7 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.zk</artifactId>
-            <version>26.1</version>
+            <version>26.2.0</version>
             <scope>provided</scope>
         </dependency>
 

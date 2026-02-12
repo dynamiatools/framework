@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>tools.dynamia.modules</groupId>
 		<artifactId>tools.dynamia.modules.entityfiles.parent</artifactId>
-		<version>26.1</version>
+		<version>26.2.0</version>
 	</parent>
 
 	<name>DynamiaModules - EntityFiles - S3</name>
@@ -49,7 +49,7 @@
 		<dependency>
 			<groupId>tools.dynamia.modules</groupId>
 			<artifactId>tools.dynamia.modules.entityfiles</artifactId>
-			<version>26.1</version>
+			<version>26.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
