@@ -22,26 +22,94 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * A Spring-managed bean that provides access to icon resources through a Map-like interface.
+ * This class extends HashMap but overrides key methods to integrate with the IconsTheme system
+ * for dynamic icon resolution and size specification.
+ *
+ * <p>The class allows icon retrieval using simple string keys, with optional size specification
+ * using a colon-separated format (e.g., "icon-name:large"). Icons are resolved through the
+ * IconsTheme system and return the real path to the icon resource.</p>
+ *
+ * <p>Example usage in expression language (EL):</p>
+ * <pre>{@code
+ * ${icons['save']}           // Returns small save icon path
+ * ${icons['save:large']}     // Returns large save icon path
+ * ${icons.get('save', 'disk')} // Returns save icon or disk icon as fallback
+ * }</pre>
+ *
+ * <p>This component is registered with Spring using the bean name "icons" for easy access
+ * in templates and views.</p>
+ *
  * @author Mario A. Serrano Leones
+ * @see IconsTheme
+ * @see Icon
+ * @see IconSize
  */
 @Component("icons")
 public class Icons extends HashMap<String, String> {
 
+    /**
+     * Overridden to prevent modification of the internal map structure.
+     * This method intentionally does nothing and always returns null, as icons
+     * are managed by the IconsTheme system and should not be added directly.
+     *
+     * @param key the icon name key (ignored)
+     * @param value the icon value (ignored)
+     * @return always returns null
+     */
     @Override
     public String put(String key, String value) {
         return null;
     }
 
+    /**
+     * Overridden to prevent modification of the internal map structure.
+     * This method intentionally does nothing, as icons are managed by the
+     * IconsTheme system and should not be added directly.
+     *
+     * @param m the map of entries to add (ignored)
+     */
     @Override
     public void putAll(Map<? extends String, ? extends String> m) {
     }
 
+    /**
+     * Retrieves the real path to an icon resource by its name.
+     * The key can include an optional size specification using colon notation (e.g., "icon-name:large").
+     * If no size is specified, IconSize.SMALL is used by default.
+     *
+     * @param key the icon name, optionally followed by ":size" (e.g., "save", "save:large")
+     * @return the real path to the icon resource, or null if the icon is not found
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * Icons icons = new Icons();
+     * String path = icons.get("save");        // Returns small save icon path
+     * String path2 = icons.get("save:large"); // Returns large save icon path
+     * }</pre>
+     */
     @Override
     public String get(Object key) {
         var icon = getIcon((String) key);
         return icon.getRealPath(getSize((String) key));
     }
 
+    /**
+     * Retrieves the real path to an icon resource by its name, with a fallback to a default icon.
+     * If the requested icon is not found or equals Icon.NONE, the default icon is used instead.
+     * The key can include an optional size specification using colon notation.
+     *
+     * @param key the icon name, optionally followed by ":size" (e.g., "save", "save:large")
+     * @param defaultIcon the fallback icon name to use if the primary icon is not found
+     * @return the real path to the icon resource (primary or default), or null if neither is found
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * Icons icons = new Icons();
+     * String path = icons.get("custom-icon", "save"); // Returns custom-icon if exists, otherwise save
+     * String path2 = icons.get("missing:large", "fallback:large"); // Returns fallback icon in large size
+     * }</pre>
+     */
     public String get(Object key, String defaultIcon) {
         var icon = getIcon((String) key);
         if (icon == null || icon.equals(Icon.NONE)) {
@@ -51,6 +119,13 @@ public class Icons extends HashMap<String, String> {
         return icon.getRealPath(getSize((String) key));
     }
 
+    /**
+     * Retrieves an Icon object from the IconsTheme system.
+     * Extracts the icon name (without size specification) and looks it up in the theme.
+     *
+     * @param key the icon name, possibly including size specification (e.g., "save:large")
+     * @return the Icon object, or null if the key is null or icon not found
+     */
     private Icon getIcon(String key) {
         if (key == null) {
             return null;
@@ -59,6 +134,22 @@ public class Icons extends HashMap<String, String> {
     }
 
 
+    /**
+     * Extracts the icon size from a name string using colon notation.
+     * If the name contains a colon, the text after it is parsed as an IconSize enum value.
+     * If no colon is present or parsing fails, returns IconSize.SMALL as default.
+     *
+     * @param name the icon name with optional size (e.g., "save", "save:large", "delete:medium")
+     * @return the parsed IconSize, or IconSize.SMALL if not specified or invalid
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * getSize("save");        // Returns IconSize.SMALL
+     * getSize("save:large");  // Returns IconSize.LARGE
+     * getSize("save:MEDIUM"); // Returns IconSize.MEDIUM
+     * getSize("save:invalid");// Returns IconSize.SMALL (fallback)
+     * }</pre>
+     */
     private IconSize getSize(String name) {
         IconSize iconSize = IconSize.SMALL;
         try {
