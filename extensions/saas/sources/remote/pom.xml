@@ -25,7 +25,7 @@
     <parent>
         <artifactId>tools.dynamia.modules.saas.parent</artifactId>
         <groupId>tools.dynamia.modules</groupId>
-        <version>26.2.0</version>
+        <version>26.2.1</version>
     </parent>
 
 
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.saas.jpa</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api -->
         <dependency>

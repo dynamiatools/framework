@@ -23,7 +23,7 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>26.2.0</version>
+        <version>26.2.1</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -74,58 +74,58 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.actions</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.commons</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.crud</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.domain</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.integration</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.io</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.navigation</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.reports</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.templates</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.viewers</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.web</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
 
 
@@ -205,7 +205,7 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.domain.jpa</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
