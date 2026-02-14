@@ -17,6 +17,10 @@
 package tools.dynamia.ui;
 
 /**
+ * Enumeration representing different types of messages that can be displayed in the UI.
+ * This enum can be used to categorize messages based on their severity or purpose, such as normal informational messages,
+ * warnings, errors, critical issues, or special notifications.
+ *
  * @author Mario A. Serrano Leones
  */
 public enum MessageType {

@@ -25,6 +25,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Annotation to mark a class as an IconsProvider installer.
+ * Classes annotated with @InstallIcons will be automatically detected and registered as IconsProvider beans in the Spring application context.
  *
  * @author Mario A. Serrano Leones
  */

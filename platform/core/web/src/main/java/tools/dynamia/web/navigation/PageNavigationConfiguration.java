@@ -15,7 +15,21 @@ import tools.dynamia.navigation.ModuleContainer;
 import java.lang.reflect.Method;
 import java.util.List;
 
-
+/**
+ * Configuration class that dynamically registers page navigation routes based on the pages defined in the application's modules.
+ *
+ * <p>This class listens for the application context to be fully initialized and then iterates through all modules and their associated pages to create dynamic routes for page navigation. Each page's virtual path is used to construct a unique URI, which is then mapped to the {@link PageNavigationController#route} method.</p>
+ *
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * @Configuration
+ * public class MyAppPageNavigationConfig extends PageNavigationConfiguration {
+ *     // Additional configuration or overrides can be added here if needed
+ * }
+ * }</pre>
+ *
+ * @author Mario A. Serrano Leones
+ */
 public class PageNavigationConfiguration {
 
     public static final String PAGE_URI = "/page/";

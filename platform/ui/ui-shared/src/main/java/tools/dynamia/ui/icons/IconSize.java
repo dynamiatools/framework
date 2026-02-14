@@ -17,6 +17,7 @@
 package tools.dynamia.ui.icons;
 
 /**
+ * Enumeration representing different sizes for icons in the UI. This enum defines three standard sizes: SMALL, NORMAL, and LARGE, each associated with a specific directory name that can be used to locate the corresponding icon resources. The getDir() method allows retrieval of the directory name for each size, facilitating the organization and access of icon assets based on their intended display size.
  *
  * @author Mario A. Serrano Leones
  */

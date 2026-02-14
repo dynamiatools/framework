@@ -38,10 +38,7 @@ import tools.dynamia.io.IOUtils;
 import tools.dynamia.io.Resource;
 import tools.dynamia.ui.MessageDisplayer;
 import tools.dynamia.ui.MessageType;
-import tools.dynamia.ui.icons.Icon;
-import tools.dynamia.ui.icons.IconSize;
-import tools.dynamia.ui.icons.IconType;
-import tools.dynamia.ui.icons.IconsTheme;
+import tools.dynamia.ui.icons.*;
 import tools.dynamia.web.util.HttpUtils;
 import tools.dynamia.zk.EventQueueSubscriber;
 import tools.dynamia.zk.crud.ui.EntityTreeNode;
@@ -795,6 +792,19 @@ public abstract class ZKUtil {
      * @param size      the desired icon size
      */
     public static void configureComponentIcon(Icon icon, Component component, IconSize size) {
+        configureComponentIcon(icon, component, size, Collections.emptyList());
+    }
+
+    /**
+     * Configures an icon for a ZK component, supporting both IMAGE and FONT icon types.
+     * Automatically handles different component types (LabelImageElement, AbstractTag, Image).
+     *
+     * @param icon         the icon to configure
+     * @param component    the component to apply the icon to
+     * @param size         the desired icon size
+     * @param extraClasses additional CSS classes to apply to the component (can be null or empty)
+     */
+    public static void configureComponentIcon(Icon icon, Component component, IconSize size, List<String> extraClasses) {
 
         if (icon == null) {
             return;
@@ -819,18 +829,23 @@ public abstract class ZKUtil {
         } else if (component instanceof Image image && icon.getType() == IconType.IMAGE) {
             image.setSrc(realPath);
         }
+
+        if (extraClasses != null && !extraClasses.isEmpty() && component instanceof HtmlBasedComponent hcomp) {
+            extraClasses.forEach(hcomp::addSclass);
+        }
     }
 
     /**
      * Configures an icon for a component using an icon name from the current theme.
      * Resolves the icon from {@link IconsTheme} and applies it to the component.
      *
-     * @param image     the icon name or identifier
+     * @param icon     the icon name or identifier
      * @param component the component to apply the icon to
      * @param size      the desired icon size
      */
-    public static void configureComponentIcon(String image, Component component, IconSize size) {
-        configureComponentIcon(IconsTheme.get().getIcon(image), component, size);
+    public static void configureComponentIcon(String icon, Component component, IconSize size) {
+        IconName iconName = Icons.parseIconName(icon);
+        configureComponentIcon(IconsTheme.get().getIcon(iconName.name()), component, size, iconName.classes());
     }
 
     /**

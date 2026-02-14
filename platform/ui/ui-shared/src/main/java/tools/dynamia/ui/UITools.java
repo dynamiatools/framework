@@ -4,11 +4,33 @@ import tools.dynamia.integration.Containers;
 
 import java.util.List;
 
+/**
+ * Central utility class for UI-related operations in the Dynamia Tools framework.
+ * This class provides static methods for creating and displaying common UI components
+ * such as dialogs, listboxes, comboboxes, and buttons. It serves as a facade over
+ * the underlying {@link UIToolsProvider} implementation, allowing for decoupled
+ * UI component creation and management.
+ *
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * DialogComponent dialog = UITools.showDialog("My Dialog", "This is the content");
+ * ListboxComponent<String> listbox = UITools.listbox(List.of("Option 1", "Option 2"));
+ * ButtonComponent button = UITools.button("Click Me", () -> System.out.println("Button clicked"));
+ * }</pre>
+ *
+ * @author Mario A. Serrano Leones
+ */
 public class UITools {
 
     private static UIToolsProvider currentProvider;
 
 
+    /**
+     * Get the current UIToolsProvider instance.
+     *
+     * @return the current provider
+     * @throws IllegalStateException if no provider is found
+     */
     private static UIToolsProvider getProvider() {
         if (currentProvider == null) {
             currentProvider = Containers.get().findObject(UIToolsProvider.class);
@@ -19,6 +41,12 @@ public class UITools {
         return currentProvider;
     }
 
+    /**
+     * Set the current UIToolsProvider instance. This method can be used to override the default provider
+     * found in the container, allowing for custom implementations or testing purposes.
+     *
+     * @param currentProvider the new provider to set
+     */
     public static void setCurrentProvider(UIToolsProvider currentProvider) {
         UITools.currentProvider = currentProvider;
     }

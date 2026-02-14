@@ -18,8 +18,7 @@ package tools.dynamia.ui.icons;
 
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A Spring-managed bean that provides access to icon resources through a Map-like interface.
@@ -53,7 +52,7 @@ public class Icons extends HashMap<String, String> {
      * This method intentionally does nothing and always returns null, as icons
      * are managed by the IconsTheme system and should not be added directly.
      *
-     * @param key the icon name key (ignored)
+     * @param key   the icon name key (ignored)
      * @param value the icon value (ignored)
      * @return always returns null
      */
@@ -99,7 +98,7 @@ public class Icons extends HashMap<String, String> {
      * If the requested icon is not found or equals Icon.NONE, the default icon is used instead.
      * The key can include an optional size specification using colon notation.
      *
-     * @param key the icon name, optionally followed by ":size" (e.g., "save", "save:large")
+     * @param key         the icon name, optionally followed by ":size" (e.g., "save", "save:large")
      * @param defaultIcon the fallback icon name to use if the primary icon is not found
      * @return the real path to the icon resource (primary or default), or null if neither is found
      *
@@ -161,6 +160,95 @@ public class Icons extends HashMap<String, String> {
             // ignore
         }
         return iconSize;
+    }
+
+    /**
+     * Parses a comma-separated string of icon class names into a list of trimmed, non-blank strings.
+     *
+     * @param names the comma-separated string of icon class names (e.g., "class1, class2, class3")
+     * @return a List of individual icon class names, or an empty list if the input is null or blank
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * parseIconNames("class1, class2, class3"); // Returns ["class1", "class2", "class3"]
+     * parseIconNames("  class1 , , class2  , "); // Returns ["class1", "class2"]
+     * parseIconNames(null); // Returns []
+     * parseIconNames(""); // Returns []
+     * }</pre>
+     */
+    public static List<String> parseIconNames(String names) {
+        if (names == null || names.isBlank()) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(names.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .toList();
+    }
+
+    /**
+     * Parses a string into an IconName object containing the icon name and optional CSS classes.
+     * The expected format is: {@code iconName|class1,class2,class3} where the icon name comes first,
+     * followed by an optional pipe separator and comma-separated CSS class names.
+     *
+     * <p>This method is useful for specifying icons with additional styling or animation classes
+     * in a compact, string-friendly format. The pipe character (|) separates the base icon name
+     * from the CSS classes, and commas separate individual class names.</p>
+     *
+     * <p>Format rules:</p>
+     * <ul>
+     *   <li>Icon name is always the first part before the pipe (|) separator</li>
+     *   <li>CSS classes are optional and come after the pipe separator</li>
+     *   <li>Multiple CSS classes are separated by commas</li>
+     *   <li>Whitespace around names and classes is automatically trimmed</li>
+     *   <li>Empty or blank strings return null</li>
+     * </ul>
+     *
+     * @param name the string to parse in format "iconName|class1,class2" or just "iconName"
+     * @return an IconName object containing the icon name and CSS classes, or null if the input is null or blank
+     *
+     * <p>Examples:</p>
+     * <pre>{@code
+     * // Simple icon without classes
+     * IconName icon1 = Icons.parseIconName("edit");
+     * // Returns: IconName{name="edit", classes=[]}
+     *
+     * // Icon with single CSS class
+     * IconName icon2 = Icons.parseIconName("check|text-success");
+     * // Returns: IconName{name="check", classes=["text-success"]}
+     *
+     * // Icon with multiple CSS classes
+     * IconName icon3 = Icons.parseIconName("edit|text-danger,pulse,fa-spin");
+     * // Returns: IconName{name="edit", classes=["text-danger", "pulse", "fa-spin"]}
+     *
+     * // Icon with whitespace (automatically trimmed)
+     * IconName icon4 = Icons.parseIconName("  save | text-primary , bounce  ");
+     * // Returns: IconName{name="save", classes=["text-primary", "bounce"]}
+     *
+     * // Invalid inputs
+     * Icons.parseIconName(null);   // Returns: null
+     * Icons.parseIconName("");     // Returns: null
+     * Icons.parseIconName("   ");  // Returns: null
+     * }</pre>
+     *
+     * @see IconName
+     * @see #parseIconNames(String)
+     */
+    public static IconName parseIconName(String name) {
+
+        if (name == null || name.isBlank()) {
+            return null;
+        }
+        String[] parts = name.split("\\|");
+        if (parts.length == 0) {
+            return null;
+        }
+        String iconName = parts[0].trim();
+        List<String> classes = Collections.emptyList();
+        if (parts.length > 1) {
+            classes = parseIconNames(parts[1]);
+        }
+        return new IconName(iconName, classes);
     }
 
 
