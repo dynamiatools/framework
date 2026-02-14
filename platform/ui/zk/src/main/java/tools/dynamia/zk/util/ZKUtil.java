@@ -830,8 +830,16 @@ public abstract class ZKUtil {
             image.setSrc(realPath);
         }
 
-        if (extraClasses != null && !extraClasses.isEmpty() && component instanceof HtmlBasedComponent hcomp) {
-            extraClasses.forEach(hcomp::addSclass);
+        if (extraClasses != null && !extraClasses.isEmpty()) {
+            if (component instanceof HtmlBasedComponent hcomp) {
+                extraClasses.forEach(hcomp::addSclass);
+            } else if (component instanceof AbstractTag tag) {
+                if (tag.getSclass() != null) {
+                    tag.setSclass(tag.getSclass() + " " + String.join(" ", extraClasses));
+                } else {
+                    tag.setSclass(String.join(" ", extraClasses));
+                }
+            }
         }
     }
 
@@ -839,7 +847,7 @@ public abstract class ZKUtil {
      * Configures an icon for a component using an icon name from the current theme.
      * Resolves the icon from {@link IconsTheme} and applies it to the component.
      *
-     * @param icon     the icon name or identifier
+     * @param icon      the icon name or identifier
      * @param component the component to apply the icon to
      * @param size      the desired icon size
      */

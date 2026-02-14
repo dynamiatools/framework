@@ -230,19 +230,20 @@ public class Icons extends HashMap<String, String> {
      * Icons.parseIconName("");     // Returns: null
      * Icons.parseIconName("   ");  // Returns: null
      * }</pre>
-     *
      * @see IconName
      * @see #parseIconNames(String)
      */
     public static IconName parseIconName(String name) {
 
         if (name == null || name.isBlank()) {
-            return null;
+            return new IconName(null, Collections.emptyList());
         }
+
+        if (!name.contains("|")) {
+            return new IconName(name.trim(), Collections.emptyList());
+        }
+
         String[] parts = name.split("\\|");
-        if (parts.length == 0) {
-            return null;
-        }
         String iconName = parts[0].trim();
         List<String> classes = Collections.emptyList();
         if (parts.length > 1) {
