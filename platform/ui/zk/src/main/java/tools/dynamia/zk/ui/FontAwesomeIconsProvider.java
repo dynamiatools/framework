@@ -27,11 +27,48 @@ import tools.dynamia.ui.icons.InstallIcons;
 import java.io.IOException;
 import java.util.Properties;
 
+/**
+ * IconsProvider implementation for Font Awesome icon library.
+ * This provider loads and manages Font Awesome icons, supporting both predefined mappings
+ * from a properties file and dynamic icon name resolution.
+ *
+ * <p>The provider supports multiple icon resolution strategies:</p>
+ * <ul>
+ *   <li>Loading predefined icon mappings from {@code /META-INF/dynamia/fa-icons.properties}</li>
+ *   <li>Dynamically resolving icons with "fa-" prefix (e.g., "fa-save" → "fa fa-save")</li>
+ *   <li>Direct Font Awesome class names (e.g., "fa fa-user", "fab fa-github")</li>
+ * </ul>
+ *
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * Icon saveIcon = provider.getIcon("save");           // From properties file
+ * Icon customIcon = provider.getIcon("fa-user");      // Dynamic resolution
+ * Icon brandIcon = provider.getIcon("fab fa-github"); // Direct class name
+ * }</pre>
+ *
+ * @see AbstractFontIconsProvider
+ * @see FAIcon
+ */
 public class FontAwesomeIconsProvider extends AbstractFontIconsProvider {
 
+    /**
+     * Logger for reporting icon loading errors and warnings.
+     */
     private static final LoggingService logger = new SLF4JLoggingService(FontAwesomeIconsProvider.class);
 
-
+    /**
+     * Provides the mapping between logical icon names and Font Awesome class names.
+     * Loads the icon mappings from a properties file located at {@code /META-INF/dynamia/fa-icons.properties}.
+     *
+     * <p>The properties file format:</p>
+     * <pre>
+     * save=floppy-disk
+     * edit=pen-to-square
+     * delete=trash-can
+     * </pre>
+     *
+     * @return Properties object containing icon name mappings, or empty Properties if loading fails
+     */
     @Override
     public Properties getNamesMapping() {
         Properties properties = new Properties();
@@ -44,10 +81,36 @@ public class FontAwesomeIconsProvider extends AbstractFontIconsProvider {
         return properties;
     }
 
+    /**
+     * Returns the classpath location of the Font Awesome icons properties file.
+     * Subclasses can override this method to provide a different properties file location.
+     *
+     * @return the classpath path to the icons properties file
+     */
     protected String getIconsPath() {
         return "/META-INF/dynamia/fa-icons.properties";
     }
 
+    /**
+     * Retrieves a Font Awesome icon by its name with support for multiple resolution strategies.
+     *
+     * <p>Resolution order:</p>
+     * <ol>
+     *   <li>Checks the predefined mappings from properties file</li>
+     *   <li>If not found and name starts with "fa-", creates icon dynamically</li>
+     *   <li>If name starts with "fa " or "fab ", uses it as direct Font Awesome class</li>
+     * </ol>
+     *
+     * <p>Examples:</p>
+     * <pre>{@code
+     * getIcon("save");           // From properties: fa fa-floppy-disk
+     * getIcon("fa-user");        // Dynamic: fa fa-user
+     * getIcon("fab fa-github");  // Direct: fab fa-github
+     * }</pre>
+     *
+     * @param name the icon name or Font Awesome class
+     * @return the Icon object, or null if not resolvable
+     */
     @Override
     public Icon getIcon(String name) {
         Icon icon = super.getIcon(name);
@@ -66,10 +129,24 @@ public class FontAwesomeIconsProvider extends AbstractFontIconsProvider {
         return icon;
     }
 
+    /**
+     * Returns the prefix used for Font Awesome icon names.
+     * This prefix is used in dynamic icon resolution and icon class generation.
+     *
+     * @return the icon prefix, default is "fa-"
+     */
     protected String getIconsPrefix() {
         return "fa-";
     }
 
+    /**
+     * Creates a new FAIcon instance with proper Font Awesome class formatting.
+     * Constructs the full Font Awesome CSS class by combining "fa " prefix with the icon name.
+     *
+     * @param name the logical name of the icon
+     * @param internalName the Font Awesome specific icon name (without "fa-" prefix)
+     * @return a new FAIcon instance configured with Font Awesome classes
+     */
     @Override
     protected Icon newIcon(String name, String internalName) {
         return new FAIcon(name, "fa " + getIconsPrefix() + internalName);

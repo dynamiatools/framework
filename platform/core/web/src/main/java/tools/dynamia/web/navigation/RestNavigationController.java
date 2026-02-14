@@ -52,6 +52,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controller responsible for handling RESTful API requests related to CRUD operations on entities defined in the application. It provides endpoints for reading, creating, updating, and deleting entities based on the paths defined in the application's navigation structure. The controller utilizes the CrudService to perform database operations and returns JSON responses with the appropriate data and metadata for each request. It also handles pagination and query parameters for listing entities, as well as access restrictions based on the navigation configuration.
+ *
+ * @author Mario A. Serrano Leones
+ */
 @RestController("restNavigationController")
 @Order(1000)
 public class RestNavigationController extends AbstractLoggable {

@@ -21,15 +21,12 @@ import org.zkoss.zhtml.I;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Span;
-import tools.dynamia.ui.icons.Icon;
-import tools.dynamia.ui.icons.IconSize;
-import tools.dynamia.ui.icons.IconType;
-import tools.dynamia.ui.icons.IconsTheme;
+import tools.dynamia.ui.icons.*;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.util.ZKUtil;
 
-public class EnumIconImage extends Span  implements LoadableOnly{
+public class EnumIconImage extends Span implements LoadableOnly {
 
     /**
      *
@@ -54,22 +51,25 @@ public class EnumIconImage extends Span  implements LoadableOnly{
 
     private void render() {
         getChildren().clear();
-        setTooltiptext(null);
-        String iconName = getIconName();
-        if (iconName != null) {
-            Icon icon = IconsTheme.get().getIcon(iconName);
-            setTooltiptext(value.name());
-            if (icon.getType() == IconType.IMAGE) {
-                Image image = new Image();
-                image.setParent(this);
-                ZKUtil.configureComponentIcon(icon, image, size);
+        if (value != null) {
+            setTooltiptext(null);
+            String iconName = getIconName();
+            if (iconName != null) {
+                IconName iconNameObj = Icons.parseIconName(iconName);
+                Icon icon = IconsTheme.get().getIcon(iconNameObj.name());
+                setTooltiptext(value.name());
+                if (icon.getType() == IconType.IMAGE) {
+                    Image image = new Image();
+                    image.setParent(this);
+                    ZKUtil.configureComponentIcon(icon, image, size, iconNameObj.classes());
+                } else {
+                    I i = new I();
+                    i.setParent(this);
+                    ZKUtil.configureComponentIcon(icon, i, size, iconNameObj.classes());
+                }
             } else {
-                I i = new I();
-                i.setParent(this);
-                ZKUtil.configureComponentIcon(icon, i, size);
+                appendChild(new Label(value.name()));
             }
-        } else {
-            appendChild(new Label(value.name()));
         }
     }
 
@@ -105,14 +105,25 @@ public class EnumIconImage extends Span  implements LoadableOnly{
         return iconsNames;
     }
 
-    public void setIconsNames(String[] iconsNames) {
+    public void setIconsNamesValues(String[] iconsNames) {
         this.iconsNames = iconsNames;
         render();
     }
 
+    /**
+     * Sets the icon names from a comma-separated string and triggers a re-render.
+     * Spaces are automatically removed from the input string.
+     *
+     * @param iconsNames comma-separated string of icon names (e.g., "check,clock,times")
+     *                   <p>
+     *                   Example:
+     *                   <pre>{@code
+     *                                                       iconImage.setIconsNames("check-circle, clock, times-circle");
+     *                                                       }</pre>
+     */
     public void setIconsNames(String iconsNames) {
         if (iconsNames != null) {
-            setIconsNames(iconsNames.replace(" ", "").split(","));
+            setIconsNamesValues(iconsNames.replace(" ", "").split(","));
         }
     }
 }

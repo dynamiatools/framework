@@ -22,7 +22,7 @@
     <parent>
         <artifactId>tools.dynamia.modules.entityfiles.parent</artifactId>
         <groupId>tools.dynamia.modules</groupId>
-        <version>26.2.0</version>
+        <version>26.2.1</version>
     </parent>
     <name>DynamiaModules - EntityFiles - Core</name>
     <artifactId>tools.dynamia.modules.entityfiles</artifactId>
@@ -54,20 +54,20 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.domain.jpa</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.io</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
             <type>jar</type>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.web</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
             <type>jar</type>
         </dependency>
 

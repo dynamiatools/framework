@@ -39,7 +39,7 @@ package tools.dynamia.reports;
  *             case "status":
  *                 return user.isActive() ? "Active" : "Inactive";
  *             default:
- *                 return BeanUtils.getFieldValue(field, user);
+ *                 return {@link tools.dynamia.commons.ObjectOperations}.getFieldValue(field, user);
  *         }
  *     }
  * }

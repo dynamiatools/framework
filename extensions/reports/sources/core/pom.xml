@@ -23,7 +23,7 @@
     <parent>
         <groupId>tools.dynamia.modules</groupId>
         <artifactId>tools.dynamia.modules.reports.parent</artifactId>
-        <version>26.2.0</version>
+        <version>26.2.1</version>
     </parent>
 
     <name>DynamiaModules - Reports Core</name>
@@ -50,17 +50,17 @@
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.reports.api</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.domain.jpa</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.saas.jpa</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -69,12 +69,12 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.reports</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.templates</artifactId>
-            <version>26.2.0</version>
+            <version>26.2.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

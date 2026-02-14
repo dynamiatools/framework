@@ -19,6 +19,8 @@ package tools.dynamia.ui.icons;
 import java.io.Serializable;
 
 /**
+ * Class representing an icon in the UI. This class encapsulates the properties of an icon, such as its name, internal name, directory, extension, and type.
+ * It provides methods to retrieve the real path of the icon based on its properties and the specified size. The class also includes a static instance representing the absence of an icon (NONE).
  *
  * @author Mario A. Serrano Leones
  */

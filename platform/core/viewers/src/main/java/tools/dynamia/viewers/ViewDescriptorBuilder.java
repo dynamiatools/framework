@@ -27,28 +27,63 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * The Class ViewDescriptorBuilder.
+ * Builder class for creating and configuring ViewDescriptor instances using a fluent API.
+ * This builder provides a convenient way to programmatically construct view descriptors
+ * for forms, tables, and other view types without using YAML configuration files.
+ *
+ * <p>The builder follows the Builder pattern, allowing method chaining for a more
+ * readable and maintainable code structure. It supports field configuration, layout
+ * customization, field grouping, and parameter specification.</p>
+ *
+ * Example usage:
+ * <pre>{@code
+ * ViewDescriptor descriptor = ViewDescriptorBuilder
+ *     .viewDescriptor("form", Customer.class)
+ *     .fields(
+ *         field("name").label("Customer Name"),
+ *         field("email").component("email"),
+ *         field("phone")
+ *     )
+ *     .layout("columns", 2)
+ *     .build();
+ * }</pre>
  *
  * @author Mario A. Serrano Leones
+ * @see ViewDescriptor
+ * @see FieldBuilder
+ * @see FieldGroupBuilder
  */
 @SuppressWarnings("unchecked")
 public class ViewDescriptorBuilder {
 
     /**
-     * The vd.
+     * The internal view descriptor being built.
      */
     protected DefaultViewDescriptor descriptor;
 
+    /**
+     * Protected constructor to enforce the use of static factory methods.
+     */
     protected ViewDescriptorBuilder() {
     }
 
     /**
-     * View descriptor.
+     * Creates a new ViewDescriptorBuilder for building view descriptors programmatically.
      *
-     * @param type       the type
-     * @param beanClass  the bean class
-     * @param autofields the autofields
-     * @return the view descriptor builder
+     * <p>This factory method initializes a builder with the specified view type and bean class,
+     * allowing you to control whether fields should be automatically detected from the bean class.</p>
+     *
+     * @param type       the view type (e.g., "form", "table", "tree")
+     * @param beanClass  the Java class representing the entity or bean for this view
+     * @param autofields if true, fields will be automatically detected from the bean class;
+     *                   if false, only explicitly added fields will be included
+     * @return a new ViewDescriptorBuilder instance configured with the specified parameters
+     *
+     * Example:
+     * <pre>{@code
+     * ViewDescriptorBuilder builder = ViewDescriptorBuilder
+     *     .viewDescriptor("table", Product.class, true);
+     * }</pre>
      */
     public static ViewDescriptorBuilder viewDescriptor(String type, Class beanClass, boolean autofields) {
         ViewDescriptorBuilder builder = new ViewDescriptorBuilder();
@@ -57,11 +92,22 @@ public class ViewDescriptorBuilder {
     }
 
     /**
-     * View descriptor.
+     * Creates a new ViewDescriptorBuilder with automatic field detection enabled by default.
      *
-     * @param type      the type
-     * @param beanClass the bean class
-     * @return the view descriptor builder
+     * <p>This is a convenience method that calls {@link #viewDescriptor(String, Class, boolean)}
+     * with autofields set to true.</p>
+     *
+     * @param type      the view type (e.g., "form", "table", "tree")
+     * @param beanClass the Java class representing the entity or bean for this view
+     * @return a new ViewDescriptorBuilder instance with autofields enabled
+     *
+     * Example:
+     * <pre>{@code
+     * ViewDescriptor descriptor = ViewDescriptorBuilder
+     *     .viewDescriptor("form", Customer.class)
+     *     .layout("columns", 3)
+     *     .build();
+     * }</pre>
      */
     public static ViewDescriptorBuilder viewDescriptor(String type, Class beanClass) {
         ViewDescriptorBuilder builder = new ViewDescriptorBuilder();
@@ -69,22 +115,40 @@ public class ViewDescriptorBuilder {
         return builder;
     }
 
+    /**
+     * Creates a new ViewDescriptorBuilder without a bean class, useful for generic views.
+     *
+     * <p>This method is suitable when creating view descriptors that don't map to a specific
+     * Java bean or entity, such as custom views or composite views.</p>
+     *
+     * @param type the view type (e.g., "form", "table", "custom")
+     * @return a new ViewDescriptorBuilder instance without a bean class
+     */
     public static ViewDescriptorBuilder viewDescriptor(String type) {
         ViewDescriptorBuilder builder = new ViewDescriptorBuilder();
         builder.descriptor = new DefaultViewDescriptor(null, type);
         return builder;
     }
 
+    /**
+     * Sets the unique identifier for this view descriptor.
+     *
+     * @param id the unique identifier for the view descriptor
+     * @return this builder instance for method chaining
+     */
     public ViewDescriptorBuilder id(String id) {
         descriptor.setId(id);
         return this;
     }
 
     /**
-     * Customizer.
+     * Sets a custom ViewCustomizer class for this view descriptor.
      *
-     * @param customizer the customizers
-     * @return the view descriptor builder
+     * <p>ViewCustomizers allow for dynamic modification of view descriptors at runtime,
+     * enabling custom logic to adjust field visibility, layout, or other view properties.</p>
+     *
+     * @param customizer the ViewCustomizer class to apply custom modifications
+     * @return this builder instance for method chaining
      */
     public ViewDescriptorBuilder customizer(Class<? extends ViewCustomizer> customizer) {
         descriptor.setViewCustomizerClass(customizer);
@@ -92,10 +156,13 @@ public class ViewDescriptorBuilder {
     }
 
     /**
-     * Sort fields.
+     * Defines the order in which fields should be displayed in the view.
      *
-     * @param fields the fields
-     * @return the view descriptor builder
+     * <p>This method allows you to specify a custom ordering for the fields,
+     * overriding their default or alphabetical order.</p>
+     *
+     * @param fields the field names in the desired display order
+     * @return this builder instance for method chaining
      */
     public ViewDescriptorBuilder sortFields(String... fields) {
         descriptor.sortFields(Arrays.asList(fields));
@@ -103,10 +170,13 @@ public class ViewDescriptorBuilder {
     }
 
     /**
-     * Hidden.
+     * Marks the specified fields as hidden in the view.
      *
-     * @param fields the fields
-     * @return the view descriptor builder
+     * <p>Hidden fields will not be displayed to the user but may still be present
+     * in the underlying data structure for processing purposes.</p>
+     *
+     * @param fields the names of the fields to hide
+     * @return this builder instance for method chaining
      */
     public ViewDescriptorBuilder hidden(String... fields) {
         descriptor.hideFields(fields);
@@ -114,10 +184,22 @@ public class ViewDescriptorBuilder {
     }
 
     /**
-     * Fields.
+     * Adds multiple fields to the view descriptor using FieldBuilder instances.
      *
-     * @param fields the fields
-     * @return the view descriptor builder
+     * <p>This method allows you to configure fields with specific properties such as labels,
+     * components, and parameters before adding them to the view.</p>
+     *
+     * @param fields an array of FieldBuilder instances defining the fields to add
+     * @return this builder instance for method chaining
+     *
+     * Example:
+     * <pre>{@code
+     * builder.fields(
+     *     field("name").label("Full Name"),
+     *     field("email").component("email"),
+     *     field("phone")
+     * );
+     * }</pre>
      */
     public ViewDescriptorBuilder fields(FieldBuilder... fields) {
         for (FieldBuilder field : fields) {
@@ -127,10 +209,18 @@ public class ViewDescriptorBuilder {
     }
 
     /**
-     * Add fields usind a {@link Supplier}
+     * Adds fields to the view descriptor using a Supplier that provides a list of Field instances.
      *
-     * @param fieldsSupplier should return a list of field
-     * @return builder
+     * <p>This method is useful when fields are generated dynamically or retrieved from an
+     * external source at runtime.</p>
+     *
+     * @param fieldsSupplier a Supplier that returns a list of Field instances to add
+     * @return this builder instance for method chaining
+     *
+     * Example:
+     * <pre>{@code
+     * builder.fields(() -> getFieldsFromConfiguration());
+     * }</pre>
      */
     public ViewDescriptorBuilder fields(Supplier<List<Field>> fieldsSupplier) {
         fieldsSupplier.get().forEach(descriptor::addField);
@@ -138,10 +228,21 @@ public class ViewDescriptorBuilder {
     }
 
     /**
-     * Groups.
+     * Adds field groups to the view descriptor for organizing fields into logical sections.
      *
-     * @param groups the groups
-     * @return the view descriptor builder
+     * <p>Field groups help structure complex forms by grouping related fields together,
+     * improving the user interface organization and usability.</p>
+     *
+     * @param groups an array of FieldGroupBuilder instances defining the field groups
+     * @return this builder instance for method chaining
+     *
+     * Example:
+     * <pre>{@code
+     * builder.groups(
+     *     group("personal", "Personal Information").fields("name", "email"),
+     *     group("address", "Address Details").fields("street", "city", "zipCode")
+     * );
+     * }</pre>
      */
     public ViewDescriptorBuilder groups(FieldGroupBuilder... groups) {
         for (FieldGroupBuilder fieldGroupBuilder : groups) {
@@ -154,10 +255,18 @@ public class ViewDescriptorBuilder {
     }
 
     /**
-     * Params.
+     * Adds multiple parameters to the view descriptor as key-value pairs.
      *
-     * @param keyValue the key value
-     * @return the view descriptor builder
+     * <p>Parameters are used to configure view-level settings and behaviors. This method
+     * accepts varargs in key-value format (key1, value1, key2, value2, ...).</p>
+     *
+     * @param keyValue the parameters in key-value pairs (must be an even number of arguments)
+     * @return this builder instance for method chaining
+     *
+     * Example:
+     * <pre>{@code
+     * builder.params("readOnly", true, "showHeader", false);
+     * }</pre>
      */
     public ViewDescriptorBuilder params(Object... keyValue) {
         Map params = MapBuilder.put(keyValue);
@@ -167,10 +276,19 @@ public class ViewDescriptorBuilder {
     }
 
     /**
-     * Add global parameter to descriptor
+     * Adds a single global parameter to the view descriptor.
      *
-     * @param key   param
-     * @param value value
+     * <p>This method allows you to add individual parameters one at a time,
+     * which is useful for conditional parameter addition.</p>
+     *
+     * @param key   the parameter key or name
+     * @param value the parameter value
+     * @return this builder instance for method chaining
+     *
+     * Example:
+     * <pre>{@code
+     * builder.addParam("customStyle", "border: 1px solid red");
+     * }</pre>
      */
     public ViewDescriptorBuilder addParam(String key, Object value) {
         descriptor.getParams().put(key, value);
@@ -178,10 +296,18 @@ public class ViewDescriptorBuilder {
     }
 
     /**
-     * Layout.
+     * Configures layout parameters for the view descriptor.
      *
-     * @param keyValue the key value
-     * @return the view descriptor builder
+     * <p>Layout parameters control how fields are arranged and displayed in the view.
+     * Common parameters include columns, spacing, alignment, and responsive behavior.</p>
+     *
+     * @param keyValue the layout parameters in key-value pairs (key1, value1, key2, value2, ...)
+     * @return this builder instance for method chaining
+     *
+     * Example:
+     * <pre>{@code
+     * builder.layout("columns", 3, "spacing", 10);
+     * }</pre>
      */
     @SuppressWarnings("unchecked")
     public ViewDescriptorBuilder layout(Object... keyValue) {
@@ -192,11 +318,19 @@ public class ViewDescriptorBuilder {
     }
 
     /**
-     * Add param to layout
+     * Adds a single parameter to the layout configuration.
      *
-     * @param key
-     * @param value
-     * @return
+     * <p>This method allows you to add individual layout parameters one at a time,
+     * which is useful for conditional layout configuration.</p>
+     *
+     * @param key   the layout parameter key or name
+     * @param value the layout parameter value
+     * @return this builder instance for method chaining
+     *
+     * Example:
+     * <pre>{@code
+     * builder.addLayoutParam("responsive", true);
+     * }</pre>
      */
     public ViewDescriptorBuilder addLayoutParam(String key, Object value) {
         descriptor.getLayout().getParams().put(key, value);
@@ -204,33 +338,57 @@ public class ViewDescriptorBuilder {
     }
 
     /**
-     * Field.
+     * Creates a new FieldBuilder instance for defining a field in the view.
      *
-     * @param name the name
-     * @return the field builder
+     * <p>This factory method creates a basic field with the specified name.
+     * Additional properties like label and component can be configured using the builder's fluent API.</p>
+     *
+     * @param name the field name (typically matches a property name in the bean class)
+     * @return a new FieldBuilder instance for configuring the field
+     *
+     * Example:
+     * <pre>{@code
+     * FieldBuilder nameField = field("name");
+     * }</pre>
      */
     public static FieldBuilder field(String name) {
         return field(name, null);
     }
 
     /**
-     * Field.
+     * Creates a new FieldBuilder instance with a custom label.
      *
-     * @param name  the name
-     * @param label the label
-     * @return the field builder
+     * <p>This factory method allows you to specify a user-friendly label for the field,
+     * which will be displayed in the UI instead of the raw field name.</p>
+     *
+     * @param name  the field name (typically matches a property name in the bean class)
+     * @param label the display label for the field (human-readable text)
+     * @return a new FieldBuilder instance configured with the specified name and label
+     *
+     * Example:
+     * <pre>{@code
+     * FieldBuilder emailField = field("email", "Email Address");
+     * }</pre>
      */
     public static FieldBuilder field(String name, String label) {
         return field(name, label, null);
     }
 
     /**
-     * Field.
+     * Creates a new FieldBuilder instance with label and custom component type.
      *
-     * @param name      the name
-     * @param label     the label
-     * @param component the component
-     * @return the field builder
+     * <p>This factory method allows full customization of the field by specifying
+     * the display label and the UI component type to be used for rendering.</p>
+     *
+     * @param name      the field name (typically matches a property name in the bean class)
+     * @param label     the display label for the field (human-readable text)
+     * @param component the component type to use for rendering (e.g., "textbox", "email", "datepicker")
+     * @return a new FieldBuilder instance configured with the specified properties
+     *
+     * Example:
+     * <pre>{@code
+     * FieldBuilder passwordField = field("password", "Password", "password");
+     * }</pre>
      */
     public static FieldBuilder field(String name, String label, String component) {
         FieldBuilder fb = new FieldBuilder(name);
@@ -239,69 +397,120 @@ public class ViewDescriptorBuilder {
     }
 
     /**
-     * Group.
+     * Creates a new FieldGroupBuilder for organizing fields into a named group.
      *
-     * @param name the name
-     * @return the field group builder
+     * <p>This factory method creates a field group using the provided name as both
+     * the internal identifier and the display label.</p>
+     *
+     * @param name the group name (used as both identifier and display label)
+     * @return a new FieldGroupBuilder instance for configuring the field group
      */
     public static FieldGroupBuilder group(String name) {
         return group(name, name);
     }
 
     /**
-     * Group.
+     * Creates a new FieldGroupBuilder with a custom display label.
      *
-     * @param name  the name
-     * @param label the label
-     * @return the field group builder
+     * <p>This factory method creates a field group with separate name (identifier)
+     * and label (display text) values.</p>
+     *
+     * @param name  the group identifier (used internally)
+     * @param label the display label for the group (shown to users)
+     * @return a new FieldGroupBuilder instance configured with name and label
      */
     public static FieldGroupBuilder group(String name, String label) {
         return group(name, label, null);
     }
 
     /**
-     * Group.
+     * Creates a new FieldGroupBuilder with label and icon.
      *
-     * @param name  the name
-     * @param label the label
-     * @param icon  the icon
-     * @return the field group builder
+     * <p>This factory method creates a fully customized field group with name,
+     * display label, and an optional icon for visual representation.</p>
+     *
+     * @param name  the group identifier (used internally)
+     * @param label the display label for the group (shown to users)
+     * @param icon  the icon identifier or path to display with the group (optional)
+     * @return a new FieldGroupBuilder instance configured with name, label, and icon
      */
     public static FieldGroupBuilder group(String name, String label, String icon) {
         return new FieldGroupBuilder(name);
     }
 
     /**
-     * Builds the.
+     * Builds and returns the configured ViewDescriptor instance.
      *
-     * @return the view descriptor
+     * <p>This method completes the building process and returns the final
+     * ViewDescriptor object with all configured properties, fields, groups,
+     * layout, and parameters.</p>
+     *
+     * @return the fully configured ViewDescriptor instance
      */
     public ViewDescriptor build() {
         return descriptor;
     }
 
+    /**
+     * Configures whether fields should be automatically detected from the bean class.
+     *
+     * <p>When autofields is true, the framework will introspect the bean class
+     * and automatically create field descriptors for its properties. When false,
+     * only explicitly defined fields will be included in the view.</p>
+     *
+     * @param autofields true to enable automatic field detection, false otherwise
+     * @return this builder instance for method chaining
+     */
     public ViewDescriptorBuilder autofields(boolean autofields) {
         descriptor.setAutofields(autofields);
         return this;
     }
 
     /**
-     * Creates a new ViewDescriptorBuilder from an existing ViewDescriptor
+     * Creates a new ViewDescriptorBuilder by copying an existing ViewDescriptor.
      *
-     * @param other the other
-     * @return the view descriptor builder
+     * <p>This factory method creates a builder initialized with all properties, fields,
+     * field groups, layout parameters, and actions from the source descriptor. This is useful
+     * for creating variations of existing descriptors or extending them with additional configuration.</p>
+     *
+     * @param other the source ViewDescriptor to copy from
+     * @return a new ViewDescriptorBuilder instance initialized with the source descriptor's configuration
+     *
+     * Example:
+     * <pre>{@code
+     * ViewDescriptor existing = getExistingDescriptor();
+     * ViewDescriptor modified = ViewDescriptorBuilder
+     *     .from(existing)
+     *     .addParam("readOnly", true)
+     *     .build();
+     * }</pre>
      */
     public static ViewDescriptorBuilder from(ViewDescriptor other) {
         return from(other.getViewTypeName(), other.getBeanClass(), other);
     }
 
     /**
-     * Creates a new ViewDescriptorBuilder from an existing ViewDescriptor
+     * Creates a new ViewDescriptorBuilder by copying an existing ViewDescriptor with a different view type and bean class.
      *
-     * @param viewType  the view type
-     * @param beanClass the bean class
-     * @param other     the other
-     * @return the view descriptor builder
+     * <p>This factory method creates a builder initialized with all properties from the source descriptor,
+     * but allows you to override the view type and bean class. This is particularly useful when you need
+     * to create a descriptor for a different view type (e.g., converting a "form" descriptor to a "table" descriptor)
+     * or adapt a descriptor to work with a different entity class while preserving the field configuration.</p>
+     *
+     * @param viewType  the new view type to use (e.g., "form", "table", "tree")
+     * @param beanClass the new bean class to associate with the descriptor
+     * @param other     the source ViewDescriptor to copy configuration from
+     * @return a new ViewDescriptorBuilder instance with the specified view type and bean class,
+     *         initialized with the source descriptor's configuration
+     *
+     * Example:
+     * <pre>{@code
+     * ViewDescriptor formDescriptor = getFormDescriptor();
+     * ViewDescriptor tableDescriptor = ViewDescriptorBuilder
+     *     .from("table", Customer.class, formDescriptor)
+     *     .hidden("description")
+     *     .build();
+     * }</pre>
      */
     public static ViewDescriptorBuilder from(String viewType, Class<?> beanClass, ViewDescriptor other) {
         ViewDescriptorBuilder builder = new ViewDescriptorBuilder();

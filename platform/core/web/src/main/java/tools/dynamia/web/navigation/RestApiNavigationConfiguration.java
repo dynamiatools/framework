@@ -17,7 +17,21 @@ import tools.dynamia.navigation.Page;
 import java.lang.reflect.Method;
 import java.util.List;
 
-
+/**
+ * Configuration class that dynamically registers REST API routes for CRUD operations based on the pages defined in the application's modules.
+ *
+ * <p>This class listens for the application context to be fully initialized and then iterates through all modules and their associated pages to create dynamic REST API routes for CRUD operations. Each page's virtual path is used to construct unique URIs for the standard CRUD operations (Create, Read, Update, Delete), which are then mapped to the corresponding methods in the {@link RestNavigationController}.</p>
+ *
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * @Configuration
+ * public class MyAppRestApiNavigationConfig extends RestApiNavigationConfiguration {
+ *     // Additional configuration or overrides can be added here if needed
+ * }
+ * }</pre>
+ *
+ * @author Mario A. Serrano Leones
+ */
 public class RestApiNavigationConfiguration {
 
 

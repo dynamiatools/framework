@@ -34,6 +34,11 @@ import java.util.Map.Entry;
 
 import static tools.dynamia.navigation.NavigationElement.PATH_SEPARATOR;
 
+/**
+ * Controller responsible for handling page navigation requests in the web application. It maps incoming HTTP requests to specific page paths and manages the navigation flow based on the requested URL structure. The controller supports various URL patterns to accommodate different levels of page hierarchy, allowing for flexible navigation within the application. It also handles access restrictions and integrates with page navigation interceptors to provide additional functionality during the navigation process.
+ *
+ * @author Mario A. Serrano Leones
+ */
 @Controller("pageNavigationController")
 @RequestMapping("/page")
 public class PageNavigationController {
