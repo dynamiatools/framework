@@ -258,9 +258,6 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
             field.addParam(Viewers.PARAM_BINDING_ATTRIBUTE, attribute);
             field.addParam("timeZone", TimeZone.getTimeZone(Messages.getDefaultTimeZone()));
             field.addParam("locale", Messages.getDefaultLocale());
-            if (field.getFieldClass() == LocalDateTime.class) {
-                field.addParam("format", "medium+medium");
-            }
         }
     }
 
