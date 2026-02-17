@@ -23,7 +23,7 @@
     <parent>
         <artifactId>tools.dynamia.modules.importer.parent</artifactId>
         <groupId>tools.dynamia.modules</groupId>
-        <version>26.2.1</version>
+        <version>26.2.2</version>
     </parent>
     <name>Dynamia Modules - Importer UI</name>
     <artifactId>tools.dynamia.modules.importer.ui</artifactId>
@@ -55,13 +55,13 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.zk</artifactId>
-            <version>26.2.1</version>
+            <version>26.2.2</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.importer</artifactId>
-            <version>26.2.1</version>
+            <version>26.2.2</version>
         </dependency>
     </dependencies>
 

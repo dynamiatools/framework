@@ -23,7 +23,7 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>26.2.1</version>
+        <version>26.2.2</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.domain</artifactId>
-            <version>26.2.1</version>
+            <version>26.2.2</version>
         </dependency>
 
 

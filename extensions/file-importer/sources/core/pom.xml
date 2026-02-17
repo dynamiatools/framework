@@ -23,7 +23,7 @@
     <parent>
         <artifactId>tools.dynamia.modules.importer.parent</artifactId>
         <groupId>tools.dynamia.modules</groupId>
-        <version>26.2.1</version>
+        <version>26.2.2</version>
     </parent>
     <name>Dynamia Modules - Importer Core</name>
     <artifactId>tools.dynamia.modules.importer</artifactId>
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.reports</artifactId>
-            <version>26.2.1</version>
+            <version>26.2.2</version>
         </dependency>
     </dependencies>
 

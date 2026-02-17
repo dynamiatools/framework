@@ -22,7 +22,7 @@
     <parent>
         <groupId>tools.dynamia.modules</groupId>
         <artifactId>tools.dynamia.modules.saas.parent</artifactId>
-        <version>26.2.1</version>
+        <version>26.2.2</version>
     </parent>
     <name>DynamiaModules - SaaS UI</name>
     <artifactId>tools.dynamia.modules.saas.ui</artifactId>
@@ -54,12 +54,12 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.zk</artifactId>
-            <version>26.2.1</version>
+            <version>26.2.2</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.saas</artifactId>
-            <version>26.2.1</version>
+            <version>26.2.2</version>
         </dependency>
 
         <dependency>
@@ -70,7 +70,7 @@
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.entityfiles.ui</artifactId>
-            <version>26.2.1</version>
+            <version>26.2.2</version>
         </dependency>
     </dependencies>
 </project>

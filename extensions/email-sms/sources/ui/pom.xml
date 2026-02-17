@@ -22,7 +22,7 @@
 	<parent>
 		<artifactId>tools.dynamia.modules.email.parent</artifactId>
 		<groupId>tools.dynamia.modules</groupId>
-		<version>26.2.1</version>
+		<version>26.2.2</version>
 	</parent>
 
 	<name>DynamiaModules - Email UI</name>
@@ -34,12 +34,12 @@
 		<dependency>
 			<groupId>tools.dynamia</groupId>
 			<artifactId>tools.dynamia.zk</artifactId>
-			<version>26.2.1</version>
+			<version>26.2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>tools.dynamia.modules</groupId>
 			<artifactId>tools.dynamia.modules.email</artifactId>
-			<version>26.2.1</version>
+			<version>26.2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>tools.dynamia.zk.addons</groupId>

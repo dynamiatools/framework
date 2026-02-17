@@ -17,7 +17,7 @@
     <parent>
         <groupId>tools.dynamia.modules</groupId>
         <artifactId>tools.dynamia.modules.security.parent</artifactId>
-        <version>26.2.1</version>
+        <version>26.2.2</version>
     </parent>
 
     <name>DynamiaModules - Security UI</name>
@@ -44,18 +44,18 @@
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.security</artifactId>
-            <version>26.2.1</version>
+            <version>26.2.2</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.zk</artifactId>
-            <version>26.2.1</version>
+            <version>26.2.2</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.app</artifactId>
-            <version>26.2.1</version>
+            <version>26.2.2</version>
         </dependency>
     </dependencies>
 
