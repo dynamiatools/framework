@@ -1,7 +1,6 @@
-[![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia.reports/tools.dynamia.reports.core)](https://search.maven.org/search?q=tools.dynamia.reports)
-![Java Version Required](https://img.shields.io/badge/java-17-blue)
-[![Maven Build](https://github.com/dynamiatools/dynamia-reports/actions/workflows/maven.yml/badge.svg)](https://github.com/dynamiatools/dynamia-reports/actions/workflows/maven.yml)
-[![Release and Deploy](https://github.com/dynamiatools/dynamia-reports/actions/workflows/release.yml/badge.svg)](https://github.com/dynamiatools/dynamia-reports/actions/workflows/release.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia.modules/tools.dynamia.modules.reports.core)](https://search.maven.org/search?q=tools.dynamia.modules.reports)
+![Java Version Required](https://img.shields.io/badge/java-25-blue)
+
 
 # DynamiaReports
 

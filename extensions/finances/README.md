@@ -1,3 +1,6 @@
+[![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia.modules/tools.dynamia.modules.finances.api)](https://search.maven.org/search?q=tools.dynamia.modules.importer)
+![Java Version Required](https://img.shields.io/badge/java-25-blue)
+
 # Dynamia Finance Framework
 Base framework for calculating classic financial documents
 
