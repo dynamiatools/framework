@@ -32,6 +32,7 @@ import tools.dynamia.crud.FilterCondition;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.query.QueryCondition;
 import tools.dynamia.domain.query.QueryParameters;
+import tools.dynamia.modules.dashboard.ChartjsDashboardWidget;
 import tools.dynamia.modules.reports.api.EnumFilterProvider;
 import tools.dynamia.modules.reports.core.*;
 import tools.dynamia.modules.reports.core.domain.Report;
@@ -48,6 +49,7 @@ import tools.dynamia.zk.actions.ButtonActionRenderer;
 import tools.dynamia.zk.crud.ui.EntityFiltersPanel;
 import tools.dynamia.zk.ui.chartjs.CategoryChartjsData;
 import tools.dynamia.zk.ui.chartjs.Chartjs;
+import tools.dynamia.zk.ui.chartjs.ChartjsOptions;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -479,8 +481,8 @@ public class ReportViewer extends Div implements ActionEventBuilder {
             updateChartView();
         } catch (Exception e) {
             UIMessages.showMessage(messages.get("errorCharting") + ": " + e.getMessage(), MessageType.ERROR);
-            if (layout.getWest() != null) {
-                layout.getWest().detach();
+            if (layout.getEast() != null) {
+                layout.getEast().detach();
             }
         }
     }
@@ -488,13 +490,14 @@ public class ReportViewer extends Div implements ActionEventBuilder {
     public void updateChartView() {
         if (report.isChartable() && report.getCharts() != null && chartsContainer != null) {
             chartsContainer.getChildren().clear();
-            currentCharts.clear();
+            currentCharts = new ArrayList<>();
 
             Vlayout chartLayout = new Vlayout();
             chartsContainer.appendChild(chartLayout);
 
             for (var c : report.getCharts()) {
                 CategoryChartjsData data = new CategoryChartjsData();
+                data.getDataset().setColorPalette(ChartjsDashboardWidget.MATERIAL_COLORS);
 
                 if (c.isGrouped()) {
                     Map<String, Number> groups = new HashMap<>();
@@ -522,6 +525,8 @@ public class ReportViewer extends Div implements ActionEventBuilder {
                 chart.setType(c.getType());
                 chart.setData(data);
                 chart.setTitle(c.getTitle());
+
+
                 currentCharts.add(chart);
 
                 chartLayout.appendChild(chart);
