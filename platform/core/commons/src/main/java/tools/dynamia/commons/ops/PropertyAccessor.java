@@ -93,7 +93,7 @@ public final class PropertyAccessor {
      * @param fieldName the name of the field
      * @param object    the object instance
      * @return the field value, or null if the field doesn't exist or cannot be accessed
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Person person = new Person();
@@ -129,12 +129,12 @@ public final class PropertyAccessor {
      * @param propertyInfo the property info descriptor
      * @param object       the object instance
      * @param value        the value to set
-     *
-     * Example:
-     * <pre>{@code
-     * PropertyInfo prop = ObjectOperations.getPropertyInfo(Person.class, "name");
-     * PropertyAccessor.setFieldValue(prop, person, "John");
-     * }</pre>
+     *                     <p>
+     *                     Example:
+     *                     <pre>{@code
+     *                     PropertyInfo prop = ObjectOperations.getPropertyInfo(Person.class, "name");
+     *                     PropertyAccessor.setFieldValue(prop, person, "John");
+     *                     }</pre>
      */
     public static void setFieldValue(PropertyInfo propertyInfo, Object object, Object value) {
         setFieldValue(propertyInfo.getName(), object, value);
@@ -150,13 +150,13 @@ public final class PropertyAccessor {
      * @param fieldName the name of the field
      * @param object    the object instance
      * @param value     the value to set
-     *
-     * Example:
-     * <pre>{@code
-     * Person person = new Person();
-     * PropertyAccessor.setFieldValue("name", person, "John");
-     * // person.name = "John"
-     * }</pre>
+     *                  <p>
+     *                  Example:
+     *                  <pre>{@code
+     *                  Person person = new Person();
+     *                  PropertyAccessor.setFieldValue("name", person, "John");
+     *                  // person.name = "John"
+     *                  }</pre>
      */
     public static void setFieldValue(String fieldName, Object object, Object value) {
         try {
@@ -188,17 +188,17 @@ public final class PropertyAccessor {
      * @param args       the arguments to pass to the method (variable arguments)
      * @return the result of the method invocation, or null if the method has no return value
      * @throws ReflectionException if the method is not found or invocation fails
-     *
-     * Example:
-     * <pre>{@code
-     * Customer customer = new Customer();
-     * // Invoke setter
-     * PropertyAccessor.invokeMethod(customer, "setName", "John Doe");
-     * // Invoke getter
-     * String name = (String) PropertyAccessor.invokeMethod(customer, "getName");
-     * // Invoke business method
-     * PropertyAccessor.invokeMethod(customer, "sendWelcomeEmail", "john@example.com");
-     * }</pre>
+     *                             <p>
+     *                             Example:
+     *                             <pre>{@code
+     *                             Customer customer = new Customer();
+     *                             // Invoke setter
+     *                             PropertyAccessor.invokeMethod(customer, "setName", "John Doe");
+     *                             // Invoke getter
+     *                             String name = (String) PropertyAccessor.invokeMethod(customer, "getName");
+     *                             // Invoke business method
+     *                             PropertyAccessor.invokeMethod(customer, "sendWelcomeEmail", "john@example.com");
+     *                             }</pre>
      */
     public static Object invokeMethod(final Object bean, final String methodName, final Object... args) {
         try {
@@ -235,7 +235,7 @@ public final class PropertyAccessor {
      * @param bean         the target object
      * @param propertyName the name of the property (supports dot notation for nested properties)
      * @return the property value, or null if not accessible
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Person person = new Person();
@@ -271,7 +271,7 @@ public final class PropertyAccessor {
      * @param bean         the target object
      * @param propertyName the name of the boolean property
      * @return the boolean value, or null if not accessible
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Person person = new Person();
@@ -294,7 +294,7 @@ public final class PropertyAccessor {
      * @param bean     the target object
      * @param property the property information descriptor
      * @return the property value, or null if not accessible
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * PropertyInfo prop = ObjectOperations.getPropertyInfo(Person.class, "name");
@@ -321,42 +321,93 @@ public final class PropertyAccessor {
      *   <li>Automatic type conversion</li>
      *   <li>Null safety in property paths</li>
      *   <li>AOT compilation compatibility</li>
+     *   <li>Handling of overloaded setters by matching parameter types</li>
      * </ul>
+     * </p>
+     * <p>
+     * When a bean has overloaded setter methods (e.g., {@code setAddress(String)} and {@code setAddress(Address)}),
+     * this method attempts multiple strategies to find the correct setter:
+     * <ol>
+     *   <li>Try using Spring's BeanWrapper (fastest, handles most cases)</li>
+     *   <li>If BeanWrapper fails, find the setter method matching the declared property type</li>
+     *   <li>As a last resort, set the field value directly using reflection</li>
+     * </ol>
      * </p>
      *
      * @param bean  the target object
      * @param name  the name of the property (supports dot notation for nested properties)
      * @param value the value to set
+     *              <p>
+     *              Example:
+     *              <pre>{@code
+     *              Person person = new Person();
+     *              PropertyAccessor.invokeSetMethod(person, "name", "John");
+     *              PropertyAccessor.invokeSetMethod(person, "age", 30);
      *
-     * Example:
-     * <pre>{@code
-     * Person person = new Person();
-     * PropertyAccessor.invokeSetMethod(person, "name", "John");
-     * PropertyAccessor.invokeSetMethod(person, "age", 30);
+     *              // Nested property
+     *              PropertyAccessor.invokeSetMethod(person, "address.city", "New York");
      *
-     * // Nested property
-     * PropertyAccessor.invokeSetMethod(person, "address.city", "New York");
-     * }</pre>
+     *              // Overloaded setters - automatically selects correct method
+     *              PropertyAccessor.invokeSetMethod(person, "address", new Address(...));
+     *              }</pre>
      */
     public static void invokeSetMethod(final Object bean, final String name, final Object value) {
         // Handle ValueWrapper for explicit type specification
         Object actualValue = value instanceof ValueWrapper valueWrapper ? valueWrapper.value() : value;
-
 
         if (bean instanceof BeanMap) {
             ((BeanMap) bean).set(name, actualValue);
             return;
         }
 
-
+        // Strategy 1: Try BeanWrapper first (fastest, handles most cases including nested properties)
         try {
             BeanWrapper wrapper = new BeanWrapperImpl(bean);
             wrapper.setPropertyValue(name, actualValue);
+            return; // Success!
         } catch (Exception e) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Error setting property " + name + " on " + bean.getClass() + " with value " + actualValue + ": " + e.getMessage());
+                LOGGER.debug("BeanWrapper failed for property " + name + " on " + bean.getClass() +
+                        " with value " + actualValue + ": " + e.getMessage() + ". Trying alternative strategies...");
             }
         }
+
+        // Strategy 2: For simple properties (no dots), try to find the specific setter method
+        if (!name.contains(".")) {
+            try {
+                PropertyInfo propertyInfo = tools.dynamia.commons.ObjectOperations.getPropertyInfo(bean.getClass(), name);
+                if (propertyInfo != null && propertyInfo.getWriteMethod() != null) {
+                    Method writeMethod = propertyInfo.getWriteMethod();
+
+                    // Check if the write method parameter type matches the value type
+                    // This handles overloaded setters correctly
+                    Class<?> paramType = writeMethod.getParameterTypes()[0];
+                    boolean canInvoke = actualValue == null ||
+                            paramType.isAssignableFrom(actualValue.getClass()) ||
+                            (paramType.isPrimitive() && isWrapperCompatible(paramType, actualValue.getClass()));
+
+                    if (canInvoke) {
+                        ReflectionUtils.makeAccessible(writeMethod);
+                        ReflectionUtils.invokeMethod(writeMethod, bean, actualValue);
+                        return; // Success!
+                    } else {
+                        // Try to find an overloaded setter that matches the actual value type
+                        Method alternativeMethod = findMatchingSetterMethod(bean.getClass(), name, actualValue);
+                        if (alternativeMethod != null) {
+                            ReflectionUtils.makeAccessible(alternativeMethod);
+                            ReflectionUtils.invokeMethod(alternativeMethod, bean, actualValue);
+                            return; // Success!
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Direct setter method invocation failed for property " + name +
+                            " on " + bean.getClass() + ": " + e.getMessage());
+                }
+            }
+        }
+
     }
 
     /**
@@ -368,12 +419,12 @@ public final class PropertyAccessor {
      * @param bean     the target object
      * @param property the property information descriptor
      * @param value    the value to set
-     *
-     * Example:
-     * <pre>{@code
-     * PropertyInfo prop = ObjectOperations.getPropertyInfo(Person.class, "name");
-     * PropertyAccessor.invokeSetMethod(person, prop, "John");
-     * }</pre>
+     *                 <p>
+     *                 Example:
+     *                 <pre>{@code
+     *                 PropertyInfo prop = ObjectOperations.getPropertyInfo(Person.class, "name");
+     *                 PropertyAccessor.invokeSetMethod(person, prop, "John");
+     *                 }</pre>
      */
     public static void invokeSetMethod(final Object bean, final PropertyInfo property, final Object value) {
         try {
@@ -395,7 +446,7 @@ public final class PropertyAccessor {
      * @param clazz        the class to inspect
      * @param propertyName the name of the property
      * @return an Optional containing the property type, or empty if not found
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Optional<Class<?>> type = PropertyAccessor.getPropertyType(Person.class, "name");
@@ -423,7 +474,7 @@ public final class PropertyAccessor {
      * @param bean         the bean to check
      * @param propertyName the name of the property
      * @return true if the property exists, false otherwise
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Person person = new Person();
@@ -446,7 +497,7 @@ public final class PropertyAccessor {
      * @param bean         the bean to check
      * @param propertyName the name of the property
      * @return true if the property is readable, false otherwise
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * boolean canRead = PropertyAccessor.isReadableProperty(person, "name");
@@ -467,7 +518,7 @@ public final class PropertyAccessor {
      * @param bean         the bean to check
      * @param propertyName the name of the property
      * @return true if the property is writable, false otherwise
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * boolean canWrite = PropertyAccessor.isWritableProperty(person, "name");
@@ -480,5 +531,133 @@ public final class PropertyAccessor {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * Finds a setter method that matches the given property name and value type.
+     * <p>
+     * This method is used internally to handle overloaded setters by finding the setter
+     * that best matches the actual value type being passed.
+     * </p>
+     *
+     * @param clazz        the class to search
+     * @param propertyName the property name
+     * @param value        the value to set (used to determine the best matching setter)
+     * @return the matching setter method, or null if not found
+     */
+    private static Method findMatchingSetterMethod(Class<?> clazz, String propertyName, Object value) {
+        String setterName = "set" + Character.toUpperCase(propertyName.charAt(0)) + propertyName.substring(1);
+        Method[] methods = clazz.getMethods();
+
+        Method bestMatch = null;
+        int bestMatchScore = -1;
+
+        for (Method method : methods) {
+            if (method.getName().equals(setterName) && method.getParameterCount() == 1) {
+                Class<?> paramType = method.getParameterTypes()[0];
+
+                if (value == null) {
+                    // For null values, prefer Object or reference types over primitives
+                    if (!paramType.isPrimitive() && (bestMatch == null || bestMatch.getParameterTypes()[0].isPrimitive())) {
+                        bestMatch = method;
+                        bestMatchScore = 0;
+                    }
+                } else {
+                    Class<?> valueType = value.getClass();
+
+                    // Exact match - highest priority
+                    if (paramType.equals(valueType)) {
+                        return method;
+                    }
+
+                    // Assignable - high priority
+                    if (paramType.isAssignableFrom(valueType)) {
+                        int score = calculateInheritanceDistance(valueType, paramType);
+                        if (score > bestMatchScore) {
+                            bestMatch = method;
+                            bestMatchScore = score;
+                        }
+                    }
+
+                    // Primitive wrapper compatibility
+                    if (isWrapperCompatible(paramType, valueType)) {
+                        if (bestMatchScore < 100) {
+                            bestMatch = method;
+                            bestMatchScore = 100;
+                        }
+                    }
+                }
+            }
+        }
+
+        return bestMatch;
+    }
+
+    /**
+     * Calculates the inheritance distance between two classes.
+     * Lower numbers indicate closer relationship.
+     *
+     * @param from the subclass
+     * @param to   the superclass or interface
+     * @return the distance, or Integer.MAX_VALUE if not related
+     */
+    private static int calculateInheritanceDistance(Class<?> from, Class<?> to) {
+        if (from.equals(to)) {
+            return 1000; // Exact match
+        }
+
+        int distance = 0;
+        Class<?> current = from;
+
+        // Check class hierarchy
+        while (current != null && !current.equals(Object.class)) {
+            if (current.equals(to)) {
+                return 500 - distance;
+            }
+            current = current.getSuperclass();
+            distance++;
+        }
+
+        // Check interfaces
+        if (to.isInterface() && to.isAssignableFrom(from)) {
+            return 250;
+        }
+
+        return -1;
+    }
+
+    /**
+     * Checks if a primitive type is compatible with a wrapper type or vice versa.
+     *
+     * @param type1 first type
+     * @param type2 second type
+     * @return true if they are compatible primitive/wrapper types
+     */
+    private static boolean isWrapperCompatible(Class<?> type1, Class<?> type2) {
+        if (type1.isPrimitive() && !type2.isPrimitive()) {
+            return getPrimitiveWrapper(type1).equals(type2);
+        }
+        if (!type1.isPrimitive() && type2.isPrimitive()) {
+            return type1.equals(getPrimitiveWrapper(type2));
+        }
+        return false;
+    }
+
+    /**
+     * Gets the wrapper class for a primitive type.
+     *
+     * @param primitiveType the primitive type
+     * @return the wrapper class
+     */
+    private static Class<?> getPrimitiveWrapper(Class<?> primitiveType) {
+        if (primitiveType == int.class) return Integer.class;
+        if (primitiveType == long.class) return Long.class;
+        if (primitiveType == double.class) return Double.class;
+        if (primitiveType == float.class) return Float.class;
+        if (primitiveType == boolean.class) return Boolean.class;
+        if (primitiveType == byte.class) return Byte.class;
+        if (primitiveType == char.class) return Character.class;
+        if (primitiveType == short.class) return Short.class;
+        return primitiveType;
     }
 }
