@@ -23,7 +23,7 @@
     <parent>
         <groupId>tools.dynamia.modules</groupId>
         <artifactId>tools.dynamia.modules.parent</artifactId>
-        <version>26.2.2</version>
+        <version>26.2.3</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -38,12 +38,12 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.zk</artifactId>
-            <version>26.2.2</version>
+            <version>26.2.3</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.saas.api</artifactId>
-            <version>26.2.2</version>
+            <version>26.2.3</version>
         </dependency>
     </dependencies>
 
