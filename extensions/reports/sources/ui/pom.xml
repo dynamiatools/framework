@@ -57,6 +57,11 @@
             <version>26.2.3</version>
         </dependency>
         <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.dashboard</artifactId>
+            <version>26.2.3</version>
+        </dependency>
+        <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations-jakarta</artifactId>
             <version>2.2.42</version>
