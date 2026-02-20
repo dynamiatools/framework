@@ -38,6 +38,7 @@ import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.ComponentCustomizerUtil;
 import tools.dynamia.viewers.util.ViewRendererUtil;
 import tools.dynamia.viewers.util.Viewers;
+import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.actions.BootstrapButtonActionRenderer;
 import tools.dynamia.zk.converters.Util;
 import tools.dynamia.zk.ui.Import;
@@ -288,7 +289,17 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
     }
 
     protected Component createFieldComponent(Object data, Object cellValue, Field field, Listcell cell) {
-        Class<?> componentClass = field.getComponentClass() != null ? field.getComponentClass() : Label.class;
+        Class<?> componentClass = null;
+        if (field.getComponentClass() != null) {
+            componentClass = field.getComponentClass();
+        } else if (field.getComponent() != null && !field.getComponent().isEmpty()) {
+            componentClass = ComponentAliasIndex.getInstance().get(field.getComponent());
+        }
+
+        if (componentClass == null) {
+            componentClass = Label.class;
+        }
+
         Component component = (Component) ObjectOperations.newInstance(componentClass);
         if (component != null) {
             ZKUtil.changeReadOnly(component, tableView.isReadonly());

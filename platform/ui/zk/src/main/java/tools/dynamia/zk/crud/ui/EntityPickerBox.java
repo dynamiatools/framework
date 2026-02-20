@@ -325,7 +325,7 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
         }
     }
 
-    public final void setEntityClass(String entityClass) {
+    public void setEntityClass(String entityClass) {
         try {
             Class clazz = Class.forName(entityClass);
             setEntityClass(clazz);
@@ -336,11 +336,11 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
         }
     }
 
-    public final void setEntityClassName(String entityClassName) {
+    public void setEntityClassName(String entityClassName) {
         setEntityClass(entityClassName);
     }
 
-    public final void setEntityClass(Class entityClass) {
+    public void setEntityClass(Class entityClass) {
         this.entityClass = entityClass;
         if (entityClass != null) {
             entityName = StringUtils.addSpaceBetweenWords(entityClass.getSimpleName());

@@ -115,12 +115,19 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
             } else if (field.getFieldClass() == Boolean.class || field.getFieldClass() == boolean.class) {
                 field.setComponentClass(Checkbox.class);
                 field.set("disabled", true);
-            } else {
-                field.setComponentClass(Label.class);
+            }
+
+            if (field.getComponent() != null && !field.getComponent().isBlank() && field.getComponentClass() == null) {
+                field.setComponentClass(ComponentAliasIndex.getInstance().get(field.getComponent()));
             }
 
             if (field.getComponentClass() != null && field.getComponent() == null) {
                 field.setComponent(ComponentAliasIndex.getInstance().getAlias(field.getComponentClass()));
+            }
+
+            if (field.getComponentClass() == null && field.getComponent() == null) {
+                field.setComponentClass(Label.class);
+                field.setComponent("label");
             }
         }
 
