@@ -336,6 +336,10 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
         }
     }
 
+    public final void setEntityClassName(String entityClassName) {
+        setEntityClass(entityClassName);
+    }
+
     public final void setEntityClass(Class entityClass) {
         this.entityClass = entityClass;
         if (entityClass != null) {
