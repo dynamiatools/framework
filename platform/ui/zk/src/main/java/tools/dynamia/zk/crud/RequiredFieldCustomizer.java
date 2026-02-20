@@ -22,6 +22,8 @@ import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.FieldCustomizer;
 import tools.dynamia.zk.constraints.ZKExtraConstraints;
 
+import java.util.Map;
+
 @Provider
 public class RequiredFieldCustomizer implements FieldCustomizer {
 
@@ -34,10 +36,7 @@ public class RequiredFieldCustomizer implements FieldCustomizer {
         if ("form".equals(viewTypeName)) {
             if (field.isRequired() && !field.getParams().containsKey(CONSTRAINT)) {
                 field.addParam(CONSTRAINT, ZKExtraConstraints.REQUIRED);
-
-                field.addParam(INPUT_ATTRIBUTES, "required=true");
-
-
+                field.addParam(INPUT_ATTRIBUTES, Map.of("required", "true"));
             }
         }
     }

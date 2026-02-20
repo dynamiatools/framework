@@ -22,7 +22,7 @@
     <parent>
         <groupId>tools.dynamia.modules</groupId>
         <artifactId>tools.dynamia.modules.saas.parent</artifactId>
-        <version>26.2.2</version>
+        <version>26.2.3</version>
     </parent>
 
     <name>DynamiaModules - SaaS Core</name>
@@ -49,18 +49,18 @@
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.saas.api</artifactId>
-            <version>26.2.2</version>
+            <version>26.2.3</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.saas.jpa</artifactId>
-            <version>26.2.2</version>
+            <version>26.2.3</version>
         </dependency>
 
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.integration</artifactId>
-            <version>26.2.2</version>
+            <version>26.2.3</version>
         </dependency>
 
         <dependency>
@@ -86,7 +86,7 @@
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.entityfiles</artifactId>
-            <version>26.2.2</version>
+            <version>26.2.3</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate.orm</groupId>

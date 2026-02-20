@@ -16,7 +16,10 @@
  */
 package tools.dynamia.commons.ops;
 
-import org.springframework.beans.BeanUtils;
+import org.springframework.beans.*;
+import tools.dynamia.commons.ObjectOperations;
+import tools.dynamia.commons.ValueWrapper;
+import tools.dynamia.commons.logger.LoggingService;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -72,6 +75,8 @@ import java.util.stream.Collectors;
  */
 public final class BeanTransformer {
 
+    private static final LoggingService LOGGER = LoggingService.get(BeanTransformer.class);
+
     /**
      * Private constructor to prevent instantiation.
      */
@@ -96,7 +101,7 @@ public final class BeanTransformer {
      * @param source      the source object to transform
      * @param targetClass the target class to transform into
      * @return a new instance of target class with copied properties, or null if source is null
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * // Entity to DTO transformation
@@ -134,7 +139,7 @@ public final class BeanTransformer {
      * @param collection  the source collection to transform
      * @param targetClass the target class to transform into
      * @return a list of transformed objects, or empty list if collection is null
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * // Transform list of entities to DTOs
@@ -173,7 +178,7 @@ public final class BeanTransformer {
      * @param bean       the source bean to extract properties from
      * @param properties the property names to extract (variable arguments)
      * @return a map with property names as keys and their values, or empty map if bean is null
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Person person = getPerson();
@@ -217,45 +222,53 @@ public final class BeanTransformer {
      *
      * @param bean   the target bean to set properties on
      * @param values a map of property names to values
+     *               <p>
+     *               Example:
+     *               <pre>{@code
+     *                                                                                     Person person = new Person();
      *
-     * Example:
-     * <pre>{@code
-     * Person person = new Person();
+     *                                                                                     // Setup from map
+     *                                                                                     Map<String, Object> values = new HashMap<>();
+     *                                                                                     values.put("name", "John Doe");
+     *                                                                                     values.put("age", 30);
+     *                                                                                     values.put("email", "john@example.com");
+     *                                                                                     BeanTransformer.setupBean(person, values);
      *
-     * // Setup from map
-     * Map<String, Object> values = new HashMap<>();
-     * values.put("name", "John Doe");
-     * values.put("age", 30);
-     * values.put("email", "john@example.com");
-     * BeanTransformer.setupBean(person, values);
+     *                                                                                     // Setup from request parameters
+     *                                                                                     @PostMapping("/users")
+     *                                                                                     public void createUser(@RequestBody Map<String, Object> data) {
+     *                                                                                         User user = new User();
+     *                                                                                         BeanTransformer.setupBean(user, data);
+     *                                                                                         userRepository.save(user);
+     *                                                                                     }
      *
-     * // Setup from request parameters
-     * @PostMapping("/users")
-     * public void createUser(@RequestBody Map<String, Object> data) {
-     *     User user = new User();
-     *     BeanTransformer.setupBean(user, data);
-     *     userRepository.save(user);
-     * }
-     *
-     * // Supports nested properties (dot notation)
-     * Map<String, Object> data = Map.of(
-     *     "name", "John",
-     *     "address.city", "New York",
-     *     "address.zipCode", "10001"
-     * );
-     * BeanTransformer.setupBean(person, data);
-     * }</pre>
+     *                                                                                     // Supports nested properties (dot notation)
+     *                                                                                     Map<String, Object> data = Map.of(
+     *                                                                                         "name", "John",
+     *                                                                                         "address.city", "New York",
+     *                                                                                         "address.zipCode", "10001"
+     *                                                                                     );
+     *                                                                                     BeanTransformer.setupBean(person, data);
+     *                                                                                     }</pre>
      */
     public static void setupBean(final Object bean, final Map<String, Object> values) {
         if (bean == null || values == null || values.isEmpty()) {
             return;
         }
 
-        for (Map.Entry<String, Object> entry : values.entrySet()) {
-            try {
-                PropertyAccessor.invokeSetMethod(bean, entry.getKey(), entry.getValue());
-            } catch (Exception e) {
-                // Ignore properties that cannot be set
+        MutablePropertyValues propertyValues = new MutablePropertyValues();
+
+        values.forEach((key, value) -> {
+            Object actualValue = value instanceof ValueWrapper wrapper ? wrapper.getValue() : value;
+            propertyValues.addPropertyValue(new PropertyValue(key, actualValue));
+        });
+
+        try {
+            BeanWrapperImpl beanWrapper = new BeanWrapperImpl(bean);
+            beanWrapper.setPropertyValues(propertyValues, true, true);
+        } catch (Exception e) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.warn("Failed to set properties on bean: " + e.getMessage(), e);
             }
         }
     }
@@ -270,25 +283,25 @@ public final class BeanTransformer {
      *
      * @param bean   the target bean to set properties on
      * @param source the source object (can be a Map or another bean)
+     *               <p>
+     *               Example:
+     *               <pre>{@code
+     *                                                                                     // Copy from another bean
+     *                                                                                     Person person = new Person();
+     *                                                                                     PersonDTO dto = getPersonDTO();
+     *                                                                                     BeanTransformer.setupBean(person, dto);
      *
-     * Example:
-     * <pre>{@code
-     * // Copy from another bean
-     * Person person = new Person();
-     * PersonDTO dto = getPersonDTO();
-     * BeanTransformer.setupBean(person, dto);
+     *                                                                                     // Copy from map
+     *                                                                                     Person person = new Person();
+     *                                                                                     Map<String, Object> data = getPersonData();
+     *                                                                                     BeanTransformer.setupBean(person, data);
      *
-     * // Copy from map
-     * Person person = new Person();
-     * Map<String, Object> data = getPersonData();
-     * BeanTransformer.setupBean(person, data);
-     *
-     * // Update existing entity from DTO
-     * Person existingPerson = personRepository.findById(id);
-     * PersonUpdateDTO updateData = getUpdateData();
-     * BeanTransformer.setupBean(existingPerson, updateData);
-     * personRepository.save(existingPerson);
-     * }</pre>
+     *                                                                                     // Update existing entity from DTO
+     *                                                                                     Person existingPerson = personRepository.findById(id);
+     *                                                                                     PersonUpdateDTO updateData = getUpdateData();
+     *                                                                                     BeanTransformer.setupBean(existingPerson, updateData);
+     *                                                                                     personRepository.save(existingPerson);
+     *                                                                                     }</pre>
      */
     public static void setupBean(Object bean, Object source) {
         if (bean == null || source == null) {
@@ -316,7 +329,7 @@ public final class BeanTransformer {
      * @param source   the source object to clone
      * @param modifier the consumer function to modify the copy (can be null for plain copy)
      * @return a modified copy of the source, or null if source is null
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Person person = getPerson();
@@ -370,7 +383,7 @@ public final class BeanTransformer {
      * @param source   the source object to deep clone
      * @param modifier the consumer function to modify the copy (can be null for plain deep copy)
      * @return a modified deep copy of the source, or null if source is null
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Person person = getPerson();
@@ -406,27 +419,27 @@ public final class BeanTransformer {
      *
      * @param target  the target bean to merge properties into
      * @param sources the source objects to merge from (variable arguments)
+     *                <p>
+     *                Example:
+     *                <pre>{@code
+     *                                                                                           Person person = new Person();
      *
-     * Example:
-     * <pre>{@code
-     * Person person = new Person();
+     *                                                                                           // Merge from multiple sources
+     *                                                                                           PersonBasicDTO basic = getBasicInfo();
+     *                                                                                           PersonContactDTO contact = getContactInfo();
+     *                                                                                           PersonPreferencesDTO prefs = getPreferences();
      *
-     * // Merge from multiple sources
-     * PersonBasicDTO basic = getBasicInfo();
-     * PersonContactDTO contact = getContactInfo();
-     * PersonPreferencesDTO prefs = getPreferences();
+     *                                                                                           BeanTransformer.merge(person, basic, contact, prefs);
+     *                                                                                           // person now has properties from all three DTOs
      *
-     * BeanTransformer.merge(person, basic, contact, prefs);
-     * // person now has properties from all three DTOs
-     *
-     * // Build object from multiple partial sources
-     * User user = new User();
-     * BeanTransformer.merge(user,
-     *     userProfile,
-     *     userSettings,
-     *     userPermissions
-     * );
-     * }</pre>
+     *                                                                                           // Build object from multiple partial sources
+     *                                                                                           User user = new User();
+     *                                                                                           BeanTransformer.merge(user,
+     *                                                                                               userProfile,
+     *                                                                                               userSettings,
+     *                                                                                               userPermissions
+     *                                                                                           );
+     *                                                                                           }</pre>
      */
     public static void merge(Object target, Object... sources) {
         if (target == null || sources == null) {
@@ -453,7 +466,7 @@ public final class BeanTransformer {
      * @param targetClass        the target class
      * @param excludedProperties property names to exclude from copying
      * @return a new instance of target class with copied properties (except excluded ones)
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Person person = getPerson();
@@ -490,7 +503,7 @@ public final class BeanTransformer {
      *
      * @param bean the source bean
      * @return a map with all property names and values, or empty map if bean is null
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Person person = getPerson();
@@ -517,7 +530,7 @@ public final class BeanTransformer {
         }
 
         List<tools.dynamia.commons.reflect.PropertyInfo> properties =
-            tools.dynamia.commons.ObjectOperations.getPropertiesInfo(bean.getClass());
+                tools.dynamia.commons.ObjectOperations.getPropertiesInfo(bean.getClass());
 
         for (tools.dynamia.commons.reflect.PropertyInfo property : properties) {
             try {
