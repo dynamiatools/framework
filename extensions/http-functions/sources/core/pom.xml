@@ -1,0 +1,31 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>tools.dynamia.modules</groupId>
+        <artifactId>tools.dynamia.modules.parent</artifactId>
+        <version>26.2.3</version>
+        <relativePath>../../../pom.xml</relativePath>
+    </parent>
+    <name>DynamiaModules - Http Functions Core</name>
+    <artifactId>tools.dynamia.modules.functions.core</artifactId>
+    <description>
+        Core module for Http Functions, contains the main classes and interfaces to create and handle http functions, a
+        way to create functions that can be called from Java like normal code and return a response with the result of
+        the function execution.
+    </description>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.saas.jpa</artifactId>
+            <version>26.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.web</artifactId>
+            <version>26.2.3</version>
+        </dependency>
+    </dependencies>
+</project>
