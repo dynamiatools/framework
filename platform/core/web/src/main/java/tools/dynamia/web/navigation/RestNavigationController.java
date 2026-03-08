@@ -17,8 +17,7 @@
 package tools.dynamia.web.navigation;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
+
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -47,6 +46,8 @@ import tools.dynamia.viewers.JsonView;
 import tools.dynamia.viewers.JsonViewDescriptorDeserializer;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.Viewers;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.util.List;
@@ -291,7 +292,7 @@ public class RestNavigationController extends AbstractLoggable {
                     ObjectOperations.invokeSetMethod(entity, field.getPropertyInfo(), fieldValue);
                 }
             });
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             log("Error updating entity", e);
         }
 
@@ -345,7 +346,7 @@ public class RestNavigationController extends AbstractLoggable {
 
             try {
                 return new ResponseEntity<>(mapper.writeValueAsString(viewDescriptor), HttpStatus.OK);
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 return new ResponseEntity<>("ERROR: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
