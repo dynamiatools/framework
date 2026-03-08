@@ -11,13 +11,14 @@ open module tools.dynamia.web {
     requires spring.context;
     requires spring.beans;
     requires spring.core;
-    requires com.fasterxml.jackson.core;
-    requires com.fasterxml.jackson.databind;
+
 
     requires java.net.http;
     requires java.scripting;
     requires jakarta.validation;
     requires io.swagger.v3.oas.annotations;
+    requires com.fasterxml.jackson.annotation;
+    requires tools.jackson.databind;
     exports tools.dynamia.web.navigation;
     exports tools.dynamia.web.util;
 }
