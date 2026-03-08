@@ -1,14 +1,13 @@
 package tools.dynamia.domain.util;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.URLable;
 import tools.dynamia.domain.AbstractEntity;
-
-import java.io.IOException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
 @SuppressWarnings("ALL")
 public class BasicEntityJsonDeserializer extends StdDeserializer<AbstractEntity> {
@@ -23,9 +22,9 @@ public class BasicEntityJsonDeserializer extends StdDeserializer<AbstractEntity>
 
     @SuppressWarnings("unchecked")
     @Override
-    public AbstractEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public AbstractEntity deserialize(JsonParser p, DeserializationContext ctxt){
 
-        JsonNode node = p.getCodec().readTree(p);
+        JsonNode node = p.readValueAsTree();
 
         String className = node.get(BasicEntityJsonSerializer.CLASS).asText();
         String name = node.get(BasicEntityJsonSerializer.NAME).asText();

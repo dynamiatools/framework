@@ -17,10 +17,9 @@
 
 package tools.dynamia.viewers;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.fasterxml.jackson.databind.util.StdDateFormat;
+
+import tools.dynamia.commons.DateTimeUtils;
+import tools.dynamia.commons.Formatters;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.URLable;
 import tools.dynamia.commons.logger.LoggingService;
@@ -32,12 +31,18 @@ import tools.dynamia.domain.EntityReferenceRepository;
 import tools.dynamia.domain.Reference;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.viewers.util.Viewers;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.databind.util.StdDateFormat;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Collection;
 import java.util.Date;
 
@@ -48,6 +53,8 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
     private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
     private final DateFormat basicDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+
     private final static LoggingService LOGGER = new SLF4JLoggingService(JsonViewDescriptorSerializer.class);
 
     public JsonViewDescriptorSerializer(ViewDescriptor viewDescriptor) {
@@ -60,8 +67,9 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
         this.viewDescriptor = viewDescriptor;
     }
 
+
     @Override
-    public void serialize(Object value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(Object value, JsonGenerator gen, SerializationContext provider) {
         if (viewDescriptor == null) {
             return;
         }
@@ -70,7 +78,7 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
         if (id != null) {
             writeField(gen, "id", id);
         }
-       // writeField(gen, "name", value.toString());
+        // writeField(gen, "name", value.toString());
 
         for (Field field : Viewers.getFields(viewDescriptor)) {
             PropertyInfo fieldInfo = field.getPropertyInfo();
@@ -92,7 +100,7 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
                 }
 
                 if (collection != null && !collection.isEmpty()) {
-                    gen.writeArrayFieldStart(field.getName());
+                    gen.writeStartArray(field.getName());
                     ViewDescriptor collectionDescriptor = getFieldViewDescriptor(fieldInfo.getGenericType());
                     JsonViewDescriptorSerializer collectionSerializer = new JsonViewDescriptorSerializer(collectionDescriptor);
                     for (Object item : collection) {
@@ -110,7 +118,7 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
                         EntityReferenceRepository repository = DomainUtils.getEntityReferenceRepositoryByAlias(reference.value());
                         @SuppressWarnings("unchecked") EntityReference entityReference = repository.load((Serializable) fieldValue);
                         if (entityReference != null) {
-                            gen.writeObjectFieldStart(fieldName);
+                            gen.writeStartObject(fieldName);
                             writeField(gen, "id", entityReference.getId());
                             writeField(gen, "name", entityReference.getName());
                             gen.writeEndObject();
@@ -144,54 +152,55 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
         return descriptor;
     }
 
-    private void writeField(JsonGenerator gen, String fieldName, Object fieldValue) throws IOException {
+    private void writeField(JsonGenerator gen, String fieldName, Object fieldValue) {
 
         if (fieldValue instanceof Integer) {
-            gen.writeNumberField(fieldName, (Integer) fieldValue);
+            gen.writeNumberProperty(fieldName, (Integer) fieldValue);
         } else if (fieldValue instanceof Long) {
-            gen.writeNumberField(fieldName, (Long) fieldValue);
+            gen.writeNumberProperty(fieldName, (Long) fieldValue);
         } else if (fieldValue instanceof Double) {
-            gen.writeNumberField(fieldName, (Double) fieldValue);
+            gen.writeNumberProperty(fieldName, (Double) fieldValue);
         } else if (fieldValue instanceof Float) {
-            gen.writeNumberField(fieldName, (Float) fieldValue);
+            gen.writeNumberProperty(fieldName, (Float) fieldValue);
         } else if (fieldValue instanceof BigDecimal) {
-            gen.writeNumberField(fieldName, (BigDecimal) fieldValue);
+            gen.writeNumberProperty(fieldName, (BigDecimal) fieldValue);
         } else if (fieldValue instanceof String) {
-            gen.writeStringField(fieldName, (String) fieldValue);
+            gen.writeStringProperty(fieldName, (String) fieldValue);
         } else if (fieldValue instanceof Date) {
             writeDateField(gen, fieldName, (Date) fieldValue);
-
+        } else if (fieldValue instanceof TemporalAccessor) {
+            writeTemporalField(gen, fieldName, (TemporalAccessor) fieldValue);
         } else if (fieldValue instanceof Boolean) {
-            gen.writeBooleanField(fieldName, (Boolean) fieldValue);
+            gen.writeBooleanProperty(fieldName, (Boolean) fieldValue);
         } else if (DomainUtils.isEntity(fieldValue)) {
             writeEntity(gen, fieldName, fieldValue);
         } else if (fieldValue != null) {
-            gen.writeObjectField(fieldName, fieldValue);
+            gen.writePOJOProperty(fieldName, fieldValue);
         }
     }
 
-    private void writeEntity(JsonGenerator gen, String fieldName, Object entity) throws IOException {
+    private void writeEntity(JsonGenerator gen, String fieldName, Object entity) {
         Field field = viewDescriptor.getField(fieldName);
         if (field.getParams().get("include") == Boolean.TRUE) {
-            gen.writeFieldName(fieldName);
+            gen.writeName(fieldName);
             ViewDescriptor fieldDescritor = getFieldViewDescriptor(field.getFieldClass());
             JsonViewDescriptorSerializer serializer = new JsonViewDescriptorSerializer(fieldDescritor);
             serializer.serialize(entity, gen, null);
         } else {
-            gen.writeObjectFieldStart(fieldName);
+            gen.writeStartObject(fieldName);
             Object id = DomainUtils.findEntityId(entity);
             if (id != null) {
                 writeField(gen, "id", id);
             }
-            gen.writeStringField("name", entity.toString());
+            gen.writeStringProperty("name", entity.toString());
             if (entity instanceof URLable) {
-                gen.writeStringField("url", ((URLable) entity).toURL());
+                gen.writeStringProperty("url", ((URLable) entity).toURL());
             }
             gen.writeEndObject();
         }
     }
 
-    private void writeDateField(JsonGenerator gen, String fieldName, Date date) throws IOException {
+    private void writeDateField(JsonGenerator gen, String fieldName, Date date) {
 
         Field field = viewDescriptor.getField(fieldName);
         String format = "basic";
@@ -211,7 +220,33 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
         };
 
 
-        gen.writeStringField(fieldName, df.format(date));
+        gen.writeStringProperty(fieldName, df.format(date));
+    }
+
+    private void writeTemporalField(JsonGenerator gen, String fieldName, TemporalAccessor value) {
+
+        Field field = viewDescriptor.getField(fieldName);
+        String format = null;
+        if (field != null && field.getParams().containsKey("format")) {
+            format = (String) field.getParams().get("format");
+        }
+
+        String valueStr = null;
+        if (format != null && !format.isEmpty()) {
+            valueStr = DateTimeUtils.getFormatter(format).format(value);
+        } else {
+            valueStr = switch (value) {
+                case java.time.LocalDateTime localDateTime -> Formatters.formatDateTime(localDateTime);
+                case java.time.LocalDate localDate -> Formatters.formatDate(localDate);
+                case java.time.LocalTime localTime -> Formatters.formatTime(localTime);
+                case java.time.ZonedDateTime zonedDateTime -> Formatters.formatZonedDateTime(zonedDateTime);
+                case java.time.OffsetDateTime offsetDateTime -> Formatters.formatOffsetDateTime(offsetDateTime);
+                case java.time.Instant instant -> Formatters.formatInstant(instant);
+                default -> value.toString();
+            };
+        }
+
+        gen.writeStringProperty(fieldName, valueStr);
     }
 
     static class FieldMetadata {

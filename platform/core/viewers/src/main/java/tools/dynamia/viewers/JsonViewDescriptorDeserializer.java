@@ -17,11 +17,7 @@
 
 package tools.dynamia.viewers;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.util.StdDateFormat;
+
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
@@ -29,14 +25,14 @@ import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.commons.reflect.ReflectionException;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.viewers.util.Viewers;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.databind.util.StdDateFormat;
 
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class JsonViewDescriptorDeserializer extends StdDeserializer<Object> {
 
@@ -56,8 +52,9 @@ public class JsonViewDescriptorDeserializer extends StdDeserializer<Object> {
 
 
     @Override
-    public Object deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-        JsonNode node = jp.getCodec().readTree(jp);
+    public Object deserialize(JsonParser jp, DeserializationContext ctxt) {
+
+        JsonNode node = jp.readValueAsTree();
         return parseNode(viewDescriptor.getBeanClass(), node, viewDescriptor);
 
     }
