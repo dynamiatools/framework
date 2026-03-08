@@ -19,9 +19,7 @@ package tools.dynamia.commons;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
@@ -311,5 +309,44 @@ public class Formatters {
      * Private constructor to prevent instantiation.
      */
     private Formatters() {
+    }
+
+    /**
+     * Formats a {@link ZonedDateTime} object as an ISO zoned date-time string.
+     *
+     * @param zonedDateTime the zoned date-time to format
+     * @return the formatted ISO zoned date-time string
+     */
+    public static String formatZonedDateTime(ZonedDateTime zonedDateTime) {
+        if (zonedDateTime == null) {
+            return "";
+        }
+        return zonedDateTime.format(DateTimeFormatter.ISO_ZONED_DATE_TIME);
+    }
+
+    /**
+     * Formats an {@link OffsetDateTime} object as an ISO offset date-time string.
+     *
+     * @param offsetDateTime the offset date-time to format
+     * @return the formatted ISO offset date-time string
+     */
+    public static String formatOffsetDateTime(OffsetDateTime offsetDateTime) {
+        if (offsetDateTime == null) {
+            return "";
+        }
+        return offsetDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    }
+
+    /**
+     * Formats an {@link Instant} object as an ISO offset date-time string in the default time zone.
+     *
+     * @param instant the instant to format
+     * @return the formatted ISO offset date-time string
+     */
+    public static String formatInstant(Instant instant) {
+        if (instant == null) {
+            return "";
+        }
+        return instant.atZone(Messages.getDefaultTimeZone()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 }
