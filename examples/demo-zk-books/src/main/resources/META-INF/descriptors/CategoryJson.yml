@@ -6,6 +6,8 @@ fields:
   name:
   description:
   subcategories:
+  parent.id:
+
 
 params:
   conditions:
