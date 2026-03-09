@@ -1,0 +1,51 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { getCategories, getBooks } from '@/lib/api';
+import type { Book } from '@/lib/types';
+
+let categories: Awaited<ReturnType<typeof getCategories>>['content'] = [];
+let error: string | null = null;
+
+try {
+  const result = await getCategories();
+  categories = result.content ?? [];
+} catch (err) {
+  error = err instanceof Error ? err.message : 'Failed to load categories';
+}
+---
+
+<Layout title="Categories">
+  <div class="section-header">
+    <h2>📂 Categories</h2>
+    <span style="color:var(--muted);font-size:.9rem">{categories.length} categories</span>
+  </div>
+
+  {error && <div class="error-box">{error}</div>}
+
+  {categories.length === 0 && !error ? (
+    <div class="empty">
+      <span class="icon">📂</span>
+      <p>No categories found. Make sure the backend is running.</p>
+    </div>
+  ) : (
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem">
+      {categories.map(cat => (
+        <a
+          href={`/books?category=${cat.id}`}
+          style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s;display:block"
+          class="category-card"
+        >
+          <div style="font-size:2rem;margin-bottom:.5rem">📂</div>
+          <div style="font-weight:700;font-size:1.05rem;margin-bottom:.25rem">{cat.name}</div>
+          {cat.description && <div style="color:var(--muted);font-size:.9rem">{cat.description}</div>}
+          <div style="margin-top:.75rem;font-size:.85rem;color:var(--accent);font-weight:600">Browse books →</div>
+        </a>
+      ))}
+    </div>
+  )}
+
+  <style>
+    .category-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+  </style>
+</Layout>
+
