@@ -18,6 +18,7 @@
 package tools.dynamia.viewers;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.commons.Formatters;
 import tools.dynamia.commons.ObjectOperations;
@@ -40,22 +41,24 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
 
+    private static final LoggingService LOGGER = new SLF4JLoggingService(JsonViewDescriptorSerializer.class);
+
+    private static final StdDateFormat FULL_DATE_FORMAT = new StdDateFormat();
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
+    private static final DateFormat BASIC_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+    private static final Map<Class<?>, ViewDescriptor> DESCRIPTOR_CACHE = new ConcurrentHashMap<>();
+
     private final ViewDescriptor viewDescriptor;
-    private final StdDateFormat fullDateFormat = new StdDateFormat();
-    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private final DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-    private final DateFormat basicDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
-
-    private final static LoggingService LOGGER = new SLF4JLoggingService(JsonViewDescriptorSerializer.class);
 
     public JsonViewDescriptorSerializer(ViewDescriptor viewDescriptor) {
         this(viewDescriptor, null);
@@ -83,73 +86,111 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
         for (Field field : Viewers.getFields(viewDescriptor)) {
             PropertyInfo fieldInfo = field.getPropertyInfo();
             if (field.isCollection() && fieldInfo != null) {
-                Collection collection = null;
-                try {
-                    collection = (Collection) ObjectOperations.invokeGetMethod(value, field.getName());
-                    collection.isEmpty();
-                } catch (Throwable e) {
-                    if (field.isEntity()) {
-                        String parentName = ObjectOperations.findParentPropertyName(viewDescriptor.getBeanClass(), fieldInfo.getGenericType());
-                        if (parentName != null) {
-                            collection = DomainUtils.lookupCrudService().find(fieldInfo.getGenericType(), parentName, value);
-                        }
-                    } else {
-                        collection = null;
-                        LOGGER.warn("Cannot serialize collection " + field.getName() + "of class " + viewDescriptor.getBeanClass() + ": " + e.getMessage());
-                    }
-                }
-
-                if (collection != null && !collection.isEmpty()) {
-                    gen.writeStartArray(field.getName());
-                    ViewDescriptor collectionDescriptor = getFieldViewDescriptor(fieldInfo.getGenericType());
-                    JsonViewDescriptorSerializer collectionSerializer = new JsonViewDescriptorSerializer(collectionDescriptor);
-                    for (Object item : collection) {
-                        collectionSerializer.serialize(item, gen, provider);
-                    }
-                    gen.writeEndArray();
-                }
+                serializeCollectionField(field, fieldInfo, value, gen, provider);
             } else {
-
-                String fieldName = field.getName();
-                try {
-                    Object fieldValue = field.getPropertyInfo() != null && field.getPropertyInfo().is(boolean.class) ? ObjectOperations.invokeBooleanGetMethod(value, field.getName()) : ObjectOperations.invokeGetMethod(value, fieldName);
-                    if (fieldInfo != null && fieldInfo.isAnnotationPresent(Reference.class)) {
-                        Reference reference = fieldInfo.getAnnotation(Reference.class);
-                        EntityReferenceRepository repository = DomainUtils.getEntityReferenceRepositoryByAlias(reference.value());
-                        @SuppressWarnings("unchecked") EntityReference entityReference = repository.load((Serializable) fieldValue);
-                        if (entityReference != null) {
-                            gen.writeStartObject(fieldName);
-                            writeField(gen, "id", entityReference.getId());
-                            writeField(gen, "name", entityReference.getName());
-                            gen.writeEndObject();
-                        } else {
-                            writeField(gen, fieldName, fieldValue);
-                        }
-                    } else {
-                        writeField(gen, fieldName, fieldValue);
-                    }
-                } catch (ReflectionException e) {
-                    LOGGER.warn("Cannot write field " + fieldName + " to json: " + e.getMessage());
-                }
-
+                serializeSimpleField(field, fieldInfo, value, gen);
             }
         }
 
         gen.writeEndObject();
+    }
+
+    private void serializeCollectionField(Field field, PropertyInfo fieldInfo, Object value,
+                                          JsonGenerator gen, SerializationContext provider) {
+        Collection<?> collection = null;
+        try {
+            collection = (Collection<?>) ObjectOperations.invokeGetMethod(value, field.getName());
+            // trigger lazy-loading check: if it throws, we fall back below
+            int size = collection.size();
+            if (size == 0) return;
+        } catch (Throwable e) {
+            if (field.isEntity()) {
+                String parentName = ObjectOperations.findParentPropertyName(viewDescriptor.getBeanClass(), fieldInfo.getGenericType());
+                if (parentName != null) {
+                    collection = DomainUtils.lookupCrudService().find(fieldInfo.getGenericType(), parentName, value);
+                }
+            } else {
+                collection = null;
+                LOGGER.warn("Cannot serialize collection " + field.getName() + " of class " + viewDescriptor.getBeanClass() + ": " + e.getMessage());
+            }
+        }
+
+        if (collection != null && !collection.isEmpty()) {
+            gen.writeArrayPropertyStart(field.getName());
+            ViewDescriptor collectionDescriptor = getFieldViewDescriptor(fieldInfo.getGenericType());
+            JsonViewDescriptorSerializer collectionSerializer = new JsonViewDescriptorSerializer(collectionDescriptor);
+            for (Object item : collection) {
+                collectionSerializer.serialize(item, gen, provider);
+            }
+            gen.writeEndArray();
+        }
+    }
+
+    private void serializeSimpleField(Field field, PropertyInfo fieldInfo, Object value, JsonGenerator gen) {
+        if (!isSerializable(field, fieldInfo)) {
+            return;
+        }
+
+        String fieldName = field.getName();
+        try {
+            Object fieldValue = fieldInfo != null && fieldInfo.is(boolean.class)
+                    ? ObjectOperations.invokeBooleanGetMethod(value, fieldName)
+                    : ObjectOperations.invokeGetMethod(value, fieldName);
+
+            if (fieldInfo != null && fieldInfo.isAnnotationPresent(Reference.class)) {
+                serializeReferenceField(gen, fieldName, fieldValue, fieldInfo);
+            } else {
+                writeField(gen, fieldName, fieldValue);
+            }
+        } catch (ReflectionException e) {
+            LOGGER.warn("Cannot write field " + fieldName + " to json: " + e.getMessage());
+        }
+    }
+
+    private boolean isSerializable(Field field, PropertyInfo fieldInfo) {
+        if (!field.isVisible()) {
+            return false;
+        }
+
+        if (fieldInfo != null) {
+            if (fieldInfo.isAnnotationPresent(JsonIgnore.class)) {
+                return false;
+            }
+
+            return !fieldInfo.isTransient();
+        }
+
+
+        return true;
+    }
+
+    private void serializeReferenceField(JsonGenerator gen, String fieldName, Object fieldValue, PropertyInfo fieldInfo) {
+        Reference reference = fieldInfo.getAnnotation(Reference.class);
+        @SuppressWarnings("unchecked")
+        EntityReferenceRepository<Serializable> repository = DomainUtils.getEntityReferenceRepositoryByAlias(reference.value());
+        EntityReference<?> entityReference = repository != null ? repository.load((Serializable) fieldValue) : null;
+        if (entityReference != null) {
+            gen.writeStartObject(fieldName);
+            writeField(gen, "id", entityReference.getId());
+            writeField(gen, "name", entityReference.getName());
+            gen.writeEndObject();
+        } else {
+            writeField(gen, fieldName, fieldValue);
+        }
 
     }
 
-    private ViewDescriptor getFieldViewDescriptor(Class clazz) {
-        ViewDescriptor descriptor = Viewers.findViewDescriptor(clazz, "json");
-
-        if (descriptor == null) {
-            descriptor = Viewers.findViewDescriptor(clazz, "tree");
-        }
-
-        if (descriptor == null) {
-            descriptor = Viewers.getViewDescriptor(clazz, "table");
-        }
-        return descriptor;
+    private ViewDescriptor getFieldViewDescriptor(Class<?> clazz) {
+        return DESCRIPTOR_CACHE.computeIfAbsent(clazz, type -> {
+            ViewDescriptor descriptor = Viewers.findViewDescriptor(type, "json");
+            if (descriptor == null) {
+                descriptor = Viewers.findViewDescriptor(type, "tree");
+            }
+            if (descriptor == null) {
+                descriptor = Viewers.getViewDescriptor(type, "table");
+            }
+            return descriptor;
+        });
     }
 
     private void writeField(JsonGenerator gen, String fieldName, Object fieldValue) {
@@ -187,7 +228,8 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
             JsonViewDescriptorSerializer serializer = new JsonViewDescriptorSerializer(fieldDescritor);
             serializer.serialize(entity, gen, null);
         } else {
-            gen.writeStartObject(fieldName);
+
+            gen.writeObjectPropertyStart(fieldName);
             Object id = DomainUtils.findEntityId(entity);
             if (id != null) {
                 writeField(gen, "id", id);
@@ -213,10 +255,10 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
         }
 
         DateFormat df = switch (format) {
-            case "ISO8601" -> fullDateFormat;
-            case "date" -> dateFormat;
-            case "time" -> timeFormat;
-            default -> basicDateFormat;
+            case "ISO8601" -> FULL_DATE_FORMAT;
+            case "date" -> DATE_FORMAT;
+            case "time" -> TIME_FORMAT;
+            default -> BASIC_DATE_FORMAT;
         };
 
 
@@ -231,7 +273,7 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
             format = (String) field.getParams().get("format");
         }
 
-        String valueStr = null;
+        String valueStr;
         if (format != null && !format.isEmpty()) {
             valueStr = DateTimeUtils.getFormatter(format).format(value);
         } else {
@@ -249,42 +291,6 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
         gen.writeStringProperty(fieldName, valueStr);
     }
 
-    static class FieldMetadata {
-
-        private String label;
-        private String description;
-        private String type;
-
-        public FieldMetadata(Field field) {
-            this.label = field.getLabel();
-            this.description = field.getDescription();
-            this.type = field.getFieldClass().getSimpleName();
-        }
-
-
-        public String getLabel() {
-            return label;
-        }
-
-        public void setLabel(String label) {
-            this.label = label;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-    }
-
 }
+
+
