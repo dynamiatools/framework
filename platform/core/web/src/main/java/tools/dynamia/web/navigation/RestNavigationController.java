@@ -33,6 +33,7 @@ import tools.dynamia.commons.logger.AbstractLoggable;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.crud.CrudPage;
 import tools.dynamia.domain.query.DataPaginator;
+import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.util.QueryBuilder;
@@ -50,6 +51,7 @@ import tools.jackson.databind.JsonNode;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * REST controller that handles CRUD operations on entities exposed through the application's
@@ -202,6 +204,7 @@ public class RestNavigationController extends AbstractLoggable {
             query.where(pageParams);
         }
         parseConditions(query, readDescriptor);
+        applyRequestFilters(request, query, readDescriptor);
 
         int pageSize = getParameterNumber(request, "size");
         int currentPage = getParameterNumber(request, "page");
@@ -471,6 +474,118 @@ public class RestNavigationController extends AbstractLoggable {
         } catch (Exception e) {
             LoggingService.get(RestNavigationController.class).error("Error parsing conditions", e);
         }
+    }
+
+    /**
+     * Applies dynamic field filters derived from HTTP query parameters to the given {@link QueryBuilder}.
+     *
+     * <p>Any request parameter whose name does not start with {@code _} and is not a reserved
+     * pagination keyword ({@code page}, {@code size}) is treated as a potential field filter.
+     * The filter value is matched against the entity field registered in the {@link ViewDescriptor}
+     * and the appropriate {@link QueryConditions} condition is selected based on the field's Java type:</p>
+     *
+     * <ul>
+     *   <li>{@link String} — {@code LIKE} with auto-searchable wildcard wrapping</li>
+     *   <li>{@link Number} / numeric primitives — exact equality ({@code =})</li>
+     *   <li>{@link Boolean} / {@code boolean} — exact equality ({@code =})</li>
+     *   <li>{@link Enum} subtypes — exact equality ({@code =}) using {@link Enum#valueOf}</li>
+     *   <li>Any other type — skipped; not safe to cast without type information</li>
+     * </ul>
+     *
+     * <p>Parameters for fields not present in the descriptor are silently ignored.</p>
+     *
+     * <p><b>Usage example:</b></p>
+     * <pre>{@code GET /api/users?name=john&status=ACTIVE&age=30 }</pre>
+     *
+     * @param request    the current HTTP request carrying the filter parameters
+     * @param query      the query builder to augment with filter conditions
+     * @param descriptor the view descriptor used to resolve field metadata; if {@code null} this
+     *                   method does nothing
+     */
+    public static void applyRequestFilters(HttpServletRequest request, QueryBuilder query, ViewDescriptor descriptor) {
+        if (descriptor == null) {
+            return;
+        }
+
+        // Parameter names that are reserved for pagination / internal use and must not be treated as filters.
+        Set<String> RESERVED_PARAMS = Set.of("page", "size");
+
+        request.getParameterMap().forEach((paramName, values) -> {
+            // Skip internal (_) params and pagination keywords
+            if (paramName.startsWith("_") || RESERVED_PARAMS.contains(paramName) || values.length == 0) {
+                return;
+            }
+
+            Field field = descriptor.getField(paramName);
+            if (field == null) {
+                return; // Unknown field — ignore silently
+            }
+
+            Class<?> fieldType = field.getFieldClass();
+            if (fieldType == null && field.getPropertyInfo() != null) {
+                fieldType = field.getPropertyInfo().getType();
+            }
+            if (fieldType == null) {
+                return; // Cannot determine type — skip
+            }
+
+            String rawValue = values[0];
+            if (rawValue == null || rawValue.isBlank()) {
+                return;
+            }
+
+            try {
+                if (fieldType == String.class) {
+                    // LIKE with auto-searchable wildcard (e.g., "john" → "%john%")
+                    query.and(paramName, QueryConditions.like(rawValue));
+
+                } else if (Number.class.isAssignableFrom(fieldType) || fieldType.isPrimitive() && fieldType != boolean.class) {
+                    // Numeric equality — parse to the right numeric type
+                    Object numericValue = parseNumber(rawValue, fieldType);
+                    if (numericValue != null) {
+                        query.and(paramName, QueryConditions.eq(numericValue));
+                    }
+
+                } else if (fieldType == Boolean.class || fieldType == boolean.class) {
+                    boolean boolValue = "true".equalsIgnoreCase(rawValue) || "1".equals(rawValue);
+                    query.and(paramName, QueryConditions.eq(boolValue));
+
+                } else if (fieldType.isEnum()) {
+                    @SuppressWarnings({"unchecked", "rawtypes"})
+                    Object enumValue = Enum.valueOf((Class<Enum>) fieldType, rawValue.toUpperCase());
+                    query.and(paramName, QueryConditions.eq(enumValue));
+
+                }
+                // Date, entity references, collections, etc. are intentionally skipped:
+                // they require more complex handling and are out of scope for simple URL filtering.
+            } catch (Exception e) {
+                LoggingService.get(RestNavigationController.class)
+                        .warn("Ignoring filter param '" + paramName + "=" + rawValue + "': " + e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Parses a raw string value into the target numeric type.
+     *
+     * <p>Supports {@link Integer}, {@code int}, {@link Long}, {@code long},
+     * {@link Double}, {@code double}, {@link Float}, {@code float},
+     * {@link Short}, {@code short}, {@link Byte}, {@code byte},
+     * and {@link java.math.BigDecimal}.</p>
+     *
+     * @param raw        the raw string to parse
+     * @param targetType the target numeric {@link Class}
+     * @return the parsed number, or {@code null} if the type is not supported
+     */
+    private static Object parseNumber(String raw, Class<?> targetType) {
+        if (targetType == Integer.class || targetType == int.class) return Integer.parseInt(raw);
+        if (targetType == Long.class || targetType == long.class) return Long.parseLong(raw);
+        if (targetType == Double.class || targetType == double.class) return Double.parseDouble(raw);
+        if (targetType == Float.class || targetType == float.class) return Float.parseFloat(raw);
+        if (targetType == Short.class || targetType == short.class) return Short.parseShort(raw);
+        if (targetType == Byte.class || targetType == byte.class) return Byte.parseByte(raw);
+        if (targetType == java.math.BigDecimal.class) return new java.math.BigDecimal(raw);
+        return null;
     }
 
     /**
