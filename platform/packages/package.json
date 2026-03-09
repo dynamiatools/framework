@@ -25,6 +25,7 @@
     "node": ">=20",
     "pnpm": ">=9"
   },
+  "packageManager": "pnpm@10.31.0",
   "license": "Apache-2.0"
 }
 
