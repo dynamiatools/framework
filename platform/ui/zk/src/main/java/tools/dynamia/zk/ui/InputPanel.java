@@ -20,38 +20,32 @@ import org.zkoss.bind.Binder;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.HtmlBasedComponent;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.Button;
-import org.zkoss.zul.Decimalbox;
-import org.zkoss.zul.Div;
-import org.zkoss.zul.Doublebox;
-import org.zkoss.zul.Label;
-import org.zkoss.zul.Textbox;
-import org.zkoss.zul.Vbox;
-import org.zkoss.zul.Window;
+import org.zkoss.zul.*;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.Loggable;
-import tools.dynamia.integration.Containers;
-import tools.dynamia.viewers.ComponentCustomizer;
 import tools.dynamia.viewers.Field;
-import tools.dynamia.viewers.FieldCustomizer;
 import tools.dynamia.viewers.util.ComponentCustomizerUtil;
+import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.web.util.HttpUtils;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
 
-import java.util.Collection;
+import java.io.Serial;
 
 @SuppressWarnings("rawtypes")
 public class InputPanel extends Div implements Loggable {
 
     public static final String ON_INPUT = "onInput";
+    @Serial
     private static final long serialVersionUID = 7388726856898185544L;
+    public static final String BINDING_ATTRIBUTE = "bindingAttribute";
 
     private HtmlBasedComponent textbox;
     private Label label;
     private Button okButton;
     private Object value;
     private final Class inputClass;
+    private Field inputField;
 
     public InputPanel() {
         this(null, null, String.class);
@@ -70,9 +64,10 @@ public class InputPanel extends Div implements Loggable {
         this.value = value;
         renderView(label);
 
+        String bindingAttribute = inputField != null && inputField.getParam(BINDING_ATTRIBUTE) != null ? inputField.getParam(BINDING_ATTRIBUTE).toString() : null;
         Binder binder = ZKBindingUtil.createBinder();
         ZKBindingUtil.initBinder(binder, this, this);
-        ZKBindingUtil.bindComponent(binder, textbox, "inputPanel.value", null);
+        ZKBindingUtil.bindComponent(binder, textbox, bindingAttribute, "inputPanel.value", null);
         ZKBindingUtil.bindBean(this, "inputPanel", this);
         binder.loadComponent(this, false);
         addListeners();
@@ -127,29 +122,24 @@ public class InputPanel extends Div implements Loggable {
     private Component buildTextbox() {
         Class componClass = null;
 
-        Field field = new Field("field", inputClass);
-        Collection<FieldCustomizer> customizers = Containers.get().findObjects(FieldCustomizer.class);
-        if (customizers != null) {
-            for (FieldCustomizer fieldCustomizer : customizers) {
-                fieldCustomizer.customize("form", field);
-            }
-        }
+        inputField = new Field("field", inputClass);
+        Viewers.customizeField("form", inputField);
 
-        if (field.getComponentClass() != null) {
-            componClass = field.getComponentClass();
+        if (inputField.getComponentClass() != null) {
+            componClass = inputField.getComponentClass();
         } else {
             componClass = Textbox.class;
         }
 
         Component comp = (Component) ObjectOperations.newInstance(componClass);
-        if (field.getComponentCustomizer() != null) {
+        if (inputField.getComponentCustomizer() != null) {
             try {
-                ComponentCustomizerUtil.customizeComponent(field, comp, field.getComponentCustomizer());
+                ComponentCustomizerUtil.customizeComponent(inputField, comp, inputField.getComponentCustomizer());
             } catch (Exception e) {
                 log("Cannot create component customizer", e);
             }
         }
-        ObjectOperations.setupBean(comp, field.getParams());
+        ObjectOperations.setupBean(comp, inputField.getParams());
         return comp;
     }
 
