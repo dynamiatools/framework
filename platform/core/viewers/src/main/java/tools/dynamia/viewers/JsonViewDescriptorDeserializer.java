@@ -76,24 +76,115 @@ public class JsonViewDescriptorDeserializer extends StdDeserializer<Object> {
 
     private Object parseNode(Class<?> type, JsonNode node, ViewDescriptor descriptor) {
         Object object = ObjectOperations.newInstance(type);
+
+        // Group fields by their root prefix (part before the first dot).
+        // Fields without a dot are stored under their own name as key.
+        Map<String, List<Field>> groups = new LinkedHashMap<>();
         for (Field field : Viewers.getFields(descriptor)) {
-            PropertyInfo fieldInfo = field.getPropertyInfo();
-            if (fieldInfo.isAnnotationPresent(JsonIgnore.class)) {
-                continue;
-            }
+            String name = field.getName();
+            String root = name.contains(".") ? name.substring(0, name.indexOf('.')) : name;
+            groups.computeIfAbsent(root, k -> new ArrayList<>()).add(field);
+        }
 
-            JsonNode fieldNode = node.get(field.getName());
-            if (fieldNode == null) {
-                continue;
-            }
+        for (Map.Entry<String, List<Field>> entry : groups.entrySet()) {
+            List<Field> groupFields = entry.getValue();
+            boolean isPathGroup = groupFields.size() > 1 || groupFields.getFirst().getName().contains(".");
 
-            if (fieldInfo.isCollection()) {
-                processCollectionField(object, field, fieldInfo, fieldNode, type);
+            if (isPathGroup) {
+                // Navigate the JsonNode by root key and recursively set nested values
+                JsonNode groupNode = node.get(entry.getKey());
+                if (groupNode != null) {
+                    deserializePathGroup(object, groupFields, entry.getKey(), groupNode);
+                }
             } else {
-                setSimpleField(object, field.getName(), fieldInfo, fieldNode);
+                Field field = groupFields.getFirst();
+                PropertyInfo fieldInfo = field.getPropertyInfo();
+                if (fieldInfo == null || fieldInfo.isAnnotationPresent(JsonIgnore.class)) {
+                    continue;
+                }
+                JsonNode fieldNode = node.get(field.getName());
+                if (fieldNode == null) {
+                    continue;
+                }
+                if (fieldInfo.isCollection()) {
+                    processCollectionField(object, field, fieldInfo, fieldNode, type);
+                } else {
+                    setSimpleField(object, field.getName(), fieldInfo, fieldNode);
+                }
             }
         }
         return object;
+    }
+
+    /**
+     * Recursively traverses a group of dot-path fields and sets their values on the target object.
+     * <p>
+     * For example, given fields {@code category.id}, {@code category.name}, {@code category.type.name}
+     * and a {@code groupNode} that is the {@code "category"} JSON object, this method:
+     * <ul>
+     *   <li>Sets {@code object.category.id} from {@code groupNode.id}</li>
+     *   <li>Sets {@code object.category.name} from {@code groupNode.name}</li>
+     *   <li>Recurses into {@code groupNode.type} for {@code category.type.name}</li>
+     * </ul>
+     *
+     * @param object      the root bean being populated
+     * @param fields      fields whose names start with the current prefix (full original dot-path names)
+     * @param prefix      the dot-path prefix consumed so far (e.g. {@code "category"})
+     * @param currentNode the JsonNode corresponding to {@code prefix}
+     */
+    private void deserializePathGroup(Object object, List<Field> fields, String prefix, JsonNode currentNode) {
+        // Separate leaf fields from those that need another level of nesting.
+        // We strip the current prefix (e.g. "category") using its length to correctly
+        // handle out-of-order fields and deep paths regardless of dot position.
+        Map<String, List<Field>> subGroups = new LinkedHashMap<>();
+        List<Field> leafFields = new ArrayList<>();
+
+        for (Field field : fields) {
+            String fullName = field.getName();
+            // Strip the current prefix: "category.type.name" with prefix "category" → "type.name"
+            String remainder = fullName.length() > prefix.length() + 1
+                    ? fullName.substring(prefix.length() + 1)
+                    : fullName;
+            if (remainder.contains(".")) {
+                // Still nested — group by the next segment (e.g. "type" from "type.name")
+                String nextRoot = remainder.substring(0, remainder.indexOf('.'));
+                subGroups.computeIfAbsent(nextRoot, k -> new ArrayList<>()).add(field);
+            } else {
+                // Leaf at this level (e.g. "id", "name")
+                leafFields.add(field);
+            }
+        }
+
+        // Set leaf values using the full dot-path on the root object
+        for (Field field : leafFields) {
+            String fullName = field.getName();  // e.g. "category.id"
+            // The JSON key is the last segment of the full path
+            String subName = fullName.contains(".") ? fullName.substring(fullName.lastIndexOf('.') + 1) : fullName;
+            PropertyInfo fieldInfo = field.getPropertyInfo();
+            if (fieldInfo == null || fieldInfo.isAnnotationPresent(JsonIgnore.class)) {
+                continue;
+            }
+            JsonNode leafNode = currentNode.get(subName);
+            if (leafNode == null) {
+                continue;
+            }
+            Object fieldValue = getNodeValue(fieldInfo, leafNode);
+            try {
+                // invokeSetMethod supports dot-notation and auto-creates null intermediate objects
+                ObjectOperations.invokeSetMethod(object, fullName, fieldValue);
+            } catch (ReflectionException e) {
+                LOGGER.warn("Cannot parse json path field " + fullName + " = " + fieldValue + ": " + e.getMessage());
+            }
+        }
+
+        // Recurse into sub-groups, passing the extended prefix and the matching sub-node
+        for (Map.Entry<String, List<Field>> sub : subGroups.entrySet()) {
+            String nextRoot = sub.getKey();
+            JsonNode subNode = currentNode.get(nextRoot);
+            if (subNode != null) {
+                deserializePathGroup(object, sub.getValue(), prefix + "." + nextRoot, subNode);
+            }
+        }
     }
 
     private void processCollectionField(Object object, Field field, PropertyInfo fieldInfo,

@@ -42,8 +42,11 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.temporal.TemporalAccessor;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -81,18 +84,155 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
         if (id != null) {
             writeField(gen, "id", id);
         }
-        // writeField(gen, "name", value.toString());
 
+        // Group fields by their root prefix (part before the first dot).
+        // Fields without a dot are stored under their own name as key.
+        Map<String, List<Field>> groups = new LinkedHashMap<>();
         for (Field field : Viewers.getFields(viewDescriptor)) {
-            PropertyInfo fieldInfo = field.getPropertyInfo();
-            if (field.isCollection() && fieldInfo != null) {
-                serializeCollectionField(field, fieldInfo, value, gen, provider);
+            String name = field.getName();
+            String root = name.contains(".") ? name.substring(0, name.indexOf('.')) : name;
+            groups.computeIfAbsent(root, k -> new ArrayList<>()).add(field);
+        }
+
+        for (Map.Entry<String, List<Field>> entry : groups.entrySet()) {
+            List<Field> groupFields = entry.getValue();
+            boolean isPathGroup = groupFields.size() > 1 || groupFields.get(0).getName().contains(".");
+
+            if (isPathGroup) {
+                // All fields in this group are path-based; render them as a nested object
+                serializePathGroup(entry.getKey(), groupFields, value, gen, provider);
             } else {
-                serializeSimpleField(field, fieldInfo, value, gen);
+                Field field = groupFields.get(0);
+                PropertyInfo fieldInfo = field.getPropertyInfo();
+                if (field.isCollection() && fieldInfo != null) {
+                    serializeCollectionField(field, fieldInfo, value, gen, provider);
+                } else {
+                    serializeSimpleField(field, fieldInfo, value, gen);
+                }
             }
         }
 
         gen.writeEndObject();
+    }
+
+    /**
+     * Writes a group of dot-path fields as a nested JSON object, recursively.
+     * Supports arbitrarily deep paths, e.g.:
+     * <pre>
+     * category.id, category.name, category.type.name  →
+     * "category": { "id": 1, "name": "...", "type": { "name": "..." } }
+     * </pre>
+     *
+     * @param rootName  the JSON key to write (current nesting level)
+     * @param fields    the fields whose names begin with rootName (full original paths)
+     * @param value     the root bean being serialized
+     * @param pathSoFar the dot-path prefix already consumed (used to read values from the root bean)
+     * @param gen       the JSON generator
+     */
+    private void serializePathGroup(String rootName, List<Field> fields, Object value,
+                                    String pathSoFar, JsonGenerator gen) {
+        // Split fields into: leaf fields (no more dots after stripping rootName)
+        // and sub-groups (need another nesting level).
+        Map<String, List<Field>> subGroups = new LinkedHashMap<>();
+        List<Field> leafFields = new ArrayList<>();
+
+        for (Field field : fields) {
+            if (!field.isVisible()) {
+                continue;
+            }
+            String fullName = field.getName();
+            // Strip the current root prefix to get the remainder
+            String remainder = fullName.contains(".") ? fullName.substring(fullName.indexOf('.') + 1) : fullName;
+            if (remainder.contains(".")) {
+                // Still nested — group by the next segment
+                String nextRoot = remainder.substring(0, remainder.indexOf('.'));
+                subGroups.computeIfAbsent(nextRoot, k -> new ArrayList<>()).add(field);
+            } else {
+                leafFields.add(field);
+            }
+        }
+
+        // Only open the object if there is something to write
+        boolean hasLeafValues = leafFields.stream().anyMatch(f -> {
+            try {
+                return ObjectOperations.invokeGetMethod(value, f.getName()) != null;
+            } catch (Exception e) {
+                return false;
+            }
+        });
+        boolean hasSubGroups = !subGroups.isEmpty();
+
+        if (!hasLeafValues && !hasSubGroups) {
+            return;
+        }
+
+        gen.writeObjectPropertyStart(rootName);
+
+        // Write leaf fields
+        for (Field field : leafFields) {
+            String fullName = field.getName();
+            String subName = fullName.contains(".") ? fullName.substring(fullName.lastIndexOf('.') + 1) : fullName;
+            try {
+                Object fieldValue = ObjectOperations.invokeGetMethod(value, fullName);
+                if (fieldValue != null) {
+                    writeField(gen, subName, fieldValue);
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Cannot write path field " + fullName + " to json: " + e.getMessage());
+            }
+        }
+
+        // Recurse into sub-groups
+        for (Map.Entry<String, List<Field>> sub : subGroups.entrySet()) {
+            // Re-root the field names so the next level sees them starting from sub.getKey()
+            String nextRoot = sub.getKey();
+            List<Field> subFields = sub.getValue().stream()
+                    .map(f -> {
+                        // Trim one prefix level from the field name for the recursive call
+                        String trimmed = f.getName().substring(f.getName().indexOf('.') + 1);
+                        return new PathAliasField(f, trimmed);
+                    })
+                    .collect(java.util.stream.Collectors.toList());
+            serializePathGroup(nextRoot, subFields, value, pathSoFar, gen);
+        }
+
+        gen.writeEndObject();
+    }
+
+    /** Overload used by the top-level serialize() method — starts pathSoFar as empty. */
+    private void serializePathGroup(String rootName, List<Field> fields, Object value,
+                                    JsonGenerator gen, SerializationContext provider) {
+        serializePathGroup(rootName, fields, value, "", gen);
+    }
+
+    /**
+     * A lightweight wrapper around a {@link Field} that overrides only {@link #getName()}
+     * so that recursive calls see the trimmed path rather than the full original path.
+     */
+    private static class PathAliasField extends Field {
+        private final Field delegate;
+        private final String aliasName;
+
+        PathAliasField(Field delegate, String aliasName) {
+            super(aliasName);
+            this.delegate = delegate;
+            this.aliasName = aliasName;
+        }
+
+        @Override
+        public String getName() {
+            return aliasName;
+        }
+
+        @Override
+        public boolean isVisible() {
+            return delegate.isVisible();
+        }
+
+        @Override
+        public java.util.Map<String, Object> getParams() {
+            return delegate.getParams();
+        }
     }
 
     private void serializeCollectionField(Field field, PropertyInfo fieldInfo, Object value,
