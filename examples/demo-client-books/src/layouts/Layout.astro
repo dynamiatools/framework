@@ -1,0 +1,272 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title = 'MyBookStore', description = 'Browse our book catalog powered by Dynamia Platform' } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title} — MyBookStore</title>
+    <style is:global>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --bg: #f8f7f4;
+        --surface: #ffffff;
+        --border: #e5e0d8;
+        --text: #1a1612;
+        --muted: #7a7065;
+        --accent: #c0392b;
+        --accent-hover: #a93226;
+        --green: #27ae60;
+        --amber: #e67e22;
+        --red: #c0392b;
+        --radius: 10px;
+        --shadow: 0 2px 12px rgba(0,0,0,.08);
+        --font: 'Segoe UI', system-ui, sans-serif;
+      }
+
+      body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.6; }
+
+      a { color: inherit; text-decoration: none; }
+      a:hover { color: var(--accent); }
+
+      /* ── Navbar ──────────────────────────────── */
+      .navbar {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 0 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 60px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: var(--shadow);
+      }
+      .navbar-brand {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+      }
+      .navbar-brand span { font-size: 1.5rem; }
+      .navbar-links { display: flex; gap: 1.5rem; font-size: .95rem; }
+      .navbar-links a { color: var(--muted); font-weight: 500; transition: color .2s; }
+      .navbar-links a:hover, .navbar-links a.active { color: var(--accent); }
+
+      /* ── Page wrapper ───────────────────────── */
+      .page { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+      /* ── Hero ───────────────────────────────── */
+      .hero {
+        background: linear-gradient(135deg, #2c1810 0%, var(--accent) 100%);
+        color: #fff;
+        padding: 4rem 2rem;
+        text-align: center;
+        border-radius: var(--radius);
+        margin-bottom: 2.5rem;
+      }
+      .hero h1 { font-size: clamp(1.8rem, 4vw, 3rem); margin-bottom: .75rem; }
+      .hero p { font-size: 1.1rem; opacity: .85; max-width: 540px; margin: 0 auto 1.5rem; }
+      .btn {
+        display: inline-block;
+        background: #fff;
+        color: var(--accent);
+        padding: .6rem 1.6rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: .95rem;
+        transition: transform .15s, box-shadow .15s;
+      }
+      .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.2); color: var(--accent); }
+
+      /* ── Section heading ────────────────────── */
+      .section-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid var(--border);
+        padding-bottom: .75rem;
+      }
+      .section-header h2 { font-size: 1.4rem; }
+      .section-header a { font-size: .9rem; color: var(--accent); font-weight: 600; }
+
+      /* ── Book grid ──────────────────────────── */
+      .books-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1.5rem;
+      }
+
+      /* ── Book card ──────────────────────────── */
+      .book-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: transform .2s, box-shadow .2s;
+        display: flex;
+        flex-direction: column;
+      }
+      .book-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+
+      .book-cover {
+        width: 100%;
+        aspect-ratio: 2/3;
+        object-fit: cover;
+        background: linear-gradient(135deg, #3d2b1f, #7b3f2d);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 3rem;
+      }
+      .book-cover img { width: 100%; height: 100%; object-fit: cover; }
+
+      .book-info { padding: 1rem; flex: 1; display: flex; flex-direction: column; gap: .25rem; }
+      .book-title { font-weight: 700; font-size: 1rem; line-height: 1.3; }
+      .book-category { font-size: .8rem; color: var(--muted); }
+      .book-year { font-size: .8rem; color: var(--muted); }
+      .book-price {
+        margin-top: auto;
+        padding-top: .5rem;
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+      }
+      .book-price .original { font-size: .85rem; text-decoration: line-through; color: var(--muted); font-weight: 400; }
+      .badge {
+        display: inline-block;
+        padding: .15rem .55rem;
+        border-radius: 50px;
+        font-size: .72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+      }
+      .badge-green  { background: #d4edda; color: #155724; }
+      .badge-red    { background: #f8d7da; color: #721c24; }
+      .badge-amber  { background: #fff3cd; color: #856404; }
+      .badge-gray   { background: #e2e3e5; color: #383d41; }
+      .badge-sale   { background: var(--accent); color: #fff; }
+
+      /* ── Book detail ────────────────────────── */
+      .book-detail { display: grid; grid-template-columns: 280px 1fr; gap: 2.5rem; align-items: start; }
+      @media (max-width: 680px) { .book-detail { grid-template-columns: 1fr; } }
+
+      .book-detail-cover {
+        width: 100%;
+        aspect-ratio: 2/3;
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0,0,0,.18);
+        background: linear-gradient(135deg, #3d2b1f, #7b3f2d);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 5rem;
+      }
+      .book-detail-cover img { width: 100%; height: 100%; object-fit: cover; }
+
+      .book-detail-meta h1 { font-size: 2rem; line-height: 1.2; margin-bottom: .5rem; }
+      .book-detail-meta .meta-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+      .book-detail-meta .meta-row span { font-size: .9rem; color: var(--muted); }
+      .book-detail-meta .sinopsys { color: #333; line-height: 1.8; margin-bottom: 1.5rem; }
+      .book-detail-meta .price-block { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+      .price-big { font-size: 2rem; font-weight: 800; color: var(--accent); }
+      .price-original { font-size: 1.1rem; text-decoration: line-through; color: var(--muted); }
+
+      /* ── Reviews ────────────────────────────── */
+      .reviews { margin-top: 2.5rem; }
+      .reviews h3 { font-size: 1.2rem; margin-bottom: 1rem; }
+      .review-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem; }
+      .review-header { display: flex; justify-content: space-between; margin-bottom: .4rem; }
+      .review-user { font-weight: 600; }
+      .stars { color: #f39c12; font-size: 1rem; letter-spacing: .1em; }
+      .review-comment { color: #444; font-size: .95rem; }
+
+      /* ── Category filter ────────────────────── */
+      .filter-bar { display: flex; gap: .75rem; flex-wrap: wrap; margin-bottom: 2rem; }
+      .filter-btn {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        padding: .35rem 1rem;
+        border-radius: 50px;
+        font-size: .875rem;
+        cursor: pointer;
+        color: var(--muted);
+        text-decoration: none;
+        transition: all .2s;
+      }
+      .filter-btn:hover, .filter-btn.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+
+      /* ── Pagination ─────────────────────────── */
+      .pagination { display: flex; justify-content: center; gap: .5rem; margin-top: 2rem; flex-wrap: wrap; }
+      .pagination a, .pagination span {
+        padding: .4rem .85rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: .9rem;
+        color: var(--muted);
+        background: var(--surface);
+        transition: all .15s;
+      }
+      .pagination a:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+      .pagination .current { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 700; }
+
+      /* ── Empty / error states ───────────────── */
+      .empty { text-align: center; padding: 4rem 1rem; color: var(--muted); }
+      .empty .icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+      .error-box { background: #fdf0ef; border: 1px solid #f5c6cb; border-radius: var(--radius); padding: 1.5rem; color: #721c24; }
+
+      /* ── Footer ─────────────────────────────── */
+      footer {
+        margin-top: 4rem;
+        padding: 2rem;
+        text-align: center;
+        border-top: 1px solid var(--border);
+        font-size: .85rem;
+        color: var(--muted);
+      }
+      footer a { color: var(--accent); }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-brand"><span>📚</span> MyBookStore</a>
+      <div class="navbar-links">
+        <a href="/">Home</a>
+        <a href="/books">Books</a>
+        <a href="/categories">Categories</a>
+      </div>
+    </nav>
+
+    <main class="page">
+      <slot />
+    </main>
+
+    <footer>
+      <p>Powered by <a href="https://www.dynamia.tools" target="_blank">Dynamia Platform</a> + <strong>@dynamia-tools/sdk</strong></p>
+    </footer>
+  </body>
+</html>
+

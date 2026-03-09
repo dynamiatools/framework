@@ -1,0 +1,102 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { getBook, getBookReviews, getCoverUrl, formatPrice, stockLabel } from '@/lib/api';
+import type { BookReview } from '@/lib/types';
+import { DynamiaApiError } from '@dynamia-tools/sdk';
+
+const { id } = Astro.params;
+
+let book;
+let reviews: BookReview[] = [];
+let error: string | null = null;
+
+try {
+  book = await getBook(id!);
+  reviews = await getBookReviews(id!);
+} catch (err) {
+  if (err instanceof DynamiaApiError && err.status === 404) {
+    return Astro.redirect('/books');
+  }
+  error = err instanceof Error ? err.message : 'Failed to load book';
+}
+
+if (!book) {
+  return Astro.redirect('/books');
+}
+
+const cover = getCoverUrl(book);
+const stock = stockLabel(book.stockStatus);
+const avgStars = reviews.length > 0 ? reviews.reduce((s, r) => s + r.stars, 0) / reviews.length : null;
+---
+
+<Layout title={book.title} description={book.sinopsys}>
+  {error && <div class="error-box" style="margin-bottom:1.5rem">⚠️ {error}</div>}
+
+  <div style="margin-bottom:1rem">
+    <a href="/books" style="color:var(--accent);font-size:.9rem">← Back to Books</a>
+  </div>
+
+  <div class="book-detail">
+    <!-- Cover -->
+    <div class="book-detail-cover">
+      {cover ? <img src={cover} alt={book.title} /> : '📕'}
+    </div>
+
+    <!-- Meta -->
+    <div class="book-detail-meta">
+      <h1>{book.title}</h1>
+
+      <div class="meta-row">
+        {book.category && <span>📂 {book.category.name}</span>}
+        {book.year > 0 && <span>📅 {book.year}</span>}
+        {book.isbn && <span>🔖 ISBN: {book.isbn}</span>}
+        {avgStars !== null && (
+          <span>{'⭐'.repeat(Math.round(avgStars))} {avgStars.toFixed(1)} ({reviews.length} reviews)</span>
+        )}
+      </div>
+
+      <div class="price-block">
+        <span class="price-big">{formatPrice(book.price, book.onSale, book.salePrice)}</span>
+        {book.onSale && book.price && (
+          <span class="price-original">${book.price.toFixed(2)}</span>
+        )}
+        {book.onSale && <span class="badge badge-sale">ON SALE</span>}
+        <span class={`badge badge-${stock.color}`}>{stock.label}</span>
+        {book.discount > 0 && (
+          <span class="badge badge-amber">{book.discount}% OFF</span>
+        )}
+      </div>
+
+      {book.sinopsys && (
+        <div class="sinopsys" style="margin-top:1.5rem">
+          <h3 style="margin-bottom:.5rem;font-size:1rem;color:var(--muted)">Synopsis</h3>
+          <p>{book.sinopsys}</p>
+        </div>
+      )}
+
+      {book.publishDate && (
+        <p style="margin-top:1rem;font-size:.85rem;color:var(--muted)">Published: {book.publishDate}</p>
+      )}
+    </div>
+  </div>
+
+  <!-- Reviews -->
+  <div class="reviews">
+    <h3>💬 Reader Reviews {reviews.length > 0 ? `(${reviews.length})` : ''}</h3>
+
+    {reviews.length === 0 ? (
+      <p style="color:var(--muted);font-size:.95rem">No reviews yet for this book.</p>
+    ) : (
+      reviews.map(review => (
+        <div class="review-card">
+          <div class="review-header">
+            <span class="review-user">👤 {review.user}</span>
+            <span class="stars">{'⭐'.repeat(Math.min(review.stars, 5))}</span>
+          </div>
+          <p class="review-comment">{review.comment}</p>
+        </div>
+      ))
+    )}
+  </div>
+</Layout>
+

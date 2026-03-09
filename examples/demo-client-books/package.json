@@ -1,0 +1,21 @@
+{
+  "name": "demo-client-books",
+  "version": "26.3.0",
+  "description": "Public storefront demo for demo-zk-books backend — built with Astro + @dynamia-tools/sdk",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/node": "^9.5.4",
+    "@dynamia-tools/sdk": "file:../../platform/packages/sdk",
+    "astro": "^5.5.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
