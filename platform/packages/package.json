@@ -2,6 +2,9 @@
   "name": "@dynamia-tools/workspace",
   "version": "26.3.0",
   "private": true,
+  "author": "Mario Serrano",
+  "repository": "https://github.com/dynamiatools/framework",
+  "website": "https://dynamia.tools",
   "description": "pnpm monorepo for Dynamia Platform Node.js / TypeScript packages",
   "scripts": {
     "build": "pnpm -r run build",

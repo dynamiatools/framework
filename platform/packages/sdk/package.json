@@ -1,6 +1,7 @@
 {
   "name": "@dynamia-tools/sdk",
   "version": "26.3.0",
+  "website": "https://dynamia.tools",
   "description": "Official JavaScript / TypeScript client SDK for Dynamia Platform REST APIs",
   "keywords": [
     "dynamia",
@@ -10,14 +11,14 @@
     "typescript",
     "client"
   ],
-  "homepage": "https://www.dynamia.tools",
+  "homepage": "https://dynamia.tools",
   "bugs": {
-    "url": "https://github.com/dynamiatools/dynamiatools/issues"
+    "url": "https://github.com/dynamiatools/framework/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dynamiatools/dynamiatools.git",
-    "directory": "framework/platform/packages/sdk"
+    "url": "https://github.com/dynamiatools/framework.git",
+    "directory": "platform/packages/sdk"
   },
   "license": "Apache-2.0",
   "author": "Dynamia Soluciones IT SAS",

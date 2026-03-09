@@ -4,6 +4,7 @@
 ![CalVer](https://img.shields.io/badge/versioning-CalVer%20YY.MM.MINOR-blue)
 [![Java CI with Maven](https://github.com/dynamiatools/framework/actions/workflows/maven.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/maven.yml)
 [![Release and Deploy](https://github.com/dynamiatools/framework/actions/workflows/release.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/release.yml)
+[![Publish NPM Packages](https://github.com/dynamiatools/framework/actions/workflows/publish-npm.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/publish-npm.yml)
 [![DynamiaTools Documentation](https://img.shields.io/badge/DynamiaTools-Documentation-orange)](https://dynamia.tools/getting-started/)
 
 
