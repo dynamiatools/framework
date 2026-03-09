@@ -1,7 +1,6 @@
 package tools.dynamia.app.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +8,8 @@ import tools.dynamia.commons.StringPojoParser;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.Serializable;
 import java.util.List;
@@ -137,7 +138,7 @@ public abstract class AbstractCrudServiceRestController {
         Class entityClass = loadClass(className);
         try {
             return mapper.readValue(json, entityClass);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new ValidationError("Error parsing json for entity class " + className, e);
         }
     }

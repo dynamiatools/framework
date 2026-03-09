@@ -17,12 +17,11 @@
 
 package tools.dynamia.viewers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import tools.dynamia.commons.StringPojoParser;
 
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 
 @SuppressWarnings("unchecked")
 public class JsonView<T> implements View<T> {
@@ -82,7 +81,7 @@ public class JsonView<T> implements View<T> {
         try {
             var mapper = getJsonMapper();
             return mapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new ViewRendererException("Exception rendering json view of " + value + " with descriptor " + viewDescriptor, e);
         }
     }
@@ -95,7 +94,7 @@ public class JsonView<T> implements View<T> {
         try {
             //noinspection unchecked
             value = (T) getJsonMapper().readValue(json, viewDescriptor.getBeanClass());
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new ViewRendererException("Error parsing json to object", e);
         }
 
@@ -103,12 +102,17 @@ public class JsonView<T> implements View<T> {
 
     private JsonMapper getJsonMapper() {
         if (mapper == null) {
-            mapper = StringPojoParser.createJsonMapper();
             SimpleModule module = new SimpleModule();
             module.addSerializer(viewDescriptor.getBeanClass(), new JsonViewDescriptorSerializer(viewDescriptor));
-            //noinspection unchecked
             module.addDeserializer((Class) viewDescriptor.getBeanClass(), new JsonViewDescriptorDeserializer(viewDescriptor));
-            mapper.registerModule(module);
+
+            mapper = JsonMapper.builder()
+                    .enable(SerializationFeature.INDENT_OUTPUT)
+                    .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                    .addModule(module)
+                    .build();
+
+
         }
         return mapper;
     }

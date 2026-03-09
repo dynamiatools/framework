@@ -363,6 +363,7 @@ public final class PropertyAccessor {
         // Strategy 1: Try BeanWrapper first (fastest, handles most cases including nested properties)
         try {
             BeanWrapper wrapper = new BeanWrapperImpl(bean);
+            wrapper.setAutoGrowNestedPaths(true); // auto-create null intermediate objects (e.g. product.category.name)
             wrapper.setPropertyValue(name, actualValue);
             return; // Success!
         } catch (Exception e) {

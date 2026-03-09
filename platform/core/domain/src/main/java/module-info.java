@@ -3,12 +3,13 @@ open module tools.dynamia.domain {
     requires tools.dynamia.integration;
     requires jakarta.validation;
 
-    requires com.fasterxml.jackson.databind;
+
     requires spring.context;
     requires java.sql;
     requires spring.jdbc;
     requires java.net.http;
     requires spring.tx;
+    requires tools.jackson.databind;
     exports tools.dynamia.domain;
     exports tools.dynamia.domain.query;
     exports tools.dynamia.domain.util;

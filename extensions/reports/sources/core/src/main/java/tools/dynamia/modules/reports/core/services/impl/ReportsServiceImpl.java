@@ -1,7 +1,6 @@
 package tools.dynamia.modules.reports.core.services.impl;
 
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import org.hibernate.Hibernate;
@@ -22,6 +21,8 @@ import tools.dynamia.modules.reports.core.domain.Report;
 import tools.dynamia.modules.reports.core.domain.ReportFilter;
 import tools.dynamia.modules.reports.core.domain.ReportGroup;
 import tools.dynamia.modules.reports.core.services.ReportsService;
+import tools.jackson.databind.ser.std.SimpleBeanPropertyFilter;
+import tools.jackson.databind.ser.std.SimpleFilterProvider;
 
 import java.io.File;
 import java.io.IOException;
