@@ -13,7 +13,7 @@ import tools.jackson.databind.deser.std.StdDeserializer;
 public class BasicEntityJsonDeserializer extends StdDeserializer<AbstractEntity> {
 
     public BasicEntityJsonDeserializer() {
-        this(null);
+        this(AbstractEntity.class);
     }
 
     public BasicEntityJsonDeserializer(Class<?> vc) {

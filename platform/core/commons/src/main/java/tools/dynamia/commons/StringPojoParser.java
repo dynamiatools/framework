@@ -20,6 +20,7 @@ package tools.dynamia.commons;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
@@ -68,6 +69,7 @@ public class StringPojoParser {
         return JsonMapper.builder()
                 .enable(SerializationFeature.INDENT_OUTPUT)
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .build();
 
     }
@@ -130,7 +132,6 @@ public class StringPojoParser {
      *
      * @param json
      * @param pojoType
-     *
      * @return object of type or null if json is null or empty
      */
     public static <T> T parseJsonToPojo(String json, Class<T> pojoType) {
@@ -149,6 +150,7 @@ public class StringPojoParser {
 
     /**
      * Parse JSON map to java type (java bean)
+     *
      * @param map
      * @param pojoType
      * @return object of type or null if json is null or empty
@@ -183,7 +185,6 @@ public class StringPojoParser {
 
     /**
      * Create a xml {@link XmlMapper} with enable IDENT_OUTPUT and disabled FAIL_ON_EMPTY_BEANS. Also add support
-     *
      *
      * @return xml mapper
      */
