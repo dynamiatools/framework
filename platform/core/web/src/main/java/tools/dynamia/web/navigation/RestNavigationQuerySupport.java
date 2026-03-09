@@ -17,6 +17,7 @@
 package tools.dynamia.web.navigation;
 
 import jakarta.servlet.http.HttpServletRequest;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.util.QueryBuilder;
@@ -116,7 +117,16 @@ public final class RestNavigationQuerySupport {
 
             Field field = descriptor.getField(paramName);
             if (field == null) {
-                return;
+                try {
+                    var property = ObjectOperations.getPropertyInfo(descriptor.getBeanClass(), paramName);
+                    if (property != null) {
+                        field = new Field(paramName, property.getType());
+                    } else {
+                        return;
+                    }
+                }catch (Exception e) {
+                    return;
+                }
             }
 
             Class<?> fieldType = field.getFieldClass();
