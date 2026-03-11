@@ -1,4 +1,4 @@
-import type { HttpClient } from './http.js';
+import type { HttpClient } from '../http.js';
 
 /**
  * Manually trigger periodic tasks registered in the platform.

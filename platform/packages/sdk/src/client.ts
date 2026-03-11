@@ -4,9 +4,9 @@ import { ActionsApi } from './metadata/actions.js';
 import { CrudResourceApi } from './cruds/crud-resource.js';
 import { CrudServiceApi } from './cruds/crud-service.js';
 import { ReportsApi } from './reports/api.js';
-import { FilesApi } from './files.js';
+import { FilesApi } from './files/api.js';
 import { SaasApi } from './saas/api.js';
-import { ScheduleApi } from './schedule.js';
+import { ScheduleApi } from './schedule/api.js';
 import type { DynamiaClientConfig } from './types.js';
 
 /**

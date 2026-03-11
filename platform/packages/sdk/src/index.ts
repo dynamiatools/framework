@@ -54,6 +54,6 @@ export { SaasApi } from './saas/index.js';
 export type { AccountDTO } from './saas/index.js';
 
 // ── API classes (files & schedule — core extensions) ─────────────────────────
-export { FilesApi } from './files.js';
-export { ScheduleApi } from './schedule.js';
+export { FilesApi } from './files/index.js';
+export { ScheduleApi } from './schedule/index.js';
 
