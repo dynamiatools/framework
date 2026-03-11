@@ -1,5 +1,5 @@
 import type { HttpClient } from '../http.js';
-import type { CrudListResult, CrudQueryParams, CrudRawResponse } from '../types.js';
+import type { CrudListResult, CrudQueryParams, CrudRawResponse } from './types.js';
 
 /**
  * CRUD operations for a single CrudPage resource (navigation-based endpoints).
@@ -76,4 +76,3 @@ function normaliseCrudResponse<T>(raw: CrudRawResponse<T> | CrudListResult<T>): 
     totalPages: p?.pagesNumber ?? 1,
   };
 }
-

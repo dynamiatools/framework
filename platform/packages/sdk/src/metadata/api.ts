@@ -7,7 +7,7 @@ import type {
   NavigationTree,
   ViewDescriptor,
   ViewDescriptorMetadata,
-} from '../types.js';
+} from './types.js';
 
 /**
  * Provides access to application metadata endpoints.
@@ -57,5 +57,3 @@ export class MetadataApi {
     );
   }
 }
-
-

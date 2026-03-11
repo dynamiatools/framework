@@ -1,5 +1,5 @@
 import type { HttpClient } from '../http.js';
-import type { ActionExecutionRequest, ActionExecutionResponse } from '../types.js';
+import type { ActionExecutionRequest, ActionExecutionResponse } from './types.js';
 
 /**
  * Execute platform actions (global or entity-scoped).
@@ -37,4 +37,3 @@ export class ActionsApi {
     );
   }
 }
-

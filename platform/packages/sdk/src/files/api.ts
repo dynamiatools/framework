@@ -27,4 +27,3 @@ export class FilesApi {
     return this.http.url(`/storage/${encodeURIComponent(file)}`, { uuid });
   }
 }
-

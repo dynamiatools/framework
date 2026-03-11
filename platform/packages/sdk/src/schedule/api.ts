@@ -31,4 +31,3 @@ export class ScheduleApi {
     return this.http.get<void>('/schedule/execute-tasks/evening');
   }
 }
-

@@ -1,5 +1,5 @@
 import type { HttpClient } from '../http.js';
-import type { ReportDTO, ReportFilters } from '../types.js';
+import type { ReportDTO, ReportFilters } from './types.js';
 
 type ReportGetParams = Record<string, string | number | boolean | undefined | null>;
 
@@ -35,4 +35,3 @@ export class ReportsApi {
     );
   }
 }
-
