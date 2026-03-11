@@ -40,4 +40,3 @@ export class CrudServiceApi<T = unknown> {
     return this.http.post<string | number>(`${this.basePath}/id`, params);
   }
 }
-

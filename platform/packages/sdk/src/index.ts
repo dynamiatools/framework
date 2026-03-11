@@ -4,9 +4,12 @@ export { DynamiaClient } from './client.js';
 // ── Error ────────────────────────────────────────────────────────────────────
 export { DynamiaApiError } from './errors.js';
 
-// ── Types ────────────────────────────────────────────────────────────────────
+// ── Core types ────────────────────────────────────────────────────────────────
+export type { DynamiaClientConfig } from './types.js';
+
+// ── Metadata module ──────────────────────────────────────────────────────────
+export { MetadataApi, ActionsApi } from './metadata/index.js';
 export type {
-  DynamiaClientConfig,
   // Application
   ApplicationMetadata,
   // Navigation
@@ -27,26 +30,30 @@ export type {
   ViewDescriptorMetadata,
   ViewDescriptor,
   ViewField,
-  // CRUD
+} from './metadata/index.js';
+
+// ── CRUD module ───────────────────────────────────────────────────────────────
+export { CrudResourceApi, CrudServiceApi } from './cruds/index.js';
+export type {
   CrudListResult,
   CrudQueryParams,
   CrudRawResponse,
   CrudPageable,
-  // Reports
+} from './cruds/index.js';
+
+// ── Reports module ────────────────────────────────────────────────────────────
+export { ReportsApi } from './reports/index.js';
+export type {
   ReportDTO,
   ReportFilter,
   ReportFilters,
-  // SaaS
-  AccountDTO,
-} from './types.js';
+} from './reports/index.js';
 
-// ── API classes (for advanced usage / extension) ─────────────────────────────
-export { MetadataApi } from './api/metadata.js';
-export { CrudResourceApi } from './api/crud.js';
-export { CrudServiceApi } from './api/crud-service.js';
-export { ActionsApi } from './api/actions.js';
-export { ReportsApi } from './api/reports.js';
-export { FilesApi } from './api/files.js';
-export { SaasApi } from './api/saas.js';
-export { ScheduleApi } from './api/schedule.js';
+// ── SaaS module ───────────────────────────────────────────────────────────────
+export { SaasApi } from './saas/index.js';
+export type { AccountDTO } from './saas/index.js';
+
+// ── API classes (files & schedule — core extensions) ─────────────────────────
+export { FilesApi } from './files.js';
+export { ScheduleApi } from './schedule.js';
 

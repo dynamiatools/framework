@@ -1,5 +1,5 @@
 import type { HttpClient } from '../http.js';
-import type { AccountDTO } from '../types.js';
+import type { AccountDTO } from './types.js';
 
 /**
  * Manage multi-tenant accounts via the SaaS extension.
@@ -17,4 +17,3 @@ export class SaasApi {
     return this.http.get<AccountDTO>(`/api/saas/account/${encodeURIComponent(uuid)}`);
   }
 }
-

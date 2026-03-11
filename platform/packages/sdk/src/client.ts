@@ -1,12 +1,12 @@
 import { HttpClient } from './http.js';
-import { MetadataApi } from './api/metadata.js';
-import { CrudResourceApi } from './api/crud.js';
-import { CrudServiceApi } from './api/crud-service.js';
-import { ActionsApi } from './api/actions.js';
-import { ReportsApi } from './api/reports.js';
-import { FilesApi } from './api/files.js';
-import { SaasApi } from './api/saas.js';
-import { ScheduleApi } from './api/schedule.js';
+import { MetadataApi } from './metadata/api.js';
+import { ActionsApi } from './metadata/actions.js';
+import { CrudResourceApi } from './cruds/crud-resource.js';
+import { CrudServiceApi } from './cruds/crud-service.js';
+import { ReportsApi } from './reports/api.js';
+import { FilesApi } from './files.js';
+import { SaasApi } from './saas/api.js';
+import { ScheduleApi } from './schedule.js';
 import type { DynamiaClientConfig } from './types.js';
 
 /**

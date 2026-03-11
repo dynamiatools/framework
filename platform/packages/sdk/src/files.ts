@@ -1,4 +1,4 @@
-import type { HttpClient } from '../http.js';
+import type { HttpClient } from './http.js';
 
 /**
  * Download files managed by the entity-files extension.
@@ -27,4 +27,3 @@ export class FilesApi {
     return this.http.url(`/storage/${encodeURIComponent(file)}`, { uuid });
   }
 }
-
