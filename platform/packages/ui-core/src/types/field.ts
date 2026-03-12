@@ -5,7 +5,8 @@ import type { ViewField } from '@dynamia-tools/sdk';
 /**
  * Maps descriptor component strings to known field component identifiers.
  * Names match ZK component names exactly for vocabulary consistency.
- * This is a const object, not an enum, so external modules can extend it.
+ * This is a const object, not an enum. External modules should define their
+ * own component identifier constants following the same pattern.
  */
 export const FieldComponent = {
   Textbox: 'textbox',

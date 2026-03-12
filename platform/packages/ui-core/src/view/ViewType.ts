@@ -3,7 +3,8 @@
 /**
  * Identity interface for a view type.
  * Anyone can implement this interface to register new view types.
- * This is intentionally NOT an enum so external modules can extend it.
+ * This is intentionally NOT an enum — external modules define their own
+ * ViewType objects and register them with ViewRendererRegistry independently.
  *
  * Example (custom view type):
  * <pre>{@code

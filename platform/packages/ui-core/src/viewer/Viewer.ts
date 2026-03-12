@@ -85,7 +85,7 @@ export class Viewer {
 
     // 2. Resolve view type
     this._resolvedViewType = this._resolveViewType();
-    if (!this._resolvedViewType) throw new Error('Cannot resolve ViewType — set viewType, descriptor, or descriptorId');
+    if (!this._resolvedViewType) throw new Error('Cannot resolve ViewType - set viewType, descriptor, or descriptorId');
 
     // 3. Create view
     if (ViewRendererRegistry.hasViewFactory(this._resolvedViewType)) {
@@ -200,9 +200,8 @@ export class Viewer {
       return;
     }
     if (!this.client) {
-      // No client — cannot fetch; descriptor must be provided
-      if (!this.descriptor) throw new Error('Either provide a descriptor or a DynamiaClient to fetch it');
-      return;
+      // No client and no descriptor: cannot proceed
+      throw new Error('Either provide a descriptor directly or a DynamiaClient to fetch it from the backend');
     }
     if (this.descriptorId) {
       // Fetch by ID
