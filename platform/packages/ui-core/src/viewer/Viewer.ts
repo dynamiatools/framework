@@ -121,8 +121,8 @@ export class Viewer {
         const entities = await this.client.metadata.getEntities();
         const entity = entities.entities.find(e => e.className === this.beanClass);
         if (entity) this._actions = entity.actions;
-      } catch {
-        // Ignore — actions are optional
+      } catch (_e) {
+        // Ignore — actions are optional; entity metadata lookup may fail for dynamic beanClass
       }
     }
 

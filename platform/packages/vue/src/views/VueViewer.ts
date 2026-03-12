@@ -39,7 +39,7 @@ export class VueViewer extends Viewer {
       this.currentView.value = super.view;
       this.currentDescriptor.value = super.resolvedDescriptor;
     } catch (e) {
-      this.error.value = String(e);
+      this.error.value = e instanceof Error ? e.message : String(e);
       throw e;
     } finally {
       this.loading.value = false;

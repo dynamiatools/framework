@@ -57,7 +57,7 @@ const componentMap: Record<string, () => Promise<Component>> = {
   [FieldComponents.EntityRefLabel]: () => import('./fields/EntityRefLabel.vue'),
   [FieldComponents.CoolLabel]: () => import('./fields/CoolLabel.vue'),
   [FieldComponents.Link]: () => import('./fields/Link.vue'),
-  [FieldComponents.Textareabox]: () => import('./fields/Textbox.vue'),
+  [FieldComponents.Textareabox]: () => import('./fields/Textareabox.vue'),
 };
 
 const resolvedFieldComponent = computed<Component | null>(() => {

@@ -43,7 +43,7 @@
           </td>
         </tr>
         <tr v-if="view.rows.value.length === 0">
-          <td :colspan="view.columns.value.length" class="dynamia-table-empty">
+          <td :colspan="view.columns.value.length + ($slots['actions'] ? 1 : 0)" class="dynamia-table-empty">
             <slot name="empty"><span>No records found</span></slot>
           </td>
         </tr>

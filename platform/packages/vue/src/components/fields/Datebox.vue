@@ -29,7 +29,14 @@ const inputType = computed(() => props.params?.['time'] ? 'datetime-local' : 'da
 const formattedValue = computed(() => {
   if (!props.modelValue) return '';
   try {
-    const d = new Date(props.modelValue as string | number);
+    let d: Date;
+    if (props.modelValue instanceof Date) {
+      d = props.modelValue;
+    } else if (typeof props.modelValue === 'string' || typeof props.modelValue === 'number') {
+      d = new Date(props.modelValue);
+    } else {
+      return String(props.modelValue);
+    }
     if (isNaN(d.getTime())) return String(props.modelValue);
     return inputType.value === 'datetime-local'
       ? d.toISOString().slice(0, 16)

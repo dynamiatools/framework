@@ -26,8 +26,11 @@ export function useViewer(config: ViewerConfig = {}) {
   onMounted(async () => {
     try {
       await viewer.initialize();
-    } catch {
-      // Error is already set on viewer.error
+    } catch (e) {
+      // Error is captured reactively on viewer.error — re-throw only in dev mode
+      if (process.env['NODE_ENV'] === 'development') {
+        console.warn('[DynamiaViewer] initialization error:', e);
+      }
     }
   });
 
