@@ -55,7 +55,12 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * @author Mario A. Serrano Leones
+ * Form-oriented {@link tools.dynamia.viewers.View} implementation backed by ZK components.
+ * <p>
+ * This component renders descriptor fields, manages binder-based synchronization,
+ * supports nested subviews, and optionally exposes descriptor actions in a dedicated area.
+ *
+ * @param <T> form value type
  */
 @SuppressWarnings("rawtypes")
 public class FormView<T> extends Div implements FormViewComponent<T, Component>, PropertyChangeListener, CanBeReadonly, IdSpace, ActionsContainer {
@@ -66,7 +71,7 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
     }
 
     /**
-     *
+     * ZK event name fired when {@link #setValue(Object)} updates the form value.
      */
     public static final String ON_VALUE_CHANGED = "onValueChanged";
     private static final long serialVersionUID = 1L;
@@ -105,15 +110,26 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
     private Supplier<T> valueSupplier;
 
 
+    /**
+     * Creates a form view with autoheight disabled.
+     */
     public FormView() {
         this(false);
     }
 
+    /**
+     * Creates a form view and initializes the base layout.
+     *
+     * @param autoheight whether the component should use full-height layout behavior
+     */
     public FormView(boolean autoheight) {
         this.autoheight = autoheight;
         initLayout();
     }
 
+    /**
+     * Builds the static layout regions used by title, content and actions.
+     */
     protected void initLayout() {
         setSclass("form-view");
 
@@ -159,6 +175,11 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
         }
     }
 
+    /**
+     * Returns the current value and optionally persists pending binder changes first.
+     *
+     * @return current form value
+     */
     @Override
     public T getValue() {
         if (autosaveBindings) {
@@ -182,6 +203,13 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
         ZKBindingUtil.postNotifyChange(this, "*");
     }
 
+    /**
+     * Sets the current value and refreshes the UI.
+     * <p>
+     * Collections are ignored because form views expect a single object value.
+     *
+     * @param value new form value
+     */
     @Override
     public void setValue(T value) {
         if (value instanceof Collection) {
@@ -220,6 +248,9 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
         return groupsComponentsMap.get(groupName);
     }
 
+    /**
+     * Reloads the visible UI fields from the current value through the binder.
+     */
     @Override
     public void updateUI() {
         if (binder != null) {
@@ -233,6 +264,11 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
     }
 
 
+    /**
+     * Enables or disables read-only mode for all nested components.
+     *
+     * @param readOnly read-only flag
+     */
     public void setReadonly(boolean readOnly) {
         if (this.readOnly != readOnly) {
             this.readOnly = readOnly;
@@ -246,6 +282,12 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
     }
 
 
+    /**
+     * Adds an auxiliary subview under a synthetic field group section.
+     *
+     * @param title section title for the subview
+     * @param subview subview to append
+     */
     @Override
     public void addSubview(String title, View subview) {
         if (subview instanceof Component subviewComp && !subviews.contains(subview)) {
@@ -301,6 +343,11 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
 
     }
 
+    /**
+     * Registers a callback executed after binder save phase completes.
+     *
+     * @param callback callback to execute on save-binding phase
+     */
     public void onSaveBinding(Callback callback) {
         if (binder != null) {
             binder.setPhaseListener(new PhaseListener() {
@@ -372,6 +419,11 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
         this.customView = customView;
     }
 
+    /**
+     * Instantiates the configured custom view when this component is attached to a parent.
+     *
+     * @param parent parent component
+     */
     @Override
     public void setParent(Component parent) {
         super.setParent(parent);
@@ -425,6 +477,11 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
         }
     }
 
+    /**
+     * Returns currently rendered actions.
+     *
+     * @return immutable empty list when no action panel exists
+     */
     @Override
     public List<Action> getActions() {
         if (actionPanel != null) {
@@ -460,6 +517,11 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
         return actionEventBuilder;
     }
 
+    /**
+     * Sets the action event builder used by the internal action panel.
+     *
+     * @param actionEventBuilder event builder implementation
+     */
     public void setActionEventBuilder(ActionEventBuilder actionEventBuilder) {
         this.actionEventBuilder = actionEventBuilder;
         if (actionEventBuilder != null && actionPanel != null) {
@@ -477,7 +539,7 @@ public class FormView<T> extends Div implements FormViewComponent<T, Component>,
     }
 
     /**
-     * Reload form view value using a value {@link Supplier} or reset the same value
+     * Reloads form value using the configured supplier when available.
      */
     public void reloadValue() {
         if (valueSupplier != null) {

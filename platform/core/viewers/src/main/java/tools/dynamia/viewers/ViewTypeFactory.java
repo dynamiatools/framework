@@ -20,33 +20,51 @@ package tools.dynamia.viewers;
 import java.io.Serializable;
 
 /**
- * A factory for creating ViewType objects.
+ * Central registry and resolver for {@link ViewType} instances.
  *
- * @author Mario A. Serrano Leones
+ * <p>A {@code ViewTypeFactory} is responsible for looking up registered {@link ViewType}s by name,
+ * obtaining their associated {@link ViewRenderer}s, and allowing applications to override the
+ * default renderer for any view type at runtime.</p>
+ *
+ * <p>Implementations are typically registered as application-scoped beans and resolved via
+ * {@link tools.dynamia.integration.Containers}.</p>
+ *
+ * @see ViewType
+ * @see ViewRenderer
  */
-public interface ViewTypeFactory  extends Serializable {
+public interface ViewTypeFactory extends Serializable {
 
     /**
-     * Gets the view type.
+     * Returns the {@link ViewType} registered under the given name.
      *
-     * @param name the name
-     * @return the view type
+     * @param name the unique name of the view type (e.g., {@code "form"}, {@code "table"});
+     *             must not be {@code null}
+     * @return the matching {@link ViewType}, or {@code null} if none is registered with that name
      */
     ViewType getViewType(String name);
 
     /**
-     * Gets the view renderer.
+     * Returns the {@link ViewRenderer} associated with the given {@link ViewType}.
      *
-     * @param viewType the view type
-     * @return the view renderer
+     * <p>If a custom renderer has been set for the view type via
+     * {@link #setCustomViewRenderer(String, Class)}, that renderer is returned instead of the
+     * default one.</p>
+     *
+     * @param viewType the view type whose renderer is requested; must not be {@code null}
+     * @return the {@link ViewRenderer} for the given view type; never {@code null}
      */
     ViewRenderer getViewRenderer(ViewType viewType);
 
     /**
-     * Sets the custom view renderer.
+     * Overrides the default {@link ViewRenderer} for the view type identified by {@code viewTypeName}.
      *
-     * @param viewTypeName the view type name
-     * @param viewRendererClass the view renderer class
+     * <p>This allows applications or plugins to substitute a custom rendering strategy without
+     * re-registering the entire {@link ViewType}. The override takes effect immediately and
+     * is reflected in subsequent calls to {@link #getViewRenderer(ViewType)}.</p>
+     *
+     * @param viewTypeName      the name of the view type to override; must not be {@code null}
+     * @param viewRendererClass the custom renderer class to associate with the view type;
+     *                          must not be {@code null} and must have a no-arg constructor
      */
     void setCustomViewRenderer(String viewTypeName, Class<? extends ViewRenderer> viewRendererClass);
 }

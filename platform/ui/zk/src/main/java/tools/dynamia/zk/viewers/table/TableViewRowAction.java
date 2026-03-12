@@ -21,8 +21,21 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zul.Listitem;
 import tools.dynamia.viewers.ViewAction;
 
+/**
+ * Base action type for table row actions with a rendering lifecycle hook.
+ * <p>
+ * Subclasses can override {@link #onRendered(Object, Listitem, Component)} to
+ * customize the generated action component per row.
+ */
 public abstract class TableViewRowAction extends ViewAction {
 
+    /**
+     * Callback invoked after the row action component has been rendered.
+     *
+     * @param data current row data
+     * @param listitem row container
+     * @param component rendered action component
+     */
     protected void onRendered(Object data, Listitem listitem, Component component) {
 
     }

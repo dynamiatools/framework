@@ -50,7 +50,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Mario A. Serrano Leones
+ * Default row renderer for {@link TableView} list items.
+ * <p>
+ * It creates per-row binders, renders common cells and field cells,
+ * attaches row actions, and applies enum-based visual styles.
  */
 public class TableViewRowRenderer implements ListitemRenderer<Object> {
     private LoggingService logger = new SLF4JLoggingService(TableViewRowRenderer.class);
@@ -64,19 +67,38 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
     private SimpleCache<String, Action> actionsCache = new SimpleCache<>();
     private ActionLoader<ViewAction> actionLoader = new ActionLoader<>(ViewAction.class);
 
+    /**
+     * Creates a renderer without descriptor/table references.
+     */
     public TableViewRowRenderer() {
     }
 
+    /**
+     * Creates a renderer preconfigured with descriptor and parent table.
+     *
+     * @param descriptor view descriptor
+     * @param tableView parent table view
+     */
     public TableViewRowRenderer(ViewDescriptor descriptor, TableView tableView) {
         setViewDescriptor(descriptor);
         this.tableView = tableView;
     }
 
+    /**
+     * Sets descriptor metadata used to render each row.
+     *
+     * @param descriptor descriptor to use
+     */
     public final void setViewDescriptor(ViewDescriptor descriptor) {
         this.viewDescriptor = descriptor;
 
     }
 
+    /**
+     * Sets parent table reference used for context and configuration.
+     *
+     * @param tableView table view instance
+     */
     public final void setTableView(TableView tableView) {
         this.tableView = tableView;
     }
@@ -85,6 +107,9 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
         return tableView;
     }
 
+    /**
+     * Renders a row item and initializes binder context for the given data object.
+     */
     @Override
     public void render(Listitem item, Object data, int index) {
         if (data != null) {
@@ -98,6 +123,9 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
         }
     }
 
+    /**
+     * Renders all row cells, actions and writable listeners for a data item.
+     */
     protected void renderRow(Listitem item, Object data, int index, Binder binder) {
         Map<String, TableFieldComponent> fieldsComponentsMap = new HashMap<>();
         item.setAttribute(Viewers.ATTRIBUTE_TABLE_FIELD_COMPONENTS, fieldsComponentsMap);
@@ -201,6 +229,9 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
         }
     }
 
+    /**
+     * Renders one field cell and creates bindings/actions when applicable.
+     */
     @SuppressWarnings("unchecked")
     protected void renderFieldCell(Binder binder, Listitem item, Object data,
                                    Map<String, TableFieldComponent> fieldsComponentsMap, Field field, int index) {
@@ -288,6 +319,9 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
         }
     }
 
+    /**
+     * Creates the component used to display a field value in a table cell.
+     */
     protected Component createFieldComponent(Object data, Object cellValue, Field field, Listcell cell) {
         Class<?> componentClass = null;
         if (field.getComponentClass() != null) {
@@ -308,10 +342,16 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
         return component;
     }
 
+    /**
+     * Indicates whether a rendered component supports binding in this renderer.
+     */
     protected boolean isBindiable(Field field, Component comp) {
         return true;
     }
 
+    /**
+     * Renders shared utility cells such as checkmark and row index columns.
+     */
     protected void renderCommonsCell(Listitem item, int index) {
         if (tableView.isCheckmark()) {
             Listcell checkCell = new Listcell();

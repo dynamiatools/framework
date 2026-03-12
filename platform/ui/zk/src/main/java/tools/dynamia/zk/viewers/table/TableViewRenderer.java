@@ -40,12 +40,24 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Mario A. Serrano Leones
+ * Renderer that builds a {@link TableView} from a table descriptor.
+ * <p>
+ * It configures row renderer, headers, group headers, footer aggregations,
+ * enum color styling and localized labels.
+ *
+ * @param <T> row type
  */
 public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
 
     private LocalizedMessagesProvider messagesProvider;
 
+    /**
+     * Renders the descriptor and initial collection into a table view component.
+     *
+     * @param descriptor descriptor to render
+     * @param value initial rows
+     * @return rendered table view
+     */
     @Override
     public View<List<T>> render(ViewDescriptor descriptor, List<T> value) {
         if (value != null && !(value instanceof Collection)) {
@@ -80,6 +92,9 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
         return table;
     }
 
+    /**
+     * Registers CSS styles used to color rows based on enum values.
+     */
     protected void renderEnumStyles(TableView<T> table, ViewDescriptor descriptor) {
 
         if (descriptor.getParams().containsKey(Viewers.PARAM_ENUM_COLORS)) {
@@ -104,6 +119,9 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
 
     }
 
+    /**
+     * Renders optional grouped headers from descriptor field groups.
+     */
     protected void renderGroups(TableView<T> table, ViewDescriptor descriptor) {
         if (descriptor.getFieldGroups() != null && !descriptor.getFieldGroups().isEmpty()) {
 
@@ -123,6 +141,9 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
         }
     }
 
+    /**
+     * Renders column headers and sorting metadata for visible fields.
+     */
     protected void renderHeaders(TableView<T> table, ViewDescriptor descriptor) {
         Listhead head = new Listhead();
 
@@ -208,6 +229,9 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
 
     }
 
+    /**
+     * Renders additional headers for row-level action references.
+     */
     protected void renderActionsHeader(TableView<T> table, Listhead head, ViewDescriptor descriptor) {
         descriptor.getActions().forEach(actionRef -> {
             Listheader header = new Listheader();
@@ -222,6 +246,9 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
         });
     }
 
+    /**
+     * Renders footer cells and prepares aggregate-function enabled footers.
+     */
     protected void renderFooters(TableView<T> table, ViewDescriptor descriptor) {
         Listfoot foot = new Listfoot();
 
@@ -277,6 +304,9 @@ public class TableViewRenderer<T> implements ViewRenderer<List<T>> {
         setupFootersFunctions(table, footersWithFunctions);
     }
 
+    /**
+     * Configures footer function processing and refresh listeners.
+     */
     protected void setupFootersFunctions(TableView<T> table, List<TableViewFooter> footersWithFunctions) {
         if (footersWithFunctions != null && !footersWithFunctions.isEmpty()) {
             table.setFootersWithFunctions(footersWithFunctions);

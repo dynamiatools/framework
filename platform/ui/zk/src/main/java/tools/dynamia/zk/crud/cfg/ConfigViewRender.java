@@ -39,24 +39,46 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Mario A. Serrano Leones
+ * Renderer for configuration forms backed by {@link Parameter} entities.
+ * <p>
+ * It adapts a descriptor to a {@link ConfigView}, loads persisted parameters,
+ * delegates visual rendering to {@link FormViewRenderer}, and creates parameter bindings.
  */
 public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
 
     private final static LoggingService LOGGER = new SLF4JLoggingService(ConfigViewRender.class);
+    /** Parameter key for custom parameter implementation class name. */
     public static final String PARAM_PARAMETER_CLASS = "parameterClass";
+    /** Parameter key for explicit parameter name override. */
     public static final String PARAM_PARAMETER_NAME = "parameterName";
+    /** Parameter key that marks a parameter as cacheable. */
     public static final String PARAM_CACHEABLE = "cacheable";
+    /** Parameter key for default value when parameter does not exist yet. */
     public static final String PARAM_DEFAULT_VALUE = "defaultValue";
 
+    /**
+     * Creates a configuration renderer.
+     */
     public ConfigViewRender() {
     }
 
+    /**
+     * Factory method for creating the target config view.
+     *
+     * @return new config view
+     */
     protected ConfigView newConfigView() {
         ConfigView formView = new ConfigView();
         return formView;
     }
 
+    /**
+     * Renders configuration fields into a config view and binds them to parameter values.
+     *
+     * @param descriptor view descriptor
+     * @param value optional initial value, replaced by loaded configuration values
+     * @return rendered config view
+     */
     @Override
     public View<List<Parameter>> render(ViewDescriptor descriptor, List<Parameter> value) {
         ConfigView view = newConfigView();
@@ -73,12 +95,18 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
         return view;
     }
 
+    /**
+     * Ensures a default layout column count is configured for configuration forms.
+     */
     protected void checkConfigLayout(ViewDescriptor descriptor) {
         if (!descriptor.getLayout().getParams().containsKey(Viewers.LAYOUT_PARAM_COLUMNS)) {
             descriptor.getLayout().addParam(Viewers.LAYOUT_PARAM_COLUMNS, "4");
         }
     }
 
+    /**
+     * Loads or creates parameter objects for all visible descriptor fields.
+     */
     protected List<Parameter> loadConfigValue(ConfigView configView, ViewDescriptor descriptor) {
         List<Parameter> value = new ArrayList<>();
         descriptor.addParam(Viewers.PARAM_IGNORE_BINDINGS, true);
@@ -102,6 +130,9 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
         return value;
     }
 
+    /**
+     * Creates component bindings for each rendered field against corresponding parameter values.
+     */
     protected void createBindings(ConfigView view, ViewDescriptor descriptor, List<Parameter> value) {
         for (Field field : ViewRendererUtil.filterRenderableFields(view, descriptor)) {
             Component component = view.getFieldComponent(field.getName()).getInputComponent();
@@ -110,11 +141,17 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
 
     }
 
+    /**
+     * Delegates visual field rendering to the standard form renderer.
+     */
     protected void delegateRender(ConfigView view, ViewDescriptor descriptor, List<Parameter> value) {
         FormViewRenderer<List<Parameter>> delegateRenderer = new FormViewRenderer<>();
         delegateRenderer.render(view, descriptor, value);
     }
 
+    /**
+     * Binds a single rendered component to its parameter value path.
+     */
     protected void createBinding(Component comp, Field field, Binder binder, ConfigView view, List<Parameter> value) {
         String name = getParamName(field);
         Parameter param = value.stream().filter(p -> p.getName().equals(name)).findFirst().orElse(null);
@@ -139,6 +176,9 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
         }
     }
 
+    /**
+     * Builds the parameter name used to store a field value.
+     */
     protected String getParamName(Field field) {
         String id = field.getViewDescriptor().getId();
         String paramName = id + "_" + field.getName();
@@ -148,6 +188,9 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
         return paramName;
     }
 
+    /**
+     * Loads a parameter from storage or creates a new instance with descriptor defaults.
+     */
     protected Parameter loadParam(Field field) {
         Class<? extends Parameter> parameterClass = getParameterClass(field.getViewDescriptor());
         String name = getParamName(field);
@@ -166,6 +209,9 @@ public class ConfigViewRender implements ViewRenderer<List<Parameter>> {
         return par;
     }
 
+    /**
+     * Resolves which parameter implementation class should be used.
+     */
     protected Class<? extends Parameter> getParameterClass(ViewDescriptor descriptor) {
         Class<? extends Parameter> parameterClass = DomainUtils.getDefaultParameterClass();
         String parameterClassName = (String) descriptor.getParams().get(PARAM_PARAMETER_CLASS);

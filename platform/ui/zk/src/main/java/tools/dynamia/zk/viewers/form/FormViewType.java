@@ -25,21 +25,22 @@ import tools.dynamia.viewers.ViewRenderer;
 import tools.dynamia.viewers.ViewType;
 
 /**
- * Represents the form view type in the viewers framework.
- * Provides the name and renderer for form views.
+ * View type registration for form-based views in the ZK viewers module.
+ * <p>
+ * Provides the canonical type name and creates the default {@link FormViewRenderer}.
  */
 @Component
 public class FormViewType implements ViewType {
 
     /**
-     * The name identifier for the form view type.
+     * Canonical identifier used to request form views.
      */
     public static final String NAME = "form";
 
     /**
-     * Returns the name of this view type.
+     * Returns the registered view type identifier.
      *
-     * @return the name of the view type.
+     * @return {@link #NAME}
      */
     @Override
     public String getName() {
@@ -47,9 +48,9 @@ public class FormViewType implements ViewType {
     }
 
     /**
-     * Returns the renderer associated with this view type.
+     * Creates the renderer responsible for form view instances.
      *
-     * @return the view renderer for form views.
+     * @return form view renderer
      */
     @Override
     public ViewRenderer getViewRenderer() {

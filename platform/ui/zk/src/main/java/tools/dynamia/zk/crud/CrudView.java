@@ -88,7 +88,12 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 
 /**
- * @author Mario A. Serrano Leones
+ * Composite CRUD component that coordinates dataset and form views for an entity type.
+ * <p>
+ * It handles state transitions, controller wiring, action loading, subview composition,
+ * and helper entry points for opening CRUD windows/pages.
+ *
+ * @param <T> entity type managed by this view
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEventBuilder, IdSpace, CanBeReadonly, Loggable, Serializable {
@@ -140,6 +145,9 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
     private ButtonActionRenderer defaultActionRenderer;
 
 
+    /**
+     * Creates a CRUD view and initializes layout, toolbars and context menu.
+     */
     public CrudView() {
         buildGeneralView();
         buildToolbars();
@@ -147,6 +155,9 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         buildContextMenu();
     }
 
+    /**
+     * Builds left and right toolbars where CRUD actions are rendered.
+     */
     protected void buildToolbars() {
         ActionPanel toolbar = new ActionPanel(this);
         toolbar.setSclass("dt-flex dt-gap-1");
@@ -159,6 +170,9 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         toolbarRight = toolbar;
     }
 
+    /**
+     * Creates the top toolbar container and attaches it to the layout header.
+     */
     protected void buildToolbarContainer() {
         Div container = new Div();
         container.setZclass("dt-flex dt-justify-between");
@@ -171,6 +185,9 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         }
     }
 
+    /**
+     * Creates the root CRUD layout with header and body regions.
+     */
     protected void buildGeneralView() {
         setHeight("100%");
         setZclass("crudview");
@@ -192,6 +209,11 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         addCrudStateChangedListener(this::controlChangedState);
     }
 
+    /**
+     * Reacts to state changes to hide or show the header depending on visible actions.
+     *
+     * @param evt state transition event
+     */
     protected void controlChangedState(ChangedStateEvent evt) {
         CrudState crudState = evt.getNewState();
         if (layout instanceof Borderlayout borderlayout) {
@@ -208,6 +230,9 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         }
     }
 
+    /**
+     * Builds the dataset view implementation according to configured view type.
+     */
     protected void buildDataSetView() {
 
         CrudDataSetViewBuilder viewBuilder = getDataSetViewBuilder(getDataSetViewType());
@@ -229,6 +254,9 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
 
     }
 
+    /**
+     * Resolves and creates the form view for this CRUD component.
+     */
     protected void buildFormView() {
         final String device = HttpUtils.detectDevice();
         if (formViewDescriptorId != null && !formViewDescriptorId.isBlank()) {
@@ -243,6 +271,9 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         formView.setAutoheight(true);
     }
 
+    /**
+     * Builds the multiview container and registers subviews defined in the form descriptor.
+     */
     protected void buildFormViewContainer() {
         String formViewTitle = (String) formView.getViewDescriptor().getParams().get(Viewers.PARAM_TITLE);
         if (formViewTitle == null) {
@@ -280,6 +311,10 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         }
     }
 
+    /**
+     * Adds the main form view to the multiview container with the specified title.
+     * @param formViewTitle title for the form view tab
+     */
     protected void addFormViewToContainer(String formViewTitle) {
         formViewContainer.addView(formViewTitle, formView);
     }
@@ -290,6 +325,11 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         contextMenu.addEventListener(Events.ON_OPEN, event -> loadMenuActions());
     }
 
+    /**
+     * Updates CRUD state and swaps active content between form and dataset views.
+     *
+     * @param crudState next CRUD state
+     */
     @Override
     public void setState(CrudState crudState) {
         CrudState oldState = this.state;
@@ -329,6 +369,11 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         return state;
     }
 
+    /**
+     * Returns the active value from the currently displayed child view.
+     *
+     * @return current value or {@code null} when no active view is attached
+     */
     @Override
     public T getValue() {
         if (activeView != null) {
@@ -339,6 +384,11 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         }
     }
 
+    /**
+     * Updates current value in the active child view.
+     *
+     * @param value value to set
+     */
     @Override
     public void setValue(T value) {
         if (activeView != null) {
@@ -361,6 +411,11 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         this.viewDescriptor = viewDescriptor;
     }
 
+    /**
+     * Lazily creates and returns the form view.
+     *
+     * @return form view instance
+     */
     @Override
     public FormView<T> getFormView() {
         if (formView == null) {
@@ -372,6 +427,11 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         return formView;
     }
 
+    /**
+     * Lazily creates and returns the dataset view.
+     *
+     * @return dataset view instance
+     */
     @Override
     public DataSetView getDataSetView() {
         if (dataSetView == null) {
@@ -404,6 +464,12 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         this.controllerClass = controller;
     }
 
+    /**
+     * Resolves and sets the controller class from a fully qualified class name.
+     *
+     * @param className controller class name
+     * @throws ClassNotFoundException when the class cannot be found
+     */
     public void setControllerClass(String className) throws ClassNotFoundException {
         Class clazz = Class.forName(className.trim());
         if (ObjectOperations.isAssignable(clazz, CrudController.class)) {
@@ -455,6 +521,9 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
 
     }
 
+    /**
+     * Clears rendered actions and releases lifecycle-aware action instances.
+     */
     public void clearActions() {
         if (applicableActions != null) {
             for (Action action : applicableActions) {
@@ -474,6 +543,11 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         applicableActions = null;
     }
 
+    /**
+     * Registers an additional CRUD action and reloads actions for current state.
+     *
+     * @param action action to add
+     */
     public void addAction(CrudAction action) {
         this.actions.add(action);
         loadActions(getState());
@@ -520,12 +594,22 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         }
     }
 
+    /**
+     * Adds a local state-change listener.
+     *
+     * @param listener listener to register
+     */
     public void addCrudStateChangedListener(CrudStateChangedListener listener) {
         if (listener != null && !localListeners.contains(listener)) {
             localListeners.add(listener);
         }
     }
 
+    /**
+     * Removes a previously registered local state-change listener.
+     *
+     * @param listener listener to remove
+     */
     public void removeCrudStateChangedListener(CrudStateChangedListener listener) {
         localListeners.remove(listener);
     }
@@ -586,6 +670,13 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         ((Component) dataSetView).setParent(getActiveViewParent());
     }
 
+    /**
+     * Adds a nested CRUD subview for collection fields configured as CRUD components.
+     *
+     * @param formView parent form view
+     * @param field descriptor field representing the subcrud relation
+     * @param label tab/section label
+     */
     protected void addSubCrudView(FormView<T> formView, final Field field, final String label) {
         if (field.getParams().get(Viewers.PARAM_INPLACE) == Boolean.TRUE) {
             View view = loadSubview(field);
@@ -611,6 +702,11 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         }
     }
 
+    /**
+     * Adds a generic nested viewer as a multiview tab when field configuration requires it.
+     *
+     * @param field descriptor field for the nested view
+     */
     protected void addSubGenericView(final Field field) {
 
         if (field.getParams().get(Viewers.PARAM_INPLACE) != Boolean.TRUE) {
@@ -640,6 +736,11 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         return source;
     }
 
+    /**
+     * Sets source context propagated to listeners and child actions.
+     *
+     * @param source source context object
+     */
     @Override
     public void setSource(Object source) {
         this.source = source;
@@ -652,6 +753,11 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         return queryProjection;
     }
 
+    /**
+     * Enables or disables query projection in the controller.
+     *
+     * @param queryProjection projection mode flag
+     */
     public void setQueryProjection(boolean queryProjection) {
         this.queryProjection = queryProjection;
         if (controller != null) {
@@ -756,6 +862,11 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         }
     }
 
+    /**
+     * Loads and renders toolbar actions applicable to the given CRUD state.
+     *
+     * @param state active CRUD state
+     */
     protected void loadActions(final CrudState state) {
         clearActions();
 
@@ -814,6 +925,13 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         }
     }
 
+    /**
+     * Finds all actions applicable to target class and state.
+     *
+     * @param targetClass target entity class
+     * @param state active CRUD state
+     * @return sorted applicable actions
+     */
     protected List<CrudAction> findApplicableActions(final Class targetClass, final CrudState state) {
         ActionLoader loader = new ActionLoader(CrudAction.class);
         loader.setActionAttributes(actionsParams);
@@ -841,6 +959,13 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         return applicableClass && applicableState;
     }
 
+    /**
+     * Builds an action event using current CRUD state context.
+     *
+     * @param source event source
+     * @param params custom params map
+     * @return CRUD action event
+     */
     @Override
     public ActionEvent buildActionEvent(Object source, Map<String, Object> params) {
         Object data = switch (getState()) {
@@ -892,10 +1017,27 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         this.actionsParams = actionsParams;
     }
 
+    /**
+     * Opens an update CRUD dialog for a given entity instance.
+     *
+     * @param title dialog title
+     * @param clazz entity class
+     * @param value entity value to edit
+     * @return dialog window
+     */
     public static Window showUpdateView(String title, Class clazz, Object value) {
         return showUpdateView(title, clazz, value, null);
     }
 
+    /**
+     * Opens an update CRUD dialog and invokes callback when update flow ends.
+     *
+     * @param title dialog title
+     * @param clazz entity class
+     * @param value entity value to edit
+     * @param callback optional completion callback
+     * @return dialog window
+     */
     public static Window showUpdateView(String title, Class clazz, Object value, Callback callback) {
 
         final Viewer viewer = new Viewer("crud", clazz);
@@ -917,6 +1059,13 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
     }
 
 
+    /**
+     * Opens an update CRUD page in navigation instead of a modal dialog.
+     *
+     * @param title page title
+     * @param clazz entity class
+     * @param value entity value to edit
+     */
     public static void showUpdateViewPage(String title, Class clazz, Object value) {
 
         final Viewer viewer = new Viewer("crud", clazz);
@@ -938,6 +1087,12 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         NavigationManager.getCurrent().setCurrentPage(page);
     }
 
+    /**
+     * Opens a create CRUD page in navigation.
+     *
+     * @param title page title
+     * @param clazz entity class
+     */
     public static void showCreateViewPage(String title, Class clazz) {
 
         final Viewer viewer = new Viewer("crud", clazz);
@@ -956,10 +1111,25 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         NavigationManager.getCurrent().setCurrentPage(page);
     }
 
+    /**
+     * Opens a create CRUD dialog.
+     *
+     * @param title dialog title
+     * @param clazz entity class
+     * @return dialog window
+     */
     public static Window showCreateView(String title, Class clazz) {
         return showCreateView(title, clazz, null);
     }
 
+    /**
+     * Opens a create CRUD dialog and invokes callback when flow returns to read state.
+     *
+     * @param title dialog title
+     * @param clazz entity class
+     * @param callback optional completion callback
+     * @return dialog window
+     */
     public static Window showCreateView(String title, Class clazz, Callback callback) {
 
         final Viewer viewer = new Viewer("crud", clazz);
@@ -978,6 +1148,12 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         return ZKUtil.showDialog(title, viewer, "90%", "98%");
     }
 
+    /**
+     * Opens a full CRUD dialog in read mode.
+     *
+     * @param title dialog title
+     * @param clazz entity class
+     */
     public static void showCrudView(String title, Class clazz) {
 
         final Viewer viewer = new Viewer("crud", clazz);
@@ -986,6 +1162,12 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
 
     }
 
+    /**
+     * Finds the dataset view builder registered for a given view type name.
+     *
+     * @param typeName dataset view type name
+     * @return matching builder or {@code null}
+     */
     public static CrudDataSetViewBuilder getDataSetViewBuilder(String typeName) {
         for (CrudDataSetViewBuilder viewBuilder : Containers.get().findObjects(CrudDataSetViewBuilder.class)) {
             if (viewBuilder.getViewTypeName().equals(typeName)) {
@@ -1007,6 +1189,11 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         this.crudServiceName = crudServiceName;
     }
 
+    /**
+     * Converts a validation error to a component-level ZK {@link WrongValueException}.
+     *
+     * @param error validation error to map
+     */
     @Override
     public void handleValidationError(ValidationError error) {
         if (error != null && error.getInvalidProperty() != null && formView != null) {
@@ -1017,6 +1204,11 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
         }
     }
 
+    /**
+     * Sets form title, resolving localization through configured messages provider when present.
+     *
+     * @param title title message key or literal
+     */
     @Override
     public void setTitle(String title) {
         if (title != null && messagesProvider != null) {

@@ -94,6 +94,14 @@ public class ViewDescriptorReaderUtils {
     private ViewDescriptorReaderUtils() {
     }
 
+    /**
+     * Parses a raw string value into a typed object. Converts {@code "true"} and {@code "false"}
+     * (case-insensitive) to their {@link Boolean} equivalents; any other string is returned as-is.
+     *
+     * @param value the raw string value to parse
+     * @return {@link Boolean#TRUE} or {@link Boolean#FALSE} for boolean strings, or the original
+     *         {@code value} if no conversion applies
+     */
     public static Object parseValue(String value) {
         Object parsed = value;
 

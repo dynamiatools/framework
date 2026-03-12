@@ -25,12 +25,14 @@ import tools.dynamia.zk.viewers.form.FormView;
 import java.util.List;
 
 /**
- * @author Mario A. Serrano Leones
+ * Specialized {@link FormView} for editing application {@link Parameter} values.
+ * <p>
+ * It keeps bindings explicit per parameter name and uses non-autosave mode by default.
  */
 public class ConfigView extends FormView<List<Parameter>> {
 
     /**
-     *
+     * Serialization identifier.
      */
     private static final long serialVersionUID = 4854627795725385607L;
 
@@ -40,11 +42,17 @@ public class ConfigView extends FormView<List<Parameter>> {
     }
 
 
+    /**
+     * Creates a config form with autoheight enabled and manual binding save mode.
+     */
     public ConfigView() {
         setAutoheight(true);
         setAutosaveBindings(false);
     }
 
+    /**
+     * Loads each parameter into binder variables and refreshes components.
+     */
     @Override
     public void updateUI() {
         if (getBinder() != null) {
@@ -58,11 +66,19 @@ public class ConfigView extends FormView<List<Parameter>> {
         }
     }
 
+    /**
+     * Sets the full parameter list without triggering extra form events.
+     *
+     * @param value parameters to edit
+     */
     @Override
     public void setValue(List<Parameter> value) {
         this.value = value;
     }
 
+    /**
+     * Saves current bindings using base form behavior.
+     */
     @Override
     public void saveBindings() {
         super.saveBindings();
