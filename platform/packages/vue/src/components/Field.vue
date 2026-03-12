@@ -45,6 +45,7 @@ defineEmits<{
 const componentMap: Record<string, () => Promise<Component>> = {
   [FieldComponents.Textbox]: () => import('./fields/Textbox.vue'),
   [FieldComponents.Intbox]: () => import('./fields/Intbox.vue'),
+  // Longbox (64-bit integer) shares the integer input component; browser inputs handle the range
   [FieldComponents.Longbox]: () => import('./fields/Intbox.vue'),
   [FieldComponents.Decimalbox]: () => import('./fields/Spinner.vue'),
   [FieldComponents.Spinner]: () => import('./fields/Spinner.vue'),
