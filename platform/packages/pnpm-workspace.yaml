@@ -1,4 +1,5 @@
 packages:
   - 'sdk'
+  - 'ui-core'
 allowBuilds:
   esbuild: true
