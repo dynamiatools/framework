@@ -1,5 +1,6 @@
 packages:
   - 'sdk'
   - 'ui-core'
+  - 'vue'
 allowBuilds:
   esbuild: true
