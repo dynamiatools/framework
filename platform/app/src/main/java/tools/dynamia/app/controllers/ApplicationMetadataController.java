@@ -9,12 +9,13 @@ import tools.dynamia.actions.ActionExecutionResponse;
 import tools.dynamia.actions.ActionRestrictions;
 import tools.dynamia.actions.Actions;
 import tools.dynamia.app.metadata.*;
-import tools.dynamia.commons.SimpleCache;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.navigation.NavigationTree;
 import tools.dynamia.viewers.ViewDescriptor;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * REST controller for exposing application metadata, navigation, entities, and actions.
@@ -48,6 +49,7 @@ public class ApplicationMetadataController {
      * Loader for application metadata.
      */
     private final ApplicationMetadataLoader metadataLoader;
+    private final EntityMetadata unknowEntity;
     /**
      * Cached application metadata.
      */
@@ -63,7 +65,7 @@ public class ApplicationMetadataController {
     /**
      * Cache for individual entity metadata.
      */
-    private SimpleCache<String, EntityMetadata> entitiesCache = new SimpleCache<>();
+
 
     /**
      * Constructs a new {@code ApplicationMetadataController} with the given metadata loader.
@@ -72,6 +74,20 @@ public class ApplicationMetadataController {
      */
     public ApplicationMetadataController(ApplicationMetadataLoader metadataLoader) {
         this.metadataLoader = metadataLoader;
+        this.unknowEntity = new EntityMetadata();
+        unknowEntity.setClassName("unknown");
+        unknowEntity.setName("Unknown Entity");
+        unknowEntity.setActions(List.of());
+        unknowEntity.setDescriptors(List.of());
+        unknowEntity.setActionsEndpoint("");
+        unknowEntity.setEndpoint("");
+    }
+
+
+    private void initMetadata() {
+        if (entities == null) {
+            entities = metadataLoader.loadEntities();
+        }
     }
 
     /**
@@ -159,11 +175,10 @@ public class ApplicationMetadataController {
      */
     @GetMapping(value = "/entities", produces = "application/json")
     public ApplicationMetadataEntities getEntities() {
-        if (entities == null) {
-            entities = metadataLoader.loadEntities();
-        }
+        initMetadata();
         return entities;
     }
+
 
     /**
      * Returns metadata for a specific entity by its class name.
@@ -173,17 +188,37 @@ public class ApplicationMetadataController {
      */
     @GetMapping(value = "/entities/{className}", produces = "application/json")
     public EntityMetadata getEntityMetadata(@PathVariable String className) {
-        if (entities == null) {
-            entities = metadataLoader.loadEntities();
+        initMetadata();
+        var result = entities.getEntityMetadata(className);
+        if (result == null) {
+            result = tryToFindEntityClass(className);
         }
 
-        return entitiesCache.getOrLoad(className, c -> {
-            var metadata = entities.getEntityMetadata(className);
-            if (metadata != null) {
-                return metadataLoader.loadEntityMetadata(metadata.getEntityClass()); //force reload cache
-            }
-            return null;
-        });
+        if (result == null) {
+            result = unknowEntity;
+        }
+
+        return result;
+
+    }
+
+    private EntityMetadata tryToFindEntityClass(String className) {
+        AtomicReference<EntityMetadata> found = new AtomicReference<>();
+        if (ObjectOperations.isValidClassName(className)) {
+
+            getNavigation().forEachNode(node -> {
+                if (node.getType().equals("CrudPage") && node.getFile().equals(className)) {
+                    var clazz = ObjectOperations.findClass(className);
+                    if (clazz != null) {
+                        var entityMetadata = metadataLoader.loadEntityMetadata(clazz);
+                        entities.getEntities().add(entityMetadata);
+                        found.set(entityMetadata);
+                    }
+                }
+            });
+
+        }
+        return found.get();
     }
 
     /**

@@ -22,9 +22,23 @@ export class FieldResolver {
    */
   static resolveFields(descriptor: ViewDescriptor, metadata: EntityMetadata | null): ResolvedField[] {
     const fields = descriptor.fields ?? [];
+
+    // Build a reverse map: fieldName → groupName from descriptor.fieldGroups[].fields.
+    // Java serializes FieldGroup with @JsonProperty("fields") listing field names.
+    const fieldGroupMap = new Map<string, string>();
+    if (descriptor.fieldGroups?.length) {
+      for (const fg of descriptor.fieldGroups) {
+        if (fg.fields?.length) {
+          for (const fieldName of fg.fields) {
+            fieldGroupMap.set(fieldName, fg.name);
+          }
+        }
+      }
+    }
+
     return fields
       .filter(f => f.visible !== false)
-      .map((field, index) => FieldResolver.resolveField(field, index, metadata));
+      .map((field, index) => FieldResolver.resolveField(field, index, metadata, fieldGroupMap));
   }
 
   /**
@@ -32,14 +46,18 @@ export class FieldResolver {
    * @param field - The raw field descriptor
    * @param index - Field index for layout positioning
    * @param metadata - Optional entity metadata
+   * @param fieldGroupMap - Optional reverse map: fieldName → groupName built from descriptor.fieldGroups
    * @returns A fully resolved field
    */
-  static resolveField(field: ViewField, index: number, _metadata: EntityMetadata | null): ResolvedField {
+  static resolveField(field: ViewField, index: number, _metadata: EntityMetadata | null, fieldGroupMap?: Map<string, string>): ResolvedField {
     const params = field.params ?? {};
     const component = FieldResolver._resolveComponent(field, params);
     const label = FieldResolver._resolveLabel(field);
     const span = FieldResolver._resolveSpan(params);
-    const group = typeof params['group'] === 'string' ? params['group'] : undefined;
+
+    // Group: 1) fieldGroups reverse map (Java serialized), 2) field.params.group (legacy/manual)
+    const group = fieldGroupMap?.get(field.name)
+      ?? (typeof params['group'] === 'string' ? params['group'] : undefined);
 
     const resolved: ResolvedField = {
       ...field,

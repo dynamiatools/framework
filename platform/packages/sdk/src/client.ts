@@ -74,6 +74,25 @@ export class DynamiaClient {
   crudService<T = unknown>(className: string): CrudServiceApi<T> {
     return new CrudServiceApi<T>(this.http, className);
   }
+
+  /**
+   * Invalidates the in-memory ViewDescriptor cache held by {@link MetadataApi}.
+   *
+   * Call this after a backend hot-reload or when you know a descriptor has changed,
+   * so the next request fetches a fresh copy from the server.
+   *
+   * @param className - When provided, only entries for that entity class are removed.
+   *   When omitted, the entire cache is cleared.
+   *
+   * @example
+   * // Invalidate just one entity
+   * client.clearViewDescriptorCache('mybookstore.domain.Book');
+   * // Invalidate everything
+   * client.clearViewDescriptorCache();
+   */
+  clearViewDescriptorCache(className?: string): void {
+    this.metadata.clearViewCache(className);
+  }
 }
 
 

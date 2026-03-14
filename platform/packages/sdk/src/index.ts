@@ -8,7 +8,7 @@ export { DynamiaApiError } from './errors.js';
 export type { DynamiaClientConfig } from './types.js';
 
 // ── Metadata module ──────────────────────────────────────────────────────────
-export { MetadataApi, ActionsApi } from './metadata/index.js';
+export { MetadataApi, ActionsApi, resolveViewFieldType, resolveFieldType } from './metadata/index.js';
 export type {
   // Application
   ApplicationMetadata,

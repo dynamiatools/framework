@@ -23,8 +23,10 @@ export class LayoutEngine {
    * @returns Computed ResolvedLayout with groups, rows and column info
    */
   static computeLayout(descriptor: ViewDescriptor, fields: ResolvedField[]): ResolvedLayout {
-    const params = descriptor.params ?? {};
-    const columns = LayoutEngine._resolveColumns(params);
+    // columns lives in ViewLayout.params (descriptor.layout.params.columns),
+    // NOT in the top-level descriptor.params
+    const layoutParams = descriptor.layout?.params ?? {};
+    const columns = LayoutEngine._resolveColumns(layoutParams);
 
     // Group fields by their group name
     const groupedFields = new Map<string, ResolvedField[]>();

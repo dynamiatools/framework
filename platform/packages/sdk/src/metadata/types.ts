@@ -112,7 +112,9 @@ export interface ViewLayout {
   params: Record<string, unknown>;
 }
 
-/** Mirrors tools.dynamia.viewers.FieldGroup (fields list is @JsonIgnore on the Java side) */
+/** Mirrors tools.dynamia.viewers.FieldGroup.
+ *  The `fields` array carries field *names* serialized by the Java
+ *  `@JsonProperty("fields") getFieldsNames()` method. */
 export interface ViewFieldGroup {
   name: string;
   label?: string;
@@ -121,6 +123,8 @@ export interface ViewFieldGroup {
   index?: number;
   collapse?: boolean;
   params: Record<string, unknown>;
+  /** Ordered list of field names belonging to this group */
+  fields?: string[];
 }
 
 /** Mirrors tools.dynamia.viewers.ViewDescriptor */
@@ -164,3 +168,96 @@ export interface ViewField {
   action?: ActionReference;
   params: Record<string, unknown>;
 }
+
+// ── ViewField utilities ────────────────────────────────────────────────────
+
+/**
+ * Well-known Java fully-qualified class names → simple type token.
+ * Extend this map to add more mappings.
+ */
+const FIELD_CLASS_TYPE_MAP: Record<string, string> = {
+  // Text
+  "java.lang.String": "text",
+  "java.lang.Character": "text",
+  // Integer numbers
+  "java.lang.Integer": "number",
+  "int": "number",
+  "java.lang.Long": "number",
+  "long": "number",
+  "java.lang.Short": "number",
+  "short": "number",
+  "java.lang.Byte": "number",
+  "byte": "number",
+  "java.math.BigInteger": "number",
+  // Decimal numbers
+  "java.lang.Double": "decimal",
+  "double": "decimal",
+  "java.lang.Float": "decimal",
+  "float": "decimal",
+  "java.math.BigDecimal": "decimal",
+  // Boolean
+  "java.lang.Boolean": "boolean",
+  "boolean": "boolean",
+  // Date / time
+  "java.time.LocalDate": "date",
+  "java.sql.Date": "date",
+  "java.time.LocalTime": "time",
+  "java.time.LocalDateTime": "datetime",
+  "java.time.ZonedDateTime": "datetime",
+  "java.time.OffsetDateTime": "datetime",
+  "java.time.Instant": "datetime",
+  "java.util.Date": "datetime",
+  "java.sql.Timestamp": "datetime",
+};
+
+/**
+ * Converts a PascalCase or camelCase identifier to kebab-case.
+ * e.g. `StockStatus` → `stock-status`, `myField` → `my-field`
+ */
+function toKebabCase(name: string): string {
+  return name
+    .replace(/([A-Z])/g, (letter, _match, offset) =>
+      offset > 0 ? `-${letter.toLowerCase()}` : letter.toLowerCase()
+    )
+    .toLowerCase();
+}
+
+/**
+ * Maps a `ViewField.fieldClass` (fully-qualified Java class name) to a
+ * simple type token suitable for UI rendering.
+ *
+ * - Known primitive / standard-library types are mapped to canonical tokens
+ *   (`"text"`, `"number"`, `"decimal"`, `"boolean"`, `"date"`, `"time"`, `"datetime"`).
+ * - Any other class is reduced to its simple (unqualified) name and converted
+ *   to kebab-case.
+ *
+ * @example
+ * resolveFieldType("java.lang.String")             // → "text"
+ * resolveFieldType("java.time.LocalDate")           // → "date"
+ * resolveFieldType("mylibrary.enums.StockStatus")   // → "stock-status"
+ * resolveFieldType(undefined)                       // → "text"
+ */
+export function resolveFieldType(fieldClass: string | undefined): string {
+  if (!fieldClass) return "text";
+
+  const known = FIELD_CLASS_TYPE_MAP[fieldClass];
+  if (known) return known;
+
+  // Fall back to the simple (unqualified) class name in kebab-case
+  const simpleName = fieldClass.includes(".")
+    ? fieldClass.substring(fieldClass.lastIndexOf(".") + 1)
+    : fieldClass;
+
+  return toKebabCase(simpleName);
+}
+
+/**
+ * Convenience overload: resolves the type token directly from a `ViewField`.
+ *
+ * @example
+ * resolveViewFieldType(field)  // delegates to resolveFieldType(field.fieldClass)
+ */
+export function resolveViewFieldType(field: ViewField): string {
+  return resolveFieldType(field.fieldClass);
+}
+

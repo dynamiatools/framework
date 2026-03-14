@@ -18,3 +18,5 @@ export type {
   ViewDescriptor,
   ViewField,
 } from './types.js';
+
+export {resolveFieldType,resolveViewFieldType} from './types.js'
