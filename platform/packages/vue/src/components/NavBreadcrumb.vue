@@ -18,14 +18,14 @@
 </template>
 
 <script setup lang="ts">
-import type { NavigationModule, NavigationGroup, NavigationPage } from '@dynamia-tools/sdk';
+import type { NavigationNode } from '@dynamia-tools/sdk';
 
 defineProps<{
-  /** Current navigation module */
-  module?: NavigationModule | null;
-  /** Current navigation group */
-  group?: NavigationGroup | null;
-  /** Current navigation page */
-  page?: NavigationPage | null;
+  /** Current navigation module node */
+  module?: NavigationNode | null;
+  /** Current navigation group node */
+  group?: NavigationNode | null;
+  /** Current navigation page node */
+  page?: NavigationNode | null;
 }>();
 </script>

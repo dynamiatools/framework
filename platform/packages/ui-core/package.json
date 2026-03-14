@@ -25,7 +25,7 @@
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
-  "peerDependencies": {"@dynamia-tools/sdk": ">=26.0.0"},
+  "dependencies": {"@dynamia-tools/sdk": ">=26.0.0"},
   "devDependencies": {
     "@dynamia-tools/sdk": "workspace:*",
     "@types/node": "^22.0.0",

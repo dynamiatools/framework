@@ -14,9 +14,7 @@ export type {
   ApplicationMetadata,
   // Navigation
   NavigationTree,
-  NavigationModule,
-  NavigationGroup,
-  NavigationPage,
+  NavigationNode,
   // Metadata
   BasicMetadata,
   ApplicationMetadataEntities,

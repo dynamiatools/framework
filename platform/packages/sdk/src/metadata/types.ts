@@ -18,39 +18,38 @@ export interface ApplicationMetadata {
   description?: string;
   logo?: string;
   url?: string;
-  modules?: NavigationModule[];
 }
 
 // ── Navigation ─────────────────────────────────────────────────────────────
 
 export interface NavigationTree {
-  modules: NavigationModule[];
+  navigation: NavigationNode[];
 }
 
-export interface NavigationModule {
+/**
+ * A node in the navigation tree. The `type` field indicates the kind of element:
+ * - `"Module"` — top-level module (children are groups or pages)
+ * - `"PageGroup"` — group within a module (children are pages)
+ * - `"Page"` — leaf page (has `internalPath` / `path`, no children)
+ */
+export interface NavigationNode {
   id: string;
   name: string;
+  longName?: string;
+  /** Simple class name of the navigation element: "Module", "PageGroup", "Page", etc. */
+  type?: string;
   description?: string;
   icon?: string;
-  groups: NavigationGroup[];
-}
-
-export interface NavigationGroup {
-  id: string;
-  name: string;
-  description?: string;
-  icon?: string;
-  pages: NavigationPage[];
-}
-
-export interface NavigationPage {
-  id: string;
-  name: string;
-  description?: string;
-  icon?: string;
-  virtualPath: string;
-  prettyVirtualPath: string;
-  pageClass?: string;
+  /** Virtual path (e.g. /pages/store/books) — use for routing */
+  internalPath?: string;
+  /** Pretty/display path */
+  path?: string;
+  position?: number;
+  featured?: boolean;
+  children?: NavigationNode[];
+  attributes?: Record<string, unknown>;
+  /** Source file path for page nodes */
+  file?: string;
 }
 
 // ── Entity metadata ────────────────────────────────────────────────────────

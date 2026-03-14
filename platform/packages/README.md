@@ -8,13 +8,11 @@ These packages allow frontend developers to interact with Dynamia Platform backe
 
 ## 📦 Packages
 
-| Package | Description |
-|---------|-------------|
-| `@dynamia-tools/sdk` | JavaScript/TypeScript client SDK for Dynamia Platform REST APIs |
-| `@dynamia-tools/vue` | Vue 3 integration — composables, components, and plugins for Dynamia Platform |
-| `@dynamia-tools/ui` | Headless UI components and utilities aligned with Dynamia Platform's view descriptors |
-| `@dynamia-tools/forms` | Dynamic form generation driven by Dynamia Platform view descriptors |
-| `@dynamia-tools/auth` | Authentication and session management helpers |
+| Package                  | Description |
+|--------------------------|-------------|
+| `@dynamia-tools/sdk`     | JavaScript/TypeScript client SDK for Dynamia Platform REST APIs |
+| `@dynamia-tools/ui-core` | Headless UI components and utilities aligned with Dynamia Platform's view descriptors |
+| `@dynamia-tools/vue`     | Vue 3 integration — composables, components, and plugins for Dynamia Platform |
 
 > **Note:** Packages are added progressively. Check each sub-folder for its own `README.md` and `CHANGELOG.md`.
 
@@ -25,10 +23,8 @@ These packages allow frontend developers to interact with Dynamia Platform backe
 ```
 packages/
 ├── sdk/          # @dynamia-tools/sdk   – Core API client
+├── ui-core/      # @dynamia-tools/ui-core    – UI components
 ├── vue/          # @dynamia-tools/vue   – Vue 3 integration
-├── ui/           # @dynamia-tools/ui    – UI components
-├── forms/        # @dynamia-tools/forms – Dynamic forms
-├── auth/         # @dynamia-tools/auth  – Auth helpers
 └── README.md     # This file
 ```
 

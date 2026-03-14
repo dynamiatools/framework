@@ -2,10 +2,28 @@
 
 import { ref, computed, onMounted } from 'vue';
 import type { Ref, ComputedRef } from 'vue';
-import type { DynamiaClient, NavigationTree, NavigationModule, NavigationPage } from '@dynamia-tools/sdk';
+import type { DynamiaClient, NavigationTree, NavigationNode } from '@dynamia-tools/sdk';
 
 // Module-level cache (singleton, not Pinia)
 let _cachedTree: NavigationTree | null = null;
+
+/** Recursively find a node by internalPath */
+function findNodeByPath(nodes: NavigationNode[], path: string): NavigationNode | null {
+  for (const node of nodes) {
+    if (node.internalPath === path) return node;
+    if (node.children) {
+      const found = findNodeByPath(node.children, path);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+/** Returns true if the node or any of its descendants has the given internalPath */
+function containsPath(node: NavigationNode, path: string): boolean {
+  if (node.internalPath === path) return true;
+  return node.children?.some(c => containsPath(c, path)) ?? false;
+}
 
 /**
  * Composable for accessing the application navigation tree.
@@ -14,7 +32,7 @@ let _cachedTree: NavigationTree | null = null;
  *
  * Example:
  * <pre>{@code
- * const { tree, currentModule, navigateTo } = useNavigation(client);
+ * const { tree, nodes, currentModule, currentPage, navigateTo } = useNavigation(client);
  * }</pre>
  *
  * @param client - DynamiaClient instance
@@ -26,25 +44,26 @@ export function useNavigation(client: DynamiaClient) {
   const error: Ref<string | null> = ref(null);
   const currentPath: Ref<string | null> = ref(null);
 
-  const modules: ComputedRef<NavigationModule[]> = computed(() => tree.value?.modules ?? []);
+  /** Top-level navigation nodes (type="Module") */
+  const nodes: ComputedRef<NavigationNode[]> = computed(() => tree.value?.navigation ?? []);
 
-  const currentModule: ComputedRef<NavigationModule | null> = computed(() => {
+  /** Current top-level module node containing the active path */
+  const currentModule: ComputedRef<NavigationNode | null> = computed(() => {
     if (!currentPath.value || !tree.value) return null;
-    return tree.value.modules.find(m =>
-      m.groups.some(g => g.pages.some(p => p.virtualPath === currentPath.value))
-    ) ?? null;
+    return tree.value.navigation.find(m => containsPath(m, currentPath.value!)) ?? null;
   });
 
-  const currentPage: ComputedRef<NavigationPage | null> = computed(() => {
+  /** Current group node (second-level) containing the active path */
+  const currentGroup: ComputedRef<NavigationNode | null> = computed(() => {
+    const mod = currentModule.value;
+    if (!mod?.children || !currentPath.value) return null;
+    return mod.children.find(g => containsPath(g, currentPath.value!)) ?? null;
+  });
+
+  /** Current page node (leaf) matching the active path */
+  const currentPage: ComputedRef<NavigationNode | null> = computed(() => {
     if (!currentPath.value || !tree.value) return null;
-    for (const m of tree.value.modules) {
-      for (const g of m.groups) {
-        for (const p of g.pages) {
-          if (p.virtualPath === currentPath.value) return p;
-        }
-      }
-    }
-    return null;
+    return findNodeByPath(tree.value.navigation, currentPath.value);
   });
 
   async function loadNavigation(): Promise<void> {
@@ -75,8 +94,9 @@ export function useNavigation(client: DynamiaClient) {
 
   return {
     tree,
-    modules,
+    nodes,
     currentModule,
+    currentGroup,
     currentPage,
     currentPath,
     loading,

@@ -23,9 +23,11 @@
     "typecheck": "vue-tsc --noEmit",
     "clean": "rm -rf dist"
   },
-  "peerDependencies": {
+  "dependencies": {
     "@dynamia-tools/sdk": ">=26.0.0",
-    "@dynamia-tools/ui-core": ">=26.0.0",
+    "@dynamia-tools/ui-core": ">=26.0.0"
+  },
+  "peerDependencies": {
     "vue": "^3.4.0"
   },
   "devDependencies": {
