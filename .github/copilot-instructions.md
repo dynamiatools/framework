@@ -68,6 +68,42 @@ The framework is organized into modules. Each module has a specific responsibili
 
 ---
 
+## JavaScript/TypeScript (SDK + Vue) Guidelines
+
+When generating frontend code for Dynamia Platform, prefer the current APIs from:
+
+- `platform/packages/sdk/src/index.ts`
+- `platform/packages/sdk/src/client.ts`
+- `platform/packages/vue/src/index.ts`
+- `platform/packages/vue/src/plugin.ts`
+
+### `@dynamia-tools/sdk`
+
+- Use `new DynamiaClient({ baseUrl, token? })` as the entry point.
+- Prefer `baseUrl` as app origin (for example `https://app.example.com`), because SDK endpoints already include `/api/...` internally.
+- Use `client.metadata.getNavigation()` for menus/routing (shape: `NavigationTree.navigation`, not `modules/groups/pages`).
+- Use `client.crud(path)` for `CrudPage` virtual paths (`findAll`, `findById`, `create`, `update`, `delete`).
+- Use `client.crudService(className)` only for class-name based `/crud-service` use cases.
+- `findAll()` returns `CrudListResult` with `content`, `total`, `page`, `pageSize`, `totalPages`.
+- Handle API failures with `DynamiaApiError` (`status`, `url`, `body`).
+
+### `@dynamia-tools/vue`
+
+- Register the plugin once: `app.use(DynamiaVue)`.
+- Use global components provided by the plugin: `DynamiaViewer`, `DynamiaForm`, `DynamiaTable`, `DynamiaCrud`, `DynamiaCrudPage`, `DynamiaNavMenu`, `DynamiaNavBreadcrumb`, etc.
+- Prefer composables over manual wiring: `useViewer`, `useView`, `useForm`, `useTable`, `useCrud`, `useCrudPage`, `useEntityPicker`, `useNavigation`.
+- For app shells driven by navigation, use `useNavigation(client)` and render by node type.
+- For nodes with `node.type === 'CrudPage'`, render with `DynamiaCrudPage` or wire with `useCrudPage`.
+- In menu/breadcrumb code use `NavigationNode.internalPath` and `children`.
+
+### Accuracy Rules for Generated Examples
+
+- Do not invent SDK or Vue APIs that are not exported from the package `index.ts` files.
+- Keep examples aligned with real return types (for example `CrudListResult`, `NavigationNode`).
+- If an API is uncertain, prefer a short TODO comment over guessing a method/signature.
+
+---
+
 ## Documentation Guidelines (Javadoc)
 
 - Every class and public method must have **Javadoc in English**.
