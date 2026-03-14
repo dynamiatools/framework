@@ -164,7 +164,7 @@ const entities: ApplicationMetadataEntities = await client.metadata.getEntities(
 const book: EntityMetadata = await client.metadata.getEntity('com.example.domain.Book');
 
 // All view descriptors (form, table, tree, …) for an entity
-const descriptors: ViewDescriptorMetadata[] = await client.metadata.getEntityViews('com.example.domain.Book');
+const descriptors: ViewDescriptor[] = await client.metadata.getEntityViews('com.example.domain.Book');
 
 // A specific view descriptor
 const formDescriptor: ViewDescriptor = await client.metadata.getEntityView(

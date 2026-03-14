@@ -46,7 +46,7 @@ export class MetadataApi {
   }
 
   /** GET /api/app/metadata/entities/{className}/views — All view descriptors for an entity */
-  getEntityViews(className: string): Promise<ViewDescriptorMetadata[]> {
+  getEntityViews(className: string): Promise<ViewDescriptor[]> {
     return this.http.get(`/api/app/metadata/entities/${encodeURIComponent(className)}/views`);
   }
 

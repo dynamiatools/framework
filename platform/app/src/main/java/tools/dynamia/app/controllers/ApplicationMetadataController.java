@@ -194,7 +194,7 @@ public class ApplicationMetadataController {
      */
     @GetMapping(value = "/entities/{className}/views", produces = "application/json")
     public List<ViewDescriptor> executeEntityAction(@PathVariable String className) {
-        var entityMetadata = getEntities().getEntityMetadata(className);
+        var entityMetadata = getEntityMetadata(className);
         if (entityMetadata != null) {
             return entityMetadata.getDescriptors().stream().map(ViewDescriptorMetadata::getDescriptor).toList();
         }

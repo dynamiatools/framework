@@ -95,19 +95,72 @@ export interface ViewDescriptorMetadata {
   descriptor: ViewDescriptor;
 }
 
-export interface ViewDescriptor {
+/** Mirrors tools.dynamia.actions.ActionReference */
+export interface ActionReference {
   id: string;
-  beanClass: string;
-  viewTypeName: string;
-  fields: ViewField[];
+  label?: string;
+  description?: string;
+  icon?: string;
+  width?: string;
+  visible?: boolean;
+  type?: string;
+  attributes?: Record<string, unknown>;
+}
+
+/** Mirrors tools.dynamia.viewers.ViewLayout */
+export interface ViewLayout {
   params: Record<string, unknown>;
 }
 
+/** Mirrors tools.dynamia.viewers.FieldGroup (fields list is @JsonIgnore on the Java side) */
+export interface ViewFieldGroup {
+  name: string;
+  label?: string;
+  description?: string;
+  icon?: string;
+  index?: number;
+  collapse?: boolean;
+  params: Record<string, unknown>;
+}
+
+/** Mirrors tools.dynamia.viewers.ViewDescriptor */
+export interface ViewDescriptor {
+  id: string;
+  /** Fully qualified class name of the target domain class */
+  beanClass: string;
+  viewTypeName: string;
+  fields: ViewField[];
+  fieldGroups?: ViewFieldGroup[];
+  layout?: ViewLayout;
+  params: Record<string, unknown>;
+  messages?: string;
+  device?: string;
+  autofields?: boolean;
+  actions?: ActionReference[];
+  /** ID of the parent descriptor this one extends */
+  extends?: string;
+  viewCustomizerClass?: string;
+  customViewRenderer?: string;
+}
+
+/** Mirrors tools.dynamia.viewers.Field */
 export interface ViewField {
   name: string;
+  /** Fully qualified class name of the field type */
   fieldClass?: string;
   label?: string;
+  description?: string;
+  /** Component name used to render the field */
+  component?: string;
   visible?: boolean;
   required?: boolean;
+  optional?: boolean;
+  index?: number;
+  icon?: string;
+  showIconOnly?: boolean;
+  path?: string;
+  variable?: string;
+  temporal?: boolean;
+  action?: ActionReference;
   params: Record<string, unknown>;
 }
