@@ -26,6 +26,7 @@
   - [FieldResolver](#fieldresolver)
   - [LayoutEngine](#layoutengine)
   - [ActionResolver](#actionresolver)
+- [Navigation helpers](#navigation-helpers)
 - [Utils](#utils)
   - [Converters](#converters)
   - [Validators](#validators)
@@ -546,6 +547,37 @@ The `Validator` function signature is:
 ```typescript
 type Validator = (value: unknown, params?: Record<string, unknown>) => string | null;
 ```
+
+---
+
+## Navigation helpers
+
+`ui-core` also ships framework-agnostic helpers for app-shell navigation trees. These utilities are intentionally stateless and reusable from Vue, React, or plain TypeScript code.
+
+```typescript
+import {
+  containsPath,
+  findNodeByPath,
+  findFirstPage,
+  resolveActivePath,
+} from '@dynamia-tools/ui-core';
+import type { NavigationTree } from '@dynamia-tools/sdk';
+
+const activePath = '/pages/store/books';
+const tree: NavigationTree = await client.metadata.getNavigation();
+
+const page = findNodeByPath(tree.navigation, activePath);
+const first = findFirstPage(tree.navigation);
+const ctx = resolveActivePath(tree, activePath);
+
+ctx.module; // current module node
+ctx.group;  // current page-group node (if any)
+ctx.page;   // current leaf page node
+
+containsPath(tree.navigation[0], activePath); // true | false
+```
+
+These helpers power `useNavigation` in `@dynamia-tools/vue`, so the resolution logic stays centralized in one package.
 
 ---
 

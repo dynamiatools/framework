@@ -358,7 +358,7 @@ const {
   navigateTo,
   clearCache,
   reload,
-} = useNavigation(client);
+} = useNavigation(client, { autoSelectFirst: true });
 
 // tree    — Ref<NavigationTree | null>
 // nodes   — ComputedRef<NavigationNode[]>
@@ -371,6 +371,7 @@ navigateTo('/pages/store/books');
 ```
 
 The navigation tree is cached in module memory after the first fetch. Call `clearCache()` and then `reload()` to force a re-fetch.
+Set `autoSelectFirst: true` to automatically navigate to the first available leaf page after loading the tree.
 
 ---
 
@@ -384,8 +385,8 @@ With `useNavigation` + `useCrudPage` + `<DynamiaCrudPage>`, you can build comple
 
 ```vue
 <script setup lang="ts">
-import { computed, watch } from 'vue';
-import type { NavigationNode, DynamiaClient } from '@dynamia-tools/sdk';
+import { computed } from 'vue';
+import type { DynamiaClient } from '@dynamia-tools/sdk';
 import { useNavigation } from '@dynamia-tools/vue';
 
 const client = new DynamiaClient({ baseUrl: '/api', token: '...' });
@@ -397,29 +398,7 @@ const {
   currentModule,
   currentGroup,
   navigateTo,
-} = useNavigation(client);
-
-function findFirstPage(list: NavigationNode[]): NavigationNode | null {
-  for (const node of list) {
-    if (node.children?.length) {
-      const nested = findFirstPage(node.children);
-      if (nested) return nested;
-    } else if (node.internalPath) {
-      return node;
-    }
-  }
-  return null;
-}
-
-watch(
-  nodes,
-  (value) => {
-    if (currentPath.value) return;
-    const first = findFirstPage(value);
-    if (first?.internalPath) navigateTo(first.internalPath);
-  },
-  { immediate: true },
-);
+} = useNavigation(client, { autoSelectFirst: true });
 
 const activeNode = computed(() => currentPage.value);
 </script>
