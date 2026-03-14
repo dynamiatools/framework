@@ -1,46 +1,56 @@
 # Dynamia Tools Vue Backoffice Demo
 
-This demo shows a typical backoffice web app experience using Dynamia Tools with vue
+Backoffice demo built with **Vue 3** + **@dynamia-tools/vue**.
 
-It connects to a local backend at `http://localhost:8484` and displays a full app shell with:
+It connects to a Dynamia backend (default `http://localhost:8484`) and renders:
 
 - a left navigation menu,
-- a top title/breadcrumb area,
-- a main content area in the center.
+- a breadcrumb on top,
+- a center panel that auto-renders CRUD pages.
 
-When a menu item is a **CRUD page**, the demo opens it in the content area.
-If a page type is different, the demo shows a simple message.
+When a selected node is not `CrudPage`, the demo shows a fallback message.
 
-## What This Demo Is For
+## Prerequisites
 
-Use this demo to quickly see how a Dynamia-based backoffice feels for end users:
+- Node.js >= 20
+- A running Dynamia backend with navigation metadata and CRUD pages
 
-- browse modules from the left menu,
-- see where you are from the top breadcrumb,
-- work with data screens in the main area.
+## Configuration
+
+Copy `.env.example` to `.env` and adjust values if needed.
+
+```bash
+cp .env.example .env
+```
+
+Available variables:
+
+- `VITE_DYNAMIA_API_URL` (default: `http://localhost:8484`)
+- `VITE_DYNAMIA_TOKEN` (optional bearer token)
+- `VITE_DYNAMIA_USERNAME` / `VITE_DYNAMIA_PASSWORD` (optional basic auth)
 
 ## Quick Start
-
-1. Start your Dynamia backend locally on port `8484`.
-2. Open and run this Vue demo app.
-3. Open the app in your browser.
-
-If your project already has npm scripts configured, a common flow is:
 
 ```bash
 npm install
 npm run dev
 ```
 
+Then open the URL printed by Vite (usually `http://localhost:5173`).
+
+## Scripts
+
+```bash
+npm run dev
+npm run build
+npm run preview
+npm run typecheck
+```
+
 ## What You Should See
 
-- **Left side:** navigation menu with available modules/pages.
-- **Top area:** current location (module/group/page).
+- **Left:** module/page navigation (`<DynamiaNavMenu>`)
+- **Top:** active location breadcrumb (`<DynamiaNavBreadcrumb>`)
 - **Center:**
-  - CRUD pages render as full data screens.
-  - Other page types show an informational message.
-
-## Notes
-
-- This README is user-focused and intentionally keeps technical details minimal.
-- If your environment requires login or a token, complete authentication before using the demo.
+  - `CrudPage` nodes render with `<DynamiaCrudPage>`
+  - other node types render an informational message
