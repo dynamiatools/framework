@@ -4,6 +4,12 @@
 
 `@dynamia-tools/sdk` provides a fully typed, zero-dependency-at-runtime client that covers every REST endpoint exposed by a Dynamia Platform backend: application metadata, navigation tree, entity CRUD, actions, reports, files, SaaS accounts, schedules, and more.
 
+Public API exports include:
+
+- `DynamiaClient`, `DynamiaApiError`
+- API classes: `MetadataApi`, `ActionsApi`, `CrudResourceApi`, `CrudServiceApi`, `ReportsApi`, `FilesApi`, `SaasApi`, `ScheduleApi`
+- Core types for metadata, navigation, CRUD, reports and SaaS responses
+
 ---
 
 ## Table of Contents
@@ -61,6 +67,7 @@ console.log(metadata.name, metadata.version);
 
 // List entities of a CRUD page
 const books = await client.crud('books').findAll();
+console.log(books.content.length, books.totalPages);
 ```
 
 ---
@@ -100,6 +107,8 @@ const client = new DynamiaClient({
   withCredentials: true, // sends session cookies automatically
 });
 ```
+
+> Note: the SDK does not include a dedicated `login()` helper. Perform login with your preferred HTTP client (or `fetch`) and then instantiate `DynamiaClient` with cookie forwarding (`withCredentials`) or a token.
 
 ---
 
@@ -155,7 +164,7 @@ const entities: ApplicationMetadataEntities = await client.metadata.getEntities(
 const book: EntityMetadata = await client.metadata.getEntity('com.example.domain.Book');
 
 // All view descriptors (form, table, tree, …) for an entity
-const descriptors: ViewDescriptor[] = await client.metadata.getEntityViews('com.example.domain.Book');
+const descriptors: ViewDescriptorMetadata[] = await client.metadata.getEntityViews('com.example.domain.Book');
 
 // A specific view descriptor
 const formDescriptor: ViewDescriptor = await client.metadata.getEntityView(
@@ -185,11 +194,11 @@ The navigation tree is also accessible through the metadata API (see above). Use
 ```typescript
 const tree: NavigationTree = await client.metadata.getNavigation();
 
-tree.modules.forEach(module => {
+tree.navigation.forEach(module => {
   console.log(module.name);
-  module.groups.forEach(group => {
-    group.pages.forEach(page => {
-      console.log(`  ${page.name} → ${page.virtualPath}`);
+  module.children?.forEach(groupOrPage => {
+    groupOrPage.children?.forEach(page => {
+      console.log(`  ${page.name} → ${page.internalPath}`);
     });
   });
 });
@@ -206,10 +215,11 @@ Auto-generated REST endpoints for every `CrudPage` registered in the platform's 
 const books = client.crud('store/catalog/books');
 
 // List all (with pagination)
-const page1: CrudPage<Book> = await books.findAll({ page: 1, size: 20 });
+const page1: CrudListResult<Book> = await books.findAll({ page: 1, size: 20 });
 // page1.content   → Book[]
 // page1.total     → total records
 // page1.pageSize  → current page size
+// page1.totalPages → total pages
 
 // Filter by query parameters
 const filtered = await books.findAll({ q: 'clean', author: 'Martin' });
@@ -400,10 +410,15 @@ Key types exported by the SDK (mirroring the Java server model):
 ```typescript
 // Core
 interface ApplicationMetadata { name: string; version: string; description?: string; /* ... */ }
-interface NavigationTree { modules: NavigationModule[]; }
-interface NavigationModule { id: string; name: string; groups: NavigationGroup[]; }
-interface NavigationGroup { id: string; name: string; pages: NavigationPage[]; }
-interface NavigationPage { id: string; name: string; virtualPath: string; prettyVirtualPath: string; }
+interface NavigationTree { navigation: NavigationNode[]; }
+interface NavigationNode {
+  id: string;
+  name: string;
+  type?: string;              // "Module" | "PageGroup" | "Page" | "CrudPage" | ...
+  internalPath?: string;      // route path used by frontends
+  path?: string;              // display path
+  children?: NavigationNode[];
+}
 
 // Entities
 interface ApplicationMetadataEntities { entities: EntityMetadata[]; }
@@ -419,10 +434,13 @@ interface ActionExecutionResponse { message: string; status: string; code: numbe
 // Views
 interface ViewDescriptor { id: string; beanClass: string; viewTypeName: string; fields: ViewField[]; params: Record<string, unknown>; }
 interface ViewDescriptorMetadata { view: string; descriptor: ViewDescriptor; }
-interface ViewField { name: string; fieldClass?: string; label?: string; visible?: boolean; params: Record<string, unknown>; }
+interface ViewField { name: string; fieldClass?: string; label?: string; visible?: boolean; required?: boolean; params: Record<string, unknown>; }
 
 // CRUD
-interface CrudListResult<T = unknown> { content: T[]; total: number; page: number; pageSize: number; }
+interface CrudPageable { totalSize: number; pageSize: number; firstResult: number; page: number; pagesNumber: number; }
+interface CrudRawResponse<T = unknown> { data: T[]; pageable: CrudPageable | null; response: string; }
+interface CrudListResult<T = unknown> { content: T[]; total: number; page: number; pageSize: number; totalPages: number; }
+type CrudQueryParams = Record<string, string | number | boolean | undefined | null>;
 
 // Reports
 interface ReportDTO { id: string; name: string; group: string; endpoint: string; description?: string; }
@@ -449,6 +467,8 @@ try {
   }
 }
 ```
+
+`DynamiaApiError` also includes `status`, `url`, and `body` to support centralized logging and UI error mapping.
 
 ---
 

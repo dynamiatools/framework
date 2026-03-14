@@ -2,7 +2,7 @@
 
 > Vue 3 adapter for **Dynamia Platform** — reactive views, composables and components built on `@dynamia-tools/ui-core`.
 
-`@dynamia-tools/vue` wraps every `ui-core` view class with Vue `ref`/`computed` reactivity, provides composables for a clean developer experience, and ships a set of thin Vue components — all the way down to individual field inputs. The central component is `<DynamiaViewer>`, which resolves any view type automatically, mirroring ZK's `Viewer` on the backend.
+`@dynamia-tools/vue` wraps every `ui-core` view class with Vue `ref`/`computed` reactivity, provides composables for a clean developer experience, and ships a set of thin Vue components — all the way down to individual field inputs. The central component is `<DynamiaViewer>`, which resolves any view type automatically, mirroring ZK's `Viewer` on the backend. For full app shells driven by `NavigationTree`, `<DynamiaCrudPage>` can render `NavigationNode` entries of type `CrudPage` end-to-end.
 
 ---
 
@@ -14,11 +14,14 @@
 - [Universal Component: `<DynamiaViewer>`](#universal-component-dynamiaviewer)
 - [Composables](#composables)
   - [useViewer](#useviewer)
+  - [useView](#useview)
   - [useForm](#useform)
   - [useTable](#usetable)
   - [useCrud](#usecrud)
+  - [useCrudPage](#usecrudpage)
   - [useEntityPicker](#useentitypicker)
   - [useNavigation](#usenavigation)
+- [Full App Shell: Auto navigation + CrudPage rendering](#full-app-shell-auto-navigation--crudpage-rendering)
 - [Vue-reactive View classes](#vue-reactive-view-classes)
   - [VueViewer](#vueviewer)
   - [VueFormView](#vueformview)
@@ -28,6 +31,7 @@
   - [Form.vue](#formvue)
   - [Table.vue](#tablevue)
   - [Crud.vue](#crudvue)
+  - [CrudPage.vue](#crudpagevue)
   - [Field.vue](#fieldvue)
   - [Field components](#field-components)
   - [Actions.vue](#actionsvue)
@@ -84,6 +88,7 @@ After `app.use(DynamiaVue)` the following components are available globally (no 
 | `<DynamiaActions>` | Action toolbar |
 | `<DynamiaNavMenu>` | Navigation sidebar/menu |
 | `<DynamiaNavBreadcrumb>` | Navigation breadcrumb |
+| `<DynamiaCrudPage>` | Fully wired CRUD page for `NavigationNode.type === 'CrudPage'` |
 
 ---
 
@@ -196,6 +201,23 @@ const { viewer, view, loading, error, getValue, setValue, setReadonly } = useVie
 // error   — Ref<string | null>
 ```
 
+### useView
+
+Generic lifecycle composable for any `VueView` subclass.
+
+```typescript
+import { useView, VueFormView } from '@dynamia-tools/vue';
+
+const { view, loading, error, initialized } = useView(
+  () => new VueFormView(descriptor, metadata),
+);
+
+// view        — VueFormView
+// loading     — Ref<boolean>
+// error       — Ref<string | null>
+// initialized — Ref<boolean>
+```
+
 ### useForm
 
 Direct access to a `VueFormView`:
@@ -300,6 +322,24 @@ const { view, searchResults, selectedEntity, searchQuery, loading, search, selec
   });
 ```
 
+### useCrudPage
+
+Builds a complete CRUD page from a navigation node of type `CrudPage`. It resolves metadata + descriptor via `CrudPageResolver`, wires table loading and save/delete handlers, initializes the view, and loads the first page.
+
+```typescript
+import { useCrudPage } from '@dynamia-tools/vue';
+
+const { view, loading, error, reload } = useCrudPage({
+  node,   // NavigationNode (type: 'CrudPage')
+  client, // DynamiaClient
+});
+
+// view    — Ref<VueCrudView | null>
+// loading — Ref<boolean>
+// error   — Ref<string | null>
+// reload  — () => Promise<void>
+```
+
 ### useNavigation
 
 Fetches and caches the application navigation tree. Uses SDK types directly — no new types defined.
@@ -307,17 +347,109 @@ Fetches and caches the application navigation tree. Uses SDK types directly — 
 ```typescript
 import { useNavigation } from '@dynamia-tools/vue';
 
-const { tree, modules, currentModule, currentPage, loading, navigateTo } = useNavigation(client);
+const {
+  tree,
+  nodes,
+  currentModule,
+  currentGroup,
+  currentPage,
+  currentPath,
+  loading,
+  navigateTo,
+  clearCache,
+  reload,
+} = useNavigation(client);
 
 // tree    — Ref<NavigationTree | null>
-// modules — ComputedRef<NavigationModule[]>
-// currentModule — ComputedRef<NavigationModule | null>
-// currentPage   — ComputedRef<NavigationPage | null>
+// nodes   — ComputedRef<NavigationNode[]>
+// currentModule — ComputedRef<NavigationNode | null>
+// currentGroup  — ComputedRef<NavigationNode | null>
+// currentPage   — ComputedRef<NavigationNode | null>
+// currentPath   — Ref<string | null>
 
 navigateTo('/pages/store/books');
 ```
 
-The navigation tree is cached in module memory after the first fetch. Call `clearCache()` to force a reload.
+The navigation tree is cached in module memory after the first fetch. Call `clearCache()` and then `reload()` to force a re-fetch.
+
+---
+
+## Full App Shell: Auto navigation + CrudPage rendering
+
+With `useNavigation` + `useCrudPage` + `<DynamiaCrudPage>`, you can build complete metadata-driven apps where:
+
+- navigation loads automatically on mount,
+- the first available page is selected automatically,
+- `CrudPage` nodes render instantly without manual CRUD wiring.
+
+```vue
+<script setup lang="ts">
+import { computed, watch } from 'vue';
+import type { NavigationNode, DynamiaClient } from '@dynamia-tools/sdk';
+import { useNavigation } from '@dynamia-tools/vue';
+
+const client = new DynamiaClient({ baseUrl: '/api', token: '...' });
+
+const {
+  nodes,
+  currentPath,
+  currentPage,
+  currentModule,
+  currentGroup,
+  navigateTo,
+} = useNavigation(client);
+
+function findFirstPage(list: NavigationNode[]): NavigationNode | null {
+  for (const node of list) {
+    if (node.children?.length) {
+      const nested = findFirstPage(node.children);
+      if (nested) return nested;
+    } else if (node.internalPath) {
+      return node;
+    }
+  }
+  return null;
+}
+
+watch(
+  nodes,
+  (value) => {
+    if (currentPath.value) return;
+    const first = findFirstPage(value);
+    if (first?.internalPath) navigateTo(first.internalPath);
+  },
+  { immediate: true },
+);
+
+const activeNode = computed(() => currentPage.value);
+</script>
+
+<template>
+  <aside>
+    <DynamiaNavMenu :nodes="nodes" :current-path="currentPath" @navigate="navigateTo" />
+  </aside>
+
+  <header>
+    <DynamiaNavBreadcrumb
+      :module="currentModule"
+      :group="currentGroup"
+      :page="activeNode"
+    />
+  </header>
+
+  <main>
+    <DynamiaCrudPage
+      v-if="activeNode?.type === 'CrudPage'"
+      :node="activeNode"
+      :client="client"
+    />
+
+    <p v-else-if="activeNode">
+      Node type "{{ activeNode.type }}" is selected. Provide a renderer for this type.
+    </p>
+  </main>
+</template>
+```
 
 ---
 
@@ -435,6 +567,34 @@ Combines `<Table>` and `<Form>` into a full CRUD interface with mode transitions
 <DynamiaCrud :view="crudView" :actions="entityActions" @save="onSave" @delete="onDelete" />
 ```
 
+### CrudPage.vue
+
+Renders a full CRUD page directly from a navigation node of type `CrudPage`.
+
+```vue
+<DynamiaCrudPage
+  :node="selectedNode"
+  :client="client"
+  :read-only="false"
+  :actions="extraActions"
+  @save="onSave"
+  @delete="onDelete"
+/>
+```
+
+`<DynamiaCrudPage>` internally uses `useCrudPage()` and exposes loading/error slots:
+
+```vue
+<DynamiaCrudPage :node="selectedNode" :client="client">
+  <template #loading>
+    <MySpinner />
+  </template>
+  <template #error="{ error }">
+    <MyAlert :message="error" />
+  </template>
+</DynamiaCrudPage>
+```
+
 ### Field.vue
 
 Dispatches to the correct field component based on `field.resolvedComponent`. Falls back to a plain `<input type="text">` for unknown component types.
@@ -527,9 +687,9 @@ Renders a `NavigationTree` as a sidebar menu. Uses SDK types directly.
 
 ```vue
 <DynamiaNavMenu
-  :modules="tree.modules"
+  :nodes="nodes"
   :current-path="currentPath"
-  @navigate="router.push"
+  @navigate="navigateTo"
 />
 ```
 
@@ -537,7 +697,7 @@ Renders a `NavigationTree` as a sidebar menu. Uses SDK types directly.
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `modules` | `NavigationModule[]` | Navigation modules |
+| `nodes` | `NavigationNode[]` | Top-level navigation nodes (modules) |
 | `currentPath` | `string \| null` | Currently active virtual path |
 
 **Events:**
@@ -640,6 +800,7 @@ app.use(KanbanPlugin);
 │   ├── useForm.ts
 │   ├── useTable.ts
 │   ├── useCrud.ts
+│   ├── useCrudPage.ts          ← auto-builds VueCrudView from a CrudPage node
 │   ├── useEntityPicker.ts
 │   └── useNavigation.ts
 │
@@ -648,6 +809,7 @@ app.use(KanbanPlugin);
 │   ├── Form.vue
 │   ├── Table.vue
 │   ├── Crud.vue
+│   ├── CrudPage.vue            ← renders CrudPage NavigationNodes end-to-end
 │   ├── Field.vue               ← field dispatcher
 │   ├── Actions.vue
 │   ├── NavMenu.vue
