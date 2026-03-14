@@ -3,26 +3,14 @@
 import { ref, computed, onMounted } from 'vue';
 import type { Ref, ComputedRef } from 'vue';
 import type { DynamiaClient, NavigationTree, NavigationNode } from '@dynamia-tools/sdk';
+import { findFirstPage, resolveActivePath } from '@dynamia-tools/ui-core';
 
 // Module-level cache (singleton, not Pinia)
 let _cachedTree: NavigationTree | null = null;
 
-/** Recursively find a node by internalPath */
-function findNodeByPath(nodes: NavigationNode[], path: string): NavigationNode | null {
-  for (const node of nodes) {
-    if (node.internalPath === path) return node;
-    if (node.children) {
-      const found = findNodeByPath(node.children, path);
-      if (found) return found;
-    }
-  }
-  return null;
-}
-
-/** Returns true if the node or any of its descendants has the given internalPath */
-function containsPath(node: NavigationNode, path: string): boolean {
-  if (node.internalPath === path) return true;
-  return node.children?.some(c => containsPath(c, path)) ?? false;
+export interface UseNavigationOptions {
+  /** Automatically navigate to the first available page after loading the tree. */
+  autoSelectFirst?: boolean;
 }
 
 /**
@@ -36,9 +24,11 @@ function containsPath(node: NavigationNode, path: string): boolean {
  * }</pre>
  *
  * @param client - DynamiaClient instance
+ * @param options - Optional behavior flags for initialization
  * @returns Object with reactive navigation state
  */
-export function useNavigation(client: DynamiaClient) {
+export function useNavigation(client: DynamiaClient, options: UseNavigationOptions = {}) {
+  const { autoSelectFirst = false } = options;
   const tree: Ref<NavigationTree | null> = ref(_cachedTree);
   const loading: Ref<boolean> = ref(false);
   const error: Ref<string | null> = ref(null);
@@ -47,33 +37,44 @@ export function useNavigation(client: DynamiaClient) {
   /** Top-level navigation nodes (type="Module") */
   const nodes: ComputedRef<NavigationNode[]> = computed(() => tree.value?.navigation ?? []);
 
+  const activeContext = computed(() => resolveActivePath(tree.value, currentPath.value));
+
   /** Current top-level module node containing the active path */
   const currentModule: ComputedRef<NavigationNode | null> = computed(() => {
-    if (!currentPath.value || !tree.value) return null;
-    return tree.value.navigation.find(m => containsPath(m, currentPath.value!)) ?? null;
+    return activeContext.value.module;
   });
 
   /** Current group node (second-level) containing the active path */
   const currentGroup: ComputedRef<NavigationNode | null> = computed(() => {
-    const mod = currentModule.value;
-    if (!mod?.children || !currentPath.value) return null;
-    return mod.children.find(g => containsPath(g, currentPath.value!)) ?? null;
+    return activeContext.value.group;
   });
 
   /** Current page node (leaf) matching the active path */
   const currentPage: ComputedRef<NavigationNode | null> = computed(() => {
-    if (!currentPath.value || !tree.value) return null;
-    return findNodeByPath(tree.value.navigation, currentPath.value);
+    return activeContext.value.page;
   });
 
+  function autoSelectFirstPage(): void {
+    if (!autoSelectFirst || currentPath.value || !tree.value) return;
+    const first = findFirstPage(tree.value.navigation);
+    if (first?.internalPath) {
+      currentPath.value = first.internalPath;
+    }
+  }
+
   async function loadNavigation(): Promise<void> {
-    if (_cachedTree) { tree.value = _cachedTree; return; }
+    if (_cachedTree) {
+      tree.value = _cachedTree;
+      autoSelectFirstPage();
+      return;
+    }
     loading.value = true;
     error.value = null;
     try {
       const navTree = await client.metadata.getNavigation();
       _cachedTree = navTree;
       tree.value = navTree;
+      autoSelectFirstPage();
     } catch (e) {
       error.value = String(e);
     } finally {

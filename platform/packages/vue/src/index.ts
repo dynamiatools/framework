@@ -30,6 +30,7 @@ export type { UseCrudPageOptions } from './composables/useCrudPage.js';
 export { useEntityPicker } from './composables/useEntityPicker.js';
 export type { UseEntityPickerOptions } from './composables/useEntityPicker.js';
 export { useNavigation } from './composables/useNavigation.js';
+export type { UseNavigationOptions } from './composables/useNavigation.js';
 
 // ── Plugin ─────────────────────────────────────────────────────────────────
 export { DynamiaVue } from './plugin.js';

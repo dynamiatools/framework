@@ -51,3 +51,12 @@ export { requiredValidator, constraintValidator, builtinValidators } from './uti
 export { CrudPageResolver, NavigationPageTypes } from './page/CrudPageResolver.js';
 export type { CrudPageContext, NavigationPageType } from './page/CrudPageResolver.js';
 
+// ── Navigation resolvers ──────────────────────────────────────────────────────
+export {
+  containsPath,
+  findNodeByPath,
+  findFirstPage,
+  resolveActivePath,
+} from './navigation/NavigationResolver.js';
+export type { ActiveNavigationPath } from './navigation/NavigationResolver.js';
+
