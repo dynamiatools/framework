@@ -35,12 +35,17 @@ export type { UseNavigationOptions } from './composables/useNavigation.js';
 // ── Plugin ─────────────────────────────────────────────────────────────────
 export { DynamiaVue } from './plugin.js';
 
+// ── Global component type augmentation (Volar / vue-tsc) ──────────────────
+// Augments vue's GlobalComponents so TypeScript recognises the components
+// registered by the DynamiaVue plugin without explicit local imports.
+export * from './global-components.js';
+
 // ── Vue Components (named exports for direct use) ──────────────────────────
-export { default as ViewerComponent } from './components/Viewer.vue';
+export { default as DynamiaViewer } from './components/Viewer.vue';
 export { default as FormComponent } from './components/Form.vue';
 export { default as TableComponent } from './components/Table.vue';
 export { default as CrudComponent } from './components/Crud.vue';
-export { default as CrudPageComponent } from './components/CrudPage.vue';
+export { default as DynamiaCrudPage } from './components/CrudPage.vue';
 export { default as FieldComponent } from './components/Field.vue';
 export { default as ActionsComponent } from './components/Actions.vue';
 export { default as NavMenuComponent } from './components/NavMenu.vue';
