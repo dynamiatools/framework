@@ -19,6 +19,7 @@ import FieldComponent from './components/Field.vue';
 import ActionsComponent from './components/Actions.vue';
 import NavMenuComponent from './components/NavMenu.vue';
 import NavBreadcrumbComponent from './components/NavBreadcrumb.vue';
+import CrudPageComponent from './components/CrudPage.vue';
 
 /**
  * Vue plugin for Dynamia Tools.
@@ -72,5 +73,6 @@ export const DynamiaVue = {
     app.component('DynamiaActions', ActionsComponent);
     app.component('DynamiaNavMenu', NavMenuComponent);
     app.component('DynamiaNavBreadcrumb', NavBreadcrumbComponent);
+    app.component('DynamiaCrudPage', CrudPageComponent);
   },
 };

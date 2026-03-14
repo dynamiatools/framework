@@ -46,3 +46,8 @@ export {
   builtinConverters,
 } from './utils/converters.js';
 export { requiredValidator, constraintValidator, builtinValidators } from './utils/validators.js';
+
+// ── Page resolvers ────────────────────────────────────────────────────────────
+export { CrudPageResolver, NavigationPageTypes } from './page/CrudPageResolver.js';
+export type { CrudPageContext, NavigationPageType } from './page/CrudPageResolver.js';
+
