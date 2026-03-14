@@ -15,7 +15,14 @@ export class CrudServiceApi<T = unknown> {
     this.basePath = `/crud-service/${encodeURIComponent(className)}`;
   }
 
-  /** POST/PUT /crud-service/{className} — Save (create or update depending on entity ID) */
+  /**
+   * `POST /crud-service/{className}` — Persist an entity (create or update).
+   *
+   * The Java controller uses a single `@PostMapping` for both create and
+   * update operations.  Whether the request results in an INSERT or UPDATE is
+   * determined server-side based on the presence of a non-null entity ID.
+   * There is no separate PUT endpoint.
+   */
   save(entity: Partial<T>): Promise<T> {
     return this.http.post<T>(this.basePath, entity);
   }

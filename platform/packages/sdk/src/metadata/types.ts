@@ -12,12 +12,25 @@ export interface BasicMetadata {
 
 // ── Application metadata ───────────────────────────────────────────────────
 
-export interface ApplicationMetadata {
-  name: string;
-  version: string;
-  description?: string;
-  logo?: string;
+/**
+ * Mirrors `tools.dynamia.app.ApplicationMetadata` (extends BasicMetadata).
+ *
+ * Java serialises all NON_NULL fields; optional fields below may be absent
+ * from the JSON payload when the application has not configured them.
+ */
+export interface ApplicationMetadata extends BasicMetadata {
+  /** Application display version */
+  version?: string;
+  /** Human-readable title (may differ from `name`) */
+  title?: string;
+  /** UI template / theme key */
+  template?: string;
+  /** Author or organisation name */
+  author?: string;
+  /** Public URL of the running application */
   url?: string;
+  /** Path to the application logo asset */
+  logo?: string;
 }
 
 // ── Navigation ─────────────────────────────────────────────────────────────
@@ -44,7 +57,9 @@ export interface NavigationNode {
   internalPath?: string;
   /** Pretty/display path */
   path?: string;
+  /** Ordering hint — Java `Double`, nullable */
   position?: number;
+  /** Whether this node should appear in featured/shortcut areas — Java `Boolean`, nullable */
   featured?: boolean;
   children?: NavigationNode[];
   attributes?: Record<string, unknown>;
@@ -58,11 +73,23 @@ export interface ApplicationMetadataEntities {
   entities: EntityMetadata[];
 }
 
+/**
+ * Mirrors `tools.dynamia.app.EntityMetadata`.
+ *
+ * `descriptors` lists lightweight view references for this entity — note that
+ * the actual `ViewDescriptor` content must be fetched separately via
+ * `MetadataApi.getEntityViews()` or `MetadataApi.getEntityView()`.
+ */
 export interface EntityMetadata extends BasicMetadata {
   className: string;
   actions: ActionMetadata[];
   descriptors: ViewDescriptorMetadata[];
   actionsEndpoint: string;
+  /**
+   * REST endpoint that returns the full list of ViewDescriptor objects for
+   * this entity (e.g. `/api/metadata/entities/MyClass/views`).
+   */
+  viewsEndpoint?: string;
 }
 
 // ── Actions ────────────────────────────────────────────────────────────────
@@ -71,28 +98,103 @@ export interface ApplicationMetadataActions {
   actions: ActionMetadata[];
 }
 
+/**
+ * Mirrors `tools.dynamia.actions.ActionMetadata`.
+ *
+ * All nullable fields are annotated `@JsonInclude(NON_NULL)` in Java and may
+ * therefore be absent from the JSON response.
+ */
 export interface ActionMetadata extends BasicMetadata {
+  /** Fully-qualified class name of the Java action implementation */
   actionClass?: string;
+  /** Arbitrary action parameters as key→value pairs */
   params?: Record<string, unknown>;
+  /** Optional grouping label for the action */
+  group?: string;
+  /** Custom renderer key for the action button/widget */
+  renderer?: string;
+  /** Simple class names of entity types this action applies to */
+  applicableClasses?: string[];
+  /** Entity state names in which this action is available */
+  applicableStates?: string[];
 }
 
+/**
+ * Request body sent to `POST /api/actions/{actionClass}`.
+ *
+ * Mirrors `tools.dynamia.actions.ActionExecutionRequest`.
+ * `data` is typed as `unknown` because the Java field is `Object` — it can
+ * carry any JSON value (scalar, array, or object).
+ */
 export interface ActionExecutionRequest {
-  data?: Record<string, unknown>;
+  /** The entity / payload on which the action should operate */
+  data?: unknown;
+  /** Arbitrary extra parameters forwarded to the action */
   params?: Record<string, unknown>;
+  /** Identifies the UI component or view that triggered the action */
+  source?: string;
+  /** Simple class name of the entity being acted upon */
+  dataType?: string;
+  /** Primary key of the entity being acted upon */
+  dataId?: unknown;
+  /** Display name of the entity being acted upon */
+  dataName?: string;
 }
 
+/**
+ * Response body returned by action execution endpoints.
+ *
+ * Mirrors `tools.dynamia.actions.ActionExecutionResponse`.
+ * Note: the field is `statusCode` (int) in Java — NOT `code`.
+ */
 export interface ActionExecutionResponse {
-  message: string;
-  status: string;
-  code: number;
+  /** Human-readable message produced by the action */
+  message?: string;
+  /** Logical status label, e.g. `"SUCCESS"` or `"ERROR"` */
+  status?: string;
+  /**
+   * Numeric status code produced by the action.
+   * Serialised as `"statusCode"` in JSON (Java field `private int statusCode`).
+   */
+  statusCode?: number;
+  /** Payload returned by the action (any JSON value) */
   data?: unknown;
+  /** Arbitrary response parameters */
+  params?: Record<string, unknown>;
+  /** Echo of the source field from the request */
+  source?: string;
+  /** Simple class name of the entity that was acted upon */
+  dataType?: string;
+  /** Primary key of the entity that was acted upon */
+  dataId?: unknown;
+  /** Display name of the entity that was acted upon */
+  dataName?: string;
 }
 
 // ── View descriptors ───────────────────────────────────────────────────────
 
+/**
+ * Lightweight reference to a view descriptor associated with an entity.
+ *
+ * Mirrors the serialised form of `tools.dynamia.app.ViewDescriptorMetadata`.
+ *
+ * ⚠️  The `descriptor` field that exists in the Java class is annotated with
+ * `@JsonIgnore` and is therefore **never** included in the JSON response.
+ * To obtain the full `ViewDescriptor`, call `MetadataApi.getEntityViews()` or
+ * `MetadataApi.getEntityView()`, which hit the dedicated `/views` endpoint and
+ * return `ViewDescriptor[]` / `ViewDescriptor` directly.
+ */
 export interface ViewDescriptorMetadata {
-  view: string;
-  descriptor: ViewDescriptor;
+  /** Unique identifier of this metadata entry */
+  id?: string;
+  /** View type name (e.g. `"form"`, `"table"`, `"tree"`) */
+  view?: string;
+  /** Target device class (e.g. `"desktop"`, `"mobile"`) */
+  device?: string;
+  /** Fully-qualified Java class name of the view bean */
+  beanClass?: string;
+  /** REST endpoint that returns the full ViewDescriptor for this view */
+  endpoint?: string;
 }
 
 /** Mirrors tools.dynamia.actions.ActionReference */
@@ -112,9 +214,15 @@ export interface ViewLayout {
   params: Record<string, unknown>;
 }
 
-/** Mirrors tools.dynamia.viewers.FieldGroup.
- *  The `fields` array carries field *names* serialized by the Java
- *  `@JsonProperty("fields") getFieldsNames()` method. */
+/**
+ * Mirrors tools.dynamia.viewers.FieldGroup.
+ *
+ * The `fields` array carries field *names* serialized by the Java
+ * `@JsonProperty("fields") getFieldsNames()` method.
+ *
+ * `params` may be absent from the JSON response when the group has no
+ * parameters (`@JsonInclude(NON_DEFAULT)` — empty Map is omitted).
+ */
 export interface ViewFieldGroup {
   name: string;
   label?: string;
@@ -122,7 +230,8 @@ export interface ViewFieldGroup {
   icon?: string;
   index?: number;
   collapse?: boolean;
-  params: Record<string, unknown>;
+  /** Arbitrary layout parameters — absent when empty (`@JsonInclude(NON_DEFAULT)`) */
+  params?: Record<string, unknown>;
   /** Ordered list of field names belonging to this group */
   fields?: string[];
 }
@@ -148,7 +257,12 @@ export interface ViewDescriptor {
   customViewRenderer?: string;
 }
 
-/** Mirrors tools.dynamia.viewers.Field */
+/**
+ * Mirrors tools.dynamia.viewers.Field.
+ *
+ * `params` may be absent from the JSON response when the field has no
+ * parameters (`@JsonInclude(NON_DEFAULT)` — empty Map is omitted).
+ */
 export interface ViewField {
   name: string;
   /** Fully qualified class name of the field type */
@@ -167,7 +281,8 @@ export interface ViewField {
   variable?: string;
   temporal?: boolean;
   action?: ActionReference;
-  params: Record<string, unknown>;
+  /** Arbitrary field parameters — absent when empty (`@JsonInclude(NON_DEFAULT)`) */
+  params?: Record<string, unknown>;
 }
 
 // ── ViewField utilities ────────────────────────────────────────────────────
@@ -261,4 +376,3 @@ export function resolveFieldType(fieldClass: string | undefined): string {
 export function resolveViewFieldType(field: ViewField): string {
   return resolveFieldType(field.fieldClass);
 }
-

@@ -204,30 +204,39 @@ export class Viewer {
       throw new Error('Either provide a descriptor directly or a DynamiaClient to fetch it from the backend');
     }
     if (this.descriptorId) {
-      // Fetch by ID
+      // Fetch by descriptor ID:
+      // ViewDescriptorMetadata.descriptor is @JsonIgnore in Java — the actual
+      // ViewDescriptor content must be fetched via the /views endpoint.
+      // We match on d.id (the ViewDescriptorMetadata lightweight id field)
+      // and then retrieve the full descriptor using getEntityView().
       const meta = await this.client.metadata.getEntities();
       for (const entity of meta.entities) {
-        for (const d of entity.descriptors) {
-          if (d.descriptor.id === this.descriptorId) {
-            this._resolvedDescriptor = d.descriptor;
-            if (!this.beanClass) this.beanClass = entity.className;
-            return;
+        const match = entity.descriptors.find(d => d.id === this.descriptorId);
+        if (match) {
+          if (!this.beanClass) this.beanClass = entity.className;
+          // Prefer the view name from the metadata reference; fall back to any
+          // view available for this entity (picks the first one from /views).
+          if (match.view) {
+            this._resolvedDescriptor = await this.client.metadata.getEntityView(entity.className, match.view);
+          } else {
+            const views = await this.client.metadata.getEntityViews(entity.className);
+            this._resolvedDescriptor = views[0] ?? null;
           }
+          if (this._resolvedDescriptor) return;
         }
       }
       throw new Error(`Descriptor with id '${this.descriptorId}' not found`);
     }
     if (this.beanClass && this.viewType) {
-      // Fetch by beanClass + viewType
+      // Fetch full ViewDescriptor by beanClass + viewType via the dedicated API.
+      // ViewDescriptorMetadata only carries lightweight reference fields (id, view,
+      // device, beanClass, endpoint) — the full descriptor lives at /views/{view}.
       const typeName = typeof this.viewType === 'string' ? this.viewType : this.viewType.name;
-      const meta = await this.client.metadata.getEntities();
-      const entity = meta.entities.find(e => e.className === this.beanClass);
-      if (entity) {
-        const found = entity.descriptors.find(d => d.view === typeName || d.descriptor.view === typeName);
-        if (found) {
-          this._resolvedDescriptor = found.descriptor;
-          return;
-        }
+      try {
+        this._resolvedDescriptor = await this.client.metadata.getEntityView(this.beanClass, typeName);
+        if (this._resolvedDescriptor) return;
+      } catch (_e) {
+        // Not found via direct fetch — fall through to minimal descriptor below
       }
     }
     // If we get here and still no descriptor, create a minimal one

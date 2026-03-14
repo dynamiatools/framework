@@ -1,6 +1,7 @@
 export { ReportsApi } from './api.js';
 export type {
   ReportDTO,
-  ReportFilter,
+  ReportFilterDTO,
+  ReportFilterOption,
   ReportFilters,
 } from './types.js';

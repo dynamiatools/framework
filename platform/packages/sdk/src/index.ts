@@ -46,7 +46,8 @@ export type {
 export { ReportsApi } from './reports/index.js';
 export type {
   ReportDTO,
-  ReportFilter,
+  ReportFilterDTO,
+  ReportFilterOption,
   ReportFilters,
 } from './reports/index.js';
 
