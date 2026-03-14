@@ -1,0 +1,16 @@
+@url = http://localhost:8484/api/app/metadata
+### Load Metadata
+GET {{url}}
+
+### Load Entities
+GET {{url}}/entities
+
+### Load Entity
+GET {{url}}/entities/mybookstore.domain.Book
+
+
+### Load Entity Views
+GET {{url}}/entities/mybookstore.domain.Book/views
+
+### Load Entity Views
+GET {{url}}/entities/mybookstore.domain.Customer/views
