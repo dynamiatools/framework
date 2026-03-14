@@ -223,7 +223,7 @@ export class Viewer {
       const meta = await this.client.metadata.getEntities();
       const entity = meta.entities.find(e => e.className === this.beanClass);
       if (entity) {
-        const found = entity.descriptors.find(d => d.view === typeName || d.descriptor.viewTypeName === typeName);
+        const found = entity.descriptors.find(d => d.view === typeName || d.descriptor.view === typeName);
         if (found) {
           this._resolvedDescriptor = found.descriptor;
           return;
@@ -235,7 +235,7 @@ export class Viewer {
       this._resolvedDescriptor = {
         id: `${this.beanClass ?? 'unknown'}-${typeof this.viewType === 'string' ? this.viewType : this.viewType?.name ?? 'form'}`,
         beanClass: this.beanClass ?? '',
-        viewTypeName: typeof this.viewType === 'string' ? this.viewType : this.viewType?.name ?? 'form',
+        view: typeof this.viewType === 'string' ? this.viewType : this.viewType?.name ?? 'form',
         fields: [],
         params: {},
       };
@@ -251,7 +251,7 @@ export class Viewer {
       return this.viewType;
     }
     if (this._resolvedDescriptor) {
-      const typeName = this._resolvedDescriptor.viewTypeName;
+      const typeName = this._resolvedDescriptor.view;
       const found = Object.values(ViewTypes).find(vt => vt.name === typeName);
       return found ?? { name: typeName };
     }

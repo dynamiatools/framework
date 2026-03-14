@@ -69,8 +69,8 @@ export class MetadataApi {
     this._viewsCache.set(className, descriptors);
     // Populate per-view cache from the bulk result to avoid redundant round-trips
     for (const d of descriptors) {
-      if (d.viewTypeName) {
-        this._viewCache.set(`${className}:${d.viewTypeName}`, d);
+      if (d.view) {
+        this._viewCache.set(`${className}:${d.view}`, d);
       }
     }
     return descriptors;

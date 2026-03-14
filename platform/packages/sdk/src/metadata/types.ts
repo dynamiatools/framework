@@ -132,7 +132,8 @@ export interface ViewDescriptor {
   id: string;
   /** Fully qualified class name of the target domain class */
   beanClass: string;
-  viewTypeName: string;
+  /** View type name — matches the JSON "view" key produced by Java's @JsonProperty("view") */
+  view: string;
   fields: ViewField[];
   fieldGroups?: ViewFieldGroup[];
   layout?: ViewLayout;

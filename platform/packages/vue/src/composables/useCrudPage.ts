@@ -60,8 +60,10 @@ export function useCrudPage(options: UseCrudPageOptions) {
       // 1. Resolve entity metadata + view descriptor
       const context = await CrudPageResolver.resolve(activeNode, client);
 
-      // 2. Create Vue-reactive CRUD view
-      const crudView = new VueCrudView(context.descriptor, context.entityMetadata);
+      // 2. Create Vue-reactive CRUD view, wiring the dedicated form descriptor
+      // (e.g. BookForm.yml with layout.columns + fieldGroups) so the FormView
+      // renders columns and groups correctly.
+      const crudView = new VueCrudView(context.descriptor, context.entityMetadata, context.formDescriptor);
 
       // 3. CRUD resource API bound to the node's virtual path
       const api = client.crud(context.virtualPath);

@@ -6,8 +6,8 @@
     </div>
     <template v-else-if="view.layout.value">
       <div
-          v-for="group in view.layout.value.groups"
-          :key="group.name"
+          v-for="(group, groupIdx) in view.layout.value.groups"
+          :key="groupIdx"
           class="dynamia-form-group"
       >
         <div v-if="group.label" class="dynamia-form-group-header">

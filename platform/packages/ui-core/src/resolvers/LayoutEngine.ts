@@ -28,46 +28,75 @@ export class LayoutEngine {
     const layoutParams = descriptor.layout?.params ?? {};
     const columns = LayoutEngine._resolveColumns(layoutParams);
 
-    // Group fields by their group name
+    // Pre-collect which fields belong to each group (preserving flat-list order within each group)
     const groupedFields = new Map<string, ResolvedField[]>();
-    const defaultGroupKey = '';
     for (const field of fields) {
-      const key = field.group ?? defaultGroupKey;
+      const key = field.group ?? '';
       if (!groupedFields.has(key)) groupedFields.set(key, []);
       groupedFields.get(key)!.push(field);
     }
 
-    // Build resolved groups in insertion order
+    // Build sections by scanning fields in declaration order.
+    //
+    // Named groups are emitted at the position of their FIRST field in the flat list,
+    // so the group header appears where the first group field would have been — matching
+    // the intent expressed in the YAML `fields:` order.
+    //
+    // Ungrouped fields that appear before, between, or after named groups form separate
+    // unnamed sections (no group header rendered). This keeps declaration order intact
+    // without mixing ungrouped and grouped fields into a single blob at the top or bottom.
     const groups: ResolvedGroup[] = [];
-    for (const [groupName, groupFields] of groupedFields) {
-      const rows = LayoutEngine._buildRows(groupFields, columns);
-      const groupParams = LayoutEngine._findGroupParams(descriptor, groupName);
-      const resolvedGroup: ResolvedGroup = { name: groupName, rows };
-      const label = groupParams?.label ?? (groupName || undefined);
-      if (label !== undefined) resolvedGroup.label = label;
-      if (groupParams?.icon !== undefined) resolvedGroup.icon = groupParams.icon;
-      groups.push(resolvedGroup);
+    const emittedGroups = new Set<string>();
+    let pendingDefault: ResolvedField[] = [];
+    let defaultIdx = 0;
+
+    const flushDefault = () => {
+      if (pendingDefault.length > 0) {
+        groups.push({
+          name: `__default_${defaultIdx++}`,
+          rows: LayoutEngine._buildRows(pendingDefault, columns),
+        });
+        pendingDefault = [];
+      }
+    };
+
+    for (const field of fields) {
+      const groupName = field.group;
+
+      if (groupName && !emittedGroups.has(groupName)) {
+        // First occurrence of this named group → flush accumulated ungrouped fields first,
+        // then emit the complete group (all its fields collected earlier in one section).
+        flushDefault();
+        const allGroupFields = groupedFields.get(groupName) ?? [];
+        const groupParams = LayoutEngine._findGroupParams(descriptor, groupName);
+        const resolvedGroup: ResolvedGroup = {
+          name: groupName,
+          rows: LayoutEngine._buildRows(allGroupFields, columns),
+        };
+        const label = groupParams?.label ?? groupName;
+        if (label) resolvedGroup.label = label;
+        if (groupParams?.icon) resolvedGroup.icon = groupParams.icon;
+        groups.push(resolvedGroup);
+        emittedGroups.add(groupName);
+      } else if (!groupName) {
+        // Ungrouped field — accumulate into the current default section
+        pendingDefault.push(field);
+      }
+      // Fields belonging to an already-emitted group are skipped here
+      // (they were already added via allGroupFields above)
     }
 
-    // Sort groups according to fieldGroups[].index when available
-    if (descriptor.fieldGroups?.length) {
-      const orderMap = new Map<string, number>();
-      [...descriptor.fieldGroups]
-        .sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
-        .forEach((fg, i) => orderMap.set(fg.name, i));
-      groups.sort((a, b) => {
-        const ia = orderMap.has(a.name) ? orderMap.get(a.name)! : Number.MAX_SAFE_INTEGER;
-        const ib = orderMap.has(b.name) ? orderMap.get(b.name)! : Number.MAX_SAFE_INTEGER;
-        return ia - ib;
-      });
-    }
+    // Flush any remaining ungrouped fields (those that appeared after all named groups)
+    flushDefault();
 
-    // Update row/col indices on the fields
-    for (const group of groups) {
-      for (const row of group.rows) {
+    // Update row/col indices on the resolved fields
+    for (let gi = 0; gi < groups.length; gi++) {
+      const group = groups[gi]!;
+      for (let ri = 0; ri < group.rows.length; ri++) {
+        const row = group.rows[ri]!;
         let colIdx = 0;
         for (const field of row.fields) {
-          (field as ResolvedField).rowIndex = groups.indexOf(group) * 1000 + group.rows.indexOf(row);
+          (field as ResolvedField).rowIndex = gi * 1000 + ri;
           (field as ResolvedField).colIndex = colIdx;
           colIdx += field.gridSpan;
         }

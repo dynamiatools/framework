@@ -45,15 +45,21 @@ export interface CrudPageContext {
     node: NavigationNode;
     /** Fully-qualified Java class name taken from {@link NavigationNode.file} */
     entityClass: string;
-    /**
+    /**ie
      * Virtual path taken from {@link NavigationNode.internalPath}.
      * Used as the base path for the CRUD resource API (`/api/{virtualPath}`).
      */
     virtualPath: string;
     /** Entity metadata loaded from the backend */
     entityMetadata: EntityMetadata;
-    /** View descriptor resolved for the CRUD view */
+    /** View descriptor resolved for the CRUD view (crud / table type) */
     descriptor: ViewDescriptor;
+    /**
+     * The dedicated form view descriptor (`view === "form"`), when available.
+     * Used to build the FormView with its own fields, layout (columns) and fieldGroups.
+     * Falls back to {@link descriptor} when no separate form descriptor exists.
+     */
+    formDescriptor: ViewDescriptor;
 }
 
 // ── CrudPageResolver ──────────────────────────────────────────────────────────
@@ -111,14 +117,21 @@ export class CrudPageResolver {
             client.metadata.getEntityViews(entityClass),
         ]);
 
-        // Prefer a descriptor explicitly named "crud"; fall back to first available
+        // Prefer a descriptor explicitly typed "crud"; fall back to first available
         const chosen =
-            descriptors.find(d => d.viewTypeName?.toLowerCase().includes('crud')) ??
+            descriptors.find(d => d.view?.toLowerCase().includes('crud')) ??
             descriptors[0];
 
         if (!chosen) {
             throw new Error(`No view descriptor found for entity "${entityClass}"`);
         }
+
+        // Resolve the dedicated form descriptor (fields + layout + fieldGroups).
+        // ZK CrudView does the same: it independently fetches the "form" descriptor
+        // for its FormView while the outer CrudView uses the "crud" descriptor.
+        const formDescriptor =
+            descriptors.find(d => d.view?.toLowerCase() === 'form') ??
+            chosen;
 
         return {
             node,
@@ -126,6 +139,7 @@ export class CrudPageResolver {
             virtualPath,
             entityMetadata,
             descriptor: chosen,
+            formDescriptor,
         };
     }
 }

@@ -69,9 +69,14 @@ export class VueCrudView extends CrudView {
     this.mode.value === 'list',
   );
 
-  constructor(descriptor: ViewDescriptor, entityMetadata: EntityMetadata | null = null) {
+  constructor(descriptor: ViewDescriptor, entityMetadata: EntityMetadata | null = null, formDescriptor?: ViewDescriptor) {
     super(descriptor, entityMetadata);
-    // formView and dataSetView are replaced by the field initializers above.
+    // If a dedicated form descriptor is supplied (e.g. BookForm.yml, view: "form"),
+    // replace the formView that the field initializer already created using the crud
+    // descriptor. The crud descriptor has no fields / layout / fieldGroups.
+    if (formDescriptor && formDescriptor !== descriptor) {
+      (this as { formView: VueFormView }).formView = new VueFormView(formDescriptor, entityMetadata);
+    }
   }
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
