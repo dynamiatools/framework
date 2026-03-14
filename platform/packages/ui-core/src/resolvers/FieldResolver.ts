@@ -56,11 +56,14 @@ export class FieldResolver {
   }
 
   private static _resolveComponent(field: ViewField, params: Record<string, unknown>): FieldComponent | string {
-    // 1. Explicit component in params
+    // 1. Direct component property on the field (mapped from Java Field.component)
+    if (field.component) return field.component;
+
+    // 2. Explicit component in params (legacy / override)
     const explicitComponent = params['component'];
     if (typeof explicitComponent === 'string' && explicitComponent) return explicitComponent;
 
-    // 2. Infer from field class
+    // 3. Infer from field class
     const fieldClass = field.fieldClass ?? '';
     return FieldResolver._inferComponent(fieldClass);
   }

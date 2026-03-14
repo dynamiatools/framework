@@ -47,6 +47,19 @@ export class LayoutEngine {
       groups.push(resolvedGroup);
     }
 
+    // Sort groups according to fieldGroups[].index when available
+    if (descriptor.fieldGroups?.length) {
+      const orderMap = new Map<string, number>();
+      [...descriptor.fieldGroups]
+        .sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
+        .forEach((fg, i) => orderMap.set(fg.name, i));
+      groups.sort((a, b) => {
+        const ia = orderMap.has(a.name) ? orderMap.get(a.name)! : Number.MAX_SAFE_INTEGER;
+        const ib = orderMap.has(b.name) ? orderMap.get(b.name)! : Number.MAX_SAFE_INTEGER;
+        return ia - ib;
+      });
+    }
+
     // Update row/col indices on the fields
     for (const group of groups) {
       for (const row of group.rows) {
@@ -91,6 +104,19 @@ export class LayoutEngine {
 
   private static _findGroupParams(descriptor: ViewDescriptor, groupName: string): { label?: string; icon?: string } | null {
     if (!groupName) return null;
+
+    // 1. Use the typed fieldGroups array (from Java ViewDescriptor.getFieldGroups())
+    if (descriptor.fieldGroups?.length) {
+      const fg = descriptor.fieldGroups.find((g: { name: string }) => g.name === groupName);
+      if (fg) {
+        const result: { label?: string; icon?: string } = {};
+        if (fg.label !== undefined) result.label = fg.label;
+        if (fg.icon !== undefined) result.icon = fg.icon;
+        return result;
+      }
+    }
+
+    // 2. Fallback: legacy params['groups'] map
     const groupsParam = descriptor.params?.['groups'];
     if (groupsParam && typeof groupsParam === 'object') {
       const groups = groupsParam as Record<string, unknown>;

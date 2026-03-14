@@ -12,6 +12,9 @@ export type {
   ActionExecutionRequest,
   ActionExecutionResponse,
   ViewDescriptorMetadata,
+  ActionReference,
+  ViewLayout,
+  ViewFieldGroup,
   ViewDescriptor,
   ViewField,
 } from './types.js';

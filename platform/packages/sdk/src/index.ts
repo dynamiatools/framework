@@ -26,6 +26,9 @@ export type {
   ActionExecutionResponse,
   // Views
   ViewDescriptorMetadata,
+  ActionReference,
+  ViewLayout,
+  ViewFieldGroup,
   ViewDescriptor,
   ViewField,
 } from './metadata/index.js';
