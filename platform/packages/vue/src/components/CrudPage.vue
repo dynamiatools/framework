@@ -29,6 +29,7 @@
 </template>
 
 <script setup lang="ts">
+import { watch } from 'vue';
 import type { NavigationNode, DynamiaClient, ActionMetadata } from '@dynamia-tools/sdk';
 import { useCrudPage } from '../composables/useCrudPage.js';
 import Crud from './Crud.vue';
@@ -67,10 +68,17 @@ const emit = defineEmits<{
   'action-executed': [action: ActionMetadata];
 }>();
 
-const { view, loading, error } = useCrudPage({
+const { view, loading, error, reload } = useCrudPage({
   node: props.node,
   client: props.client,
 });
+
+// Re-initialize whenever the navigation node changes (user navigates to a
+// different CrudPage while this component stays mounted).
+watch(
+  () => props.node,
+  () => { void reload(); },
+);
 </script>
 
 

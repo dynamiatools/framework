@@ -54,6 +54,7 @@ export class VueCrudView extends CrudView {
       this.state.initialized = true;
     } catch (e) {
       this.errorMessage.value = String(e);
+      throw e;
     } finally {
       this.isLoading.value = false;
     }
@@ -78,9 +79,23 @@ export class VueCrudView extends CrudView {
     this.isLoading.value = true;
     try {
       await super.save();
+      // super.save() already set this.state.mode = 'list'; mirror to reactive ref
       this.mode.value = 'list';
     } catch (e) {
       this.errorMessage.value = String(e);
+      throw e;
+    } finally {
+      this.isLoading.value = false;
+    }
+  }
+
+  override async delete(entity: unknown): Promise<void> {
+    this.isLoading.value = true;
+    try {
+      await super.delete(entity);
+    } catch (e) {
+      this.errorMessage.value = String(e);
+      throw e;
     } finally {
       this.isLoading.value = false;
     }

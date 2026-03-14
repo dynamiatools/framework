@@ -74,35 +74,24 @@ export class CrudView extends View {
     this.emit('mode-change', 'list');
   }
 
-  /** Save the current entity (create or update) */
+  /** Save the current entity (create or update).
+   * Validates, emits 'save' and transitions mode to 'list'.
+   * Callers / event handlers are responsible for the actual API call and
+   * reloading the table so the reload happens *after* the persist completes.
+   */
   async save(): Promise<void> {
     if (!this.formView.validate()) return;
-    this.state.loading = true;
-    try {
-      const data = this.formView.getValue();
-      this.emit('save', { mode: this.state.mode, data });
-      this.state.mode = 'list';
-      this.emit('mode-change', 'list');
-      await this.tableView.load();
-    } catch (e) {
-      this.state.error = String(e);
-      this.emit('error', e);
-    } finally {
-      this.state.loading = false;
-    }
+    const data = this.formView.getValue();
+    this.emit('save', { mode: this.state.mode, data });
+    this.state.mode = 'list';
+    this.emit('mode-change', 'list');
   }
 
-  /** Delete an entity */
+  /** Delete an entity.
+   * Emits 'delete'. Callers / event handlers are responsible for the actual
+   * API call and reloading the table after the delete completes.
+   */
   async delete(entity: unknown): Promise<void> {
-    this.state.loading = true;
-    try {
-      this.emit('delete', entity);
-      await this.tableView.load();
-    } catch (e) {
-      this.state.error = String(e);
-      this.emit('error', e);
-    } finally {
-      this.state.loading = false;
-    }
+    this.emit('delete', entity);
   }
 }

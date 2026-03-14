@@ -87,6 +87,7 @@ export class TableView extends View {
     } catch (e) {
       this.state.error = String(e);
       this.emit('error', e);
+      throw e;
     } finally {
       this.state.loading = false;
     }

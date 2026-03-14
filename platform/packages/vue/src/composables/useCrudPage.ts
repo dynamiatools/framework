@@ -78,18 +78,23 @@ export function useCrudPage(options: UseCrudPageOptions) {
       crudView.on('save', (payload) => {
         const { mode, data } = payload as { mode: 'create' | 'edit'; data: Record<string, unknown> };
         const persist = async () => {
-          if (mode === 'create') {
-            await api.create(data);
-          } else {
-            const id = data['id'] as string | number | undefined;
-            if (id == null) throw new Error(`Cannot update entity: "id" field is missing`);
-            await api.update(id, data);
+          crudView.isLoading.value = true;
+          try {
+            if (mode === 'create') {
+              await api.create(data);
+            } else {
+              const id = data['id'] as string | number | undefined;
+              if (id == null) throw new Error(`Cannot update entity: "id" field is missing`);
+              await api.update(id, data);
+            }
+            await crudView.tableView.load();
+          } catch (e) {
+            crudView.errorMessage.value = String(e);
+          } finally {
+            crudView.isLoading.value = false;
           }
-          await crudView.tableView.load();
         };
-        persist().catch((e) => {
-          crudView.errorMessage.value = String(e);
-        });
+        void persist();
       });
 
       // 6. Wire delete handler
@@ -97,13 +102,18 @@ export function useCrudPage(options: UseCrudPageOptions) {
         const rec = entity as Record<string, unknown>;
         const id = rec['id'] as string | number | undefined;
         const remove = async () => {
-          if (id == null) throw new Error(`Cannot delete entity: "id" field is missing`);
-          await api.delete(id);
-          await crudView.tableView.load();
+          crudView.isLoading.value = true;
+          try {
+            if (id == null) throw new Error(`Cannot delete entity: "id" field is missing`);
+            await api.delete(id);
+            await crudView.tableView.load();
+          } catch (e) {
+            crudView.errorMessage.value = String(e);
+          } finally {
+            crudView.isLoading.value = false;
+          }
         };
-        remove().catch((e) => {
-          crudView.errorMessage.value = String(e);
-        });
+        void remove();
       });
 
       // 7. Initialize and load first page
