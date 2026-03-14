@@ -77,7 +77,7 @@ const { view, loading, error, reload } = useCrudPage({
 // different CrudPage while this component stays mounted).
 watch(
   () => props.node,
-  () => { void reload(); },
+  (newNode) => { void reload(newNode); },
 );
 </script>
 

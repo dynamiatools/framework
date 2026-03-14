@@ -1,6 +1,6 @@
 // useCrudPage: composable that auto-generates a full CRUD page from a NavigationNode of type "CrudPage"
 
-import { ref, onMounted } from 'vue';
+import { ref, shallowRef, onMounted } from 'vue';
 import type { Ref } from 'vue';
 import type { NavigationNode, DynamiaClient } from '@dynamia-tools/sdk';
 import { CrudPageResolver } from '@dynamia-tools/ui-core';
@@ -38,18 +38,27 @@ export interface UseCrudPageOptions {
  * @returns Reactive `view`, `loading`, `error` refs and a `reload` function.
  */
 export function useCrudPage(options: UseCrudPageOptions) {
-  const { node, client } = options;
+  // Use a mutable reference so reload() always operates on the current node,
+  // even when the component re-uses the same instance across navigation changes.
+  let activeNode = options.node;
+  const { client } = options;
 
   const loading: Ref<boolean> = ref(false);
   const error: Ref<string | null> = ref(null);
-  const view: Ref<VueCrudView | null> = ref(null);
+  // shallowRef is required here: using plain ref() would make Vue deeply proxy the
+  // VueCrudView instance and auto-unwrap its nested Refs (errorMessage, showTable, …),
+  // turning them into their raw values and breaking all ".value" accesses in templates.
+  const view = shallowRef<VueCrudView | null>(null);
 
   async function initialize(): Promise<void> {
+    // Guard: skip if the current node is not a CrudPage (e.g. called just before unmount)
+    if (!CrudPageResolver.isCrudPage(activeNode)) return;
     loading.value = true;
     error.value = null;
+    view.value = null;
     try {
       // 1. Resolve entity metadata + view descriptor
-      const context = await CrudPageResolver.resolve(node, client);
+      const context = await CrudPageResolver.resolve(activeNode, client);
 
       // 2. Create Vue-reactive CRUD view
       const crudView = new VueCrudView(context.descriptor, context.entityMetadata);
@@ -128,6 +137,16 @@ export function useCrudPage(options: UseCrudPageOptions) {
     }
   }
 
+  /**
+   * Re-run full initialization, optionally with a new node.
+   * Pass `newNode` when the navigation node has changed (e.g. user navigated
+   * to a different CrudPage while this composable instance is still alive).
+   */
+  function reload(newNode?: NavigationNode): Promise<void> {
+    if (newNode !== undefined) activeNode = newNode;
+    return initialize();
+  }
+
   onMounted(initialize);
 
   return {
@@ -138,7 +157,7 @@ export function useCrudPage(options: UseCrudPageOptions) {
     /** Error message if initialization or a CRUD operation failed */
     error,
     /** Re-run full initialization (re-fetches metadata and first page) */
-    reload: initialize,
+    reload,
   };
 }
 
