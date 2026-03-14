@@ -2,6 +2,7 @@
 
 import { onMounted } from 'vue';
 import type { ViewDescriptor, CrudPageable, EntityMetadata } from '@dynamia-tools/sdk';
+import type { TreeNode } from '@dynamia-tools/ui-core';
 import { VueCrudView } from '../views/VueCrudView.js';
 
 /** Options for useCrud composable */
@@ -10,8 +11,10 @@ export interface UseCrudOptions {
   descriptor: ViewDescriptor;
   /** Entity metadata */
   entityMetadata?: EntityMetadata | null;
-  /** Data loader function for the table */
+  /** Data loader for TableView (ignored when dataSetViewType is tree) */
   loader?: (params: Record<string, unknown>) => Promise<{ rows: unknown[]; pagination: CrudPageable | null }>;
+  /** Node loader for TreeView (ignored when dataSetViewType is table) */
+  nodeLoader?: (params: Record<string, unknown>) => Promise<{ nodes: TreeNode[] }>;
   /** Save handler called on form submit */
   onSave?: (data: unknown, mode: 'create' | 'edit') => Promise<void>;
   /** Delete handler */
@@ -19,26 +22,28 @@ export interface UseCrudOptions {
 }
 
 /**
- * Composable for creating and managing a VueCrudView.
- * Provides direct access to reactive CRUD state.
+ * Composable for creating and managing a {@link VueCrudView}.
+ * Automatically selects the right DataSetView (table or tree) from the
+ * descriptor param `dataSetViewType` and wires the appropriate loader.
  *
  * Example:
  * <pre>{@code
- * const { view, mode, form, table, startCreate, startEdit, cancelEdit, save, remove } = useCrud({
+ * const { view, mode, form, dataSetView, startCreate, save } = useCrud({
  *   descriptor,
- *   loader: async (params) => { ... },
- *   onSave: async (data, mode) => { ... },
+ *   loader: async (params) => fetchBooks(params),
+ *   onSave: async (data, mode) => saveBook(data, mode),
  * });
  * }</pre>
- *
- * @param options - UseCrudOptions with descriptor and handlers
- * @returns Object with VueCrudView and reactive state
  */
 export function useCrud(options: UseCrudOptions) {
   const view = new VueCrudView(options.descriptor, options.entityMetadata ?? null);
 
-  if (options.loader) {
+  // Wire the appropriate loader based on the resolved DataSetView type
+  if (options.loader && view.tableView) {
     view.tableView.setLoader(options.loader);
+  }
+  if (options.nodeLoader && view.treeView) {
+    view.treeView.setLoader(options.nodeLoader);
   }
 
   if (options.onSave) {
@@ -58,7 +63,7 @@ export function useCrud(options: UseCrudOptions) {
 
   onMounted(async () => {
     await view.initialize();
-    await view.tableView.load();
+    await view.dataSetView.load();
   });
 
   return {
@@ -68,12 +73,16 @@ export function useCrud(options: UseCrudOptions) {
     mode: view.mode,
     /** The VueFormView */
     form: view.formView,
-    /** The VueTableView */
-    table: view.tableView,
+    /** The active DataSetView (VueTableView or VueTreeView) */
+    dataSetView: view.dataSetView,
+    /** The VueTableView, or null when using a tree */
+    tableView: view.tableView,
+    /** The VueTreeView, or null when using a table */
+    treeView: view.treeView,
     /** Reactive show-form computed */
     showForm: view.showForm,
-    /** Reactive show-table computed */
-    showTable: view.showTable,
+    /** Reactive show-dataset computed */
+    showDataSet: view.showDataSet,
     /** Reactive loading state */
     loading: view.isLoading,
     /** Reactive error message */

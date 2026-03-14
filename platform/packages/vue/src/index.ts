@@ -9,6 +9,7 @@ export { VueCrudView } from './views/VueCrudView.js';
 export { VueTreeView } from './views/VueTreeView.js';
 export { VueConfigView } from './views/VueConfigView.js';
 export { VueEntityPickerView } from './views/VueEntityPickerView.js';
+export { VueDataSetViewRegistry, vueDataSetViewRegistry } from './views/VueDataSetViewRegistry.js';
 
 // ── Renderers ──────────────────────────────────────────────────────────────
 export { VueFormRenderer } from './renderers/VueFormRenderer.js';
@@ -44,6 +45,7 @@ export * from './global-components.js';
 export { default as DynamiaViewer } from './components/Viewer.vue';
 export { default as FormComponent } from './components/Form.vue';
 export { default as TableComponent } from './components/Table.vue';
+export { default as TreeComponent } from './components/Tree.vue';
 export { default as CrudComponent } from './components/Crud.vue';
 export { default as DynamiaCrudPage } from './components/CrudPage.vue';
 export { default as FieldComponent } from './components/Field.vue';

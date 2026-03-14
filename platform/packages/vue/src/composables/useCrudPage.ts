@@ -66,8 +66,8 @@ export function useCrudPage(options: UseCrudPageOptions) {
       // 3. CRUD resource API bound to the node's virtual path
       const api = client.crud(context.virtualPath);
 
-      // 4. Wire table loader
-      crudView.tableView.setLoader(async (params) => {
+      // 4. Wire table loader (CrudPage always resolves to a TableView by default)
+      crudView.tableView!.setLoader(async (params) => {
         const result = await api.findAll(
           params as Record<string, string | number | boolean | undefined | null>,
         );
@@ -96,7 +96,7 @@ export function useCrudPage(options: UseCrudPageOptions) {
               if (id == null) throw new Error(`Cannot update entity: "id" field is missing`);
               await api.update(id, data);
             }
-            await crudView.tableView.load();
+            await crudView.dataSetView.load();
           } catch (e) {
             crudView.errorMessage.value = String(e);
           } finally {
@@ -115,7 +115,7 @@ export function useCrudPage(options: UseCrudPageOptions) {
           try {
             if (id == null) throw new Error(`Cannot delete entity: "id" field is missing`);
             await api.delete(id);
-            await crudView.tableView.load();
+            await crudView.dataSetView.load();
           } catch (e) {
             crudView.errorMessage.value = String(e);
           } finally {
@@ -127,7 +127,7 @@ export function useCrudPage(options: UseCrudPageOptions) {
 
       // 7. Initialize and load first page
       await crudView.initialize();
-      await crudView.tableView.load();
+      await crudView.dataSetView.load();
 
       view.value = crudView;
     } catch (e) {

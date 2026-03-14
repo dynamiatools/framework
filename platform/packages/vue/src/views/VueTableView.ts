@@ -25,8 +25,8 @@ export class VueTableView extends TableView {
   readonly pagination: Ref<CrudPageable | null> = ref(null);
   /** Reactive loading state */
   readonly isLoading: Ref<boolean> = ref(false);
-  /** Reactive selected row */
-  readonly selectedRow: Ref<unknown> = ref(null);
+  /** Reactive selected item */
+  readonly selectedItem: Ref<unknown> = ref(null);
   /** Reactive sort field */
   readonly sortField: Ref<string | null> = ref(null);
   /** Reactive sort direction */
@@ -71,7 +71,7 @@ export class VueTableView extends TableView {
 
   override selectRow(row: unknown): void {
     super.selectRow(row);
-    this.selectedRow.value = row;
+    this.selectedItem.value = row;
   }
 
   override async sort(field: string): Promise<void> {

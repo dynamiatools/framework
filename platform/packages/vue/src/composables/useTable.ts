@@ -54,8 +54,8 @@ export function useTable(options: UseTableOptions) {
     pagination: view.pagination,
     /** Reactive loading state */
     loading: view.isLoading,
-    /** Reactive selected row */
-    selectedRow: view.selectedRow,
+    /** Reactive selected item */
+    selectedItem: view.selectedItem,
     /** Reactive sort field */
     sortField: view.sortField,
     /** Reactive sort direction */

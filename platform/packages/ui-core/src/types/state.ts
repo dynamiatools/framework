@@ -9,6 +9,11 @@ export interface ViewState {
   initialized: boolean;
 }
 
+/** Base state for DataSetView implementations (TableView, TreeView, etc.) */
+export interface DataSetViewState extends ViewState {
+  selectedItem: unknown | null;
+}
+
 /** State specific to FormView */
 export interface FormState extends ViewState {
   values: Record<string, unknown>;
@@ -21,13 +26,12 @@ export interface FormState extends ViewState {
 export type SortDirection = 'asc' | 'desc' | null;
 
 /** State specific to TableView */
-export interface TableState extends ViewState {
+export interface TableState extends DataSetViewState {
   rows: unknown[];
   pagination: CrudPageable | null;
   sortField: string | null;
   sortDir: SortDirection;
   searchQuery: string;
-  selectedRow: unknown | null;
 }
 
 /** CRUD interaction mode */
@@ -38,20 +42,29 @@ export interface CrudState extends ViewState {
   mode: CrudMode;
 }
 
-/** State specific to TreeView */
-export interface TreeState extends ViewState {
-  nodes: TreeNode[];
-  expandedNodeIds: Set<string>;
-  selectedNodeId: string | null;
-}
-
-/** A single node in a tree view */
+/**
+ * A single node in a flat tree view.
+ * Parent-child links are expressed via `parentId`; `children` is an optional
+ * convenience for APIs that already return a nested structure.
+ */
 export interface TreeNode {
   id: string;
   label: string;
+  /** ID of the parent node — undefined/null for root nodes */
+  parentId?: string;
   icon?: string;
+  /** Pre-nested children returned by the API (optional) */
   children?: TreeNode[];
+  /** Original domain entity attached to this node */
   data?: unknown;
+}
+
+/** State specific to TreeView */
+export interface TreeState extends DataSetViewState {
+  nodes: TreeNode[];
+  expandedNodeIds: Set<string>;
+  /** Typed narrowing of DataSetViewState.selectedItem */
+  selectedItem: TreeNode | null;
 }
 
 /** State specific to EntityPickerView */

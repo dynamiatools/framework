@@ -1,14 +1,14 @@
 // TableView: handles tabular data, columns, pagination, sorting and search
 
 import type { ViewDescriptor, EntityMetadata, CrudPageable } from '@dynamia-tools/sdk';
-import { View } from './View.js';
+import { DataSetView } from './DataSetView.js';
 import { ViewTypes } from './ViewType.js';
 import type { ResolvedField } from '../types/field.js';
 import type { TableState, SortDirection } from '../types/state.js';
 import { FieldResolver } from '../resolvers/FieldResolver.js';
 
 /**
- * View implementation for tabular data display.
+ * DataSetView implementation for tabular data.
  * Handles column resolution, row data, pagination, sorting and search.
  *
  * Example:
@@ -18,13 +18,13 @@ import { FieldResolver } from '../resolvers/FieldResolver.js';
  * await view.load();
  * }</pre>
  */
-export class TableView extends View {
+export class TableView extends DataSetView {
   protected override state: TableState;
 
   private _resolvedColumns: ResolvedField[] = [];
   private _readOnly = false;
   private _crudPath?: string;
-  private _loader?: (params: Record<string, unknown>) => Promise<{ rows: unknown[]; pagination: CrudPageable | null }>;
+  private _tableLoader?: (params: Record<string, unknown>) => Promise<{ rows: unknown[]; pagination: CrudPageable | null }>;
 
   constructor(descriptor: ViewDescriptor, entityMetadata: EntityMetadata | null = null) {
     super(ViewTypes.Table, descriptor, entityMetadata);
@@ -37,7 +37,7 @@ export class TableView extends View {
       sortField: null,
       sortDir: null,
       searchQuery: '',
-      selectedRow: null,
+      selectedItem: null,
     };
   }
 
@@ -64,22 +64,26 @@ export class TableView extends View {
   override isReadOnly(): boolean { return this._readOnly; }
   override setReadOnly(readOnly: boolean): void { this._readOnly = readOnly; }
 
-  /** Set the path for CRUD operations (used to build API calls) */
-  setCrudPath(path: string): void { this._crudPath = path; }
-  getCrudPath(): string | undefined { return this._crudPath; }
+  // ── DataSetView contract ──────────────────────────────────────────────────
 
-  /** Set a custom loader function for fetching rows */
-  setLoader(loader: (params: Record<string, unknown>) => Promise<{ rows: unknown[]; pagination: CrudPageable | null }>): void {
-    this._loader = loader;
+  override isTableView(): boolean { return true; }
+
+  override getSelected(): unknown { return this.state.selectedItem; }
+
+  override setSelected(item: unknown): void {
+    this.state.selectedItem = item;
+    this.emit('select', item);
   }
 
+  override isEmpty(): boolean { return this.state.rows.length === 0; }
+
   /** Load data with optional query parameters */
-  async load(params: Record<string, unknown> = {}): Promise<void> {
+  override async load(params: Record<string, unknown> = {}): Promise<void> {
     this.state.loading = true;
     this.state.error = null;
     try {
-      if (this._loader) {
-        const result = await this._loader({ ...params, ...this._buildQueryParams() });
+      if (this._tableLoader) {
+        const result = await this._tableLoader({ ...params, ...this._buildQueryParams() });
         this.state.rows = result.rows;
         this.state.pagination = result.pagination;
         this.emit('load', this.state.rows);
@@ -91,6 +95,17 @@ export class TableView extends View {
     } finally {
       this.state.loading = false;
     }
+  }
+
+  // ── Table-specific API ────────────────────────────────────────────────────
+
+  /** Set the path for CRUD operations (used to build API calls) */
+  setCrudPath(path: string): void { this._crudPath = path; }
+  getCrudPath(): string | undefined { return this._crudPath; }
+
+  /** Set a custom loader function for fetching rows */
+  setLoader(loader: (params: Record<string, unknown>) => Promise<{ rows: unknown[]; pagination: CrudPageable | null }>): void {
+    this._tableLoader = loader;
   }
 
   /** Go to next page */
@@ -124,14 +139,11 @@ export class TableView extends View {
     await this.load({ page: 1 });
   }
 
-  /** Select a row */
-  selectRow(row: unknown): void {
-    this.state.selectedRow = row;
-    this.emit('select', row);
-  }
+  /** Select a row (alias for setSelected with table semantics) */
+  selectRow(row: unknown): void { this.setSelected(row); }
 
-  /** Get selected row */
-  getSelectedRow(): unknown { return this.state.selectedRow; }
+  /** Get selected row (alias for getSelected) */
+  getSelectedRow(): unknown { return this.getSelected(); }
 
   /** Get resolved column definitions */
   getResolvedColumns(): ResolvedField[] { return this._resolvedColumns; }

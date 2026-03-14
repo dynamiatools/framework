@@ -26,7 +26,7 @@
           v-for="(row, index) in view.rows.value"
           :key="index"
           class="dynamia-table-row"
-          :class="{ 'dynamia-table-row-selected': view.selectedRow.value === row }"
+          :class="{ 'dynamia-table-row-selected': view.selectedItem.value === row }"
           @click="view.selectRow(row)"
         >
           <td

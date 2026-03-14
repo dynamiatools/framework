@@ -5,7 +5,8 @@ export type { FieldComponent, ResolvedField } from './types/field.js';
 export { FieldComponent as FieldComponents } from './types/field.js';
 export type { ResolvedLayout, ResolvedGroup, ResolvedRow } from './types/layout.js';
 export type {
-  ViewState, FormState, TableState, CrudState, CrudMode, SortDirection,
+  ViewState, DataSetViewState,
+  FormState, TableState, CrudState, CrudMode, SortDirection,
   TreeState, TreeNode, EntityPickerState, ConfigState, ConfigParameter,
 } from './types/state.js';
 export type { Converter, ConverterRegistry } from './types/converters.js';
@@ -18,10 +19,14 @@ export { ViewTypes } from './view/ViewType.js';
 // ── View base + concrete views ────────────────────────────────────────────────
 export type { EventHandler } from './view/View.js';
 export { View } from './view/View.js';
+export { DataSetView } from './view/DataSetView.js';
+export { DataSetViewRegistry, dataSetViewRegistry, registerDataSetView, resolveDataSetView } from './view/DataSetViewRegistry.js';
+export type { DataSetViewFactory } from './view/DataSetViewRegistry.js';
 export { FormView } from './view/FormView.js';
 export { TableView } from './view/TableView.js';
 export { CrudView } from './view/CrudView.js';
 export { TreeView } from './view/TreeView.js';
+export type { TreeLoader } from './view/TreeView.js';
 export { ConfigView } from './view/ConfigView.js';
 export { EntityPickerView } from './view/EntityPickerView.js';
 

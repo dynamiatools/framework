@@ -14,6 +14,7 @@ import { VueCrudRenderer } from './renderers/VueCrudRenderer.js';
 import ViewerComponent from './components/Viewer.vue';
 import FormComponent from './components/Form.vue';
 import TableComponent from './components/Table.vue';
+import TreeComponent from './components/Tree.vue';
 import CrudComponent from './components/Crud.vue';
 import FieldComponent from './components/Field.vue';
 import ActionsComponent from './components/Actions.vue';
@@ -68,6 +69,7 @@ export const DynamiaVue = {
     app.component('DynamiaViewer', ViewerComponent);
     app.component('DynamiaForm', FormComponent);
     app.component('DynamiaTable', TableComponent);
+    app.component('DynamiaTree', TreeComponent);
     app.component('DynamiaCrud', CrudComponent);
     app.component('DynamiaField', FieldComponent);
     app.component('DynamiaActions', ActionsComponent);
