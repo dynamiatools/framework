@@ -54,6 +54,8 @@ export interface CrudPageContext {
     entityMetadata: EntityMetadata;
     /** View descriptor resolved for the CRUD view (crud / table type) */
     descriptor: ViewDescriptor;
+    /** Descriptor used by the DataSetView (table/tree), when available. */
+    dataSetDescriptor: ViewDescriptor;
     /**
      * The dedicated form view descriptor (`view === "form"`), when available.
      * Used to build the FormView with its own fields, layout (columns) and fieldGroups.
@@ -133,12 +135,23 @@ export class CrudPageResolver {
             descriptors.find(d => d.view?.toLowerCase() === 'form') ??
             chosen;
 
+        const dataSetViewType = String(chosen.params?.['dataSetViewType'] ?? 'table').toLowerCase();
+        const dataSetDescriptor =
+            (dataSetViewType === 'tree'
+                ? descriptors.find(d => d.view?.toLowerCase() === 'tree' || d.view?.toLowerCase().includes('tree'))
+                : descriptors.find(d => d.view?.toLowerCase() === 'table' || d.view?.toLowerCase().includes('table'))
+            )
+            // Fallback for legacy descriptors where "table" view is missing but fields are present
+            ?? descriptors.find(d => (d.fields?.length ?? 0) > 0 && d.view?.toLowerCase() !== 'form')
+            ?? chosen;
+
         return {
             node,
             entityClass,
             virtualPath,
             entityMetadata,
             descriptor: chosen,
+            dataSetDescriptor,
             formDescriptor,
         };
     }

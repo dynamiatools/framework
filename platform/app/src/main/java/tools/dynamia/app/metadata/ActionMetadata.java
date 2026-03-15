@@ -97,6 +97,8 @@ public class ActionMetadata extends BasicMetadata {
         if (action instanceof ClassAction classAction) {
             this.applicableClasses = Streams.mapAndCollect(classAction.getApplicableClasses(), a -> a.targetClass() == null ? "all" : a.targetClass().getName());
         }
+
+        this.action = action;
     }
 
     /**

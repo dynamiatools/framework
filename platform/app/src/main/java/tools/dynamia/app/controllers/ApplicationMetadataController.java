@@ -4,13 +4,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import tools.dynamia.actions.ActionExecutionRequest;
-import tools.dynamia.actions.ActionExecutionResponse;
-import tools.dynamia.actions.ActionRestrictions;
-import tools.dynamia.actions.Actions;
+import tools.dynamia.actions.*;
 import tools.dynamia.app.metadata.*;
 import tools.dynamia.commons.ObjectOperations;
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.ValidationError;
+import tools.dynamia.integration.Containers;
 import tools.dynamia.navigation.NavigationTree;
 import tools.dynamia.viewers.ViewDescriptor;
 
@@ -41,6 +40,9 @@ import java.util.concurrent.atomic.AtomicReference;
 @Tag(name = "DynamiaApplicationMetadata")
 @DependsOn({"applicationInfo"})
 public class ApplicationMetadataController {
+
+    private final static LoggingService logger = LoggingService.get(ApplicationMetadataController.class);
+
     /**
      * Base path for all metadata endpoints.
      */
@@ -150,8 +152,12 @@ public class ApplicationMetadataController {
     private static ActionExecutionResponse executeAction(String action, ActionExecutionRequest request, ActionMetadata actionMetadata) {
         if (actionMetadata != null) {
             try {
-                var actionInstance = actionMetadata.getAction();
+                Action actionInstance = null;
+                if (actionMetadata.getAction() != null) {
+                    actionInstance = Containers.get().findObject(actionMetadata.getAction().getClass());
+                }
                 if (ActionRestrictions.allowAccess(actionInstance)) {
+                    logger.info("Executing action " + action);
                     return Actions.execute(actionInstance, request);
                 } else {
                     return new ActionExecutionResponse("Action " + action + " not allowed", HttpStatus.FORBIDDEN.getReasonPhrase(), 403);
@@ -228,7 +234,7 @@ public class ApplicationMetadataController {
      * @return the list of {@link ViewDescriptor} objects
      */
     @GetMapping(value = "/entities/{className}/views", produces = "application/json")
-    public List<ViewDescriptor> executeEntityAction(@PathVariable String className) {
+    public List<ViewDescriptor> getEntityViewDescriptors(@PathVariable String className) {
         var entityMetadata = getEntityMetadata(className);
         if (entityMetadata != null) {
             return entityMetadata.getDescriptors().stream().map(ViewDescriptorMetadata::getDescriptor).toList();
@@ -265,7 +271,7 @@ public class ApplicationMetadataController {
      */
     @PostMapping(value = "/entities/{className}/action/{action}", produces = "application/json", consumes = "application/json")
     public ActionExecutionResponse executeEntityAction(@PathVariable String className, @PathVariable String action, @RequestBody ActionExecutionRequest request) {
-        var entityMetadata = getEntities().getEntityMetadata(className);
+        var entityMetadata = getEntityMetadata(className);
         if (entityMetadata != null) {
             var actionMetadata = entityMetadata.getActions().stream().filter(a -> a.getId().equals(action)).findFirst().orElse(null);
             return executeAction(action, request, actionMetadata);

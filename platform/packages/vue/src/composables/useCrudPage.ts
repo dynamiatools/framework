@@ -3,6 +3,7 @@
 import { ref, shallowRef, onMounted } from 'vue';
 import type { Ref } from 'vue';
 import type { NavigationNode, DynamiaClient } from '@dynamia-tools/sdk';
+import type { TreeNode } from '@dynamia-tools/ui-core';
 import { CrudPageResolver } from '@dynamia-tools/ui-core';
 import { VueCrudView } from '../views/VueCrudView.js';
 
@@ -25,7 +26,7 @@ export interface UseCrudPageOptions {
  * the composable will:
  * 1. Load entity metadata and the CRUD view descriptor from the backend.
  * 2. Create a {@link VueCrudView} configured with the resolved descriptor.
- * 3. Wire up the table data loader using `client.crud(internalPath).findAll()`.
+ * 3. Wire up the dataset loader (table or tree) using `client.crud(internalPath).findAll()`.
  * 4. Wire up save (create / update) and delete handlers through the same resource API.
  * 5. Initialize the view and load the first page of data.
  *
@@ -63,27 +64,46 @@ export function useCrudPage(options: UseCrudPageOptions) {
       // 2. Create Vue-reactive CRUD view, wiring the dedicated form descriptor
       // (e.g. BookForm.yml with layout.columns + fieldGroups) so the FormView
       // renders columns and groups correctly.
-      const crudView = new VueCrudView(context.descriptor, context.entityMetadata, context.formDescriptor);
+      const dataSetDescriptor =
+        (context as { dataSetDescriptor?: typeof context.descriptor }).dataSetDescriptor
+        ?? context.descriptor;
+      const crudView = new VueCrudView(
+        context.descriptor,
+        context.entityMetadata,
+        context.formDescriptor,
+        dataSetDescriptor,
+      );
 
       // 3. CRUD resource API bound to the node's virtual path
       const api = client.crud(context.virtualPath);
 
-      // 4. Wire table loader (CrudPage always resolves to a TableView by default)
-      crudView.tableView!.setLoader(async (params) => {
-        const result = await api.findAll(
-          params as Record<string, string | number | boolean | undefined | null>,
-        );
-        return {
-          rows: result.content,
-          pagination: {
-            page: result.page,
-            pageSize: result.pageSize,
-            totalSize: result.total,
-            pagesNumber: result.totalPages,
-            firstResult: (result.page - 1) * result.pageSize,
-          },
-        };
-      });
+      // 4. Wire loader according to the resolved dataset view type.
+      if (crudView.tableView) {
+        crudView.tableView.setLoader(async (params) => {
+          const result = await api.findAll(
+            params as Record<string, string | number | boolean | undefined | null>,
+          );
+          return {
+            rows: result.content,
+            pagination: {
+              page: result.page,
+              pageSize: result.pageSize,
+              totalSize: result.total,
+              pagesNumber: result.totalPages,
+              firstResult: (result.page - 1) * result.pageSize,
+            },
+          };
+        });
+      } else if (crudView.treeView) {
+        crudView.treeView.setLoader(async (params) => {
+          const result = await api.findAll(
+            params as Record<string, string | number | boolean | undefined | null>,
+          );
+          return {
+            nodes: mapCrudRowsToTreeNodes(result.content, context.descriptor),
+          };
+        });
+      }
 
       // 5. Wire save handler (create or update)
       crudView.on('save', (payload) => {
@@ -161,5 +181,36 @@ export function useCrudPage(options: UseCrudPageOptions) {
     /** Re-run full initialization (re-fetches metadata and first page) */
     reload,
   };
+}
+
+function mapCrudRowsToTreeNodes(rows: unknown[], descriptor: { params?: Record<string, unknown> }): TreeNode[] {
+  const parentFieldName = String(descriptor.params?.['parentName'] ?? 'parentId');
+  const labelFieldName = String(descriptor.params?.['labelName'] ?? 'name');
+
+  return rows
+    .filter((row): row is Record<string, unknown> => !!row && typeof row === 'object')
+    .map((row, index) => {
+      const idValue = row['id'] ?? index;
+      const labelValue = row[labelFieldName] ?? row['label'] ?? row['title'] ?? row['id'] ?? `Node ${index + 1}`;
+      const parentValue = row[parentFieldName];
+      const parentId = extractParentId(parentValue);
+
+      return {
+        id: String(idValue),
+        label: String(labelValue),
+        ...(parentId ? { parentId } : {}),
+        data: row,
+      };
+    });
+}
+
+function extractParentId(parentValue: unknown): string | undefined {
+  if (parentValue == null) return undefined;
+  if (typeof parentValue === 'object') {
+    const parentRecord = parentValue as Record<string, unknown>;
+    const id = parentRecord['id'];
+    return id != null ? String(id) : undefined;
+  }
+  return String(parentValue);
 }
 
