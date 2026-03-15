@@ -19,11 +19,16 @@
     <Crud
       v-else-if="view"
       :view="view"
+      :client="client"
+      :auto-execute-actions="true"
       :read-only="readOnly ?? false"
       :actions="actions ?? []"
       @save="emit('save', $event)"
       @delete="emit('delete', $event)"
+      @action="emit('action', $event)"
       @action-executed="emit('action-executed', $event)"
+      @action-response="emit('action-response', $event)"
+      @action-error="emit('action-error', $event)"
     />
   </div>
 </template>
@@ -31,6 +36,7 @@
 <script setup lang="ts">
 import { watch } from 'vue';
 import type { NavigationNode, DynamiaClient, ActionMetadata } from '@dynamia-tools/sdk';
+import type { ActionExecutionErrorEvent, ActionExecutionEvent } from '@dynamia-tools/ui-core';
 import { useCrudPage } from '../composables/useCrudPage.js';
 import Crud from './Crud.vue';
 
@@ -64,8 +70,14 @@ const emit = defineEmits<{
   save: [data: Record<string, unknown>];
   /** Emitted after a successful delete */
   delete: [entity: unknown];
+  /** Emitted when an action is triggered */
+  action: [action: ActionMetadata];
   /** Emitted when a toolbar action is executed */
   'action-executed': [action: ActionMetadata];
+  /** Emitted with the detailed action execution result */
+  'action-response': [event: ActionExecutionEvent];
+  /** Emitted when automatic action execution fails */
+  'action-error': [event: ActionExecutionErrorEvent];
 }>();
 
 const { view, loading, error, reload } = useCrudPage({

@@ -9,6 +9,7 @@ export type { DynamiaClientConfig } from './types.js';
 
 // ── Metadata module ──────────────────────────────────────────────────────────
 export { MetadataApi, ActionsApi, resolveViewFieldType, resolveFieldType } from './metadata/index.js';
+export type { ExecuteActionOptions } from './metadata/index.js';
 export type {
   // Application
   ApplicationMetadata,
@@ -20,6 +21,7 @@ export type {
   ApplicationMetadataEntities,
   EntityMetadata,
   ApplicationMetadataActions,
+  ActionType,
   ActionMetadata,
   // Actions
   ActionExecutionRequest,

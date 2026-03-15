@@ -1,6 +1,6 @@
 // CrudView: orchestrates FormView + DataSetView + action lifecycle
 
-import type { ViewDescriptor, EntityMetadata } from '@dynamia-tools/sdk';
+import type { ActionExecutionRequest, ActionMetadata, EntityMetadata, ViewDescriptor } from '@dynamia-tools/sdk';
 import { View } from './View.js';
 import { ViewTypes } from './ViewType.js';
 import { FormView } from './FormView.js';
@@ -9,6 +9,10 @@ import { resolveDataSetView } from './DataSetViewRegistry.js';
 import type { TableView } from './TableView.js';
 import type { TreeView } from './TreeView.js';
 import type { CrudState, CrudMode } from '../types/state.js';
+import type { ActionResolutionContext } from '../resolvers/ActionResolver.js';
+import { ActionResolver } from '../resolvers/ActionResolver.js';
+import type { CrudActionState, CrudActionStateAlias } from '../actions/crudActionState.js';
+import { crudModeToActionState, normalizeCrudActionState } from '../actions/crudActionState.js';
 
 /**
  * CRUD view that orchestrates a {@link FormView} and a {@link DataSetView}.
@@ -80,6 +84,59 @@ export class CrudView extends View {
 
   /** Get the current CRUD mode */
   getMode(): CrudMode { return this.state.mode; }
+
+  /** Returns the current CRUD state using Java-compatible READ/CREATE/UPDATE aliases. */
+  getCrudActionState(): CrudActionState {
+    return crudModeToActionState(this.getMode());
+  }
+
+  /** Returns the entity class name associated with this CRUD view, when known. */
+  getEntityClassName(): string | null {
+    return this.entityMetadata?.className ?? this.descriptor.beanClass ?? null;
+  }
+
+  /** Returns the data object that should be used for action execution in the given state. */
+  getActionData(state: CrudActionStateAlias = this.getCrudActionState()): unknown {
+    const normalizedState = normalizeCrudActionState(state) ?? this.getCrudActionState();
+    if (normalizedState === 'CREATE' || normalizedState === 'UPDATE') {
+      return this.formView.getValue();
+    }
+
+    return this.dataSetView.getSelected();
+  }
+
+  /** Builds an ActionExecutionRequest from the current CRUD context. */
+  buildActionExecutionRequest(
+    overrides: Partial<ActionExecutionRequest> = {},
+    state: CrudActionStateAlias = this.getCrudActionState(),
+  ): ActionExecutionRequest {
+    const data = overrides.data ?? this.getActionData(state);
+    const entityClassName = overrides.dataType ?? this.getEntityClassName() ?? undefined;
+    const record = data && typeof data === 'object' ? (data as Record<string, unknown>) : null;
+    const dataId = overrides.dataId ?? record?.id;
+    const dataName = overrides.dataName ?? (typeof record?.name === 'string' ? record.name : undefined);
+
+    return {
+      ...(data !== undefined ? { data } : {}),
+      ...(overrides.params !== undefined ? { params: overrides.params } : {}),
+      ...(overrides.source ?? this.viewType.name ? { source: overrides.source ?? this.viewType.name } : {}),
+      ...(entityClassName !== undefined ? { dataType: entityClassName } : {}),
+      ...(dataId !== undefined ? { dataId } : {}),
+      ...(dataName !== undefined ? { dataName } : {}),
+    };
+  }
+
+  /** Resolve actions for the current CRUD state and entity class. */
+  resolveActions(
+    actions?: ActionMetadata[] | null,
+    context: Omit<ActionResolutionContext, 'targetClass' | 'crudState'> = {},
+  ): ActionMetadata[] {
+    return ActionResolver.resolveActions(actions ?? this.entityMetadata?.actions ?? [], {
+      ...context,
+      targetClass: this.getEntityClassName(),
+      crudState: this.getCrudActionState(),
+    });
+  }
 
   /** Start creating a new entity */
   startCreate(): void {

@@ -44,6 +44,17 @@ export type {
 export { FieldResolver } from './resolvers/FieldResolver.js';
 export { LayoutEngine } from './resolvers/LayoutEngine.js';
 export { ActionResolver } from './resolvers/ActionResolver.js';
+export type { ActionResolutionContext } from './resolvers/ActionResolver.js';
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+export { ActionRendererRegistry, getActionRendererKeyCandidates } from './actions/ActionRendererRegistry.js';
+export type { ActionExecutionEvent, ActionExecutionErrorEvent, ActionTriggerPayload } from './actions/types.js';
+export type { CrudActionState, CrudActionStateAlias } from './actions/crudActionState.js';
+export {
+  crudModeToActionState,
+  normalizeCrudActionState,
+  isCrudActionStateApplicable,
+} from './actions/crudActionState.js';
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
 export {

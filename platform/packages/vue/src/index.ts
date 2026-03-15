@@ -16,6 +16,17 @@ export { VueFormRenderer } from './renderers/VueFormRenderer.js';
 export { VueTableRenderer } from './renderers/VueTableRenderer.js';
 export { VueCrudRenderer } from './renderers/VueCrudRenderer.js';
 export { VueFieldRenderer } from './renderers/VueFieldRenderer.js';
+export { VueButtonActionRenderer } from './action-renderers/VueButtonActionRenderer.js';
+
+// ── Actions ────────────────────────────────────────────────────────────────
+export {
+  isCancelCrudAction,
+  isCreateCrudAction,
+  isDeleteCrudAction,
+  isEditCrudAction,
+  isSaveCrudAction,
+  matchesActionIdentity,
+} from './actions/crudActionUtils.js';
 
 // ── Composables ────────────────────────────────────────────────────────────
 export { useViewer } from './composables/useViewer.js';

@@ -1,5 +1,6 @@
 export { MetadataApi } from './api.js';
 export { ActionsApi } from './actions.js';
+export type { ExecuteActionOptions } from './actions.js';
 export type {
   BasicMetadata,
   ApplicationMetadata,
@@ -8,6 +9,7 @@ export type {
   ApplicationMetadataEntities,
   EntityMetadata,
   ApplicationMetadataActions,
+  ActionType,
   ActionMetadata,
   ActionExecutionRequest,
   ActionExecutionResponse,

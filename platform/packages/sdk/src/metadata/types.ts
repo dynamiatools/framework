@@ -98,6 +98,8 @@ export interface ApplicationMetadataActions {
   actions: ActionMetadata[];
 }
 
+export type ActionType = 'Action' | 'ClassAction' | 'CrudAction' | string;
+
 /**
  * Mirrors `tools.dynamia.actions.ActionMetadata`.
  *
@@ -105,10 +107,12 @@ export interface ApplicationMetadataActions {
  * therefore be absent from the JSON response.
  */
 export interface ActionMetadata extends BasicMetadata {
+  /** Logical server-side action type: Action, ClassAction or CrudAction */
+  type?: ActionType;
+  /** Simple Java class name of the action implementation */
+  className?: string;
   /** Fully-qualified class name of the Java action implementation */
   actionClass?: string;
-  /** Arbitrary action parameters as key→value pairs */
-  params?: Record<string, unknown>;
   /** Optional grouping label for the action */
   group?: string;
   /** Custom renderer key for the action button/widget */

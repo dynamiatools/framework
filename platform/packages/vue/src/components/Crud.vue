@@ -4,14 +4,24 @@
     <div class="dynamia-crud-toolbar">
       <slot name="toolbar">
         <button
-          v-if="!readOnly && view.showDataSet.value"
+          v-if="!readOnly && view.showDataSet.value && !hasCreateAction"
           type="button"
           class="dynamia-crud-new-btn"
           @click="view.startCreate()"
         >
           New
         </button>
-        <Actions :actions="resolvedActions" :view="view" @action="handleAction" />
+        <Actions
+          :actions="resolvedActions"
+          :view="view"
+          :client="client"
+          :auto-execute="autoExecuteActions"
+          :entity-class-name="view.getEntityClassName() ?? undefined"
+          @action="handleAction"
+          @action-executed="emit('action-executed', $event)"
+          @action-response="emit('action-response', $event)"
+          @action-error="emit('action-error', $event)"
+        />
       </slot>
     </div>
 
@@ -69,13 +79,14 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { ActionMetadata } from '@dynamia-tools/sdk';
-import type { TreeNode } from '@dynamia-tools/ui-core';
+import type { ActionMetadata, DynamiaClient } from '@dynamia-tools/sdk';
+import type { ActionExecutionErrorEvent, ActionExecutionEvent, TreeNode } from '@dynamia-tools/ui-core';
 import type { VueCrudView } from '../views/VueCrudView.js';
 import Form from './Form.vue';
 import Table from './Table.vue';
 import Tree from './Tree.vue';
 import Actions from './Actions.vue';
+import { isCreateCrudAction } from '../actions/crudActionUtils.js';
 
 const props = withDefaults(defineProps<{
   /** The VueCrudView instance to render */
@@ -84,16 +95,37 @@ const props = withDefaults(defineProps<{
   readOnly?: boolean;
   /** Actions to show in the toolbar */
   actions?: ActionMetadata[];
-}>(), { readOnly: false });
+  /** DynamiaClient used for automatic action execution */
+  client?: DynamiaClient;
+  /** Enables automatic SDK execution for non-local actions */
+  autoExecuteActions?: boolean;
+}>(), { readOnly: false, autoExecuteActions: false });
 
 const emit = defineEmits<{
   save: [data: Record<string, unknown>];
   delete: [entity: unknown];
   select: [entity: unknown];
+  action: [action: ActionMetadata];
   'action-executed': [action: ActionMetadata];
+  'action-response': [event: ActionExecutionEvent];
+  'action-error': [event: ActionExecutionErrorEvent];
 }>();
 
-const resolvedActions = computed(() => props.actions ?? []);
+const resolvedActions = computed(() => {
+  const mergedActions = new Map<string, ActionMetadata>();
+
+  for (const action of props.view.entityMetadata?.actions ?? []) {
+    mergedActions.set(action.id, action);
+  }
+
+  for (const action of props.actions ?? []) {
+    mergedActions.set(action.id, action);
+  }
+
+  return props.view.resolveActions(Array.from(mergedActions.values()));
+});
+
+const hasCreateAction = computed(() => resolvedActions.value.some(action => isCreateCrudAction(action)));
 
 async function handleSave(values: Record<string, unknown>) {
   await props.view.save();
@@ -105,6 +137,6 @@ function handleTreeSelect(node: TreeNode) {
 }
 
 function handleAction(action: ActionMetadata) {
-  emit('action-executed', action);
+  emit('action', action);
 }
 </script>

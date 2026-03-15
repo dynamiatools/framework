@@ -1,7 +1,7 @@
 // plugin.ts: Vue plugin that registers all renderers, factories and global components
 
 import type { App } from 'vue';
-import { ViewRendererRegistry, ViewTypes } from '@dynamia-tools/ui-core';
+import { ActionRendererRegistry, ViewRendererRegistry, ViewTypes } from '@dynamia-tools/ui-core';
 import { VueFormView } from './views/VueFormView.js';
 import { VueTableView } from './views/VueTableView.js';
 import { VueCrudView } from './views/VueCrudView.js';
@@ -11,6 +11,7 @@ import { VueEntityPickerView } from './views/VueEntityPickerView.js';
 import { VueFormRenderer } from './renderers/VueFormRenderer.js';
 import { VueTableRenderer } from './renderers/VueTableRenderer.js';
 import { VueCrudRenderer } from './renderers/VueCrudRenderer.js';
+import { VueButtonActionRenderer } from './action-renderers/VueButtonActionRenderer.js';
 import ViewerComponent from './components/Viewer.vue';
 import FormComponent from './components/Form.vue';
 import TableComponent from './components/Table.vue';
@@ -38,6 +39,13 @@ export const DynamiaVue = {
     ViewRendererRegistry.register(ViewTypes.Form, new VueFormRenderer());
     ViewRendererRegistry.register(ViewTypes.Table, new VueTableRenderer());
     ViewRendererRegistry.register(ViewTypes.Crud, new VueCrudRenderer());
+    ActionRendererRegistry.register('default', VueButtonActionRenderer, [
+      'button',
+      'ButtonActionRenderer',
+      'ToolbarbuttonActionRenderer',
+      'MenuitemActionRenderer',
+      'MenuActionRenderer',
+    ]);
 
     // Register view factories
     ViewRendererRegistry.registerViewFactory(

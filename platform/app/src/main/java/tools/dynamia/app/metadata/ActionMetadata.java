@@ -57,6 +57,9 @@ public class ActionMetadata extends BasicMetadata {
     @JsonIgnore
     private Action action;
 
+    private String type;
+    private String className;
+
     /**
      * Default constructor for serialization and manual instantiation.
      */
@@ -77,7 +80,12 @@ public class ActionMetadata extends BasicMetadata {
         setDescription(action.getLocalizedDescription());
         setIcon(action.getImage());
         setEndpoint(ApplicationMetadataController.PATH + "/actions/execute/" + getId());
-
+        setClassName(action.getClass().getSimpleName());
+        setType(switch (action) {
+            case CrudAction crudAction -> "CrudAction";
+            case ClassAction classAction -> "ClassAction";
+            default -> "Action";
+        });
         var actionRenderer = action.getRenderer();
         this.renderer = actionRenderer != null ? actionRenderer.getClass().getName() : null;
         this.group = action.getGroup() != null ? action.getGroup().getName() : null;
@@ -172,5 +180,21 @@ public class ActionMetadata extends BasicMetadata {
      */
     public Action getAction() {
         return action;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
     }
 }
