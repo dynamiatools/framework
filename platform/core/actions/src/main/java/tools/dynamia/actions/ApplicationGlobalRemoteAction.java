@@ -18,18 +18,18 @@
 package tools.dynamia.actions;
 
 /**
- * Represents a global action that is available throughout the entire application.
+ * Represents a global remote action that is available throughout the entire application.
  * <p>
- * Subclasses of {@code ApplicationGlobalAction} define actions that are not limited to a specific context or module,
+ * Subclasses of {@code ApplicationGlobalRemoteAction} define actions that are not limited to a specific context or module,
  * but can be accessed and executed from anywhere in the application. These actions are typically used for
  * application-wide operations such as global shortcuts, settings, or utilities.
  * </p>
  * <p>
- * This abstract class extends {@link AbstractAction}, inheriting its properties and behavior, and serves as a base
+ * This abstract class extends {@link AbstractRemoteAction}, inheriting its properties and behavior, and serves as a base
  * for implementing custom global actions.
  * </p>
  */
-public abstract class ApplicationGlobalAction extends AbstractLocalAction {
+public abstract class ApplicationGlobalRemoteAction extends AbstractRemoteAction {
 
     // No additional methods or fields. Subclasses should implement specific global actions.
 }

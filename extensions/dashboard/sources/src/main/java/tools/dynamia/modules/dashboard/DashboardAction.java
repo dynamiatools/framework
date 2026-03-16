@@ -17,11 +17,11 @@
 
 package tools.dynamia.modules.dashboard;
 
-import tools.dynamia.actions.AbstractAction;
+import tools.dynamia.actions.AbstractLocalAction;
 
 /**
  * Dashboard actions
  */
-public abstract class DashboardAction extends AbstractAction {
+public abstract class DashboardAction extends AbstractLocalAction {
 
 }

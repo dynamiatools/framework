@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ClassAction;
+import tools.dynamia.actions.RemoteAction;
 import tools.dynamia.app.controllers.ApplicationMetadataController;
 import tools.dynamia.commons.Streams;
 import tools.dynamia.crud.CrudAction;
@@ -55,7 +56,7 @@ public class ActionMetadata extends BasicMetadata {
      * The underlying {@link Action} instance. This field is ignored during JSON serialization.
      */
     @JsonIgnore
-    private Action action;
+    private RemoteAction action;
 
     private String type;
     private String className;
@@ -74,7 +75,7 @@ public class ActionMetadata extends BasicMetadata {
      *
      * @param action the {@link Action} instance to extract metadata from
      */
-    public ActionMetadata(Action action) {
+    public ActionMetadata(RemoteAction action) {
         setId(action.getId());
         setName(action.getLocalizedName());
         setDescription(action.getLocalizedDescription());
@@ -180,7 +181,7 @@ public class ActionMetadata extends BasicMetadata {
      *
      * @return the {@link Action} instance
      */
-    public Action getAction() {
+    public RemoteAction getAction() {
         return action;
     }
 

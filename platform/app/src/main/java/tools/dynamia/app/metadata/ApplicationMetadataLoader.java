@@ -3,10 +3,12 @@ package tools.dynamia.app.metadata;
 import org.springframework.context.annotation.DependsOn;
 import tools.dynamia.actions.ActionLoader;
 import tools.dynamia.actions.ApplicationGlobalAction;
+import tools.dynamia.actions.ApplicationGlobalRemoteAction;
 import tools.dynamia.app.ApplicationInfo;
 import tools.dynamia.app.controllers.ApplicationMetadataController;
 import tools.dynamia.commons.ApplicableClass;
 import tools.dynamia.crud.CrudAction;
+import tools.dynamia.crud.CrudRemoteAction;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.ViewDescriptorFactory;
@@ -86,7 +88,7 @@ public class ApplicationMetadataLoader {
     public ApplicationMetadataActions loadGlobalActions() {
         ApplicationMetadataActions metadata = new ApplicationMetadataActions();
         metadata.setActions(new ArrayList<>());
-        ActionLoader<ApplicationGlobalAction> actionLoader = new ActionLoader<>(ApplicationGlobalAction.class);
+        ActionLoader<ApplicationGlobalRemoteAction> actionLoader = new ActionLoader<>(ApplicationGlobalRemoteAction.class);
         actionLoader.load().forEach(action -> {
             var actionMetadata = new ActionMetadata(action);
             metadata.getActions().add(actionMetadata);
@@ -108,7 +110,7 @@ public class ApplicationMetadataLoader {
         }
         entity.setDescriptors(descriptors.stream().map(ViewDescriptorMetadata::new).toList());
 
-        ActionLoader<CrudAction> loader = new ActionLoader<>(CrudAction.class);
+        ActionLoader<CrudRemoteAction> loader = new ActionLoader<>(CrudRemoteAction.class);
         entity.setActions(loader
                 .load(action -> isApplicable(entityClass, action))
                 .stream().map(a -> {
@@ -122,7 +124,7 @@ public class ApplicationMetadataLoader {
         return entity;
     }
 
-    private boolean isApplicable(final Class targetClass, CrudAction crudAction) {
+    private boolean isApplicable(final Class targetClass, CrudRemoteAction crudAction) {
         return ApplicableClass.isApplicable(targetClass, crudAction.getApplicableClasses(), true);
     }
 

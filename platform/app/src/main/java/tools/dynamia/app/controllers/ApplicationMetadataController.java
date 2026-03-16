@@ -152,7 +152,7 @@ public class ApplicationMetadataController {
     private static ActionExecutionResponse executeAction(String action, ActionExecutionRequest request, ActionMetadata actionMetadata) {
         if (actionMetadata != null) {
             try {
-                Action actionInstance = null;
+                RemoteAction actionInstance = null;
                 if (actionMetadata.getAction() != null) {
                     actionInstance = Containers.get().findObject(actionMetadata.getAction().getClass());
                 }

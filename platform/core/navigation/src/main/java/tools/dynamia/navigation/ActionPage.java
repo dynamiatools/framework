@@ -19,6 +19,8 @@ package tools.dynamia.navigation;
 
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionEvent;
+import tools.dynamia.actions.Actions;
+import tools.dynamia.actions.LocalAction;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.integration.Containers;
 
@@ -89,8 +91,8 @@ public class ActionPage extends Page {
      */
     public void execute() {
         Action action = Containers.get().findObject(actionClass);
-        if (action != null) {
-            action.actionPerformed(new ActionEvent(this, this));
+        if (action instanceof LocalAction localAction) {
+            localAction.actionPerformed(new ActionEvent(this, this));
         }
     }
 

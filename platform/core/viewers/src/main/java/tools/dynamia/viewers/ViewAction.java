@@ -1,6 +1,7 @@
 package tools.dynamia.viewers;
 
 import tools.dynamia.actions.AbstractAction;
+import tools.dynamia.actions.AbstractLocalAction;
 
 /**
  * Base class for actions that are contextually bound to a {@link View}.
@@ -19,5 +20,5 @@ import tools.dynamia.actions.AbstractAction;
  * @see AbstractAction
  * @see ViewDescriptor#getActions()
  */
-public abstract class ViewAction extends AbstractAction {
+public abstract class ViewAction extends AbstractLocalAction {
 }
