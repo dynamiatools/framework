@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/vue",
-  "version": "26.3.1",
+  "version": "26.3.2",
   "description": "Vue 3 adapter for Dynamia Platform UI",
   "keywords": ["dynamia", "vue", "viewer", "form", "table", "crud", "typescript"],
   "homepage": "https://dynamia.tools",
@@ -24,8 +24,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@dynamia-tools/sdk": ">=26.0.0",
-    "@dynamia-tools/ui-core": ">=26.0.0"
+    "@dynamia-tools/sdk": ">=26.3.0",
+    "@dynamia-tools/ui-core": ">=26.3.0"
   },
   "peerDependencies": {
     "vue": "^3.4.0"

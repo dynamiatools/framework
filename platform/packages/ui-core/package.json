@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/ui-core",
-  "version": "26.3.1",
+  "version": "26.3.2",
   "description": "Framework-agnostic view/viewer/renderer core for Dynamia Platform",
   "keywords": ["dynamia", "ui-core", "viewer", "view", "renderer", "typescript"],
   "homepage": "https://dynamia.tools",
@@ -25,7 +25,7 @@
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
-  "dependencies": {"@dynamia-tools/sdk": ">=26.0.0"},
+  "dependencies": {"@dynamia-tools/sdk": ">=26.3.0"},
   "devDependencies": {
     "@dynamia-tools/sdk": "workspace:*",
     "@types/node": "^22.0.0",
