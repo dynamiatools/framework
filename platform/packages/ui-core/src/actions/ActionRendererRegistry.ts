@@ -1,3 +1,5 @@
+import { Registry } from '../registry/Registry.js';
+
 function toKebabCase(value: string): string {
   return value
     .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
@@ -32,38 +34,35 @@ export function getActionRendererKeyCandidates(renderer?: string | null): string
   ])];
 }
 
+/**
+ * Registry for action renderer components.
+ * Keys are normalised using {@link getActionRendererKeyCandidates} so that
+ * fully-qualified Java class names, simple names, and kebab-case variants all
+ * resolve to the same registered renderer.
+ *
+ * Backed by the generic {@link Registry} — public static API is unchanged.
+ */
 export class ActionRendererRegistry {
-  private static readonly renderers = new Map<string, unknown>();
+  private static readonly _registry = new Registry<unknown>(getActionRendererKeyCandidates);
 
   static register<TRenderer>(
     key: string,
     renderer: TRenderer,
     aliases: string[] = [],
   ): void {
-    for (const candidate of [key, ...aliases]) {
-      for (const normalized of getActionRendererKeyCandidates(candidate)) {
-        ActionRendererRegistry.renderers.set(normalized, renderer);
-      }
-    }
+    ActionRendererRegistry._registry.register(key, renderer, aliases);
   }
 
   static get<TRenderer = unknown>(renderer?: string | null): TRenderer | null {
-    for (const candidate of getActionRendererKeyCandidates(renderer)) {
-      const registered = ActionRendererRegistry.renderers.get(candidate);
-      if (registered) {
-        return registered as TRenderer;
-      }
-    }
-
-    return null;
+    return ActionRendererRegistry._registry.get(renderer) as TRenderer | null;
   }
 
   static has(renderer?: string | null): boolean {
-    return ActionRendererRegistry.get(renderer) != null;
+    return ActionRendererRegistry._registry.has(renderer);
   }
 
   static clear(): void {
-    ActionRendererRegistry.renderers.clear();
+    ActionRendererRegistry._registry.clear();
   }
 }
 

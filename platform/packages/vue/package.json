@@ -24,8 +24,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@dynamia-tools/sdk": ">=26.3.0",
-    "@dynamia-tools/ui-core": ">=26.3.0"
+    "@dynamia-tools/sdk": "workspace:*",
+    "@dynamia-tools/ui-core": "workspace:*"
   },
   "peerDependencies": {
     "vue": "^3.4.0"

@@ -1,5 +1,9 @@
 // @dynamia-tools/ui-core — Framework-agnostic view/viewer/renderer core for Dynamia Platform
 
+// ── Registry base ─────────────────────────────────────────────────────────────
+export { Registry } from './registry/Registry.js';
+export type { KeyNormalizer } from './registry/Registry.js';
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 export type { FieldComponent, ResolvedField } from './types/field.js';
 export { FieldComponent as FieldComponents } from './types/field.js';
@@ -55,6 +59,10 @@ export {
   normalizeCrudActionState,
   isCrudActionStateApplicable,
 } from './actions/crudActionState.js';
+
+// ── Client actions ────────────────────────────────────────────────────────────
+export { ClientActionRegistry, registerClientAction, isClientActionApplicable } from './actions/ClientAction.js';
+export type { ClientAction, ClientActionContext, ClientActionRegistryClass } from './actions/ClientAction.js';
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
 export {

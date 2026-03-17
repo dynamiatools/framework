@@ -1,6 +1,9 @@
 // ── Main client ─────────────────────────────────────────────────────────────
 export { DynamiaClient } from './client.js';
 
+// ── HTTP client (exported so extension SDK packages can type-check against it) ──
+export { HttpClient } from './http.js';
+
 // ── Error ────────────────────────────────────────────────────────────────────
 export { DynamiaApiError } from './errors.js';
 
@@ -44,20 +47,5 @@ export type {
   CrudPageable,
 } from './cruds/index.js';
 
-// ── Reports module ────────────────────────────────────────────────────────────
-export { ReportsApi } from './reports/index.js';
-export type {
-  ReportDTO,
-  ReportFilterDTO,
-  ReportFilterOption,
-  ReportFilters,
-} from './reports/index.js';
-
-// ── SaaS module ───────────────────────────────────────────────────────────────
-export { SaasApi } from './saas/index.js';
-export type { AccountDTO } from './saas/index.js';
-
-// ── API classes (files & schedule — core extensions) ─────────────────────────
-export { FilesApi } from './files/index.js';
+// ── Schedule API (platform-core feature) ─────────────────────────────────────
 export { ScheduleApi } from './schedule/index.js';
-

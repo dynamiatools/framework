@@ -28,6 +28,10 @@ export {
   matchesActionIdentity,
 } from './actions/crudActionUtils.js';
 
+// ── Client actions (re-exported from ui-core for convenience) ──────────────
+export { ClientActionRegistry, registerClientAction, isClientActionApplicable } from '@dynamia-tools/ui-core';
+export type { ClientAction, ClientActionContext } from '@dynamia-tools/ui-core';
+
 // ── Composables ────────────────────────────────────────────────────────────
 export { useViewer } from './composables/useViewer.js';
 export { useView } from './composables/useView.js';

@@ -20,6 +20,7 @@ import type { Component } from 'vue';
 import type { ActionExecutionRequest, ActionMetadata, DynamiaClient } from '@dynamia-tools/sdk';
 import {
   ActionRendererRegistry,
+  ClientActionRegistry,
   CrudView,
   type ActionExecutionErrorEvent,
   type ActionExecutionEvent,
@@ -76,6 +77,15 @@ async function handleTrigger(action: ActionMetadata, payload?: ActionTriggerPayl
   const request = buildRequest(action, payload?.request);
 
   try {
+    // 1. Registered client actions (highest priority — can override any action)
+    const clientHandled = await tryHandleClientAction(action, request);
+    if (clientHandled) {
+      emit('action-executed', action);
+      emit('action-response', { action, request, local: true });
+      return;
+    }
+
+    // 2. Built-in CRUD local actions (new / edit / save / cancel / delete)
     const handledLocally = await tryHandleCrudActionLocally(action, request);
     if (handledLocally) {
       emit('action-executed', action);
@@ -140,6 +150,20 @@ function resolveEntityClassName(request: ActionExecutionRequest): string | null 
   }
 
   return request.dataType ?? null;
+}
+
+async function tryHandleClientAction(
+  action: ActionMetadata,
+  request: ActionExecutionRequest,
+): Promise<boolean> {
+  const clientAction = ClientActionRegistry.resolve(action);
+  if (!clientAction) return false;
+  await clientAction.execute({
+    action,
+    request,
+    ...(props.view !== undefined ? { view: props.view } : {}),
+  });
+  return true;
 }
 
 async function tryHandleCrudActionLocally(

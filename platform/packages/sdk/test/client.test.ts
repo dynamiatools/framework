@@ -8,9 +8,6 @@ describe('DynamiaClient', () => {
     const client = makeClient(mockFetch(200, {}));
     expect(client.metadata).toBeDefined();
     expect(client.actions).toBeDefined();
-    expect(client.reports).toBeDefined();
-    expect(client.files).toBeDefined();
-    expect(client.saas).toBeDefined();
     expect(client.schedule).toBeDefined();
   });
   it('crud() returns a CrudResourceApi', () => {
