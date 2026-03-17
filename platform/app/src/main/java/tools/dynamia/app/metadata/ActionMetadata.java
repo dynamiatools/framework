@@ -8,6 +8,7 @@ import tools.dynamia.actions.RemoteAction;
 import tools.dynamia.app.controllers.ApplicationMetadataController;
 import tools.dynamia.commons.Streams;
 import tools.dynamia.crud.CrudAction;
+import tools.dynamia.crud.CrudRemoteAction;
 
 import java.util.List;
 
@@ -83,7 +84,7 @@ public class ActionMetadata extends BasicMetadata {
         setEndpoint(ApplicationMetadataController.PATH + "/actions/execute/" + getId());
         setClassName(action.getClass().getSimpleName());
         setType(switch (action) {
-            case CrudAction crudAction -> "CrudAction";
+            case CrudRemoteAction crudAction -> "CrudAction";
             case ClassAction classAction -> "ClassAction";
             default -> "Action";
         });
