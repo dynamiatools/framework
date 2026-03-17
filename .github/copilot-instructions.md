@@ -1,6 +1,6 @@
 # Copilot Instructions for Dynamia Tools (Framework Internal)
 
-These guidelines are for contributing to the **Dynamia Tools framework itself**, not for applications that use the framework.  
+These guidelines are for contributing to the **Dynamia Tools framework itself**, not for applications that use the framework.
 The focus is on keeping the codebase consistent, maintainable, and well-documented.
 
 ---
@@ -9,52 +9,52 @@ The focus is on keeping the codebase consistent, maintainable, and well-document
 
 The framework is organized into modules. Each module has a specific responsibility:
 
-- **actions**  
+- **actions**
   Handles platform actions, implementing operations users can perform (create, update, delete entities).
 
-- **app**  
+- **app**
   Main application module, orchestrating the integration of all other modules and providing the entry point.
 
-- **commons**  
+- **commons**
   Contains shared utilities and common code used across multiple modules to avoid duplication.
 
-- **crud**  
+- **crud**
   Provides generic Create, Read, Update, Delete functionalities for entities, simplifying data management.
 
-- **domain**  
+- **domain**
   Defines core business entities and domain logic, serving as the foundation for other modules.
 
-- **domain-jpa**  
+- **domain-jpa**
   Adds JPA (Java Persistence API) support for domain entities, enabling ORM and database integration.
 
-- **integration**  
+- **integration**
   Manages integration with external systems and services, handling communication and data exchange.
 
-- **io**  
+- **io**
   Responsible for input/output operations, such as file handling and data streams.
 
-- **navigation**  
+- **navigation**
   Implements navigation logic and structures for the application's user interface.
 
-- **reports**  
+- **reports**
   Generates and manages reports, providing tools for data analysis and export.
 
-- **starter**  
+- **starter**
   Offers starter templates and configurations to bootstrap new projects or modules.
 
-- **templates**  
+- **templates**
   Contains reusable templates for UI, emails, or documents.
 
-- **ui**  
+- **ui**
   Manages user interface components and visual elements.
 
-- **viewers**  
+- **viewers**
   Provides components for viewing and presenting data in various formats.
 
-- **web**  
+- **web**
   Exposes web functionalities, including REST endpoints and web resources.
 
-- **zk**  
+- **zk**
   Integrates ZK framework components for building rich web interfaces.
 
 ---
@@ -169,7 +169,7 @@ Start fast with DynamiaTools
 
 ## Installation
 
-1. Create a new SpringBoot project using [start.spring.io](https://start.spring.io) and select Web, JPA and a programming language for your Spring Boot app.  
+1. Create a new SpringBoot project using [start.spring.io](https://start.spring.io) and select Web, JPA and a programming language for your Spring Boot app.
    DynamiaTools is compatible with Java, Groovy and Kotlin.
 
    You can also [click here](https://start.spring.io/#!type=maven-project&language=java&packaging=jar&jvmVersion=21&groupId=com.example&artifactId=dynamia-tools-project&name=Dynaima&description=Demo%20project%20for%20Spring%20Boot&packageName=com.example.demo&dependencies=web,data-jpa,h2) to get a preconfigured Spring Boot project with Java, Maven and Web with JPA support.
@@ -219,7 +219,7 @@ class MyApplication {
 }
 ```
 
-After running the application, open your browser and go to http://localhost:8080.  
+After running the application, open your browser and go to http://localhost:8080.
 You should see a blank page with a fully functional HTML template called Dynamical.
 
 ---
@@ -300,14 +300,14 @@ public class ContactModuleProvider implements ModuleProvider {
 }
 ```
 
-Modules include ID, name, pages and page groups. Pages include ID, name and path, which in this case is represented by an entity class.  
+Modules include ID, name, pages and page groups. Pages include ID, name and path, which in this case is represented by an entity class.
 For example, the `Contact` crud page has the path `/pages/my-module/contacts`.
 
 ---
 
 ### 3. View descriptors
 
-Descriptors are YAML files defining how views for entities are rendered at runtime.  
+Descriptors are YAML files defining how views for entities are rendered at runtime.
 Create a folder `/resources/META-INF/descriptors` and a file `ContactForm.yml`:
 
 ```yaml
@@ -346,7 +346,7 @@ fields:
 
 ### 4. Run and enjoy
 
-Your app now has a new menu called *My Module* and a submenu called *Contacts*.  
+Your app now has a new menu called *My Module* and a submenu called *Contacts*.
 This is a fully functional CRUD with create, read, update, delete, and many more ready-to-use actions.
 
 ---
@@ -371,7 +371,7 @@ dynamia:
 
 ### Automatic REST
 
-Every `CrudPage` automatically generates a REST endpoint.  
+Every `CrudPage` automatically generates a REST endpoint.
 Example: `http://localhost:8080/api/my-module/contacts`
 
 ```json
@@ -404,3 +404,4 @@ With this guide, you’ve just built a web application with:
 - A responsive template
 
 Continue with the advanced guides to explore more features of DynamiaTools.
+
