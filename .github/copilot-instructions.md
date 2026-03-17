@@ -3,6 +3,16 @@
 These guidelines are for contributing to the **Dynamia Tools framework itself**, not for applications that use the framework.
 The focus is on keeping the codebase consistent, maintainable, and well-documented.
 
+## IDE Integration Always use the `intellij-index` MCP server when applicable for: 
+- **Finding references** — Use `ide_find_references` instead of grep/search 
+- **Go to definition** — Use `ide_find_definition` for accurate navigation 
+- **Renaming symbols** — Use `ide_refactor_rename` for safe, project-wide renames 
+- **Type hierarchy** — Use `ide_type_hierarchy` to understand class relationships 
+- **Finding implementations** — Use `ide_find_implementations` for interfaces/abstract classes 
+- **Diagnostics** — Use `ide_diagnostics` to check for code problems The IDE's semantic understanding is far more accurate than text-based search. 
+- Prefer IDE tools over grep, ripgrep, or manual file searching when working with code symbols.
+
+
 ---
 
 ## Project Structure
