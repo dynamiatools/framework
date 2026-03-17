@@ -18,6 +18,7 @@ package tools.dynamia.viewers;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.validation.constraints.NotNull;
 import tools.dynamia.actions.ActionReference;
 import tools.dynamia.commons.BeanMessages;
@@ -40,6 +41,8 @@ import java.util.Map;
  * @author Mario A. Serrano Leones
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({"name", "label","localizedLabel", "description","localizedDescription", "fieldClass", "componentClass", "component", "visible", "index", "entity",
+        "enum", "value", "required", "action", "icon", "showIconOnly", "params"})
 public class Field implements Serializable, Indexable, Cloneable {
 
     /**
@@ -591,6 +594,10 @@ public class Field implements Serializable, Indexable, Cloneable {
         } else {
             return DomainUtils.isEntity(fieldClass);
         }
+    }
+
+    public boolean isEnum() {
+        return propertyInfo != null && propertyInfo.isEnum() || fieldClass != null && fieldClass.isEnum();
     }
 
     public ActionReference getAction() {
