@@ -3,11 +3,11 @@
 // ── Basic / shared ─────────────────────────────────────────────────────────
 
 export interface BasicMetadata {
-  id: string;
-  name: string;
-  endpoint?: string;
-  description?: string;
-  icon?: string;
+    id: string;
+    name: string;
+    endpoint?: string;
+    description?: string;
+    icon?: string;
 }
 
 // ── Application metadata ───────────────────────────────────────────────────
@@ -19,24 +19,24 @@ export interface BasicMetadata {
  * from the JSON payload when the application has not configured them.
  */
 export interface ApplicationMetadata extends BasicMetadata {
-  /** Application display version */
-  version?: string;
-  /** Human-readable title (may differ from `name`) */
-  title?: string;
-  /** UI template / theme key */
-  template?: string;
-  /** Author or organisation name */
-  author?: string;
-  /** Public URL of the running application */
-  url?: string;
-  /** Path to the application logo asset */
-  logo?: string;
+    /** Application display version */
+    version?: string;
+    /** Human-readable title (may differ from `name`) */
+    title?: string;
+    /** UI template / theme key */
+    template?: string;
+    /** Author or organisation name */
+    author?: string;
+    /** Public URL of the running application */
+    url?: string;
+    /** Path to the application logo asset */
+    logo?: string;
 }
 
 // ── Navigation ─────────────────────────────────────────────────────────────
 
 export interface NavigationTree {
-  navigation: NavigationNode[];
+    navigation: NavigationNode[];
 }
 
 /**
@@ -46,31 +46,31 @@ export interface NavigationTree {
  * - `"Page"` — leaf page (has `internalPath` / `path`, no children)
  */
 export interface NavigationNode {
-  id: string;
-  name: string;
-  longName?: string;
-  /** Simple class name of the navigation element: "Module", "PageGroup", "Page", etc. */
-  type?: string;
-  description?: string;
-  icon?: string;
-  /** Virtual path (e.g. /pages/store/books) — use for routing */
-  internalPath?: string;
-  /** Pretty/display path */
-  path?: string;
-  /** Ordering hint — Java `Double`, nullable */
-  position?: number;
-  /** Whether this node should appear in featured/shortcut areas — Java `Boolean`, nullable */
-  featured?: boolean;
-  children?: NavigationNode[];
-  attributes?: Record<string, unknown>;
-  /** Source file path for page nodes */
-  file?: string;
+    id: string;
+    name: string;
+    longName?: string;
+    /** Simple class name of the navigation element: "Module", "PageGroup", "Page", etc. */
+    type?: string;
+    description?: string;
+    icon?: string;
+    /** Virtual path (e.g. /pages/store/books) — use for routing */
+    internalPath?: string;
+    /** Pretty/display path */
+    path?: string;
+    /** Ordering hint — Java `Double`, nullable */
+    position?: number;
+    /** Whether this node should appear in featured/shortcut areas — Java `Boolean`, nullable */
+    featured?: boolean;
+    children?: NavigationNode[];
+    attributes?: Record<string, unknown>;
+    /** Source file path for page nodes */
+    file?: string;
 }
 
 // ── Entity metadata ────────────────────────────────────────────────────────
 
 export interface ApplicationMetadataEntities {
-  entities: EntityMetadata[];
+    entities: EntityMetadata[];
 }
 
 /**
@@ -81,21 +81,21 @@ export interface ApplicationMetadataEntities {
  * `MetadataApi.getEntityViews()` or `MetadataApi.getEntityView()`.
  */
 export interface EntityMetadata extends BasicMetadata {
-  className: string;
-  actions: ActionMetadata[];
-  descriptors: ViewDescriptorMetadata[];
-  actionsEndpoint: string;
-  /**
-   * REST endpoint that returns the full list of ViewDescriptor objects for
-   * this entity (e.g. `/api/metadata/entities/MyClass/views`).
-   */
-  viewsEndpoint?: string;
+    className: string;
+    actions: ActionMetadata[];
+    descriptors: ViewDescriptorMetadata[];
+    actionsEndpoint: string;
+    /**
+     * REST endpoint that returns the full list of ViewDescriptor objects for
+     * this entity (e.g. `/api/metadata/entities/MyClass/views`).
+     */
+    viewsEndpoint?: string;
 }
 
 // ── Actions ────────────────────────────────────────────────────────────────
 
 export interface ApplicationMetadataActions {
-  actions: ActionMetadata[];
+    actions: ActionMetadata[];
 }
 
 export type ActionType = 'Action' | 'ClassAction' | 'CrudAction' | string;
@@ -107,20 +107,20 @@ export type ActionType = 'Action' | 'ClassAction' | 'CrudAction' | string;
  * therefore be absent from the JSON response.
  */
 export interface ActionMetadata extends BasicMetadata {
-  /** Logical server-side action type: Action, ClassAction or CrudAction */
-  type?: ActionType;
-  /** Simple Java class name of the action implementation */
-  className?: string;
-  /** Fully-qualified class name of the Java action implementation */
-  actionClass?: string;
-  /** Optional grouping label for the action */
-  group?: string;
-  /** Custom renderer key for the action button/widget */
-  renderer?: string;
-  /** Simple class names of entity types this action applies to */
-  applicableClasses?: string[];
-  /** Entity state names in which this action is available */
-  applicableStates?: string[];
+    /** Logical server-side action type: Action, ClassAction or CrudAction */
+    type?: ActionType;
+    /** Simple Java class name of the action implementation */
+    className?: string;
+    /** Fully-qualified class name of the Java action implementation */
+    actionClass?: string;
+    /** Optional grouping label for the action */
+    group?: string;
+    /** Custom renderer key for the action button/widget */
+    renderer?: string;
+    /** Simple class names of entity types this action applies to */
+    applicableClasses?: string[];
+    /** Entity state names in which this action is available */
+    applicableStates?: string[];
 }
 
 /**
@@ -131,18 +131,18 @@ export interface ActionMetadata extends BasicMetadata {
  * carry any JSON value (scalar, array, or object).
  */
 export interface ActionExecutionRequest {
-  /** The entity / payload on which the action should operate */
-  data?: unknown;
-  /** Arbitrary extra parameters forwarded to the action */
-  params?: Record<string, unknown>;
-  /** Identifies the UI component or view that triggered the action */
-  source?: string;
-  /** Simple class name of the entity being acted upon */
-  dataType?: string;
-  /** Primary key of the entity being acted upon */
-  dataId?: unknown;
-  /** Display name of the entity being acted upon */
-  dataName?: string;
+    /** The entity / payload on which the action should operate */
+    data?: unknown;
+    /** Arbitrary extra parameters forwarded to the action */
+    params?: Record<string, unknown>;
+    /** Identifies the UI component or view that triggered the action */
+    source?: string;
+    /** Simple class name of the entity being acted upon */
+    dataType?: string;
+    /** Primary key of the entity being acted upon */
+    dataId?: unknown;
+    /** Display name of the entity being acted upon */
+    dataName?: string;
 }
 
 /**
@@ -152,27 +152,27 @@ export interface ActionExecutionRequest {
  * Note: the field is `statusCode` (int) in Java — NOT `code`.
  */
 export interface ActionExecutionResponse {
-  /** Human-readable message produced by the action */
-  message?: string;
-  /** Logical status label, e.g. `"SUCCESS"` or `"ERROR"` */
-  status?: string;
-  /**
-   * Numeric status code produced by the action.
-   * Serialised as `"statusCode"` in JSON (Java field `private int statusCode`).
-   */
-  statusCode?: number;
-  /** Payload returned by the action (any JSON value) */
-  data?: unknown;
-  /** Arbitrary response parameters */
-  params?: Record<string, unknown>;
-  /** Echo of the source field from the request */
-  source?: string;
-  /** Simple class name of the entity that was acted upon */
-  dataType?: string;
-  /** Primary key of the entity that was acted upon */
-  dataId?: unknown;
-  /** Display name of the entity that was acted upon */
-  dataName?: string;
+    /** Human-readable message produced by the action */
+    message?: string;
+    /** Logical status label, e.g. `"SUCCESS"` or `"ERROR"` */
+    status?: string;
+    /**
+     * Numeric status code produced by the action.
+     * Serialised as `"statusCode"` in JSON (Java field `private int statusCode`).
+     */
+    statusCode?: number;
+    /** Payload returned by the action (any JSON value) */
+    data?: unknown;
+    /** Arbitrary response parameters */
+    params?: Record<string, unknown>;
+    /** Echo of the source field from the request */
+    source?: string;
+    /** Simple class name of the entity that was acted upon */
+    dataType?: string;
+    /** Primary key of the entity that was acted upon */
+    dataId?: unknown;
+    /** Display name of the entity that was acted upon */
+    dataName?: string;
 }
 
 // ── View descriptors ───────────────────────────────────────────────────────
@@ -189,33 +189,33 @@ export interface ActionExecutionResponse {
  * return `ViewDescriptor[]` / `ViewDescriptor` directly.
  */
 export interface ViewDescriptorMetadata {
-  /** Unique identifier of this metadata entry */
-  id?: string;
-  /** View type name (e.g. `"form"`, `"table"`, `"tree"`) */
-  view?: string;
-  /** Target device class (e.g. `"desktop"`, `"mobile"`) */
-  device?: string;
-  /** Fully-qualified Java class name of the view bean */
-  beanClass?: string;
-  /** REST endpoint that returns the full ViewDescriptor for this view */
-  endpoint?: string;
+    /** Unique identifier of this metadata entry */
+    id?: string;
+    /** View type name (e.g. `"form"`, `"table"`, `"tree"`) */
+    view?: string;
+    /** Target device class (e.g. `"desktop"`, `"mobile"`) */
+    device?: string;
+    /** Fully-qualified Java class name of the view bean */
+    beanClass?: string;
+    /** REST endpoint that returns the full ViewDescriptor for this view */
+    endpoint?: string;
 }
 
 /** Mirrors tools.dynamia.actions.ActionReference */
 export interface ActionReference {
-  id: string;
-  label?: string;
-  description?: string;
-  icon?: string;
-  width?: string;
-  visible?: boolean;
-  type?: string;
-  attributes?: Record<string, unknown>;
+    id: string;
+    label?: string;
+    description?: string;
+    icon?: string;
+    width?: string;
+    visible?: boolean;
+    type?: string;
+    attributes?: Record<string, unknown>;
 }
 
 /** Mirrors tools.dynamia.viewers.ViewLayout */
 export interface ViewLayout {
-  params: Record<string, unknown>;
+    params: Record<string, unknown>;
 }
 
 /**
@@ -228,37 +228,37 @@ export interface ViewLayout {
  * parameters (`@JsonInclude(NON_DEFAULT)` — empty Map is omitted).
  */
 export interface ViewFieldGroup {
-  name: string;
-  label?: string;
-  description?: string;
-  icon?: string;
-  index?: number;
-  collapse?: boolean;
-  /** Arbitrary layout parameters — absent when empty (`@JsonInclude(NON_DEFAULT)`) */
-  params?: Record<string, unknown>;
-  /** Ordered list of field names belonging to this group */
-  fields?: string[];
+    name: string;
+    label?: string;
+    description?: string;
+    icon?: string;
+    index?: number;
+    collapse?: boolean;
+    /** Arbitrary layout parameters — absent when empty (`@JsonInclude(NON_DEFAULT)`) */
+    params?: Record<string, unknown>;
+    /** Ordered list of field names belonging to this group */
+    fields?: string[];
 }
 
 /** Mirrors tools.dynamia.viewers.ViewDescriptor */
 export interface ViewDescriptor {
-  id: string;
-  /** Fully qualified class name of the target domain class */
-  beanClass: string;
-  /** View type name — matches the JSON "view" key produced by Java's @JsonProperty("view") */
-  view: string;
-  fields: ViewField[];
-  fieldGroups?: ViewFieldGroup[];
-  layout?: ViewLayout;
-  params: Record<string, unknown>;
-  messages?: string;
-  device?: string;
-  autofields?: boolean;
-  actions?: ActionReference[];
-  /** ID of the parent descriptor this one extends */
-  extends?: string;
-  viewCustomizerClass?: string;
-  customViewRenderer?: string;
+    id: string;
+    /** Fully qualified class name of the target domain class */
+    beanClass: string;
+    /** View type name — matches the JSON "view" key produced by Java's @JsonProperty("view") */
+    view: string;
+    fields: ViewField[];
+    fieldGroups?: ViewFieldGroup[];
+    layout?: ViewLayout;
+    params: Record<string, unknown>;
+    messages?: string;
+    device?: string;
+    autofields?: boolean;
+    actions?: ActionReference[];
+    /** ID of the parent descriptor this one extends */
+    extends?: string;
+    viewCustomizerClass?: string;
+    customViewRenderer?: string;
 }
 
 /**
@@ -268,25 +268,29 @@ export interface ViewDescriptor {
  * parameters (`@JsonInclude(NON_DEFAULT)` — empty Map is omitted).
  */
 export interface ViewField {
-  name: string;
-  /** Fully qualified class name of the field type */
-  fieldClass?: string;
-  label?: string;
-  description?: string;
-  /** Component name used to render the field */
-  component?: string;
-  visible?: boolean;
-  required?: boolean;
-  optional?: boolean;
-  index?: number;
-  icon?: string;
-  showIconOnly?: boolean;
-  path?: string;
-  variable?: string;
-  temporal?: boolean;
-  action?: ActionReference;
-  /** Arbitrary field parameters — absent when empty (`@JsonInclude(NON_DEFAULT)`) */
-  params?: Record<string, unknown>;
+    name: string;
+    /** Fully qualified class name of the field type */
+    fieldClass?: string;
+    label?: string;
+    description?: string;
+    /** Component name used to render the field */
+    component?: string;
+    visible?: boolean;
+    required?: boolean;
+    optional?: boolean;
+    index?: number;
+    icon?: string;
+    showIconOnly?: boolean;
+    path?: string;
+    variable?: string;
+    temporal?: boolean;
+    action?: ActionReference;
+    entity?: boolean;
+    enum?: boolean;
+    localizedLabel?: string;
+    localizedDescription?: string;
+    /** Arbitrary field parameters — absent when empty (`@JsonInclude(NON_DEFAULT)`) */
+    params?: Record<string, unknown>;
 }
 
 // ── ViewField utilities ────────────────────────────────────────────────────
@@ -296,38 +300,38 @@ export interface ViewField {
  * Extend this map to add more mappings.
  */
 const FIELD_CLASS_TYPE_MAP: Record<string, string> = {
-  // Text
-  "java.lang.String": "text",
-  "java.lang.Character": "text",
-  // Integer numbers
-  "java.lang.Integer": "number",
-  "int": "number",
-  "java.lang.Long": "number",
-  "long": "number",
-  "java.lang.Short": "number",
-  "short": "number",
-  "java.lang.Byte": "number",
-  "byte": "number",
-  "java.math.BigInteger": "number",
-  // Decimal numbers
-  "java.lang.Double": "decimal",
-  "double": "decimal",
-  "java.lang.Float": "decimal",
-  "float": "decimal",
-  "java.math.BigDecimal": "decimal",
-  // Boolean
-  "java.lang.Boolean": "boolean",
-  "boolean": "boolean",
-  // Date / time
-  "java.time.LocalDate": "date",
-  "java.sql.Date": "date",
-  "java.time.LocalTime": "time",
-  "java.time.LocalDateTime": "datetime",
-  "java.time.ZonedDateTime": "datetime",
-  "java.time.OffsetDateTime": "datetime",
-  "java.time.Instant": "datetime",
-  "java.util.Date": "datetime",
-  "java.sql.Timestamp": "datetime",
+    // Text
+    "java.lang.String": "text",
+    "java.lang.Character": "text",
+    // Integer numbers
+    "java.lang.Integer": "number",
+    "int": "number",
+    "java.lang.Long": "number",
+    "long": "number",
+    "java.lang.Short": "number",
+    "short": "number",
+    "java.lang.Byte": "number",
+    "byte": "number",
+    "java.math.BigInteger": "number",
+    // Decimal numbers
+    "java.lang.Double": "decimal",
+    "double": "decimal",
+    "java.lang.Float": "decimal",
+    "float": "decimal",
+    "java.math.BigDecimal": "decimal",
+    // Boolean
+    "java.lang.Boolean": "boolean",
+    "boolean": "boolean",
+    // Date / time
+    "java.time.LocalDate": "date",
+    "java.sql.Date": "date",
+    "java.time.LocalTime": "time",
+    "java.time.LocalDateTime": "datetime",
+    "java.time.ZonedDateTime": "datetime",
+    "java.time.OffsetDateTime": "datetime",
+    "java.time.Instant": "datetime",
+    "java.util.Date": "datetime",
+    "java.sql.Timestamp": "datetime",
 };
 
 /**
@@ -335,11 +339,11 @@ const FIELD_CLASS_TYPE_MAP: Record<string, string> = {
  * e.g. `StockStatus` → `stock-status`, `myField` → `my-field`
  */
 function toKebabCase(name: string): string {
-  return name
-    .replace(/([A-Z])/g, (letter, _match, offset) =>
-      offset > 0 ? `-${letter.toLowerCase()}` : letter.toLowerCase()
-    )
-    .toLowerCase();
+    return name
+        .replace(/([A-Z])/g, (letter, _match, offset) =>
+            offset > 0 ? `-${letter.toLowerCase()}` : letter.toLowerCase()
+        )
+        .toLowerCase();
 }
 
 /**
@@ -358,17 +362,17 @@ function toKebabCase(name: string): string {
  * resolveFieldType(undefined)                       // → "text"
  */
 export function resolveFieldType(fieldClass: string | undefined): string {
-  if (!fieldClass) return "text";
+    if (!fieldClass) return "text";
 
-  const known = FIELD_CLASS_TYPE_MAP[fieldClass];
-  if (known) return known;
+    const known = FIELD_CLASS_TYPE_MAP[fieldClass];
+    if (known) return known;
 
-  // Fall back to the simple (unqualified) class name in kebab-case
-  const simpleName = fieldClass.includes(".")
-    ? fieldClass.substring(fieldClass.lastIndexOf(".") + 1)
-    : fieldClass;
+    // Fall back to the simple (unqualified) class name in kebab-case
+    const simpleName = fieldClass.includes(".")
+        ? fieldClass.substring(fieldClass.lastIndexOf(".") + 1)
+        : fieldClass;
 
-  return toKebabCase(simpleName);
+    return toKebabCase(simpleName);
 }
 
 /**
@@ -378,5 +382,29 @@ export function resolveFieldType(fieldClass: string | undefined): string {
  * resolveViewFieldType(field)  // delegates to resolveFieldType(field.fieldClass)
  */
 export function resolveViewFieldType(field: ViewField): string {
-  return resolveFieldType(field.fieldClass);
+    return resolveFieldType(field.fieldClass);
+}
+
+/**
+ * Resolve enum constants for enum fields
+ * @param field
+ */
+export function resolveFieldEnumConstants(field: ViewField): string[] {
+    if (!field.enum) return [];
+
+    const raw = field.params?.['ENUM_CONSTANTS'];
+    if (raw == null) return [];
+
+    if (Array.isArray(raw)) {
+        return raw.map(item => String(item));
+    }
+
+    if (typeof raw === 'string') {
+        // Support comma-separated lists as well as single values
+        return raw.includes(',')
+            ? raw.split(',').map(s => s.trim()).filter(Boolean)
+            : [raw];
+    }
+
+    return [];
 }
