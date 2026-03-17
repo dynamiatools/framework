@@ -1,0 +1,19 @@
+packages:
+  # Core platform packages
+  - 'platform/packages/sdk'
+  - 'platform/packages/ui-core'
+  - 'platform/packages/vue'
+  # Extension SDK packages
+  - 'extensions/reports/packages/*'
+  - 'extensions/saas/packages/*'
+  - 'extensions/entity-files/packages/*'
+  - 'extensions/security/packages/*'
+  - 'extensions/dashboard/packages/*'
+  - 'extensions/email-sms/packages/*'
+  - 'extensions/file-importer/packages/*'
+  - 'extensions/finances/packages/*'
+  - 'extensions/http-functions/packages/*'
+
+allowBuilds:
+  esbuild: true
+
