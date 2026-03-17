@@ -2,20 +2,17 @@ name: Publish NPM Packages
 
 on:
   release:
-    types: [published]    # triggers when a release is published on GitHub
-  workflow_dispatch:       # allows manual trigger from the Actions tab
+    types: [published]
+  workflow_dispatch:
 
 jobs:
   publish:
     name: Build, Test & Publish to NPM
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: platform/packages
 
     permissions:
       contents: read
-      id-token: write     # required for npm provenance
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -33,19 +30,18 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
           cache: 'pnpm'
-          cache-dependency-path: platform/packages/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build all packages
-        run: pnpm build
+        run: pnpm -r build
 
       - name: Run tests
-        run: pnpm test
+        run: pnpm -r test
 
       - name: Publish all packages to NPM
         run: pnpm -r publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
