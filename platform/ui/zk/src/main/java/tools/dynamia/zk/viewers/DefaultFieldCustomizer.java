@@ -138,7 +138,17 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
             customizeTimeboxBindings(field);
             customizeDateSelectorBinding(field);
         }
+
+        if (field.isEnum()) {
+            loadEnumValues(field);
+        }
+
         logger.debug("Customized field: " + field + " params: " + field.getParams());
+    }
+
+    private void loadEnumValues(Field field) {
+        var enumConstants = field.getFieldClass().getEnumConstants();
+        field.addParam("ENUM_CONSTANTS", enumConstants);
     }
 
     /**
