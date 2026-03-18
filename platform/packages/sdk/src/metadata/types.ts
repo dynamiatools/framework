@@ -92,6 +92,19 @@ export interface EntityMetadata extends BasicMetadata {
     viewsEndpoint?: string;
 }
 
+/**
+ * Mirrors `tools.dynamia.domain.EntityReference`, a lightweight reference to an entity instance used in action parameters and elsewhere.
+ *
+ * All fields are nullable in Java and may be absent from the JSON response.
+ */
+export interface EntityReference {
+    id?: string;
+    name?: string;
+    className?: string;
+    description?: string;
+    attributes?: Record<string, unknown>;
+}
+
 // ── Actions ────────────────────────────────────────────────────────────────
 
 export interface ApplicationMetadataActions {
