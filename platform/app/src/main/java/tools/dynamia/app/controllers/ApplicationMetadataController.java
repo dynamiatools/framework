@@ -8,11 +8,14 @@ import tools.dynamia.actions.*;
 import tools.dynamia.app.metadata.*;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.domain.EntityReference;
 import tools.dynamia.domain.ValidationError;
+import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.navigation.NavigationTree;
 import tools.dynamia.viewers.ViewDescriptor;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -277,6 +280,23 @@ public class ApplicationMetadataController {
             return executeAction(action, request, actionMetadata);
         }
         return new ActionExecutionResponse("Entity " + className + " not found", HttpStatus.NOT_FOUND.getReasonPhrase(), 404);
+    }
+
+    @GetMapping(value = "/entities/ref/{alias}/{id}", produces = "application/json")
+    public EntityReference getEntityReference(@PathVariable String alias, @PathVariable String id) {
+        return DomainUtils.getEntityReference(alias, id);
+    }
+
+    @GetMapping(value = "/entities/ref/{alias}/search", produces = "application/json")
+    public List<EntityReference> findEntityReferences(@PathVariable String alias, @RequestParam("q") String query) {
+        var repo = DomainUtils.getEntityReferenceRepositoryByAlias(alias);
+        var params = new HashMap<String, Object>();
+
+
+        if (repo != null) {
+            return repo.find(query, params);
+        }
+        return List.of();
     }
 
 }
