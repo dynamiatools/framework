@@ -1,4 +1,7 @@
-<!-- Combobox.vue: Dropdown select field component -->
+<!-- Combobox.vue: Dropdown select field component.
+     - When field.enum === true, options are built from ENUM_CONSTANTS via resolveFieldEnumConstants.
+     - Otherwise options come from field.params['options'] / params['options'].
+     - The component always renders a native <select> (non-editable by design). -->
 <template>
   <select
     :id="field.name"
@@ -21,6 +24,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { ResolvedField } from '@dynamia-tools/ui-core';
+import { resolveFieldEnumConstants } from '@dynamia-tools/sdk';
 
 interface SelectOption { value: unknown; label: string; }
 
@@ -39,13 +43,29 @@ const proxyValue = computed({
 });
 
 const options = computed<SelectOption[]>(() => {
-  const rawOptions = props.params?.['options'] ?? props.params?.['values'];
+  // Priority 1: enum constants from field metadata (field.enum === true)
+  if (props.field.enum) {
+    const enumConstants = resolveFieldEnumConstants(props.field);
+    if (enumConstants.length > 0) {
+      return enumConstants.map(c => ({ value: c, label: c }));
+    }
+  }
+
+  // Priority 2: explicit options list from field.params or component params
+  const rawOptions =
+    props.field.params?.['options'] ??
+    props.field.params?.['values'] ??
+    props.params?.['options'] ??
+    props.params?.['values'];
+
   if (Array.isArray(rawOptions)) {
-    return rawOptions.map(o => typeof o === 'object' && o !== null
-      ? o as SelectOption
-      : { value: o, label: String(o) }
+    return rawOptions.map(o =>
+      typeof o === 'object' && o !== null
+        ? (o as SelectOption)
+        : { value: o, label: String(o) }
     );
   }
+
   return [];
 });
 </script>

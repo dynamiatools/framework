@@ -1,7 +1,27 @@
 // plugin.ts: Vue plugin that registers all renderers, factories and global components
 
 import type { App } from 'vue';
+import type { DynamiaClient } from '@dynamia-tools/sdk';
 import { ActionRendererRegistry, ViewRendererRegistry, ViewTypes } from '@dynamia-tools/ui-core';
+import { DYNAMIA_CLIENT_KEY } from './composables/useDynamiaClient.js';
+
+/**
+ * Options accepted by the DynamiaVue plugin.
+ *
+ * @example
+ * ```ts
+ * app.use(DynamiaVue, { client: new DynamiaClient({ baseUrl: '...', token: '...' }) });
+ * ```
+ */
+export interface DynamiaVueOptions {
+  /**
+   * Optional DynamiaClient instance.
+   * When provided it is made available to all components via `inject(DYNAMIA_CLIENT_KEY)` /
+   * the `useDynamiaClient()` composable — primarily used by EntityPicker and similar
+   * components that perform direct HTTP calls.
+   */
+  client?: DynamiaClient;
+}
 import { VueFormView } from './views/VueFormView.js';
 import { VueTableView } from './views/VueTableView.js';
 import { VueCrudView } from './views/VueCrudView.js';
@@ -34,7 +54,12 @@ import CrudPageComponent from './components/CrudPage.vue';
  * }</pre>
  */
 export const DynamiaVue = {
-  install(app: App): void {
+  install(app: App, options?: DynamiaVueOptions): void {
+    // Provide the DynamiaClient to the entire component tree when supplied
+    if (options?.client) {
+      app.provide(DYNAMIA_CLIENT_KEY, options.client);
+    }
+
     // Register view renderers
     ViewRendererRegistry.register(ViewTypes.Form, new VueFormRenderer());
     ViewRendererRegistry.register(ViewTypes.Table, new VueTableRenderer());

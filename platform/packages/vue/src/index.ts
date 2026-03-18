@@ -47,9 +47,11 @@ export { useEntityPicker } from './composables/useEntityPicker.js';
 export type { UseEntityPickerOptions } from './composables/useEntityPicker.js';
 export { useNavigation } from './composables/useNavigation.js';
 export type { UseNavigationOptions } from './composables/useNavigation.js';
+export { useDynamiaClient, DYNAMIA_CLIENT_KEY } from './composables/useDynamiaClient.js';
 
 // ── Plugin ─────────────────────────────────────────────────────────────────
 export { DynamiaVue } from './plugin.js';
+export type { DynamiaVueOptions } from './plugin.js';
 
 // ── Global component type augmentation (Volar / vue-tsc) ──────────────────
 // Augments vue's GlobalComponents so TypeScript recognises the components
