@@ -14,3 +14,13 @@ GET {{url}}/entities/mybookstore.domain.Book/views
 
 ### Load Entity Views
 GET {{url}}/entities/mybookstore.domain.Customer/views
+
+### Load Entity Reference
+GET {{url}}/entities/ref/Book/1
+
+
+### Search Entity Reference
+GET {{url}}/entities/ref/Book/search?q=My
+
+### Load Entity  Views with entity references
+GET {{url}}/entities/mybookstore.domain.BookLog/views

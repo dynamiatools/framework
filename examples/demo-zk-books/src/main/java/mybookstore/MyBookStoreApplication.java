@@ -17,6 +17,7 @@
 
 package mybookstore;
 
+import mybookstore.domain.Book;
 import mybookstore.domain.Category;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -117,5 +118,19 @@ public class MyBookStoreApplication { //<1>
         userInfo.setFullName("Administrator");
         userInfo.setImage("/static/user-photo.jpg");
         return userInfo;
+    }
+
+    /**
+     * Entity reference repository to integrate entities in external modules without direct relation
+     * @return repository
+     */
+    @Bean
+    public EntityReferenceRepository<Long> categoryReferenceRepository() {
+        return new DefaultEntityReferenceRepository<>(Category.class, "name");
+    }
+
+    @Bean
+    public EntityReferenceRepository<Long> bookReferenceRepository() {
+        return new DefaultEntityReferenceRepository<>(Book.class, "title");
     }
 }
