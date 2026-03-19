@@ -24,88 +24,91 @@
 -->
 <template>
   <div
-    class="dynamia-entity-picker"
-    :class="{ 'is-loading': loading, 'has-value': !!modelValue, 'is-open': showDropdown }"
+      class="dynamia-entity-picker"
+      :class="{ 'is-loading': loading, 'has-value': !!modelValue, 'is-open': showDropdown }"
   >
     <!-- ── Selected value display (when a value is set and not actively searching) ── -->
     <div v-if="selectedDisplay && !isSearching" class="dynamia-entity-picker-value">
       <span class="dynamia-entity-picker-label">{{ selectedDisplay }}</span>
       <button
-        v-if="!readOnly"
-        type="button"
-        class="dynamia-entity-picker-btn dynamia-entity-picker-edit"
-        :title="'Change selection'"
-        aria-label="Change selection"
-        @click="startSearch"
-      >✎</button>
+          v-if="!readOnly"
+          type="button"
+          class="dynamia-entity-picker-btn dynamia-entity-picker-edit"
+          :title="'Change selection'"
+          aria-label="Change selection"
+          @click="startSearch"
+      >✎
+      </button>
       <button
-        v-if="!readOnly"
-        type="button"
-        class="dynamia-entity-picker-btn dynamia-entity-picker-clear"
-        :title="'Clear selection'"
-        aria-label="Clear selection"
-        @click="handleClear"
-      >✕</button>
+          v-if="!readOnly"
+          type="button"
+          class="dynamia-entity-picker-btn dynamia-entity-picker-clear"
+          :title="'Clear selection'"
+          aria-label="Clear selection"
+          @click="handleClear"
+      >✕
+      </button>
     </div>
 
     <!-- ── Search input (shown when no value yet OR actively searching) ── -->
     <div v-if="!modelValue || isSearching" class="dynamia-entity-picker-search">
       <input
-        ref="inputRef"
-        v-model="searchText"
-        type="text"
-        :id="field.name"
-        :placeholder="placeholder"
-        :disabled="readOnly"
-        :aria-label="field.resolvedLabel"
-        :aria-expanded="showDropdown"
-        :aria-autocomplete="'list'"
-        :aria-controls="`${field.name}-listbox`"
-        :aria-activedescendant="highlightIndex >= 0 ? `${field.name}-opt-${highlightIndex}` : undefined"
-        :aria-busy="loading"
-        class="dynamia-entity-picker-input"
-        autocomplete="off"
-        role="combobox"
-        @input="handleInput"
-        @blur="handleBlur"
-        @keydown="handleKeydown"
+          ref="inputRef"
+          v-model="searchText"
+          type="text"
+          :id="field.name"
+          :placeholder="placeholder"
+          :disabled="readOnly"
+          :aria-label="field.resolvedLabel"
+          :aria-expanded="showDropdown"
+          :aria-autocomplete="'list'"
+          :aria-controls="`${field.name}-listbox`"
+          :aria-activedescendant="highlightIndex >= 0 ? `${field.name}-opt-${highlightIndex}` : undefined"
+          :aria-busy="loading"
+          class="dynamia-entity-picker-input"
+          autocomplete="off"
+          role="combobox"
+          @input="handleInput"
+          @blur="handleBlur"
+          @keydown="handleKeydown"
       />
       <span v-if="loading" class="dynamia-entity-picker-spinner" aria-hidden="true" title="Searching…">⟳</span>
       <button
-        v-if="isSearching && !readOnly"
-        type="button"
-        class="dynamia-entity-picker-btn dynamia-entity-picker-cancel"
-        aria-label="Cancel search"
-        @click="cancelSearch"
-      >✕</button>
+          v-if="isSearching && !readOnly"
+          type="button"
+          class="dynamia-entity-picker-btn dynamia-entity-picker-cancel"
+          aria-label="Cancel search"
+          @click="cancelSearch"
+      >✕
+      </button>
     </div>
 
     <!-- ── Results dropdown ── -->
     <ul
-      v-if="showDropdown"
-      :id="`${field.name}-listbox`"
-      class="dynamia-entity-picker-dropdown"
-      role="listbox"
-      :aria-label="`Results for ${field.resolvedLabel}`"
+        v-if="showDropdown"
+        :id="`${field.name}-listbox`"
+        class="dynamia-entity-picker-dropdown"
+        role="listbox"
+        :aria-label="`Results for ${field.resolvedLabel}`"
     >
       <li
-        v-if="results.length === 0 && !loading"
-        class="dynamia-entity-picker-empty"
-        role="option"
-        aria-disabled="true"
+          v-if="results.content.length === 0 && !loading"
+          class="dynamia-entity-picker-empty"
+          role="option"
+          aria-disabled="true"
       >
         No results found
       </li>
       <li
-        v-for="(item, index) in results"
-        :key="getItemId(item) != null ? String(getItemId(item)) : index"
-        :id="`${field.name}-opt-${index}`"
-        class="dynamia-entity-picker-option"
-        :class="{ 'is-highlighted': highlightIndex === index }"
-        role="option"
-        :aria-selected="highlightIndex === index"
-        @mousedown.prevent="handleSelect(item)"
-        @mouseover="highlightIndex = index"
+          v-for="(item, index) in results.content"
+          :key="getItemId(item) != null ? String(getItemId(item)) : index"
+          :id="`${field.name}-opt-${index}`"
+          class="dynamia-entity-picker-option"
+          :class="{ 'is-highlighted': highlightIndex === index }"
+          role="option"
+          :aria-selected="highlightIndex === index"
+          @mousedown.prevent="handleSelect(item)"
+          @mouseover="highlightIndex = index"
       >
         <slot name="item" :item="item">{{ getItemDisplay(item) }}</slot>
       </li>
@@ -117,9 +120,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue';
-import type { ResolvedField } from '@dynamia-tools/ui-core';
-import { useDynamiaClient } from '../../composables/useDynamiaClient.js';
+import {computed, nextTick, onBeforeUnmount, ref, watch} from 'vue';
+import type {ResolvedField} from '@dynamia-tools/ui-core';
+import {useDynamiaClient} from '../../composables/useDynamiaClient.js';
+import type {CrudListResult} from "@dynamia-tools/sdk";
+
+function createEmptyCrudListResult(): CrudListResult {
+  return {
+    content: [],
+    total: 0,
+    page: 0,
+    pageSize: 0,
+    totalPages: 0,
+  };
+}
 
 const props = defineProps<{
   field: ResolvedField;
@@ -135,7 +149,7 @@ const client = useDynamiaClient();
 
 // ── Reactive state ────────────────────────────────────────────────────────
 const searchText = ref('');
-const results = ref<unknown[]>([]);
+const results = ref<CrudListResult>(createEmptyCrudListResult());
 const loading = ref(false);
 const error = ref<string | null>(null);
 const isSearching = ref(false);
@@ -152,16 +166,14 @@ const fieldParams = computed<Record<string, unknown>>(() => ({
   ...props.field.params,
 }));
 
-const placeholder    = computed(() => String(fieldParams.value['placeholder']           ?? 'Search…'));
-const displayField   = computed(() => String(fieldParams.value['displayField']           ?? 'name'));
-const valueField     = computed(() => String(fieldParams.value['valueField']             ?? 'id'));
-const returnValue    = computed(() => String(fieldParams.value['returnValue']            ?? 'id'));
-const minChars       = computed(() => Number(fieldParams.value['minChars']               ?? 2));
-const debounceMs     = computed(() => Number(fieldParams.value['debounce']               ?? 300));
-const limitRows      = computed(() => Number(fieldParams.value['limit']                  ?? 20));
-const entityAlias    = computed(() => fieldParams.value['entityAlias']    as string | undefined);
-const virtualPath    = computed(() => fieldParams.value['virtualPath']    as string | undefined);
-const searchEndpoint = computed(() => fieldParams.value['entitySearchEndpoint'] as string | undefined);
+const placeholder = computed(() => String(fieldParams.value['placeholder'] ?? 'Search…'));
+const displayField = computed(() => String(fieldParams.value['displayField'] ?? 'name'));
+const valueField = computed(() => String(fieldParams.value['valueField'] ?? 'id'));
+const returnValue = computed(() => String(fieldParams.value['returnValue'] ?? 'id'));
+const minChars = computed(() => Number(fieldParams.value['minChars'] ?? 2));
+const debounceMs = computed(() => Number(fieldParams.value['debounce'] ?? 300));
+const limitRows = computed(() => Number(fieldParams.value['limit'] ?? 20));
+const virtualPath = computed(() => fieldParams.value['virtualPath'] as string | undefined);
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 function getItemId(item: unknown): unknown {
@@ -184,31 +196,12 @@ const selectedDisplay = computed<string>(() => {
   return String(val);
 });
 
-/** Build the relative path to the search endpoint */
-function buildSearchPath(): string {
-  if (searchEndpoint.value) return searchEndpoint.value;
-  if (virtualPath.value)    return `/api/${virtualPath.value.replace(/^\/+/, '')}`;
-  if (entityAlias.value)    return `/api/entities/${encodeURIComponent(entityAlias.value)}/search`;
-  return '';
-}
-
-/** Normalize heterogeneous response formats into a plain array */
-function normalizeResults(data: unknown): unknown[] {
-  if (Array.isArray(data)) return data;
-  if (data && typeof data === 'object') {
-    const obj = data as Record<string, unknown>;
-    if (Array.isArray(obj['content'])) return obj['content']; // CrudListResult
-    if (Array.isArray(obj['items']))   return obj['items'];   // { items, total }
-    if (Array.isArray(obj['data']))    return obj['data'];     // CrudRawResponse
-  }
-  return [];
-}
 
 // ── Show dropdown when there are results (or when loading in-progress) ────
 const showDropdown = computed(() =>
-  isSearching.value &&
-  searchText.value.length >= minChars.value &&
-  (results.value.length > 0 || loading.value)
+    isSearching.value &&
+    searchText.value.length >= minChars.value &&
+    ((results.value?.content?.length ?? 0) > 0 || loading.value)
 );
 
 // ── Core search logic ─────────────────────────────────────────────────────
@@ -216,49 +209,29 @@ async function performSearch(query: string) {
   const seq = ++searchSeq;
   loading.value = true;
   error.value = null;
-  results.value = [];
+  results.value = createEmptyCrudListResult();
 
   try {
-    // 1. Custom searcher function (field.params.searcher)
-    const searcher = fieldParams.value['searcher'];
-    if (typeof searcher === 'function') {
-      const raw = await (searcher as (q: string) => Promise<unknown[]>)(query);
-      if (seq !== searchSeq) return;
-      results.value = Array.isArray(raw) ? raw : [];
-      return;
-    }
 
-    // 2. HTTP search via DynamiaClient or native fetch
-    const path = buildSearchPath();
-    if (!path) {
-      // No endpoint configured — cannot search
-      // NOTE: backend must implement GET {path}?q=&page=&limit= returning CrudListResult or { items, total }
-      results.value = [];
-      return;
-    }
-
-    let data: unknown;
+    let data: CrudListResult = createEmptyCrudListResult();
     if (client) {
+
+      if (!virtualPath.value) {
+        error.value = 'EntityPicker: missing "virtualPath" parameter';
+        return;
+      }
       // Auth headers handled by HttpClient
-      data = await client.http.get<unknown>(path, { q: query, page: 1, limit: limitRows.value });
+      data = await client.crud(virtualPath?.value).findAll({q: query, page: 1, limit: limitRows.value});
     } else {
-      // Fallback: plain fetch (no auth — same-origin / proxy assumed)
-      const qs = new URLSearchParams({
-        q: query,
-        page: '1',
-        limit: String(limitRows.value),
-      }).toString();
-      const res = await fetch(`${path}?${qs}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      data = await res.json();
+      return;
     }
 
     if (seq !== searchSeq) return; // discard stale response
-    results.value = normalizeResults(data);
+    results.value = data;
   } catch (e: unknown) {
     if (seq !== searchSeq) return;
     error.value = e instanceof Error ? e.message : 'Search failed';
-    results.value = [];
+    results.value = createEmptyCrudListResult();
   } finally {
     if (seq === searchSeq) loading.value = false;
   }
@@ -267,7 +240,7 @@ async function performSearch(query: string) {
 // ── Event handlers ────────────────────────────────────────────────────────
 function handleInput() {
   highlightIndex.value = -1;
-  results.value = [];
+  results.value = createEmptyCrudListResult();
   error.value = null;
 
   if (debounceTimer) {
@@ -284,7 +257,7 @@ function handleInput() {
 
 function handleSelect(item: unknown) {
   isSearching.value = false;
-  results.value = [];
+  results.value = createEmptyCrudListResult();
   searchText.value = '';
   highlightIndex.value = -1;
   emit('update:modelValue', returnValue.value === 'object' ? item : getItemId(item) ?? item);
@@ -293,7 +266,7 @@ function handleSelect(item: unknown) {
 function handleClear() {
   emit('update:modelValue', null);
   searchText.value = '';
-  results.value = [];
+  results.value = createEmptyCrudListResult();
   isSearching.value = false;
   error.value = null;
 }
@@ -306,7 +279,7 @@ function startSearch() {
 function cancelSearch() {
   isSearching.value = false;
   searchText.value = '';
-  results.value = [];
+  results.value = createEmptyCrudListResult();
   error.value = null;
 }
 
@@ -316,24 +289,25 @@ function handleBlur() {
     if (isSearching.value && !searchText.value) {
       isSearching.value = false;
     }
-    results.value = [];
+    results.value = createEmptyCrudListResult();
   }, 200);
 }
 
 function handleKeydown(e: KeyboardEvent) {
+  const items = results.value.content;
   switch (e.key) {
     case 'ArrowDown':
       e.preventDefault();
-      highlightIndex.value = Math.min(highlightIndex.value + 1, results.value.length - 1);
+      highlightIndex.value = Math.min(highlightIndex.value + 1, items.length - 1);
       break;
     case 'ArrowUp':
       e.preventDefault();
       highlightIndex.value = Math.max(highlightIndex.value - 1, 0);
       break;
     case 'Enter':
-      if (highlightIndex.value >= 0 && results.value[highlightIndex.value] != null) {
+      if (highlightIndex.value >= 0 && items[highlightIndex.value] != null) {
         e.preventDefault();
-        handleSelect(results.value[highlightIndex.value]!);
+        handleSelect(items[highlightIndex.value]!);
       }
       break;
     case 'Escape':

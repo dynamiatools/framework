@@ -187,18 +187,13 @@ async function performSearch(query: string) {
   results.value = [];
 
   try {
-    const searcher = fieldParams.value['searcher'];
-    if (typeof searcher === 'function') {
-      const raw = await (searcher as (q: string) => Promise<unknown[]>)(query);
-      if (seq !== searchSeq) return;
-      results.value = Array.isArray(raw) ? raw : [];
-      return;
-    }
-
-
     let data: EntityReference[] = [];
     if (client) {
-      data = await client.metadata.findEntityReferences(entityAlias, query);
+      // Ensure we pass the actual alias string (computed ref -> .value)
+      if (!entityAlias.value) {
+        throw new Error('EntityRefPicker: missing "entityAlias" parameter');
+      }
+      data = await client.metadata.findEntityReferences(entityAlias.value, query);
     }
 
     if (seq !== searchSeq) return;
