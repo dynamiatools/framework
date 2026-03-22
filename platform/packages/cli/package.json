@@ -1,0 +1,59 @@
+{
+  "name": "@dynamia-tools/cli",
+  "version": "26.3.0",
+  "description": "Dynamia Tools CLI — Scaffold new Dynamia Platform projects",
+  "keywords": [
+    "dynamia",
+    "cli",
+    "scaffold",
+    "spring-boot",
+    "vue",
+    "typescript"
+  ],
+  "homepage": "https://dynamia.tools",
+  "bugs": {
+    "url": "https://github.com/dynamiatools/framework/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dynamiatools/framework.git",
+    "directory": "platform/packages/cli"
+  },
+  "license": "Apache-2.0",
+  "author": "Dynamia Soluciones IT SAS",
+  "type": "module",
+  "bin": {
+    "dynamia": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "cli.properties",
+    "install.sh",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.0.0",
+    "chalk": "^5.0.0",
+    "execa": "^9.0.0",
+    "ora": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
