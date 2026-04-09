@@ -62,7 +62,7 @@
         <mongodb.version>1</mongodb.version>
 
         <!-- Web -->
-        <zk.version>10.1.0-jakarta</zk.version>
+        <zk.version>10.2.1-jakarta</zk.version>
         <dynamia.zk.version>1.1.0</dynamia.zk.version>
         <aws.version>2.41.10</aws.version>
 
