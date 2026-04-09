@@ -16,6 +16,10 @@
  */
 package tools.dynamia.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -89,6 +93,8 @@ import java.util.Map;
  * @see tools.dynamia.domain.EntityReferenceRepository
  * @see tools.dynamia.domain.DefaultEntityReferenceRepository
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({ "id", "name", "className", "description", "attributes" })
 public class EntityReference<ID extends Serializable> implements Serializable {
 
     /**
@@ -119,6 +125,7 @@ public class EntityReference<ID extends Serializable> implements Serializable {
     /**
      * Additional custom attributes for the referenced entity
      */
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private final Map<String, Object> attributes = new HashMap<>();
 
     /**

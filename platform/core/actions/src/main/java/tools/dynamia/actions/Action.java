@@ -58,8 +58,7 @@ import java.util.Map;
  *     }
  * </pre>
  * <p>
- * Actions can be triggered from UI components, toolbars, menus, or programmatically, and can respond to external requests
- * such as REST API calls using {@link #execute(ActionExecutionRequest)}.
+ * Actions can be triggered from UI components, toolbars, menus, or programmatically.
  * </p>
  *
  * @author Mario A. Serrano Leones
@@ -223,29 +222,7 @@ public interface Action extends Comparable<Action>, Serializable {
      */
     Action getParent();
 
-    /**
-     * Called when the action is performed server-side (e.g., from UI or logic).
-     * <p>
-     * Implement this method to define the behavior when the action is triggered by the user or system.
-     * </p>
-     *
-     * @param evt the action event
-     */
-    void actionPerformed(ActionEvent evt);
 
-    /**
-     * Executes this action using an {@link ActionExecutionRequest} instead of an {@link ActionEvent}.
-     * <p>
-     * Implement this method to process the action result for external systems (e.g., REST API, automation).
-     * The default implementation returns a response with success=false.
-     * </p>
-     *
-     * @param request the execution request
-     * @return the execution response
-     */
-    default ActionExecutionResponse execute(ActionExecutionRequest request) {
-        return new ActionExecutionResponse(false);
-    }
 
     /**
      * Converts this action into an {@link ActionReference} for lightweight representation.

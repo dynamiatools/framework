@@ -3,14 +3,16 @@ import { MetadataApi } from './metadata/api.js';
 import { ActionsApi } from './metadata/actions.js';
 import { CrudResourceApi } from './cruds/crud-resource.js';
 import { CrudServiceApi } from './cruds/crud-service.js';
-import { ReportsApi } from './reports/api.js';
-import { FilesApi } from './files/api.js';
-import { SaasApi } from './saas/api.js';
 import { ScheduleApi } from './schedule/api.js';
 import type { DynamiaClientConfig } from './types.js';
 
 /**
  * Root client for the Dynamia Platform REST API.
+ *
+ * Extension-specific APIs (reports, files, saas) are available as separate packages:
+ *   - `@dynamia-tools/reports-sdk`  → `new ReportsApi(client.http)`
+ *   - `@dynamia-tools/files-sdk`    → `new FilesApi(client.http)`
+ *   - `@dynamia-tools/saas-sdk`     → `new SaasApi(client.http)`
  *
  * @example
  * ```typescript
@@ -20,18 +22,13 @@ import type { DynamiaClientConfig } from './types.js';
  * ```
  */
 export class DynamiaClient {
-  private readonly http: HttpClient;
+  /** @internal exposed so extension SDK packages can build their own API instances */
+  readonly http: HttpClient;
 
   /** Application metadata API */
   readonly metadata: MetadataApi;
   /** Global & entity actions API */
   readonly actions: ActionsApi;
-  /** Reports extension API */
-  readonly reports: ReportsApi;
-  /** Entity-files extension API */
-  readonly files: FilesApi;
-  /** SaaS extension API */
-  readonly saas: SaasApi;
   /** Scheduled-tasks API */
   readonly schedule: ScheduleApi;
 
@@ -39,9 +36,6 @@ export class DynamiaClient {
     this.http = new HttpClient(config);
     this.metadata = new MetadataApi(this.http);
     this.actions = new ActionsApi(this.http);
-    this.reports = new ReportsApi(this.http);
-    this.files = new FilesApi(this.http);
-    this.saas = new SaasApi(this.http);
     this.schedule = new ScheduleApi(this.http);
   }
 
@@ -74,6 +68,23 @@ export class DynamiaClient {
   crudService<T = unknown>(className: string): CrudServiceApi<T> {
     return new CrudServiceApi<T>(this.http, className);
   }
+
+  /**
+   * Invalidates the in-memory ViewDescriptor cache held by {@link MetadataApi}.
+   *
+   * Call this after a backend hot-reload or when you know a descriptor has changed,
+   * so the next request fetches a fresh copy from the server.
+   *
+   * @param className - When provided, only entries for that entity class are removed.
+   *   When omitted, the entire cache is cleared.
+   *
+   * @example
+   * // Invalidate just one entity
+   * client.clearViewDescriptorCache('mybookstore.domain.Book');
+   * // Invalidate everything
+   * client.clearViewDescriptorCache();
+   */
+  clearViewDescriptorCache(className?: string): void {
+    this.metadata.clearViewCache(className);
+  }
 }
-
-

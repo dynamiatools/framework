@@ -1,0 +1,26 @@
+{
+  "name": "demo-vue-books",
+  "version": "26.3.1",
+  "description": "Backoffice demo built with Vue 3 + @dynamia-tools/vue",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@dynamia-tools/sdk": "file:../../platform/packages/sdk",
+    "@dynamia-tools/ui-core": "file:../../platform/packages/ui-core",
+    "@dynamia-tools/vue": "file:../../platform/packages/vue",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.3",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.0",
+    "vue-tsc": "^2.2.0"
+  }
+}
+

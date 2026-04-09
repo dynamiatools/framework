@@ -19,6 +19,6 @@ package tools.dynamia.actions;
 /**
  * Extend {@link AbstractAction} and implement {@link ClassAction}
  */
-public abstract class AbstractClassAction extends AbstractAction implements ClassAction {
+public abstract class AbstractClassAction extends AbstractLocalAction implements ClassAction {
 
 }

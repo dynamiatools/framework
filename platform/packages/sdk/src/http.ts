@@ -55,6 +55,17 @@ export class HttpClient {
   private buildUrl(path: string, params?: Record<string, string | number | boolean | undefined | null>): string {
     const base = this.config.baseUrl.replace(/\/$/, '');
     const normalized = path.startsWith('/') ? path : `/${path}`;
+
+    // Empty baseUrl → relative path (e.g. Vite proxy, same-origin usage)
+    if (!base) {
+      if (!params) return normalized;
+      const query = Object.entries(params)
+        .filter(([, v]) => v !== undefined && v !== null)
+        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
+        .join('&');
+      return query ? `${normalized}?${query}` : normalized;
+    }
+
     const url = new URL(`${base}${normalized}`);
 
     if (params) {
@@ -89,6 +100,10 @@ export class HttpClient {
       method,
       headers: this.buildHeaders(),
     };
+
+    if (this.config.corsMode) {
+      init.mode = this.config.corsMode;
+    }
 
     if (this.config.withCredentials) {
       init.credentials = 'include';

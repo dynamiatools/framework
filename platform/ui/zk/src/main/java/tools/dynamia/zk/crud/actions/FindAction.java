@@ -16,9 +16,12 @@
  */
 package tools.dynamia.zk.crud.actions;
 
-import tools.dynamia.actions.*;
-import tools.dynamia.commons.ObjectOperations;
+import tools.dynamia.actions.ActionGroup;
+import tools.dynamia.actions.ActionRenderer;
+import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.ReadableOnly;
 import tools.dynamia.commons.Messages;
+import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.reflect.AccessMode;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
@@ -29,7 +32,6 @@ import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.ViewDescriptor;
-import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.actions.FindActionRenderer;
 import tools.dynamia.zk.crud.CrudController;
 import tools.dynamia.zk.crud.CrudControllerAware;
@@ -140,14 +142,4 @@ public class FindAction extends AbstractCrudAction implements CrudControllerAwar
 
     }
 
-    @Override
-    public ActionExecutionResponse execute(ActionExecutionRequest request) {
-        List result = null;
-        if (request.getData() instanceof String text && request.getDataType() != null) {
-            Class entityClass = ObjectOperations.findClass(request.getDataType());
-            ViewDescriptor descriptor = Viewers.getViewDescriptor(entityClass, "table");
-            result = search(text, new QueryParameters(), entityClass, crudService(), loadFields(descriptor));
-        }
-        return new ActionExecutionResponse(result);
-    }
 }

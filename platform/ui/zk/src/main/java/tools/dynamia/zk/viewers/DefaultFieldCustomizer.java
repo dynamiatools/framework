@@ -27,6 +27,7 @@ import tools.dynamia.commons.DayOfWeek;
 import tools.dynamia.commons.collect.ArrayListMultiMap;
 import tools.dynamia.commons.collect.ListMultiMap;
 import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.domain.Reference;
 import tools.dynamia.integration.sterotypes.Provider;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.FieldCustomizer;
@@ -138,7 +139,30 @@ public class DefaultFieldCustomizer implements FieldCustomizer {
             customizeTimeboxBindings(field);
             customizeDateSelectorBinding(field);
         }
+
+        if (field.isEnum()) {
+            loadEnumValues(field);
+        }
+
+        if (field.isReference()) {
+            loadEntityReferenceAlias(field);
+        }
+
         logger.debug("Customized field: " + field + " params: " + field.getParams());
+    }
+
+    private void loadEntityReferenceAlias(Field field) {
+        if (field.isReference()) {
+            var reference = field.getPropertyInfo().getAnnotation(Reference.class);
+            if (reference != null) {
+                field.addParam("entityAlias", reference.value());
+            }
+        }
+    }
+
+    private void loadEnumValues(Field field) {
+        var enumConstants = field.getFieldClass().getEnumConstants();
+        field.addParam("ENUM_CONSTANTS", enumConstants);
     }
 
     /**

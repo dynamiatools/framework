@@ -4,6 +4,12 @@
 
 `@dynamia-tools/sdk` provides a fully typed, zero-dependency-at-runtime client that covers every REST endpoint exposed by a Dynamia Platform backend: application metadata, navigation tree, entity CRUD, actions, reports, files, SaaS accounts, schedules, and more.
 
+Public API exports include:
+
+- `DynamiaClient`, `DynamiaApiError`
+- API classes: `MetadataApi`, `ActionsApi`, `CrudResourceApi`, `CrudServiceApi`, `ReportsApi`, `FilesApi`, `SaasApi`, `ScheduleApi`
+- Core types for metadata, navigation, CRUD, reports and SaaS responses
+
 ---
 
 ## Table of Contents
@@ -18,10 +24,6 @@
   - [CRUD Navigation API](#crud-navigation-api)
   - [CRUD Service API](#crud-service-api)
   - [Actions API](#actions-api)
-  - [Reports API](#reports-api)
-  - [Files API](#files-api)
-  - [SaaS API](#saas-api)
-  - [Schedule API](#schedule-api)
 - [TypeScript Types](#typescript-types)
 - [Error Handling](#error-handling)
 - [Contributing](#contributing)
@@ -61,6 +63,7 @@ console.log(metadata.name, metadata.version);
 
 // List entities of a CRUD page
 const books = await client.crud('books').findAll();
+console.log(books.content.length, books.totalPages);
 ```
 
 ---
@@ -100,6 +103,8 @@ const client = new DynamiaClient({
   withCredentials: true, // sends session cookies automatically
 });
 ```
+
+> Note: the SDK does not include a dedicated `login()` helper. Perform login with your preferred HTTP client (or `fetch`) and then instantiate `DynamiaClient` with cookie forwarding (`withCredentials`) or a token.
 
 ---
 
@@ -185,11 +190,11 @@ The navigation tree is also accessible through the metadata API (see above). Use
 ```typescript
 const tree: NavigationTree = await client.metadata.getNavigation();
 
-tree.modules.forEach(module => {
+tree.navigation.forEach(module => {
   console.log(module.name);
-  module.groups.forEach(group => {
-    group.pages.forEach(page => {
-      console.log(`  ${page.name} → ${page.virtualPath}`);
+  module.children?.forEach(groupOrPage => {
+    groupOrPage.children?.forEach(page => {
+      console.log(`  ${page.name} → ${page.internalPath}`);
     });
   });
 });
@@ -206,10 +211,11 @@ Auto-generated REST endpoints for every `CrudPage` registered in the platform's 
 const books = client.crud('store/catalog/books');
 
 // List all (with pagination)
-const page1: CrudPage<Book> = await books.findAll({ page: 1, size: 20 });
+const page1: CrudListResult<Book> = await books.findAll({ page: 1, size: 20 });
 // page1.content   → Book[]
 // page1.total     → total records
 // page1.pageSize  → current page size
+// page1.totalPages → total pages
 
 // Filter by query parameters
 const filtered = await books.findAll({ q: 'clean', author: 'Martin' });
@@ -301,97 +307,6 @@ const entityResponse: ActionExecutionResponse = await client.actions.executeEnti
 
 ---
 
-### Reports API
-
-Access the **Reports extension** (`/api/reports`). Requires the `dynamia-reports` module installed on the server.
-
-```typescript
-// List all exportable reports
-const reports: ReportDTO[] = await client.reports.list();
-
-// Fetch report data (GET with query-string filters)
-const data = await client.reports.get('sales', 'monthly-summary', {
-  year: '2026',
-  month: '03',
-});
-
-// Fetch report data (POST with structured filters)
-const data2 = await client.reports.post('sales', 'monthly-summary', {
-  filters: [
-    { name: 'year', value: '2026' },
-    { name: 'status', value: 'CLOSED' },
-  ],
-});
-```
-
-**Endpoint map:**
-
-| Method | Endpoint | SDK call |
-|--------|----------|----------|
-| `GET` | `/api/reports` | `reports.list()` |
-| `GET` | `/api/reports/{group}/{endpoint}` | `reports.get(group, endpoint, params?)` |
-| `POST` | `/api/reports/{group}/{endpoint}` | `reports.post(group, endpoint, filters?)` |
-
----
-
-### Files API
-
-Download files managed by the **entity-files** extension.
-
-```typescript
-// Get a file as a Blob
-const blob: Blob = await client.files.download('profile-picture.png', 'uuid-abc-123');
-
-// Get a direct download URL (useful for <img src="...">)
-const url: string = client.files.getUrl('profile-picture.png', 'uuid-abc-123');
-```
-
-**Endpoint map:**
-
-| Method | Endpoint | SDK call |
-|--------|----------|----------|
-| `GET` | `/storage/{file}?uuid={uuid}` | `files.download(file, uuid)` |
-
----
-
-### SaaS API
-
-Manage multi-tenant accounts via the **SaaS extension** (`/api/saas`).
-
-```typescript
-// Get account information by UUID
-const account: AccountDTO = await client.saas.getAccount('account-uuid-here');
-```
-
-**Endpoint map:**
-
-| Method | Endpoint | SDK call |
-|--------|----------|----------|
-| `GET` | `/api/saas/account/{uuid}` | `saas.getAccount(uuid)` |
-
----
-
-### Schedule API
-
-Manually trigger periodic tasks registered in the platform.
-
-```typescript
-await client.schedule.executeMorning();
-await client.schedule.executeMidday();
-await client.schedule.executeAfternoon();
-await client.schedule.executeEvening();
-```
-
-**Endpoint map:**
-
-| Method | Endpoint | SDK call |
-|--------|----------|----------|
-| `GET` | `/schedule/execute-tasks/morning` | `schedule.executeMorning()` |
-| `GET` | `/schedule/execute-tasks/midday` | `schedule.executeMidday()` |
-| `GET` | `/schedule/execute-tasks/afternoon` | `schedule.executeAfternoon()` |
-| `GET` | `/schedule/execute-tasks/evening` | `schedule.executeEvening()` |
-
----
 
 ## TypeScript Types
 
@@ -400,10 +315,15 @@ Key types exported by the SDK (mirroring the Java server model):
 ```typescript
 // Core
 interface ApplicationMetadata { name: string; version: string; description?: string; /* ... */ }
-interface NavigationTree { modules: NavigationModule[]; }
-interface NavigationModule { id: string; name: string; groups: NavigationGroup[]; }
-interface NavigationGroup { id: string; name: string; pages: NavigationPage[]; }
-interface NavigationPage { id: string; name: string; virtualPath: string; prettyVirtualPath: string; }
+interface NavigationTree { navigation: NavigationNode[]; }
+interface NavigationNode {
+  id: string;
+  name: string;
+  type?: string;              // "Module" | "PageGroup" | "Page" | "CrudPage" | ...
+  internalPath?: string;      // route path used by frontends
+  path?: string;              // display path
+  children?: NavigationNode[];
+}
 
 // Entities
 interface ApplicationMetadataEntities { entities: EntityMetadata[]; }
@@ -419,10 +339,13 @@ interface ActionExecutionResponse { message: string; status: string; code: numbe
 // Views
 interface ViewDescriptor { id: string; beanClass: string; viewTypeName: string; fields: ViewField[]; params: Record<string, unknown>; }
 interface ViewDescriptorMetadata { view: string; descriptor: ViewDescriptor; }
-interface ViewField { name: string; fieldClass?: string; label?: string; visible?: boolean; params: Record<string, unknown>; }
+interface ViewField { name: string; fieldClass?: string; label?: string; visible?: boolean; required?: boolean; params: Record<string, unknown>; }
 
 // CRUD
-interface CrudListResult<T = unknown> { content: T[]; total: number; page: number; pageSize: number; }
+interface CrudPageable { totalSize: number; pageSize: number; firstResult: number; page: number; pagesNumber: number; }
+interface CrudRawResponse<T = unknown> { data: T[]; pageable: CrudPageable | null; response: string; }
+interface CrudListResult<T = unknown> { content: T[]; total: number; page: number; pageSize: number; totalPages: number; }
+type CrudQueryParams = Record<string, string | number | boolean | undefined | null>;
 
 // Reports
 interface ReportDTO { id: string; name: string; group: string; endpoint: string; description?: string; }
@@ -449,6 +372,8 @@ try {
   }
 }
 ```
+
+`DynamiaApiError` also includes `status`, `url`, and `body` to support centralized logging and UI error mapping.
 
 ---
 

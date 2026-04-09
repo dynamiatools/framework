@@ -65,9 +65,7 @@ import static tools.dynamia.commons.Lambdas.ifNotNull;
  *     }
  * </pre>
  * <p>
- * Actions can be triggered from UI components, toolbars, menus, or programmatically, and can respond to external requests
- * such as REST API calls using {@link #execute(ActionExecutionRequest)}.
- * </p>
+ * Actions can be triggered from UI components, toolbars, menus, or programmatically.
  * <p>
  * <b>Localization:</b> To support multiple languages, place Messages.properties files in the same package as your action class.
  * For example: Messages_es.properties, Messages_fr.properties, etc.

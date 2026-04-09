@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ClassAction;
+import tools.dynamia.actions.RemoteAction;
 import tools.dynamia.app.controllers.ApplicationMetadataController;
 import tools.dynamia.commons.Streams;
 import tools.dynamia.crud.CrudAction;
+import tools.dynamia.crud.CrudRemoteAction;
 
 import java.util.List;
 
@@ -55,7 +57,10 @@ public class ActionMetadata extends BasicMetadata {
      * The underlying {@link Action} instance. This field is ignored during JSON serialization.
      */
     @JsonIgnore
-    private Action action;
+    private RemoteAction action;
+
+    private String type;
+    private String className;
 
     /**
      * Default constructor for serialization and manual instantiation.
@@ -71,13 +76,18 @@ public class ActionMetadata extends BasicMetadata {
      *
      * @param action the {@link Action} instance to extract metadata from
      */
-    public ActionMetadata(Action action) {
+    public ActionMetadata(RemoteAction action) {
         setId(action.getId());
         setName(action.getLocalizedName());
         setDescription(action.getLocalizedDescription());
         setIcon(action.getImage());
         setEndpoint(ApplicationMetadataController.PATH + "/actions/execute/" + getId());
-
+        setClassName(action.getClass().getSimpleName());
+        setType(switch (action) {
+            case CrudRemoteAction crudAction -> "CrudAction";
+            case ClassAction classAction -> "ClassAction";
+            default -> "Action";
+        });
         var actionRenderer = action.getRenderer();
         this.renderer = actionRenderer != null ? actionRenderer.getClass().getName() : null;
         this.group = action.getGroup() != null ? action.getGroup().getName() : null;
@@ -89,6 +99,8 @@ public class ActionMetadata extends BasicMetadata {
         if (action instanceof ClassAction classAction) {
             this.applicableClasses = Streams.mapAndCollect(classAction.getApplicableClasses(), a -> a.targetClass() == null ? "all" : a.targetClass().getName());
         }
+
+        this.action = action;
     }
 
     /**
@@ -170,7 +182,23 @@ public class ActionMetadata extends BasicMetadata {
      *
      * @return the {@link Action} instance
      */
-    public Action getAction() {
+    public RemoteAction getAction() {
         return action;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
     }
 }

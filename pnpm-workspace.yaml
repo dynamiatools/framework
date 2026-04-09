@@ -1,0 +1,10 @@
+packages:
+  # Core platform packages
+  - 'platform/packages/*'
+  # Extension SDK packages
+  - 'extensions/*/packages/*'
+
+
+allowBuilds:
+  esbuild: true
+

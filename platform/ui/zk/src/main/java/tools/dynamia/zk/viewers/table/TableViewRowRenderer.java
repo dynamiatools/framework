@@ -64,7 +64,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
     private TableView tableView;
     private List<Field> fields;
 
-    private SimpleCache<String, Action> actionsCache = new SimpleCache<>();
+    private SimpleCache<String, LocalAction> actionsCache = new SimpleCache<>();
     private ActionLoader<ViewAction> actionLoader = new ActionLoader<>(ViewAction.class);
 
     /**
@@ -302,7 +302,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
 
             if (field.getAction() != null) {
                 String actionId = field.getAction().getId();
-                Action action = actionsCache.getOrLoad(actionId, key -> ActionLoader.findActionById(Action.class, actionId));
+                var action = actionsCache.getOrLoad(actionId, key -> ActionLoader.findActionById(LocalAction.class, actionId));
                 if (action != null) {
                     if (comp instanceof HtmlBasedComponent hcomp) {
                         if (hcomp.getTooltiptext() == null && action.getDescription() != null) {

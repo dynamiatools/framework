@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/sdk",
-  "version": "26.3.1",
+  "version": "26.3.2",
   "website": "https://dynamia.tools",
   "description": "Official JavaScript / TypeScript client SDK for Dynamia Platform REST APIs",
   "keywords": [
@@ -28,6 +28,7 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"

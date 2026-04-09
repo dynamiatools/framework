@@ -17,12 +17,9 @@
 package tools.dynamia.domain.util;
 
 import tools.dynamia.commons.BeanSorter;
-import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.Identifiable;
-import tools.dynamia.domain.CurrencyExchangeProvider;
-import tools.dynamia.domain.EntityReferenceRepository;
-import tools.dynamia.domain.EntityUtilsProvider;
-import tools.dynamia.domain.ValidationError;
+import tools.dynamia.commons.ObjectOperations;
+import tools.dynamia.domain.*;
 import tools.dynamia.domain.query.Parameter;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.services.GraphCrudService;
@@ -63,9 +60,8 @@ public abstract class DomainUtils {
      * @param original    the original string to clean
      * @param onlyNumbers if true, keeps only digits and hyphens; if false, keeps letters, digits, and whitespace
      * @return the cleaned string in uppercase
-     *
      * @see #cleanString(String)
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * String result = cleanString("Hello-123!", false); // Returns "HELLO 123"
@@ -95,9 +91,8 @@ public abstract class DomainUtils {
      *
      * @param original the original string to clean
      * @return the cleaned string in uppercase, containing only letters, digits, and whitespace
-     *
      * @see #cleanString(String, boolean)
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * String result = cleanString("Hello, World! 123"); // Returns "HELLO WORLD 123"
@@ -114,7 +109,7 @@ public abstract class DomainUtils {
      *
      * @param src the source object to convert into a searchable pattern
      * @return a string pattern with wildcards, suitable for SQL LIKE queries; returns "%" if src is null
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * String pattern = buildSearcheableString("John Doe"); // Returns "%J%o%h%n%D%o%e%"
@@ -152,7 +147,7 @@ public abstract class DomainUtils {
      * @param queryText the original query string
      * @param sorter    the BeanSorter containing column name and sort direction
      * @return the query string with ORDER BY clause appended, or the original query if sorter is null
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * BeanSorter sorter = new BeanSorter("name", true);
@@ -183,7 +178,7 @@ public abstract class DomainUtils {
      * @param n     the BigDecimal number to round
      * @param zeros the number of zeros in the rounding pattern (e.g., 2 for hundreds, 3 for thousands)
      * @return the rounded BigDecimal value
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * BigDecimal result = simpleRound(new BigDecimal("1567"), 2); // Returns 1600 (rounds to nearest 100)
@@ -213,7 +208,7 @@ public abstract class DomainUtils {
      *
      * @param n the BigDecimal number to round; can be null
      * @return the rounded BigDecimal with no decimal places, or null if input is null
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * BigDecimal result = simpleRound(new BigDecimal("1234.56")); // Returns 1234
@@ -242,7 +237,7 @@ public abstract class DomainUtils {
      * @param number          the number to format
      * @param numberReference the reference number that determines the total length
      * @return the formatted string with leading zeros
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * String result = formatNumberWithZeroes(5, 1000);  // Returns "0005"
@@ -261,7 +256,7 @@ public abstract class DomainUtils {
      *
      * @param values the BigDecimal values to sum
      * @return the sum of all values; returns BigDecimal.ZERO if no values are provided
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * BigDecimal result = sum(new BigDecimal("10"), new BigDecimal("20"), new BigDecimal("30"));
@@ -282,7 +277,7 @@ public abstract class DomainUtils {
      *
      * @param values the BigDecimal values to subtract; the first value is the minuend
      * @return the result after subtracting all values sequentially, or null if no values provided
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * BigDecimal result = substract(new BigDecimal("100"), new BigDecimal("30"), new BigDecimal("20"));
@@ -310,12 +305,12 @@ public abstract class DomainUtils {
      * @param fieldName the name of the field to sum (must be a BigDecimal type)
      * @return the sum of all field values across the collection
      * @throws ValidationError if the field cannot be accessed or summed
-     *
-     * Example:
-     * <pre>{@code
-     * List<Product> products = Arrays.asList(product1, product2, product3);
-     * BigDecimal totalPrice = sumField(products, Product.class, "price");
-     * }</pre>
+     *                         <p>
+     *                         Example:
+     *                         <pre>{@code
+     *                                                 List<Product> products = Arrays.asList(product1, product2, product3);
+     *                                                 BigDecimal totalPrice = sumField(products, Product.class, "price");
+     *                                                 }</pre>
      */
     public static BigDecimal sumField(Collection data, Class clazz, String fieldName) {
         BigDecimal result = BigDecimal.ZERO;
@@ -338,9 +333,8 @@ public abstract class DomainUtils {
      *
      * @param entityClass the entity class to find the repository for
      * @return the EntityReferenceRepository for the entity class, or null if not found
-     *
      * @see #getEntityReferenceRepository(String)
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * EntityReferenceRepository repo = getEntityReferenceRepository(Customer.class);
@@ -356,7 +350,7 @@ public abstract class DomainUtils {
      *
      * @param className the fully qualified class name of the entity
      * @return the EntityReferenceRepository for the entity, or null if not found or className is null
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * EntityReferenceRepository repo = getEntityReferenceRepository("com.example.Customer");
@@ -381,7 +375,7 @@ public abstract class DomainUtils {
      *
      * @param alias the alias to search for
      * @return the EntityReferenceRepository matching the alias, or null if not found or alias is null
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * EntityReferenceRepository repo = getEntityReferenceRepositoryByAlias("customer");
@@ -405,7 +399,7 @@ public abstract class DomainUtils {
      *
      * @param number the BigDecimal number to check
      * @return the original number if not null, or BigDecimal.ZERO if null
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * BigDecimal result = getZeroIfNull(null);              // Returns BigDecimal.ZERO
@@ -423,9 +417,8 @@ public abstract class DomainUtils {
      *
      * @return the CrudService implementation
      * @throws NotImplementationFoundException if no CrudService implementation is found
-     *
      * @see #lookupCrudService(Class)
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * CrudService service = lookupCrudService();
@@ -448,9 +441,8 @@ public abstract class DomainUtils {
      * @param crudClass the class of the CrudService implementation to find
      * @return the CrudService implementation of the specified type
      * @throws NotImplementationFoundException if no implementation of the specified type is found
-     *
      * @see #lookupCrudService()
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * GraphCrudService graphService = lookupCrudService(GraphCrudService.class);
@@ -470,9 +462,8 @@ public abstract class DomainUtils {
      *
      * @return the GraphCrudService implementation
      * @throws NotImplementationFoundException if no GraphCrudService implementation is found
-     *
      * @see #lookupCrudService(Class)
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * GraphCrudService service = lookupGraphCrudService();
@@ -494,7 +485,7 @@ public abstract class DomainUtils {
      * @param <E>    the entity type
      * @param entity the entity object to extract the ID from
      * @return the entity's ID as a Serializable, or null if entity is null or ID cannot be found
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Customer customer = new Customer();
@@ -526,9 +517,8 @@ public abstract class DomainUtils {
      *
      * @param entity the object to check
      * @return true if the object is an entity, false otherwise
-     *
      * @see #isEntity(Class)
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Customer customer = new Customer();
@@ -549,9 +539,8 @@ public abstract class DomainUtils {
      *
      * @param entityClass the class to check
      * @return true if the class is an entity type, false otherwise
-     *
      * @see #isEntity(Object)
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * boolean result = isEntity(Customer.class); // Returns true if Customer is a JPA entity
@@ -572,7 +561,7 @@ public abstract class DomainUtils {
      *
      * @param field the field to check for persistence capability
      * @return true if the field can be persisted, false otherwise; defaults to true
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Field nameField = Customer.class.getDeclaredField("name");
@@ -592,7 +581,7 @@ public abstract class DomainUtils {
      * Finds the current {@link EntityUtilsProvider} implementation and returns its default {@link Parameter} class.
      *
      * @return the default Parameter class, or null if no EntityUtilsProvider is found
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Class<? extends Parameter> paramClass = getDefaultParameterClass();
@@ -623,7 +612,7 @@ public abstract class DomainUtils {
      * @param target   the source object to extract data from
      * @param dtoClass the class of the DTO to create and populate
      * @return a new instance of DTO class with all common properties set
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * // Case 1: Entity to String
@@ -665,13 +654,13 @@ public abstract class DomainUtils {
      *
      * @param obj the object to validate
      * @throws ValidationError if validation fails
-     *
-     * Example:
-     * <pre>{@code
-     * Customer customer = new Customer();
-     * customer.setEmail("invalid-email");
-     * validate(customer); // Throws ValidationError if email format is invalid
-     * }</pre>
+     *                         <p>
+     *                         Example:
+     *                         <pre>{@code
+     *                                                 Customer customer = new Customer();
+     *                                                 customer.setEmail("invalid-email");
+     *                                                 validate(customer); // Throws ValidationError if email format is invalid
+     *                                                 }</pre>
      */
     public static void validate(Object obj) {
         ValidatorService service = Containers.get().findObject(ValidatorService.class);
@@ -688,9 +677,8 @@ public abstract class DomainUtils {
      * @param alias the alias of the entity reference repository
      * @param id    the ID of the entity reference to load
      * @return the name of the entity reference, or null if not found or parameters are null
-     *
      * @see #getEntityReferenceName(String, Serializable, String)
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * String customerName = getEntityReferenceName("customer", 123L);
@@ -719,9 +707,8 @@ public abstract class DomainUtils {
      * @param id           the ID of the entity reference to load
      * @param defaultValue the default value to return if name is not found or blank
      * @return the name of the entity reference, or defaultValue if not found or blank
-     *
      * @see #getEntityReferenceName(String, Serializable)
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * String customerName = getEntityReferenceName("customer", 999L, "Unknown Customer");
@@ -740,7 +727,7 @@ public abstract class DomainUtils {
      * @param entity      the entity containing the counter field
      * @param counterName the name of the counter field to increment
      * @return the new incremented counter value
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * Invoice invoice = new Invoice();
@@ -759,7 +746,7 @@ public abstract class DomainUtils {
      * This provider is used for currency conversion operations.
      *
      * @return the CurrencyExchangeProvider instance, or null if no implementation is found
-     *
+     * <p>
      * Example:
      * <pre>{@code
      * CurrencyExchangeProvider provider = getCurrencyExchangeProvider();
@@ -807,5 +794,20 @@ public abstract class DomainUtils {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    /**
+     * Return an entity reference using entity alias and id
+     *
+     * @param alias    entity alias
+     * @param entityId id
+     * @return reference or null if not found
+     */
+    public static EntityReference<Long> getEntityReference(String alias, Serializable entityId) {
+        var repo = getEntityReferenceRepositoryByAlias(alias);
+        if (repo != null) {
+            return repo.load(entityId);
+        }
+        return null;
     }
 }

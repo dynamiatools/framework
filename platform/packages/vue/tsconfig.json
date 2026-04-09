@@ -1,0 +1,11 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "customConditions": ["development"],
+    "noEmit": true,
+    "jsx": "preserve",
+    "lib": ["ES2022", "DOM"],
+    "moduleResolution": "bundler"
+  },
+  "include": ["src"]
+}

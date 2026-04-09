@@ -19,12 +19,12 @@ describe('MetadataApi', () => {
     fetchMock.mockResolvedValue({
       ok: true, status: 200,
       headers: { get: () => 'application/json' },
-      json: () => Promise.resolve({ modules: [] }),
+      json: () => Promise.resolve({ navigation: [] }),
     } as unknown as Response);
     const result = await client.metadata.getNavigation();
     const [url] = fetchMock.mock.calls[0] as [string];
     expect(url).toContain('/api/app/metadata/navigation');
-    expect(result.modules).toEqual([]);
+    expect(result.navigation).toEqual([]);
   });
   it('getEntity(className) encodes the class name in the URL', async () => {
     await client.metadata.getEntity('com.example.Book');

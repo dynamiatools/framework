@@ -1,4 +1,0 @@
-packages:
-  - 'sdk'
-allowBuilds:
-  esbuild: true
