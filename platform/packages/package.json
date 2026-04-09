@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/platform-packages",
-  "version": "26.3.2",
+  "version": "26.4.0",
   "private": true,
   "description": "Platform packages workspace sub-directory (not a workspace root — see framework/package.json)",
   "license": "Apache-2.0"
