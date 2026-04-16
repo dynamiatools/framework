@@ -8,3 +8,4 @@ fields:
   currency:
   timeZone:
   locale:
+  paymentProvider:
