@@ -22,22 +22,23 @@ import org.zkoss.zul.ListModelList;
 import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringUtils;
-import tools.dynamia.commons.reflect.ReflectionException;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.util.ZKUtil;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
 public class ProviderPickerBox extends Combobox {
 
     /**
      *
      */
+    @Serial
     private static final long serialVersionUID = 4710970528102748639L;
 
     static {
@@ -58,25 +59,12 @@ public class ProviderPickerBox extends Combobox {
 
         setItemRenderer((item, data, index) -> {
 
-            String id, name, icon;
-
-            try {
-                id = ObjectOperations.invokeGetMethod(data, idField).toString();
-            } catch (ReflectionException | NullPointerException e) {
-                throw new UiException("Error loading ID field for " + data, e);
+            String id = getItemId(item);
+            if (id == null) {
+                throw new UiException(item + " has no id field named [" + idField + "]");
             }
-
-            try {
-                name = ObjectOperations.invokeGetMethod(data, nameField).toString();
-            } catch (ReflectionException | NullPointerException e) {
-                name = id;
-            }
-
-            try {
-                icon = ObjectOperations.invokeGetMethod(data, iconField).toString();
-            } catch (ReflectionException | NullPointerException e) {
-                icon = null;
-            }
+            String name = getItemName(item);
+            String icon = getItemIcon(item);
 
 
             if (name == null) {
@@ -161,22 +149,48 @@ public class ProviderPickerBox extends Combobox {
         return selected;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void setSelected(String selected) {
-        if (selected != this.selected) {
+        if (!Objects.equals(selected, this.selected)) {
             this.selected = selected;
-            try {
-                Optional provider = Containers.get().findObjects(providerClass)
-                        .stream()
-                        .filter(p -> selected.equals(ObjectOperations.invokeGetMethod(p, idField)))
-                        .findFirst();
-                if (provider.isPresent()) {
-                    ListModelList model = (ListModelList) getModel();
-                    //noinspection unchecked
-                    model.addToSelection(provider.get());
-                }
-            } catch (Exception ignored) {
-
+            if (getModel() instanceof ListModelList model) {
+                model.stream().filter(item -> Objects.equals(getItemId(item), selected))
+                        .findFirst()
+                        .ifPresent(model::addToSelection);
             }
         }
+    }
+
+    /**
+     * Return the ID of the item, using the idField property. By default it is "id", but you can change it to any field of your provider class.
+     *
+     * @param item to check
+     * @return item id
+     */
+    protected String getItemId(Object item) {
+        return getItemField(item, idField);
+    }
+
+    protected String getItemName(Object item) {
+        return getItemField(item, nameField);
+    }
+
+    protected String getItemIcon(Object item) {
+        return getItemField(item, iconField);
+    }
+
+    protected String getItemField(Object item, String field) {
+        try {
+            if (item != null) {
+                Object fieldValue = ObjectOperations.invokeGetMethod(item, field);
+                if (fieldValue != null) {
+                    return fieldValue.toString();
+                }
+            } else {
+                return null;
+            }
+        } catch (Exception _) {
+        }
+        return null;
     }
 }
