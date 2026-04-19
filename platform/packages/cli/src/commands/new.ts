@@ -11,13 +11,18 @@ import { generateFrontend } from '../generators/frontend.js'
 // ---------------------------------------------------------------------------
 
 /** Fetch the latest Spring Boot version from Spring Initializr metadata. */
+function normalizeSpringBootVersion(version: string): string {
+  // Initializr can return legacy values like "4.0.5.RELEASE"; Maven/Gradle expect "4.0.5".
+  return version.trim().replace(/\.RELEASE$/i, '')
+}
+
 async function fetchSpringBootVersion(_config: CliConfig): Promise<string> {
   try {
     const metaRes = await fetch('https://start.spring.io/metadata/client')
     if (metaRes.ok) {
       const meta = await metaRes.json() as Record<string, unknown>
       const bootVersion = (meta as { bootVersion?: { default?: string } }).bootVersion?.default
-      if (bootVersion) return bootVersion
+      if (bootVersion) return normalizeSpringBootVersion(bootVersion)
     }
   } catch {
     // ignore — use fallback
@@ -48,13 +53,15 @@ function printSuccessMessage(opts: {
     springBootVersion,
   } = opts
 
+  const displaySpringBootVersion = normalizeSpringBootVersion(springBootVersion)
+
   console.log('')
   console.log(`✓ Project "${projectName}" created successfully!`)
   console.log('')
   console.log('  📁 Structure:')
   console.log(`     ${projectName}/`)
   if (doBackend) {
-    console.log(`     ├── backend/     (${language.charAt(0).toUpperCase() + language.slice(1)} · Spring Boot ${springBootVersion} · Dynamia Tools ${config.dynamia.version})`)
+    console.log(`     ├── backend/     (${language.charAt(0).toUpperCase() + language.slice(1)} · Spring Boot ${displaySpringBootVersion} · Dynamia Tools ${config.dynamia.version})`)
   }
   if (doFrontend) {
     const frontendLabel = config.templates.frontend[framework]?.label ?? framework
@@ -212,12 +219,18 @@ export async function runNew(): Promise<void> {
     })
   }
 
-  // --- Step 7: Confirm ---
+  // --- Step 7: Resolve Spring Boot version for backend summary and generation ---
+  let springBootVersion = ''
+  if (doBackend) {
+    springBootVersion = normalizeSpringBootVersion(await fetchSpringBootVersion(config))
+  }
+
+  // --- Step 8: Confirm ---
   console.log('')
   console.log('  Summary:')
   console.log(`    Project:   ${projectName}`)
   if (doBackend) {
-    console.log(`    Backend:   ${language} | ${groupId}:${artifactId}:${version}`)
+    console.log(`    Backend:   ${language} | ${groupId}:${artifactId}:${version} | Spring Boot ${springBootVersion}`)
   }
   if (doFrontend) {
     console.log(`    Frontend:  ${framework} | ${packageManager}`)
@@ -233,9 +246,6 @@ export async function runNew(): Promise<void> {
     info('Cancelled.')
     process.exit(0)
   }
-
-  // Fetch Spring Boot version (best-effort)
-  const springBootVersion = await fetchSpringBootVersion(config)
 
   // Target directory is CWD / projectName
   const targetDir = join(process.cwd(), projectName)
