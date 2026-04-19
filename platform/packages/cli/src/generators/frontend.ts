@@ -3,7 +3,8 @@ import { rmSync, mkdirSync } from 'node:fs'
 import { execa } from 'execa'
 import { type CliConfig } from '../utils/config.js'
 import { replaceTokensInDir } from '../utils/replace.js'
-import { spin, warn, success } from '../utils/logger.js'
+import { spin, warn, success, friendlyGitError, cliError, errorMessage } from '../utils/logger.js'
+import { validateTemplateRepo } from '../utils/template-repo.js'
 
 // Fallback package names used when cli.properties entries are unavailable
 const DEFAULT_SDK_PACKAGE = '@dynamia-tools/sdk'
@@ -27,7 +28,21 @@ async function cloneFrontendTemplate(
 ): Promise<void> {
   const template = config.templates.frontend[framework]
   if (!template) {
-    throw new Error(`Unknown frontend framework: ${framework}`)
+    throw cliError('DT-FRONTEND-001', `Unknown frontend framework: ${framework}.`)
+  }
+  if (!template.enabled) {
+    throw cliError('DT-FRONTEND-002', template.availabilityMessage)
+  }
+
+  const validation = await validateTemplateRepo({
+    repo: template.repo,
+    branch: template.branch,
+  })
+  if (!validation.ok) {
+    throw cliError(
+      'DT-TEMPLATE-002',
+      `Frontend template validation failed for ${template.repo}#${template.branch}. ${validation.reason ?? ''}`.trim(),
+    )
   }
 
   await execa('git', [
@@ -53,7 +68,7 @@ async function generateWithVite(
 ): Promise<void> {
   const viteTemplate = config.vite.templates[framework]
   if (!viteTemplate) {
-    throw new Error(`No Vite template configured for framework: ${framework}`)
+    throw cliError('DT-FRONTEND-003', `No Vite template configured for framework: ${framework}`)
   }
 
   await execa(pm, ['create', 'vite@latest', targetDir, '--template', viteTemplate], {
@@ -97,21 +112,24 @@ export async function generateFrontend(options: FrontendOptions): Promise<void> 
     spinner.succeed('Frontend template cloned')
     cloneSuccess = true
   } catch (err) {
-    spinner.warn(`Could not clone frontend template: ${(err as Error).message}`)
+    spinner.warn(`Could not clone frontend template: ${friendlyGitError(err)}`)
   }
 
   if (!cloneSuccess) {
     if (!config.vite.fallbackEnabled) {
-      throw new Error('Frontend template clone failed and Vite fallback is disabled.')
+      throw cliError(
+        'DT-FRONTEND-003',
+        'Frontend template is currently not available and Vite fallback is disabled. Please try again later or enable vite.fallback.enabled in cli.properties.',
+      )
     }
-    warn('Falling back to Vite scaffold…')
+    warn('Template is unavailable right now, so we will use Vite fallback.')
     const viteSpinner = spin('Scaffolding with Vite…')
     try {
       await generateWithVite(framework, targetDir, packageManager, config)
       viteSpinner.succeed('Vite scaffold complete')
     } catch (err) {
       viteSpinner.fail('Vite scaffold failed')
-      throw err
+      throw cliError('DT-FRONTEND-004', `Vite fallback failed: ${errorMessage(err)}`)
     }
   } else {
     // Replace tokens in cloned template
@@ -121,7 +139,7 @@ export async function generateFrontend(options: FrontendOptions): Promise<void> 
       replaceSpinner.succeed('Tokens replaced')
     } catch (err) {
       replaceSpinner.fail('Token replacement failed')
-      throw err
+      throw cliError('DT-FRONTEND-004', `Frontend token replacement failed: ${errorMessage(err)}`)
     }
   }
 

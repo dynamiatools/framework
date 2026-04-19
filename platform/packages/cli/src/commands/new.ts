@@ -2,7 +2,7 @@ import { input, select, confirm } from '@inquirer/prompts'
 import { join } from 'node:path'
 import { loadConfig, type CliConfig } from '../utils/config.js'
 import { runChecks } from '../utils/env.js'
-import { banner, info, success, error, warn } from '../utils/logger.js'
+import { banner, info, error, beta, errorMessage, errorWithCode } from '../utils/logger.js'
 import { generateBackend } from '../generators/backend.js'
 import { generateFrontend } from '../generators/frontend.js'
 
@@ -23,13 +23,12 @@ async function fetchSpringBootVersion(_config: CliConfig): Promise<string> {
     // ignore — use fallback
   }
   // Fallback from config (spring.boot.version kept as reference)
-  return '3.4.0'
+  return '4.0.5'
 }
 
 /** Print the final success message. */
 function printSuccessMessage(opts: {
   projectName: string
-  targetDir: string
   generateBackend: boolean
   generateFrontend: boolean
   language: string
@@ -40,7 +39,6 @@ function printSuccessMessage(opts: {
 }): void {
   const {
     projectName,
-    targetDir,
     generateBackend: doBackend,
     generateFrontend: doFrontend,
     language,
@@ -97,7 +95,12 @@ export async function runNew(): Promise<void> {
   try {
     config = await loadConfig()
   } catch (err) {
-    error(`Failed to load CLI configuration: ${(err as Error).message}`)
+    const reason = err instanceof Error ? err.message : 'Unknown configuration error.'
+    errorWithCode('DT-CONFIG-001', `Failed to load CLI configuration: ${reason}`)
+  }
+
+  if (config.beta.enabled && config.beta.introMessageEnabled) {
+    beta('Dynamia Tools CLI is in beta. Some features may still be under active development.')
   }
 
   // Environment checks (git missing = hard stop)
@@ -137,12 +140,17 @@ export async function runNew(): Promise<void> {
   let description = ''
 
   if (doBackend) {
-    const backendTemplates = config!.templates.backend
+    const backendTemplates = config.templates.backend
     const languageChoices = Object.entries(backendTemplates).map(([id, entry]) => ({
       name: entry.label,
       value: id,
-      description: entry.description,
+      description: entry.enabled ? entry.description : `${entry.description} — ${entry.availabilityMessage}`,
+      disabled: entry.enabled ? false : entry.availabilityMessage,
     }))
+
+    if (!languageChoices.some((choice) => !choice.disabled)) {
+      errorWithCode('DT-BACKEND-005', 'Backend templates are not available yet. Please try frontend only for now.')
+    }
 
     language = await select({
       message: 'Backend language:',
@@ -176,12 +184,17 @@ export async function runNew(): Promise<void> {
   let packageManager = 'pnpm'
 
   if (doFrontend) {
-    const frontendTemplates = config!.templates.frontend
+    const frontendTemplates = config.templates.frontend
     const frameworkChoices = Object.entries(frontendTemplates).map(([id, entry]) => ({
       name: entry.label,
       value: id,
-      description: entry.description,
+      description: entry.enabled ? entry.description : `${entry.description} — ${entry.availabilityMessage}`,
+      disabled: entry.enabled ? false : entry.availabilityMessage,
     }))
+
+    if (!frameworkChoices.some((choice) => !choice.disabled)) {
+      errorWithCode('DT-FRONTEND-005', 'Frontend templates are not available yet. Please try again soon.')
+    }
 
     framework = await select({
       message: 'Frontend framework:',
@@ -222,46 +235,50 @@ export async function runNew(): Promise<void> {
   }
 
   // Fetch Spring Boot version (best-effort)
-  const springBootVersion = await fetchSpringBootVersion(config!)
+  const springBootVersion = await fetchSpringBootVersion(config)
 
   // Target directory is CWD / projectName
   const targetDir = join(process.cwd(), projectName)
 
   // Generate backend
-  if (doBackend) {
-    await generateBackend({
-      projectName,
-      language,
-      groupId,
-      artifactId,
-      version,
-      description,
-      targetDir: join(targetDir, 'backend'),
-      config: config!,
-      springBootVersion,
-    })
-  }
+  try {
+    if (doBackend) {
+      await generateBackend({
+        projectName,
+        language,
+        groupId,
+        artifactId,
+        version,
+        description,
+        targetDir: join(targetDir, 'backend'),
+        config,
+        springBootVersion,
+      })
+    }
 
-  // Generate frontend
-  if (doFrontend) {
-    await generateFrontend({
-      projectName,
-      framework,
-      packageManager,
-      targetDir: join(targetDir, 'frontend'),
-      config: config!,
-    })
+    // Generate frontend
+    if (doFrontend) {
+      await generateFrontend({
+        projectName,
+        framework,
+        packageManager,
+        targetDir: join(targetDir, 'frontend'),
+        config,
+      })
+    }
+  } catch (err) {
+    const reason = errorMessage(err, 'DT-RUN-001')
+    error(`${reason}\nIf this keeps happening, please open an issue at https://github.com/dynamiatools/framework/issues`)
   }
 
   printSuccessMessage({
     projectName,
-    targetDir,
     generateBackend: doBackend,
     generateFrontend: doFrontend,
     language,
     framework,
     packageManager,
-    config: config!,
+    config,
     springBootVersion,
   })
 }

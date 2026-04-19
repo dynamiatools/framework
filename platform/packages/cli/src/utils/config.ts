@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { dirname, join, resolve } from 'node:path'
+import { dirname, resolve } from 'node:path'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -11,10 +11,17 @@ export interface TemplateEntry {
   repo: string
   branch: string
   description: string
+  enabled: boolean
+  availabilityMessage: string
 }
 
 export interface CliConfig {
   dynamia: { version: string; docsUrl: string }
+  beta: {
+    enabled: boolean
+    introMessageEnabled: boolean
+    notAvailableMessageEnabled: boolean
+  }
   java: { version: string; sdkmanCandidate: string }
   node: { minimumVersion: string }
   installer: { sdkmanUrl: string; fnmUrl: string }
@@ -65,26 +72,47 @@ export async function loadConfig(): Promise<CliConfig> {
   const backendTemplates: Record<string, TemplateEntry> = {}
   const frontendTemplates: Record<string, TemplateEntry> = {}
 
+  const createTemplate = (): TemplateEntry => ({
+    label: '',
+    repo: '',
+    branch: 'main',
+    description: '',
+    enabled: true,
+    availabilityMessage: 'Not available yet in this beta release.',
+  })
+
   for (const [key, value] of Object.entries(props)) {
-    const backMatch = key.match(/^template\.backend\.(\w+)\.(label|repo|branch|description)$/)
+    const backMatch = key.match(/^template\.backend\.(\w+)\.(label|repo|branch|description|enabled|availabilityMessage)$/)
     if (backMatch) {
       const id = backMatch[1]!
-      const field = backMatch[2] as keyof TemplateEntry
+      const field = backMatch[2]!
       if (!backendTemplates[id]) {
-        backendTemplates[id] = { label: '', repo: '', branch: 'main', description: '' }
+        backendTemplates[id] = createTemplate()
       }
-      backendTemplates[id]![field] = value
+      if (field === 'enabled') {
+        backendTemplates[id]!.enabled = value !== 'false'
+      } else if (field === 'availabilityMessage') {
+        backendTemplates[id]!.availabilityMessage = value
+      } else {
+        backendTemplates[id]![field as 'label' | 'repo' | 'branch' | 'description'] = value
+      }
       continue
     }
 
-    const frontMatch = key.match(/^template\.frontend\.(\w+)\.(label|repo|branch|description)$/)
+    const frontMatch = key.match(/^template\.frontend\.(\w+)\.(label|repo|branch|description|enabled|availabilityMessage)$/)
     if (frontMatch) {
       const id = frontMatch[1]!
-      const field = frontMatch[2] as keyof TemplateEntry
+      const field = frontMatch[2]!
       if (!frontendTemplates[id]) {
-        frontendTemplates[id] = { label: '', repo: '', branch: 'main', description: '' }
+        frontendTemplates[id] = createTemplate()
       }
-      frontendTemplates[id]![field] = value
+      if (field === 'enabled') {
+        frontendTemplates[id]!.enabled = value !== 'false'
+      } else if (field === 'availabilityMessage') {
+        frontendTemplates[id]!.availabilityMessage = value
+      } else {
+        frontendTemplates[id]![field as 'label' | 'repo' | 'branch' | 'description'] = value
+      }
     }
   }
 
@@ -128,6 +156,11 @@ export async function loadConfig(): Promise<CliConfig> {
     dynamia: {
       version: get('dynamia.version'),
       docsUrl: get('dynamia.docs.url'),
+    },
+    beta: {
+      enabled: get('beta.enabled', 'true') === 'true',
+      introMessageEnabled: get('beta.intro.message.enabled', 'true') === 'true',
+      notAvailableMessageEnabled: get('beta.not.available.message.enabled', 'true') === 'true',
     },
     java: {
       version: get('java.version'),

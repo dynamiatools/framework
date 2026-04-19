@@ -46,6 +46,10 @@ The wizard guides you through:
 6. **Package manager** — pnpm, npm, or yarn
 7. **Confirm** — shows a summary table before generating
 
+> Beta note: this CLI is in active beta. If a command or template is not ready yet, you will get a friendly "not available yet" message.
+
+Errors include short support codes such as `DT-TEMPLATE-002` to make issue reporting easier.
+
 ---
 
 ## What gets generated
@@ -59,6 +63,7 @@ my-erp-app/
 ### Backend
 
 - Cloned from a GitHub template repo (e.g. `dynamiatools/template-backend-java`)
+- Template repository and branch are validated before cloning
 - Placeholder package `com.example.demo` renamed to your `groupId.artifactId`
 - All tokens replaced in `.java`, `.kt`, `.groovy`, `.xml`, `.yml`, `.properties`, `.md`
 - `DemoApplication.java` renamed to `<YourArtifactId>Application.java`
@@ -66,7 +71,8 @@ my-erp-app/
 ### Frontend
 
 - Cloned from a GitHub template repo (e.g. `dynamiatools/template-frontend-vue`)
-- Falls back to `npm create vite@latest` if clone fails
+- Template repository and branch are validated before cloning
+- Falls back to `npm create vite@latest` if template clone/validation fails
 - `@dynamia-tools/sdk` and `@dynamia-tools/ui-core` installed automatically
 
 ---
@@ -80,9 +86,12 @@ Key sections:
 | Section | Description |
 |---|---|
 | `dynamia.*` | Framework version and docs URL |
+| `beta.*` | Beta-mode UX messages |
 | `java.*` | JDK version and SDKMAN candidate |
 | `template.backend.<id>.*` | Backend template repos (java, kotlin, groovy) |
 | `template.frontend.<id>.*` | Frontend template repos (vue, react) |
+| `template.*.<id>.enabled` | Enable/disable template options in the wizard |
+| `template.*.<id>.availabilityMessage` | Message shown when a template is disabled |
 | `token.*` | Placeholder tokens used inside template repos |
 | `vite.*` | Vite fallback config |
 

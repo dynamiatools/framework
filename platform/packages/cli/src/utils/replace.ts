@@ -54,6 +54,7 @@ export function replaceTokensInDir(
 
 export interface RenameOptions {
   projectDir: string
+  projectName: string
   groupId: string
   artifactId: string
   version: string
@@ -77,9 +78,11 @@ export interface RenameOptions {
 export async function renameJavaPackages(options: RenameOptions): Promise<void> {
   const {
     projectDir,
+    projectName,
     groupId,
     artifactId,
     version,
+    description,
     dynamiaVersion,
     springBootVersion,
     language,
@@ -125,12 +128,21 @@ export async function renameJavaPackages(options: RenameOptions): Promise<void> 
       case 'groupId':           replacements[placeholder] = groupId; break
       case 'artifactId':        replacements[placeholder] = artifactId; break
       case 'basePackage':       replacements[placeholder] = basePackage; break
-      case 'projectName':       replacements[placeholder] = artifactId; break
+      case 'projectName':       replacements[placeholder] = projectName; break
       case 'projectVersion':    replacements[placeholder] = version; break
+      case 'projectDescription': replacements[placeholder] = description; break
       case 'dynamiaVersion':    replacements[placeholder] = dynamiaVersion; break
       case 'springBootVersion': replacements[placeholder] = springBootVersion; break
     }
   }
+
+  // Fallbacks for templates that still use Spring Initializr defaults instead of placeholders.
+  replacements['<groupId>com.example</groupId>'] = `<groupId>${groupId}</groupId>`
+  replacements['<artifactId>demo</artifactId>'] = `<artifactId>${artifactId}</artifactId>`
+  replacements['<version>0.0.1-SNAPSHOT</version>'] = `<version>${version}</version>`
+  replacements['<name>DynamiaTools App Backend</name>'] = `<name>${projectName}</name>`
+  replacements['<dynamia.version>26.4.1</dynamia.version>'] = `<dynamia.version>${dynamiaVersion}</dynamia.version>`
+  replacements['<version>4.0.5</version>'] = `<version>${springBootVersion}</version>`
 
   // Always replace the placeholder package string itself in source files
   replacements['com.example.demo'] = basePackage
@@ -138,6 +150,9 @@ export async function renameJavaPackages(options: RenameOptions): Promise<void> 
 
   // 4. Replace tokens in all text files
   replaceTokensInDir(projectDir, replacements)
+
+  // Ensure a user-provided description updates pom.xml even when template has multiline defaults.
+  replacePomDescription(projectDir, description)
 
   // 5. Rename the main Application class file
   renameApplicationClass(projectDir, artifactId, basePackagePath, srcExtension)
@@ -179,6 +194,28 @@ function removeEmptyDirs(dir: string): void {
 }
 
 /**
+ * Update pom.xml description content when template uses a hardcoded multiline block.
+ */
+function replacePomDescription(projectDir: string, description: string): void {
+  if (!description) return
+
+  const pomPath = join(projectDir, 'pom.xml')
+  let pomContent: string
+  try {
+    pomContent = readFileSync(pomPath, 'utf-8')
+  } catch {
+    return
+  }
+
+  const normalized = description.trim().replace(/[\r\n]+/g, ' ')
+  const updated = pomContent.replace(/<description>[\s\S]*?<\/description>/, `<description>${normalized}</description>`)
+
+  if (updated !== pomContent) {
+    writeFileSync(pomPath, updated, 'utf-8')
+  }
+}
+
+/**
  * Rename DemoApplication.java → MyErpApplication.java (or .kt / .groovy).
  */
 function renameApplicationClass(
@@ -202,13 +239,27 @@ function renameApplicationClass(
   const fileExt = fileExtMap[srcExtension] ?? '.java'
   const oldFileName = `DemoApplication${fileExt}`
   const newFileName = `${newClassName}${fileExt}`
+  const oldClassName = 'DemoApplication'
 
   const searchDir = join(projectDir, 'src', 'main', srcExtension, basePackagePath)
   try {
     const files = readdirSync(searchDir)
     for (const file of files) {
       if (file === oldFileName) {
-        renameSync(join(searchDir, file), join(searchDir, newFileName))
+        const oldFilePath = join(searchDir, file)
+        const newFilePath = join(searchDir, newFileName)
+
+        try {
+          const content = readFileSync(oldFilePath, 'utf-8')
+          const updated = content.split(oldClassName).join(newClassName)
+          if (updated !== content) {
+            writeFileSync(oldFilePath, updated, 'utf-8')
+          }
+        } catch {
+          // If class-content replacement fails, continue with file rename attempt.
+        }
+
+        renameSync(oldFilePath, newFilePath)
         break
       }
     }
