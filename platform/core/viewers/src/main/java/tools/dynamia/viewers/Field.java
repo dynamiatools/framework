@@ -26,6 +26,7 @@ import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.reflect.AccessMode;
 import tools.dynamia.commons.reflect.PropertyInfo;
+import tools.dynamia.domain.Reference;
 import tools.dynamia.domain.contraints.NotEmpty;
 import tools.dynamia.domain.util.DomainUtils;
 
@@ -41,7 +42,7 @@ import java.util.Map;
  * @author Mario A. Serrano Leones
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"name", "label","localizedLabel", "description","localizedDescription", "fieldClass", "componentClass", "component", "visible", "index", "entity",
+@JsonPropertyOrder({"name", "label", "localizedLabel", "description", "localizedDescription", "fieldClass", "componentClass", "component", "visible", "index", "entity",
         "enum", "value", "required", "action", "icon", "showIconOnly", "params"})
 public class Field implements Serializable, Indexable, Cloneable {
 
@@ -598,6 +599,10 @@ public class Field implements Serializable, Indexable, Cloneable {
 
     public boolean isEnum() {
         return propertyInfo != null && propertyInfo.isEnum() || fieldClass != null && fieldClass.isEnum();
+    }
+
+    public boolean isReference() {
+        return propertyInfo != null && propertyInfo.isAnnotationPresent(Reference.class);
     }
 
     public ActionReference getAction() {

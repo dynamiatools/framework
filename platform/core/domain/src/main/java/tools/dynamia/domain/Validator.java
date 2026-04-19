@@ -156,7 +156,7 @@ package tools.dynamia.domain;
  * @see ValidationError
  * @see ValidatorUtil
  * @see tools.dynamia.domain.services.ValidatorService
- * @see tools.dynamia.integration.sterotypes.Provider
+ * @see tools.dynamia.domain.InstallValidator
  */
 public interface Validator<T> {
 

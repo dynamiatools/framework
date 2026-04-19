@@ -22,22 +22,48 @@ import org.zkoss.zul.ListModelList;
 import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringUtils;
-import tools.dynamia.commons.reflect.ReflectionException;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.util.ZKUtil;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
+/**
+ * A ZK Combobox component that discovers and lists implementations of a given
+ * provider interface or base class from the application's IoC container.
+ *
+ * <p>The component populates its items by querying {@link Containers#get()}
+ * for all objects assignable to the configured provider class. Each item is
+ * rendered using configurable field names for the identifier, display name,
+ * and optional icon. By default the fields are {@code id}, {@code name} and
+ * {@code icon} respectively.</p>
+ *
+ * <p>The combobox is configured as read-only and will show the provider's
+ * display name while the underlying value stored for selection is the provider
+ * identifier (as resolved by {@link #idField}). The component registers the
+ * alias {@code providerpickerbox} for use in ZUL files and supports binding
+ * via the {@code selected} property.</p>
+ *
+ * <h3>Example ZUL usage</h3>
+ * <pre>{@code
+ * <providerpickerbox className="com.example.MyProvider"
+ *                    idField="code"
+ *                    nameField="label"
+ *                    iconField="iconSclass"
+ *                    selected="@bind(vm.selectedProvider)" />
+ * }</pre>
+ */
 public class ProviderPickerBox extends Combobox {
 
     /**
-     *
+     * Serialization id.
      */
+    @Serial
     private static final long serialVersionUID = 4710970528102748639L;
 
     static {
@@ -45,38 +71,59 @@ public class ProviderPickerBox extends Combobox {
         BindingComponentIndex.getInstance().put("selected", ProviderPickerBox.class);
     }
 
+    /**
+     * The currently selected provider identifier. This value corresponds to the
+     * field defined by {@link #idField} for the selected provider instance.
+     */
     private String selected;
+
+    /**
+     * Fully-qualified class name of the provider interface or base class used to
+     * discover implementations in the IoC container.
+     */
     private String className;
+
+    /**
+     * Name of the provider field used as unique identifier. Defaults to {@code "id"}.
+     */
     private String idField = "id";
+
+    /**
+     * Name of the provider field used for display label. Defaults to {@code "name"}.
+     */
     private String nameField = "name";
 
+    /**
+     * Name of the provider field used as an icon CSS class. Defaults to {@code "icon"}.
+     */
     private String iconField = "icon";
+
+    /**
+     * Resolved provider {@link Class} corresponding to {@link #className}. May be {@code null}
+     * until {@link #setClassName(String)} is called with a valid class name.
+     */
     private Class<?> providerClass;
 
+    /**
+     * Constructs a new ProviderPickerBox.
+     *
+     * <p>The combobox is set to read-only and an item renderer is installed that
+     * resolves the item's id, name and icon using the configured field names.
+     * If the id cannot be resolved for an item an {@link UiException} is thrown
+     * during rendering.</p>
+     */
     public ProviderPickerBox() {
         setReadonly(true);
 
         setItemRenderer((item, data, index) -> {
 
-            String id, name, icon;
-
-            try {
-                id = ObjectOperations.invokeGetMethod(data, idField).toString();
-            } catch (ReflectionException | NullPointerException e) {
-                throw new UiException("Error loading ID field for " + data, e);
+            String id = getDataId(data);
+            if (id == null) {
+                throw new UiException(item + " has no id field named [" + idField + "]");
             }
 
-            try {
-                name = ObjectOperations.invokeGetMethod(data, nameField).toString();
-            } catch (ReflectionException | NullPointerException e) {
-                name = id;
-            }
-
-            try {
-                icon = ObjectOperations.invokeGetMethod(data, iconField).toString();
-            } catch (ReflectionException | NullPointerException e) {
-                icon = null;
-            }
+            String name = getDataName(data);
+            String icon = getDataIcon(data);
 
 
             if (name == null) {
@@ -92,6 +139,15 @@ public class ProviderPickerBox extends Combobox {
         });
     }
 
+    /**
+     * Initializes or refreshes the combobox model by locating all provider
+     * implementations from the IoC container and filling the component model.
+     *
+     * <p>The list is attempted to be sorted by {@link #nameField} using
+     * {@link BeanSorter}; if sorting fails the raw collection is used.</p>
+     *
+     * @throws UiException if the lookup or model population fails
+     */
     private void initModel() {
         if (providerClass != null) {
             try {
@@ -112,10 +168,23 @@ public class ProviderPickerBox extends Combobox {
 
     }
 
+    /**
+     * Returns the fully-qualified class name configured to discover provider
+     * implementations.
+     *
+     * @return the configured provider class name, or {@code null} if none set
+     */
     public String getClassName() {
         return className;
     }
 
+    /**
+     * Sets the fully-qualified provider class name and immediately attempts to
+     * resolve the class and initialize the component model.
+     *
+     * @param className fully-qualified provider interface or base class name
+     * @throws UiException if the class cannot be found on the classpath
+     */
     public void setClassName(String className) {
         this.className = className;
         try {
@@ -126,33 +195,72 @@ public class ProviderPickerBox extends Combobox {
         }
     }
 
+    /**
+     * Returns the name of the field used as the provider identifier.
+     *
+     * @return the id field name
+     */
     public String getIdField() {
         return idField;
     }
 
+    /**
+     * Sets the name of the field used as the provider identifier and refreshes
+     * the component model.
+     *
+     * @param idField the identifier field name (getter must be available on provider objects)
+     */
     public void setIdField(String idField) {
         this.idField = idField;
         initModel();
     }
 
+    /**
+     * Returns the name of the field used as the provider display label.
+     *
+     * @return the display name field
+     */
     public String getNameField() {
         return nameField;
     }
 
+    /**
+     * Sets the name of the field used as the provider display label and
+     * refreshes the component model.
+     *
+     * @param nameField the display name field
+     */
     public void setNameField(String nameField) {
         this.nameField = nameField;
         initModel();
     }
 
+    /**
+     * Returns the name of the field used as the provider icon CSS class.
+     *
+     * @return the icon field name
+     */
     public String getIconField() {
         return iconField;
     }
 
+    /**
+     * Sets the name of the field used as the provider icon CSS class and
+     * refreshes the component model.
+     *
+     * @param iconField the icon field name
+     */
     public void setIconField(String iconField) {
         this.iconField = iconField;
         initModel();
     }
 
+    /**
+     * Returns the identifier of the currently selected provider item, or
+     * {@code null} if nothing is selected.
+     *
+     * @return selected provider id or {@code null}
+     */
     public String getSelected() {
         selected = null;
         if (getSelectedItem() != null) {
@@ -161,22 +269,79 @@ public class ProviderPickerBox extends Combobox {
         return selected;
     }
 
+    /**
+     * Programmatically selects the item whose identifier matches the provided
+     * {@code selected} value. If a matching item is found it is added to the
+     * selection of the underlying {@link ListModelList}.
+     *
+     * @param selected provider identifier to select
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void setSelected(String selected) {
-        if (selected != this.selected) {
+        if (!Objects.equals(selected, this.selected)) {
             this.selected = selected;
-            try {
-                Optional provider = Containers.get().findObjects(providerClass)
-                        .stream()
-                        .filter(p -> selected.equals(ObjectOperations.invokeGetMethod(p, idField)))
-                        .findFirst();
-                if (provider.isPresent()) {
-                    ListModelList model = (ListModelList) getModel();
-                    //noinspection unchecked
-                    model.addToSelection(provider.get());
-                }
-            } catch (Exception ignored) {
-
+            if (getModel() instanceof ListModelList model) {
+                model.stream().filter(item -> Objects.equals(getDataId(item), selected))
+                        .findFirst()
+                        .ifPresent(model::addToSelection);
             }
         }
+    }
+
+    /**
+     * Returns the provider item's identifier by reading the configured {@code field}
+     * from the given {@code item} using reflection utilities.
+     *
+     * @param data provider instance to inspect
+     * @return identifier as string or {@code null} when it cannot be resolved
+     */
+    protected String getDataId(Object data) {
+        return getDataField(data, idField);
+    }
+
+    /**
+     * Returns the provider item's display name by reading the configured
+     * {@link #nameField} from the given {@code item}.
+     *
+     * @param data provider instance to inspect
+     * @return display name as string or {@code null} when it cannot be resolved
+     */
+    protected String getDataName(Object data) {
+        return getDataField(data, nameField);
+    }
+
+    /**
+     * Returns the provider item's icon CSS class by reading the configured
+     * {@link #iconField} from the given {@code item}.
+     *
+     * @param data provider instance to inspect
+     * @return icon css class as string or {@code null} when it cannot be resolved
+     */
+    protected String getDataIcon(Object data) {
+        return getDataField(data, iconField);
+    }
+
+    /**
+     * Generic helper that reads a named field value from an object using
+     * {@link ObjectOperations#invokeGetMethod(Object, String)} and returns
+     * its string representation when present.
+     *
+     * @param data  object to inspect
+     * @param field field name to read (getter must exist)
+     * @return field value as string or {@code null} if not found or not accessible
+     */
+    protected String getDataField(Object data, String field) {
+        try {
+            if (data != null) {
+                Object fieldValue = ObjectOperations.invokeGetMethod(data, field);
+                if (fieldValue != null) {
+                    return fieldValue.toString();
+                }
+            } else {
+                return null;
+            }
+        } catch (Exception _) {
+        }
+        return null;
     }
 }

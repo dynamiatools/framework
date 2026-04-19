@@ -197,6 +197,9 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     @ManyToOne
     private AccountSaleChannel channel;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private AccountPaymentProvider customPaymentProvider;
+
     public Account() {
         initLocale();
     }
@@ -947,5 +950,13 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
 
     public void setResellerInvoiceDate(Date resellerInvoiceDate) {
         this.resellerInvoiceDate = resellerInvoiceDate;
+    }
+
+    public AccountPaymentProvider getCustomPaymentProvider() {
+        return customPaymentProvider;
+    }
+
+    public void setCustomPaymentProvider(AccountPaymentProvider customPaymentProvider) {
+        this.customPaymentProvider = customPaymentProvider;
     }
 }

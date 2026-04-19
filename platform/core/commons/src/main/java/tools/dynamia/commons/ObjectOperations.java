@@ -16,7 +16,6 @@
  */
 package tools.dynamia.commons;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import tools.dynamia.commons.logger.LoggingService;
@@ -857,6 +856,24 @@ public final class ObjectOperations {
      */
     public static Map<String, Object> getValuesMaps(Object bean) {
         return getValuesMaps("", bean, null);
+    }
+
+    /**
+     * Load all bean standard properties into map but only with non null values
+     *
+     * @param bean objet to scan
+     * @return values
+     */
+    public static Map<String, Object> getNonNullValuesMaps(Object bean) {
+
+        var finalMap = new HashMap<String, Object>();
+        getValuesMaps("", bean, null)
+                .forEach((k, v) -> {
+                    if (v != null) {
+                        finalMap.put(k, v);
+                    }
+                });
+        return finalMap;
     }
 
     /**
