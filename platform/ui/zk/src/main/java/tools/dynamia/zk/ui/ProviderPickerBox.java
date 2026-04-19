@@ -117,12 +117,13 @@ public class ProviderPickerBox extends Combobox {
 
         setItemRenderer((item, data, index) -> {
 
-            String id = getItemId(item);
+            String id = getDataId(data);
             if (id == null) {
                 throw new UiException(item + " has no id field named [" + idField + "]");
             }
-            String name = getItemName(item);
-            String icon = getItemIcon(item);
+
+            String name = getDataName(data);
+            String icon = getDataIcon(data);
 
 
             if (name == null) {
@@ -280,7 +281,7 @@ public class ProviderPickerBox extends Combobox {
         if (!Objects.equals(selected, this.selected)) {
             this.selected = selected;
             if (getModel() instanceof ListModelList model) {
-                model.stream().filter(item -> Objects.equals(getItemId(item), selected))
+                model.stream().filter(item -> Objects.equals(getDataId(item), selected))
                         .findFirst()
                         .ifPresent(model::addToSelection);
             }
@@ -291,33 +292,33 @@ public class ProviderPickerBox extends Combobox {
      * Returns the provider item's identifier by reading the configured {@code field}
      * from the given {@code item} using reflection utilities.
      *
-     * @param item provider instance to inspect
+     * @param data provider instance to inspect
      * @return identifier as string or {@code null} when it cannot be resolved
      */
-    protected String getItemId(Object item) {
-        return getItemField(item, idField);
+    protected String getDataId(Object data) {
+        return getDataField(data, idField);
     }
 
     /**
      * Returns the provider item's display name by reading the configured
      * {@link #nameField} from the given {@code item}.
      *
-     * @param item provider instance to inspect
+     * @param data provider instance to inspect
      * @return display name as string or {@code null} when it cannot be resolved
      */
-    protected String getItemName(Object item) {
-        return getItemField(item, nameField);
+    protected String getDataName(Object data) {
+        return getDataField(data, nameField);
     }
 
     /**
      * Returns the provider item's icon CSS class by reading the configured
      * {@link #iconField} from the given {@code item}.
      *
-     * @param item provider instance to inspect
+     * @param data provider instance to inspect
      * @return icon css class as string or {@code null} when it cannot be resolved
      */
-    protected String getItemIcon(Object item) {
-        return getItemField(item, iconField);
+    protected String getDataIcon(Object data) {
+        return getDataField(data, iconField);
     }
 
     /**
@@ -325,14 +326,14 @@ public class ProviderPickerBox extends Combobox {
      * {@link ObjectOperations#invokeGetMethod(Object, String)} and returns
      * its string representation when present.
      *
-     * @param item  object to inspect
+     * @param data  object to inspect
      * @param field field name to read (getter must exist)
      * @return field value as string or {@code null} if not found or not accessible
      */
-    protected String getItemField(Object item, String field) {
+    protected String getDataField(Object data, String field) {
         try {
-            if (item != null) {
-                Object fieldValue = ObjectOperations.invokeGetMethod(item, field);
+            if (data != null) {
+                Object fieldValue = ObjectOperations.invokeGetMethod(data, field);
                 if (fieldValue != null) {
                     return fieldValue.toString();
                 }
