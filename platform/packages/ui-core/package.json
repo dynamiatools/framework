@@ -1,10 +1,21 @@
 {
   "name": "@dynamia-tools/ui-core",
-  "version": "26.3.2",
+  "version": "26.4.1",
   "description": "Framework-agnostic view/viewer/renderer core for Dynamia Platform",
-  "keywords": ["dynamia", "ui-core", "viewer", "view", "renderer", "typescript"],
+  "keywords": [
+    "dynamia",
+    "ui-core",
+    "viewer",
+    "view",
+    "renderer",
+    "typescript"
+  ],
   "homepage": "https://dynamia.tools",
-  "repository": {"type": "git", "url": "https://github.com/dynamiatools/framework.git", "directory": "platform/packages/ui-core"},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dynamiatools/framework.git",
+    "directory": "platform/packages/ui-core"
+  },
   "license": "Apache-2.0",
   "author": "Dynamia Soluciones IT SAS",
   "type": "module",
@@ -14,11 +25,21 @@
   "exports": {
     ".": {
       "development": "./src/index.ts",
-      "import": {"types": "./dist/index.d.ts", "default": "./dist/index.js"},
-      "require": {"types": "./dist/index.d.cts", "default": "./dist/index.cjs"}
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "vite build",
     "test": "vitest run",
@@ -26,7 +47,9 @@
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
-  "dependencies": {"@dynamia-tools/sdk": "workspace:*"},
+  "dependencies": {
+    "@dynamia-tools/sdk": "workspace:*"
+  },
   "devDependencies": {
     "@dynamia-tools/sdk": "workspace:*",
     "@types/node": "^22.0.0",
@@ -35,5 +58,8 @@
     "vite-plugin-dts": "^4.5.0",
     "vitest": "^3.0.0"
   },
-  "publishConfig": {"access": "public", "registry": "https://registry.npmjs.org/"}
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
 }

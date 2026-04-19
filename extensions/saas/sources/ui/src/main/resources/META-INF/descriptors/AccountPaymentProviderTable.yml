@@ -7,6 +7,5 @@ fields:
   paymentProcessor:
     label: Processor
   merchantId:
-  serviceURL:
   testMode:
   active:

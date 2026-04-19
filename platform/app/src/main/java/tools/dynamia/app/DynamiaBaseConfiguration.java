@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import tools.dynamia.app.reports.JasperReportCompiler;
+import tools.dynamia.commons.StringUtils;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.services.impl.NoOpCrudService;
 import tools.dynamia.integration.ms.MessageService;
@@ -31,6 +32,8 @@ import tools.dynamia.integration.search.DefaultSearchService;
 import tools.dynamia.integration.search.NoOpSearchProvider;
 import tools.dynamia.integration.search.SearchResultProvider;
 import tools.dynamia.integration.search.SearchService;
+import tools.dynamia.navigation.Module;
+import tools.dynamia.navigation.ModuleProvider;
 import tools.dynamia.reports.ReportCompiler;
 import tools.dynamia.templates.TemplateEngine;
 import tools.dynamia.web.navigation.RestApiNavigationConfiguration;
@@ -176,6 +179,18 @@ public class DynamiaBaseConfiguration extends RootAppConfiguration {
         return new VelocityTemplateEngine();
     }
 
+
+
+    /**
+     * Provides an empty {@link ModuleProvider} bean if none is registered.
+     *
+     * @return a ModuleProvider that returns a dummy module with a random name and message
+     */
+    @Bean
+    @ConditionalOnMissingBean(ModuleProvider.class)
+    public ModuleProvider emptyModuleProvider() {
+        return () -> new Module(StringUtils.randomString(), "No modules registered");
+    }
 
 
 }

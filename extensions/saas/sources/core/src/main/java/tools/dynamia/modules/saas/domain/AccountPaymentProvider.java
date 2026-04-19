@@ -16,13 +16,24 @@ public class AccountPaymentProvider extends SimpleEntity {
     private String apiKey;
     @Column(length = 500)
     private String apiSecret;
+
+    @Column(length = 500)
+    private String integritySecret;
+
+    @Column(length = 500)
+    private String webCheckoutSecret;
+    @Column(length = 500)
     private String serviceURL;
     private String merchantId;
     private boolean testMode;
-
     private boolean active = true;
 
     private String paymentProcessor;
+
+    private String extra0;
+    private String extra1;
+    private String extra2;
+    private String extra3;
 
     public String getName() {
         return name;
@@ -78,6 +89,54 @@ public class AccountPaymentProvider extends SimpleEntity {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public String getIntegritySecret() {
+        return integritySecret;
+    }
+
+    public void setIntegritySecret(String integritySecret) {
+        this.integritySecret = integritySecret;
+    }
+
+    public String getWebCheckoutSecret() {
+        return webCheckoutSecret;
+    }
+
+    public void setWebCheckoutSecret(String webcheckoutSecret) {
+        this.webCheckoutSecret = webcheckoutSecret;
+    }
+
+    public String getExtra0() {
+        return extra0;
+    }
+
+    public void setExtra0(String extra0) {
+        this.extra0 = extra0;
+    }
+
+    public String getExtra1() {
+        return extra1;
+    }
+
+    public void setExtra1(String extra1) {
+        this.extra1 = extra1;
+    }
+
+    public String getExtra2() {
+        return extra2;
+    }
+
+    public void setExtra2(String extra2) {
+        this.extra2 = extra2;
+    }
+
+    public String getExtra3() {
+        return extra3;
+    }
+
+    public void setExtra3(String extra3) {
+        this.extra3 = extra3;
     }
 
     @Override

@@ -1,10 +1,22 @@
 {
   "name": "@dynamia-tools/vue",
-  "version": "26.3.2",
+  "version": "26.4.1",
   "description": "Vue 3 adapter for Dynamia Platform UI",
-  "keywords": ["dynamia", "vue", "viewer", "form", "table", "crud", "typescript"],
+  "keywords": [
+    "dynamia",
+    "vue",
+    "viewer",
+    "form",
+    "table",
+    "crud",
+    "typescript"
+  ],
   "homepage": "https://dynamia.tools",
-  "repository": {"type": "git", "url": "https://github.com/dynamiatools/framework.git", "directory": "platform/packages/vue"},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dynamiatools/framework.git",
+    "directory": "platform/packages/vue"
+  },
   "license": "Apache-2.0",
   "author": "Dynamia Soluciones IT SAS",
   "type": "module",
@@ -14,11 +26,21 @@
   "exports": {
     ".": {
       "development": "./src/index.ts",
-      "import": {"types": "./dist/index.d.ts", "default": "./dist/index.js"},
-      "require": {"types": "./dist/index.d.cts", "default": "./dist/index.cjs"}
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "vite build",
     "typecheck": "vue-tsc --noEmit",
@@ -42,5 +64,8 @@
     "vue": "^3.4.0",
     "vue-tsc": "^2.0.0"
   },
-  "publishConfig": {"access": "public", "registry": "https://registry.npmjs.org/"}
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
 }
