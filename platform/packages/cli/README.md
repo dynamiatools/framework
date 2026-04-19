@@ -22,11 +22,11 @@ npm install -g @dynamia-tools/cli
 
 ### Requirements
 
-| Tool | Minimum version |
-|---|---|
-| Node.js | 22 |
-| git | any recent version (required) |
-| Java | 25 (recommended) |
+| Tool | Minimum version                |
+|---|--------------------------------|
+| Node.js | 24                             |
+| git | any recent version (required)  |
+| Java | 25 (recommended)               |
 
 ---
 

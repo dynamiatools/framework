@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/cli",
-  "version": "26.3.0",
+  "version": "26.4.1",
   "description": "Dynamia Tools CLI — Scaffold new Dynamia Platform projects",
   "keywords": [
     "dynamia",
@@ -46,7 +46,7 @@
     "ora": "^8.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
+    "@types/node": "^24.0.0",
     "typescript": "^5.7.0"
   },
   "publishConfig": {
@@ -54,6 +54,6 @@
     "registry": "https://registry.npmjs.org/"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   }
 }

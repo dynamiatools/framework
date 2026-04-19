@@ -109,6 +109,17 @@ install_prerequisites() {
 install_java() {
   info "Checking JDK 25..."
 
+  if java -version 2>&1 | grep -qE '^(openjdk|java) version "25'; then
+    success "JDK 25 already installed"
+    return
+  fi
+
+  # Only bootstrap SDKMAN when JDK 25 is missing
+  if [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]]; then
+    # shellcheck source=/dev/null
+    source "$HOME/.sdkman/bin/sdkman-init.sh"
+  fi
+
   if ! command -v sdk &>/dev/null; then
     info "Installing SDKMAN..."
     curl -s "https://get.sdkman.io" | bash
@@ -116,14 +127,10 @@ install_java() {
     source "$HOME/.sdkman/bin/sdkman-init.sh"
   fi
 
-  if java -version 2>&1 | grep -qE '^(openjdk|java) version "25'; then
-    success "JDK 25 already installed"
-  else
-    info "Installing JDK 25 via SDKMAN..."
-    sdk install java 25-tem
-    sdk default java 25-tem
-    success "JDK 25 installed"
-  fi
+  info "Installing JDK 25 via SDKMAN..."
+  sdk install java 25-tem
+  sdk default java 25-tem
+  success "JDK 25 installed"
 }
 
 # ---------------------------------------------------------------------------
@@ -131,7 +138,6 @@ install_java() {
 # ---------------------------------------------------------------------------
 install_node() {
   info "Checking Node.js..."
-
   if ! command -v fnm &>/dev/null; then
     info "Installing fnm (Fast Node Manager)..."
     curl -fsSL https://fnm.vercel.app/install | bash
