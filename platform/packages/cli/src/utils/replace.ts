@@ -143,6 +143,7 @@ export async function renameJavaPackages(options: RenameOptions): Promise<void> 
   replacements['<name>DynamiaTools App Backend</name>'] = `<name>${projectName}</name>`
   replacements['<dynamia.version>26.4.1</dynamia.version>'] = `<dynamia.version>${dynamiaVersion}</dynamia.version>`
   replacements['<version>4.0.5</version>'] = `<version>${springBootVersion}</version>`
+  replacements['<version>4.0.5.RELEASE</version>'] = `<version>${springBootVersion}</version>`
 
   // Always replace the placeholder package string itself in source files
   replacements['com.example.demo'] = basePackage
