@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/saas-sdk",
-  "version": "26.4.0",
+  "version": "26.4.1",
   "website": "https://dynamia.tools",
   "description": "TypeScript/JavaScript client SDK for the Dynamia SaaS extension REST API",
   "keywords": [
