@@ -1,8 +1,10 @@
 import { input, select, confirm } from '@inquirer/prompts'
 import { join } from 'node:path'
+import { existsSync } from 'node:fs'
+import { execa } from 'execa'
 import { loadConfig, type CliConfig } from '../utils/config.js'
 import { runChecks } from '../utils/env.js'
-import { banner, info, error, beta, errorMessage, errorWithCode } from '../utils/logger.js'
+import { banner, info, error, beta, errorMessage, errorWithCode, success, warn } from '../utils/logger.js'
 import { generateBackend } from '../generators/backend.js'
 import { generateFrontend } from '../generators/frontend.js'
 
@@ -291,4 +293,27 @@ export async function runNew(): Promise<void> {
     config,
     springBootVersion,
   })
+
+  const initGit = await confirm({
+    message: 'Initialize a Git repository in the project root?',
+    default: true,
+  })
+
+  if (!initGit) {
+    info('Git initialization skipped.')
+    return
+  }
+
+  const gitDir = join(targetDir, '.git')
+  if (existsSync(gitDir)) {
+    info('Git repository is already initialized.')
+    return
+  }
+
+  try {
+    await execa('git', ['init'], { cwd: targetDir, stdout: 'pipe', stderr: 'pipe' })
+    success(`Git repository initialized at ${targetDir}`)
+  } catch (err) {
+    warn(`Project was created, but Git initialization failed: ${errorMessage(err, 'DT-RUN-001')}`)
+  }
 }
