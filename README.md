@@ -18,14 +18,14 @@
 
 Starting with version **26.4.1**, Dynamia Platform adopts **Calendar Versioning (CalVer)** with the format `YY.MM.MINOR`. This means:
 - **All modules share the same version**: Core, extensions, starters, themes—everything is released together
-- **26.4.1** = First release of February 2026 (Year 26, Month 02, Release 0)
+- **26.2.0** = First release of February 2026 (Year 26, Month 02, Release 0)
 - **26.2.1** = Second release of February 2026
 - **26.3.0** = First release of March 2026
 - **Unified releases** ensure compatibility and simplify dependency management
 - No more version mismatches between platform components!
 
 **Examples**:
-- `26.4.1` → February 2026, first release
+- `26.2.0` → February 2026, first release
 - `26.2.1` → February 2026, second release (hotfix or minor update)
 - `26.12.3` → December 2026, fourth release
 
