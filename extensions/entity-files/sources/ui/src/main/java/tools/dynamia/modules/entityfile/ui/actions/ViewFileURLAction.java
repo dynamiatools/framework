@@ -36,7 +36,7 @@ public class ViewFileURLAction extends AbstractEntityFileAction implements Reada
     @Override
     public void actionPerformed(EntityFileActionEvent evt) {
         if (evt.getEntityFile() != null) {
-            String url = evt.getEntityFile().getStoredEntityFile().getUrl();
+            String url = evt.getEntityFile().toURL();
             UIMessages.showMessageDialog("<pre>" + url + "</pre>");
         }
     }

@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.List;
 
+import tools.dynamia.modules.entityfile.EntityFileStorage;
 import tools.dynamia.modules.entityfile.StoredEntityFile;
 import tools.dynamia.modules.entityfile.UploadedFileInfo;
 import tools.dynamia.modules.entityfile.domain.EntityFile;
@@ -34,140 +35,121 @@ import tools.dynamia.modules.entityfile.domain.EntityFile;
  */
 public interface EntityFileService {
 
-	/**
-	 * Creates the directory.
-	 *
-	 * @param ownerEntity
-	 *            the owner entity
-	 * @param name
-	 *            the name
-	 * @param description
-	 *            the description
-	 * @return the entity file
-	 */
+    /**
+     * Creates the directory.
+     *
+     * @param ownerEntity the owner entity
+     * @param name        the name
+     * @param description the description
+     * @return the entity file
+     */
     EntityFile createDirectory(Object ownerEntity, String name, String description);
 
-	/**
-	 * Creates the directory.
-	 *
-	 * @param parent
-	 *            the parent
-	 * @param name
-	 *            the name
-	 * @param description
-	 *            the description
-	 * @return the entity file
-	 */
+    /**
+     * Creates the directory.
+     *
+     * @param parent      the parent
+     * @param name        the name
+     * @param description the description
+     * @return the entity file
+     */
     EntityFile createDirectory(EntityFile parent, String name, String description);
 
-	/**
-	 * Creates the entity file.
-	 *
-	 * @param fileInfo
-	 *            the file info
-	 * @param target
-	 *            the target
-	 * @param desc
-	 *            the desc
-	 * @return the entity file
-	 */
+    /**
+     * Creates the entity file.
+     *
+     * @param fileInfo the file info
+     * @param target   the target
+     * @param desc     the desc
+     * @return the entity file
+     */
     EntityFile createEntityFile(UploadedFileInfo fileInfo, Object target, String desc);
 
-	/**
-	 * Creates the entity file.
-	 *
-	 * @param fileInfo
-	 *            the file info
-	 * @param targetEntity
-	 *            the target entity
-	 * @return the entity file
-	 */
+    /**
+     * Creates the entity file.
+     *
+     * @param fileInfo     the file info
+     * @param targetEntity the target entity
+     * @return the entity file
+     */
     EntityFile createEntityFile(UploadedFileInfo fileInfo, Object targetEntity);
 
-	/**
-	 * Gets the entity files.
-	 *
-	 * @param clazz
-	 *            the clazz
-	 * @param id
-	 *            the id
-	 * @param parentDirectory
-	 *            the parent directory
-	 * @return the entity files
-	 */
+    /**
+     * Gets the entity files.
+     *
+     * @param clazz           the clazz
+     * @param id              the id
+     * @param parentDirectory the parent directory
+     * @return the entity files
+     */
     List<EntityFile> getEntityFiles(Class clazz, Serializable id, EntityFile parentDirectory);
 
-	/**
-	 * Gets the entity files.
-	 *
-	 * @param entity
-	 *            the entity
-	 * @param parentDirectory
-	 *            the parent directory
-	 * @return the entity files
-	 */
+    /**
+     * Gets the entity files.
+     *
+     * @param entity          the entity
+     * @param parentDirectory the parent directory
+     * @return the entity files
+     */
     List<EntityFile> getEntityFiles(Object entity, EntityFile parentDirectory);
 
-	/**
-	 * Gets the entity files.
-	 *
-	 * @param entity
-	 *            the entity
-	 * @return the entity files
-	 */
+    /**
+     * Gets the entity files.
+     *
+     * @param entity the entity
+     * @return the entity files
+     */
     List<EntityFile> getEntityFiles(Object entity);
 
-	/**
-	 * Delete.
-	 *
-	 * @param entityFile
-	 *            the entity file
-	 */
+    /**
+     * Delete.
+     *
+     * @param entityFile the entity file
+     */
     void delete(EntityFile entityFile);
 
-	/**
-	 * Sync entity file aware.
-	 */
+    /**
+     * Sync entity file aware.
+     */
     void syncEntityFileAware();
 
-	/**
-	 * Get an stored entity file instance for download
-	 * @param entityFile
-	 * @return
-	 */
+    /**
+     * Get an stored entity file instance for download
+     *
+     * @param entityFile
+     * @return
+     */
     StoredEntityFile download(EntityFile entityFile);
 
-	/**
-	 * Download the EntityFile internal file to a local output file, this is
-	 * usefull when entityfiles are stored in difernte localtion
-	 *
-	 * @param entityFile
-	 * @param outputFile
-	 */
+    /**
+     * Download the EntityFile internal file to a local output file, this is
+     * usefull when entityfiles are stored in difernte localtion
+     *
+     * @param entityFile
+     * @param outputFile
+     */
     void download(EntityFile entityFile, File outputFile);
 
-	/**
-	 * Creates the temporal entity file.
-	 *
-	 * @param fileInfo
-	 *            the file info
-	 * @return the entity file
-	 */
+    /**
+     * Creates the temporal entity file.
+     *
+     * @param fileInfo the file info
+     * @return the entity file
+     */
     EntityFile createTemporalEntityFile(UploadedFileInfo fileInfo);
 
-	/**
-	 * Configure entity file. Setup targetEntity and targetEntityId for
-	 * EntityFile
-	 *
-	 * @param target
-	 *            the target
-	 * @param entityFile
-	 *            the entity file
-	 */
+    /**
+     * Configure entity file. Setup targetEntity and targetEntityId for
+     * EntityFile
+     *
+     * @param target     the target
+     * @param entityFile the entity file
+     */
     void configureEntityFile(Object target, EntityFile entityFile);
 
-	void syncEntityFileAware(Object target);
+    void syncEntityFileAware(Object target);
 
-	EntityFile getEntityFile(String uuid);
+    EntityFile getEntityFile(String uuid);
 
+    EntityFileStorage getStorage(String name);
 }

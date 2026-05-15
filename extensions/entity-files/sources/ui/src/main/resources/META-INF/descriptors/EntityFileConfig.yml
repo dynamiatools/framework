@@ -56,10 +56,18 @@ fields:
       parameterName: AWS_SECRET_KEY
       cacheable: true
 
+  s3Endpoint:
+    label: Endpoint Override
+    description: Optional endpoint override for S3 compatible storage
+    params:
+      parameterName: AWS_S3_OVERRIDE_ENDPOINT
+      cacheable: true
+      span: 2
+
 groups:
-  s3:
-    label: Amazon Web Service (S3)
-    fields: [ s3BucketName,s3Region,s3User,s3Secret ]
+  s3Config:
+    label: S3 Compatible Storage
+    fields: [ s3BucketName,s3Region,s3User,s3Secret,s3Endpoint ]
 
 layout:
   columns: 4
