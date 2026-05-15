@@ -283,6 +283,21 @@ public class EntityFile extends BaseEntity implements URLable {
         return url+"?w="+w+"&h="+h;
     }
 
+    @Transient
+    public String getUrl(){
+        return toURL();
+    }
+
+    @Transient
+    public String getThumbnailUrl(){
+       return toThumbnailURL(200, 200);
+    }
+
+    @Transient
+    public String getThumbnailUrl(int w, int h) {
+        return toThumbnailURL(w, h);
+    }
+
     public String getExternalRef() {
         return externalRef;
     }
