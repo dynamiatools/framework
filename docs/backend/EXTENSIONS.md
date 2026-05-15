@@ -301,6 +301,16 @@ dynamia.entityfiles.s3.secret-key=${AWS_SECRET_KEY}
 ```
 
 ### When to Use Entity Files Extension
+#### MinIO Storage
+```properties
+# MinIO storage
+DEFAULT_STORAGE_ID=MinioStorage
+MINIO_ENDPOINT=http://localhost:9000
+MINIO_BUCKET=my-bucket
+MINIO_REGION=us-east-1
+MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+```
 
 - Attach documents to records
 - Store user profiles or avatars

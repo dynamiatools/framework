@@ -81,4 +81,12 @@ public abstract class SimpleEntity extends AbstractEntity<Long> {
     public void setRemoteId(Long remoteId) {
         this.remoteId = remoteId;
     }
+
+    /**
+     * Generic getter to query curent entity version
+     * @return version
+     */
+    public int currentVersion() {
+        return version;
+    }
 }
