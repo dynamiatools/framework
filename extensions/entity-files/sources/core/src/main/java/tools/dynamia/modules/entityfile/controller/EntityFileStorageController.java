@@ -1,12 +1,14 @@
 package tools.dynamia.modules.entityfile.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Controller;
 import tools.dynamia.io.IOUtils;
@@ -20,8 +22,10 @@ import tools.dynamia.modules.entityfile.enums.EntityFileType;
 import tools.dynamia.modules.entityfile.local.LocalEntityFileStorage;
 import tools.dynamia.modules.entityfile.local.LocalEntityFileStorageHandler;
 import tools.dynamia.modules.entityfile.service.EntityFileService;
+import tools.dynamia.web.util.HttpUtils;
 
 import java.io.File;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static tools.dynamia.modules.entityfile.local.LocalEntityFileStorageHandler.getParam;
@@ -34,7 +38,38 @@ public class EntityFileStorageController {
 
     public EntityFileStorageController(EntityFileService entityFileService) {
         this.entityFileService = entityFileService;
+    }
 
+    @GetMapping(value = "/api/storage/{uuid}/export", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> export(@PathVariable String uuid, HttpServletResponse response, HttpServletRequest request) {
+        var entityFile = entityFileService.getEntityFile(uuid);
+        if (entityFile == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (!isSameAccount(entityFile)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String url = entityFile.toURL();
+        if (!entityFile.isShared()) {
+            EntityFileSecurityProvider securityProvider = Containers.get().findObject(EntityFileSecurityProvider.class);
+            if (securityProvider != null) {
+                String token = securityProvider.generateToken(entityFile);
+                url = entityFile.toURL() + "?token=" + token;
+            }
+        }
+
+        return ResponseEntity.ok(MapBuilder.put(
+                        "name", entityFile.getName(),
+                        "id", entityFile.getId(),
+                        "uuid", entityFile.getUuid(),
+                        "description", entityFile.getDescription(),
+                        "size", entityFile.getSize(),
+                        "version", entityFile.currentVersion(),
+                        "url", url
+                )
+        );
     }
 
     @GetMapping(value = "/storage/{uuid}/{file}")
@@ -44,18 +79,16 @@ public class EntityFileStorageController {
             return ResponseEntity.notFound().build();
         }
 
-        EntityFileAccountProvider accountProvider = Containers.get().findObject(EntityFileAccountProvider.class);
-        if (accountProvider != null) {
-            if (entityFile.getAccountId() != null) {
-                if (!entityFile.getAccountId().equals(accountProvider.getAccountId())) {
-                    return ResponseEntity.notFound().build();
-                }
-            }
+        if (!isSameAccount(entityFile)) {
+            return ResponseEntity.notFound().build();
         }
 
         if (!entityFile.isShared()) {
             EntityFileSecurityProvider securityProvider = Containers.get().findObject(EntityFileSecurityProvider.class);
-            if (securityProvider != null && !securityProvider.canAccess(entityFile)) {
+
+            Map<String, String> params = HttpUtils.loadParams(request);
+            Map<String, String> headers = HttpUtils.loadHeaders(request);
+            if (securityProvider != null && !securityProvider.canAccess(entityFile, params, headers)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .build();
             }
@@ -109,6 +142,16 @@ public class EntityFileStorageController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    private boolean isSameAccount(EntityFile entityFile) {
+        EntityFileAccountProvider accountProvider = Containers.get().findObject(EntityFileAccountProvider.class);
+        if (accountProvider != null) {
+            if (entityFile.getAccountId() != null) {
+                return entityFile.getAccountId().equals(accountProvider.getAccountId());
+            }
+        }
+        return true;
     }
 
     private static @NonNull MediaType getMediaType(EntityFile entityFile) {
