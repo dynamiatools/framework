@@ -1,4 +1,5 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
+import fp from 'fastify-plugin'
 import { IdentityService } from '../../auth/identity.service.js'
 import type { Identity } from '../../types/index.js'
 import { SFSError, SFSErrorCode, unauthorized } from '../../errors/index.js'
@@ -15,7 +16,18 @@ interface AuthPluginOptions {
   logger: OperationalLogger
 }
 
-export async function authPlugin(fastify: FastifyInstance, options: AuthPluginOptions): Promise<void> {
+/**
+ * Authentication plugin wrapped with fastify-plugin so that:
+ *  - The `authIdentity` request decoration is visible in all sibling/child plugins.
+ *  - The `onRequest` hook applies to ALL routes registered on the root instance.
+ *
+ * Without fastify-plugin, Fastify's encapsulation would isolate the decoration
+ * and hook to routes within this plugin's scope only.
+ */
+export const authPlugin = fp(async function authPlugin(
+  fastify: FastifyInstance,
+  options: AuthPluginOptions,
+): Promise<void> {
   const { identityService, logger } = options
 
   fastify.decorateRequest<Identity | null>('authIdentity', { getter: () => null })
@@ -42,7 +54,7 @@ export async function authPlugin(fastify: FastifyInstance, options: AuthPluginOp
 
     request.authIdentity = id
   })
-}
+}, { name: 'sfs-auth' })
 
 function extractIdentity(request: FastifyRequest): string | undefined {
   const headerIdentity = request.headers['x-sfs-identity']

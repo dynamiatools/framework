@@ -67,6 +67,11 @@ export async function createServer(options: ServerOptions): Promise<FastifyInsta
     return { ok: true, data: { status: 'healthy', uptime: process.uptime() } }
   })
 
+  // Accept any Content-Type for upload routes.
+  // The PUT handler reads directly from `request.raw` (Node.js IncomingMessage stream),
+  // so Fastify must NOT attempt to parse the body — it just needs to not reject it.
+  fastify.addContentTypeParser('*', (_request, _payload, done) => done(null))
+
   // Auth plugin (applies to all routes below)
   await fastify.register(authPlugin, { identityService, logger: operationalLogger })
 

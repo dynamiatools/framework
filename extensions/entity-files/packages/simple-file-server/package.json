@@ -56,6 +56,9 @@
     "argon2": "^0.43.0",
     "commander": "^13.1.0",
     "fastify": "^5.3.0",
+    "fastify-plugin": "^5.0.0",
+    "file-type": "^21.0.0",
+    "fastify-plugin": "^5.1.0",
     "file-type": "^21.0.0",
     "pino": "^9.7.0",
     "pino-pretty": "^13.0.0",
@@ -73,4 +76,3 @@
     "node": ">=22.0.0"
   }
 }
-

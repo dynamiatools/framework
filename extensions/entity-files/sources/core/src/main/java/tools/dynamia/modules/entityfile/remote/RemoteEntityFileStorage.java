@@ -19,6 +19,8 @@ package tools.dynamia.modules.entityfile.remote;
 
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.web.client.RestClient;
 import tools.dynamia.commons.logger.LoggingService;
@@ -114,19 +116,36 @@ public class RemoteEntityFileStorage implements EntityFileStorage {
         logger.info("Uploading " + entityFile.getName() + " → sfs://" + bucket + "/" + key);
 
         try {
-            byte[] body = fileInfo.getInputStream().readAllBytes();
+            // Stream the InputStream directly — InputStreamResource avoids loading
+            // the entire file into memory (ResourceHttpMessageConverter streams it).
+            var resource = new InputStreamResource(fileInfo.getInputStream()) {
+                @Override
+                public long contentLength() {
+                    // Return the known length so the server gets a correct Content-Length
+                    // header; -1 means unknown (chunked transfer will be used instead).
+                    return fileInfo.getLength() > 0 ? fileInfo.getLength() : -1;
+                }
 
-            client().put()
-                    .uri("/{bucket}/{key}", bucket, key)
+                @Override
+                public String getFilename() {
+                    return fileInfo.getFullName();
+                }
+            };
+
+            var response = client().put()
+                    .uri(uriBuilder -> uriBuilder.replacePath("/" + bucket + "/" + key).build())
                     .header(HEADER_IDENTITY, getIdentity())
                     .header(HEADER_SECRET, getSecret())
-                    .header("Content-Type", contentType(fileInfo))
-                    .body(body)
+                    .contentType(org.springframework.http.MediaType.parseMediaType(contentType(fileInfo)))
+                    .body(resource)
                     .retrieve()
                     .toBodilessEntity();
 
-            entityFile.setSize((long) body.length);
-            logger.info("Uploaded successfully: " + key);
+            // Use the length from fileInfo; if 0 fall back to what was set by the caller.
+            if (fileInfo.getLength() > 0) {
+                entityFile.setSize(fileInfo.getLength());
+            }
+            logger.info("Uploaded successfully [" + response.getStatusCode() + "]: " + key);
         } catch (Exception e) {
             logger.error("Error uploading entity file to SFS: " + key, e);
             throw new EntityFileException("Error uploading entity file to SFS: " + key, e);
@@ -150,7 +169,7 @@ public class RemoteEntityFileStorage implements EntityFileStorage {
 
         try {
             client().delete()
-                    .uri("/{bucket}/{key}", bucket, key)
+                    .uri(uriBuilder -> uriBuilder.replacePath("/" + bucket + "/" + key).build())
                     .header(HEADER_IDENTITY, getIdentity())
                     .header(HEADER_SECRET, getSecret())
                     .retrieve()
