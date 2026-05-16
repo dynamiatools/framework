@@ -78,7 +78,112 @@ DELETE /:bucket/:key
 GET /health
 ```
 
+## curl Examples
+
+All examples assume the server is running at `http://localhost:8080` with identity `erp-prod` and secret `my-secret-password`.
+
+### Health check
+
+```bash
+curl http://localhost:8080/health
+```
+
+### Upload a file
+
+```bash
+curl -X PUT http://localhost:8080/documents/tenant-a/invoice.pdf \
+  -H "X-SFS-Identity: erp-prod" \
+  -H "X-SFS-Secret: my-secret-password" \
+  -H "Content-Type: application/octet-stream" \
+  --data-binary @/path/to/invoice.pdf
+```
+
+### Upload a file using HTTP Basic Auth
+
+```bash
+curl -X PUT http://localhost:8080/documents/tenant-a/report.xlsx \
+  -u "erp-prod:my-secret-password" \
+  -H "Content-Type: application/octet-stream" \
+  --data-binary @/path/to/report.xlsx
+```
+
+### Download a file
+
+```bash
+curl http://localhost:8080/documents/tenant-a/invoice.pdf \
+  -H "X-SFS-Identity: erp-prod" \
+  -H "X-SFS-Secret: my-secret-password" \
+  -o invoice.pdf
+```
+
+### Download a thumbnail (image resize on the fly)
+
+```bash
+# 300×300 WebP thumbnail with cover fit
+curl "http://localhost:8080/documents/tenant-a/photo.jpg?w=300&h=300&fit=cover&format=webp" \
+  -H "X-SFS-Identity: erp-prod" \
+  -H "X-SFS-Secret: my-secret-password" \
+  -o thumbnail.webp
+```
+
+### List a directory
+
+```bash
+curl http://localhost:8080/documents/tenant-a/ \
+  -H "X-SFS-Identity: erp-prod" \
+  -H "X-SFS-Secret: my-secret-password"
+```
+
+### List bucket contents (paginated)
+
+```bash
+# First page
+curl "http://localhost:8080/documents?limit=50" \
+  -H "X-SFS-Identity: erp-prod" \
+  -H "X-SFS-Secret: my-secret-password"
+
+# Next page using the cursor returned from the previous response
+curl "http://localhost:8080/documents?limit=50&cursor=<cursor-value>" \
+  -H "X-SFS-Identity: erp-prod" \
+  -H "X-SFS-Secret: my-secret-password"
+```
+
+### Delete a file
+
+```bash
+curl -X DELETE http://localhost:8080/documents/tenant-a/invoice.pdf \
+  -H "X-SFS-Identity: erp-prod" \
+  -H "X-SFS-Secret: my-secret-password"
+```
+
+### Pretty-print JSON responses
+
+Pipe responses through `jq` for readable output:
+
+```bash
+curl -s "http://localhost:8080/documents/tenant-a/" \
+  -H "X-SFS-Identity: erp-prod" \
+  -H "X-SFS-Secret: my-secret-password" | jq
+```
+
 ## CLI Reference
+
+### Tab Completion
+
+SFS supports tab completion for Bash, Zsh and Fish.
+
+```bash
+# Bash — add to ~/.bashrc
+eval "$(sfs completion bash)"
+
+# Zsh — add to ~/.zshrc  (compinit must already be loaded)
+eval "$(sfs completion zsh)"
+
+# Fish — save to completions directory
+sfs completion fish > ~/.config/fish/completions/sfs.fish
+```
+
+Completion is dynamic: bucket names and identity names are resolved at completion time by querying the local SFS runtime.
 
 ```bash
 # Server
@@ -97,14 +202,22 @@ sfs remove identity <identity>
 # Permissions
 sfs grant <identity> <bucket> --read --write --delete --prefix <path>
 sfs revoke <identity> <bucket>
+
+# Files
+sfs list files <bucket> [path]          # List files in a bucket or directory
+sfs upload <bucket> <key> <localFile>   # Upload a local file to a bucket
+sfs copy <srcBucket> <srcKey> <dstBucket> <dstKey>  # Copy a file between buckets
+
+# Provisioning (auto-generate identity + secret + grant in one step)
+sfs provision <bucket> [--identity <name>] [--prefix <path>] [--read] [--write] [--delete]
 ```
 
 ## Data Directory Structure
 
-SFS stores all runtime configuration in the working directory:
+SFS stores all runtime configuration under a `.sfs/` directory in the working directory:
 
 ```
-./sfs/
+.sfs/
  ├── config/        # Server configuration
  ├── identities/    # Identity definitions + hashed secrets + grants
  ├── buckets/       # Bucket definitions

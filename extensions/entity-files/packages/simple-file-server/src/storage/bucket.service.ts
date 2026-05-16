@@ -106,10 +106,12 @@ export class BucketService {
       throw new SFSError(SFSErrorCode.PATH_RESERVED, `Access to internal '${SFS_INTERNAL_DIR}' path is forbidden`, 403)
     }
 
-    const resolved = path.resolve(bucket.path, normalized.replace(/^\//, ''))
+    // Normalize bucket root to remove any trailing separator
+    const bucketRoot = path.resolve(bucket.path)
+    const resolved = path.resolve(bucketRoot, normalized.replace(/^\//, ''))
 
     // Ensure resolved path is within bucket root
-    if (!resolved.startsWith(bucket.path + path.sep) && resolved !== bucket.path) {
+    if (!resolved.startsWith(bucketRoot + path.sep) && resolved !== bucketRoot) {
       throw new SFSError(SFSErrorCode.PATH_TRAVERSAL, 'Path traversal detected', 400)
     }
 

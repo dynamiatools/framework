@@ -4,7 +4,7 @@ import fsp from 'node:fs/promises'
 import type { SFSConfig } from '../types/index.js'
 
 // Default data directory relative to CWD
-const DEFAULT_DATA_DIR = path.join(process.cwd(), 'sfs')
+const DEFAULT_DATA_DIR = path.join(process.cwd(), '.sfs')
 
 export function getDataDir(): string {
   return process.env.SFS_DATA_DIR ?? DEFAULT_DATA_DIR

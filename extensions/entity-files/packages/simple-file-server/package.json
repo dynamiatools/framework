@@ -23,7 +23,8 @@
   "author": "Dynamia Soluciones IT SAS",
   "type": "module",
   "bin": {
-    "sfs": "./dist/cli/index.js"
+    "sfs": "./dist/cli/index.js",
+    "sfs-test": "./dist/cli/index.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -42,6 +43,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "rebuild": "tsc -p tsconfig.build.json && echo '✅ sfs-test actualizado'",
     "dev": "tsx watch src/cli/index.ts serve",
     "start": "node dist/cli/index.js serve",
     "test": "vitest run",
@@ -50,7 +52,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@fastify/sensible": "^5.6.0",
+    "@fastify/sensible": "^6.0.4",
     "argon2": "^0.43.0",
     "commander": "^13.1.0",
     "fastify": "^5.3.0",
