@@ -45,6 +45,7 @@ import tools.dynamia.modules.entityfile.StoredEntityFile;
 import tools.dynamia.modules.entityfile.UploadedFileInfo;
 import tools.dynamia.modules.entityfile.domain.EntityFile;
 import tools.dynamia.modules.entityfile.enums.EntityFileType;
+import tools.dynamia.modules.entityfile.remote.RemoteEntityFileStorage;
 
 import java.io.File;
 import java.net.URL;
@@ -56,6 +57,9 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static tools.dynamia.modules.entityfile.remote.RemoteEntityFileStorage.getAccountFolderName;
+import static tools.dynamia.modules.entityfile.remote.RemoteEntityFileStorage.getFileName;
 
 /**
  * {@link EntityFileStorage} implementation that store files in Amazon S3 service.
@@ -220,29 +224,6 @@ public class S3EntityFileStorage implements EntityFileStorage {
     }
 
 
-    private String getFileName(EntityFile entityFile) {
-        String subfolder = "";
-        if (entityFile.getSubfolder() != null) {
-            subfolder = entityFile.getSubfolder() + "/";
-        }
-
-        var name = entityFile.getName().toLowerCase().trim()
-                .replace(" ", "_")
-                .replace("-", "_")
-                .replace("\u00F1", "n")
-                .replace("\u00E1", "a")
-                .replace("\u00E9", "e")
-                .replace("\u00ED", "i")
-                .replace("\u00F3", "o")
-                .replace("\u00FA", "u");
-        String storedFileName = entityFile.getUuid() + "_" + name;
-        if (entityFile.getStoredFileName() != null && !entityFile.getStoredFileName().isEmpty()) {
-            storedFileName = entityFile.getStoredFileName();
-        }
-
-        return subfolder + storedFileName;
-    }
-
     /**
      * Get or build a S3 async client using static credentials
      *
@@ -264,9 +245,7 @@ public class S3EntityFileStorage implements EntityFileStorage {
 
     }
 
-    protected String getAccountFolderName(Long accountId) {
-        return "account" + accountId + "/";
-    }
+
 
     /**
      * Generate thumbnail url

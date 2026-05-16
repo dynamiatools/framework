@@ -64,10 +64,36 @@ fields:
       cacheable: true
       span: 2
 
+  sfsUrl:
+    label: Server URL
+    description: Base URL of the simple-file-server instance, e.g. http://files.example.com:8080
+    params:
+      parameterName: SFS_URL
+      cacheable: true
+      span: 2
+  sfsBucket:
+    label: Bucket
+    params:
+      parameterName: SFS_BUCKET
+      cacheable: true
+  sfsIdentity:
+    label: Identity
+    params:
+      parameterName: SFS_IDENTITY
+      cacheable: true
+  sfsSecret:
+    label: Secret
+    params:
+      parameterName: SFS_SECRET
+      cacheable: true
+
 groups:
   s3Config:
     label: S3 Compatible Storage
     fields: [ s3BucketName,s3Region,s3User,s3Secret,s3Endpoint ]
+  sfsConfig:
+    label: Remote Simple File Storage
+    fields: [ sfsUrl,sfsBucket,sfsIdentity,sfsSecret ]
 
 layout:
   columns: 4
