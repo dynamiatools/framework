@@ -136,7 +136,7 @@ public class RemoteEntityFileStorage implements EntityFileStorage {
                     .uri(uriBuilder -> uriBuilder.replacePath("/" + bucket + "/" + key).build())
                     .header(HEADER_IDENTITY, getIdentity())
                     .header(HEADER_SECRET, getSecret())
-                    .contentType(org.springframework.http.MediaType.parseMediaType(contentType(fileInfo)))
+                   // .contentType(org.springframework.http.MediaType.parseMediaType(contentType(fileInfo)))
                     .body(resource)
                     .retrieve()
                     .toBodilessEntity();
