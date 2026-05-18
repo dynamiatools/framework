@@ -72,7 +72,7 @@ export class ThumbnailService {
         pipeline = pipeline.resize({
           width: options.width,
           height: options.height,
-          fit: options.fit ?? 'cover',
+          fit: options.fit ?? 'contain',
           withoutEnlargement: true,
         })
       }
@@ -102,7 +102,7 @@ export class ThumbnailService {
 
   private buildCacheKey(key: string, options: ThumbnailOptions): string {
     const normalized = key.replace(/\//g, '_').replace(/\s/g, '_')
-    const optStr = `${options.width ?? 0}x${options.height ?? 0}-${options.fit ?? 'cover'}-${options.format ?? 'webp'}`
+    const optStr = `${options.width ?? 0}x${options.height ?? 0}-${options.fit ?? 'contain'}-${options.format ?? 'webp'}`
     const hash = crypto.createHash('sha1').update(`${normalized}:${optStr}`).digest('hex').slice(0, 12)
     const ext = options.format ?? 'webp'
     return `${hash}.${ext}`
