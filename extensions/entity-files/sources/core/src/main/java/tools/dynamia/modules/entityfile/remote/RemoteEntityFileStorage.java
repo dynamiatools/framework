@@ -18,10 +18,8 @@
 package tools.dynamia.modules.entityfile.remote;
 
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.Resource;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.Resource;
 import org.springframework.web.client.RestClient;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
@@ -154,10 +152,8 @@ public class RemoteEntityFileStorage implements EntityFileStorage {
 
     @Override
     public StoredEntityFile download(EntityFile entityFile) {
-        // Return a URL that goes through the local proxy handler — SFS credentials
-        // are never sent to the browser.
         String url = buildRemoteUrl(entityFile);
-        return new RemoteStoredEntityFile(entityFile, url);
+        return new RemoteStoredEntityFile(entityFile, url, client(), getIdentity(), getSecret());
     }
 
     @Override
@@ -298,14 +294,24 @@ public class RemoteEntityFileStorage implements EntityFileStorage {
      * {@link StoredEntityFile} for files hosted on a remote SFS instance.
      * There is no local {@link File} — {@link #getRealFile()} returns {@code null}.
      * Thumbnails are generated server-side by SFS and requested through the proxy.
+     * SFS credentials are included in every download request so the server can
+     * authorise the caller.
      */
     public static class RemoteStoredEntityFile extends StoredEntityFile {
 
         @Serial
         private static final long serialVersionUID = 1L;
 
-        public RemoteStoredEntityFile(EntityFile entityFile, String removeUrl) {
-            super(entityFile, removeUrl, null);
+        private final transient RestClient restClient;
+        private final String identity;
+        private final String secret;
+
+        public RemoteStoredEntityFile(EntityFile entityFile, String remoteUrl,
+                                      RestClient restClient, String identity, String secret) {
+            super(entityFile, remoteUrl, null);
+            this.restClient = restClient;
+            this.identity = identity;
+            this.secret = secret;
         }
 
         @Override
@@ -323,17 +329,30 @@ public class RemoteEntityFileStorage implements EntityFileStorage {
 
         @Override
         public Resource toResource() {
-            try {
-                return new UrlResource(getUrl());
-            } catch (Exception e) {
-                return null;
-            }
+            return fetchResource(getUrl());
         }
 
         @Override
         public Resource toThumbnailResource(int width, int height) {
+            return fetchResource(getThumbnailUrl(width, height));
+        }
+
+        /**
+         * GETs the given URL through the {@link RestClient} with SFS authentication headers
+         * and wraps the response body in an {@link InputStreamResource}.
+         */
+        private Resource fetchResource(String url) {
             try {
-                return new UrlResource(getThumbnailUrl(width, height));
+                var inputStream = restClient.get()
+                        .uri(url)
+                        .header(HEADER_IDENTITY, identity)
+                        .header(HEADER_SECRET, secret)
+                        .retrieve()
+                        .body(java.io.InputStream.class);
+                if (inputStream == null) {
+                    return null;
+                }
+                return new InputStreamResource(inputStream);
             } catch (Exception e) {
                 return null;
             }

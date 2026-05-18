@@ -216,20 +216,33 @@ public class RemoteEntityFileStorageTest {
     }
 
     @Test
-    public void testToResource_returnsUrlResource() {
-        EntityFile ef = buildEntityFile("file.pdf", null, 1L);
-        StoredEntityFile stored = storage.download(ef);
+    public void testToResource_returnsInputStreamResource() {
+        Assume.assumeTrue("SFS server not available at " + sfsUrl, isServerReachable());
 
-        // toResource() must not throw even if the URL is not reachable
-        // (UrlResource accepts any syntactically valid URL without connecting)
+        // Upload a file first so the URL is actually retrievable
+        EntityFile ef = buildEntityFile("to-resource-" + System.currentTimeMillis() + ".txt", null, 1L);
+        byte[] bytes = "toResource content".getBytes(StandardCharsets.UTF_8);
+        UploadedFileInfo info = new UploadedFileInfo(ef.getName(), "text/plain", new ByteArrayInputStream(bytes));
+        info.setLength(bytes.length);
+        storage.upload(ef, info);
+
+        StoredEntityFile stored = storage.download(ef);
+        // toResource() must authenticate with SFS and return an InputStreamResource
         assertNotNull("toResource() must not throw or return null", stored.toResource());
     }
 
     @Test
-    public void testToThumbnailResource_returnsUrlResource() {
-        EntityFile ef = buildEntityFile("image.png", null, 1L);
-        StoredEntityFile stored = storage.download(ef);
+    public void testToThumbnailResource_returnsInputStreamResource() {
+        Assume.assumeTrue("SFS server not available at " + sfsUrl, isServerReachable());
 
+        EntityFile ef = buildEntityFile("to-thumb-" + System.currentTimeMillis() + ".png", null, 1L);
+        byte[] bytes = new byte[]{(byte) 0xFF, (byte) 0xD8}; // minimal JPEG-like stub
+        UploadedFileInfo info = new UploadedFileInfo(ef.getName(), "image/png", new ByteArrayInputStream(bytes));
+        info.setLength(bytes.length);
+        storage.upload(ef, info);
+
+        StoredEntityFile stored = storage.download(ef);
+        // toThumbnailResource() must authenticate with SFS and return an InputStreamResource
         assertNotNull("toThumbnailResource() must not throw or return null",
                 stored.toThumbnailResource(200, 200));
     }
