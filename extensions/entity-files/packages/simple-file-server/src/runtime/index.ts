@@ -41,7 +41,7 @@ export async function createRuntime(overrides?: Partial<SFSConfig>): Promise<SFS
   }
 }
 
-export async function startServer(overrides?: Partial<SFSConfig>): Promise<void> {
+export async function startServer(overrides?: Partial<SFSConfig>): Promise<SFSRuntime> {
   const runtime = await createRuntime(overrides)
   const { config, bucketService, storageService, thumbnailService, identityService, operationalLogger } = runtime
 
@@ -79,5 +79,7 @@ export async function startServer(overrides?: Partial<SFSConfig>): Promise<void>
     await operationalLogger.close()
     process.exit(1)
   }
+
+  return runtime
 }
 
