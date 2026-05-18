@@ -343,16 +343,12 @@ public class RemoteEntityFileStorage implements EntityFileStorage {
          */
         private Resource fetchResource(String url) {
             try {
-                var inputStream = restClient.get()
+                return restClient.get()
                         .uri(url)
                         .header(HEADER_IDENTITY, identity)
                         .header(HEADER_SECRET, secret)
                         .retrieve()
-                        .body(java.io.InputStream.class);
-                if (inputStream == null) {
-                    return null;
-                }
-                return new InputStreamResource(inputStream);
+                        .body(Resource.class);
             } catch (Exception e) {
                 return null;
             }

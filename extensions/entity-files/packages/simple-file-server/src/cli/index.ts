@@ -4,17 +4,18 @@ import { Command } from 'commander'
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { randomBytes } from 'node:crypto'
+import os from 'node:os'
 import { createRuntime, startServer } from '../runtime/index.js'
 import { getDataDir } from '../config/config.service.js'
 import { bashCompletion, zshCompletion, fishCompletion } from './completion.js'
-import type { Permission } from '../types/index.js'
+import type { Permission, Bucket, Identity } from '../types/index.js'
 
 const program = new Command()
 
 program
   .name('sfs')
   .description('Simple File Server - filesystem-native file server with S3-style API')
-  .version('26.5.0')
+  .version('26.5.1')
 
 // ──────────────────────────────────────────────────────────
 // sfs serve
@@ -27,12 +28,14 @@ program
   .option('--data-dir <dir>', 'Data directory', getDataDir())
   .option('--log-level <level>', 'Log level (trace|debug|info|warn|error)', 'info')
   .action(async (opts) => {
-    await startServer({
+    printEnvInfo()
+    const runtime = await startServer({
       host: opts.host,
       port: parseInt(opts.port, 10),
       dataDir: opts.dataDir,
       logLevel: opts.logLevel,
     })
+    await printServerSummary(runtime)
   })
 
 // ──────────────────────────────────────────────────────────
@@ -369,6 +372,54 @@ Examples:
 // ──────────────────────────────────────────────────────────
 // Helpers
 // ──────────────────────────────────────────────────────────
+async function printServerSummary(runtime: Awaited<ReturnType<typeof startServer>>): Promise<void> {
+  try {
+    const [buckets, identities] = await Promise.all([
+      runtime.bucketService.list() as Promise<Bucket[]>,
+      runtime.identityService.list() as Promise<Identity[]>,
+    ])
+
+    const bucketLines = buckets.length
+      ? buckets.map(b => `│    · ${b.name}  →  ${b.path}`)
+      : ['│    (none)']
+
+    const identityLines = identities.length
+      ? identities.map(id => `│    · ${id.identity}  (grants: ${id.grants.map(g => g.bucket).join(', ') || 'none'})`)
+      : ['│    (none)']
+
+    const lines = [
+      '┌─────────────────────────────────────────────',
+      '│  Buckets',
+      '├─────────────────────────────────────────────',
+      ...bucketLines,
+      '├─────────────────────────────────────────────',
+      '│  Identities',
+      '├─────────────────────────────────────────────',
+      ...identityLines,
+      '└─────────────────────────────────────────────',
+    ]
+    console.log(lines.join('\n'))
+  } catch {
+    // Non-fatal — server is already running
+  }
+}
+function printEnvInfo(): void {
+  const cpus = os.cpus()
+  const lines = [
+
+    'Simple File Server — Environment',
+      '─────────────────────────────────────────────',
+    `  OS          : ${os.type()} ${os.release()} (${os.platform()}/${os.arch()})`,
+    `  Node.js     : ${process.version}`,
+    `  V8          : ${process.versions.v8}`,
+    `  CPUs        : ${cpus.length}x ${cpus[0]?.model ?? 'unknown'}`,
+    `  Memory      : ${(os.totalmem() / 1024 / 1024 / 1024).toFixed(1)} GB total`,
+    `  Hostname    : ${os.hostname()}`,
+    `  User        : ${os.userInfo().username}`,
+    `  PID         : ${process.pid}`
+  ]
+  console.log(lines.join('\n'))
+}
 function collect(value: string, previous: string[]): string[] {
   return previous.concat([value])
 }
