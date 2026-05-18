@@ -14,6 +14,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 import tools.dynamia.commons.StringUtils;
 
 import java.io.File;
+import java.net.URI;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
@@ -60,6 +61,23 @@ public class S3Utils {
                 .credentialsProvider(() -> getCredentials(accessKey, secretKey))
                 .region(Region.of(region));
 
+    }
+
+    /**
+     * Build a generic client with override endpoint. Useful for servers like MinIO or Seaweed
+     *
+     * @param accessKey the access key
+     * @param secretKey the secret key
+     * @param endpoint  the endpoint
+     * @return the S3AsyncClient
+     */
+    public static S3AsyncClient buildGenericClient(String accessKey, String secretKey, String endpoint) {
+        return S3AsyncClient.builder()
+                .credentialsProvider(() -> getCredentials(accessKey, secretKey))
+                .region(Region.US_EAST_1)
+                .endpointOverride(URI.create(endpoint))
+                .forcePathStyle(true)
+                .build();
     }
 
     /**
@@ -161,11 +179,12 @@ public class S3Utils {
      */
     public static boolean objectExists(S3AsyncClient client, String bucketName, String key) {
         try {
-            getObjectAttributes(client, bucketName, key).wait();
+            headObject(client, bucketName, key).join();
+            return true;
         } catch (Exception e) {
             return false;
         }
-        return true;
+
     }
 
     /**
@@ -189,7 +208,12 @@ public class S3Utils {
      * @return the CompletableFuture
      */
     public static CompletableFuture<HeadObjectResponse> headObject(S3AsyncClient client, String bucketName, String key) {
-        return client.headObject(builder -> builder.bucket(bucketName).key(key));
+        HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+
+        return client.headObject(headObjectRequest);
     }
 
     /**

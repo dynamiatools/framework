@@ -21,6 +21,7 @@ import java.io.File;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
@@ -63,7 +64,6 @@ public class LocalEntityFileStorageHandler {
         EntityFile entityFile = service.getEntityFile(uuid);
 
 
-
         if (entityFile != null && (currentAccountId == null || currentAccountId.equals(0L) || entityFile.isShared() || entityFile.getAccountId().equals(currentAccountId))) {
 
             StoredEntityFile storedEntityFile = storage.download(entityFile);
@@ -89,7 +89,7 @@ public class LocalEntityFileStorageHandler {
         }
     }
 
-    private boolean isThumbnail(HttpServletRequest request) {
+    public static boolean isThumbnail(HttpServletRequest request) {
         return getParam(request, "w", null) != null && getParam(request, "h", null) != null;
     }
 
@@ -97,19 +97,23 @@ public class LocalEntityFileStorageHandler {
 
         String w = getParam(request, "w", "200");
         String h = getParam(request, "h", "200");
+        return createThumbnail(realImg, entityFile, Integer.parseInt(w), Integer.parseInt(h));
+
+    }
+
+    public static @NonNull File createThumbnail(File realImg, EntityFile entityFile, int w, int h) {
         String subfolder = w + "x" + h;
 
         File realThumbImg = new File(realImg.getParentFile(), subfolder + "/" + realImg.getName());
         if (!realThumbImg.exists()) {
             if (realImg.exists()) {
-                ImageUtil.resizeImage(realImg, realThumbImg, entityFile.getExtension(), Integer.parseInt(w), Integer.parseInt(h));
+                ImageUtil.resizeImage(realImg, realThumbImg, entityFile.getExtension(), w, h);
             }
         }
         return realThumbImg;
-
     }
 
-    public String getParam(HttpServletRequest request, String name, String defaultValue) {
+    public static String getParam(HttpServletRequest request, String name, String defaultValue) {
         String value = request.getParameter(name);
         if (value == null || value.trim().isEmpty()) {
             value = defaultValue;

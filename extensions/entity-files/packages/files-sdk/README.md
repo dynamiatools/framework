@@ -2,9 +2,9 @@
 
 > TypeScript / JavaScript client SDK for the Dynamia Entity Files extension REST API.
 
-`@dynamia-tools/files-sdk` provides a small, focused client to download files managed by the Entity Files extension of a Dynamia Platform backend. The package exposes a single API class, `FilesApi`, which delegates HTTP, authentication and error handling to the core `@dynamia-tools/sdk` `HttpClient`.
+`@dynamia-tools/files-sdk` provides a small, focused client to download, inspect and upload files managed by the Entity Files extension of a Dynamia Platform backend. The package exposes a single API class, `FilesApi`, which delegates base URL handling to the core `@dynamia-tools/sdk` `HttpClient` and reuses the same authentication context for upload operations.
 
-This README explains how to install the package, how to use `FilesApi` (recommended via `DynamiaClient`) and how to handle binary downloads in browser and Node.js environments.
+This README explains how to install the package, how to use `FilesApi` (recommended via `DynamiaClient`) and how to handle downloads plus the new multipart / base64 upload flows.
 
 ---
 
@@ -13,6 +13,7 @@ This README explains how to install the package, how to use `FilesApi` (recommen
 - [Installation](#installation)
 - [Quick Start (recommended)](#quick-start-recommended)
 - [API methods](#api-methods)
+- [Upload examples](#upload-examples)
 - [Browser example (download and show)](#browser-example-download-and-show)
 - [Node.js example (save to disk)](#nodejs-example-save-to-disk)
 - [Authentication & Errors](#authentication--errors)
@@ -54,27 +55,82 @@ const files = new FilesApi(client.http);
 // Download a file as a Blob (browser)
 const blob = await files.download('myfile.pdf', 'f9a3e8c2-...');
 
+// Get file metadata and direct URL from the server
+const metadata = await files.export('f9a3e8c2-...');
+
 // Get a direct URL (no network call performed)
-const url = files.getUrl('images/logo.png', 'f9a3e8c2-...');
+const url = files.getUrl('myfile.pdf', 'f9a3e8c2-...');
 console.log(url);
 ```
 
 Notes:
 - `FilesApi` methods are thin wrappers over the core `HttpClient` (`get`, `url`) implemented by `DynamiaClient`.
-- The `download()` method calls `GET /storage/{file}?uuid={uuid}` and returns a `Blob` in browser environments; when running in Node.js the underlying fetch polyfill may provide an `ArrayBuffer`/`Buffer` which you should convert to a file.
+- The `download()` method calls `GET /storage/{uuid}/{file}` and returns a `Blob` in browser environments; when running in Node.js the underlying fetch polyfill may provide an `ArrayBuffer`/`Buffer` which you should convert to a file.
+- The upload methods call the new REST endpoints exposed by `EntityFileStorageController`: `POST /api/storage/upload` and `POST /api/storage/upload-base64`.
 
 ---
 
 ## API methods
 
-The implementation in `src/api.ts` exposes two methods on `FilesApi`:
+The implementation in `src/api.ts` exposes the following methods on `FilesApi`:
 
+- `export(uuid: string): Promise<EntityFileExportResponse>`
+  - GET `/api/storage/{uuid}/export` — Returns server-side metadata such as `name`, `size`, `version` and `url`.
 - `download(file: string, uuid: string): Promise<Blob>`
-  - GET `/storage/{file}?uuid={uuid}` — Downloads the file. The SDK returns parsed JSON for `application/json` responses and a `Blob` for other content types (binary).
+  - GET `/storage/{uuid}/{file}` — Downloads the file. The SDK returns parsed JSON for `application/json` responses and a `Blob` for other content types (binary).
 - `getUrl(file: string, uuid: string): string`
-  - Returns a fully-qualified URL that points to `/storage/{file}` with the `uuid` query parameter. No HTTP request is made.
+  - Returns a fully-qualified URL that points to `/storage/{uuid}/{file}`. No HTTP request is made.
+- `uploadMultipart(file: Blob | File, options?: MultipartUploadOptions): Promise<EntityFileUploadResponse>`
+  - POST `/api/storage/upload` — Uploads a file using multipart form data.
+- `uploadBase64(request: Base64UploadRequest): Promise<EntityFileUploadResponse>`
+  - POST `/api/storage/upload-base64` — Uploads a file using JSON containing `base64` or `data` content.
 
-Use `download()` when you need the file content programmatically (e.g., for preview or file save). Use `getUrl()` when you want to put a direct link in an `img` `src`, anchor `href`, or let the browser perform the download.
+Use `download()` when you need the file content programmatically (e.g., for preview or file save). Use `getUrl()` when you want to put a direct link in an `img` `src`, anchor `href`, or let the browser perform the download. Use `export()` when you need server-generated metadata or a pre-authorized URL. Use the upload methods when the frontend must create `EntityFile` records directly.
+
+---
+
+## Upload examples
+
+### Multipart upload
+
+```ts
+const uploaded = await files.uploadMultipart(fileInput.files![0], {
+  className: 'com.example.crm.Customer',
+  entityId: 15,
+  description: 'Signed contract',
+  shared: false,
+  parentUuid: 'folder-uuid',
+});
+
+console.log(uploaded.uuid, uploaded.url);
+```
+
+### Base64 JSON upload
+
+```ts
+const uploaded = await files.uploadBase64({
+  fileName: 'avatar.png',
+  contentType: 'image/png',
+  base64: imageBase64,
+  className: 'com.example.crm.Customer',
+  entityId: '15',
+  shared: true,
+});
+
+console.log(uploaded.uuid, uploaded.valid);
+```
+
+Both upload methods support these optional fields:
+
+- `className`
+- `entityId`
+- `description`
+- `shared`
+- `subfolder`
+- `storedFileName`
+- `parentUuid`
+
+When `className` and `entityId` are omitted, the server creates a temporal file. When both are provided, the uploaded file is attached to the referenced entity.
 
 ---
 

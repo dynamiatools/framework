@@ -334,6 +334,11 @@ public class EntityFileServiceImpl implements EntityFileService {
         return storage;
     }
 
+    @Override
+    public EntityFileStorage getStorage(String name) {
+        return findStorage(name);
+    }
+
     private EntityFileStorage findStorage(String storageId) {
         Optional<EntityFileStorage> storage = Containers.get().findObjects(EntityFileStorage.class)
                 .stream()

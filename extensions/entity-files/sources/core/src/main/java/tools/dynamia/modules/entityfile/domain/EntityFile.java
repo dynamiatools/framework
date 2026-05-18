@@ -28,6 +28,7 @@ import tools.dynamia.io.IOUtils;
 import tools.dynamia.modules.entityfile.StoredEntityFile;
 import tools.dynamia.modules.entityfile.domain.enums.EntityFileState;
 import tools.dynamia.modules.entityfile.enums.EntityFileType;
+import tools.dynamia.modules.entityfile.local.LocalEntityFileStorage;
 import tools.dynamia.modules.entityfile.service.EntityFileService;
 
 import jakarta.persistence.*;
@@ -273,7 +274,28 @@ public class EntityFile extends BaseEntity implements URLable {
         if (remoteURL != null && !remoteURL.isBlank()) {
             return remoteURL;
         }
-        return getStoredEntityFile().getUrl();
+        LocalEntityFileStorage storage = Containers.get().findObject(LocalEntityFileStorage.class);
+        return storage.generateURL(this);
+    }
+
+    public String toThumbnailURL( int w, int h) {
+        String url = toURL();
+        return url+"?w="+w+"&h="+h;
+    }
+
+    @Transient
+    public String getUrl(){
+        return toURL();
+    }
+
+    @Transient
+    public String getThumbnailUrl(){
+       return toThumbnailURL(200, 200);
+    }
+
+    @Transient
+    public String getThumbnailUrl(int w, int h) {
+        return toThumbnailURL(w, h);
     }
 
     public String getExternalRef() {
@@ -309,4 +331,5 @@ public class EntityFile extends BaseEntity implements URLable {
     public void setUploading(boolean uploading) {
         this.uploading = uploading;
     }
+
 }

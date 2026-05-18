@@ -4,7 +4,6 @@ packages:
   # Extension SDK packages
   - 'extensions/*/packages/*'
 
-
 allowBuilds:
   esbuild: true
-
+  sharp: false

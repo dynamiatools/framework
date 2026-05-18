@@ -71,7 +71,7 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
      * Renders a descriptor into a form view instance.
      *
      * @param descriptor descriptor to render
-     * @param value initial value
+     * @param value      initial value
      * @return rendered view
      */
     @Override
@@ -100,9 +100,9 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
     /**
      * Renders descriptor fields and actions into an existing form view instance.
      *
-     * @param view target form view
+     * @param view       target form view
      * @param descriptor descriptor to render
-     * @param value initial value
+     * @param value      initial value
      * @return rendered view
      */
     public View<T> render(FormView<T> view, ViewDescriptor descriptor, T value) {
@@ -125,11 +125,12 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
 
     // protected METHODS
+
     /**
      * Calculates effective number of columns used by the form layout.
      *
      * @param view form view
-     * @param d descriptor
+     * @param d    descriptor
      * @return number of columns in range 1..12
      */
     protected int renderHeaders(FormView<T> view, ViewDescriptor d) {
@@ -158,10 +159,10 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
     /**
      * Renders ungrouped and grouped fields into form rows.
      *
-     * @param view target form view
+     * @param view     target form view
      * @param viewDesc descriptor
      * @param realCols effective columns
-     * @param value current value
+     * @param value    current value
      * @return root rendered component
      */
     protected Component renderRows(FormView<T> view, ViewDescriptor viewDesc, int realCols, T value) {
@@ -176,14 +177,16 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
         for (Field field : ViewRendererUtil.filterRenderableFields(view, viewDesc)) {
 
-            if (!hasSpace(row, realCols, field)) {
-                row = newRow();
-                row.setParent(panelBody);
-                if (panel.getParent() == null) {
-                    panel.setParent(view.getContentArea());
+            if (field.getGroup() == null) {
+                if (!hasSpace(row, realCols, field)) {
+                    row = newRow();
+                    row.setParent(panelBody);
+                    if (panel.getParent() == null) {
+                        panel.setParent(view.getContentArea());
+                    }
                 }
+                renderField(row, field, view.getBinder(), view, value, realCols);
             }
-            renderField(row, field, view.getBinder(), view, value, realCols);
 
         }
 

@@ -9,12 +9,19 @@ export function mockFetch(status: number, body: unknown, contentType = 'applicat
     headers: { get: (key: string) => (key === 'content-type' ? contentType : null) },
     json: () => Promise.resolve(body),
     text: () => Promise.resolve(String(body)),
-    blob: () => Promise.resolve(new Blob()),
+    blob: () => Promise.resolve(body instanceof Blob ? body : new Blob()),
   } as unknown as Response);
+}
+
+export function mockJsonResponse<T>(body: T, status = 200) {
+  return mockFetch(status, body, 'application/json');
+}
+
+export function mockBlobResponse(body = new Blob(['content']), status = 200) {
+  return mockFetch(status, body, 'application/octet-stream');
 }
 
 export function makeHttpClient(fetchMock: ReturnType<typeof vi.fn>): HttpClient {
   const client = new DynamiaClient({ baseUrl: 'https://app.example.com', token: 'test-token', fetch: fetchMock });
   return client.http as HttpClient;
 }
-

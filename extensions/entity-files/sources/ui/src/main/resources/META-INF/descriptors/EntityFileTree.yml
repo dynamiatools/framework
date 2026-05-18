@@ -11,7 +11,7 @@ fields:
     label: Nombre
     params:
       header:
-        width: 460px
+        width: 600px
 
   creationDate:
     label: Fecha

@@ -20,41 +20,66 @@ package tools.dynamia.modules.entityfile;
 import java.io.File;
 import java.io.Serializable;
 
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import tools.dynamia.io.VirtualFile;
 import tools.dynamia.modules.entityfile.domain.EntityFile;
 
 public abstract class StoredEntityFile implements Serializable {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 421213041955145817L;
-	private EntityFile entityFile;
-	private String url;
-	private File realFile;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 421213041955145817L;
+    private EntityFile entityFile;
+    private String url;
+    private File realFile;
 
-	public StoredEntityFile(EntityFile entityFile, String url, File realFile) {
-		super();
-		this.entityFile = entityFile;
-		this.url = url;
-		this.realFile = realFile;
-	}
+    public StoredEntityFile(EntityFile entityFile, String url, File realFile) {
+        super();
+        this.entityFile = entityFile;
+        this.url = url;
+        this.realFile = realFile;
+    }
 
-	public EntityFile getEntityFile() {
-		return entityFile;
-	}
+    public EntityFile getEntityFile() {
+        return entityFile;
+    }
 
-	public String getUrl() {
-		return url;
-	}
+    public String getUrl() {
+        return url;
+    }
 
-	public String getThumbnailUrl() {
-		return getThumbnailUrl(200, 200);
-	}
+    public String getThumbnailUrl() {
+        return getThumbnailUrl(200, 200);
+    }
 
-	public abstract String getThumbnailUrl(int width, int height);
+    public abstract String getThumbnailUrl(int width, int height);
 
-	public File getRealFile() {
-		return realFile;
-	}
+    public File getRealFile() {
+        return realFile;
+    }
 
+    public File getThumbnailFile(int width, int height) {
+        return realFile;
+    }
+
+    public Resource toResource() {
+        if (realFile != null) {
+            if (realFile.exists() && realFile.isFile()) {
+                return new FileSystemResource(realFile);
+            }
+        }
+        return null;
+    }
+
+    public Resource toThumbnailResource(int width, int height) {
+        File thumbnailFile = getThumbnailFile(width, height);
+        if (thumbnailFile != null) {
+            if (thumbnailFile.exists() && thumbnailFile.isFile()) {
+                return new FileSystemResource(thumbnailFile);
+            }
+        }
+        return null;
+    }
 }
