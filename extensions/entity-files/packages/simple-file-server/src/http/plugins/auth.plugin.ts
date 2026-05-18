@@ -30,7 +30,12 @@ export const authPlugin = fp(async function authPlugin(
 ): Promise<void> {
   const { identityService, logger } = options
 
-  fastify.decorateRequest<Identity | null>('authIdentity', { getter: () => null })
+  // Use a plain null initial value — NOT { getter: () => null }.
+  // In Fastify v5 the getter-object form defines the property as read-only
+  // (getter-only, no setter), which causes:
+  //   "Cannot set property authIdentity of #<_Request> which has only a getter"
+  // when the onRequest hook does `request.authIdentity = id`.
+  fastify.decorateRequest<Identity | null>('authIdentity', null)
 
   fastify.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
     // Skip health check
