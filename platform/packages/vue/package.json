@@ -56,7 +56,7 @@
   "devDependencies": {
     "@dynamia-tools/sdk": "workspace:*",
     "@dynamia-tools/ui-core": "workspace:*",
-    "@types/node": "^22.0.0",
+    "@types/node": "^24.0.0",
     "@vitejs/plugin-vue": "^5.0.0",
     "typescript": "^5.7.0",
     "vite": "^6.2.0",
@@ -67,5 +67,8 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }

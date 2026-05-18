@@ -11,7 +11,7 @@
     "@dynamia-tools/simple-file-server": "^26.5.0"
   },
   "engines": {
-    "node": ">=18.17.0"
+    "node": ">=24"
   }
 }
 
