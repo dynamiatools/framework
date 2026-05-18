@@ -1,7 +1,6 @@
 import path from 'node:path'
 import fsp from 'node:fs/promises'
 import fs from 'node:fs'
-import crypto from 'node:crypto'
 import sharp from 'sharp'
 import type { Bucket } from '../types/index.js'
 import { BucketService } from '../storage/bucket.service.js'
@@ -27,30 +26,37 @@ export class ThumbnailService {
   ) {}
 
   /**
-   * Generate or retrieve a cached thumbnail.
+   * Generate or retrieve a thumbnail.
+   * Thumbnails are stored inside the bucket alongside the original file:
+   *   {original_dir}/{WxH}/{original_filename}
+   * Example:
+   *   Request:  account1/producto.jpg?w=200&h=200
+   *   Stored:   account1/200x200/producto.jpg
    */
   async getThumbnail(bucket: Bucket, key: string, options: ThumbnailOptions): Promise<ThumbnailResult | null> {
     const filePath = this.bucketService.resolveKey(bucket, key)
 
-    // Check if file exists
+    // Check if original file exists
     try {
       await fsp.stat(filePath)
     } catch {
       return null
     }
 
-    // Detect mime type
+    // Detect mime type — only process images
     const mimeType = await this.storageService.detectMimeType(filePath)
     if (!this.storageService.isImageMime(mimeType)) {
       return null
     }
 
-    const cacheKey = this.buildCacheKey(key, options)
-    const thumbsDir = this.bucketService.getThumbsDir(bucket)
-    const thumbPath = path.join(thumbsDir, cacheKey)
-    const outputFormat = options.format ?? 'webp'
+    // Resolve output format: explicit param > inferred from original mime
+    const outputFormat = options.format ?? this.formatFromMime(mimeType)
 
-    // Check if cached thumbnail exists
+    // Build the thumbnail key and resolve its absolute path inside the bucket
+    const thumbKey = this.buildThumbKey(key, options)
+    const thumbPath = this.bucketService.resolveKey(bucket, thumbKey)
+
+    // Serve existing thumbnail if already cached
     try {
       const stat = await fsp.stat(thumbPath)
       return {
@@ -59,10 +65,10 @@ export class ThumbnailService {
         size: stat.size,
       }
     } catch {
-      // Generate thumbnail
+      // Not cached yet — generate below
     }
 
-    // Generate thumbnail
+    // Ensure the {WxH} sub-directory exists
     await fsp.mkdir(path.dirname(thumbPath), { recursive: true })
 
     try {
@@ -72,7 +78,7 @@ export class ThumbnailService {
         pipeline = pipeline.resize({
           width: options.width,
           height: options.height,
-          fit: options.fit ?? 'contain',
+          fit: options.fit ?? 'cover',
           withoutEnlargement: true,
         })
       }
@@ -94,18 +100,36 @@ export class ThumbnailService {
         size: stat.size,
       }
     } catch (err) {
-      // Cleanup failed thumb
+      // Clean up any partial file on failure
       await fsp.unlink(thumbPath).catch(() => {})
       return null
     }
   }
 
-  private buildCacheKey(key: string, options: ThumbnailOptions): string {
-    const normalized = key.replace(/\//g, '_').replace(/\s/g, '_')
-    const optStr = `${options.width ?? 0}x${options.height ?? 0}-${options.fit ?? 'contain'}-${options.format ?? 'webp'}`
-    const hash = crypto.createHash('sha1').update(`${normalized}:${optStr}`).digest('hex').slice(0, 12)
-    const ext = options.format ?? 'webp'
-    return `${hash}.${ext}`
+  /**
+   * Build the bucket-relative key for a thumbnail.
+   * Structure: {original_dir}/{WxH}/{original_filename}
+   * Examples:
+   *   "account1/producto.jpg"  + 200x200  →  "account1/200x200/producto.jpg"
+   *   "photo.png"              + 100x100  →  "100x100/photo.png"
+   */
+  buildThumbKey(key: string, options: Pick<ThumbnailOptions, 'width' | 'height'>): string {
+    const dir = path.dirname(key)       // "account1" | "."
+    const filename = path.basename(key) // "producto.jpg"
+    const w = options.width ?? 0
+    const h = options.height ?? 0
+    const dimensionFolder = `${w}x${h}`
+    const baseDir = dir === '.' ? '' : dir
+    return baseDir ? `${baseDir}/${dimensionFolder}/${filename}` : `${dimensionFolder}/${filename}`
+  }
+
+  /**
+   * Infer a sharp-compatible output format from a MIME type.
+   */
+  private formatFromMime(mimeType: string): 'jpeg' | 'png' | 'webp' {
+    if (mimeType === 'image/png') return 'png'
+    if (mimeType === 'image/webp') return 'webp'
+    return 'jpeg'
   }
 }
 
