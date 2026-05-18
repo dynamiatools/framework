@@ -246,9 +246,117 @@ Each bucket also contains an internal `.sfs/` directory:
 - **Path traversal protection**: canonical path validation on every request
 - **No public access**: no anonymous or public bucket support
 
+## Requirements
+
+| Requirement | Minimum version |
+|---|---|
+| Node.js | **18.17.0** |
+| npm | 9+ (or pnpm 8+) |
+
+> **Why 18.17.0?** The `sharp` native image-processing library requires exactly `^18.17.0` as the lowest Node 18 patch that ships a compatible binary. All other dependencies support Node ≥ 18.
+
+## Embedded Usage
+
+You can start SFS programmatically inside your own Node.js application — no CLI needed.
+
+### Installation
+
+```bash
+npm install @dynamia-tools/simple-file-server
+```
+
+### Minimal example
+
+```js
+// index.js  (type: "module")
+import { startServer } from '@dynamia-tools/simple-file-server'
+
+// Reads configuration from the .sfs/ directory in process.cwd().
+// Provision buckets and identities first with the CLI, or do it
+// programmatically (see "Full programmatic setup" below).
+startServer({
+  host: process.env.SFS_HOST ?? '0.0.0.0',
+  port: parseInt(process.env.SFS_PORT ?? '8080', 10),
+}).catch((err) => {
+  console.error('Fatal error during startup:', err)
+  process.exit(1)
+})
+```
+
+### Full programmatic setup
+
+Use `createRuntime` to bootstrap services and configure buckets/identities entirely in code:
+
+```js
+import path from 'node:path'
+import { createRuntime, createServer } from '@dynamia-tools/simple-file-server'
+
+const runtime = await createRuntime({
+  dataDir:  path.join(process.cwd(), '.sfs'),
+  host:     '0.0.0.0',
+  port:     8080,
+  logLevel: 'info',
+})
+
+const { config, bucketService, storageService, thumbnailService,
+        identityService, operationalLogger } = runtime
+
+// Create a bucket (idempotent pattern)
+if (!await bucketService.find('documents')) {
+  await bucketService.create('documents', '/mnt/storage/documents')
+}
+
+// Create an identity (idempotent pattern)
+if (!await identityService.find('app-user')) {
+  await identityService.create('app-user', process.env.APP_SECRET ?? 'changeme')
+}
+
+// Grant permissions
+await identityService.grant('app-user', {
+  bucket:      'documents',
+  prefixes:    ['/'],                          // entire bucket
+  permissions: ['read', 'write', 'delete'],
+})
+
+// Validate buckets and start the server
+await bucketService.validateStartup()
+
+const server = await createServer({
+  config, bucketService, storageService,
+  thumbnailService, identityService, operationalLogger,
+})
+
+process.on('SIGTERM', async () => { await server.close(); process.exit(0) })
+process.on('SIGINT',  async () => { await server.close(); process.exit(0) })
+
+await server.listen({ host: config.host, port: config.port })
+```
+
+### Available exports
+
+| Export | Description |
+|---|---|
+| `startServer(overrides?)` | One-call bootstrap: creates runtime + server + starts listening |
+| `createRuntime(overrides?)` | Initialises services and data dirs, returns the `SFSRuntime` object |
+| `createServer(runtime)` | Builds and returns the Fastify instance (does not call `.listen`) |
+| `BucketService` | Manage bucket definitions |
+| `IdentityService` | Manage identities and grants |
+| `StorageService` | Low-level file upload / download / list |
+| `ThumbnailService` | On-the-fly image thumbnails via Sharp |
+| `OperationalLogger` | Structured JSONL access + error logs |
+
+### Environment variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `SFS_DATA_DIR` | `<cwd>/.sfs` | Where SFS stores config, identities and buckets |
+| `SFS_HOST` | `0.0.0.0` | Bind host |
+| `SFS_PORT` | `8080` | Bind port |
+| `SFS_LOG_LEVEL` | `info` | Pino log level (`trace` `debug` `info` `warn` `error`) |
+
 ## Technology Stack
 
-- **Node.js 22+** with TypeScript (strict mode)
+- **Node.js 18.17+** with TypeScript (strict mode)
 - **Fastify** for high-throughput HTTP
 - **Pino** for structured JSON logging
 - **Sharp** for efficient thumbnail generation

@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/simple-file-server",
-  "version": "26.5.0",
+  "version": "26.5.1",
   "description": "Standalone filesystem-native file server with a minimal S3-style API for secure server-to-server file operations",
   "keywords": [
     "dynamia",
@@ -57,7 +57,7 @@
     "commander": "^13.1.0",
     "fastify": "^5.3.0",
     "fastify-plugin": "^5.1.0",
-    "file-type": "^21.0.0",
+    "file-type": "^20.0.0",
     "pino": "^9.7.0",
     "pino-pretty": "^13.0.0",
     "sharp": "^0.34.1",
@@ -71,6 +71,6 @@
     "vitest": "^3.0.0"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=18.17.0"
   }
 }
