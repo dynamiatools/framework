@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/simple-file-server",
-  "version": "26.5.1",
+  "version": "26.5.2",
   "description": "Standalone filesystem-native file server with a minimal S3-style API for secure server-to-server file operations",
   "keywords": [
     "dynamia",
