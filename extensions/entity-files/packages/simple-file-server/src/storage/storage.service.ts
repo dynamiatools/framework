@@ -1,247 +1,133 @@
 import path from 'node:path'
-import fsp from 'node:fs/promises'
-import fs from 'node:fs'
-import type { Stats } from 'node:fs'
-import crypto from 'node:crypto'
-import { pipeline } from 'node:stream/promises'
+import { fileTypeFromBuffer } from 'file-type'
 import type { Readable } from 'node:stream'
-import { fileTypeFromBuffer, fileTypeFromFile } from 'file-type'
-import type { Bucket, ListResult, ListEntry } from '../types/index.js'
-import { SFSError, SFSErrorCode, notFound } from '../errors/index.js'
-import { BucketService } from './bucket.service.js'
+import type { Bucket, ListResult } from '../types/index.js'
+import { StorageProviderRegistry } from './storage.provider.js'
+import type { StorageProvider, DownloadResult, UploadOptions } from './storage.provider.js'
+import { LocalStorageProvider } from './local.provider.js'
+import type { BucketService } from './bucket.service.js'
 
-export interface DownloadResult {
-  stream: fs.ReadStream
-  size: number
-  mimeType: string
-  lastModified: Date
-  etag: string
-}
+export type { DownloadResult, UploadOptions }
 
-export interface UploadOptions {
-  overwrite?: boolean
-}
-
+/**
+ * Facade over the {@link StorageProviderRegistry} that routes file operations
+ * to the correct backend based on each bucket's `storageTarget`.
+ *
+ * By default, a `LocalStorageProvider` is registered for the `'local'` target.
+ * Additional providers (e.g., `SftpStorageProvider`) can be registered via
+ * {@link registerProvider}.
+ *
+ * Example:
+ * <pre>{@code
+ * const storageService = new StorageService(bucketService)
+ * storageService.registerProvider('sftp', new SftpStorageProvider(cacheDir))
+ * }</pre>
+ */
 export class StorageService {
-  constructor(private readonly bucketService: BucketService) {}
+  private readonly registry: StorageProviderRegistry
+
+  constructor(private readonly bucketService: BucketService, registry?: StorageProviderRegistry) {
+    this.registry = registry ?? new StorageProviderRegistry()
+    // Register the built-in local provider
+    this.registry.register('local', new LocalStorageProvider(bucketService))
+  }
+
+  /**
+   * Register an additional storage provider.
+   * @param target Storage target identifier (e.g., `'sftp'`).
+   * @param provider The provider implementation.
+   */
+  registerProvider(target: string, provider: StorageProvider): void {
+    this.registry.register(target, provider)
+  }
+
+  private getProvider(bucket: Bucket): StorageProvider {
+    return this.registry.get(bucket.storageTarget ?? 'local')
+  }
+
+  /**
+   * Initialise a newly-created bucket (creates directories, remote paths, etc.).
+   */
+  async initBucket(bucket: Bucket): Promise<void> {
+    await this.getProvider(bucket).initBucket(bucket)
+  }
+
+  /**
+   * Validate all registered buckets on startup.
+   * For local buckets this checks write access and cleans orphan staging files.
+   * For remote buckets (e.g., SFTP) this verifies connectivity.
+   */
+  async validateStartup(): Promise<void> {
+    const buckets = await this.bucketService.list()
+    for (const bucket of buckets) {
+      try {
+        await this.getProvider(bucket).validateBucket(bucket)
+      } catch (err) {
+        console.warn(`[SFS] Warning: could not validate bucket '${bucket.name}':`, err)
+      }
+    }
+  }
+
+  /**
+   * Close all provider connections (called on graceful shutdown).
+   */
+  async closeProviders(): Promise<void> {
+    for (const provider of this.registry.getAll().values()) {
+      await provider.close?.()
+    }
+  }
+
+  // ── Delegated operations ──────────────────────────────────────────────────
 
   /**
    * Download a file from a bucket. Returns a readable stream.
    */
   async download(bucket: Bucket, key: string): Promise<DownloadResult> {
-    const filePath = this.bucketService.resolveKey(bucket, key)
-
-    let stat: Stats
-    try {
-      stat = await fsp.stat(filePath)
-    } catch {
-      throw notFound(`Object '${key}' in bucket '${bucket.name}'`, SFSErrorCode.OBJECT_NOT_FOUND)
-    }
-
-    if (stat.isDirectory()) {
-      throw new SFSError(SFSErrorCode.OBJECT_IS_DIRECTORY, `'${key}' is a directory, not a file`, 400)
-    }
-
-    const mimeType = await this.detectMimeType(filePath)
-    const etag = `"${stat.size}-${stat.mtimeMs}"`
-
-    return {
-      stream: fs.createReadStream(filePath),
-      size: stat.size,
-      mimeType,
-      lastModified: stat.mtime,
-      etag,
-    }
+    return this.getProvider(bucket).download(bucket, key)
   }
 
   /**
-   * Upload a file to a bucket using staging + atomic move.
+   * Upload a file to a bucket using staging + atomic commit.
    */
-  async upload(bucket: Bucket, key: string, source: Readable, options: UploadOptions = {}): Promise<{ size: number; etag: string }> {
-    const finalPath = this.bucketService.resolveKey(bucket, key)
-    const stagingDir = this.bucketService.getStagingDir(bucket)
-    const stagingFile = path.join(stagingDir, `${crypto.randomUUID()}.tmp`)
-
-    // Ensure parent directory exists
-    const parentDir = path.dirname(finalPath)
-    await fsp.mkdir(parentDir, { recursive: true })
-
-    let bytesWritten = 0
-
-    try {
-      // Stream upload to staging
-      const writeStream = fs.createWriteStream(stagingFile)
-      writeStream.on('pipe', () => {})
-
-      await pipeline(source, writeStream)
-
-      // fsync to ensure data is on disk
-      const fd = await fsp.open(stagingFile, 'r')
-      try {
-        await fd.sync()
-      } finally {
-        await fd.close()
-      }
-
-      const stat = await fsp.stat(stagingFile)
-      bytesWritten = stat.size
-
-      // Atomic move to final destination
-      try {
-        await fsp.rename(stagingFile, finalPath)
-      } catch (err: unknown) {
-        // Cross-device rename: fallback to copy + unlink
-        const error = err as NodeJS.ErrnoException
-        if (error.code === 'EXDEV') {
-          await pipeline(fs.createReadStream(stagingFile), fs.createWriteStream(finalPath))
-          await fsp.unlink(stagingFile)
-        } else {
-          throw err
-        }
-      }
-
-      const etag = `"${bytesWritten}-${Date.now()}"`
-      return { size: bytesWritten, etag }
-    } catch (err) {
-      // Cleanup staging file on error
-      await fsp.unlink(stagingFile).catch(() => {})
-      throw err
-    }
+  async upload(
+    bucket: Bucket,
+    key: string,
+    source: Readable,
+    options: UploadOptions = {},
+  ): Promise<{ size: number; etag: string }> {
+    return this.getProvider(bucket).upload(bucket, key, source, options)
   }
 
   /**
    * Delete a file from a bucket.
    */
   async delete(bucket: Bucket, key: string): Promise<void> {
-    const filePath = this.bucketService.resolveKey(bucket, key)
-
-    let stat: Stats
-    try {
-      stat = await fsp.stat(filePath)
-    } catch {
-      throw notFound(`Object '${key}' in bucket '${bucket.name}'`, SFSErrorCode.OBJECT_NOT_FOUND)
-    }
-
-    if (stat.isDirectory()) {
-      throw new SFSError(SFSErrorCode.OBJECT_IS_DIRECTORY, `'${key}' is a directory and cannot be deleted`, 400)
-    }
-
-    await fsp.unlink(filePath)
+    return this.getProvider(bucket).delete(bucket, key)
   }
 
   /**
    * List directory contents.
    */
   async listDirectory(bucket: Bucket, keyPrefix: string): Promise<ListResult> {
-    const dirPath = this.bucketService.resolveKey(bucket, keyPrefix || '/')
-
-    let stat: Stats
-    try {
-      stat = await fsp.stat(dirPath)
-    } catch {
-      throw notFound(`Directory '${keyPrefix}' in bucket '${bucket.name}'`, SFSErrorCode.OBJECT_NOT_FOUND)
-    }
-
-    if (!stat.isDirectory()) {
-      throw new SFSError(SFSErrorCode.OBJECT_IS_DIRECTORY, `'${keyPrefix}' is not a directory`, 404)
-    }
-
-    const entries = await fsp.readdir(dirPath, { withFileTypes: true })
-    const result: ListEntry[] = []
-
-    for (const entry of entries) {
-      // Skip internal .sfs directory
-      if (entry.name === '.sfs') continue
-
-      const entryPath = path.join(dirPath, entry.name)
-      try {
-        const entryStat = await fsp.stat(entryPath)
-        const relativeKey = path.join(keyPrefix || '', entry.name).replace(/\\/g, '/')
-
-        result.push({
-          key: entry.isDirectory() ? `${relativeKey}/` : relativeKey,
-          size: entryStat.size,
-          lastModified: entryStat.mtime.toISOString(),
-          isDirectory: entry.isDirectory(),
-        })
-      } catch {
-        // Skip entries we can't stat
-      }
-    }
-
-    return {
-      bucket: bucket.name,
-      prefix: keyPrefix || '/',
-      entries: result,
-      hasMore: false,
-      total: result.length,
-    }
+    return this.getProvider(bucket).listDirectory(bucket, keyPrefix)
   }
 
   /**
    * List bucket contents with pagination.
    */
   async listBucket(bucket: Bucket, limit: number = 100, cursor?: string): Promise<ListResult> {
-    const allEntries = await this.collectAllEntries(bucket, bucket.path, '')
-
-    let startIdx = 0
-    if (cursor) {
-      const cursorIdx = allEntries.findIndex(e => e.key === cursor)
-      if (cursorIdx >= 0) startIdx = cursorIdx + 1
-    }
-
-    const page = allEntries.slice(startIdx, startIdx + limit)
-    const hasMore = startIdx + limit < allEntries.length
-    const nextCursor = hasMore ? page[page.length - 1]?.key : undefined
-
-    return {
-      bucket: bucket.name,
-      prefix: '/',
-      entries: page,
-      cursor: nextCursor,
-      hasMore,
-      total: allEntries.length,
-    }
+    return this.getProvider(bucket).listBucket(bucket, limit, cursor)
   }
 
-  private async collectAllEntries(bucket: Bucket, dirPath: string, prefix: string): Promise<ListEntry[]> {
-    const result: ListEntry[] = []
-    try {
-      const entries = await fsp.readdir(dirPath, { withFileTypes: true })
-      for (const entry of entries) {
-        if (entry.name === '.sfs') continue
-
-        const entryPath = path.join(dirPath, entry.name)
-        const relKey = prefix ? `${prefix}/${entry.name}` : entry.name
-
-        try {
-          const stat = await fsp.stat(entryPath)
-          if (entry.isDirectory()) {
-            const subEntries = await this.collectAllEntries(bucket, entryPath, relKey)
-            result.push(...subEntries)
-          } else {
-            result.push({
-              key: relKey,
-              size: stat.size,
-              lastModified: stat.mtime.toISOString(),
-              isDirectory: false,
-            })
-          }
-        } catch {
-          // skip
-        }
-      }
-    } catch {
-      // empty
-    }
-    return result
-  }
+  // ── MIME helpers (independent of storage backend) ─────────────────────────
 
   /**
    * Detect MIME type using magic bytes, with fallback to extension.
+   * This method is only reliable for locally-accessible file paths.
    */
   async detectMimeType(filePath: string): Promise<string> {
     try {
+      const { fileTypeFromFile } = await import('file-type')
       const result = await fileTypeFromFile(filePath)
       if (result) return result.mime
     } catch {
@@ -250,6 +136,9 @@ export class StorageService {
     return this.mimeFromExtension(filePath)
   }
 
+  /**
+   * Detect MIME type from an in-memory buffer using magic bytes.
+   */
   async detectMimeTypeFromBuffer(buffer: Buffer): Promise<string> {
     try {
       const result = await fileTypeFromBuffer(buffer)
@@ -258,6 +147,14 @@ export class StorageService {
       // fallback
     }
     return 'application/octet-stream'
+  }
+
+  /**
+   * Returns true when the MIME type represents a raster image that can be
+   * processed by Sharp (excludes SVG).
+   */
+  isImageMime(mimeType: string): boolean {
+    return mimeType.startsWith('image/') && mimeType !== 'image/svg+xml'
   }
 
   private mimeFromExtension(filePath: string): string {
@@ -286,13 +183,5 @@ export class StorageService {
     }
     return mimeMap[ext] ?? 'application/octet-stream'
   }
-
-  isImageMime(mimeType: string): boolean {
-    return mimeType.startsWith('image/') && mimeType !== 'image/svg+xml'
-  }
 }
-
-
-
-
 
