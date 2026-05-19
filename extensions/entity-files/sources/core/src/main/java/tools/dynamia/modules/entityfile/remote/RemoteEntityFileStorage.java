@@ -72,8 +72,8 @@ public class RemoteEntityFileStorage implements EntityFileStorage {
     public static final String SFS_SECRET = "SFS_SECRET";
 
     // ── Header names ─────────────────────────────────────────────────────────
-    static final String HEADER_IDENTITY = "X-SFS-Identity";
-    static final String HEADER_SECRET = "X-SFS-Secret";
+    static final String HEADER_IDENTITY = "X-Buckie-Identity";
+    static final String HEADER_SECRET = "X-Buckie-Secret";
     private final LocalEntityFileStorage localEntityFileStorage;
     private final Parameters appParams;
     private final CrudService crudService;
@@ -336,6 +336,10 @@ public class RemoteEntityFileStorage implements EntityFileStorage {
         @Override
         public Resource toResource() {
             return fetchResource(remoteUrl);
+        }
+
+        public String getRemoteUrl() {
+            return remoteUrl;
         }
 
         @Override
