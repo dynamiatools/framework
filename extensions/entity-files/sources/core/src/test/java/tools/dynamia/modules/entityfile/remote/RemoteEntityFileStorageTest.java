@@ -336,7 +336,7 @@ public class RemoteEntityFileStorageTest {
         storage.upload(ef, info);
 
         StoredEntityFile stored = storage.download(ef);
-        String url = stored.getUrl();
+        String url = stored instanceof RemoteEntityFileStorage.RemoteStoredEntityFile r ? r.getRemoteUrl() : stored.getUrl();
 
         // The URL returned by download() must point to the same resource that was uploaded
         assertNotNull(url);
