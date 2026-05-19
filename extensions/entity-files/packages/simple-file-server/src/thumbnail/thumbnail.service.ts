@@ -34,6 +34,11 @@ export class ThumbnailService {
    *   Stored:   account1/200x200/producto.jpg
    */
   async getThumbnail(bucket: Bucket, key: string, options: ThumbnailOptions): Promise<ThumbnailResult | null> {
+    // Thumbnails are only supported for local-storage buckets
+    if (bucket.storageTarget && bucket.storageTarget !== 'local') {
+      return null
+    }
+
     const filePath = this.bucketService.resolveKey(bucket, key)
 
     // Check if original file exists

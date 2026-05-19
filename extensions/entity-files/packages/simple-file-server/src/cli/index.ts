@@ -44,13 +44,51 @@ program
 const create = program.command('create').description('Create resources')
 
 create
-  .command('bucket <name> <absolutePath>')
-  .description('Create a new bucket mapped to an absolute filesystem path')
+  .command('bucket <name> <path>')
+  .description('Create a new bucket mapped to an absolute path (local filesystem or SFTP)')
   .option('--data-dir <dir>', 'Data directory', getDataDir())
-  .action(async (name: string, absolutePath: string, opts) => {
+  .option('--storage <target>', 'Storage target: local (default) or sftp', 'local')
+  .option('--sftp-host <host>', 'SFTP server hostname (required for sftp storage)')
+  .option('--sftp-port <port>', 'SFTP server port (default: 22)', '22')
+  .option('--sftp-username <username>', 'SFTP username (required for sftp storage)')
+  .option('--sftp-password <password>', 'SFTP password')
+  .option('--sftp-private-key <key>', 'PEM-encoded private key content for SFTP authentication')
+  .option('--sftp-passphrase <passphrase>', 'Passphrase for an encrypted SFTP private key')
+  .action(async (name: string, bucketPath: string, opts) => {
     const runtime = await createRuntime({ dataDir: opts.dataDir })
     try {
-      const bucket = await runtime.bucketService.create(name, absolutePath)
+      const storageTarget = opts.storage as 'local' | 'sftp'
+      let bucket: Bucket
+
+      if (storageTarget === 'sftp') {
+        if (!opts.sftpHost) {
+          console.error(JSON.stringify({ ok: false, error: { code: 'SFS_INVALID_ARGS', message: '--sftp-host is required for sftp storage' } }))
+          process.exit(1)
+        }
+        if (!opts.sftpUsername) {
+          console.error(JSON.stringify({ ok: false, error: { code: 'SFS_INVALID_ARGS', message: '--sftp-username is required for sftp storage' } }))
+          process.exit(1)
+        }
+        if (!opts.sftpPassword && !opts.sftpPrivateKey) {
+          console.error(JSON.stringify({ ok: false, error: { code: 'SFS_INVALID_ARGS', message: 'Either --sftp-password or --sftp-private-key is required for sftp storage' } }))
+          process.exit(1)
+        }
+
+        bucket = await runtime.bucketService.create(name, bucketPath, 'sftp', {
+          host: opts.sftpHost as string,
+          port: parseInt(opts.sftpPort as string, 10),
+          username: opts.sftpUsername as string,
+          password: opts.sftpPassword as string | undefined,
+          privateKey: opts.sftpPrivateKey as string | undefined,
+          passphrase: opts.sftpPassphrase as string | undefined,
+        })
+
+        // Initialise SFTP bucket (creates remote dir + local staging)
+        await runtime.storageService.initBucket(bucket)
+      } else {
+        bucket = await runtime.bucketService.create(name, bucketPath)
+      }
+
       console.log(JSON.stringify({ ok: true, data: bucket }, null, 2))
     } catch (err: unknown) {
       printError(err)

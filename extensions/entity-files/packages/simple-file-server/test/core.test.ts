@@ -4,10 +4,15 @@ import os from 'node:os'
 import fsp from 'node:fs/promises'
 import { BucketService } from '../src/storage/bucket.service.js'
 import { StorageService } from '../src/storage/storage.service.js'
+import { StorageProviderRegistry } from '../src/storage/storage.provider.js'
+import type { StorageProvider } from '../src/storage/storage.provider.js'
 import { ThumbnailService } from '../src/thumbnail/thumbnail.service.js'
 import { IdentityService } from '../src/auth/identity.service.js'
 import { ensureDataDirs } from '../src/config/config.service.js'
 import { Readable } from 'node:stream'
+import type { Bucket, ListResult } from '../src/types/index.js'
+import type { DownloadResult, UploadOptions } from '../src/storage/storage.provider.js'
+import { SFSError, SFSErrorCode } from '../src/errors/index.js'
 
 let tempDir: string
 let bucketService: BucketService
@@ -239,6 +244,158 @@ describe('ThumbnailService.buildThumbKey', () => {
     const bucket = await bucketService.create('thumb-missing', path.join(tempDir, 'thumb-missing'))
     const result = await thumbnailService.getThumbnail(bucket, 'nonexistent.jpg', { width: 200, height: 200 })
     expect(result).toBeNull()
+  })
+
+  it('should return null for sftp buckets (thumbnails not supported)', async () => {
+    const sftpBucket: Bucket = {
+      name: 'sftp-thumb',
+      path: '/remote/files',
+      createdAt: new Date().toISOString(),
+      storageTarget: 'sftp',
+      sftpConfig: { host: 'localhost', port: 22, username: 'user', password: 'pass' },
+    }
+    const result = await thumbnailService.getThumbnail(sftpBucket, 'image.jpg', { width: 200, height: 200 })
+    expect(result).toBeNull()
+  })
+})
+
+// ──────────────────────────────────────────────────────────
+// StorageProviderRegistry Tests
+// ──────────────────────────────────────────────────────────
+describe('StorageProviderRegistry', () => {
+  it('should register and retrieve a provider', () => {
+    const registry = new StorageProviderRegistry()
+    const mockProvider = {} as StorageProvider
+    registry.register('mock', mockProvider)
+    expect(registry.get('mock')).toBe(mockProvider)
+  })
+
+  it('should throw for an unregistered target', () => {
+    const registry = new StorageProviderRegistry()
+    expect(() => registry.get('unknown')).toThrow(SFSError)
+    expect(() => registry.get('unknown')).toThrow('unknown')
+  })
+
+  it('should list all registered providers', () => {
+    const registry = new StorageProviderRegistry()
+    const p1 = {} as StorageProvider
+    const p2 = {} as StorageProvider
+    registry.register('a', p1)
+    registry.register('b', p2)
+    const all = registry.getAll()
+    expect(all.size).toBe(2)
+    expect(all.get('a')).toBe(p1)
+    expect(all.get('b')).toBe(p2)
+  })
+
+  it('should allow overwriting a registered provider', () => {
+    const registry = new StorageProviderRegistry()
+    const p1 = {} as StorageProvider
+    const p2 = {} as StorageProvider
+    registry.register('local', p1)
+    registry.register('local', p2)
+    expect(registry.get('local')).toBe(p2)
+  })
+})
+
+// ──────────────────────────────────────────────────────────
+// StorageService provider routing tests
+// ──────────────────────────────────────────────────────────
+describe('StorageService provider routing', () => {
+  it('should auto-register local provider', () => {
+    const registry = new StorageProviderRegistry()
+    const svc = new StorageService(bucketService, registry)
+    // Retrieving the local provider should not throw
+    expect(() => registry.get('local')).not.toThrow()
+  })
+
+  it('should allow registering a custom provider', () => {
+    const calls: string[] = []
+    const customProvider: StorageProvider = {
+      async initBucket() { calls.push('init') },
+      async validateBucket() { calls.push('validate') },
+      async download() { return {} as DownloadResult },
+      async upload() { return { size: 0, etag: '' } },
+      async delete() {},
+      async listDirectory() { return {} as ListResult },
+      async listBucket() { return {} as ListResult },
+    }
+
+    storageService.registerProvider('custom', customProvider)
+    const bucket: Bucket = {
+      name: 'custom-bucket',
+      path: '/custom/path',
+      createdAt: new Date().toISOString(),
+      storageTarget: 'custom' as any,
+    }
+
+    storageService.initBucket(bucket)
+    storageService.validateStartup().catch(() => {})
+    expect(calls).toContain('init')
+  })
+
+  it('should use local provider for buckets without storageTarget', async () => {
+    const bucket = await bucketService.create('routing-test', path.join(tempDir, 'routing-test'))
+    expect(bucket.storageTarget).toBeUndefined()
+    // Local provider should handle this bucket
+    const content = 'routing test'
+    await storageService.upload(bucket, 'file.txt', Readable.from([content]))
+    const result = await storageService.download(bucket, 'file.txt')
+    const chunks: Buffer[] = []
+    for await (const chunk of result.stream) {
+      chunks.push(Buffer.from(chunk))
+    }
+    expect(Buffer.concat(chunks).toString()).toBe(content)
+  })
+})
+
+// ──────────────────────────────────────────────────────────
+// BucketService SFTP creation tests
+// ──────────────────────────────────────────────────────────
+describe('BucketService SFTP buckets', () => {
+  it('should create an sftp bucket with sftpConfig', async () => {
+    const bucket = await bucketService.create('sftp-test', '/remote/files', 'sftp', {
+      host: 'sftp.example.com',
+      port: 22,
+      username: 'deploy',
+      password: 'secret',
+    })
+    expect(bucket.storageTarget).toBe('sftp')
+    expect(bucket.sftpConfig?.host).toBe('sftp.example.com')
+    expect(bucket.sftpConfig?.username).toBe('deploy')
+    expect(bucket.path).toBe('/remote/files')
+  })
+
+  it('should persist and reload sftp bucket metadata', async () => {
+    await bucketService.create('sftp-persist', '/remote/persist', 'sftp', {
+      host: 'sftp.example.com',
+      port: 2222,
+      username: 'user',
+      privateKey: '-----BEGIN RSA PRIVATE KEY-----\n...',
+    })
+    const loaded = await bucketService.find('sftp-persist')
+    expect(loaded).not.toBeNull()
+    expect(loaded?.storageTarget).toBe('sftp')
+    expect(loaded?.sftpConfig?.port).toBe(2222)
+    expect(loaded?.sftpConfig?.privateKey).toBe('-----BEGIN RSA PRIVATE KEY-----\n...')
+  })
+
+  it('should reject sftp bucket creation without sftpConfig', async () => {
+    await expect(bucketService.create('sftp-bad', '/remote/path', 'sftp')).rejects.toThrow('sftpConfig is required')
+  })
+
+  it('should list both local and sftp buckets together', async () => {
+    await bucketService.create('local-one', path.join(tempDir, 'local-one'))
+    await bucketService.create('sftp-one', '/remote/sftp-one', 'sftp', {
+      host: 'host',
+      port: 22,
+      username: 'u',
+      password: 'p',
+    })
+    const all = await bucketService.list()
+    const names = all.map(b => b.name)
+    expect(names).toContain('local-one')
+    expect(names).toContain('sftp-one')
   })
 })
 

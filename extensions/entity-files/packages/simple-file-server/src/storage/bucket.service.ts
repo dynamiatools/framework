@@ -2,7 +2,7 @@ import path from 'node:path'
 import fsp from 'node:fs/promises'
 import fs from 'node:fs'
 import { resolveDataPaths, readJsonFile, writeJsonFile } from '../config/config.service.js'
-import type { Bucket } from '../types/index.js'
+import type { Bucket, StorageTarget, SftpConfig } from '../types/index.js'
 import { SFSError, SFSErrorCode, notFound } from '../errors/index.js'
 
 const SFS_INTERNAL_DIR = '.sfs'
@@ -23,9 +23,24 @@ export class BucketService {
     return path.join(this.bucketsDir, `${safe}.json`)
   }
 
-  async create(name: string, absolutePath: string): Promise<Bucket> {
-    if (!path.isAbsolute(absolutePath)) {
-      throw new SFSError(SFSErrorCode.BUCKET_PATH_INVALID, `Bucket path must be absolute: ${absolutePath}`, 400)
+  /**
+   * Create a new bucket.
+   *
+   * @param name        Unique bucket name.
+   * @param bucketPath  Absolute path to the storage root.
+   *                    For `'local'` this is a local filesystem path.
+   *                    For `'sftp'` this is the remote base path on the SFTP server.
+   * @param storageTarget  Storage backend (default: `'local'`).
+   * @param sftpConfig     Required when `storageTarget` is `'sftp'`.
+   */
+  async create(
+    name: string,
+    bucketPath: string,
+    storageTarget: StorageTarget = 'local',
+    sftpConfig?: SftpConfig,
+  ): Promise<Bucket> {
+    if (!path.isAbsolute(bucketPath)) {
+      throw new SFSError(SFSErrorCode.BUCKET_PATH_INVALID, `Bucket path must be absolute: ${bucketPath}`, 400)
     }
 
     const existing = await this.find(name)
@@ -33,22 +48,45 @@ export class BucketService {
       throw conflict(`Bucket '${name}' already exists`, SFSErrorCode.BUCKET_ALREADY_EXISTS)
     }
 
+    if (storageTarget === 'sftp') {
+      if (!sftpConfig) {
+        throw new SFSError(
+          SFSErrorCode.BUCKET_PATH_INVALID,
+          `sftpConfig is required when storageTarget is 'sftp'`,
+          400,
+        )
+      }
+
+      const bucket: Bucket = {
+        name,
+        path: bucketPath,
+        createdAt: new Date().toISOString(),
+        storageTarget: 'sftp',
+        sftpConfig,
+      }
+
+      await writeJsonFile(this.bucketFilePath(name), bucket)
+      return bucket
+    }
+
+    // ── local storage ──────────────────────────────────────────────────────
+
     // Ensure bucket dir exists
-    await fsp.mkdir(absolutePath, { recursive: true })
+    await fsp.mkdir(bucketPath, { recursive: true })
 
     // Validate writable
     try {
-      await fsp.access(absolutePath, fs.constants.W_OK)
+      await fsp.access(bucketPath, fs.constants.W_OK)
     } catch {
-      throw new SFSError(SFSErrorCode.BUCKET_PATH_NOT_WRITABLE, `Bucket path is not writable: ${absolutePath}`, 400)
+      throw new SFSError(SFSErrorCode.BUCKET_PATH_NOT_WRITABLE, `Bucket path is not writable: ${bucketPath}`, 400)
     }
 
     // Create internal .sfs directory
-    await this.ensureBucketInternals(absolutePath)
+    await this.ensureBucketInternals(bucketPath)
 
     const bucket: Bucket = {
       name,
-      path: absolutePath,
+      path: bucketPath,
       createdAt: new Date().toISOString(),
     }
 
@@ -94,6 +132,7 @@ export class BucketService {
 
   /**
    * Resolve a key to an absolute filesystem path within the bucket.
+   * Only valid for `'local'` storage target buckets.
    * Validates against path traversal attacks.
    */
   resolveKey(bucket: Bucket, key: string): string {
@@ -138,39 +177,6 @@ export class BucketService {
 
   getThumbsDir(bucket: Bucket): string {
     return path.join(bucket.path, SFS_INTERNAL_DIR, 'thumbs')
-  }
-
-  /**
-   * Validate startup: check all buckets are accessible and writable, clean orphan staging files.
-   */
-  async validateStartup(): Promise<void> {
-    const buckets = await this.list()
-    for (const bucket of buckets) {
-      try {
-        await fsp.access(bucket.path, fs.constants.W_OK)
-        await this.ensureBucketInternals(bucket.path)
-        await this.cleanOrphanStagingFiles(bucket)
-      } catch (err) {
-        console.warn(`[SFS] Warning: bucket '${bucket.name}' at '${bucket.path}' is not accessible:`, err)
-      }
-    }
-  }
-
-  private async cleanOrphanStagingFiles(bucket: Bucket): Promise<void> {
-    const stagingDir = this.getStagingDir(bucket)
-    try {
-      const files = await fsp.readdir(stagingDir)
-      const cutoff = Date.now() - 60 * 60 * 1000 // older than 1 hour
-      for (const file of files) {
-        const filePath = path.join(stagingDir, file)
-        const stat = await fsp.stat(filePath)
-        if (stat.mtimeMs < cutoff) {
-          await fsp.unlink(filePath).catch(() => {})
-        }
-      }
-    } catch {
-      // Ignore cleanup errors
-    }
   }
 }
 
