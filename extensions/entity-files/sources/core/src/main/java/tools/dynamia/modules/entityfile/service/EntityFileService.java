@@ -152,4 +152,6 @@ public interface EntityFileService {
     EntityFile getEntityFile(String uuid);
 
     EntityFileStorage getStorage(String name);
+
+    boolean isForceEntityFileStorage();
 }

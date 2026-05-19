@@ -31,6 +31,7 @@ import tools.dynamia.modules.entityfile.UploadedFileInfo;
 import tools.dynamia.modules.entityfile.domain.EntityFile;
 import tools.dynamia.modules.entityfile.domain.enums.EntityFileState;
 import tools.dynamia.modules.entityfile.enums.EntityFileType;
+import tools.dynamia.modules.entityfile.local.LocalEntityFileStorage;
 
 import java.io.ByteArrayInputStream;
 import java.net.HttpURLConnection;
@@ -71,10 +72,10 @@ public class RemoteEntityFileStorageTest {
 
     @BeforeClass
     public static void readConfiguration() {
-        sfsUrl      = systemOrEnv(RemoteEntityFileStorage.SFS_URL,      "http://localhost:8500");
-        sfsBucket   = systemOrEnv(RemoteEntityFileStorage.SFS_BUCKET,   "test");
+        sfsUrl = systemOrEnv(RemoteEntityFileStorage.SFS_URL, "http://localhost:8500");
+        sfsBucket = systemOrEnv(RemoteEntityFileStorage.SFS_BUCKET, "test");
         sfsIdentity = systemOrEnv(RemoteEntityFileStorage.SFS_IDENTITY, "test");
-        sfsSecret   = systemOrEnv(RemoteEntityFileStorage.SFS_SECRET,   "test");
+        sfsSecret = systemOrEnv(RemoteEntityFileStorage.SFS_SECRET, "test");
 
         System.out.println("[SFS Test] URL=" + sfsUrl + " | BUCKET=" + sfsBucket);
     }
@@ -82,12 +83,14 @@ public class RemoteEntityFileStorageTest {
     @Before
     public void setUp() {
         MockEnvironment env = new MockEnvironment();
-        env.setProperty(RemoteEntityFileStorage.SFS_URL,      sfsUrl);
-        env.setProperty(RemoteEntityFileStorage.SFS_BUCKET,   sfsBucket);
+        env.setProperty(RemoteEntityFileStorage.SFS_URL, sfsUrl);
+        env.setProperty(RemoteEntityFileStorage.SFS_BUCKET, sfsBucket);
         env.setProperty(RemoteEntityFileStorage.SFS_IDENTITY, sfsIdentity);
-        env.setProperty(RemoteEntityFileStorage.SFS_SECRET,   sfsSecret);
+        env.setProperty(RemoteEntityFileStorage.SFS_SECRET, sfsSecret);
 
-        storage = new RemoteEntityFileStorage(noOpParameters(), new InMemoryCrudService(), env);
+        var local = new LocalEntityFileStorage(noOpParameters(), new InMemoryCrudService(), env);
+
+        storage = new RemoteEntityFileStorage(local, noOpParameters(), new InMemoryCrudService(), env);
     }
 
     // ── Pure-logic tests (no server required) ─────────────────────────────────
@@ -128,7 +131,7 @@ public class RemoteEntityFileStorageTest {
 
         assertFalse("File name must not contain spaces", name.contains(" "));
         assertFalse("File name base must not contain dashes",
-                    name.substring(name.lastIndexOf('/') + 1).replace(ef.getUuid(), "").contains("-"));
+                name.substring(name.lastIndexOf('/') + 1).replace(ef.getUuid(), "").contains("-"));
     }
 
     @Test
@@ -163,8 +166,8 @@ public class RemoteEntityFileStorageTest {
 
     @Test
     public void testGetAccountFolderName() {
-        assertEquals("account42/",  RemoteEntityFileStorage.getAccountFolderName(42L));
-        assertEquals("account1/",   RemoteEntityFileStorage.getAccountFolderName(1L));
+        assertEquals("account42/", RemoteEntityFileStorage.getAccountFolderName(42L));
+        assertEquals("account1/", RemoteEntityFileStorage.getAccountFolderName(1L));
         assertEquals("account999/", RemoteEntityFileStorage.getAccountFolderName(999L));
     }
 
@@ -398,22 +401,80 @@ public class RemoteEntityFileStorageTest {
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static Parameters noOpParameters() {
         return new Parameters() {
-            @Override public List getParameters(List<String> n) { return List.of(); }
-            @Override public List getParameters(Class<? extends Parameter> c, List<String> n) { return List.of(); }
-            @Override public List all() { return List.of(); }
-            @Override public Parameter getParameter(String name) { return null; }
-            @Override public String getValue(String p) { return null; }
-            @Override public String getValue(Class<? extends Parameter> c, String p) { return null; }
-            @Override public String getValue(String p, String def) { return def; }
-            @Override public String getValue(Class<? extends Parameter> c, String p, String def) { return def; }
-            @Override public void save(Parameter p) {}
-            @Override public void save(Collection params) {}
-            @Override public void setParameter(Class<? extends Parameter> c, String n, Object v) {}
-            @Override public void setParameter(String n, Object v) {}
-            @Override public Parameter getParameter(Class<? extends Parameter> c, String n) { return null; }
-            @Override public void increaseCounter(Parameter p) {}
-            @Override public long findNextCounterValue(Parameter p) { return 0; }
-            @Override public Parameter findParameter(Class<? extends Parameter> c, String n, QueryParameters f) { return null; }
+            @Override
+            public List getParameters(List<String> n) {
+                return List.of();
+            }
+
+            @Override
+            public List getParameters(Class<? extends Parameter> c, List<String> n) {
+                return List.of();
+            }
+
+            @Override
+            public List all() {
+                return List.of();
+            }
+
+            @Override
+            public Parameter getParameter(String name) {
+                return null;
+            }
+
+            @Override
+            public String getValue(String p) {
+                return null;
+            }
+
+            @Override
+            public String getValue(Class<? extends Parameter> c, String p) {
+                return null;
+            }
+
+            @Override
+            public String getValue(String p, String def) {
+                return def;
+            }
+
+            @Override
+            public String getValue(Class<? extends Parameter> c, String p, String def) {
+                return def;
+            }
+
+            @Override
+            public void save(Parameter p) {
+            }
+
+            @Override
+            public void save(Collection params) {
+            }
+
+            @Override
+            public void setParameter(Class<? extends Parameter> c, String n, Object v) {
+            }
+
+            @Override
+            public void setParameter(String n, Object v) {
+            }
+
+            @Override
+            public Parameter getParameter(Class<? extends Parameter> c, String n) {
+                return null;
+            }
+
+            @Override
+            public void increaseCounter(Parameter p) {
+            }
+
+            @Override
+            public long findNextCounterValue(Parameter p) {
+                return 0;
+            }
+
+            @Override
+            public Parameter findParameter(Class<? extends Parameter> c, String n, QueryParameters f) {
+                return null;
+            }
         };
     }
 }

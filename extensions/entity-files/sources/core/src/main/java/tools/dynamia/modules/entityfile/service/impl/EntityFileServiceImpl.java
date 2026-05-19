@@ -47,8 +47,8 @@ import tools.dynamia.modules.entityfile.local.LocalEntityFileStorage;
 import tools.dynamia.modules.entityfile.service.EntityFileService;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.io.Serializable;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -65,6 +65,7 @@ public class EntityFileServiceImpl implements EntityFileService {
     private Parameters appParams;
 
     private static final String DEFAULT_STORAGE = "DEFAULT_STORAGE_ID";
+    private static final String FORCE_STORAGE = "FORCE_STORAGE";
 
     private LoggingService logger = new SLF4JLoggingService(EntityFileService.class);
 
@@ -272,7 +273,7 @@ public class EntityFileServiceImpl implements EntityFileService {
     @Override
     public StoredEntityFile download(EntityFile file) {
         EntityFileStorage storage = null;
-        if (file.getStorageInfo() != null && !file.getStorageInfo().isEmpty()) {
+        if (!isForceEntityFileStorage() && file.getStorageInfo() != null && !file.getStorageInfo().isEmpty()) {
             storage = findStorage(file.getStorageInfo());
         }
 
@@ -289,10 +290,27 @@ public class EntityFileServiceImpl implements EntityFileService {
         try {
             StoredEntityFile storedEntityFile = download(entityFile);
             if (storedEntityFile != null) {
-                IOUtils.copy(new URL(storedEntityFile.getUrl()).openStream(), outputFile);
+                var resource = storedEntityFile.toResource();
+                if (resource != null) {
+                    IOUtils.copy(resource.getInputStream(), outputFile);
+                }
             }
         } catch (Exception e) {
             throw new EntityFileException("Error downloading entity file to local file", e);
+        }
+    }
+
+    public void download(EntityFile entityFile, OutputStream outputStream) {
+        try {
+            StoredEntityFile storedEntityFile = download(entityFile);
+            if (storedEntityFile != null) {
+                var resource = storedEntityFile.toResource();
+                if (resource != null) {
+                    IOUtils.copy(resource.getInputStream(), outputStream);
+                }
+            }
+        } catch (Exception e) {
+            throw new EntityFileException("Error downloading entity file to outputstream", e);
         }
     }
 
@@ -370,6 +388,12 @@ public class EntityFileServiceImpl implements EntityFileService {
         if (provider != null) {
             entityFile.setAccountId(provider.getAccountId());
         }
+    }
+
+    @Override
+    public boolean isForceEntityFileStorage() {
+        String storageId = appParams.getValue(FORCE_STORAGE, "false");
+        return "true".equalsIgnoreCase(storageId);
     }
 
 }
