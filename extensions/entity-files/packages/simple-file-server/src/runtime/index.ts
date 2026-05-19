@@ -1,7 +1,9 @@
-import { ensureDataDirs, getDefaultConfig } from '../config/config.service.js'
+import path from 'node:path'
+import { ensureDataDirs, getDefaultConfig, resolveDataPaths } from '../config/config.service.js'
 import { IdentityService } from '../auth/identity.service.js'
 import { BucketService } from '../storage/bucket.service.js'
 import { StorageService } from '../storage/storage.service.js'
+import { SftpStorageProvider } from '../storage/sftp.provider.js'
 import { ThumbnailService } from '../thumbnail/thumbnail.service.js'
 import { OperationalLogger } from '../logging/logger.js'
 import { createServer } from '../http/server.js'
@@ -29,6 +31,11 @@ export async function createRuntime(overrides?: Partial<SFSConfig>): Promise<SFS
   const identityService = new IdentityService(config.dataDir)
   const bucketService = new BucketService(config.dataDir)
   const storageService = new StorageService(bucketService)
+
+  // Register the SFTP provider so SFTP buckets are supported out-of-the-box
+  const sftpStagingDir = path.join(resolveDataPaths(config.dataDir).cacheDir, 'sftp-staging')
+  storageService.registerProvider('sftp', new SftpStorageProvider(sftpStagingDir))
+
   const thumbnailService = new ThumbnailService(bucketService, storageService)
 
   return {
@@ -45,8 +52,8 @@ export async function startServer(overrides?: Partial<SFSConfig>): Promise<SFSRu
   const runtime = await createRuntime(overrides)
   const { config, bucketService, storageService, thumbnailService, identityService, operationalLogger } = runtime
 
-  // Validate buckets on startup
-  await bucketService.validateStartup()
+  // Validate buckets on startup (uses StorageService to dispatch to correct provider)
+  await storageService.validateStartup()
 
   const server = await createServer({
     config,
@@ -64,6 +71,7 @@ export async function startServer(overrides?: Partial<SFSConfig>): Promise<SFSRu
     server.log.info(`Received ${signal}, gracefully shutting down...`)
     operationalLogger.log({ event: 'server_stop', message: `Shutting down (${signal})` })
     await server.close()
+    await storageService.closeProviders()
     await operationalLogger.close()
     process.exit(0)
   }
