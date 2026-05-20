@@ -43,7 +43,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 /**
- * Integration tests for {@link RemoteEntityFileStorage}.
+ * Integration tests for {@link BuckieEntityFileStorage}.
  *
  * <p>Pure-logic tests (buildKey, getFileName, etc.) always run.
  * HTTP tests are skipped automatically via {@code Assume.assumeTrue}
@@ -59,23 +59,23 @@ import static org.junit.Assert.*;
  * Maven example: {@code mvn test -DSFS_URL=http://my-sfs:8081 -DSFS_BUCKET=test}
  * </p>
  */
-public class RemoteEntityFileStorageTest {
+public class BuckieEntityFileStorageTest {
 
     private static String sfsUrl;
     private static String sfsBucket;
     private static String sfsIdentity;
     private static String sfsSecret;
 
-    private RemoteEntityFileStorage storage;
+    private BuckieEntityFileStorage storage;
 
     // ── Setup ─────────────────────────────────────────────────────────────────
 
     @BeforeClass
     public static void readConfiguration() {
-        sfsUrl = systemOrEnv(RemoteEntityFileStorage.SFS_URL, "http://localhost:8500");
-        sfsBucket = systemOrEnv(RemoteEntityFileStorage.SFS_BUCKET, "test");
-        sfsIdentity = systemOrEnv(RemoteEntityFileStorage.SFS_IDENTITY, "test");
-        sfsSecret = systemOrEnv(RemoteEntityFileStorage.SFS_SECRET, "test");
+        sfsUrl = systemOrEnv(BuckieEntityFileStorage.SFS_URL, "http://localhost:8500");
+        sfsBucket = systemOrEnv(BuckieEntityFileStorage.SFS_BUCKET, "test");
+        sfsIdentity = systemOrEnv(BuckieEntityFileStorage.SFS_IDENTITY, "test");
+        sfsSecret = systemOrEnv(BuckieEntityFileStorage.SFS_SECRET, "test");
 
         System.out.println("[SFS Test] URL=" + sfsUrl + " | BUCKET=" + sfsBucket);
     }
@@ -83,21 +83,21 @@ public class RemoteEntityFileStorageTest {
     @Before
     public void setUp() {
         MockEnvironment env = new MockEnvironment();
-        env.setProperty(RemoteEntityFileStorage.SFS_URL, sfsUrl);
-        env.setProperty(RemoteEntityFileStorage.SFS_BUCKET, sfsBucket);
-        env.setProperty(RemoteEntityFileStorage.SFS_IDENTITY, sfsIdentity);
-        env.setProperty(RemoteEntityFileStorage.SFS_SECRET, sfsSecret);
+        env.setProperty(BuckieEntityFileStorage.SFS_URL, sfsUrl);
+        env.setProperty(BuckieEntityFileStorage.SFS_BUCKET, sfsBucket);
+        env.setProperty(BuckieEntityFileStorage.SFS_IDENTITY, sfsIdentity);
+        env.setProperty(BuckieEntityFileStorage.SFS_SECRET, sfsSecret);
 
         var local = new LocalEntityFileStorage(noOpParameters(), new InMemoryCrudService(), env);
 
-        storage = new RemoteEntityFileStorage(local, noOpParameters(), new InMemoryCrudService(), env);
+        storage = new BuckieEntityFileStorage(local, noOpParameters(), new InMemoryCrudService(), env);
     }
 
     // ── Pure-logic tests (no server required) ─────────────────────────────────
 
     @Test
     public void testGetId() {
-        assertEquals(RemoteEntityFileStorage.ID, storage.getId());
+        assertEquals(BuckieEntityFileStorage.ID, storage.getId());
     }
 
     @Test
@@ -127,7 +127,7 @@ public class RemoteEntityFileStorageTest {
     @Test
     public void testGetFileName_withSpacesAndDashes() {
         EntityFile ef = buildEntityFile("My File-Final.pdf", null, 1L);
-        String name = RemoteEntityFileStorage.getFileName(ef);
+        String name = BuckieEntityFileStorage.getFileName(ef);
 
         assertFalse("File name must not contain spaces", name.contains(" "));
         assertFalse("File name base must not contain dashes",
@@ -137,7 +137,7 @@ public class RemoteEntityFileStorageTest {
     @Test
     public void testGetFileName_withAccentsAndSpecialChars() {
         EntityFile ef = buildEntityFile("Ñoño Ávido Murió.pdf", null, 1L);
-        String name = RemoteEntityFileStorage.getFileName(ef);
+        String name = BuckieEntityFileStorage.getFileName(ef);
 
         assertFalse("File name must not contain ñ", name.contains("ñ"));
         assertFalse("File name must not contain á", name.contains("á"));
@@ -150,7 +150,7 @@ public class RemoteEntityFileStorageTest {
         EntityFile ef = buildEntityFile("original.pdf", null, 1L);
         ef.setStoredFileName("custom_stored_name.pdf");
 
-        String name = RemoteEntityFileStorage.getFileName(ef);
+        String name = BuckieEntityFileStorage.getFileName(ef);
 
         assertEquals("Must use storedFileName when it is set", "custom_stored_name.pdf", name);
     }
@@ -158,7 +158,7 @@ public class RemoteEntityFileStorageTest {
     @Test
     public void testGetFileName_withoutSubfolder() {
         EntityFile ef = buildEntityFile("doc.txt", null, 1L);
-        String name = RemoteEntityFileStorage.getFileName(ef);
+        String name = BuckieEntityFileStorage.getFileName(ef);
 
         assertFalse("Without subfolder the name must not start with /", name.startsWith("/"));
         assertTrue("Name must contain the uuid", name.contains(ef.getUuid()));
@@ -166,9 +166,9 @@ public class RemoteEntityFileStorageTest {
 
     @Test
     public void testGetAccountFolderName() {
-        assertEquals("account42/", RemoteEntityFileStorage.getAccountFolderName(42L));
-        assertEquals("account1/", RemoteEntityFileStorage.getAccountFolderName(1L));
-        assertEquals("account999/", RemoteEntityFileStorage.getAccountFolderName(999L));
+        assertEquals("account42/", BuckieEntityFileStorage.getAccountFolderName(42L));
+        assertEquals("account1/", BuckieEntityFileStorage.getAccountFolderName(1L));
+        assertEquals("account999/", BuckieEntityFileStorage.getAccountFolderName(999L));
     }
 
     @Test
@@ -336,7 +336,7 @@ public class RemoteEntityFileStorageTest {
         storage.upload(ef, info);
 
         StoredEntityFile stored = storage.download(ef);
-        String url = stored instanceof RemoteEntityFileStorage.RemoteStoredEntityFile r ? r.getRemoteUrl() : stored.getUrl();
+        String url = stored instanceof BuckieEntityFileStorage.BuckieStoredEntityFile r ? r.getRemoteUrl() : stored.getUrl();
 
         // The URL returned by download() must point to the same resource that was uploaded
         assertNotNull(url);

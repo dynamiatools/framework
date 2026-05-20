@@ -59,11 +59,11 @@ import java.io.Serial;
  * @author Dynamia Soluciones IT
  */
 @Service
-public class RemoteEntityFileStorage implements EntityFileStorage {
+public class BuckieEntityFileStorage implements EntityFileStorage {
 
-    private final LoggingService logger = new SLF4JLoggingService(RemoteEntityFileStorage.class, "SFS: ");
+    private final LoggingService logger = new SLF4JLoggingService(BuckieEntityFileStorage.class, "Buckie: ");
 
-    public static final String ID = "RemoteSimpleFileStorage";
+    public static final String ID = "buckie";
 
     // ── Parameter names ──────────────────────────────────────────────────────
     public static final String SFS_URL = "SFS_URL";
@@ -85,7 +85,7 @@ public class RemoteEntityFileStorage implements EntityFileStorage {
      */
     private volatile RestClient restClient;
 
-    public RemoteEntityFileStorage(LocalEntityFileStorage localEntityFileStorage, Parameters appParams, CrudService crudService, Environment environment) {
+    public BuckieEntityFileStorage(LocalEntityFileStorage localEntityFileStorage, Parameters appParams, CrudService crudService, Environment environment) {
         this.localEntityFileStorage = localEntityFileStorage;
         this.appParams = appParams;
         this.crudService = crudService;
@@ -101,7 +101,7 @@ public class RemoteEntityFileStorage implements EntityFileStorage {
 
     @Override
     public String getName() {
-        return "Remote Simple File Storage";
+        return "Buckie Remote File Storage";
     }
 
     @Override
@@ -153,7 +153,7 @@ public class RemoteEntityFileStorage implements EntityFileStorage {
         String remoteUrl = buildRemoteUrl(entityFile);
         String publicUrl = localEntityFileStorage.generateURL(entityFile);
 
-        return new RemoteStoredEntityFile(entityFile, remoteUrl, publicUrl, client(), getIdentity(), getSecret());
+        return new BuckieStoredEntityFile(entityFile, remoteUrl, publicUrl, client(), getIdentity(), getSecret());
     }
 
     @Override
@@ -161,7 +161,7 @@ public class RemoteEntityFileStorage implements EntityFileStorage {
         String key = buildKey(entityFile);
         String bucket = getBucket();
 
-        logger.info("Deleting from SFS: " + key);
+        logger.info("Deleting: " + key);
 
         try {
             client().delete()
@@ -297,12 +297,12 @@ public class RemoteEntityFileStorage implements EntityFileStorage {
      * SFS credentials are included in every download request so the server can
      * authorise the caller.
      */
-    public static class RemoteStoredEntityFile extends StoredEntityFile {
+    public static class BuckieStoredEntityFile extends StoredEntityFile {
 
         @Serial
         private static final long serialVersionUID = 1L;
 
-        private final LoggingService logger = LoggingService.get(RemoteStoredEntityFile.class, "SFS: ");
+        private final LoggingService logger = LoggingService.get(BuckieStoredEntityFile.class, "SFS: ");
 
 
         private final transient RestClient restClient;
@@ -311,7 +311,7 @@ public class RemoteEntityFileStorage implements EntityFileStorage {
         private final String remoteUrl;
 
 
-        public RemoteStoredEntityFile(EntityFile entityFile, String remoteUrl, String publicUrl,
+        public BuckieStoredEntityFile(EntityFile entityFile, String remoteUrl, String publicUrl,
                                       RestClient restClient, String identity, String secret) {
             super(entityFile, publicUrl, null);
             this.remoteUrl = remoteUrl;

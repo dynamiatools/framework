@@ -74,7 +74,7 @@ public class EntityFileStorageController {
             return ResponseEntity.notFound().build();
         }
 
-        if (!isSameAccount(entityFile)) {
+        if (!isValidAccount(entityFile)) {
             return ResponseEntity.notFound().build();
         }
 
@@ -209,7 +209,7 @@ public class EntityFileStorageController {
             return ResponseEntity.notFound().build();
         }
 
-        if (!isSameAccount(entityFile)) {
+        if (!isValidAccount(entityFile)) {
             return ResponseEntity.notFound().build();
         }
 
@@ -320,7 +320,7 @@ public class EntityFileStorageController {
         }
 
         EntityFile parent = entityFileService.getEntityFile(parentUuid.trim());
-        if (parent == null || !isSameAccount(parent)) {
+        if (parent == null || !isValidAccount(parent)) {
             throw new UploadRequestException(HttpStatus.NOT_FOUND, "Parent entity file not found: " + parentUuid);
         }
         return parent;
@@ -565,12 +565,10 @@ public class EntityFileStorageController {
      * @param entityFile file to evaluate
      * @return {@code true} when the file can be accessed from the current account context
      */
-    private boolean isSameAccount(EntityFile entityFile) {
+    private boolean isValidAccount(EntityFile entityFile) {
         EntityFileAccountProvider accountProvider = Containers.get().findObject(EntityFileAccountProvider.class);
-        if (accountProvider != null) {
-            if (entityFile.getAccountId() != null) {
-                return entityFile.getAccountId().equals(accountProvider.getAccountId());
-            }
+        if (accountProvider != null && entityFile != null) {
+            return accountProvider.isValidEntityFile(entityFile);
         }
         return true;
     }

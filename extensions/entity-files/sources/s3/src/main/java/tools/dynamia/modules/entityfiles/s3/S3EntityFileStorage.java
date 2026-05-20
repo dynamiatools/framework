@@ -45,10 +45,8 @@ import tools.dynamia.modules.entityfile.StoredEntityFile;
 import tools.dynamia.modules.entityfile.UploadedFileInfo;
 import tools.dynamia.modules.entityfile.domain.EntityFile;
 import tools.dynamia.modules.entityfile.enums.EntityFileType;
-import tools.dynamia.modules.entityfile.remote.RemoteEntityFileStorage;
 
 import java.io.File;
-import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -58,8 +56,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static tools.dynamia.modules.entityfile.remote.RemoteEntityFileStorage.getAccountFolderName;
-import static tools.dynamia.modules.entityfile.remote.RemoteEntityFileStorage.getFileName;
+import static tools.dynamia.modules.entityfile.remote.BuckieEntityFileStorage.getAccountFolderName;
+import static tools.dynamia.modules.entityfile.remote.BuckieEntityFileStorage.getFileName;
 
 /**
  * {@link EntityFileStorage} implementation that store files in Amazon S3 service.
