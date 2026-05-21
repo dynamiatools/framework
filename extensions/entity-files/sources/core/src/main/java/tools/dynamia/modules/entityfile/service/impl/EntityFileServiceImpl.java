@@ -346,8 +346,8 @@ public class EntityFileServiceImpl implements EntityFileService {
         String storageId = appParams.getValue(DEFAULT_STORAGE, LocalEntityFileStorage.ID);
         EntityFileStorage storage = findStorage(storageId);
         if (storage == null) {
-            throw new EntityFileException("No default " + EntityFileStorage.class
-                    .getSimpleName() + " configured");
+            logger.warn("No default " + EntityFileStorage.class.getSimpleName() + " found with id: " + storageId + ". Using local storage.");
+            return Containers.get().findObject(LocalEntityFileStorage.class);
         }
         return storage;
     }
