@@ -14,13 +14,37 @@ import java.util.function.Supplier;
 public class Lambdas {
 
 
+    /**
+     * Consumer variant that allows checked exceptions.
+     *
+     * @param <T> the consumed value type
+     */
     @FunctionalInterface
     public interface ThrowingConsumer<T> {
+
+        /**
+         * Performs this operation on the given argument.
+         *
+         * @param t the input argument
+         * @throws Exception if processing fails
+         */
         void accept(T t) throws Exception;
     }
 
+    /**
+     * Supplier variant that allows checked exceptions.
+     *
+     * @param <T> the supplied value type
+     */
     @FunctionalInterface
     public interface ThrowingSupplier<T> {
+
+        /**
+         * Gets a result value.
+         *
+         * @return the supplied value
+         * @throws Exception if value retrieval fails
+         */
         T get() throws Exception;
     }
 

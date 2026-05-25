@@ -16,8 +16,20 @@ package tools.dynamia.modules.security;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 
+/**
+ * Intercepts login controller rendering to customize model data or flow.
+ * Implementations can inject additional attributes, flags, or contextual
+ * values before the login view is rendered.
+ */
 public interface LoginControllerInterceptor {
 
+    /**
+     * Called when the login controller is preparing the login page.
+     *
+     * @param request the current HTTP request
+     * @param viewName the view name that will be rendered
+     * @param params mutable model parameters for the login view
+     */
     void login(HttpServletRequest request, String viewName, Map<String, Object> params);
 
 

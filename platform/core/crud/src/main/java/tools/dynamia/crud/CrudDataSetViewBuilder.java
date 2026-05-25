@@ -19,15 +19,32 @@ package tools.dynamia.crud;
 import tools.dynamia.viewers.DataSetView;
 
 /**
- *
- * @author Mario A. Serrano Leones
+ * Builds {@link DataSetView} instances for CRUD screens.
+ * Implementations map a view type to its UI builder and optionally
+ * indicate a preferred controller implementation.
  */
 public interface CrudDataSetViewBuilder {
 
+    /**
+     * Returns the view type name handled by this builder.
+     *
+     * @return the supported view type identifier
+     */
     String getViewTypeName();
 
+    /**
+     * Returns the preferred CRUD controller class for this view builder.
+     *
+     * @return the preferred controller type, or {@code null} when not restricted
+     */
     Class getPreferredController();
 
+    /**
+     * Builds the dataset view for the provided CRUD view component.
+     *
+     * @param crudView the CRUD view component context
+     * @return the constructed dataset view
+     */
     DataSetView build(CrudViewComponent crudView);
 
 }

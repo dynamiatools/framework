@@ -19,9 +19,20 @@ package tools.dynamia.modules.importer;
 
 import org.apache.poi.ss.usermodel.Row;
 
+/**
+ * Functional contract for converting a spreadsheet {@link Row} into a domain object.
+ *
+ * @param <T> the target object type produced from each row
+ */
 @FunctionalInterface
 public interface ImportBeanParser<T> {
 
+	/**
+	 * Parses a spreadsheet row into a typed object.
+	 *
+	 * @param row the row to parse
+	 * @return the parsed object instance
+	 */
 	T parse(Row row);
 
 }
