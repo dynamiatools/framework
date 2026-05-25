@@ -15,11 +15,17 @@
 package tools.dynamia.modules.security;
 
 /**
- *
- * @author Mario Serrano Leones
+ * Provides request matcher patterns that should bypass security filters.
+ * Implementations are typically used to register public paths such as static
+ * assets, health endpoints, or public APIs.
  */
 public interface IgnoringSecurityMatcher {
 
+    /**
+     * Returns the matcher expressions that must be ignored by security.
+     *
+     * @return an array of path matcher patterns
+     */
     String[] matchers();
 
 }
