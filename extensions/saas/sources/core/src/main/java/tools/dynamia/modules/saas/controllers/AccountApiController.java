@@ -18,11 +18,14 @@
 package tools.dynamia.modules.saas.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.AbstractService;
+import tools.dynamia.modules.saas.api.AccountServiceAPI;
 import tools.dynamia.modules.saas.api.AccountStatsList;
 import tools.dynamia.modules.saas.api.dto.AccountDTO;
 import tools.dynamia.modules.saas.api.enums.AccountPeriodicity;
@@ -37,6 +40,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/api/saas", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
@@ -53,15 +57,20 @@ public class AccountApiController extends AbstractService {
     }
 
     private final AccountService service;
+    private final AccountServiceAPI serviceAPI;
 
     @Autowired
-    public AccountApiController(AccountService service) {
+    public AccountApiController(AccountService service, AccountServiceAPI serviceAPI) {
         this.service = service;
+        this.serviceAPI = serviceAPI;
     }
 
     @GetMapping("/account/{uuid}")
-    public AccountDTO getAccount(@PathVariable("uuid") String uuid, HttpServletRequest request) {
+    public ResponseEntity<AccountDTO> getAccount(@PathVariable("uuid") String uuid, HttpServletRequest request) {
 
+        if (!isAuthorized(request) && !isSameAccount(uuid, request)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         Account account = getAccount(uuid);
 
@@ -75,28 +84,31 @@ public class AccountApiController extends AbstractService {
                     accountDTO.setStatusDescription("Licencia invalida");
                 }
             }
-            return accountDTO;
+            return ResponseEntity.ok(accountDTO);
         }
 
 
-        return NO_ACCOUNT;
+        return ResponseEntity.ok(NO_ACCOUNT);
 
     }
 
     @PostMapping("/account/{uuid}/stats")
-    public String updateStats(@PathVariable("uuid") String uuid, @RequestBody AccountStatsList stats, HttpServletRequest request) {
+    public ResponseEntity<Map<String, String>> updateStats(@PathVariable("uuid") String uuid, @RequestBody AccountStatsList stats, HttpServletRequest request) {
 
+        if (!isAuthorized(request) && !isSameAccount(uuid, request)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         Account account = getAccount(uuid);
         if (account != null) {
             if (stats != null) {
                 service.updateStats(account, stats.getData());
-                return "DONE: Account stats updated";
+                return ResponseEntity.ok(Map.of("message", "DONE: Account stats updated"));
             } else {
-                return "Invalid stats";
+                return ResponseEntity.ok(Map.of("message", "Invalid stats"));
             }
         } else {
-            return "Cannot found account with uuid: " + uuid;
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -110,7 +122,12 @@ public class AccountApiController extends AbstractService {
     }
 
     @GetMapping("/account/{uuid}/parameter/{name}")
-    public String getAccountParameter(@PathVariable("uuid") String uuid, @PathVariable("name") String name, HttpServletRequest request) {
+    public ResponseEntity<Map<String, String>> getAccountParameter(@PathVariable("uuid") String uuid, @PathVariable("name") String name, HttpServletRequest request) {
+
+        if (!isAuthorized(request) && !isSameAccount(uuid, request)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         String defautlValue = request.getParameter("defaultValue");
         String value = null;
         Account account = getAccount(uuid);
@@ -129,7 +146,11 @@ public class AccountApiController extends AbstractService {
                 });
             }
         }
-        return value;
+        if (value != null) {
+            return ResponseEntity.ok(Map.of("parameter", name, "value", value));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     private void newLog(String uuid, HttpServletRequest request, Account account) {
@@ -141,5 +162,19 @@ public class AccountApiController extends AbstractService {
         } catch (Exception e) {
 
         }
+    }
+
+    public boolean isAuthorized(HttpServletRequest request) {
+        if (serviceAPI.getSystemAccountId().equals(serviceAPI.getCurrentAccountId())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean isSameAccount(String uuid, HttpServletRequest request) {
+        var subdomain = HttpUtils.getSubdomain(request);
+        var currentAccount = service.getAccount(subdomain);
+        return uuid.equals(currentAccount.getUuid());
     }
 }

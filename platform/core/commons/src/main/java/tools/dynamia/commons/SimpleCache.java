@@ -54,6 +54,19 @@ public class SimpleCache<K, V> implements Serializable {
     }
 
     /**
+     * Alias to add
+     * @param key
+     * @param value
+     */
+    public void put(K key, V value) {
+        data.put(key, value);
+    }
+
+    public void putIfAbsent(K key, V value) {
+        data.putIfAbsent(key, value);
+    }
+
+    /**
      * Retrieves a value from the cache by key.
      *
      * @param key the cache key
