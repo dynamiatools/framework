@@ -33,6 +33,13 @@ fields:
     params:
       parameterName: LOCAL_USE_HTTPS
       cacheable: true
+  forceStorage:
+    label: Force Use of Selected Storage
+    component: checkbox
+    params:
+      parameterName: FORCE_STORAGE
+      cacheable: true
+
 
   s3BucketName:
     label: Bucket Name

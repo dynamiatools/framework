@@ -26,18 +26,17 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
@@ -65,6 +64,10 @@ import java.util.zip.ZipInputStream;
  */
 public abstract class IOUtils {
 
+    private static final long KB = 1024L;
+    private static final long MB = KB * 1024L;
+    private static final long GB = MB * 1024L;
+
     /**
      * The default resource locator.
      */
@@ -91,19 +94,16 @@ public abstract class IOUtils {
      * @return the located Resource, or null if not found
      */
     public static Resource getResource(String location) {
-        Resource resource = null;
+        Objects.requireNonNull(location, "location cannot be null");
         Collection<ResourceLocator> locators = Containers.get().findObjects(ResourceLocator.class);
         if (locators != null && !locators.isEmpty()) {
-            for (ResourceLocator resourceLocator : locators) {
-                resource = resourceLocator.getResource(location);
-                if (resource != null) {
-                    break;
-                }
-            }
-        } else {
-            resource = DEFAULT_RESOURCE_LOCATOR.getResource(location);
+            return locators.stream()
+                    .map(rl -> rl.getResource(location))
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
         }
-        return resource;
+        return DEFAULT_RESOURCE_LOCATOR.getResource(location);
     }
 
     /**
@@ -115,21 +115,18 @@ public abstract class IOUtils {
      * @throws IOException if an I/O error occurs
      */
     public static Resource[] getResources(String location) throws IOException {
-        Resource[] results = new Resource[0];
+        Objects.requireNonNull(location, "location cannot be null");
         Collection<ResourceLocator> locators = Containers.get().findObjects(ResourceLocator.class);
         if (locators != null && !locators.isEmpty()) {
             for (ResourceLocator resourceLocator : locators) {
                 Resource[] resources = resourceLocator.getResources(location);
                 if (resources != null) {
-                    results = resources;
-                    break;
+                    return resources;
                 }
             }
-        } else {
-            results = DEFAULT_RESOURCE_LOCATOR.getResources(location);
+            return new Resource[0];
         }
-
-        return results;
+        return DEFAULT_RESOURCE_LOCATOR.getResources(location);
     }
 
     /**
@@ -140,8 +137,15 @@ public abstract class IOUtils {
      * @return the File object, or null if not found or error
      */
     public static File createFromClasspath(final String path) {
+        if (path == null) {
+            return null;
+        }
         try {
-            return new File(IOUtils.class.getResource(path).toURI());
+            URL url = IOUtils.class.getResource(path);
+            if (url == null) {
+                return null;
+            }
+            return new File(url.toURI());
         } catch (URISyntaxException ex) {
             return null;
         }
@@ -155,9 +159,11 @@ public abstract class IOUtils {
      * @throws IOException if an I/O error occurs during serialization
      */
     public static byte[] serializeToBytes(Serializable obj) throws IOException {
+        Objects.requireNonNull(obj, "obj cannot be null");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(obj);
+        try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+            oos.writeObject(obj);
+        }
         return baos.toByteArray();
     }
 
@@ -170,9 +176,10 @@ public abstract class IOUtils {
      * @throws ClassNotFoundException if the class of the object cannot be found
      */
     public static Serializable deserializeFromBytes(byte[] data) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(data);
-        ObjectInputStream ois = new ObjectInputStream(bais);
-        return (Serializable) ois.readObject();
+        Objects.requireNonNull(data, "data cannot be null");
+        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
+            return (Serializable) ois.readObject();
+        }
     }
 
     /**
@@ -183,12 +190,10 @@ public abstract class IOUtils {
      * @throws IOException if an I/O error occurs
      */
     public static String readContent(String path) throws IOException {
-        InputStream in = IOUtils.class.getResourceAsStream(path);
-        if (in == null) {
-            in = new FileInputStream(path);
+        Objects.requireNonNull(path, "path cannot be null");
+        try (InputStream in = openInputStream(path)) {
+            return readContent(in, Charset.defaultCharset());
         }
-
-        return readContent(in, Charset.defaultCharset());
     }
 
     /**
@@ -200,12 +205,11 @@ public abstract class IOUtils {
      * @throws IOException if an I/O error occurs
      */
     public static String readContent(String path, String charset) throws IOException {
-        InputStream in = IOUtils.class.getResourceAsStream(path);
-        if (in == null) {
-            in = new FileInputStream(path);
+        Objects.requireNonNull(path, "path cannot be null");
+        Objects.requireNonNull(charset, "charset cannot be null");
+        try (InputStream in = openInputStream(path)) {
+            return readContent(in, Charset.forName(charset));
         }
-
-        return readContent(in, Charset.forName(charset));
     }
 
     /**
@@ -217,45 +221,29 @@ public abstract class IOUtils {
      * @throws IOException if an I/O error occurs
      */
     public static String readContent(InputStream inputStream, Charset charset) throws IOException {
+        Objects.requireNonNull(inputStream, "inputStream cannot be null");
+        Objects.requireNonNull(charset, "charset cannot be null");
         StringBuilder content = new StringBuilder();
         try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, charset))) {
-            String line = null;
+            String line;
             while ((line = br.readLine()) != null) {
                 content.append(line);
             }
         }
-
         return content.toString();
     }
 
     /**
-     * Copies data from an InputStream to an OutputStream using NIO channels for fast transfer.
+     * Copies data from an InputStream to an OutputStream.
      *
      * @param streamIn  the source InputStream
      * @param streamOut the destination OutputStream
      * @throws IOException if an I/O error occurs
      */
     public static void copy(InputStream streamIn, OutputStream streamOut) throws IOException {
-        ReadableByteChannel src = Channels.newChannel(streamIn);
-        WritableByteChannel dest = Channels.newChannel(streamOut);
-        final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
-
-        while (src.read(buffer) != -1) {
-            // prepare the buffer to be drained
-            buffer.flip();
-            // write to the channel, may block
-            dest.write(buffer);
-            // If partial transfer, shift remainder down
-            // If buffer is empty, same as doing clear()
-            buffer.compact();
-        }
-        // EOF will leave buffer in fill state
-        buffer.flip();
-        // make sure the buffer is fully drained.
-        while (buffer.hasRemaining()) {
-            dest.write(buffer);
-        }
-
+        Objects.requireNonNull(streamIn, "streamIn cannot be null");
+        Objects.requireNonNull(streamOut, "streamOut cannot be null");
+        streamIn.transferTo(streamOut);
     }
 
     /**
@@ -266,7 +254,11 @@ public abstract class IOUtils {
      * @throws IOException if an I/O error occurs
      */
     public static void copy(InputStream streamIn, File fileOut) throws IOException {
-        copy(streamIn, new FileOutputStream(fileOut));
+        Objects.requireNonNull(streamIn, "streamIn cannot be null");
+        Objects.requireNonNull(fileOut, "fileOut cannot be null");
+        try (FileOutputStream fos = new FileOutputStream(fileOut)) {
+            streamIn.transferTo(fos);
+        }
     }
 
     /**
@@ -277,10 +269,9 @@ public abstract class IOUtils {
      * @throws IOException if an I/O error occurs
      */
     public static void copy(File fileIn, File fileOut) throws IOException {
-        FileInputStream fis = new FileInputStream(fileIn);
-        FileOutputStream fos = new FileOutputStream(fileOut);
-        copy(fis, fos);
-
+        Objects.requireNonNull(fileIn, "fileIn cannot be null");
+        Objects.requireNonNull(fileOut, "fileOut cannot be null");
+        Files.copy(fileIn.toPath(), fileOut.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     /**
@@ -291,10 +282,11 @@ public abstract class IOUtils {
      * @throws IOException if an I/O error occurs
      */
     public static void copy(byte[] bytes, File fileOut) throws IOException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        FileOutputStream fos = new FileOutputStream(fileOut);
-        copy(bais, fos);
-
+        Objects.requireNonNull(bytes, "bytes cannot be null");
+        Objects.requireNonNull(fileOut, "fileOut cannot be null");
+        try (FileOutputStream fos = new FileOutputStream(fileOut)) {
+            fos.write(bytes);
+        }
     }
 
     /**
@@ -305,8 +297,9 @@ public abstract class IOUtils {
      * @throws IOException if an I/O error occurs
      */
     public static void copy(byte[] bytes, OutputStream streamOut) throws IOException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        copy(bais, streamOut);
+        Objects.requireNonNull(bytes, "bytes cannot be null");
+        Objects.requireNonNull(streamOut, "streamOut cannot be null");
+        streamOut.write(bytes);
     }
 
     /**
@@ -317,19 +310,12 @@ public abstract class IOUtils {
      */
     public static String formatFileSize(long length) {
         DecimalFormat f = new DecimalFormat("###,###.#");
-        if (length > 1024) {
-            double kb = (double) length / 1024;
-            if (kb > 1024) {
-                double mb = kb / 1024;
-                if (mb > 1024) {
-                    double gb = mb / 1024;
-                    return f.format(gb) + " GB";
-                } else {
-                    return f.format(mb) + " MB";
-                }
-            } else {
-                return f.format(kb) + " KB";
-            }
+        if (length >= GB) {
+            return f.format((double) length / GB) + " GB";
+        } else if (length >= MB) {
+            return f.format((double) length / MB) + " MB";
+        } else if (length >= KB) {
+            return f.format((double) length / KB) + " KB";
         } else {
             return length + " B";
         }
@@ -342,24 +328,23 @@ public abstract class IOUtils {
      * @return the file name without extension
      */
     public static String getFileNameWithoutExtension(File file) {
+        Objects.requireNonNull(file, "file cannot be null");
         String name = file.getName();
-        if (name.contains(".")) {
-            return name.substring(0, name.lastIndexOf("."));
-        } else {
-            return name;
-        }
-
+        int dotIndex = name.lastIndexOf('.');
+        return (dotIndex != -1) ? name.substring(0, dotIndex) : name;
     }
 
     /**
      * Gets the file extension from a File object.
      *
      * @param file the File object
-     * @return the file extension (without dot)
+     * @return the file extension (without dot), or empty string if no extension
      */
     public static String getFileExtension(File file) {
+        Objects.requireNonNull(file, "file cannot be null");
         String name = file.getName();
-        return name.substring(name.lastIndexOf(".") + 1);
+        int dotIndex = name.lastIndexOf('.');
+        return (dotIndex != -1) ? name.substring(dotIndex + 1) : "";
     }
 
     /**
@@ -370,43 +355,47 @@ public abstract class IOUtils {
      * @return the matching FileInfo, or null if not found
      */
     public static FileInfo find(String name, List<FileInfo> fileList) {
-        for (FileInfo fileInfo : fileList) {
-            if (fileInfo.getName().equals(name)) {
-                return fileInfo;
-            }
+        if (fileList == null || fileList.isEmpty() || name == null) {
+            return null;
         }
-        return null;
+        return fileList.stream()
+                .filter(f -> f != null && name.equals(f.getName()))
+                .findFirst()
+                .orElse(null);
     }
 
     /**
      * Unzips a specific zip file into the given output folder.
+     * Protected against Zip Slip path traversal attacks.
      *
      * @param zipFile      the zip file to unzip
      * @param outputfolder the output directory
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if an I/O error occurs or a Zip Slip attack is detected
      */
     public static void unzipFile(File zipFile, File outputfolder) throws IOException {
-        byte[] buffer = new byte[1024];
+        Objects.requireNonNull(zipFile, "zipFile cannot be null");
+        Objects.requireNonNull(outputfolder, "outputfolder cannot be null");
+        final byte[] buffer = new byte[8 * 1024];
+        final String canonicalOutput = outputfolder.getCanonicalPath() + File.separator;
 
-        // create output directory is not exists
         if (!outputfolder.exists()) {
-            outputfolder.mkdir();
+            outputfolder.mkdirs();
         }
 
-        // get the zipped file list entry
-        try ( // get the zip file content
-              ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
-            // get the zipped file list entry
-            ZipEntry ze = zis.getNextEntry();
-            while (ze != null) {
-                String fileName = ze.getName();
-                File newFile = new File(outputfolder, fileName);
-                // create all non exists folders
-                // else you will hit FileNotFoundException for compressed folder
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+            ZipEntry ze;
+            while ((ze = zis.getNextEntry()) != null) {
+                File newFile = new File(outputfolder, ze.getName());
+
+                // Zip Slip protection
+                if (!newFile.getCanonicalPath().startsWith(canonicalOutput)) {
+                    throw new IOException("Zip Slip attack detected: " + ze.getName());
+                }
+
                 if (ze.isDirectory()) {
                     newFile.mkdirs();
                 } else {
-                    new File(newFile.getParent()).mkdirs();
+                    newFile.getParentFile().mkdirs();
                     try (FileOutputStream fos = new FileOutputStream(newFile)) {
                         int len;
                         while ((len = zis.read(buffer)) > 0) {
@@ -414,9 +403,8 @@ public abstract class IOUtils {
                         }
                     }
                 }
-                ze = zis.getNextEntry();
+                zis.closeEntry();
             }
-            zis.closeEntry();
         }
     }
 
@@ -460,22 +448,21 @@ public abstract class IOUtils {
      * Deletes a directory recursively, including all its files and subdirectories.
      *
      * @param directory the directory to delete
-     * @return true if the directory was deleted, false otherwise
+     * @return true if the directory was deleted successfully, false otherwise
      */
     public static boolean deleteDirectory(File directory) {
-        if (directory.exists()) {
-            File[] files = directory.listFiles();
-            if (null != files) {
-                for (File file : files) {
-                    if (file.isDirectory()) {
-                        deleteDirectory(file);
-                    } else {
-                        file.delete();
-                    }
-                }
-            }
+        if (directory == null || !directory.exists()) {
+            return false;
         }
-        return (directory.delete());
+        try (var paths = Files.walk(directory.toPath())) {
+            paths.sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+            return !directory.exists();
+        } catch (IOException e) {
+            LOGGER.error("Error deleting directory: " + directory, e);
+            return false;
+        }
     }
 
     /**
@@ -488,19 +475,17 @@ public abstract class IOUtils {
      * @throws Exception if an error occurs
      */
     public static Path downloadFile(String baseURL, final String fileURI, final String localFolder) throws Exception {
-
         if (baseURL == null || baseURL.isEmpty()) {
-            LOGGER.info("-No base URL  to download file: " + fileURI);
+            LOGGER.info("-No base URL to download file: " + fileURI);
+            return null;
+        }
+        if (localFolder == null || localFolder.isEmpty()) {
+            LOGGER.info("-No local folder specified to download file: " + fileURI);
             return null;
         }
 
         if (fileURI != null && !fileURI.isEmpty()) {
-
-            String separator = "/";
-            if (baseURL.endsWith("/")) {
-                separator = "";
-            }
-
+            String separator = baseURL.endsWith("/") ? "" : "/";
             final URL url = URI.create(baseURL + separator + fileURI).toURL();
             final Path folder = Paths.get(localFolder);
             final Path localFile = folder.resolve(fileURI);
@@ -549,7 +534,9 @@ public abstract class IOUtils {
      * @throws IOException if an I/O error occurs
      */
     public static List<Path> downloadFiles(List<URL> urls, Path destPath) throws IOException {
-        List<Path> downloadedFiles = new java.util.ArrayList<>();
+        Objects.requireNonNull(urls, "urls cannot be null");
+        Objects.requireNonNull(destPath, "destPath cannot be null");
+        List<Path> downloadedFiles = new ArrayList<>(urls.size());
 
         if (Files.notExists(destPath)) {
             Files.createDirectories(destPath);
@@ -573,6 +560,7 @@ public abstract class IOUtils {
      * @throws IOException if an I/O error occurs
      */
     public static String encodeBase64(File file) throws IOException {
+        Objects.requireNonNull(file, "file cannot be null");
         return Base64.getEncoder().encodeToString(Files.readAllBytes(file.toPath()));
     }
 
@@ -584,8 +572,10 @@ public abstract class IOUtils {
      * @throws IOException if an I/O error occurs
      */
     public static void decodeBase64(String base64, File outputFile) throws IOException {
+        Objects.requireNonNull(base64, "base64 cannot be null");
+        Objects.requireNonNull(outputFile, "outputFile cannot be null");
+        byte[] data = Base64.getDecoder().decode(base64.getBytes(StandardCharsets.US_ASCII));
         try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
-            byte[] data = Base64.getDecoder().decode(base64.getBytes());
             outputStream.write(data);
         }
     }
@@ -608,7 +598,8 @@ public abstract class IOUtils {
      */
     public static List<File> listFiles(File directory) {
         if (directory != null && directory.isDirectory()) {
-            return List.of(Objects.requireNonNull(directory.listFiles(File::isFile)));
+            File[] files = directory.listFiles(File::isFile);
+            return (files != null) ? List.of(files) : List.of();
         }
         return List.of();
     }
@@ -617,11 +608,12 @@ public abstract class IOUtils {
      * Lists all directories in a given directory.
      *
      * @param directory the directory to list subdirectories from
-     * @return an list of Files representing directories, or empty list if none
+     * @return a list of Files representing directories, or empty list if none
      */
     public static List<File> listDirectories(File directory) {
         if (directory != null && directory.isDirectory()) {
-            return List.of(Objects.requireNonNull(directory.listFiles(File::isDirectory)));
+            File[] dirs = directory.listFiles(File::isDirectory);
+            return (dirs != null) ? List.of(dirs) : List.of();
         }
         return List.of();
     }
@@ -697,4 +689,17 @@ public abstract class IOUtils {
         return (file != null) ? file.toPath().toAbsolutePath() : null;
     }
 
+    // -------------------------------------------------------------------------
+    // Private helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Opens an InputStream for the given path, first trying the classpath,
+     * then the file system.
+     */
+    private static InputStream openInputStream(String path) throws FileNotFoundException {
+        Objects.requireNonNull(path, "path cannot be null");
+        InputStream in = IOUtils.class.getResourceAsStream(path);
+        return (in != null) ? in : new FileInputStream(path);
+    }
 }

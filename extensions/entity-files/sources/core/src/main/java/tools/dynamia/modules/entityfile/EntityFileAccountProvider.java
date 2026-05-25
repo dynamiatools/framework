@@ -18,12 +18,30 @@
 
 package tools.dynamia.modules.entityfile;
 
+import tools.dynamia.modules.entityfile.domain.EntityFile;
+
 /**
  *
  * @author Mario Serrano Leones
  */
 public interface EntityFileAccountProvider {
 
+    /**
+     * Return current account Id for tenant
+     *
+     * @return account id
+     */
     Long getAccountId();
+
+
+    /**
+     * Check is the account id is valid, by default just validate if account id not null
+     *
+     * @param entityFile
+     * @return valid
+     */
+    default boolean isValidEntityFile(EntityFile entityFile) {
+        return entityFile != null && entityFile.getAccountId() != null && entityFile.getAccountId() > 0;
+    }
 
 }

@@ -56,13 +56,12 @@ public class LocalEntityFileStorage implements EntityFileStorage {
 
     private final Environment environment;
 
-    private final EntityFileService entityFileService;
 
-    public LocalEntityFileStorage(Parameters appParams, CrudService crudService, Environment environment, EntityFileService entityFileService) {
+    public LocalEntityFileStorage(Parameters appParams, CrudService crudService, Environment environment) {
         this.appParams = appParams;
         this.crudService = crudService;
         this.environment = environment;
-        this.entityFileService = entityFileService;
+
     }
 
     @Override
@@ -117,7 +116,7 @@ public class LocalEntityFileStorage implements EntityFileStorage {
         String fileName = entityFile.getName();
         fileName = fileName.replace(" ", "%20");
 
-        return serverPath + context + LOCAL_FILE_HANDLER +  entityFile.getUuid() + "/" + fileName;
+        return serverPath + context + LOCAL_FILE_HANDLER + entityFile.getUuid() + "/" + fileName;
     }
 
     private String getContextPath() {
