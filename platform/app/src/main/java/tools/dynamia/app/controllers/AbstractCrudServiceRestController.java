@@ -4,10 +4,13 @@ package tools.dynamia.app.controllers;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tools.dynamia.commons.SimpleCache;
 import tools.dynamia.commons.StringPojoParser;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
+import tools.dynamia.integration.Containers;
+import tools.dynamia.viewers.ViewDescriptorFactory;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -46,8 +49,11 @@ public abstract class AbstractCrudServiceRestController {
      */
     private final JsonMapper mapper = StringPojoParser.createJsonMapper();
 
+    private SimpleCache<String, Class> allowedClasses = new SimpleCache<>();
+
     /**
      * Constructs a new {@code CrudServiceRestController} with the given CRUD service.
+     *
      * @param crudService the CRUD service to use
      */
     public AbstractCrudServiceRestController(CrudService crudService) {
@@ -56,8 +62,9 @@ public abstract class AbstractCrudServiceRestController {
 
     /**
      * Creates or updates an entity of the specified class.
+     *
      * @param className the fully qualified class name of the entity
-     * @param json the JSON representation of the entity
+     * @param json      the JSON representation of the entity
      * @return the persisted entity
      */
     @RequestMapping(method = {RequestMethod.POST, RequestMethod.PUT})
@@ -69,8 +76,9 @@ public abstract class AbstractCrudServiceRestController {
 
     /**
      * Deletes an entity by its class name and ID.
+     *
      * @param className the fully qualified class name of the entity
-     * @param id the entity ID
+     * @param id        the entity ID
      * @return the deleted entity ID if successful, or 404 if not found
      */
     @DeleteMapping("/{id}")
@@ -87,8 +95,9 @@ public abstract class AbstractCrudServiceRestController {
 
     /**
      * Retrieves an entity by its class name and ID.
+     *
      * @param className the fully qualified class name of the entity
-     * @param id the entity ID
+     * @param id        the entity ID
      * @return the entity if found, or 404 if not found
      */
     @GetMapping("/{id}")
@@ -103,7 +112,8 @@ public abstract class AbstractCrudServiceRestController {
 
     /**
      * Finds entities by query parameters.
-     * @param className the fully qualified class name of the entity
+     *
+     * @param className  the fully qualified class name of the entity
      * @param parameters the query parameters
      * @return the list of matching entities
      */
@@ -116,7 +126,8 @@ public abstract class AbstractCrudServiceRestController {
 
     /**
      * Gets the ID of an entity by query parameters.
-     * @param className the fully qualified class name of the entity
+     *
+     * @param className  the fully qualified class name of the entity
      * @param parameters the query parameters
      * @return the entity ID
      */
@@ -129,8 +140,9 @@ public abstract class AbstractCrudServiceRestController {
 
     /**
      * Parses a JSON string into an entity object of the specified class.
+     *
      * @param className the fully qualified class name
-     * @param json the JSON string
+     * @param json      the JSON string
      * @return the entity object
      * @throws ValidationError if parsing fails
      */
@@ -145,15 +157,29 @@ public abstract class AbstractCrudServiceRestController {
 
     /**
      * Loads a class by its fully qualified name.
+     *
      * @param className the class name
      * @return the {@link Class} object
      * @throws ValidationError if the class is not found
      */
     private Class loadClass(String className) {
-        try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            throw new ValidationError("Class not found " + className + " - " + e.getMessage(), e);
+        initAllowedClasses();
+        Class entityClass = allowedClasses.get(className);
+        if (entityClass == null) {
+            throw new ValidationError("Class not allowed: " + className);
+        }
+        return entityClass;
+    }
+
+    private void initAllowedClasses() {
+        if (allowedClasses == null || allowedClasses.isEmpty()) {
+            ViewDescriptorFactory viewDescriptorFactory = Containers.get().findObject(ViewDescriptorFactory.class);
+            if (viewDescriptorFactory != null) {
+                viewDescriptorFactory.findDescriptorsByType("crud").forEach(d -> {
+                    var entityClass = d.getKey();
+                    allowedClasses.add(entityClass.getName(), entityClass);
+                });
+            }
         }
     }
 }
