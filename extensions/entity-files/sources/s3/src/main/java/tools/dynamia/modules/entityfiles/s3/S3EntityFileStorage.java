@@ -405,7 +405,7 @@ public class S3EntityFileStorage implements EntityFileStorage {
         @Override
         public Resource toResource() {
             ResponseInputStream<GetObjectResponse> stream =
-                    s3Client.getObject(
+                    getClient().getObject(
                             GetObjectRequest.builder()
                                     .bucket(getBucketName())
                                     .key(s3Key)
