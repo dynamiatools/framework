@@ -98,7 +98,7 @@ public class EntityFileLocalCache implements EntityFileCache {
             try (var stream = Files.list(cacheDirectory)) {
                 stream.forEach(p -> {
                     try {
-                        if (p.getFileName().endsWith(CACHE_EXTENSION) && condition.apply(p) == Boolean.TRUE) {
+                        if (p.getFileName().toString().endsWith(CACHE_EXTENSION) && condition.apply(p) == Boolean.TRUE) {
                             logger.info("Deleting cache file: " + p);
                             Files.delete(p);
                         }
