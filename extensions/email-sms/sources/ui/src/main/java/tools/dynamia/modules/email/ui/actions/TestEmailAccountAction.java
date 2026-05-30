@@ -54,15 +54,16 @@ import static tools.dynamia.viewers.ViewDescriptorBuilder.viewDescriptor;
 @InstallAction
 public class TestEmailAccountAction extends AbstractCrudAction {
 
-    @Autowired
-    private EmailService service;
+    private final EmailService service;
 
-    public TestEmailAccountAction() {
+    public TestEmailAccountAction(EmailService service) {
         setName("Test Account");
         setDescription("Send a test message using this email account");
         setImage("mail");
         setMenuSupported(true);
+        setApplicableStates(CrudState.get(CrudState.READ, CrudState.CREATE, CrudState.UPDATE));
 
+        this.service = service;
     }
 
     @Override

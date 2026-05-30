@@ -232,7 +232,7 @@ public class EntityFileStorageController {
 
 
         var storedEntityFile = entityFile.getStoredEntityFile();
-        var etag = AtomicString.of("v" + entityFile.currentVersion());
+        var etag = AtomicString.of(entityFile.etag());
         Resource resource = entityFileCache.get(entityFile.getUuid(), etag.get())
                 .orElseGet(() -> {
                     Resource remoteResource;
@@ -244,7 +244,7 @@ public class EntityFileStorageController {
                     } else {
                         remoteResource = storedEntityFile.toResource();
                     }
-                    entityFileCache.put(entityFile.getUuid(), etag.get(), remoteResource);
+                    remoteResource = entityFileCache.put(entityFile.getUuid(), etag.get(), remoteResource);
                     return remoteResource;
                 });
 

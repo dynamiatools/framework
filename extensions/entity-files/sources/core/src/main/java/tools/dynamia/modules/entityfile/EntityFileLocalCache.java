@@ -5,6 +5,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Scheduled;
 import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.integration.scheduling.SchedulerUtil;
 import tools.dynamia.integration.sterotypes.Component;
 
 import java.io.IOException;
@@ -16,10 +17,12 @@ import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Component
 public class EntityFileLocalCache implements EntityFileCache {
 
+    public static final String CACHE_EXTENSION = ".cache";
     private final LoggingService logger = LoggingService.get(EntityFileLocalCache.class);
     private final Path cacheDirectory;
     private final Duration defaultTtl;
@@ -65,27 +68,48 @@ public class EntityFileLocalCache implements EntityFileCache {
 
     @Override
     public Path resolvePath(String uuid, String etag) {
-        return cacheDirectory.resolve(uuid + "-" + etag + ".cache");
+        return cacheDirectory.resolve(uuid + "-" + etag + CACHE_EXTENSION);
     }
 
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     @Override
     public void evict() {
+        Duration ttl = resolveTtl();
+        Instant cutoff = Instant.now().minus(ttl);
+        deleteIf(p -> {
+            try {
+                return Files.getLastModifiedTime(p).toInstant().isBefore(cutoff);
+            } catch (IOException e) {
+                logger.error("Failed to check last modified time for cache file: " + p, e);
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public void clear() {
+        deleteIf(p -> true);
+    }
+
+    public void deleteIf(Function<Path, Boolean> condition) {
         if (!Files.exists(cacheDirectory)) return;
-        try (var stream = Files.list(cacheDirectory)) {
-            stream.forEach(p -> {
-                try {
-                    Duration ttl = resolveTtl();
-                    Instant cutoff = Instant.now().minus(ttl);
-                    if (Files.getLastModifiedTime(p).toInstant().isBefore(cutoff)) {
-                        Files.delete(p);
+        SchedulerUtil.run(() -> {
+            logger.info("Cleaning entity file cache in directory: " + cacheDirectory);
+            try (var stream = Files.list(cacheDirectory)) {
+                stream.forEach(p -> {
+                    try {
+                        if (p.getFileName().endsWith(CACHE_EXTENSION) && condition.apply(p) == Boolean.TRUE) {
+                            logger.info("Deleting cache file: " + p);
+                            Files.delete(p);
+                        }
+                    } catch (IOException e) {
+                        logger.error("Failed to delete cache file: " + p, e);
                     }
-                } catch (IOException e) {
-                    logger.error("Failed to evict cache file: " + p, e);
-                }
-            });
-        } catch (IOException ignored) {
-        }
+                });
+            } catch (IOException e) {
+                logger.error("Failed to list cache directory: " + cacheDirectory, e);
+            }
+        });
     }
 
     @Override

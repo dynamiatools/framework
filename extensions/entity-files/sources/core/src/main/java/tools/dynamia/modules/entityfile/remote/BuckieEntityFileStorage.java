@@ -109,7 +109,7 @@ public class BuckieEntityFileStorage implements EntityFileStorage {
         String key = buildKey(entityFile);
         String bucket = getBucket();
 
-        logger.info("Uploading " + entityFile.getName() + " → sfs://" + bucket + "/" + key);
+        logger.info("Uploading " + entityFile.getName() + " → Buckie//" + bucket + "/" + key);
 
         try {
             // Stream the InputStream directly — InputStreamResource avoids loading
@@ -143,8 +143,8 @@ public class BuckieEntityFileStorage implements EntityFileStorage {
             }
             logger.info("Uploaded successfully [" + response.getStatusCode() + "]: " + key);
         } catch (Exception e) {
-            logger.error("Error uploading entity file to SFS: " + key, e);
-            throw new EntityFileException("Error uploading entity file to SFS: " + key, e);
+            logger.error("Error uploading entity file to Buckie " + key, e);
+            throw new EntityFileException("Error uploading entity file to Buckie " + key, e);
         }
     }
 
@@ -174,7 +174,7 @@ public class BuckieEntityFileStorage implements EntityFileStorage {
             entityFile.setState(EntityFileState.DELETED);
             crudService.update(entityFile);
         } catch (Exception e) {
-            throw new EntityFileException("Error deleting entity file from SFS: " + key, e);
+            throw new EntityFileException("Error deleting entity file from Buckie " + key, e);
         }
     }
 
@@ -302,7 +302,7 @@ public class BuckieEntityFileStorage implements EntityFileStorage {
         @Serial
         private static final long serialVersionUID = 1L;
 
-        private final LoggingService logger = LoggingService.get(BuckieStoredEntityFile.class, "SFS: ");
+        private final LoggingService logger = LoggingService.get(BuckieStoredEntityFile.class, "Buckie ");
 
 
         private final transient RestClient restClient;
@@ -353,7 +353,7 @@ public class BuckieEntityFileStorage implements EntityFileStorage {
          */
         private Resource fetchResource(String url) {
             try {
-                logger.info("Fetching resource from SFS: " + url);
+                logger.info("Fetching resource from Buckie " + url);
                 return restClient.get()
                         .uri(url)
                         .header(HEADER_IDENTITY, identity)

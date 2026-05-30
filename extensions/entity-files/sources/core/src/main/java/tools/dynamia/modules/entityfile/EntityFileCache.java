@@ -17,5 +17,7 @@ public interface EntityFileCache {
 
     void evict();
 
+    void clear();
+
     Duration resolveTtl();
 }
