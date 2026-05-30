@@ -265,10 +265,16 @@ public class EntityFileStorageController {
                         .immutable();
             }
 
+
             return ResponseEntity.ok()
                     .contentType(contentType)
                     .cacheControl(cacheControl)
                     .header(HttpHeaders.ETAG, etag.get())
+                    .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition
+                            .attachment()
+                            .filename(file)
+                            .build()
+                            .toString())
                     .body(resource);
         } else {
             return ResponseEntity.notFound().build();
