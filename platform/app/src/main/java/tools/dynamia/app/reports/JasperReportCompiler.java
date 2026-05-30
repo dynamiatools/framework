@@ -40,6 +40,7 @@ import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleExporterInputItem;
 import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import org.springframework.core.io.Resource;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
@@ -164,6 +165,10 @@ public class JasperReportCompiler implements ReportCompiler {
                         InputStream is = url.openStream();
                         JasperFillManager.fillReportToStream(is, out, params, jrds);
                     }
+                    case Resource resource -> {
+                        InputStream is = resource.getInputStream();
+                        JasperFillManager.fillReportToStream(is, out, params, jrds);
+                    }
                     case null, default ->
                             throw new ReportFillerException("Unknow report template type :" + reportDescriptor.getTemplate());
                 }
@@ -181,6 +186,10 @@ public class JasperReportCompiler implements ReportCompiler {
                     }
                     case URL url -> {
                         InputStream is = url.openStream();
+                        JasperFillManager.fillReportToStream(is, out, params, connection);
+                    }
+                    case Resource resource -> {
+                        InputStream is = resource.getInputStream();
                         JasperFillManager.fillReportToStream(is, out, params, connection);
                     }
                     case null, default ->
