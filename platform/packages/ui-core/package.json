@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/ui-core",
-  "version": "26.5.3",
+  "version": "26.5.4",
   "description": "Framework-agnostic view/viewer/renderer core for Dynamia Platform",
   "keywords": [
     "dynamia",

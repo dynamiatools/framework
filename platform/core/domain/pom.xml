@@ -26,7 +26,7 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>26.5.3</version>
+        <version>26.5.4</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
     <name>DynamiaTools - Domain</name>

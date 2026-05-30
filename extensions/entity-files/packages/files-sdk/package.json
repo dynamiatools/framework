@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/files-sdk",
-  "version": "26.5.3",
+  "version": "26.5.4",
   "website": "https://dynamia.tools",
   "description": "TypeScript/JavaScript client SDK for the Dynamia Entity Files extension REST API",
   "keywords": [
