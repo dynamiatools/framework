@@ -3,6 +3,7 @@ package tools.dynamia.modules.entityfile.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,11 +12,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import tools.dynamia.commons.AtomicString;
 import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Controller;
+import tools.dynamia.modules.entityfile.EntityFileCache;
 import tools.dynamia.modules.entityfile.UploadedFileInfo;
 import tools.dynamia.modules.entityfile.EntityFileAccountProvider;
 import tools.dynamia.modules.entityfile.EntityFileSecurityProvider;
@@ -48,15 +51,18 @@ public class EntityFileStorageController {
     private final EntityFileService entityFileService;
     private final CrudService crudService;
 
+    private final EntityFileCache entityFileCache;
+
     /**
      * Creates a new controller instance.
      *
      * @param entityFileService service used to create, resolve and download entity files
      * @param crudService       service used to resolve target entities dynamically by class name and ID
      */
-    public EntityFileStorageController(EntityFileService entityFileService, CrudService crudService) {
+    public EntityFileStorageController(EntityFileService entityFileService, CrudService crudService, EntityFileCache entityFileCache) {
         this.entityFileService = entityFileService;
         this.crudService = crudService;
+        this.entityFileCache = entityFileCache;
     }
 
     /**
@@ -224,18 +230,23 @@ public class EntityFileStorageController {
             }
         }
 
-        Resource resource = null;
-        var storedEntityFile = entityFile.getStoredEntityFile();
-        var etag = "v" + entityFile.currentVersion();
 
-        if (entityFile.getType() == EntityFileType.IMAGE && isThumbnail(request)) {
-            String w = getParam(request, "w", "200");
-            String h = getParam(request, "h", "200");
-            etag += "-thumb-" + w + "x" + h;
-            resource = storedEntityFile.toThumbnailResource(safeSize(w, 200), safeSize(h, 200));
-        } else {
-            resource = storedEntityFile.toResource();
-        }
+        var storedEntityFile = entityFile.getStoredEntityFile();
+        var etag = AtomicString.of("v" + entityFile.currentVersion());
+        Resource resource = entityFileCache.get(entityFile.getUuid(), etag.get())
+                .orElseGet(() -> {
+                    Resource remoteResource;
+                    if (entityFile.getType() == EntityFileType.IMAGE && isThumbnail(request)) {
+                        String w = getParam(request, "w", "200");
+                        String h = getParam(request, "h", "200");
+                        etag.append("-thumb-" + w + "x" + h);
+                        remoteResource = storedEntityFile.toThumbnailResource(safeSize(w, 200), safeSize(h, 200));
+                    } else {
+                        remoteResource = storedEntityFile.toResource();
+                    }
+                    entityFileCache.put(entityFile.getUuid(), etag.get(), remoteResource);
+                    return remoteResource;
+                });
 
 
         if (resource != null && resource.exists() && resource.isReadable()) {
@@ -254,20 +265,10 @@ public class EntityFileStorageController {
                         .immutable();
             }
 
-            String ifNoneMatch = request.getHeader(HttpHeaders.IF_NONE_MATCH);
-
-            if (etag.equals(ifNoneMatch)) {
-                return ResponseEntity
-                        .status(HttpStatus.NOT_MODIFIED)
-                        .eTag(etag)
-                        .cacheControl(cacheControl)
-                        .build();
-            }
-
             return ResponseEntity.ok()
                     .contentType(contentType)
                     .cacheControl(cacheControl)
-                    .header(HttpHeaders.ETAG, etag)
+                    .header(HttpHeaders.ETAG, etag.get())
                     .body(resource);
         } else {
             return ResponseEntity.notFound().build();
@@ -615,11 +616,11 @@ public class EntityFileStorageController {
      *
      * @param value requested size value
      * @param def   fallback size when parsing fails
-     * @return a value between 1 and 2000
+     * @return a value between 1 and 1000
      */
     private int safeSize(String value, int def) {
         try {
-            return Math.min(Math.max(Integer.parseInt(value), 1), 2000);
+            return Math.clamp(Integer.parseInt(value), 1, 1000);
         } catch (Exception e) {
             return def;
         }
