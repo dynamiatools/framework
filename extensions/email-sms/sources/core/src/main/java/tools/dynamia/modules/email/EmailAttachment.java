@@ -17,6 +17,8 @@
 
 package tools.dynamia.modules.email;
 
+import org.springframework.core.io.InputStreamSource;
+
 import java.io.File;
 
 /**
@@ -24,27 +26,37 @@ import java.io.File;
  */
 public class EmailAttachment {
 
-	private String name;
-	private File file;
+    private final String name;
+    private File file;
 
-	public EmailAttachment(File file) {
-		super();
-		this.file = file;
-		this.name = file.getName();
-	}
+    private InputStreamSource inputStreamSource;
 
-	public EmailAttachment(String name, File file) {
-		super();
-		this.name = name;
-		this.file = file;
-	}
+    public EmailAttachment(File file) {
+        super();
+        this.file = file;
+        this.name = file.getName();
+    }
 
-	public File getFile() {
-		return file;
-	}
+    public EmailAttachment(String name, File file) {
+        super();
+        this.name = name;
+        this.file = file;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public EmailAttachment(String name, InputStreamSource inputStreamSource) {
+        this.name = name;
+        this.inputStreamSource = inputStreamSource;
+    }
 
+    public File getFile() {
+        return file;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public InputStreamSource getInputStreamSource() {
+        return inputStreamSource;
+    }
 }
