@@ -13,7 +13,7 @@ fields:
         title: username
         subtitle: fullname
         description: email
-        imageURL: photo.storedEntityFile.thumbnailUrl
+        imageURL: photo.thumbnailUrl
 
   enabled:
     params:

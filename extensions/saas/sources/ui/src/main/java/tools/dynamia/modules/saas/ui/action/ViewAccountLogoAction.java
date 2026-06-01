@@ -65,7 +65,6 @@ public class ViewAccountLogoAction extends AbstractCrudAction {
         if (account.getLogo() == null) {
             UIMessages.showMessage("La cuenta seleccionada no tiene logo", MessageType.WARNING);
         } else {
-            System.out.println(account.getLogo().getStoredEntityFile().getThumbnailUrl());
             EntityFileImage image = new EntityFileImage();
             image.setValue(account.getLogo());
 

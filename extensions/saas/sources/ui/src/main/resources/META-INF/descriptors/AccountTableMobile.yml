@@ -16,7 +16,7 @@ fields:
         title: name
         subtitle: email
         description: type
-        imageURL: logo.storedEntityFile.thumbnailUrl
+        imageURL: logo.thumbnailUrl
   status:
     component: enumlabel
     params:

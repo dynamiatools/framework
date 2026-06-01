@@ -413,7 +413,7 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     public void setLogo(EntityFile logo) {
         this.logo = logo;
         if (logo != null && logo.getName() != null) {
-            logoURL = logo.getStoredEntityFile().getThumbnailUrl();
+            logoURL = logo.getThumbnailUrl();
             if (logoURL != null && logoURL.length() > 600) {
                 logoURL = null;
             }
@@ -538,7 +538,7 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
 
         String logoURL = null;
         if (logo != null) {
-            logoURL = logo.getStoredEntityFile().getThumbnailUrl(200, 200);
+            logoURL = logo.getThumbnailUrl(200, 200);
         }
         dto.setLogo(logoURL);
         dto.setType(getType().toDTO());
@@ -887,7 +887,7 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
 
     public String getLogoURL() {
         if (logoURL == null && logo != null) {
-            logoURL = logo.getStoredEntityFile().getThumbnailUrl();
+            logoURL = logo.getThumbnailUrl();
         }
         return logoURL;
     }
