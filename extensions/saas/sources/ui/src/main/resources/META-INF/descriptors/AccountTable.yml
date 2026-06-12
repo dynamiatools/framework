@@ -13,7 +13,7 @@ fields:
         title: name
         subtitle: email
         description: type
-        imageURL: logoURL
+        imageURL: logo.thumbnailUrl
         tooltiptext: customerInfo
 
   profile:

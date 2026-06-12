@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/sdk",
-  "version": "26.5.4",
+  "version": "26.6.0",
   "website": "https://dynamia.tools",
   "description": "Official JavaScript / TypeScript client SDK for Dynamia Platform REST APIs",
   "keywords": [
