@@ -1,8 +1,8 @@
-# Tenant Mobility Module — Architecture
+# Account Migration Module — Architecture
 
 ## 1. Overview
 
-The Tenant Mobility Module enables full lifecycle management of tenant (Account) data: export, import, clone, backup, and restore. It is designed for:
+The Account Migration Module enables full lifecycle management of tenant (Account) data: export, import, clone, backup, and restore. It is designed for:
 
 - **Millions of rows** — streaming, never loads all data into memory.
 - **Database independence** — uses JPA/Hibernate metamodel exclusively.
@@ -15,14 +15,14 @@ The Tenant Mobility Module enables full lifecycle management of tenant (Account)
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│                    TenantMobilityController  (REST)                   │
+│                    AccountMigrationController  (REST)                   │
 │   POST /export  POST /import  POST /clone  GET /status  GET /download │
 └─────────────────────────────┬────────────────────────────────────────┘
                               │ delegates to
 ┌─────────────────────────────▼────────────────────────────────────────┐
-│                   TenantMobilityJobService                            │
+│                   AccountMigrationJobService                            │
 │   createJob() · cancelJob() · getJob() · listJobs()                  │
-│   Persists TenantMobilityJob entity in DB                            │
+│   Persists AccountMigrationJob entity in DB                            │
 └──────┬───────────────────────────────────────────┬───────────────────┘
        │  launches via                              │ saves progress via
        │  SchedulerUtil.runWithResult(worker)       │  CrudService.update()
@@ -36,7 +36,7 @@ The Tenant Mobility Module enables full lifecycle management of tenant (Account)
 │  └────────────┬───────────┘
 │               │ calls
 │  ┌────────────▼───────────┐
-│  │ TenantMobilityService   │
+│  │ AccountMigrationService   │
 │  │ (impl: coordinates      │
 │  │  pipelines)             │
 │  └────────────┬───────────┘
@@ -174,9 +174,9 @@ REGENERATE_IDS (default for clone):
 POST /export/{accountId}
     │
     ▼
-TenantMobilityJobService.createExportJob(accountId, options)
+AccountMigrationJobService.createExportJob(accountId, options)
     │
-    ├── 1. Persist TenantMobilityJob{status=PENDING}
+    ├── 1. Persist AccountMigrationJob{status=PENDING}
     ├── 2. SchedulerUtil.runWithResult(new ExportWorker(jobId, accountId, options))
     │         └── Virtual Thread starts
     │               ├── Update job status → RUNNING
