@@ -18,6 +18,7 @@ import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
 import tools.dynamia.modules.saas.migration.api.AccountImportOptions;
 import tools.dynamia.modules.saas.migration.api.AccountMigrationService;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -58,7 +59,7 @@ public class ImportWorker extends TaskWithResult<Boolean> {
     public Boolean doWorkWithResult() {
         log.info("[Migration/Worker] Starting IMPORT from {} → accountId={}",
                 inputFile, options.getTargetAccountId());
-        try (InputStream in = new FileInputStream(inputFile.toFile())) {
+        try (InputStream in = new BufferedInputStream(new FileInputStream(inputFile.toFile()))) {
             mobilityService.importTenant(in, options, progressListener, cancellationToken);
             if (cancellationToken != null && cancellationToken.isCancelled()) {
                 log.info("[Migration/Worker] IMPORT cancelled");

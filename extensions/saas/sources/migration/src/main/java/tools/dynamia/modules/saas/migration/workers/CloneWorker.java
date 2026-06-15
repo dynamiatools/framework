@@ -22,10 +22,11 @@ import tools.dynamia.modules.saas.migration.api.AccountMigrationService;
  * Background worker that executes a tenant clone operation
  * (source account → target account, same system).
  *
- * <p>Uses an in-memory {@code PipedOutputStream / PipedInputStream} bridge so
- * the export and import pipelines run sequentially without writing to disk.
- * For very large datasets, consider using {@link ExportWorker} followed by
- * {@link ImportWorker} with a temporary file to avoid memory pressure.
+ * <p>Export data is buffered in a {@code ByteArrayOutputStream} and then fed
+ * directly to the import pipeline — no disk I/O required.
+ * For tenants with very large datasets (&gt; ~100 MB uncompressed), prefer the
+ * {@link ExportWorker} + {@link ImportWorker} sequence via a temporary file
+ * to avoid heap pressure.
  *
  * <p>Submitted to {@code SchedulerUtil.runWithResult()} and runs on a virtual thread.
  *

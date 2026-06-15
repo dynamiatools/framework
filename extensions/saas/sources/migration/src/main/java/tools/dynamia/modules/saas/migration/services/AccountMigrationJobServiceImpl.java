@@ -10,12 +10,15 @@
  */
 package tools.dynamia.modules.saas.migration.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.multipart.MultipartFile;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.integration.scheduling.SchedulerUtil;
+import tools.dynamia.integration.scheduling.TaskWithResult;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.modules.saas.migration.api.CancellationToken;
 import tools.dynamia.modules.saas.migration.api.IdentityStrategy;
@@ -45,6 +48,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
 /**
@@ -73,13 +77,18 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     private final CrudService crudService;
     private final AccountMigrationService mobilityService;
     private final AccountMigrationProperties properties;
+    private final ObjectMapper objectMapper;
+    private final Semaphore concurrencyLimit;
 
     public AccountMigrationJobServiceImpl(CrudService crudService,
                                           AccountMigrationService mobilityService,
-                                          AccountMigrationProperties properties) {
+                                          AccountMigrationProperties properties,
+                                          @Qualifier("migrationObjectMapper") ObjectMapper objectMapper) {
         this.crudService = crudService;
         this.mobilityService = mobilityService;
         this.properties = properties;
+        this.objectMapper = objectMapper;
+        this.concurrencyLimit = new Semaphore(Math.max(1, properties.getMaxConcurrentJobs()));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -88,7 +97,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
 
     @Override
     public AccountMigrationJobDto createExportJob(Long accountId, AccountExportOptions options) {
-        AccountMigrationJob job = createAndSaveJob(accountId, null, AccountJobType.EXPORT);
+        AccountMigrationJob job = createAndSaveJob(accountId, null, AccountJobType.EXPORT, options);
         launchExportJob(job, accountId, options);
         return toDto(job);
     }
@@ -98,7 +107,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
         AccountExportOptions options = new AccountExportOptions()
                 .compressionEnabled(properties.isCompressionEnabled())
                 .label("backup");
-        AccountMigrationJob job = createAndSaveJob(accountId, null, AccountJobType.BACKUP);
+        AccountMigrationJob job = createAndSaveJob(accountId, null, AccountJobType.BACKUP, options);
         launchExportJob(job, accountId, options);
         return toDto(job);
     }
@@ -106,7 +115,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     @Override
     public AccountMigrationJobDto createImportJob(MultipartFile file, AccountImportOptions options) {
         Path savedFile = saveUploadedFile(file, "import");
-        AccountMigrationJob job = createAndSaveJob(options.getTargetAccountId(), null, AccountJobType.IMPORT);
+        AccountMigrationJob job = createAndSaveJob(options.getTargetAccountId(), null, AccountJobType.IMPORT, options);
         launchImportJob(job, savedFile, options);
         return toDto(job);
     }
@@ -117,7 +126,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
         AccountImportOptions options = new AccountImportOptions()
                 .targetAccountId(accountId)
                 .identityStrategy(IdentityStrategy.KEEP_IDS);
-        AccountMigrationJob job = createAndSaveJob(accountId, null, AccountJobType.RESTORE);
+        AccountMigrationJob job = createAndSaveJob(accountId, null, AccountJobType.RESTORE, options);
         launchImportJob(job, savedFile, options);
         return toDto(job);
     }
@@ -125,7 +134,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     @Override
     public AccountMigrationJobDto createCloneJob(AccountCloneOptions options) {
         AccountMigrationJob job = createAndSaveJob(
-                options.getSourceAccountId(), options.getTargetAccountId(), AccountJobType.CLONE);
+                options.getSourceAccountId(), options.getTargetAccountId(), AccountJobType.CLONE, options);
         launchCloneJob(job, options);
         return toDto(job);
     }
@@ -187,49 +196,69 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     private void launchExportJob(AccountMigrationJob job, Long accountId, AccountExportOptions options) {
         CancellationToken token = CancellationToken.active();
         activeTokens.put(job.getUuid(), token);
-
         Path outputFile = buildOutputPath(job, options.isCompressionEnabled());
-
         ExportWorker worker = new ExportWorker(
                 accountId, outputFile, options, mobilityService,
                 buildProgressListener(job), token);
-
-        SchedulerUtil.runWithResult(worker).whenComplete((result, ex) -> {
-            activeTokens.remove(job.getUuid());
-            finalizeJob(job.getUuid(), ex, outputFile, token);
-        });
+        scheduleWorker(job, worker, outputFile, null, token);
     }
 
     private void launchImportJob(AccountMigrationJob job, Path inputFile, AccountImportOptions options) {
         CancellationToken token = CancellationToken.active();
         activeTokens.put(job.getUuid(), token);
-
         ImportWorker worker = new ImportWorker(
                 inputFile, options, mobilityService,
                 buildProgressListener(job), token);
-
-        SchedulerUtil.runWithResult(worker).whenComplete((result, ex) -> {
-            activeTokens.remove(job.getUuid());
-            finalizeJob(job.getUuid(), ex, null, token);
-            // Clean up uploaded file after import
-            try {
-                Files.deleteIfExists(inputFile);
-            } catch (IOException ignored) {
-            }
-        });
+        scheduleWorker(job, worker, null, inputFile, token);
     }
 
     private void launchCloneJob(AccountMigrationJob job, AccountCloneOptions options) {
         CancellationToken token = CancellationToken.active();
         activeTokens.put(job.getUuid(), token);
-
         CloneWorker worker = new CloneWorker(
                 options, mobilityService,
                 buildProgressListener(job), token);
+        scheduleWorker(job, worker, null, null, token);
+    }
 
-        SchedulerUtil.runWithResult(worker).whenComplete((result, ex) -> {
+    /**
+     * Submits {@code worker} to a virtual thread, enforcing the configured
+     * {@link AccountMigrationProperties#getMaxConcurrentJobs()} limit via a semaphore.
+     * Workers that cannot immediately acquire a slot park the virtual thread
+     * (cheap) until a running job finishes.
+     *
+     * @param resultFile  written to the job on success (may be null)
+     * @param cleanupPath deleted after the job completes (uploaded temp files; may be null)
+     */
+    private void scheduleWorker(AccountMigrationJob job,
+                                 TaskWithResult<Boolean> worker,
+                                 Path resultFile,
+                                 Path cleanupPath,
+                                 CancellationToken token) {
+        SchedulerUtil.runWithResult(new TaskWithResult<Boolean>(worker.getName() + "#queued") {
+            @Override
+            public Boolean doWorkWithResult() {
+                try {
+                    concurrencyLimit.acquire();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Interrupted waiting for migration concurrency slot");
+                }
+                try {
+                    return worker.doWorkWithResult();
+                } finally {
+                    concurrencyLimit.release();
+                }
+            }
+        }).whenComplete((result, ex) -> {
             activeTokens.remove(job.getUuid());
-            finalizeJob(job.getUuid(), ex, null, token);
+            finalizeJob(job.getUuid(), ex, resultFile, token);
+            if (cleanupPath != null) {
+                try {
+                    Files.deleteIfExists(cleanupPath);
+                } catch (IOException ignored) {
+                }
+            }
         });
     }
 
@@ -237,12 +266,20 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     // Helpers
     // ─────────────────────────────────────────────────────────────────────────
 
-    private AccountMigrationJob createAndSaveJob(Long accountId, Long targetAccountId, AccountJobType type) {
+    private AccountMigrationJob createAndSaveJob(Long accountId, Long targetAccountId,
+                                                   AccountJobType type, Object options) {
         AccountMigrationJob job = new AccountMigrationJob();
         job.setAccountId(accountId);
         job.setTargetAccountId(targetAccountId);
         job.setJobType(type);
         job.setStatus(AccountJobStatus.PENDING);
+        if (options != null) {
+            try {
+                job.setOptionsJson(objectMapper.writeValueAsString(options));
+            } catch (Exception e) {
+                log.debug("[Migration/Jobs] Could not serialize options for {} job: {}", type, e.getMessage());
+            }
+        }
         crudService.create(job);
         log.info("[Migration/Jobs] Created job {} type={} account={}", job.getUuid(), type, accountId);
         return job;

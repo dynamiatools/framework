@@ -16,7 +16,7 @@ The Account Migration Module enables full lifecycle management of tenant (Accoun
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
 │                    AccountMigrationController  (REST)                   │
-│   POST /export  POST /import  POST /clone  GET /status  GET /download │
+│  POST /export  POST /import  POST /clone  GET /jobs/{jobId}  GET /download │
 └─────────────────────────────┬────────────────────────────────────────┘
                               │ delegates to
 ┌─────────────────────────────▼────────────────────────────────────────┐
@@ -252,12 +252,16 @@ public interface IdentityMapper {
 }
 ```
 
+Register a custom implementation as a Spring bean (`@Component` / `@Service`) to override the default behaviour for a given strategy. `ImportPipeline` auto-discovers all `IdentityMapper` beans and selects by `getStrategy()` before falling back to the built-in defaults.
+
 ### Built-in Implementations
 
 | Class | Strategy | Use Case |
 |-------|----------|---------- |
 | `KeepIdsIdentityMapper` | `KEEP_IDS` | Cross-env restore to empty DB |
 | `RegenerateIdsIdentityMapper` | `REGENERATE_IDS` | Clone within same DB |
+
+> **Note:** `UUID7` is declared in `IdentityStrategy` but not yet implemented. Selecting it throws `MigrationException` (planned for v3).
 
 ---
 

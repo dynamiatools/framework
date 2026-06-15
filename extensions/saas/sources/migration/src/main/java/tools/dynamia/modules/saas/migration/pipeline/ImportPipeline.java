@@ -22,6 +22,7 @@ import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.SingularAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ import tools.dynamia.domain.jpa.JpaUtils;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.modules.saas.migration.api.CancellationToken;
 import tools.dynamia.modules.saas.migration.api.IdentityMapper;
+import tools.dynamia.modules.saas.migration.api.IdentityStrategy;
 import tools.dynamia.modules.saas.migration.api.MigrationException;
 import tools.dynamia.modules.saas.migration.api.MigrationProgress;
 import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
@@ -74,6 +76,10 @@ public class ImportPipeline {
 
     @PersistenceContext
     private EntityManager em;
+
+    /** Custom SPI mappers registered as Spring beans; queried before built-in defaults. */
+    @Autowired(required = false)
+    private List<IdentityMapper> customMappers;
 
     private final EntityManagerFactory emf;
     private final AccountMigrationProperties properties;
@@ -404,7 +410,20 @@ public class ImportPipeline {
     }
 
     private IdentityMapper resolveIdentityMapper(AccountImportOptions options) {
-        return switch (options.getIdentityStrategy()) {
+        IdentityStrategy strategy = options.getIdentityStrategy();
+        if (strategy == IdentityStrategy.UUID7) {
+            throw new MigrationException(
+                    "IdentityStrategy.UUID7 is not yet supported (planned for v3). " +
+                    "Use KEEP_IDS or REGENERATE_IDS.");
+        }
+        if (customMappers != null) {
+            for (IdentityMapper mapper : customMappers) {
+                if (mapper.getStrategy() == strategy) {
+                    return mapper;
+                }
+            }
+        }
+        return switch (strategy) {
             case KEEP_IDS -> new KeepIdsIdentityMapper();
             default -> new RegenerateIdsIdentityMapper();
         };

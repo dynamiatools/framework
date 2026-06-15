@@ -316,21 +316,6 @@ public class ExportPipeline {
         return size > 0 ? size : properties.getChunkSize();
     }
 
-    /** Count total exportable records across all entity types for progress reporting. */
-    private List<Class<?>> buildSortedList(Long accountId, List<Class<?>> entities) {
-        List<Class<?>> nonEmpty = new ArrayList<>();
-        for (Class<?> ec : entities) {
-            if (Account.class.equals(ec)) continue;
-            try {
-                if (crudService.count(ec, QueryParameters.with("accountId", accountId)) > 0) {
-                    nonEmpty.add(ec);
-                }
-            } catch (Exception ignored) {
-                nonEmpty.add(ec);
-            }
-        }
-        return nonEmpty;
-    }
 }
 
 
