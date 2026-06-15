@@ -24,12 +24,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import tools.dynamia.modules.saas.migration.api.TenantCloneOptions;
-import tools.dynamia.modules.saas.migration.api.TenantExportOptions;
-import tools.dynamia.modules.saas.migration.api.TenantImportOptions;
-import tools.dynamia.modules.saas.migration.api.TenantMobilityJobDto;
-import tools.dynamia.modules.saas.migration.api.TenantMobilityJobService;
-import tools.dynamia.modules.saas.migration.domain.TenantMobilityJob;
+import tools.dynamia.modules.saas.migration.api.AccountCloneOptions;
+import tools.dynamia.modules.saas.migration.api.AccountExportOptions;
+import tools.dynamia.modules.saas.migration.api.AccountImportOptions;
+import tools.dynamia.modules.saas.migration.api.AccountMigrationJobDto;
+import tools.dynamia.modules.saas.migration.api.AccountMigrationJobService;
+import tools.dynamia.modules.saas.migration.domain.AccountMigrationJob;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -61,11 +61,11 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping(value = "/api/saas/migration", produces = MediaType.APPLICATION_JSON_VALUE)
-public class TenantMobilityController {
+public class AccountMigrationRestController {
 
-    private final TenantMobilityJobService jobService;
+    private final AccountMigrationJobService jobService;
 
-    public TenantMobilityController(TenantMobilityJobService jobService) {
+    public AccountMigrationRestController(AccountMigrationJobService jobService) {
         this.jobService = jobService;
     }
 
@@ -86,12 +86,12 @@ public class TenantMobilityController {
      * }</pre>
      */
     @PostMapping("/jobs/export/{accountId}")
-    public ResponseEntity<TenantMobilityJobDto> startExport(
+    public ResponseEntity<AccountMigrationJobDto> startExport(
             @PathVariable Long accountId,
-            @RequestBody(required = false) TenantExportOptions options) {
+            @RequestBody(required = false) AccountExportOptions options) {
 
-        TenantExportOptions opts = options != null ? options : new TenantExportOptions();
-        TenantMobilityJobDto job = jobService.createExportJob(accountId, opts);
+        AccountExportOptions opts = options != null ? options : new AccountExportOptions();
+        AccountMigrationJobDto job = jobService.createExportJob(accountId, opts);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(job);
     }
 
@@ -111,13 +111,13 @@ public class TenantMobilityController {
      * </ul>
      */
     @PostMapping(value = "/jobs/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<TenantMobilityJobDto> startImport(
+    public ResponseEntity<AccountMigrationJobDto> startImport(
             @RequestParam("file") MultipartFile file,
             @RequestParam(required = false) Long targetAccountId,
             @RequestParam(required = false) String identityStrategy,
             @RequestParam(required = false, defaultValue = "0") int chunkSize) {
 
-        TenantImportOptions options = new TenantImportOptions()
+        AccountImportOptions options = new AccountImportOptions()
                 .targetAccountId(targetAccountId)
                 .chunkSize(chunkSize > 0 ? chunkSize : 500);
 
@@ -130,7 +130,7 @@ public class TenantMobilityController {
             }
         }
 
-        TenantMobilityJobDto job = jobService.createImportJob(file, options);
+        AccountMigrationJobDto job = jobService.createImportJob(file, options);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(job);
     }
 
@@ -152,13 +152,13 @@ public class TenantMobilityController {
      * }</pre>
      */
     @PostMapping("/jobs/clone")
-    public ResponseEntity<TenantMobilityJobDto> startClone(
-            @RequestBody TenantCloneOptions options) {
+    public ResponseEntity<AccountMigrationJobDto> startClone(
+            @RequestBody AccountCloneOptions options) {
 
         if (options.getSourceAccountId() == null || options.getTargetAccountId() == null) {
             return ResponseEntity.badRequest().build();
         }
-        TenantMobilityJobDto job = jobService.createCloneJob(options);
+        AccountMigrationJobDto job = jobService.createCloneJob(options);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(job);
     }
 
@@ -168,18 +168,18 @@ public class TenantMobilityController {
 
     /** Start a backup job (export with BACKUP type label and compression). */
     @PostMapping("/jobs/backup/{accountId}")
-    public ResponseEntity<TenantMobilityJobDto> startBackup(@PathVariable Long accountId) {
-        TenantMobilityJobDto job = jobService.createBackupJob(accountId);
+    public ResponseEntity<AccountMigrationJobDto> startBackup(@PathVariable Long accountId) {
+        AccountMigrationJobDto job = jobService.createBackupJob(accountId);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(job);
     }
 
     /** Start a restore job from an uploaded export file. */
     @PostMapping(value = "/jobs/restore/{accountId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<TenantMobilityJobDto> startRestore(
+    public ResponseEntity<AccountMigrationJobDto> startRestore(
             @PathVariable Long accountId,
             @RequestParam("file") MultipartFile file) {
 
-        TenantMobilityJobDto job = jobService.createRestoreJob(accountId, file);
+        AccountMigrationJobDto job = jobService.createRestoreJob(accountId, file);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(job);
     }
 
@@ -191,15 +191,15 @@ public class TenantMobilityController {
      * List all jobs. Pass {@code ?accountId=X} to filter by account.
      */
     @GetMapping("/jobs")
-    public ResponseEntity<List<TenantMobilityJobDto>> listJobs(
+    public ResponseEntity<List<AccountMigrationJobDto>> listJobs(
             @RequestParam(required = false) Long accountId) {
         return ResponseEntity.ok(jobService.listJobs(accountId));
     }
 
     /** Get the current status of a job by its UUID. */
     @GetMapping("/jobs/{jobId}")
-    public ResponseEntity<TenantMobilityJobDto> getJob(@PathVariable String jobId) {
-        TenantMobilityJobDto job = jobService.getJob(jobId);
+    public ResponseEntity<AccountMigrationJobDto> getJob(@PathVariable String jobId) {
+        AccountMigrationJobDto job = jobService.getJob(jobId);
         if (job == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(job);
     }
@@ -207,7 +207,7 @@ public class TenantMobilityController {
     /** Request cancellation of a running job. Idempotent. */
     @PostMapping("/jobs/{jobId}/cancel")
     public ResponseEntity<Map<String, String>> cancelJob(@PathVariable String jobId) {
-        TenantMobilityJobDto job = jobService.getJob(jobId);
+        AccountMigrationJobDto job = jobService.getJob(jobId);
         if (job == null) return ResponseEntity.notFound().build();
         jobService.cancelJob(jobId);
         return ResponseEntity.ok(Map.of("message", "Cancellation requested for job " + jobId));
@@ -223,7 +223,7 @@ public class TenantMobilityController {
      */
     @GetMapping("/jobs/{jobId}/download")
     public ResponseEntity<Resource> downloadResult(@PathVariable String jobId) {
-        TenantMobilityJob job = jobService.getJobEntity(jobId);
+        AccountMigrationJob job = jobService.getJobEntity(jobId);
         if (job == null || job.getResultPath() == null) {
             return ResponseEntity.notFound().build();
         }

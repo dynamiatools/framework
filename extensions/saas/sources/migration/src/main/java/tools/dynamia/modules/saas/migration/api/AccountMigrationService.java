@@ -18,7 +18,7 @@ import java.io.OutputStream;
  *
  * <p>This service is designed to be called from within a worker/job that is already
  * running in a background virtual thread. For async job management see
- * {@link TenantMobilityJobService}.
+ * {@link AccountMigrationJobService}.
  *
  * <pre>{@code
  * // Direct usage (synchronous — blocks until complete):
@@ -30,7 +30,7 @@ import java.io.OutputStream;
  *
  * @author Mario Serrano Leones
  */
-public interface TenantMobilityService {
+public interface AccountMigrationService {
 
     /**
      * Exports all tenant data for {@code accountId} to the given {@code output} stream.
@@ -43,7 +43,7 @@ public interface TenantMobilityService {
      */
     void exportTenant(Long accountId,
                       OutputStream output,
-                      TenantExportOptions options,
+                      AccountExportOptions options,
                       MigrationProgressListener listener,
                       CancellationToken token);
 
@@ -56,7 +56,7 @@ public interface TenantMobilityService {
      * @param token    optional cancellation token; may be {@code null}
      */
     void importTenant(InputStream input,
-                      TenantImportOptions options,
+                      AccountImportOptions options,
                       MigrationProgressListener listener,
                       CancellationToken token);
 
@@ -68,7 +68,7 @@ public interface TenantMobilityService {
      * @param listener optional progress callback; may be {@code null}
      * @param token    optional cancellation token; may be {@code null}
      */
-    void cloneTenant(TenantCloneOptions options,
+    void cloneTenant(AccountCloneOptions options,
                      MigrationProgressListener listener,
                      CancellationToken token);
 }

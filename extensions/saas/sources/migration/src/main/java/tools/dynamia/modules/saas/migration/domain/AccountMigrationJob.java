@@ -17,6 +17,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.domain.jpa.SimpleEntity;
+import tools.dynamia.modules.saas.migration.api.AccountExportOptions;
+import tools.dynamia.modules.saas.migration.api.AccountImportOptions;
 
 import java.time.LocalDateTime;
 
@@ -32,7 +34,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "saas_migration_jobs")
-public class TenantMobilityJob extends SimpleEntity {
+public class AccountMigrationJob extends SimpleEntity {
 
     // ─── Identity ──────────────────────────────────────────────────────────────
 
@@ -52,11 +54,11 @@ public class TenantMobilityJob extends SimpleEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 30)
-    private TenantJobType jobType;
+    private AccountJobType jobType;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 30)
-    private TenantJobStatus status = TenantJobStatus.PENDING;
+    private AccountJobStatus status = AccountJobStatus.PENDING;
 
     // ─── Progress ──────────────────────────────────────────────────────────────
 
@@ -81,8 +83,8 @@ public class TenantMobilityJob extends SimpleEntity {
     @Column(length = 1000)
     private String resultPath;
 
-    /** Serialized {@link tools.dynamia.modules.saas.migration.api.TenantExportOptions}
-     *  or {@link tools.dynamia.modules.saas.migration.api.TenantImportOptions} as JSON. */
+    /** Serialized {@link AccountExportOptions}
+     *  or {@link AccountImportOptions} as JSON. */
     @Column(length = 4000)
     private String optionsJson;
 
@@ -90,27 +92,27 @@ public class TenantMobilityJob extends SimpleEntity {
 
     /** Mark the job as started. */
     public void markRunning() {
-        this.status = TenantJobStatus.RUNNING;
+        this.status = AccountJobStatus.RUNNING;
         this.startedAt = LocalDateTime.now();
     }
 
     /** Mark the job as successfully completed. */
     public void markCompleted() {
-        this.status = TenantJobStatus.COMPLETED;
+        this.status = AccountJobStatus.COMPLETED;
         this.finishedAt = LocalDateTime.now();
         this.progress = 100;
     }
 
     /** Mark the job as failed with an error message. */
     public void markFailed(String errorMessage) {
-        this.status = TenantJobStatus.FAILED;
+        this.status = AccountJobStatus.FAILED;
         this.finishedAt = LocalDateTime.now();
         this.errorMessage = errorMessage;
     }
 
     /** Mark the job as cancelled. */
     public void markCancelled(String reason) {
-        this.status = TenantJobStatus.CANCELLED;
+        this.status = AccountJobStatus.CANCELLED;
         this.finishedAt = LocalDateTime.now();
         this.progressMessage = reason;
     }
@@ -123,9 +125,9 @@ public class TenantMobilityJob extends SimpleEntity {
 
     /** Returns {@code true} if the job is in a terminal state. */
     public boolean isFinished() {
-        return status == TenantJobStatus.COMPLETED
-                || status == TenantJobStatus.FAILED
-                || status == TenantJobStatus.CANCELLED;
+        return status == AccountJobStatus.COMPLETED
+                || status == AccountJobStatus.FAILED
+                || status == AccountJobStatus.CANCELLED;
     }
 
     // ─── Accessors ─────────────────────────────────────────────────────────────
@@ -154,19 +156,19 @@ public class TenantMobilityJob extends SimpleEntity {
         this.targetAccountId = targetAccountId;
     }
 
-    public TenantJobType getJobType() {
+    public AccountJobType getJobType() {
         return jobType;
     }
 
-    public void setJobType(TenantJobType jobType) {
+    public void setJobType(AccountJobType jobType) {
         this.jobType = jobType;
     }
 
-    public TenantJobStatus getStatus() {
+    public AccountJobStatus getStatus() {
         return status;
     }
 
-    public void setStatus(TenantJobStatus status) {
+    public void setStatus(AccountJobStatus status) {
         this.status = status;
     }
 

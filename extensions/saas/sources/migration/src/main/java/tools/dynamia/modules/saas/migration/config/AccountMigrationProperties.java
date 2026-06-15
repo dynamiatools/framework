@@ -29,7 +29,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author Mario Serrano Leones
  */
 @ConfigurationProperties(prefix = "dynamia.saas.migration")
-public class TenantMigrationProperties {
+public class AccountMigrationProperties {
 
     /** Number of records read/written per pagination page. Default: 500. */
     private int chunkSize = 500;

@@ -11,14 +11,14 @@
 package tools.dynamia.modules.saas.migration.api;
 
 import org.springframework.web.multipart.MultipartFile;
-import tools.dynamia.modules.saas.migration.domain.TenantMobilityJob;
+import tools.dynamia.modules.saas.migration.domain.AccountMigrationJob;
 
 import java.util.List;
 
 /**
  * Async job management service for tenant mobility operations.
  *
- * <p>Each method creates a {@link TenantMobilityJob} record, launches the operation
+ * <p>Each method creates a {@link AccountMigrationJob} record, launches the operation
  * as a background virtual thread via {@code SchedulerUtil.runWithResult()}, and returns
  * the job DTO immediately (non-blocking).
  *
@@ -30,7 +30,7 @@ import java.util.List;
  *
  * @author Mario Serrano Leones
  */
-public interface TenantMobilityJobService {
+public interface AccountMigrationJobService {
 
     /**
      * Starts an async export job for the given account.
@@ -39,7 +39,7 @@ public interface TenantMobilityJobService {
      * @param options   export configuration
      * @return the newly created (PENDING) job
      */
-    TenantMobilityJobDto createExportJob(Long accountId, TenantExportOptions options);
+    AccountMigrationJobDto createExportJob(Long accountId, AccountExportOptions options);
 
     /**
      * Starts an async import job from an uploaded file.
@@ -48,7 +48,7 @@ public interface TenantMobilityJobService {
      * @param options import configuration (target account, identity strategy, etc.)
      * @return the newly created (PENDING) job
      */
-    TenantMobilityJobDto createImportJob(MultipartFile file, TenantImportOptions options);
+    AccountMigrationJobDto createImportJob(MultipartFile file, AccountImportOptions options);
 
     /**
      * Starts an async clone job (source tenant → target tenant, same system).
@@ -56,7 +56,7 @@ public interface TenantMobilityJobService {
      * @param options clone configuration
      * @return the newly created (PENDING) job
      */
-    TenantMobilityJobDto createCloneJob(TenantCloneOptions options);
+    AccountMigrationJobDto createCloneJob(AccountCloneOptions options);
 
     /**
      * Starts an async backup job (semantically equivalent to export with BACKUP type label).
@@ -64,7 +64,7 @@ public interface TenantMobilityJobService {
      * @param accountId ID of the account to back up
      * @return the newly created (PENDING) job
      */
-    TenantMobilityJobDto createBackupJob(Long accountId);
+    AccountMigrationJobDto createBackupJob(Long accountId);
 
     /**
      * Starts an async restore job from an uploaded file
@@ -74,7 +74,7 @@ public interface TenantMobilityJobService {
      * @param file      multipart upload
      * @return the newly created (PENDING) job
      */
-    TenantMobilityJobDto createRestoreJob(Long accountId, MultipartFile file);
+    AccountMigrationJobDto createRestoreJob(Long accountId, MultipartFile file);
 
     /**
      * Returns the current state of the job identified by {@code jobUuid}.
@@ -82,15 +82,15 @@ public interface TenantMobilityJobService {
      * @param jobUuid UUID of the job
      * @return job DTO or {@code null} if not found
      */
-    TenantMobilityJobDto getJob(String jobUuid);
+    AccountMigrationJobDto getJob(String jobUuid);
 
     /**
-     * Returns the raw {@link TenantMobilityJob} entity for internal use (e.g. file download).
+     * Returns the raw {@link AccountMigrationJob} entity for internal use (e.g. file download).
      *
      * @param jobUuid UUID of the job
      * @return entity or {@code null}
      */
-    TenantMobilityJob getJobEntity(String jobUuid);
+    AccountMigrationJob getJobEntity(String jobUuid);
 
     /**
      * Lists all known jobs, optionally filtered by account.
@@ -98,7 +98,7 @@ public interface TenantMobilityJobService {
      * @param accountId filter by account; pass {@code null} to return all jobs
      * @return list of jobs ordered by creation date descending
      */
-    List<TenantMobilityJobDto> listJobs(Long accountId);
+    List<AccountMigrationJobDto> listJobs(Long accountId);
 
     /**
      * Requests cooperative cancellation of a running job.

@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 import tools.dynamia.integration.scheduling.TaskWithResult;
 import tools.dynamia.modules.saas.migration.api.CancellationToken;
 import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
-import tools.dynamia.modules.saas.migration.api.TenantImportOptions;
-import tools.dynamia.modules.saas.migration.api.TenantMobilityService;
+import tools.dynamia.modules.saas.migration.api.AccountImportOptions;
+import tools.dynamia.modules.saas.migration.api.AccountMigrationService;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -36,14 +36,14 @@ public class ImportWorker extends TaskWithResult<Boolean> {
     private static final Logger log = LoggerFactory.getLogger(ImportWorker.class);
 
     private final Path inputFile;
-    private final TenantImportOptions options;
-    private final TenantMobilityService mobilityService;
+    private final AccountImportOptions options;
+    private final AccountMigrationService mobilityService;
     private final MigrationProgressListener progressListener;
     private final CancellationToken cancellationToken;
 
     public ImportWorker(Path inputFile,
-                        TenantImportOptions options,
-                        TenantMobilityService mobilityService,
+                        AccountImportOptions options,
+                        AccountMigrationService mobilityService,
                         MigrationProgressListener progressListener,
                         CancellationToken cancellationToken) {
         super("ImportWorker-account-" + options.getTargetAccountId());

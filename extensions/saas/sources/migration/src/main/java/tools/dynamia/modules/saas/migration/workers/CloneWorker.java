@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 import tools.dynamia.integration.scheduling.TaskWithResult;
 import tools.dynamia.modules.saas.migration.api.CancellationToken;
 import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
-import tools.dynamia.modules.saas.migration.api.TenantCloneOptions;
-import tools.dynamia.modules.saas.migration.api.TenantMobilityService;
+import tools.dynamia.modules.saas.migration.api.AccountCloneOptions;
+import tools.dynamia.modules.saas.migration.api.AccountMigrationService;
 
 /**
  * Background worker that executes a tenant clone operation
@@ -35,13 +35,13 @@ public class CloneWorker extends TaskWithResult<Boolean> {
 
     private static final Logger log = LoggerFactory.getLogger(CloneWorker.class);
 
-    private final TenantCloneOptions options;
-    private final TenantMobilityService mobilityService;
+    private final AccountCloneOptions options;
+    private final AccountMigrationService mobilityService;
     private final MigrationProgressListener progressListener;
     private final CancellationToken cancellationToken;
 
-    public CloneWorker(TenantCloneOptions options,
-                       TenantMobilityService mobilityService,
+    public CloneWorker(AccountCloneOptions options,
+                       AccountMigrationService mobilityService,
                        MigrationProgressListener progressListener,
                        CancellationToken cancellationToken) {
         super("CloneWorker-" + options.getSourceAccountId() + "->" + options.getTargetAccountId());

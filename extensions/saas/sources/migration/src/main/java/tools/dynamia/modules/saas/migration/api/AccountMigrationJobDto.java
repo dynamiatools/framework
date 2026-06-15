@@ -10,24 +10,25 @@
  */
 package tools.dynamia.modules.saas.migration.api;
 
-import tools.dynamia.modules.saas.migration.domain.TenantJobStatus;
-import tools.dynamia.modules.saas.migration.domain.TenantJobType;
+import tools.dynamia.modules.saas.migration.domain.AccountJobStatus;
+import tools.dynamia.modules.saas.migration.domain.AccountJobType;
+import tools.dynamia.modules.saas.migration.domain.AccountMigrationJob;
 
 import java.time.LocalDateTime;
 
 /**
- * Read-only DTO representing the state of a {@link tools.dynamia.modules.saas.migration.domain.TenantMobilityJob}.
+ * Read-only DTO representing the state of a {@link AccountMigrationJob}.
  * Returned by REST endpoints.
  *
  * @author Mario Serrano Leones
  */
-public record TenantMobilityJobDto(
+public record AccountMigrationJobDto(
         Long id,
         String uuid,
         Long accountId,
         Long targetAccountId,
-        TenantJobType jobType,
-        TenantJobStatus status,
+        AccountJobType jobType,
+        AccountJobStatus status,
         int progress,
         String progressMessage,
         String errorMessage,
@@ -39,9 +40,9 @@ public record TenantMobilityJobDto(
 
     /** Convenience: returns {@code true} when the job has reached a terminal state. */
     public boolean isFinished() {
-        return status == TenantJobStatus.COMPLETED
-                || status == TenantJobStatus.FAILED
-                || status == TenantJobStatus.CANCELLED;
+        return status == AccountJobStatus.COMPLETED
+                || status == AccountJobStatus.FAILED
+                || status == AccountJobStatus.CANCELLED;
     }
 }
 

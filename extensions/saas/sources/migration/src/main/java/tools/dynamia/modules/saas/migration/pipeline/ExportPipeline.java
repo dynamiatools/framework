@@ -30,8 +30,8 @@ import tools.dynamia.modules.saas.migration.api.CancellationToken;
 import tools.dynamia.modules.saas.migration.api.MigrationException;
 import tools.dynamia.modules.saas.migration.api.MigrationProgress;
 import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
-import tools.dynamia.modules.saas.migration.api.TenantExportOptions;
-import tools.dynamia.modules.saas.migration.config.TenantMigrationProperties;
+import tools.dynamia.modules.saas.migration.api.AccountExportOptions;
+import tools.dynamia.modules.saas.migration.config.AccountMigrationProperties;
 import tools.dynamia.modules.saas.migration.discovery.AccountEntityDiscovery;
 import tools.dynamia.modules.saas.migration.graph.EntityDependencyGraph;
 
@@ -73,14 +73,14 @@ public class ExportPipeline {
     private final CrudService crudService;
     private final AccountEntityDiscovery discovery;
     private final EntityDependencyGraph dependencyGraph;
-    private final TenantMigrationProperties properties;
+    private final AccountMigrationProperties properties;
     private final ObjectMapper objectMapper;
 
     public ExportPipeline(EntityManagerFactory emf,
                           CrudService crudService,
                           AccountEntityDiscovery discovery,
                           EntityDependencyGraph dependencyGraph,
-                          TenantMigrationProperties properties,
+                          AccountMigrationProperties properties,
                           @Qualifier("migrationObjectMapper") ObjectMapper objectMapper) {
         this.emf = emf;
         this.crudService = crudService;
@@ -101,7 +101,7 @@ public class ExportPipeline {
      */
     public void export(Long accountId,
                        OutputStream output,
-                       TenantExportOptions options,
+                       AccountExportOptions options,
                        MigrationProgressListener listener,
                        CancellationToken token) {
 
@@ -183,7 +183,7 @@ public class ExportPipeline {
     // ─────────────────────────────────────────────────────────────────────────
 
     private long exportEntityType(JsonGenerator gen, Class<?> entityClass, Long accountId,
-                                   TenantExportOptions options, CancellationToken token)
+                                  AccountExportOptions options, CancellationToken token)
             throws IOException {
 
         long processed = 0;
@@ -311,7 +311,7 @@ public class ExportPipeline {
         return null;
     }
 
-    private int resolveChunkSize(TenantExportOptions options) {
+    private int resolveChunkSize(AccountExportOptions options) {
         int size = options.getChunkSize();
         return size > 0 ? size : properties.getChunkSize();
     }

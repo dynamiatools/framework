@@ -15,7 +15,7 @@ package tools.dynamia.modules.saas.migration.api;
  *
  * @author Mario Serrano Leones
  */
-public class TenantExportOptions {
+public class AccountExportOptions {
 
     /** Number of records to read from DB per pagination page. Default: 500. */
     private int chunkSize = 500;
@@ -31,31 +31,31 @@ public class TenantExportOptions {
 
     // ─── Constructors ──────────────────────────────────────────────────────────
 
-    public TenantExportOptions() {
+    public AccountExportOptions() {
     }
 
-    public TenantExportOptions(IdentityStrategy identityStrategy) {
+    public AccountExportOptions(IdentityStrategy identityStrategy) {
         this.identityStrategy = identityStrategy;
     }
 
     // ─── Fluent builder ────────────────────────────────────────────────────────
 
-    public TenantExportOptions chunkSize(int chunkSize) {
+    public AccountExportOptions chunkSize(int chunkSize) {
         this.chunkSize = chunkSize;
         return this;
     }
 
-    public TenantExportOptions compressionEnabled(boolean compressionEnabled) {
+    public AccountExportOptions compressionEnabled(boolean compressionEnabled) {
         this.compressionEnabled = compressionEnabled;
         return this;
     }
 
-    public TenantExportOptions identityStrategy(IdentityStrategy identityStrategy) {
+    public AccountExportOptions identityStrategy(IdentityStrategy identityStrategy) {
         this.identityStrategy = identityStrategy;
         return this;
     }
 
-    public TenantExportOptions label(String label) {
+    public AccountExportOptions label(String label) {
         this.label = label;
         return this;
     }

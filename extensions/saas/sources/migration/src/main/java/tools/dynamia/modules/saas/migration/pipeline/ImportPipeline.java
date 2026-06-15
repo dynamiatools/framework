@@ -29,12 +29,11 @@ import tools.dynamia.domain.jpa.JpaUtils;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.modules.saas.migration.api.CancellationToken;
 import tools.dynamia.modules.saas.migration.api.IdentityMapper;
-import tools.dynamia.modules.saas.migration.api.IdentityStrategy;
 import tools.dynamia.modules.saas.migration.api.MigrationException;
 import tools.dynamia.modules.saas.migration.api.MigrationProgress;
 import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
-import tools.dynamia.modules.saas.migration.api.TenantImportOptions;
-import tools.dynamia.modules.saas.migration.config.TenantMigrationProperties;
+import tools.dynamia.modules.saas.migration.api.AccountImportOptions;
+import tools.dynamia.modules.saas.migration.config.AccountMigrationProperties;
 import tools.dynamia.modules.saas.migration.identity.KeepIdsIdentityMapper;
 import tools.dynamia.modules.saas.migration.identity.RegenerateIdsIdentityMapper;
 
@@ -77,11 +76,11 @@ public class ImportPipeline {
     private EntityManager em;
 
     private final EntityManagerFactory emf;
-    private final TenantMigrationProperties properties;
+    private final AccountMigrationProperties properties;
     private final ObjectMapper objectMapper;
 
     public ImportPipeline(EntityManagerFactory emf,
-                          TenantMigrationProperties properties,
+                          AccountMigrationProperties properties,
                           @Qualifier("migrationObjectMapper") ObjectMapper objectMapper) {
         this.emf = emf;
         this.properties = properties;
@@ -97,7 +96,7 @@ public class ImportPipeline {
      * @param token    optional cancellation token
      */
     public void importTenant(InputStream input,
-                             TenantImportOptions options,
+                             AccountImportOptions options,
                              MigrationProgressListener listener,
                              CancellationToken token) {
         IdentityMapper identityMapper = resolveIdentityMapper(options);
@@ -154,7 +153,7 @@ public class ImportPipeline {
     // ─────────────────────────────────────────────────────────────────────────
 
     private long importEntitiesSection(JsonParser parser,
-                                        TenantImportOptions options,
+                                        AccountImportOptions options,
                                         IdentityMapper identityMapper,
                                         Map<String, Map<Object, Object>> idMappings,
                                         MigrationProgressListener listener,
@@ -195,7 +194,7 @@ public class ImportPipeline {
 
     private long importEntityArray(JsonParser parser,
                                     Class<?> entityClass,
-                                    TenantImportOptions options,
+                                    AccountImportOptions options,
                                     IdentityMapper identityMapper,
                                     Map<String, Map<Object, Object>> idMappings,
                                     MigrationProgressListener listener,
@@ -233,7 +232,7 @@ public class ImportPipeline {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public int persistChunk(List<JsonNode> chunk,
                              Class<?> entityClass,
-                             TenantImportOptions options,
+                             AccountImportOptions options,
                              IdentityMapper identityMapper,
                              Map<String, Map<Object, Object>> idMappings) {
         int count = 0;
@@ -404,7 +403,7 @@ public class ImportPipeline {
         return in;
     }
 
-    private IdentityMapper resolveIdentityMapper(TenantImportOptions options) {
+    private IdentityMapper resolveIdentityMapper(AccountImportOptions options) {
         return switch (options.getIdentityStrategy()) {
             case KEEP_IDS -> new KeepIdsIdentityMapper();
             default -> new RegenerateIdsIdentityMapper();

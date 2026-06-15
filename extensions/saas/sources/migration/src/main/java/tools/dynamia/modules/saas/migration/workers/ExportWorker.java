@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 import tools.dynamia.integration.scheduling.TaskWithResult;
 import tools.dynamia.modules.saas.migration.api.CancellationToken;
 import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
-import tools.dynamia.modules.saas.migration.api.TenantExportOptions;
-import tools.dynamia.modules.saas.migration.api.TenantMobilityService;
+import tools.dynamia.modules.saas.migration.api.AccountExportOptions;
+import tools.dynamia.modules.saas.migration.api.AccountMigrationService;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -26,7 +26,7 @@ import java.nio.file.Path;
  * Background worker that executes a tenant export operation.
  *
  * <p>This task is submitted to {@code SchedulerUtil.runWithResult()} and runs
- * on a virtual thread. It calls {@link TenantMobilityService#exportTenant} and
+ * on a virtual thread. It calls {@link AccountMigrationService#exportTenant} and
  * writes the result to the file path provided by the job service.
  *
  * <p>Returns {@code true} on success, {@code false} on failure or cancellation.
@@ -39,15 +39,15 @@ public class ExportWorker extends TaskWithResult<Boolean> {
 
     private final Long accountId;
     private final Path outputFile;
-    private final TenantExportOptions options;
-    private final TenantMobilityService mobilityService;
+    private final AccountExportOptions options;
+    private final AccountMigrationService mobilityService;
     private final MigrationProgressListener progressListener;
     private final CancellationToken cancellationToken;
 
     public ExportWorker(Long accountId,
                         Path outputFile,
-                        TenantExportOptions options,
-                        TenantMobilityService mobilityService,
+                        AccountExportOptions options,
+                        AccountMigrationService mobilityService,
                         MigrationProgressListener progressListener,
                         CancellationToken cancellationToken) {
         super("ExportWorker-account-" + accountId);

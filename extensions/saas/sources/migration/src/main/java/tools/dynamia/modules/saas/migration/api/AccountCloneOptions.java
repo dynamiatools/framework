@@ -11,54 +11,65 @@
 package tools.dynamia.modules.saas.migration.api;
 
 /**
- * Options controlling a tenant import operation.
+ * Options for a clone operation (source tenant → target tenant, same system).
  *
  * @author Mario Serrano Leones
  */
-public class TenantImportOptions {
+public class AccountCloneOptions {
 
-    /**
-     * Target account ID.
-     * When {@code null}, the import will attempt to create a new account from
-     * the {@code account} section of the export file.
-     */
+    /** ID of the account to clone data from. Required. */
+    private Long sourceAccountId;
+
+    /** ID of the (already existing) target account. Required. */
     private Long targetAccountId;
 
-    /** How to handle primary keys when persisting imported entities. */
+    /**
+     * Strategy for handling IDs.
+     * Defaults to {@link IdentityStrategy#REGENERATE_IDS} because clone typically
+     * happens within the same database.
+     */
     private IdentityStrategy identityStrategy = IdentityStrategy.REGENERATE_IDS;
 
-    /** Number of entities to persist per transaction batch. Default: 500. */
+    /** Records per page during export/import. Default: 500. */
     private int chunkSize = 500;
 
     /**
-     * When {@code true}, the import fails immediately if any entity cannot be
-     * persisted. When {@code false}, errors are logged and the import continues.
+     * When {@code true}, entity errors are fatal. When {@code false}, they are
+     * logged and the clone continues. Default: {@code false}.
      */
     private boolean failOnEntityError = false;
 
     // ─── Fluent builder ────────────────────────────────────────────────────────
 
-    public TenantImportOptions targetAccountId(Long targetAccountId) {
+    public AccountCloneOptions source(Long sourceAccountId) {
+        this.sourceAccountId = sourceAccountId;
+        return this;
+    }
+
+    public AccountCloneOptions target(Long targetAccountId) {
         this.targetAccountId = targetAccountId;
         return this;
     }
 
-    public TenantImportOptions identityStrategy(IdentityStrategy identityStrategy) {
+    public AccountCloneOptions identityStrategy(IdentityStrategy identityStrategy) {
         this.identityStrategy = identityStrategy;
         return this;
     }
 
-    public TenantImportOptions chunkSize(int chunkSize) {
+    public AccountCloneOptions chunkSize(int chunkSize) {
         this.chunkSize = chunkSize;
         return this;
     }
 
-    public TenantImportOptions failOnEntityError(boolean failOnEntityError) {
-        this.failOnEntityError = failOnEntityError;
-        return this;
+    // ─── Accessors ─────────────────────────────────────────────────────────────
+
+    public Long getSourceAccountId() {
+        return sourceAccountId;
     }
 
-    // ─── Accessors ─────────────────────────────────────────────────────────────
+    public void setSourceAccountId(Long sourceAccountId) {
+        this.sourceAccountId = sourceAccountId;
+    }
 
     public Long getTargetAccountId() {
         return targetAccountId;

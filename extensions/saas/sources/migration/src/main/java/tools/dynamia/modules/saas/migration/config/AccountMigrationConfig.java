@@ -31,19 +31,19 @@ import java.nio.file.Path;
  * <p>Registers:
  * <ul>
  *   <li>A migration-specific {@link ObjectMapper} (qualified name: {@code migrationObjectMapper}).</li>
- *   <li>The default {@link TenantMobilityService} implementation.</li>
+ *   <li>The default {@link tools.dynamia.modules.saas.migration.api.AccountMigrationService} implementation.</li>
  *   <li>Ensures the output directory exists at startup.</li>
  * </ul>
  *
  * @author Mario Serrano Leones
  */
 @Configuration
-@EnableConfigurationProperties(TenantMigrationProperties.class)
-public class TenantMigrationConfig {
+@EnableConfigurationProperties(AccountMigrationProperties.class)
+public class AccountMigrationConfig {
 
-    private final TenantMigrationProperties properties;
+    private final AccountMigrationProperties properties;
 
-    public TenantMigrationConfig(TenantMigrationProperties properties) {
+    public AccountMigrationConfig(AccountMigrationProperties properties) {
         this.properties = properties;
         initOutputDirectory();
     }

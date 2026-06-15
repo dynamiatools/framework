@@ -15,10 +15,10 @@ import org.slf4j.LoggerFactory;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.modules.saas.migration.api.CancellationToken;
 import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
-import tools.dynamia.modules.saas.migration.api.TenantCloneOptions;
-import tools.dynamia.modules.saas.migration.api.TenantExportOptions;
-import tools.dynamia.modules.saas.migration.api.TenantImportOptions;
-import tools.dynamia.modules.saas.migration.api.TenantMobilityService;
+import tools.dynamia.modules.saas.migration.api.AccountCloneOptions;
+import tools.dynamia.modules.saas.migration.api.AccountExportOptions;
+import tools.dynamia.modules.saas.migration.api.AccountImportOptions;
+import tools.dynamia.modules.saas.migration.api.AccountMigrationService;
 import tools.dynamia.modules.saas.migration.pipeline.ExportPipeline;
 import tools.dynamia.modules.saas.migration.pipeline.ImportPipeline;
 
@@ -28,7 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Default implementation of {@link TenantMobilityService}.
+ * Default implementation of {@link AccountMigrationService}.
  *
  * <p>Delegates export to {@link ExportPipeline} and import to {@link ImportPipeline}.
  * For clone operations, the export is buffered in-memory ({@link ByteArrayOutputStream})
@@ -39,15 +39,15 @@ import java.io.OutputStream;
  * @author Mario Serrano Leones
  */
 @Service
-public class TenantMobilityServiceImpl implements TenantMobilityService {
+public class AccountMigrationServiceImpl implements AccountMigrationService {
 
-    private static final Logger log = LoggerFactory.getLogger(TenantMobilityServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AccountMigrationServiceImpl.class);
 
     private final ExportPipeline exportPipeline;
     private final ImportPipeline importPipeline;
 
-    public TenantMobilityServiceImpl(ExportPipeline exportPipeline,
-                                      ImportPipeline importPipeline) {
+    public AccountMigrationServiceImpl(ExportPipeline exportPipeline,
+                                       ImportPipeline importPipeline) {
         this.exportPipeline = exportPipeline;
         this.importPipeline = importPipeline;
     }
@@ -55,7 +55,7 @@ public class TenantMobilityServiceImpl implements TenantMobilityService {
     @Override
     public void exportTenant(Long accountId,
                               OutputStream output,
-                              TenantExportOptions options,
+                              AccountExportOptions options,
                               MigrationProgressListener listener,
                               CancellationToken token) {
         log.info("[Migration] Starting export for accountId={}", accountId);
@@ -65,7 +65,7 @@ public class TenantMobilityServiceImpl implements TenantMobilityService {
 
     @Override
     public void importTenant(InputStream input,
-                              TenantImportOptions options,
+                              AccountImportOptions options,
                               MigrationProgressListener listener,
                               CancellationToken token) {
         log.info("[Migration] Starting import for targetAccountId={}", options.getTargetAccountId());
@@ -74,15 +74,15 @@ public class TenantMobilityServiceImpl implements TenantMobilityService {
     }
 
     @Override
-    public void cloneTenant(TenantCloneOptions options,
-                             MigrationProgressListener listener,
-                             CancellationToken token) {
+    public void cloneTenant(AccountCloneOptions options,
+                            MigrationProgressListener listener,
+                            CancellationToken token) {
         Long source = options.getSourceAccountId();
         Long target = options.getTargetAccountId();
         log.info("[Migration] Starting clone {} → {}", source, target);
 
         // ── Phase 1: Export to memory buffer ───────────────────────────────
-        TenantExportOptions exportOptions = new TenantExportOptions()
+        AccountExportOptions exportOptions = new AccountExportOptions()
                 .chunkSize(options.getChunkSize())
                 .identityStrategy(options.getIdentityStrategy())
                 .label("clone-" + source + "->" + target);
@@ -100,7 +100,7 @@ public class TenantMobilityServiceImpl implements TenantMobilityService {
         }
 
         // ── Phase 2: Import from buffer ────────────────────────────────────
-        TenantImportOptions importOptions = new TenantImportOptions()
+        AccountImportOptions importOptions = new AccountImportOptions()
                 .targetAccountId(target)
                 .chunkSize(options.getChunkSize())
                 .identityStrategy(options.getIdentityStrategy())

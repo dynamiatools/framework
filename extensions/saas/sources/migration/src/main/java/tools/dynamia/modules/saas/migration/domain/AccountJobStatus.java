@@ -11,11 +11,11 @@
 package tools.dynamia.modules.saas.migration.domain;
 
 /**
- * Lifecycle status of a {@link TenantMobilityJob}.
+ * Lifecycle status of a {@link AccountMigrationJob}.
  *
  * @author Mario Serrano Leones
  */
-public enum TenantJobStatus {
+public enum AccountJobStatus {
 
     /** Job has been created but not started yet. */
     PENDING,
@@ -26,7 +26,7 @@ public enum TenantJobStatus {
     /** Job finished successfully. Result file is available for download. */
     COMPLETED,
 
-    /** Job failed with an error. See {@link TenantMobilityJob#getErrorMessage()}. */
+    /** Job failed with an error. See {@link AccountMigrationJob#getErrorMessage()}. */
     FAILED,
 
     /** Job was cancelled by the user before it completed. */

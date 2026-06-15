@@ -11,11 +11,11 @@
 package tools.dynamia.modules.saas.migration.domain;
 
 /**
- * Type of a {@link TenantMobilityJob}.
+ * Type of a {@link AccountMigrationJob}.
  *
  * @author Mario Serrano Leones
  */
-public enum TenantJobType {
+public enum AccountJobType {
 
     /** Export all tenant data to a JSON/GZIP file. */
     EXPORT,
