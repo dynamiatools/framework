@@ -11,10 +11,10 @@
 package tools.dynamia.modules.saas.migration.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -53,7 +53,7 @@ public class AccountMigrationConfig {
      *
      * <p>Configured to:
      * <ul>
-     *   <li>Support Java 8+ date/time types via {@link JavaTimeModule}.</li>
+     *   <li>Java time types supported natively (Jackson 3 built-in, no module needed).</li>
      *   <li>Not fail on unknown properties during import.</li>
      *   <li>Not fail on empty beans.</li>
      *   <li>Exclude null values from output (smaller files).</li>
@@ -65,12 +65,12 @@ public class AccountMigrationConfig {
     @Bean("migrationObjectMapper")
     @ConditionalOnMissingBean(name = "migrationObjectMapper")
     public ObjectMapper migrationObjectMapper() {
-        return new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        return JsonMapper.builder()
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                .changeDefaultPropertyInclusion(
+                        i -> i.withValueInclusion(JsonInclude.Include.NON_NULL))
+                .build();
     }
 
     private void initOutputDirectory() {

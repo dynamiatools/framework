@@ -10,8 +10,8 @@
  */
 package tools.dynamia.modules.saas.migration.pipeline;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -56,16 +56,16 @@ public class ExportConstantsTest {
         // Build the minimal JSON skeleton that ImportPipeline expects
         ObjectMapper mapper = new ObjectMapper();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        var gen = mapper.getFactory().createGenerator(out);
+        var gen = mapper.createGenerator(out);
 
         gen.writeStartObject();
-        gen.writeStringField(ExportConstants.FIELD_VERSION, ExportConstants.FORMAT_VERSION);
-        gen.writeStringField(ExportConstants.FIELD_EXPORTED_AT, "2026-06-15T10:00:00");
-        gen.writeNumberField(ExportConstants.FIELD_SOURCE_ACCOUNT_ID, 1L);
-        gen.writeStringField(ExportConstants.FIELD_IDENTITY_STRATEGY, "KEEP_IDS");
-        gen.writeObjectFieldStart(ExportConstants.FIELD_ACCOUNT);
+        gen.writeStringProperty(ExportConstants.FIELD_VERSION, ExportConstants.FORMAT_VERSION);
+        gen.writeStringProperty(ExportConstants.FIELD_EXPORTED_AT, "2026-06-15T10:00:00");
+        gen.writeNumberProperty(ExportConstants.FIELD_SOURCE_ACCOUNT_ID, 1L);
+        gen.writeStringProperty(ExportConstants.FIELD_IDENTITY_STRATEGY, "KEEP_IDS");
+        gen.writeName(ExportConstants.FIELD_ACCOUNT); gen.writeStartObject();
         gen.writeEndObject();
-        gen.writeObjectFieldStart(ExportConstants.FIELD_ENTITIES);
+        gen.writeName(ExportConstants.FIELD_ENTITIES); gen.writeStartObject();
         gen.writeEndObject();
         gen.writeEndObject();
         gen.close();

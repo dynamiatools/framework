@@ -10,9 +10,8 @@
  */
 package tools.dynamia.modules.saas.migration.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +27,6 @@ public class OptionsFluentBuilderTest {
     @Before
     public void setUp() {
         objectMapper = JsonMapper.builder()
-                .addModule(new JavaTimeModule())
                 .build();
     }
 

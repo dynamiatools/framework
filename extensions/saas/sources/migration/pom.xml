@@ -100,16 +100,10 @@
             <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
 
-        <!-- Jackson Databind: ObjectMapper, JsonGenerator, JsonParser -->
+        <!-- Jackson 3: ObjectMapper, JsonGenerator, JsonParser (Java Time built-in) -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-        </dependency>
-
-        <!-- Jackson JavaTime module: LocalDate, LocalDateTime serialization -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
 
         <!-- Jakarta APIs (provided by container) -->

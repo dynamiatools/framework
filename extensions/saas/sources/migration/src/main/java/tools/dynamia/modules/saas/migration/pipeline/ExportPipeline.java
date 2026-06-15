@@ -10,8 +10,8 @@
  */
 package tools.dynamia.modules.saas.migration.pipeline;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.core.JsonGenerator;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.metamodel.Attribute.PersistentAttributeType;
 import jakarta.persistence.metamodel.EntityType;
@@ -133,21 +133,22 @@ public class ExportPipeline {
             throw new MigrationException("Failed to set up output stream", e);
         }
 
-        try (JsonGenerator gen = objectMapper.getFactory().createGenerator(target)) {
+        try (JsonGenerator gen = objectMapper.createGenerator(target)) {
 
             gen.writeStartObject();
-            gen.writeStringField(ExportConstants.FIELD_VERSION, ExportConstants.FORMAT_VERSION);
-            gen.writeStringField(ExportConstants.FIELD_EXPORTED_AT, LocalDateTime.now().toString());
-            gen.writeNumberField(ExportConstants.FIELD_SOURCE_ACCOUNT_ID, accountId);
-            gen.writeStringField(ExportConstants.FIELD_IDENTITY_STRATEGY,
+            gen.writeStringProperty(ExportConstants.FIELD_VERSION, ExportConstants.FORMAT_VERSION);
+            gen.writeStringProperty(ExportConstants.FIELD_EXPORTED_AT, LocalDateTime.now().toString());
+            gen.writeNumberProperty(ExportConstants.FIELD_SOURCE_ACCOUNT_ID, accountId);
+            gen.writeStringProperty(ExportConstants.FIELD_IDENTITY_STRATEGY,
                     options.getIdentityStrategy().name());
 
             // Serialize AccountDTO as the tenant descriptor
-            gen.writeFieldName(ExportConstants.FIELD_ACCOUNT);
+            gen.writeName(ExportConstants.FIELD_ACCOUNT);
             objectMapper.writeValue(gen, account.toDTO());
 
             // Entity section
-            gen.writeObjectFieldStart(ExportConstants.FIELD_ENTITIES);
+            gen.writeName(ExportConstants.FIELD_ENTITIES);
+            gen.writeStartObject();
 
             long processed = 0;
             for (Class<?> entityClass : ordered) {
@@ -189,7 +190,8 @@ public class ExportPipeline {
         long processed = 0;
         int chunkSize = resolveChunkSize(options);
 
-        gen.writeArrayFieldStart(entityClass.getName());
+        gen.writeName(entityClass.getName());
+        gen.writeStartArray();
 
         try {
             EntityType<?> entityType = emf.getMetamodel().entity(entityClass);
@@ -244,8 +246,8 @@ public class ExportPipeline {
         // Write ID explicitly
         try {
             Serializable id = JpaUtils.getJPAIdValue(entity);
-            gen.writeFieldName("id");
-            gen.writeObject(id);
+            gen.writeName("id");
+            gen.writePOJO(id);
         } catch (Exception e) {
             log.debug("[Migration/Export] Could not write ID for {}", entity.getClass().getSimpleName());
         }
@@ -270,8 +272,8 @@ public class ExportPipeline {
                         || pt == PersistentAttributeType.ONE_TO_ONE) {
                     if (value != null) {
                         Serializable refId = JpaUtils.getJPAIdValue(value);
-                        gen.writeFieldName(name + ExportConstants.REF_ID_SUFFIX);
-                        gen.writeObject(refId);
+                        gen.writeName(name + ExportConstants.REF_ID_SUFFIX);
+                        gen.writePOJO(refId);
                     }
                 } else if (pt == PersistentAttributeType.ONE_TO_MANY
                         || pt == PersistentAttributeType.MANY_TO_MANY
@@ -279,7 +281,7 @@ public class ExportPipeline {
                     // Skip collections — they are reconstructed via child entities
                 } else {
                     // BASIC or EMBEDDED
-                    gen.writeFieldName(name);
+                    gen.writeName(name);
                     objectMapper.writeValue(gen, value);
                 }
 

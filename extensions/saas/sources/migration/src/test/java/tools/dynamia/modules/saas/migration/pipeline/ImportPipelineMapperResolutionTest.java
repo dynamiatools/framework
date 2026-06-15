@@ -10,9 +10,8 @@
  */
 package tools.dynamia.modules.saas.migration.pipeline;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.Assert;
 import org.junit.Before;
@@ -59,7 +58,6 @@ public class ImportPipelineMapperResolutionTest {
     public void setUp() {
         properties = new AccountMigrationProperties();
         objectMapper = JsonMapper.builder()
-                .addModule(new JavaTimeModule())
                 .build();
 
         // Minimal metamodel: getEntities() returns empty set so no entity processing occurs
