@@ -1,0 +1,60 @@
+{
+  "name": "@dynamia-tools/mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Dynamia Tools documentation",
+  "keywords": [
+    "dynamia",
+    "mcp",
+    "documentation",
+    "ai"
+  ],
+  "homepage": "https://dynamia.tools",
+  "bugs": {
+    "url": "https://github.com/dynamiatools/framework/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dynamiatools/framework.git",
+    "directory": "platform/packages/mcp"
+  },
+  "license": "Apache-2.0",
+  "author": "Dynamia Soluciones IT SAS",
+  "type": "module",
+  "bin": {
+    "dynamia-docs-mcp": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm run build && pnpm run test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.18.2",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
+

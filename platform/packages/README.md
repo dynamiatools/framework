@@ -13,6 +13,7 @@ These packages allow frontend developers to interact with Dynamia Platform backe
 | `@dynamia-tools/sdk`     | JavaScript/TypeScript client SDK for Dynamia Platform REST APIs |
 | `@dynamia-tools/ui-core` | Headless UI components and utilities aligned with Dynamia Platform's view descriptors |
 | `@dynamia-tools/vue`     | Vue 3 integration — composables, components, and plugins for Dynamia Platform |
+| `@dynamia-tools/mcp`     | MCP server for Dynamia Tools documentation |
 
 > **Note:** Packages are added progressively. Check each sub-folder for its own `README.md` and `CHANGELOG.md`.
 
@@ -25,7 +26,8 @@ packages/
 ├── sdk/          # @dynamia-tools/sdk   – Core API client
 ├── ui-core/      # @dynamia-tools/ui-core    – UI components
 ├── vue/          # @dynamia-tools/vue   – Vue 3 integration
-└── README.md     # This file
+├── cli/          # @dynamia-tools/cli   – Project scaffolding CLI
+└── mcp/          # @dynamia-tools/mcp   – Documentation MCP server
 ```
 
 ---
@@ -113,4 +115,3 @@ Please read the root [CONTRIBUTING.md](../../../../CONTRIBUTING.md) for more det
 ## 📄 License
 
 [Apache License 2.0](../../../../LICENSE) — © Dynamia Soluciones IT SAS
-
