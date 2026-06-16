@@ -71,6 +71,7 @@
         <module>core</module>
         <module>ui</module>
         <module>remote</module>
+        <module>migration</module>
     </modules>
 
     <build>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
+  ~ Colombia / South America
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>tools.dynamia.modules</groupId>
+        <artifactId>tools.dynamia.modules.saas.parent</artifactId>
+        <version>26.6.0</version>
+    </parent>
+
+    <name>DynamiaModules - SaaS Tenant Mobility (Migration)</name>
+    <artifactId>tools.dynamia.modules.saas.migration</artifactId>
+    <url>https://www.dynamia.tools/modules/saas/migration</url>
+    <description>
+        Tenant Mobility module for DynamiaTools SaaS. Provides async export, import, clone,
+        backup and restore of tenant data via streaming JSON with JPA-based entity discovery.
+    </description>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler}</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>${source.encoding}</encoding>
+                    <parameters>true</parameters>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+
+        <!-- SaaS core: Account entity, AccountService, AccountServiceAPI -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.saas</artifactId>
+            <version>26.6.0</version>
+        </dependency>
+
+        <!-- SaaS API: AccountAware, AccountExportIgnore annotations -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.saas.api</artifactId>
+            <version>26.6.0</version>
+        </dependency>
+
+        <!-- SaaS JPA: SimpleEntitySaaS base classes -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.saas.jpa</artifactId>
+            <version>26.6.0</version>
+        </dependency>
+
+        <!-- Dynamia Integration: SchedulerUtil, VT, Containers -->
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.integration</artifactId>
+            <version>26.6.0</version>
+        </dependency>
+
+        <!-- Dynamia Domain JPA: CrudService, SimpleEntity, JpaUtils -->
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.domain.jpa</artifactId>
+            <version>26.6.0</version>
+        </dependency>
+
+        <!-- Hibernate ORM: EntityManagerFactory, Metamodel -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
+
+        <!-- Spring Boot autoconfigure: @ConfigurationProperties, @ConditionalOn* -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+
+        <!-- Jackson 3: ObjectMapper, JsonGenerator, JsonParser (Java Time built-in) -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- Jakarta APIs (provided by container) -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.20.0</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+</project>
+
