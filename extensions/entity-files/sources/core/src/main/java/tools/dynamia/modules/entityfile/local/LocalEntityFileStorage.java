@@ -37,10 +37,12 @@ import tools.dynamia.web.util.HttpUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serial;
+import java.net.URI;
 
 @Service
 public class LocalEntityFileStorage implements EntityFileStorage {
 
+    public static final String LOCAL_STORAGE_DEFAULT_CDN = "LOCAL_STORAGE_DEFAULT_CDN";
     private final LoggingService logger = new SLF4JLoggingService(LocalEntityFileStorage.class, "Local: ");
 
     public static final String ID = "LocalStorage";
@@ -105,6 +107,18 @@ public class LocalEntityFileStorage implements EntityFileStorage {
         if (useHttps && serverPath.startsWith("http:")) {
             serverPath = serverPath.replace("http:", "https:");
         }
+
+        if (serverPath == null || serverPath.isBlank()) {
+            String cdn = environment.getProperty(LOCAL_STORAGE_DEFAULT_CDN);
+            try {
+                if (cdn != null && !cdn.isBlank()) {
+                    serverPath = URI.create(cdn).toURL().toString();
+                }
+            } catch (Exception e) {
+                logger.warn("Error generating local storage url for default CDN: " + cdn, e);
+            }
+        }
+
 
         String context = getContextPath();
 
