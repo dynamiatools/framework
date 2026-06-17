@@ -12,6 +12,7 @@ package tools.dynamia.modules.saas.migration.api;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 
 /**
  * High-level service for executing tenant mobility operations synchronously.
@@ -41,7 +42,7 @@ public interface AccountMigrationService {
      * @param listener  optional progress callback; may be {@code null}
      * @param token     optional cancellation token; may be {@code null}
      */
-    void exportTenant(Long accountId,
+    void exportTenant(Serializable accountId,
                       OutputStream output,
                       AccountExportOptions options,
                       MigrationProgressListener listener,

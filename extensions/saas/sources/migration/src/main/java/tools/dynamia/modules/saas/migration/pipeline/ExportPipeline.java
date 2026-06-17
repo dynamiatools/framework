@@ -38,6 +38,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -156,7 +157,7 @@ public class ExportPipeline {
      * @param listener  optional progress callback
      * @param token     optional cancellation token
      */
-    public void export(Long accountId,
+    public void export(Serializable accountId,
                        OutputStream output,
                        AccountExportOptions options,
                        MigrationProgressListener listener,
@@ -212,7 +213,7 @@ public class ExportPipeline {
     // Manifest
     // ─────────────────────────────────────────────────────────────────────────
 
-    private void writeManifestToFile(Path manifestPath, Account account, Long accountId,
+    private void writeManifestToFile(Path manifestPath, Account account, Serializable accountId,
                                      AccountExportOptions options, List<Class<?>> ordered)
             throws IOException {
 
@@ -222,7 +223,11 @@ public class ExportPipeline {
             gen.writeStartObject();
             gen.writeStringProperty(ExportConstants.FIELD_VERSION, ExportConstants.FORMAT_VERSION);
             gen.writeStringProperty(ExportConstants.FIELD_EXPORTED_AT, LocalDateTime.now().toString());
-            gen.writeNumberProperty(ExportConstants.FIELD_SOURCE_ACCOUNT_ID, accountId);
+            if(accountId instanceof Long accountIdNumber) {
+                gen.writeNumberProperty(ExportConstants.FIELD_SOURCE_ACCOUNT_ID, accountIdNumber);
+            }else{
+                gen.writeStringProperty(ExportConstants.FIELD_SOURCE_ACCOUNT_ID, accountId.toString());
+            }
             gen.writeStringProperty(ExportConstants.FIELD_IDENTITY_STRATEGY,
                     options.getIdentityStrategy().name());
 
@@ -250,7 +255,7 @@ public class ExportPipeline {
 
     private void exportEntitiesInParallel(Path tempDir,
                                           List<Class<?>> ordered,
-                                          Long accountId,
+                                          Serializable accountId,
                                           AccountExportOptions options,
                                           CancellationToken token,
                                           int parallelism,
@@ -320,7 +325,7 @@ public class ExportPipeline {
      * concurrently from multiple virtual threads.
      */
     private long exportEntityToFile(Path tempDir, Class<?> entityClass,
-                                    Long accountId, AccountExportOptions options,
+                                    Serializable accountId, AccountExportOptions options,
                                     CancellationToken token) throws IOException {
 
         Path filePath = tempDir.resolve(entityFileName(accountId, entityClass));
@@ -393,7 +398,7 @@ public class ExportPipeline {
      */
     private long writeEntityRows(JsonGenerator gen,
                                  Class<?> entityClass,
-                                 Long accountId,
+                                 Serializable accountId,
                                  AccountExportOptions options,
                                  CancellationToken token,
                                  EntityManager localEm,
@@ -458,7 +463,7 @@ public class ExportPipeline {
      * Streams the temp directory contents to {@code output} as a ZIP archive.
      * Entries are added in topological order: manifest first, then entities.
      */
-    private void zipToOutput(Path tempDir, List<Class<?>> ordered, Long accountId,
+    private void zipToOutput(Path tempDir, List<Class<?>> ordered, Object accountId,
                              OutputStream output) throws IOException {
 
         // Keep reference to the buffer so we can flush it after finish().
@@ -568,7 +573,7 @@ public class ExportPipeline {
     // Utilities
     // ─────────────────────────────────────────────────────────────────────────
 
-    private static String entityFileName(Long accountId, Class<?> entityClass) {
+    private static String entityFileName(Object accountId, Class<?> entityClass) {
         return "Account" + accountId + "_" + entityClass.getSimpleName() + ".json";
     }
 

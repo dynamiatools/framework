@@ -20,6 +20,7 @@ import tools.dynamia.domain.jpa.SimpleEntity;
 import tools.dynamia.modules.saas.migration.api.AccountExportOptions;
 import tools.dynamia.modules.saas.migration.api.AccountImportOptions;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -49,12 +50,13 @@ public class AccountMigrationJob extends SimpleEntity {
     /**
      * Source tenant account ID.
      */
-    private Long accountId;
+    private String accountId;
 
     /**
      * Target tenant account ID (used for clone/restore operations).
      */
-    private Long targetAccountId;
+    private String targetAccountId;
+    private String accountIdType;
 
     // ─── Classification ────────────────────────────────────────────────────────
 
@@ -166,20 +168,46 @@ public class AccountMigrationJob extends SimpleEntity {
         this.uuid = uuid;
     }
 
-    public Long getAccountId() {
+    public String getAccountId() {
         return accountId;
     }
 
-    public void setAccountId(Long accountId) {
+    public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
 
-    public Long getTargetAccountId() {
+    public void accountId(Serializable accountId) {
+        if (accountId != null) {
+            this.accountId = String.valueOf(accountId);
+            this.accountIdType = accountId.getClass().getName();
+        } else {
+            this.accountId = null;
+            this.accountIdType = null;
+        }
+    }
+
+    public String getTargetAccountId() {
         return targetAccountId;
     }
 
-    public void setTargetAccountId(Long targetAccountId) {
+    public void setTargetAccountId(String targetAccountId) {
         this.targetAccountId = targetAccountId;
+    }
+
+    public void targetAccountId(Serializable targetAccountId) {
+        if (targetAccountId != null) {
+            this.targetAccountId = String.valueOf(targetAccountId);
+        } else {
+            this.targetAccountId = null;
+        }
+    }
+
+    public String getAccountIdType() {
+        return accountIdType;
+    }
+
+    public void setAccountIdType(String accountIdType) {
+        this.accountIdType = accountIdType;
     }
 
     public AccountJobType getJobType() {

@@ -12,6 +12,7 @@ package tools.dynamia.modules.saas.migration.services;
 
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.query.QueryConditions;
+import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
 import tools.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +40,7 @@ import tools.dynamia.modules.saas.migration.workers.ImportWorker;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -98,14 +100,14 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     // ─────────────────────────────────────────────────────────────────────────
 
     @Override
-    public AccountMigrationJobDto createExportJob(Long accountId, AccountExportOptions options) {
+    public AccountMigrationJobDto createExportJob(Serializable accountId, AccountExportOptions options) {
         AccountMigrationJob job = createAndSaveJob(accountId, null, AccountJobType.EXPORT, options);
         launchExportJob(job, accountId, options);
         return toDto(job);
     }
 
     @Override
-    public AccountMigrationJobDto createBackupJob(Long accountId) {
+    public AccountMigrationJobDto createBackupJob(Serializable accountId) {
         AccountExportOptions options = new AccountExportOptions()
                 .label("backup");
         AccountMigrationJob job = createAndSaveJob(accountId, null, AccountJobType.BACKUP, options);
@@ -122,7 +124,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     }
 
     @Override
-    public AccountMigrationJobDto createRestoreJob(Long accountId, MultipartFile file) {
+    public AccountMigrationJobDto createRestoreJob(Serializable accountId, MultipartFile file) {
         Path savedFile = saveUploadedFile(file, "restore");
         AccountImportOptions options = new AccountImportOptions()
                 .targetAccountId(accountId)
@@ -156,7 +158,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     }
 
     @Override
-    public List<AccountMigrationJobDto> listJobs(Long accountId) {
+    public List<AccountMigrationJobDto> listJobs(Serializable accountId) {
         QueryParameters qp = new QueryParameters()
                 .orderBy("createdAt", false);
         if (accountId != null) {
@@ -194,7 +196,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     // Worker launchers
     // ─────────────────────────────────────────────────────────────────────────
 
-    private void launchExportJob(AccountMigrationJob job, Long accountId, AccountExportOptions options) {
+    private void launchExportJob(AccountMigrationJob job, Serializable accountId, AccountExportOptions options) {
         CancellationToken token = CancellationToken.active();
         activeTokens.put(job.getUuid(), token);
         Path outputFile = buildOutputPath(job);
@@ -267,11 +269,11 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     // Helpers
     // ─────────────────────────────────────────────────────────────────────────
 
-    private AccountMigrationJob createAndSaveJob(Long accountId, Long targetAccountId,
+    private AccountMigrationJob createAndSaveJob(Serializable accountId, Serializable targetAccountId,
                                                  AccountJobType type, Object options) {
         AccountMigrationJob job = new AccountMigrationJob();
-        job.setAccountId(accountId);
-        job.setTargetAccountId(targetAccountId);
+        job.accountId(accountId);
+        job.targetAccountId(targetAccountId);
         job.setJobType(type);
         job.setStatus(AccountJobStatus.PENDING);
         if (options != null) {
@@ -318,7 +320,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
         });
     }
 
-    private tools.dynamia.modules.saas.migration.api.MigrationProgressListener buildProgressListener(
+    private MigrationProgressListener buildProgressListener(
             AccountMigrationJob job) {
         // Mark the job as RUNNING on first progress event, then persist progress updates
         final boolean[] started = {false};

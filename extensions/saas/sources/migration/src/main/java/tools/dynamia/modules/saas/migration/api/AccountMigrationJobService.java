@@ -13,6 +13,7 @@ package tools.dynamia.modules.saas.migration.api;
 import org.springframework.web.multipart.MultipartFile;
 import tools.dynamia.modules.saas.migration.domain.AccountMigrationJob;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -39,7 +40,7 @@ public interface AccountMigrationJobService {
      * @param options   export configuration
      * @return the newly created (PENDING) job
      */
-    AccountMigrationJobDto createExportJob(Long accountId, AccountExportOptions options);
+    AccountMigrationJobDto createExportJob(Serializable accountId, AccountExportOptions options);
 
     /**
      * Starts an async import job from an uploaded file.
@@ -64,7 +65,7 @@ public interface AccountMigrationJobService {
      * @param accountId ID of the account to back up
      * @return the newly created (PENDING) job
      */
-    AccountMigrationJobDto createBackupJob(Long accountId);
+    AccountMigrationJobDto createBackupJob(Serializable accountId);
 
     /**
      * Starts an async restore job from an uploaded file
@@ -74,7 +75,7 @@ public interface AccountMigrationJobService {
      * @param file      multipart upload
      * @return the newly created (PENDING) job
      */
-    AccountMigrationJobDto createRestoreJob(Long accountId, MultipartFile file);
+    AccountMigrationJobDto createRestoreJob(Serializable accountId, MultipartFile file);
 
     /**
      * Returns the current state of the job identified by {@code jobUuid}.
@@ -98,7 +99,7 @@ public interface AccountMigrationJobService {
      * @param accountId filter by account; pass {@code null} to return all jobs
      * @return list of jobs ordered by creation date descending
      */
-    List<AccountMigrationJobDto> listJobs(Long accountId);
+    List<AccountMigrationJobDto> listJobs(Serializable accountId);
 
     /**
      * Requests cooperative cancellation of a running job.

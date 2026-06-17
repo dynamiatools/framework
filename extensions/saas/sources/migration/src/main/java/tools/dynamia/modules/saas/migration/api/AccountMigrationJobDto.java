@@ -15,6 +15,7 @@ import tools.dynamia.modules.saas.migration.domain.AccountJobStatus;
 import tools.dynamia.modules.saas.migration.domain.AccountJobType;
 import tools.dynamia.modules.saas.migration.domain.AccountMigrationJob;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -28,8 +29,8 @@ import java.time.LocalDateTime;
 public record AccountMigrationJobDto(
         Long id,
         String uuid,
-        Long accountId,
-        Long targetAccountId,
+        Serializable accountId,
+        Serializable targetAccountId,
         AccountJobType jobType,
         AccountJobStatus status,
         int progress,

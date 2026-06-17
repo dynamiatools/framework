@@ -44,6 +44,7 @@ import tools.jackson.databind.node.ObjectNode;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,8 +65,7 @@ import java.util.zip.ZipInputStream;
  *       {@code entityClass} → {@code fields} → {@code rows} in streaming mode.</li>
  *   <li>Rows are accumulated into chunks and persisted via
  *       {@link #persistChunk} in isolated transactions.</li>
- *   <li>{@link #closeEntry} is called after each entry so the stream
- *       advances cleanly to the next one.</li>
+ *
  * </ol>
  *
  * <p>Entities arrive in the same topological order they were written by
@@ -382,7 +382,7 @@ public class ImportPipeline {
     private Object deserializeEntity(JsonNode node,
                                      Class<?> entityClass,
                                      EntityType<?> entityType,
-                                     Long targetAccountId,
+                                     Serializable targetAccountId,
                                      IdentityMapper identityMapper,
                                      Map<String, Map<Object, Object>> idMappings) throws Exception {
 

@@ -19,6 +19,7 @@ import tools.dynamia.modules.saas.migration.api.AccountMigrationService;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.nio.file.Path;
 
 /**
@@ -36,14 +37,14 @@ public class ExportWorker extends TaskWithResult<Boolean> {
 
     private static final LoggingService log = LoggingService.get(ExportWorker.class);
 
-    private final Long accountId;
+    private final Serializable accountId;
     private final Path outputFile;
     private final AccountExportOptions options;
     private final AccountMigrationService migrationService;
     private final MigrationProgressListener progressListener;
     private final CancellationToken cancellationToken;
 
-    public ExportWorker(Long accountId,
+    public ExportWorker(Serializable accountId,
                         Path outputFile,
                         AccountExportOptions options,
                         AccountMigrationService migrationService,

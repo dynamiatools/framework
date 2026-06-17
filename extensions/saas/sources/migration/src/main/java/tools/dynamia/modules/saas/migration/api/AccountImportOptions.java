@@ -10,6 +10,8 @@
  */
 package tools.dynamia.modules.saas.migration.api;
 
+import java.io.Serializable;
+
 /**
  * Options controlling a tenant import operation.
  *
@@ -22,7 +24,7 @@ public class AccountImportOptions {
      * When {@code null}, the import will attempt to create a new account from
      * the {@code account} section of the export file.
      */
-    private Long targetAccountId;
+    private Serializable targetAccountId;
 
     /** How to handle primary keys when persisting imported entities. */
     private IdentityStrategy identityStrategy = IdentityStrategy.REGENERATE_IDS;
@@ -38,7 +40,7 @@ public class AccountImportOptions {
 
     // ─── Fluent builder ────────────────────────────────────────────────────────
 
-    public AccountImportOptions targetAccountId(Long targetAccountId) {
+    public AccountImportOptions targetAccountId(Serializable targetAccountId) {
         this.targetAccountId = targetAccountId;
         return this;
     }
@@ -60,11 +62,11 @@ public class AccountImportOptions {
 
     // ─── Accessors ─────────────────────────────────────────────────────────────
 
-    public Long getTargetAccountId() {
+    public Serializable getTargetAccountId() {
         return targetAccountId;
     }
 
-    public void setTargetAccountId(Long targetAccountId) {
+    public void setTargetAccountId(Serializable targetAccountId) {
         this.targetAccountId = targetAccountId;
     }
 
