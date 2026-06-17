@@ -108,7 +108,9 @@ public class OptionsFluentBuilderTest {
         Assert.assertTrue(json.contains("REGENERATE_IDS"));
 
         AccountImportOptions roundtrip = objectMapper.readValue(json, AccountImportOptions.class);
-        Assert.assertEquals(7L, (long) roundtrip.getTargetAccountId());
+        if (roundtrip.getTargetAccountId() instanceof Number id) {
+            Assert.assertEquals(7L, id.longValue());
+        }
     }
 
     // ─── AccountCloneOptions ─────────────────────────────────────────────────

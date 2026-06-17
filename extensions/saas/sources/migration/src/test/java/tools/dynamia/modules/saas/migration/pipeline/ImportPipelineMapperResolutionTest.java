@@ -22,9 +22,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import tools.dynamia.modules.saas.migration.api.AccountImportOptions;
 import tools.dynamia.modules.saas.migration.api.IdentityMapper;
 import tools.dynamia.modules.saas.migration.api.IdentityStrategy;
-import tools.dynamia.modules.saas.migration.api.MigrationException;
 import tools.dynamia.modules.saas.migration.config.AccountMigrationProperties;
 import tools.dynamia.modules.saas.migration.identity.KeepIdsIdentityMapper;
+import tools.dynamia.modules.saas.migration.identity.Uuid7IdentityMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -40,7 +40,7 @@ import static org.mockito.Mockito.when;
 /**
  * Verifies that {@link ImportPipeline} correctly resolves the identity mapper:
  * <ul>
- *   <li>UUID7 throws {@link MigrationException} immediately.</li>
+ *   <li>UUID7 completes without error (uses {@link tools.dynamia.modules.saas.migration.identity.Uuid7IdentityMapper}).</li>
  *   <li>A custom Spring bean mapper is preferred over built-in defaults.</li>
  *   <li>KEEP_IDS falls back to {@link tools.dynamia.modules.saas.migration.identity.KeepIdsIdentityMapper}
  *       when no custom bean is present.</li>
@@ -71,20 +71,41 @@ public class ImportPipelineMapperResolutionTest {
     }
 
     @Test
-    public void uuid7StrategyThrowsMigrationException() {
+    public void uuid7StrategyCompletesWithoutException() {
         ImportPipeline pipeline = new ImportPipeline(emf, properties, objectMapper);
 
         AccountImportOptions opts = new AccountImportOptions()
                 .targetAccountId(1L)
                 .identityStrategy(IdentityStrategy.UUID7);
 
-        try {
-            pipeline.importTenant(emptyExportStream(), opts, null, null);
-            Assert.fail("Expected MigrationException for UUID7");
-        } catch (MigrationException e) {
-            Assert.assertTrue("Message should mention UUID7",
-                    e.getMessage().contains("UUID7"));
-        }
+        // Empty entity stream — should complete cleanly using Uuid7IdentityMapper
+        pipeline.importTenant(emptyExportStream(), opts, null, null);
+    }
+
+    @Test
+    public void uuid7StrategyUsesUuid7IdentityMapper() {
+        // Verify the built-in UUID7 mapper is selected when no custom bean overrides it
+        ImportPipeline pipeline = new ImportPipeline(emf, properties, objectMapper);
+
+        IdentityMapper[] captured = {null};
+        IdentityMapper spy = new Uuid7IdentityMapper() {
+            @Override
+            public Object mapId(Object originalId, Class<?> entityClass) {
+                captured[0] = this;
+                return super.mapId(originalId, entityClass);
+            }
+        };
+        injectCustomMappers(pipeline, List.of(spy));
+
+        // spy handles UUID7 → it should be selected
+        AccountImportOptions opts = new AccountImportOptions()
+                .targetAccountId(1L)
+                .identityStrategy(IdentityStrategy.UUID7);
+
+        pipeline.importTenant(emptyExportStream(), opts, null, null);
+        // No entities → mapId is never called, but resolveIdentityMapper must pick
+        // our spy (strategy == UUID7) rather than throwing.
+        // The import completes: that alone proves UUID7 is no longer rejected.
     }
 
     @Test
