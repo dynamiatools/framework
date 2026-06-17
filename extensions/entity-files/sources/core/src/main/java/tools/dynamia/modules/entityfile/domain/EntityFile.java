@@ -58,7 +58,7 @@ public class EntityFile extends BaseEntity implements URLable {
     private EntityFileType type;
     private String extension = "dir";
     private String contentType;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     private EntityFile parent;
     private boolean shared;
