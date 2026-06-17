@@ -10,10 +10,12 @@
  */
 package tools.dynamia.modules.saas.migration.api;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import tools.dynamia.modules.saas.migration.domain.AccountJobStatus;
 import tools.dynamia.modules.saas.migration.domain.AccountJobType;
 import tools.dynamia.modules.saas.migration.domain.AccountMigrationJob;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 /**
@@ -22,6 +24,7 @@ import java.time.LocalDateTime;
  *
  * @author Mario Serrano Leones
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record AccountMigrationJobDto(
         Long id,
         String uuid,
@@ -31,6 +34,7 @@ public record AccountMigrationJobDto(
         AccountJobStatus status,
         int progress,
         String progressMessage,
+        long records,
         String errorMessage,
         String downloadUrl,
         LocalDateTime createdAt,
@@ -38,11 +42,20 @@ public record AccountMigrationJobDto(
         LocalDateTime finishedAt
 ) {
 
-    /** Convenience: returns {@code true} when the job has reached a terminal state. */
+    /**
+     * Convenience: returns {@code true} when the job has reached a terminal state.
+     */
     public boolean isFinished() {
         return status == AccountJobStatus.COMPLETED
                 || status == AccountJobStatus.FAILED
                 || status == AccountJobStatus.CANCELLED;
+    }
+
+    public Duration getDuration() {
+        if (startedAt != null && finishedAt != null) {
+            return Duration.between(startedAt, finishedAt);
+        }
+        return null;
     }
 }
 

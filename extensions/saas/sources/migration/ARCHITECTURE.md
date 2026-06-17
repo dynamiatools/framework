@@ -108,27 +108,29 @@ OutputStream (raw or GZIPOutputStream)
             ├── Write "account": AccountDTO object
             └── Write "entities": {
                     For each entityClass in topological order:
-                        Write entityClass.getName(): [
-                            LOOP (pagination by chunks):
-                                count = CrudService.count(entityClass, {accountId})
-                                for page 1..N:
-                                    chunk = CrudService.find(entityClass, {accountId, paginator})
-                                    for each record:
-                                        write as JSON object (flat map, refs as _ref_id)
-                        ]
+                        Write entityClass.getName(): {
+                            "fields": ["id", "name", "category_ref_id", ...],
+                            "rows": [
+                                [1, "John", 3],
+                                [2, "Cindy", null],
+                                ...
+                            ]
+                        }
                 }
 ```
 
-### Serialization of a Single Entity
+### Serialization of a Single Entity (Columnar Format)
 
+Columns are built once per entity type from `EntityType.getSingularAttributes()`:
 ```
-For each SingularAttribute in EntityType:
-  BASIC / EMBEDDED  → write field value directly
-  MANY_TO_ONE / ONE_TO_ONE → write {fieldName}_ref_id: <referenced entity's id>
-  ONE_TO_MANY / MANY_TO_MANY → SKIP (reconstructed during import via child entities)
+id → always first column
+For each SingularAttribute (excluding id):
+  BASIC / EMBEDDED  → column name = fieldName, value written directly
+  MANY_TO_ONE / ONE_TO_ONE → column name = fieldName + "_ref_id", value = referenced PK
+  ONE_TO_MANY / MANY_TO_MANY / ELEMENT_COLLECTION → SKIP
 ```
 
-Fields annotated with `@ExportIgnore` are skipped.
+Fields annotated with `@ExportIgnore` are skipped. Missing or inaccessible fields write `null`.
 
 ---
 
@@ -144,7 +146,9 @@ InputStream (auto-detected: raw or GZIPInputStream)
             └── Read "entities" → {
                     For each entityClassName:
                         resolve class → Class.forName(entityClassName)
-                        For each JSON record in array (chunked):
+                        Read "fields": [...] → ordered column names
+                        For each row array (chunked):
+                            reconstruct JsonNode from fields + row values
                             deserialize → entity instance
                             resolve _ref_id references via idMappings
                             set accountId = targetAccountId
@@ -204,7 +208,7 @@ saas_export_42_20260614T100500.json[.gz]
 
 ```json
 {
-  "version": "1",
+  "version": "2",
   "exportedAt": "2026-06-14T10:05:00",
   "sourceAccountId": 42,
   "identityStrategy": "KEEP_IDS",
@@ -216,23 +220,34 @@ saas_export_42_20260614T100500.json[.gz]
     ...
   },
   "entities": {
-    "tools.dynamia.modules.saas.jpa.AccountParameter": [
-      { "id": 1, "accountId": 42, "name": "theme", "value": "dark" }
-    ],
-    "com.example.Customer": [
-      { "id": 10, "accountId": 42, "name": "John", "category_ref_id": 3 }
-    ],
-    "com.example.Order": [
-      { "id": 100, "accountId": 42, "customer_ref_id": 10, "total": 99.99 }
-    ]
+    "tools.dynamia.modules.saas.jpa.AccountParameter": {
+      "fields": ["id", "accountId", "name", "value"],
+      "rows": [
+        [1, 42, "theme", "dark"]
+      ]
+    },
+    "com.example.Customer": {
+      "fields": ["id", "accountId", "name", "category_ref_id"],
+      "rows": [
+        [10, 42, "John", 3]
+      ]
+    },
+    "com.example.Order": {
+      "fields": ["id", "accountId", "total", "customer_ref_id"],
+      "rows": [
+        [100, 42, 99.99, 10]
+      ]
+    }
   }
 }
 ```
 
 **Key conventions:**
+- Each entity section is an object with `fields` (column names) and `rows` (value arrays).
 - `{fieldName}_ref_id` encodes a `@ManyToOne` / `@OneToOne` reference by its primary key.
 - The `account` section makes the package self-describing.
 - Entities appear in topological order (parents before children).
+- Format version `"2"` uses the columnar layout; version `"1"` (legacy) used per-row objects.
 
 ---
 

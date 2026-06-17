@@ -85,13 +85,13 @@ public class AccountMigrationJobTest {
     public void updateProgressClampsTo0_100Range() {
         AccountMigrationJob job = new AccountMigrationJob();
 
-        job.updateProgress(-5, "below zero");
+        job.updateProgress(-5, "below zero", 0);
         Assert.assertEquals(0, job.getProgress());
 
-        job.updateProgress(150, "above hundred");
+        job.updateProgress(150, "above hundred", 0);
         Assert.assertEquals(100, job.getProgress());
 
-        job.updateProgress(42, "normal");
+        job.updateProgress(42, "normal", 0);
         Assert.assertEquals(42, job.getProgress());
         Assert.assertEquals("normal", job.getProgressMessage());
     }

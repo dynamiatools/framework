@@ -72,6 +72,7 @@ public class AccountMigrationJob extends SimpleEntity {
      * Completion percentage 0–100.
      */
     private int progress;
+    private long records;
 
     @Column(length = 2000)
     private String progressMessage;
@@ -140,9 +141,10 @@ public class AccountMigrationJob extends SimpleEntity {
     /**
      * Update running progress (0-100) and an optional human-readable message.
      */
-    public void updateProgress(int progress, String message) {
+    public void updateProgress(int progress, String message, long records) {
         this.progress = Math.min(100, Math.max(0, progress));
         this.progressMessage = StringUtils.truncate(message, 1999);
+        this.records = records;
     }
 
     /**
@@ -263,6 +265,14 @@ public class AccountMigrationJob extends SimpleEntity {
     @Override
     public String toString() {
         return "TenantMobilityJob{uuid=" + uuid + ", type=" + jobType + ", status=" + status + "}";
+    }
+
+    public long getRecords() {
+        return records;
+    }
+
+    public void setRecords(long records) {
+        this.records = records;
     }
 }
 

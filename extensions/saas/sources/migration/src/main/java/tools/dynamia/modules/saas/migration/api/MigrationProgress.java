@@ -13,25 +13,28 @@ package tools.dynamia.modules.saas.migration.api;
 /**
  * Carries progress information during a tenant migration operation.
  *
- * @param processedRecords Total records processed so far.
- * @param totalRecords     Total records expected (0 if unknown).
- * @param message          Human-readable description of the current step.
+ * @param processedEntities Total entities processed so far.
+ * @param totalEntities     Total entities expected (0 if unknown).
+ * @param message           Human-readable description of the current step.
+ * @param processedRecords  Total records processed so far (across all entities).
  * @author Mario Serrano Leones
  */
-public record MigrationProgress(long processedRecords, long totalRecords, String message) {
+public record MigrationProgress(long processedEntities, long totalEntities, String message, long processedRecords) {
 
-    /** Returns the progress as a percentage (0–100), or -1 if total is unknown. */
+    /**
+     * Returns the progress as a percentage (0–100), or -1 if total is unknown.
+     */
     public int percentage() {
-        if (totalRecords <= 0) return -1;
-        return (int) Math.min(100, (processedRecords * 100L) / totalRecords);
+        if (totalEntities <= 0) return -1;
+        return (int) Math.min(100, (processedEntities * 100L) / totalEntities);
     }
 
     @Override
     public String toString() {
-        if (totalRecords > 0) {
-            return "[%d%%] %s (%d / %d)".formatted(percentage(), message, processedRecords, totalRecords);
+        if (totalEntities > 0) {
+            return "[%d%%] %s (%d / %d)".formatted(percentage(), message, processedEntities, totalEntities);
         }
-        return "[?] %s (%d processed)".formatted(message, processedRecords);
+        return "[?] %s (%d processed)".formatted(message, processedEntities);
     }
 }
 

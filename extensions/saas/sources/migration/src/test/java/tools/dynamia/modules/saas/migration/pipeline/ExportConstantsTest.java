@@ -25,8 +25,8 @@ import java.io.IOException;
 public class ExportConstantsTest {
 
     @Test
-    public void formatVersionIsOne() {
-        Assert.assertEquals("1", ExportConstants.FORMAT_VERSION);
+    public void formatVersionIsTwo() {
+        Assert.assertEquals("2", ExportConstants.FORMAT_VERSION);
     }
 
     @Test
@@ -42,6 +42,8 @@ public class ExportConstantsTest {
         Assert.assertEquals("identityStrategy", ExportConstants.FIELD_IDENTITY_STRATEGY);
         Assert.assertEquals("account",          ExportConstants.FIELD_ACCOUNT);
         Assert.assertEquals("entities",         ExportConstants.FIELD_ENTITIES);
+        Assert.assertEquals("fields",           ExportConstants.FIELD_FIELDS);
+        Assert.assertEquals("rows",             ExportConstants.FIELD_ROWS);
     }
 
     @Test
@@ -71,7 +73,7 @@ public class ExportConstantsTest {
         gen.close();
 
         JsonNode root = mapper.readTree(out.toByteArray());
-        Assert.assertEquals("1",        root.get(ExportConstants.FIELD_VERSION).asText());
+        Assert.assertEquals("2",        root.get(ExportConstants.FIELD_VERSION).asText());
         Assert.assertEquals(1L,         root.get(ExportConstants.FIELD_SOURCE_ACCOUNT_ID).asLong());
         Assert.assertEquals("KEEP_IDS", root.get(ExportConstants.FIELD_IDENTITY_STRATEGY).asText());
         Assert.assertTrue(root.has(ExportConstants.FIELD_ACCOUNT));

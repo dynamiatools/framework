@@ -21,7 +21,7 @@ public final class ExportConstants {
     }
 
     /** Current format version written to every export file. */
-    public static final String FORMAT_VERSION = "1";
+    public static final String FORMAT_VERSION = "2";
 
     /**
      * Suffix appended to field names when serializing {@code @ManyToOne} /
@@ -48,5 +48,11 @@ public final class ExportConstants {
 
     /** Top-level JSON field for the identity strategy name. */
     public static final String FIELD_IDENTITY_STRATEGY = "identityStrategy";
+
+    /** Per-entity field listing the ordered column names in the columnar format. */
+    public static final String FIELD_FIELDS = "fields";
+
+    /** Per-entity field containing the data rows as value arrays in the columnar format. */
+    public static final String FIELD_ROWS = "rows";
 }
 

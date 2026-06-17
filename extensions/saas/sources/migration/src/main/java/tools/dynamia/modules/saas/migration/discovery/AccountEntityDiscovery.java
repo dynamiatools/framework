@@ -15,6 +15,7 @@ import jakarta.persistence.metamodel.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.dynamia.integration.sterotypes.Service;
+import tools.dynamia.modules.entityfile.domain.EntityFile;
 import tools.dynamia.modules.saas.api.AccountAware;
 import tools.dynamia.modules.saas.api.AccountExportIgnore;
 import tools.dynamia.modules.saas.domain.Account;
@@ -60,6 +61,8 @@ public class AccountEntityDiscovery {
 
         // Always include Account as the tenant root
         exportable.add(Account.class);
+
+
         log.debug("[Migration] Always including: {}", Account.class.getName());
 
         for (EntityType<?> entityType : managedTypes) {
@@ -84,6 +87,7 @@ public class AccountEntityDiscovery {
             exportable.add(javaType);
             log.debug("[Migration] Discovered exportable entity: {}", javaType.getName());
         }
+        exportable.add(EntityFile.class); // EntityFile is used for storing exported file metadata and must be included even if not AccountAware
 
         log.info("[Migration] Discovered {} exportable entity types", exportable.size());
         return exportable;

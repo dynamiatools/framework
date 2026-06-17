@@ -19,11 +19,9 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.metamodel.Attribute.PersistentAttributeType;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.SingularAttribute;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.util.ReflectionUtils;
 import tools.dynamia.domain.jpa.JpaUtils;
-import tools.dynamia.domain.query.DataPaginator;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.integration.sterotypes.Service;
@@ -44,7 +42,10 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -71,6 +72,11 @@ import java.util.zip.GZIPOutputStream;
 public class ExportPipeline {
 
     private static final LoggingService logger = LoggingService.get(ExportPipeline.class);
+
+    /**
+     * Column definitions cached per entity class; built once, reused across export runs.
+     */
+    private final Map<Class<?>, List<ColumnDef>> columnCache = new ConcurrentHashMap<>();
 
     private final EntityManagerFactory emf;
     private final CrudService crudService;
@@ -149,6 +155,7 @@ public class ExportPipeline {
             gen.writeStartObject();
 
             long processed = 0;
+            long records = 0;
             for (Class<?> entityClass : ordered) {
                 if (token != null && token.isCancelled()) {
                     logger.info("[Migration/Export] Cancelled at entity: {}", entityClass.getSimpleName());
@@ -156,11 +163,13 @@ public class ExportPipeline {
                 }
 
                 var count = exportEntityType(gen, entityClass, accountId, options, token);
+                records += count;
                 processed++;
 
                 if (listener != null) {
                     listener.onProgress(new MigrationProgress(processed, totalEntities,
-                            "Exported " + entityClass.getSimpleName() + " (" + count + " records)"));
+                            "Exported " + entityClass.getSimpleName() + " (" + count + " records)", records)
+                    );
                 }
             }
 
@@ -181,127 +190,151 @@ public class ExportPipeline {
     // Internal helpers
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Describes one exported column. The {@link Field} is resolved and made accessible once
+     * (in {@link #buildColumns}) and cached — never looked up again per row.
+     */
+    private record ColumnDef(String columnName, Field field, PersistentAttributeType type) {
+    }
+
     private long exportEntityType(JsonGenerator gen, Class<?> entityClass, Long accountId,
                                   AccountExportOptions options, CancellationToken token)
             throws IOException {
 
-        long processed = 0;
-        int chunkSize = resolveChunkSize(options);
-
         gen.writeName(entityClass.getName());
-        gen.writeStartArray();
+        gen.writeStartObject();
 
         try {
             EntityType<?> entityType = emf.getMetamodel().entity(entityClass);
+            List<ColumnDef> columns = buildColumns(entityType);
 
-            if (Account.class.equals(entityClass)) {
-                // Account is already serialized in the header; produce an empty array here
-                // to keep the format consistent (importers can find it if needed)
-                gen.writeEndArray();
-                return 0;
+            // Write column header
+            gen.writeName(ExportConstants.FIELD_FIELDS);
+            gen.writeStartArray();
+            for (ColumnDef col : columns) {
+                gen.writeString(col.columnName());
             }
+            gen.writeEndArray();
 
+            gen.writeName(ExportConstants.FIELD_ROWS);
+            gen.writeStartArray();
 
-            logger.info("Reading entity {} data", entityClass);
-            EntityManager em = (EntityManager) crudService.getDelgate();
-            QueryParameters qp = QueryParameters.with("accountId", accountId)
-                    .paginate(chunkSize)
-                    .setHint(JpaCrudService.HINT_FETCH_GRAPH,em.createEntityGraph(entityClass))
-                    .orderBy("id", true);
+            long processed = 0;
 
-            @SuppressWarnings("unchecked")
-            List<Object> entities = (List<Object>) crudService.find(entityClass, qp);
-            if (entities != null && !entities.isEmpty()) {
-                logger.info("Exporting {} records of type {} for accountId={}", entities.size(), entityClass.getSimpleName(), accountId);
-                for (Object entity : entities) {
-                    if (token != null && token.isCancelled()) break;
-                    if (entity != null) {
-                        writeEntity(gen, entity, entityType);
+            if (!Account.class.equals(entityClass)) {
+                logger.info("Reading entity {} data", entityClass);
+                int chunkSize = resolveChunkSize(options);
+                EntityManager em = (EntityManager) crudService.getDelgate();
+                QueryParameters qp = QueryParameters.with("accountId", accountId)
+                        .paginate(chunkSize)
+                        .setHint(JpaCrudService.HINT_FETCH_GRAPH, em.createEntityGraph(entityClass))
+                        .setReadOnly(true)
+                        .orderBy("id", true);
+
+                @SuppressWarnings("unchecked")
+                List<Object> entities = (List<Object>) crudService.findReadOnly(entityClass, qp);
+                if (entities != null && !entities.isEmpty()) {
+                    logger.info("Exporting {} records of type {} for accountId={}", entities.size(), entityClass.getSimpleName(), accountId);
+                    for (Object entity : entities) {
+                        if (token != null && token.isCancelled()) break;
+                        if (entity != null) {
+                            writeEntityRow(gen, entity, columns);
+                        }
+                        processed++;
                     }
-                    processed++;
+                    em.clear();
                 }
             }
-        } catch (IllegalArgumentException e) {
-            logger.warn("[Migration/Export] Entity not in JPA metamodel, writing raw: {}", entityClass.getName());
-        }
 
-        gen.writeEndArray();
-        logger.debug("[Migration/Export] {} records exported for {}", processed, entityClass.getSimpleName());
-        return processed;
+            gen.writeEndArray(); // rows
+            logger.debug("[Migration/Export] {} records exported for {}", processed, entityClass.getSimpleName());
+            gen.writeEndObject();
+            return processed;
+
+        } catch (IllegalArgumentException e) {
+            logger.warn("[Migration/Export] Entity not in JPA metamodel, skipping: {}", entityClass.getName());
+            // Still close the object cleanly with empty fields/rows
+            gen.writeName(ExportConstants.FIELD_FIELDS);
+            gen.writeStartArray();
+            gen.writeEndArray();
+            gen.writeName(ExportConstants.FIELD_ROWS);
+            gen.writeStartArray();
+            gen.writeEndArray();
+            gen.writeEndObject();
+            return 0;
+        }
     }
 
-    private void writeEntity(JsonGenerator gen, Object entity, EntityType<?> entityType)
-            throws IOException {
-        gen.writeStartObject();
+    /**
+     * Builds and caches the column list for an entity class.
+     * Fields are resolved and made accessible here — once per entity class per JVM lifetime.
+     */
+    private List<ColumnDef> buildColumns(EntityType<?> entityType) {
+        return columnCache.computeIfAbsent(entityType.getJavaType(), cls -> {
+            List<ColumnDef> cols = new ArrayList<>();
 
-        // Write ID explicitly
-        try {
-            Serializable id = JpaUtils.getJPAIdValue(entity);
-            gen.writeName("id");
-            gen.writePOJO(id);
-        } catch (Exception e) {
-            logger.debug("[Migration/Export] Could not write ID for {}", entity.getClass().getSimpleName());
-        }
+            Field idField = ReflectionUtils.findField(cls, "id");
+            if (idField != null) {
+                ReflectionUtils.makeAccessible(idField);
+                cols.add(new ColumnDef("id", idField, PersistentAttributeType.BASIC));
+            }
 
-        // Write all singular attributes
-        for (SingularAttribute<?, ?> attr : entityType.getSingularAttributes()) {
-            String name = attr.getName();
-            if ("id".equals(name)) continue; // already written
-
-            // Skip fields annotated with @ExportIgnore
-            if (hasExportIgnore(entityType.getJavaType(), name)) continue;
-
-            try {
-                Field field = findField(entityType.getJavaType(), name);
-                if (field == null) continue;
-                field.setAccessible(true);
-                Object value = field.get(entity);
+            for (SingularAttribute<?, ?> attr : entityType.getSingularAttributes()) {
+                String name = attr.getName();
+                if ("id".equals(name)) continue;
+                if (hasExportIgnore(cls, name)) continue;
 
                 PersistentAttributeType pt = attr.getPersistentAttributeType();
-
-                if (pt == PersistentAttributeType.MANY_TO_ONE
-                        || pt == PersistentAttributeType.ONE_TO_ONE) {
-                    if (value != null) {
-                        Serializable refId = JpaUtils.getJPAIdValue(value);
-                        gen.writeName(name + ExportConstants.REF_ID_SUFFIX);
-                        gen.writePOJO(refId);
-                    }
-                } else if (pt == PersistentAttributeType.ONE_TO_MANY
+                if (pt == PersistentAttributeType.ONE_TO_MANY
                         || pt == PersistentAttributeType.MANY_TO_MANY
-                        || pt == PersistentAttributeType.ELEMENT_COLLECTION) {
-                    // Skip collections — they are reconstructed via child entities
+                        || pt == PersistentAttributeType.ELEMENT_COLLECTION) continue;
+
+                Field field = ReflectionUtils.findField(cls, name);
+                if (field == null) continue;
+                ReflectionUtils.makeAccessible(field);
+
+                String colName = (pt == PersistentAttributeType.MANY_TO_ONE
+                        || pt == PersistentAttributeType.ONE_TO_ONE)
+                        ? name + ExportConstants.REF_ID_SUFFIX : name;
+                cols.add(new ColumnDef(colName, field, pt));
+            }
+            return Collections.unmodifiableList(cols);
+        });
+    }
+
+    private void writeEntityRow(JsonGenerator gen, Object entity, List<ColumnDef> columns)
+            throws IOException {
+        gen.writeStartArray();
+        for (ColumnDef col : columns) {
+            try {
+                Object value = col.field().get(entity); // Field already accessible — no lookup here
+
+                if (col.type() == PersistentAttributeType.MANY_TO_ONE
+                        || col.type() == PersistentAttributeType.ONE_TO_ONE) {
+                    if (value != null) {
+                        gen.writePOJO(JpaUtils.getJPAIdValue(value));
+                    } else {
+                        gen.writeNull();
+                    }
                 } else {
-                    // BASIC or EMBEDDED
-                    gen.writeName(name);
                     objectMapper.writeValue(gen, value);
                 }
-
             } catch (IllegalAccessException e) {
                 logger.debug("[Migration/Export] Cannot access field {} on {}: {}",
-                        name, entityType.getJavaType().getSimpleName(), e.getMessage());
+                        col.field().getName(), entity.getClass().getSimpleName(), e.getMessage());
+                gen.writeNull();
             } catch (Exception e) {
-                logger.debug("[Migration/Export] Skipping field {} due to: {}", name, e.getMessage());
+                logger.debug("[Migration/Export] Skipping field {} due to: {}",
+                        col.field().getName(), e.getMessage());
+                gen.writeNull();
             }
         }
-
-        gen.writeEndObject();
+        gen.writeEndArray();
     }
 
     private boolean hasExportIgnore(Class<?> clazz, String fieldName) {
-        Field field = findField(clazz, fieldName);
+        Field field = ReflectionUtils.findField(clazz, fieldName);
         return field != null && field.isAnnotationPresent(ExportIgnore.class);
-    }
-
-    private Field findField(Class<?> clazz, String fieldName) {
-        Class<?> current = clazz;
-        while (current != null && current != Object.class) {
-            try {
-                return current.getDeclaredField(fieldName);
-            } catch (NoSuchFieldException e) {
-                current = current.getSuperclass();
-            }
-        }
-        return null;
     }
 
     private int resolveChunkSize(AccountExportOptions options) {

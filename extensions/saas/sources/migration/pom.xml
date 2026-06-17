@@ -27,7 +27,7 @@
         <version>26.6.0</version>
     </parent>
 
-    <name>DynamiaModules - SaaS Tenant Mobility (Migration)</name>
+    <name>DynamiaModules - SaaS Migration</name>
     <artifactId>tools.dynamia.modules.saas.migration</artifactId>
     <url>https://www.dynamia.tools/modules/saas/migration</url>
     <description>

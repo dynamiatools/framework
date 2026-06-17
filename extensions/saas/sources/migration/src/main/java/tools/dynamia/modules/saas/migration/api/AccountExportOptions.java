@@ -19,10 +19,12 @@ import java.util.List;
  */
 public class AccountExportOptions {
 
+    public static final int DEFAULT_CHUNK_SIZE = 5000;
+
     /**
-     * Number of records to read from DB per pagination page. Default: 500.
+     * Number of records to read from DB per pagination page. Default: 5000.
      */
-    private int chunkSize = 500;
+    private int chunkSize = DEFAULT_CHUNK_SIZE;
 
     /**
      * When {@code true}, the output stream is wrapped in GZIP compression.
@@ -75,7 +77,7 @@ public class AccountExportOptions {
 
     public int getChunkSize() {
         if (chunkSize <= 0) {
-            chunkSize = 500;
+            chunkSize = DEFAULT_CHUNK_SIZE;
         }
         return chunkSize;
     }

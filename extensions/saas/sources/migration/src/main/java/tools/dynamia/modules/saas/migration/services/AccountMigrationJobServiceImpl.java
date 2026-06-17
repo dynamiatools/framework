@@ -71,7 +71,9 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     private static final LoggingService log = LoggingService.get(AccountMigrationJobServiceImpl.class);
     private static final DateTimeFormatter FILE_TS = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
 
-    /** In-memory token registry: jobUuid → CancellationToken. Cleaned up when job finishes. */
+    /**
+     * In-memory token registry: jobUuid → CancellationToken. Cleaned up when job finishes.
+     */
     private final Map<String, CancellationToken> activeTokens = new ConcurrentHashMap<>();
 
     private final CrudService crudService;
@@ -231,10 +233,10 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
      * @param cleanupPath deleted after the job completes (uploaded temp files; may be null)
      */
     private void scheduleWorker(AccountMigrationJob job,
-                                 TaskWithResult<Boolean> worker,
-                                 Path resultFile,
-                                 Path cleanupPath,
-                                 CancellationToken token) {
+                                TaskWithResult<Boolean> worker,
+                                Path resultFile,
+                                Path cleanupPath,
+                                CancellationToken token) {
         SchedulerUtil.runWithResult(new TaskWithResult<Boolean>(worker.getName() + "#queued") {
             @Override
             public Boolean doWorkWithResult() {
@@ -267,7 +269,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     // ─────────────────────────────────────────────────────────────────────────
 
     private AccountMigrationJob createAndSaveJob(Long accountId, Long targetAccountId,
-                                                   AccountJobType type, Object options) {
+                                                 AccountJobType type, Object options) {
         AccountMigrationJob job = new AccountMigrationJob();
         job.setAccountId(accountId);
         job.setTargetAccountId(targetAccountId);
@@ -331,7 +333,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
                     AccountMigrationJob j = findByUuid(job.getUuid());
                     if (j != null && !j.isFinished()) {
                         j.updateProgress(p.percentage() >= 0 ? p.percentage() : j.getProgress(),
-                                p.message());
+                                p.message(), p.processedRecords());
                         crudService.update(j);
                     }
                 });
@@ -384,6 +386,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
                 job.getStatus(),
                 job.getProgress(),
                 job.getProgressMessage(),
+                job.getRecords(),
                 job.getErrorMessage(),
                 downloadUrl,
                 job.getCreatedAt(),

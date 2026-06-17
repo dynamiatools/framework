@@ -35,7 +35,7 @@ public class OptionsFluentBuilderTest {
     @Test
     public void exportOptionsDefaults() {
         AccountExportOptions opts = new AccountExportOptions();
-        Assert.assertEquals(500, opts.getChunkSize());
+        Assert.assertEquals(AccountExportOptions.DEFAULT_CHUNK_SIZE, opts.getChunkSize());
         Assert.assertFalse(opts.isCompressionEnabled());
         Assert.assertEquals(IdentityStrategy.KEEP_IDS, opts.getIdentityStrategy());
     }

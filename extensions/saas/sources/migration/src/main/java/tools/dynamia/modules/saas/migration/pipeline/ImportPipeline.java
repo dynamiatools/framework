@@ -14,6 +14,7 @@ import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceContext;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ReflectionUtils;
 import tools.dynamia.domain.jpa.JpaUtils;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.modules.saas.migration.api.CancellationToken;
@@ -46,6 +48,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -77,9 +81,17 @@ public class ImportPipeline {
     @PersistenceContext
     private EntityManager em;
 
-    /** Custom SPI mappers registered as Spring beans; queried before built-in defaults. */
+    /**
+     * Custom SPI mappers registered as Spring beans; queried before built-in defaults.
+     */
     @Autowired(required = false)
     private List<IdentityMapper> customMappers;
+
+    /**
+     * Field cache: class → (fieldName → accessible Field).
+     * {@link Optional#empty()} is stored when a field doesn't exist, avoiding repeated failed lookups.
+     */
+    private final Map<Class<?>, Map<String, Optional<Field>>> fieldCache = new ConcurrentHashMap<>();
 
     private final EntityManagerFactory emf;
     private final AccountMigrationProperties properties;
@@ -119,6 +131,7 @@ public class ImportPipeline {
 
             expectToken(parser, JsonToken.START_OBJECT, "root object");
             long totalProcessed = 0;
+            long records = 0;
 
             while (parser.nextToken() != JsonToken.END_OBJECT) {
                 if (token != null && token.isCancelled()) break;
@@ -128,25 +141,25 @@ public class ImportPipeline {
 
                 switch (fieldName) {
                     case ExportConstants.FIELD_VERSION,
-                            ExportConstants.FIELD_EXPORTED_AT,
-                            ExportConstants.FIELD_SOURCE_ACCOUNT_ID,
-                            ExportConstants.FIELD_IDENTITY_STRATEGY -> {
+                         ExportConstants.FIELD_EXPORTED_AT,
+                         ExportConstants.FIELD_SOURCE_ACCOUNT_ID,
+                         ExportConstants.FIELD_IDENTITY_STRATEGY -> {
                         // Read and discard header metadata (validated if needed in future)
                     }
                     case ExportConstants.FIELD_ACCOUNT -> {
                         parser.skipChildren(); // Account handled externally
                     }
                     case ExportConstants.FIELD_ENTITIES -> {
-                        totalProcessed = importEntitiesSection(
-                                parser, options, identityMapper, idMappings, listener, token);
+                        totalProcessed = importEntitiesSection(parser, options, identityMapper, idMappings, listener, token);
                     }
                     default -> parser.skipChildren();
                 }
             }
 
             if (listener != null) {
+                records += totalProcessed;
                 listener.onProgress(new MigrationProgress(
-                        totalProcessed, totalProcessed, "Import complete"));
+                        totalProcessed, totalProcessed, "Import complete", records));
             }
 
         } catch (IOException e) {
@@ -159,11 +172,11 @@ public class ImportPipeline {
     // ─────────────────────────────────────────────────────────────────────────
 
     private long importEntitiesSection(JsonParser parser,
-                                        AccountImportOptions options,
-                                        IdentityMapper identityMapper,
-                                        Map<String, Map<Object, Object>> idMappings,
-                                        MigrationProgressListener listener,
-                                        CancellationToken token) throws IOException {
+                                       AccountImportOptions options,
+                                       IdentityMapper identityMapper,
+                                       Map<String, Map<Object, Object>> idMappings,
+                                       MigrationProgressListener listener,
+                                       CancellationToken token) throws IOException {
 
         expectToken(parser, JsonToken.START_OBJECT, "entities object");
         long total = 0;
@@ -186,7 +199,7 @@ public class ImportPipeline {
 
                 if (listener != null) {
                     listener.onProgress(new MigrationProgress(total, 0,
-                            "Imported " + entityClass.getSimpleName() + " (" + count + " records)"));
+                            "Imported " + entityClass.getSimpleName() + " (" + count + " records)",total));
                 }
 
             } catch (ClassNotFoundException e) {
@@ -199,36 +212,73 @@ public class ImportPipeline {
     }
 
     private long importEntityArray(JsonParser parser,
-                                    Class<?> entityClass,
-                                    AccountImportOptions options,
-                                    IdentityMapper identityMapper,
-                                    Map<String, Map<Object, Object>> idMappings,
-                                    MigrationProgressListener listener,
-                                    CancellationToken token) throws IOException {
+                                   Class<?> entityClass,
+                                   AccountImportOptions options,
+                                   IdentityMapper identityMapper,
+                                   Map<String, Map<Object, Object>> idMappings,
+                                   MigrationProgressListener listener,
+                                   CancellationToken token) throws IOException {
 
-        expectToken(parser, JsonToken.START_ARRAY, "entity array for " + entityClass.getSimpleName());
+        // v2 columnar format: each entity section is an object with "fields" and "rows"
+        expectToken(parser, JsonToken.START_OBJECT, "entity section for " + entityClass.getSimpleName());
 
         int chunkSize = options.getChunkSize() > 0 ? options.getChunkSize() : properties.getChunkSize();
         List<JsonNode> chunk = new ArrayList<>(chunkSize);
+        List<String> fields = null;
         long total = 0;
 
-        while (parser.nextToken() != JsonToken.END_ARRAY) {
-            if (token != null && token.isCancelled()) break;
+        while (parser.nextToken() != JsonToken.END_OBJECT) {
+            String sectionName = parser.currentName();
+            parser.nextToken(); // move to value
 
-            JsonNode node = objectMapper.readTree(parser);
-            chunk.add(node);
+            if (ExportConstants.FIELD_FIELDS.equals(sectionName)) {
+                expectToken(parser, JsonToken.START_ARRAY, "fields array for " + entityClass.getSimpleName());
+                fields = new ArrayList<>();
+                while (parser.nextToken() != JsonToken.END_ARRAY) {
+                    fields.add(parser.getText());
+                }
 
-            if (chunk.size() >= chunkSize) {
-                total += persistChunk(chunk, entityClass, options, identityMapper, idMappings);
-                chunk.clear();
+            } else if (ExportConstants.FIELD_ROWS.equals(sectionName)) {
+                if (fields == null) {
+                    throw new MigrationException("'rows' section appeared before 'fields' for " + entityClass.getName());
+                }
+                expectToken(parser, JsonToken.START_ARRAY, "rows array for " + entityClass.getSimpleName());
+                while (parser.nextToken() != JsonToken.END_ARRAY) {
+                    if (token != null && token.isCancelled()) break;
+
+                    JsonNode node = rowToObjectNode(parser, fields);
+                    chunk.add(node);
+
+                    if (chunk.size() >= chunkSize) {
+                        total += persistChunk(chunk, entityClass, options, identityMapper, idMappings);
+                        chunk.clear();
+                    }
+                }
+                if (!chunk.isEmpty()) {
+                    total += persistChunk(chunk, entityClass, options, identityMapper, idMappings);
+                }
+
+            } else {
+                parser.skipChildren();
             }
         }
 
-        if (!chunk.isEmpty()) {
-            total += persistChunk(chunk, entityClass, options, identityMapper, idMappings);
-        }
-
         return total;
+    }
+
+    private JsonNode rowToObjectNode(JsonParser parser, List<String> fields) throws IOException {
+        // parser is positioned at the START_ARRAY token for this row
+        ObjectNode node = objectMapper.createObjectNode();
+        int i = 0;
+        while (parser.nextToken() != JsonToken.END_ARRAY) {
+            if (i < fields.size()) {
+                node.set(fields.get(i), objectMapper.readTree(parser));
+            } else {
+                parser.skipChildren();
+            }
+            i++;
+        }
+        return node;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -237,10 +287,10 @@ public class ImportPipeline {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public int persistChunk(List<JsonNode> chunk,
-                             Class<?> entityClass,
-                             AccountImportOptions options,
-                             IdentityMapper identityMapper,
-                             Map<String, Map<Object, Object>> idMappings) {
+                            Class<?> entityClass,
+                            AccountImportOptions options,
+                            IdentityMapper identityMapper,
+                            Map<String, Map<Object, Object>> idMappings) {
         int count = 0;
         EntityType<?> entityType;
         try {
@@ -296,11 +346,11 @@ public class ImportPipeline {
     // ─────────────────────────────────────────────────────────────────────────
 
     private Object deserializeEntity(JsonNode node,
-                                      Class<?> entityClass,
-                                      EntityType<?> entityType,
-                                      Long targetAccountId,
-                                      IdentityMapper identityMapper,
-                                      Map<String, Map<Object, Object>> idMappings) throws Exception {
+                                     Class<?> entityClass,
+                                     EntityType<?> entityType,
+                                     Long targetAccountId,
+                                     IdentityMapper identityMapper,
+                                     Map<String, Map<Object, Object>> idMappings) throws Exception {
 
         Object entity = entityClass.getDeclaredConstructor().newInstance();
 
@@ -360,21 +410,21 @@ public class ImportPipeline {
     // Utilities
     // ─────────────────────────────────────────────────────────────────────────
 
-    private static void setField(Object entity, String fieldName, Object value) {
-        Class<?> clazz = entity.getClass();
-        while (clazz != null && clazz != Object.class) {
+    private void setField(Object entity, String fieldName, Object value) {
+        Optional<Field> cached = fieldCache
+                .computeIfAbsent(entity.getClass(), c -> new ConcurrentHashMap<>())
+                .computeIfAbsent(fieldName, fn -> {
+                    Field f = ReflectionUtils.findField(entity.getClass(), fn);
+                    if (f != null) ReflectionUtils.makeAccessible(f);
+                    return Optional.ofNullable(f);
+                });
+        cached.ifPresent(field -> {
             try {
-                Field field = clazz.getDeclaredField(fieldName);
-                field.setAccessible(true);
                 field.set(entity, value);
-                return;
-            } catch (NoSuchFieldException e) {
-                clazz = clazz.getSuperclass();
             } catch (IllegalAccessException e) {
                 log.debug("[Migration/Import] Cannot set field {}: {}", fieldName, e.getMessage());
-                return;
             }
-        }
+        });
     }
 
     private static Object readId(JsonNode node) {
@@ -414,7 +464,7 @@ public class ImportPipeline {
         if (strategy == IdentityStrategy.UUID7) {
             throw new MigrationException(
                     "IdentityStrategy.UUID7 is not yet supported (planned for v3). " +
-                    "Use KEEP_IDS or REGENERATE_IDS.");
+                            "Use KEEP_IDS or REGENERATE_IDS.");
         }
         if (customMappers != null) {
             for (IdentityMapper mapper : customMappers) {
