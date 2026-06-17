@@ -16,6 +16,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.metamodel.Attribute.PersistentAttributeType;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.SingularAttribute;
+import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.ReflectionUtils;
 import tools.dynamia.commons.logger.LoggingService;
@@ -56,6 +57,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -116,6 +118,7 @@ public class ExportPipeline {
      */
     private static final int ENTITY_BUFFER_SIZE = 64 * 1024;
     public static final String JAKARTA_PERSISTENCE_FETCHGRAPH = "jakarta.persistence.fetchgraph";
+    public static final String HIBERNATE_READ_ONLY = "org.hibernate.readOnly";
 
     /**
      * Column definitions cached per entity class; built once on first export,
@@ -225,9 +228,9 @@ public class ExportPipeline {
             gen.writeStartObject();
             gen.writeStringProperty(ExportConstants.FIELD_VERSION, ExportConstants.FORMAT_VERSION);
             gen.writeStringProperty(ExportConstants.FIELD_EXPORTED_AT, LocalDateTime.now().toString());
-            if(accountId instanceof Long accountIdNumber) {
+            if (accountId instanceof Long accountIdNumber) {
                 gen.writeNumberProperty(ExportConstants.FIELD_SOURCE_ACCOUNT_ID, accountIdNumber);
-            }else{
+            } else {
                 gen.writeStringProperty(ExportConstants.FIELD_SOURCE_ACCOUNT_ID, accountId.toString());
             }
             gen.writeStringProperty(ExportConstants.FIELD_IDENTITY_STRATEGY,
@@ -265,6 +268,11 @@ public class ExportPipeline {
 
         ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
         Semaphore semaphore = new Semaphore(parallelism);
+
+        AtomicLong processedTypes = new AtomicLong(0);
+        AtomicLong totalRecords = new AtomicLong(0);
+        long totalTypes = ordered.size();
+
         List<Future<Long>> futures = new ArrayList<>(ordered.size());
 
         for (Class<?> entityClass : ordered) {
@@ -272,7 +280,17 @@ public class ExportPipeline {
                 semaphore.acquire();
                 try {
                     if (token != null && token.isCancelled()) return 0L;
-                    return exportEntityToFile(tempDir, entityClass, accountId, options, token);
+                    long count = exportEntityToFile(tempDir, entityClass, accountId, options, token);
+
+                    // Report progress immediately upon completion, not waiting for topological order
+                    long processed = processedTypes.incrementAndGet();
+                    long records = totalRecords.addAndGet(count);
+                    if (listener != null) {
+                        listener.onProgress(new MigrationProgress(processed, totalTypes,
+                                "Exported " + entityClass.getSimpleName() + " (" + count + " records)",
+                                records));
+                    }
+                    return count;
                 } finally {
                     semaphore.release();
                 }
@@ -280,23 +298,11 @@ public class ExportPipeline {
         }
         pool.shutdown();
 
-        // Collect results in topological order (for progress reporting)
-        long processedTypes = 0;
-        long totalTypes = ordered.size();
-        long totalRecords = 0;
-
+        // Collect futures in topological order only to propagate exceptions
         for (int i = 0; i < ordered.size(); i++) {
             Class<?> entityClass = ordered.get(i);
             try {
-                long count = futures.get(i).get();
-                totalRecords += count;
-                processedTypes++;
-
-                if (listener != null) {
-                    listener.onProgress(new MigrationProgress(processedTypes, totalTypes,
-                            "Exported " + entityClass.getSimpleName() + " (" + count + " records)",
-                            totalRecords));
-                }
+                futures.get(i).get();
             } catch (ExecutionException e) {
                 Throwable cause = e.getCause();
                 logger.error("[Migration/Export] Failed to export {}: {}",
@@ -314,7 +320,7 @@ public class ExportPipeline {
         }
 
         logger.info("[Migration/Export] All entities exported — {} types, {} total records",
-                processedTypes, totalRecords);
+                processedTypes.get(), totalRecords.get());
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -344,6 +350,8 @@ public class ExportPipeline {
             }
 
             List<ColumnDef> columns = buildColumns(entityType);
+            localEm.clear();
+            localEm.close();
 
             try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(filePath), ENTITY_BUFFER_SIZE);
                  JsonGenerator gen = objectMapper.createGenerator(out)) {
@@ -360,12 +368,12 @@ public class ExportPipeline {
 
                 gen.writeName(ExportConstants.FIELD_ROWS);
                 gen.writeStartArray();
-                long processed = writeEntityRows(gen, entityClass, accountId, options, token, localEm, columns);
+                long processed = writeEntityRows(gen, entityClass, accountId, options, token, columns);
                 gen.writeEndArray();
 
                 gen.writeEndObject();
 
-                logger.debug("[Migration/Export] {} → {} records written", entityClass.getSimpleName(), processed);
+                logger.info("[Migration/Export] {} → {} records written", entityClass.getSimpleName(), processed);
                 return processed;
             }
         } finally {
@@ -403,7 +411,6 @@ public class ExportPipeline {
                                  Serializable accountId,
                                  AccountExportOptions options,
                                  CancellationToken token,
-                                 EntityManager localEm,
                                  List<ColumnDef> columns) throws IOException {
         if (Account.class.equals(entityClass)) {
             return 0;
@@ -413,28 +420,13 @@ public class ExportPipeline {
         int chunkSize = resolveChunkSize(options);
         Object lastId = null;   // null = first page; avoids assuming ID type
         long processed = 0;
-
-        EntityGraph<?> emptyGraph = localEm.createEntityGraph(entityClass); //to avoid errors with multiple eagers calls
+        int pageNum = 0;
 
 
         do {
-            @SuppressWarnings("unchecked")
-            List<Object> page = (lastId == null)
-                    ? localEm.createQuery(
-                            "SELECT e FROM " + simpleName +
-                            " e WHERE e.accountId = :accountId ORDER BY e.id ASC")
-                    .setParameter("accountId", accountId)
-                    .setMaxResults(chunkSize)
-                    .setHint(JAKARTA_PERSISTENCE_FETCHGRAPH, emptyGraph)
-                    .getResultList()
-                    : localEm.createQuery(
-                            "SELECT e FROM " + simpleName +
-                            " e WHERE e.accountId = :accountId AND e.id > :lastId ORDER BY e.id ASC")
-                    .setParameter("accountId", accountId)
-                    .setParameter("lastId", lastId)
-                    .setMaxResults(chunkSize)
-                    .setHint(JAKARTA_PERSISTENCE_FETCHGRAPH, emptyGraph)
-                    .getResultList();
+            List<Object> page = queryEntityDataPage(entityClass, accountId, lastId, simpleName, chunkSize);
+            logger.info("[Migration/Export] {} - page {} with {} records. Rows processed {}", simpleName, pageNum, page.size(), processed);
+            pageNum++;
 
             for (Object entity : page) {
                 if (token != null && token.isCancelled()) break;
@@ -447,14 +439,39 @@ public class ExportPipeline {
                 }
                 processed++;
             }
-
-            localEm.clear();
-
             if (page.size() < chunkSize || (token != null && token.isCancelled())) break;
 
         } while (true);
 
         return processed;
+    }
+
+    private List<Object> queryEntityDataPage(Class<?> entityClass, Serializable accountId, Object lastId, String simpleName, int chunkSize) {
+        EntityManager localEm = emf.createEntityManager();
+        EntityGraph<?> emptyEntityGraph = localEm.createEntityGraph(entityClass); //to avoid errors with multiple eagers calls
+
+        @SuppressWarnings("unchecked")
+        List<Object> page = (lastId == null)
+                ? localEm.createQuery(
+                        "SELECT e FROM " + simpleName +
+                        " e WHERE e.accountId = :accountId ORDER BY e.id ASC")
+                .setParameter("accountId", accountId)
+                .setMaxResults(chunkSize)
+                .setHint(JAKARTA_PERSISTENCE_FETCHGRAPH, emptyEntityGraph)
+                .setHint(HIBERNATE_READ_ONLY, true) // optimization for read-only access
+                .getResultList()
+                : localEm.createQuery(
+                        "SELECT e FROM " + simpleName +
+                        " e WHERE e.accountId = :accountId AND e.id > :lastId ORDER BY e.id ASC")
+                .setParameter("accountId", accountId)
+                .setParameter("lastId", lastId)
+                .setMaxResults(chunkSize)
+                .setHint(JAKARTA_PERSISTENCE_FETCHGRAPH, emptyEntityGraph)
+                .setHint(HIBERNATE_READ_ONLY, true) // optimization for read-only access
+                .getResultList();
+        //query and release entity manager
+        localEm.close();
+        return page;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
