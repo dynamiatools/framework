@@ -379,6 +379,13 @@ public class JpaCrudService extends AbstractCrudService {
         return executeQuery((QueryBuilder) null, parameters);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public <T> List<T> findReadOnly(Class<T> type, QueryParameters parameters) {
+        parameters.setReadOnly(true);
+        return find(type, parameters);
+    }
+
     /*
      * (non-Javadoc)
      *
@@ -564,6 +571,13 @@ public class JpaCrudService extends AbstractCrudService {
         JpaUtils.configurePaginator(em, query, null, queryMetada.getParameters());
 
         return mapResultsToBeanMaps(queryMetada.getQueryBuilder(), query.getResultList());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List findReadOnly(QueryMetadata queryMetadata) {
+        queryMetadata.getParameters().setReadOnly(true);
+        return find(queryMetadata);
     }
 
     /*

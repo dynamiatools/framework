@@ -48,6 +48,8 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
 
     private QueryParameters nestedParameters;
 
+    private boolean readOnly;
+
     public QueryParameters() {
     }
 
@@ -546,4 +548,12 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
     }
 
 
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public QueryParameters setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+        return this;
+    }
 }

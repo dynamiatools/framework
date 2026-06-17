@@ -405,4 +405,14 @@ public abstract class AbstractCrudService implements CrudService {
     public <T> T getFieldValue(Object entity, String fieldName, Class<T> fieldClass) {
         throw new UnsupportedOperationException("Method not supported in this CrudService");
     }
+
+    @Override
+    public List findReadOnly(QueryMetadata queryMetadata) {
+        return find(queryMetadata);
+    }
+
+    @Override
+    public <T> List<T> findReadOnly(Class<T> type, QueryParameters parameters) {
+        return find(type, parameters);
+    }
 }
