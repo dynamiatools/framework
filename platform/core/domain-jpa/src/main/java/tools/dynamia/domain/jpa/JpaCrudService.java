@@ -67,8 +67,8 @@ import static tools.dynamia.domain.util.QueryBuilder.select;
 @Service("jpaCrudService")
 public class JpaCrudService extends AbstractCrudService {
 
-    public static final String HINT_FETCH_GRAPH = "javax.persistence.fetchgraph";
-    public static final String HINT_LOAD_GRAPH = "javax.persistence.loadgraph";
+    public static final String HINT_FETCH_GRAPH = "jakarta.persistence.fetchgraph";
+    public static final String HINT_LOAD_GRAPH = "jakarta.persistence.loadgraph";
     /**
      * The em.
      */
