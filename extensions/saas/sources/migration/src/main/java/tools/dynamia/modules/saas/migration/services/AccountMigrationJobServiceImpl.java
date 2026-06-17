@@ -52,6 +52,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
@@ -73,6 +75,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
 
     private static final LoggingService log = LoggingService.get(AccountMigrationJobServiceImpl.class);
     private static final DateTimeFormatter FILE_TS = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
+    private static final long PROGRESS_THROTTLE_MS = 500;
 
     /**
      * In-memory token registry: jobUuid → CancellationToken. Cleaned up when job finishes.
@@ -195,7 +198,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
 
     @Override
     public List<AccountMigrationJobDto> getLastJobs() {
-        var jobs = crudService.find(AccountMigrationJob.class, QueryParameters.with("status", QueryConditions.notEq(AccountJobStatus.DELETED))
+        var jobs = crudService.findReadOnly(AccountMigrationJob.class, QueryParameters.with("status", QueryConditions.notEq(AccountJobStatus.DELETED))
                 .setMaxResults(100)
                 .orderBy("createdAt", false));
         return jobs.stream().map(this::toDto).toList();
@@ -329,19 +332,24 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
         });
     }
 
-    private MigrationProgressListener buildProgressListener(
-            AccountMigrationJob job) {
-        // Mark the job as RUNNING on first progress event, then persist progress updates
-        final boolean[] started = {false};
+    private MigrationProgressListener buildProgressListener(AccountMigrationJob job) {
+        AtomicBoolean started = new AtomicBoolean(false);
+        AtomicLong lastPersistedAt = new AtomicLong(0);
+
         return (MigrationProgress p) -> {
-            if (!started[0]) {
-                started[0] = true;
-                markRunning(job.getUuid());
-            }
+            boolean isFirst = started.compareAndSet(false, true);
+            long now = System.currentTimeMillis();
+            boolean throttleExpired = (now - lastPersistedAt.get()) >= PROGRESS_THROTTLE_MS;
+            boolean isFinal = p.totalEntities() > 0 && p.processedEntities() >= p.totalEntities();
+
+            if (!isFirst && !throttleExpired && !isFinal) return;
+
+            lastPersistedAt.set(now);
             try {
                 crudService.executeWithinTransaction(() -> {
                     AccountMigrationJob j = findByUuid(job.getUuid());
                     if (j != null && !j.isFinished()) {
+                        if (isFirst) j.markRunning();
                         j.updateProgress(p.percentage() >= 0 ? p.percentage() : j.getProgress(),
                                 p.message(), p.processedRecords());
                         crudService.update(j);
