@@ -76,8 +76,8 @@ public class AccountMigrationServiceImpl implements AccountMigrationService {
     public void cloneTenant(AccountCloneOptions options,
                             MigrationProgressListener listener,
                             CancellationToken token) {
-        Long source = options.getSourceAccountId();
-        Long target = options.getTargetAccountId();
+        Serializable source = options.getSourceAccountId();
+        Serializable target = options.getTargetAccountId();
         log.info("[Migration] Starting clone {} → {}", source, target);
 
         Path tempFile = null;

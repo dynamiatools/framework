@@ -10,6 +10,7 @@
  */
 package tools.dynamia.modules.saas.migration.services;
 
+import org.springframework.core.io.InputStreamSource;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
@@ -116,7 +117,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     }
 
     @Override
-    public AccountMigrationJobDto createImportJob(MultipartFile file, AccountImportOptions options) {
+    public AccountMigrationJobDto createImportJob(InputStreamSource file, AccountImportOptions options) {
         Path savedFile = saveUploadedFile(file, "import");
         AccountMigrationJob job = createAndSaveJob(options.getTargetAccountId(), null, AccountJobType.IMPORT, options);
         launchImportJob(job, savedFile, options);
@@ -350,14 +351,10 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
         return Paths.get(properties.getOutputDirectory(), fileName);
     }
 
-    private Path saveUploadedFile(MultipartFile file, String prefix) {
+    private Path saveUploadedFile(InputStreamSource file, String prefix) {
         try {
             String ts = LocalDateTime.now().format(FILE_TS);
-            String original = file.getOriginalFilename() != null ? file.getOriginalFilename() : "";
-            String ext = original.endsWith(".zip") ? ".zip"
-                    : original.endsWith(".json.gz") ? ".json.gz"
-                    : ".json";
-            Path dest = Paths.get(properties.getOutputDirectory(), prefix + "_upload_" + ts + ext);
+            Path dest = Paths.get(properties.getOutputDirectory(), prefix + "_upload_" + ts + ".zip");
             Files.createDirectories(dest.getParent());
             try (InputStream in = file.getInputStream()) {
                 Files.copy(in, dest, StandardCopyOption.REPLACE_EXISTING);

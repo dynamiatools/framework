@@ -10,6 +10,8 @@
  */
 package tools.dynamia.modules.saas.migration.api;
 
+import java.io.Serializable;
+
 /**
  * Options for a clone operation (source tenant → target tenant, same system).
  *
@@ -18,10 +20,10 @@ package tools.dynamia.modules.saas.migration.api;
 public class AccountCloneOptions {
 
     /** ID of the account to clone data from. Required. */
-    private Long sourceAccountId;
+    private Serializable sourceAccountId;
 
     /** ID of the (already existing) target account. Required. */
-    private Long targetAccountId;
+    private Serializable targetAccountId;
 
     /**
      * Strategy for handling IDs.
@@ -31,7 +33,7 @@ public class AccountCloneOptions {
     private IdentityStrategy identityStrategy = IdentityStrategy.REGENERATE_IDS;
 
     /** Records per page during export/import. Default: 500. */
-    private int chunkSize = 500;
+    private int chunkSize = 5000;
 
     /**
      * When {@code true}, entity errors are fatal. When {@code false}, they are
@@ -41,12 +43,12 @@ public class AccountCloneOptions {
 
     // ─── Fluent builder ────────────────────────────────────────────────────────
 
-    public AccountCloneOptions source(Long sourceAccountId) {
+    public AccountCloneOptions source(Serializable sourceAccountId) {
         this.sourceAccountId = sourceAccountId;
         return this;
     }
 
-    public AccountCloneOptions target(Long targetAccountId) {
+    public AccountCloneOptions target(Serializable targetAccountId) {
         this.targetAccountId = targetAccountId;
         return this;
     }
@@ -63,7 +65,7 @@ public class AccountCloneOptions {
 
     // ─── Accessors ─────────────────────────────────────────────────────────────
 
-    public Long getSourceAccountId() {
+    public Serializable getSourceAccountId() {
         return sourceAccountId;
     }
 
@@ -71,7 +73,7 @@ public class AccountCloneOptions {
         this.sourceAccountId = sourceAccountId;
     }
 
-    public Long getTargetAccountId() {
+    public Serializable getTargetAccountId() {
         return targetAccountId;
     }
 

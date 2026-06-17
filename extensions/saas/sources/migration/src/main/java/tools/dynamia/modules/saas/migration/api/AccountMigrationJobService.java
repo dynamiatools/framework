@@ -10,6 +10,7 @@
  */
 package tools.dynamia.modules.saas.migration.api;
 
+import org.springframework.core.io.InputStreamSource;
 import org.springframework.web.multipart.MultipartFile;
 import tools.dynamia.modules.saas.migration.domain.AccountMigrationJob;
 
@@ -45,11 +46,11 @@ public interface AccountMigrationJobService {
     /**
      * Starts an async import job from an uploaded file.
      *
-     * @param file    multipart upload containing the export JSON (or .json.gz)
+     * @param file    multipart upload containing the export zip
      * @param options import configuration (target account, identity strategy, etc.)
      * @return the newly created (PENDING) job
      */
-    AccountMigrationJobDto createImportJob(MultipartFile file, AccountImportOptions options);
+    AccountMigrationJobDto createImportJob(InputStreamSource file, AccountImportOptions options);
 
     /**
      * Starts an async clone job (source tenant → target tenant, same system).
