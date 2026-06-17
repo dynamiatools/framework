@@ -25,6 +25,7 @@ import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.Descriptor;
 import tools.dynamia.domain.OrderBy;
 import tools.dynamia.domain.jpa.SimpleEntity;
+import tools.dynamia.modules.saas.api.AccountExportIgnore;
 import tools.dynamia.modules.saas.api.AccountStats;
 
 import java.time.LocalDateTime;
@@ -33,6 +34,7 @@ import java.time.LocalDateTime;
 @Table(name = "saas_stats")
 @OrderBy("module")
 @Descriptor(fields = {"module", "name","quantity", "value",  "description", "creationDate", "lastUpdate"})
+@AccountExportIgnore
 public class AccountStatsData extends SimpleEntity {
 
     @ManyToOne

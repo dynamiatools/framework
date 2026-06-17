@@ -10,6 +10,8 @@
  */
 package tools.dynamia.modules.saas.migration.api;
 
+import java.util.List;
+
 /**
  * Options controlling a tenant export operation.
  *
@@ -17,17 +19,26 @@ package tools.dynamia.modules.saas.migration.api;
  */
 public class AccountExportOptions {
 
-    /** Number of records to read from DB per pagination page. Default: 500. */
+    /**
+     * Number of records to read from DB per pagination page. Default: 500.
+     */
     private int chunkSize = 500;
 
-    /** When {@code true}, the output stream is wrapped in GZIP compression. */
+    /**
+     * When {@code true}, the output stream is wrapped in GZIP compression.
+     */
     private boolean compressionEnabled = false;
 
-    /** Controls how IDs are represented in the exported file. */
+    /**
+     * Controls how IDs are represented in the exported file.
+     */
     private IdentityStrategy identityStrategy = IdentityStrategy.KEEP_IDS;
 
-    /** Optional display name for this export (used in file names and job labels). */
+    /**
+     * Optional display name for this export (used in file names and job labels).
+     */
     private String label;
+    private List<String> entities;
 
     // ─── Constructors ──────────────────────────────────────────────────────────
 
@@ -63,6 +74,9 @@ public class AccountExportOptions {
     // ─── Accessors ─────────────────────────────────────────────────────────────
 
     public int getChunkSize() {
+        if (chunkSize <= 0) {
+            chunkSize = 500;
+        }
         return chunkSize;
     }
 
@@ -79,6 +93,9 @@ public class AccountExportOptions {
     }
 
     public IdentityStrategy getIdentityStrategy() {
+        if (identityStrategy == null) {
+            identityStrategy = IdentityStrategy.KEEP_IDS;
+        }
         return identityStrategy;
     }
 
@@ -92,6 +109,14 @@ public class AccountExportOptions {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public List<String> getEntities() {
+        return entities;
+    }
+
+    public void setEntities(List<String> entities) {
+        this.entities = entities;
     }
 }
 

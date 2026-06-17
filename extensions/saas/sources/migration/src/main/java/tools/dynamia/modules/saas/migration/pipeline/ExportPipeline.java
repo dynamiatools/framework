@@ -10,6 +10,9 @@
  */
 package tools.dynamia.modules.saas.migration.pipeline;
 
+import jakarta.persistence.EntityManager;
+import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.domain.jpa.JpaCrudService;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.core.JsonGenerator;
 import jakarta.persistence.EntityManagerFactory;
@@ -67,7 +70,7 @@ import java.util.zip.GZIPOutputStream;
 @Service
 public class ExportPipeline {
 
-    private static final Logger log = LoggerFactory.getLogger(ExportPipeline.class);
+    private static final LoggingService logger = LoggingService.get(ExportPipeline.class);
 
     private final EntityManagerFactory emf;
     private final CrudService crudService;
@@ -111,20 +114,15 @@ public class ExportPipeline {
         }
 
         List<Class<?>> candidates = discovery.discoverExportableEntities();
+
+        if (options.getEntities() != null && !options.getEntities().isEmpty()) {
+            candidates.removeIf(c -> !options.getEntities().contains(c.getSimpleName()));
+            logger.info("[Migration/Export] Filtered entities based on options, {} remaining", candidates.size());
+        }
+
         List<Class<?>> ordered = dependencyGraph.topologicalSort(candidates);
 
-        // Pre-calculate approximate total for progress reporting
-        long totalRecords = 0;
-        for (Class<?> ec : ordered) {
-            if (!Account.class.equals(ec)) {
-                try {
-                    totalRecords += crudService.count(ec, QueryParameters.with("accountId", accountId));
-                } catch (Exception e) {
-                    log.debug("[Migration/Export] Could not count {}: {}", ec.getSimpleName(), e.getMessage());
-                }
-            }
-        }
-        totalRecords += 1; // +1 for the account itself
+        long totalEntities = ordered.size() + 1; // number of entity types
 
         OutputStream target;
         try {
@@ -134,7 +132,7 @@ public class ExportPipeline {
         }
 
         try (JsonGenerator gen = objectMapper.createGenerator(target)) {
-
+            logger.info("[Migration/Export] Writing export data for accountId={} with {} entity types", accountId, ordered.size());
             gen.writeStartObject();
             gen.writeStringProperty(ExportConstants.FIELD_VERSION, ExportConstants.FORMAT_VERSION);
             gen.writeStringProperty(ExportConstants.FIELD_EXPORTED_AT, LocalDateTime.now().toString());
@@ -153,15 +151,15 @@ public class ExportPipeline {
             long processed = 0;
             for (Class<?> entityClass : ordered) {
                 if (token != null && token.isCancelled()) {
-                    log.info("[Migration/Export] Cancelled at entity: {}", entityClass.getSimpleName());
+                    logger.info("[Migration/Export] Cancelled at entity: {}", entityClass.getSimpleName());
                     break;
                 }
 
-                long count = exportEntityType(gen, entityClass, accountId, options, token);
-                processed += count;
+                var count = exportEntityType(gen, entityClass, accountId, options, token);
+                processed++;
 
                 if (listener != null) {
-                    listener.onProgress(new MigrationProgress(processed, totalRecords,
+                    listener.onProgress(new MigrationProgress(processed, totalEntities,
                             "Exported " + entityClass.getSimpleName() + " (" + count + " records)"));
                 }
             }
@@ -203,39 +201,32 @@ public class ExportPipeline {
                 return 0;
             }
 
-            long totalCount = crudService.count(entityClass,
-                    QueryParameters.with("accountId", accountId));
-            if (totalCount == 0) {
-                gen.writeEndArray();
-                return 0;
-            }
 
-            int totalPages = (int) Math.ceil((double) totalCount / chunkSize);
+            logger.info("Reading entity {} data", entityClass);
+            EntityManager em = (EntityManager) crudService.getDelgate();
+            QueryParameters qp = QueryParameters.with("accountId", accountId)
+                    .paginate(chunkSize)
+                    .setHint(JpaCrudService.HINT_FETCH_GRAPH,em.createEntityGraph(entityClass))
+                    .orderBy("id", true);
 
-            for (int page = 1; page <= totalPages; page++) {
-                if (token != null && token.isCancelled()) break;
-
-                DataPaginator paginator = new DataPaginator(totalCount, chunkSize, page);
-                QueryParameters qp = QueryParameters.with("accountId", accountId)
-                        .paginate(paginator)
-                        .orderBy("id", true);
-
-                @SuppressWarnings("unchecked")
-                List<Object> chunk = (List<Object>) crudService.find(entityClass, qp);
-                if (chunk == null || chunk.isEmpty()) break;
-
-                for (Object entity : chunk) {
-                    writeEntity(gen, entity, entityType);
+            @SuppressWarnings("unchecked")
+            List<Object> entities = (List<Object>) crudService.find(entityClass, qp);
+            if (entities != null && !entities.isEmpty()) {
+                logger.info("Exporting {} records of type {} for accountId={}", entities.size(), entityClass.getSimpleName(), accountId);
+                for (Object entity : entities) {
+                    if (token != null && token.isCancelled()) break;
+                    if (entity != null) {
+                        writeEntity(gen, entity, entityType);
+                    }
                     processed++;
                 }
             }
-
         } catch (IllegalArgumentException e) {
-            log.warn("[Migration/Export] Entity not in JPA metamodel, writing raw: {}", entityClass.getName());
+            logger.warn("[Migration/Export] Entity not in JPA metamodel, writing raw: {}", entityClass.getName());
         }
 
         gen.writeEndArray();
-        log.debug("[Migration/Export] {} records exported for {}", processed, entityClass.getSimpleName());
+        logger.debug("[Migration/Export] {} records exported for {}", processed, entityClass.getSimpleName());
         return processed;
     }
 
@@ -249,7 +240,7 @@ public class ExportPipeline {
             gen.writeName("id");
             gen.writePOJO(id);
         } catch (Exception e) {
-            log.debug("[Migration/Export] Could not write ID for {}", entity.getClass().getSimpleName());
+            logger.debug("[Migration/Export] Could not write ID for {}", entity.getClass().getSimpleName());
         }
 
         // Write all singular attributes
@@ -286,10 +277,10 @@ public class ExportPipeline {
                 }
 
             } catch (IllegalAccessException e) {
-                log.debug("[Migration/Export] Cannot access field {} on {}: {}",
+                logger.debug("[Migration/Export] Cannot access field {} on {}: {}",
                         name, entityType.getJavaType().getSimpleName(), e.getMessage());
             } catch (Exception e) {
-                log.debug("[Migration/Export] Skipping field {} due to: {}", name, e.getMessage());
+                logger.debug("[Migration/Export] Skipping field {} due to: {}", name, e.getMessage());
             }
         }
 

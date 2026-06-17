@@ -12,6 +12,7 @@ package tools.dynamia.modules.saas.migration.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.modules.saas.migration.api.CancellationToken;
 import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
@@ -41,7 +42,7 @@ import java.io.OutputStream;
 @Service
 public class AccountMigrationServiceImpl implements AccountMigrationService {
 
-    private static final Logger log = LoggerFactory.getLogger(AccountMigrationServiceImpl.class);
+    private static final LoggingService log = LoggingService.get(AccountMigrationServiceImpl.class);
 
     private final ExportPipeline exportPipeline;
     private final ImportPipeline importPipeline;
@@ -54,10 +55,10 @@ public class AccountMigrationServiceImpl implements AccountMigrationService {
 
     @Override
     public void exportTenant(Long accountId,
-                              OutputStream output,
-                              AccountExportOptions options,
-                              MigrationProgressListener listener,
-                              CancellationToken token) {
+                             OutputStream output,
+                             AccountExportOptions options,
+                             MigrationProgressListener listener,
+                             CancellationToken token) {
         log.info("[Migration] Starting export for accountId={}", accountId);
         exportPipeline.export(accountId, output, options, listener, token);
         log.info("[Migration] Export complete for accountId={}", accountId);
@@ -65,9 +66,9 @@ public class AccountMigrationServiceImpl implements AccountMigrationService {
 
     @Override
     public void importTenant(InputStream input,
-                              AccountImportOptions options,
-                              MigrationProgressListener listener,
-                              CancellationToken token) {
+                             AccountImportOptions options,
+                             MigrationProgressListener listener,
+                             CancellationToken token) {
         log.info("[Migration] Starting import for targetAccountId={}", options.getTargetAccountId());
         importPipeline.importTenant(input, options, listener, token);
         log.info("[Migration] Import complete for targetAccountId={}", options.getTargetAccountId());

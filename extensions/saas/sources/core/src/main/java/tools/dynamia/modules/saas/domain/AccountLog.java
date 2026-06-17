@@ -24,12 +24,14 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import tools.dynamia.domain.Transferable;
 import tools.dynamia.domain.jpa.BaseEntity;
+import tools.dynamia.modules.saas.api.AccountExportIgnore;
 import tools.dynamia.modules.saas.api.dto.AccountLogDTO;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "saas_logs")
+@AccountExportIgnore
 public class AccountLog extends BaseEntity implements Transferable<AccountLogDTO> {
 
 

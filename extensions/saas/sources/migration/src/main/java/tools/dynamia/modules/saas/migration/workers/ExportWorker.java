@@ -10,8 +10,7 @@
  */
 package tools.dynamia.modules.saas.migration.workers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.integration.scheduling.TaskWithResult;
 import tools.dynamia.modules.saas.migration.api.CancellationToken;
 import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
@@ -35,26 +34,26 @@ import java.nio.file.Path;
  */
 public class ExportWorker extends TaskWithResult<Boolean> {
 
-    private static final Logger log = LoggerFactory.getLogger(ExportWorker.class);
+    private static final LoggingService log = LoggingService.get(ExportWorker.class);
 
     private final Long accountId;
     private final Path outputFile;
     private final AccountExportOptions options;
-    private final AccountMigrationService mobilityService;
+    private final AccountMigrationService migrationService;
     private final MigrationProgressListener progressListener;
     private final CancellationToken cancellationToken;
 
     public ExportWorker(Long accountId,
                         Path outputFile,
                         AccountExportOptions options,
-                        AccountMigrationService mobilityService,
+                        AccountMigrationService migrationService,
                         MigrationProgressListener progressListener,
                         CancellationToken cancellationToken) {
         super("ExportWorker-account-" + accountId);
         this.accountId = accountId;
         this.outputFile = outputFile;
         this.options = options;
-        this.mobilityService = mobilityService;
+        this.migrationService = migrationService;
         this.progressListener = progressListener;
         this.cancellationToken = cancellationToken;
     }
@@ -63,7 +62,7 @@ public class ExportWorker extends TaskWithResult<Boolean> {
     public Boolean doWorkWithResult() {
         log.info("[Migration/Worker] Starting EXPORT for accountId={} → {}", accountId, outputFile);
         try (OutputStream out = new FileOutputStream(outputFile.toFile())) {
-            mobilityService.exportTenant(accountId, out, options, progressListener, cancellationToken);
+            migrationService.exportTenant(accountId, out, options, progressListener, cancellationToken);
             if (cancellationToken != null && cancellationToken.isCancelled()) {
                 log.info("[Migration/Worker] EXPORT cancelled for accountId={}", accountId);
                 return false;

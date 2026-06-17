@@ -54,6 +54,7 @@ public class AccountEntityDiscovery {
      * to obtain the correct import order.
      */
     public List<Class<?>> discoverExportableEntities() {
+        log.info("[Migration] Discovering exportable entity types from JPA metamodel");
         Set<EntityType<?>> managedTypes = emf.getMetamodel().getEntities();
         List<Class<?>> exportable = new ArrayList<>();
 

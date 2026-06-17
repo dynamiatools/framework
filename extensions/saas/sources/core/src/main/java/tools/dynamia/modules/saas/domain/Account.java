@@ -157,13 +157,13 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     private boolean useTempPaymentDay;
     private AccountStatus oldStatus;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private AccountCategory category;
 
     @ManyToOne
     private AccountReseller reseller;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private AccountResellerAgent resellerAgent;
 
     @Lob
@@ -184,7 +184,7 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     private long closedTicketsCount;
     private boolean autoInit = true;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     private Account parentAccount;
     private int freeTrial;
@@ -194,7 +194,7 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
 
     private String activationCoupon;
     private String redirect;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private AccountSaleChannel channel;
 
     @ManyToOne(fetch = FetchType.LAZY)

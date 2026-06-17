@@ -10,9 +10,9 @@
  */
 package tools.dynamia.modules.saas.migration.services;
 
+import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.domain.query.QueryConditions;
 import tools.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.multipart.MultipartFile;
 import tools.dynamia.domain.query.QueryParameters;
@@ -68,24 +68,24 @@ import java.util.stream.Collectors;
 @Service
 public class AccountMigrationJobServiceImpl implements AccountMigrationJobService {
 
-    private static final Logger log = LoggerFactory.getLogger(AccountMigrationJobServiceImpl.class);
+    private static final LoggingService log = LoggingService.get(AccountMigrationJobServiceImpl.class);
     private static final DateTimeFormatter FILE_TS = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
 
     /** In-memory token registry: jobUuid → CancellationToken. Cleaned up when job finishes. */
     private final Map<String, CancellationToken> activeTokens = new ConcurrentHashMap<>();
 
     private final CrudService crudService;
-    private final AccountMigrationService mobilityService;
+    private final AccountMigrationService migrationService;
     private final AccountMigrationProperties properties;
     private final ObjectMapper objectMapper;
     private final Semaphore concurrencyLimit;
 
     public AccountMigrationJobServiceImpl(CrudService crudService,
-                                          AccountMigrationService mobilityService,
+                                          AccountMigrationService migrationService,
                                           AccountMigrationProperties properties,
                                           @Qualifier("migrationObjectMapper") ObjectMapper objectMapper) {
         this.crudService = crudService;
-        this.mobilityService = mobilityService;
+        this.migrationService = migrationService;
         this.properties = properties;
         this.objectMapper = objectMapper;
         this.concurrencyLimit = new Semaphore(Math.max(1, properties.getMaxConcurrentJobs()));
@@ -198,7 +198,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
         activeTokens.put(job.getUuid(), token);
         Path outputFile = buildOutputPath(job, options.isCompressionEnabled());
         ExportWorker worker = new ExportWorker(
-                accountId, outputFile, options, mobilityService,
+                accountId, outputFile, options, migrationService,
                 buildProgressListener(job), token);
         scheduleWorker(job, worker, outputFile, null, token);
     }
@@ -207,7 +207,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
         CancellationToken token = CancellationToken.active();
         activeTokens.put(job.getUuid(), token);
         ImportWorker worker = new ImportWorker(
-                inputFile, options, mobilityService,
+                inputFile, options, migrationService,
                 buildProgressListener(job), token);
         scheduleWorker(job, worker, null, inputFile, token);
     }
@@ -216,7 +216,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
         CancellationToken token = CancellationToken.active();
         activeTokens.put(job.getUuid(), token);
         CloneWorker worker = new CloneWorker(
-                options, mobilityService,
+                options, migrationService,
                 buildProgressListener(job), token);
         scheduleWorker(job, worker, null, null, token);
     }
@@ -367,7 +367,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
 
     private AccountMigrationJob findByUuid(String uuid) {
         return crudService.findSingle(AccountMigrationJob.class,
-                QueryParameters.with("uuid", uuid));
+                QueryParameters.with("uuid", QueryConditions.eq(uuid)));
     }
 
     private AccountMigrationJobDto toDto(AccountMigrationJob job) {

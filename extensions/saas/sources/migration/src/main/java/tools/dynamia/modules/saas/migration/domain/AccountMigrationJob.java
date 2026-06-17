@@ -38,16 +38,22 @@ public class AccountMigrationJob extends SimpleEntity {
 
     // ─── Identity ──────────────────────────────────────────────────────────────
 
-    /** Stable external identifier (URL-safe, used in REST paths). */
+    /**
+     * Stable external identifier (URL-safe, used in REST paths).
+     */
     @Column(nullable = false, unique = true, length = 64)
     private String uuid = StringUtils.randomString();
 
     // ─── Tenant references ─────────────────────────────────────────────────────
 
-    /** Source tenant account ID. */
+    /**
+     * Source tenant account ID.
+     */
     private Long accountId;
 
-    /** Target tenant account ID (used for clone/restore operations). */
+    /**
+     * Target tenant account ID (used for clone/restore operations).
+     */
     private Long targetAccountId;
 
     // ─── Classification ────────────────────────────────────────────────────────
@@ -62,7 +68,9 @@ public class AccountMigrationJob extends SimpleEntity {
 
     // ─── Progress ──────────────────────────────────────────────────────────────
 
-    /** Completion percentage 0–100. */
+    /**
+     * Completion percentage 0–100.
+     */
     private int progress;
 
     @Column(length = 2000)
@@ -79,51 +87,67 @@ public class AccountMigrationJob extends SimpleEntity {
     @Column(columnDefinition = "TEXT")
     private String errorMessage;
 
-    /** Absolute path to the result file on disk (EXPORT / BACKUP jobs). */
+    /**
+     * Absolute path to the result file on disk (EXPORT / BACKUP jobs).
+     */
     @Column(length = 1000)
     private String resultPath;
 
-    /** Serialized {@link AccountExportOptions}
-     *  or {@link AccountImportOptions} as JSON. */
+    /**
+     * Serialized {@link AccountExportOptions}
+     * or {@link AccountImportOptions} as JSON.
+     */
     @Column(length = 4000)
     private String optionsJson;
 
     // ─── Helpers ───────────────────────────────────────────────────────────────
 
-    /** Mark the job as started. */
+    /**
+     * Mark the job as started.
+     */
     public void markRunning() {
         this.status = AccountJobStatus.RUNNING;
         this.startedAt = LocalDateTime.now();
     }
 
-    /** Mark the job as successfully completed. */
+    /**
+     * Mark the job as successfully completed.
+     */
     public void markCompleted() {
         this.status = AccountJobStatus.COMPLETED;
         this.finishedAt = LocalDateTime.now();
         this.progress = 100;
     }
 
-    /** Mark the job as failed with an error message. */
+    /**
+     * Mark the job as failed with an error message.
+     */
     public void markFailed(String errorMessage) {
         this.status = AccountJobStatus.FAILED;
         this.finishedAt = LocalDateTime.now();
         this.errorMessage = errorMessage;
     }
 
-    /** Mark the job as cancelled. */
+    /**
+     * Mark the job as cancelled.
+     */
     public void markCancelled(String reason) {
         this.status = AccountJobStatus.CANCELLED;
         this.finishedAt = LocalDateTime.now();
         this.progressMessage = reason;
     }
 
-    /** Update running progress (0-100) and an optional human-readable message. */
+    /**
+     * Update running progress (0-100) and an optional human-readable message.
+     */
     public void updateProgress(int progress, String message) {
         this.progress = Math.min(100, Math.max(0, progress));
-        this.progressMessage = message;
+        this.progressMessage = StringUtils.truncate(message, 1999);
     }
 
-    /** Returns {@code true} if the job is in a terminal state. */
+    /**
+     * Returns {@code true} if the job is in a terminal state.
+     */
     public boolean isFinished() {
         return status == AccountJobStatus.COMPLETED
                 || status == AccountJobStatus.FAILED
