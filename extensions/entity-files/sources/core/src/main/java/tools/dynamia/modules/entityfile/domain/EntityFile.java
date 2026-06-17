@@ -40,7 +40,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "mod_entity_files", indexes = {
-        @Index(name = "idx_uuid", columnList = "uuid")
+        @Index(name = "idx_uuid", columnList = "uuid"),
+        @Index(name = "idx_accountId", columnList = "accountId"),
+        @Index(name = "idx_target_entity", columnList = "targetEntity,targetEntityId"),
+        @Index(name = "idx_subfolder", columnList = "subfolder")
+
 })
 @BatchSize(size = 80)
 public class EntityFile extends BaseEntity implements URLable {
@@ -71,15 +75,17 @@ public class EntityFile extends BaseEntity implements URLable {
     private EntityFileState state;
     @NotEmpty
     private String uuid = StringUtils.randomString();
-    @Column(length = 1000)
+    @Column(name = "storageInfo", length = 1000)
     private String storageInfo;
 
+    @Column(name = "subfolder")
     private String subfolder;
     private String storedFileName;
 
     @Column(length = 500)
     private String remoteURL;
 
+    @Column(name = "accountId")
     private Long accountId;
     private String externalRef;
 
