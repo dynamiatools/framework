@@ -17,19 +17,31 @@ package tools.dynamia.modules.saas.migration.domain;
  */
 public enum AccountJobStatus {
 
-    /** Job has been created but not started yet. */
+    /**
+     * Job has been created but not started yet.
+     */
     PENDING,
 
-    /** Job is currently executing in a background virtual thread. */
+    /**
+     * Job is currently executing in a background virtual thread.
+     */
     RUNNING,
 
-    /** Job finished successfully. Result file is available for download. */
+    /**
+     * Job finished successfully. Result file is available for download.
+     */
     COMPLETED,
 
-    /** Job failed with an error. See {@link AccountMigrationJob#getErrorMessage()}. */
+    /**
+     * Job failed with an error. See {@link AccountMigrationJob#getErrorMessage()}.
+     */
     FAILED,
 
-    /** Job was cancelled by the user before it completed. */
-    CANCELLED
+    /**
+     * Job was cancelled by the user before it completed.
+     */
+    CANCELLED,
+
+    DELETED
 }
 

@@ -193,6 +193,14 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
         }
     }
 
+    @Override
+    public List<AccountMigrationJobDto> getLastJobs() {
+        var jobs = crudService.find(AccountMigrationJob.class, QueryParameters.with("status", QueryConditions.notEq(AccountJobStatus.DELETED))
+                .setMaxResults(100)
+                .orderBy("createdAt", false));
+        return jobs.stream().map(this::toDto).toList();
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Worker launchers
     // ─────────────────────────────────────────────────────────────────────────

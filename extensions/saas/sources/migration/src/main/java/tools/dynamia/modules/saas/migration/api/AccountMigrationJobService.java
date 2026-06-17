@@ -111,5 +111,7 @@ public interface AccountMigrationJobService {
      * @param jobUuid UUID of the job to cancel
      */
     void cancelJob(String jobUuid);
+
+    List<AccountMigrationJobDto> getLastJobs();
 }
 

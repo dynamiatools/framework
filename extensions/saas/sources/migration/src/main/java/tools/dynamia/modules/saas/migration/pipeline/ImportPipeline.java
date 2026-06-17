@@ -451,7 +451,7 @@ public class ImportPipeline {
         int i = 0;
         while (parser.nextToken() != JsonToken.END_ARRAY) {
             if (i < fields.size()) {
-                node.set(fields.get(i), objectMapper.readTree(parser));
+                node.set(fields.get(i), parser.readValueAsTree());
             } else {
                 parser.skipChildren();
             }

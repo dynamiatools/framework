@@ -10,13 +10,10 @@
  */
 package tools.dynamia.modules.saas.migration.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.domain.jpa.SimpleEntity;
+import tools.dynamia.modules.entityfile.domain.EntityFile;
 import tools.dynamia.modules.saas.migration.api.AccountExportOptions;
 import tools.dynamia.modules.saas.migration.api.AccountImportOptions;
 
