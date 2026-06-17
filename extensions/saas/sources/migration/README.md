@@ -13,12 +13,12 @@ All operations run as **async background jobs** via virtual threads, so long-run
 
 | Operation | Description |
 |-----------|-------------|
-| `EXPORT`  | Serialize all tenant data to a versioned JSON/GZIP file |
-| `IMPORT`  | Restore tenant data from a previously exported file |
+| `EXPORT`  | Serialize all tenant data to a versioned ZIP archive (one JSON file per entity) |
+| `IMPORT`  | Restore tenant data from a previously exported ZIP (or legacy JSON/GZIP) |
 | `CLONE`   | Duplicate a tenant in the same system (different accountId) |
 | `BACKUP`  | Alias for EXPORT tagged as backup |
 | `RESTORE` | Alias for IMPORT that replaces existing data |
-| `MIGRATE` | Cross-environment export + remote import (planned v2) |
+| `MIGRATE` | Cross-environment export + remote import (planned) |
 
 ---
 
@@ -63,7 +63,6 @@ Content-Type: application/json
 
 {
   "chunkSize": 500,
-  "compressionEnabled": true,
   "identityStrategy": "KEEP_IDS"
 }
 ```
@@ -90,13 +89,15 @@ GET /api/saas/migration/jobs/abc-123
 GET /api/saas/migration/jobs/abc-123/download
 ```
 
+The response is a ZIP archive named `Account42_20260614T100500.zip`.
+
 ### 5. Import a file
 
 ```http
 POST /api/saas/migration/jobs/import
 Content-Type: multipart/form-data
 
-file=@tenant_backup.json.gz
+file=@Account42_20260614T100500.zip
 targetAccountId=99
 identityStrategy=REGENERATE_IDS
 ```
@@ -128,7 +129,7 @@ Content-Type: application/json
 | `GET`  | `/api/saas/migration/jobs` | List all jobs |
 | `GET`  | `/api/saas/migration/jobs/{jobId}` | Get job status & progress |
 | `POST` | `/api/saas/migration/jobs/{jobId}/cancel` | Cancel a running job |
-| `GET`  | `/api/saas/migration/jobs/{jobId}/download` | Download result file |
+| `GET`  | `/api/saas/migration/jobs/{jobId}/download` | Download result ZIP |
 
 ---
 
@@ -138,10 +139,11 @@ Content-Type: application/json
 # saas-migration
 dynamia.saas.migration.chunk-size=500
 dynamia.saas.migration.output-directory=${java.io.tmpdir}/saas-migration
-dynamia.saas.migration.compression-enabled=false
 dynamia.saas.migration.max-concurrent-jobs=5
 dynamia.saas.migration.fail-on-entity-error=false
 ```
+
+> `compression-enabled` has been removed. All exports now produce a ZIP archive by default.
 
 ---
 
@@ -151,32 +153,54 @@ dynamia.saas.migration.fail-on-entity-error=false
 |----------|-------------|
 | `KEEP_IDS` | Preserve original database IDs. Suitable for cross-environment restore to an empty target DB. |
 | `REGENERATE_IDS` | Assign new auto-generated IDs. Safe for cloning within the same DB. |
-| `UUID7` | (Planned v3) Use UUIDv7 for all IDs. |
+| `UUID7` | (Planned) Use UUIDv7 for all IDs. |
 
 ---
 
-## Export Format
+## Export Format (v3)
 
+The result is always a ZIP archive containing:
+
+```
+Account42_20260614T100500.zip
+├── manifest.json              ← metadata + ordered entity list
+├── Account42_Customer.json
+├── Account42_Product.json
+└── Account42_Order.json
+```
+
+**manifest.json:**
 ```json
 {
-  "version": "1",
+  "version": "3",
   "exportedAt": "2026-06-14T10:05:00",
   "sourceAccountId": 42,
   "identityStrategy": "KEEP_IDS",
-  "account": { "id": 42, "name": "Acme Corp", ... },
-  "entities": {
-    "com.example.Customer": [
-      { "id": 1, "accountId": 42, "name": "John", "type_ref_id": 5 },
-      ...
-    ],
-    "com.example.Order": [
-      { "id": 10, "accountId": 42, "customer_ref_id": 1, ... }
-    ]
-  }
+  "account": { "id": 42, "name": "Acme Corp" },
+  "entities": [
+    { "file": "Account42_Customer.json", "entityClass": "com.example.Customer" },
+    { "file": "Account42_Order.json",    "entityClass": "com.example.Order" }
+  ]
 }
 ```
 
-Relationship fields (`@ManyToOne`, `@OneToOne`) are serialized as `{fieldName}_ref_id` to decouple the export from JPA serialization complexity. Collections (`@OneToMany`, `@ManyToMany`) are reconstructed naturally when child entities reference their parents.
+**Account42_Customer.json:**
+```json
+{
+  "entityClass": "com.example.Customer",
+  "fields": ["id", "accountId", "name", "type_ref_id"],
+  "rows": [
+    [1, 42, "John", 5],
+    [2, 42, "Jane", 5]
+  ]
+}
+```
+
+Relationship fields (`@ManyToOne`, `@OneToOne`) are serialized as `{fieldName}_ref_id`.
+Collections (`@OneToMany`, `@ManyToMany`) are reconstructed naturally when child entities
+reference their parents.
+
+The importer is backward-compatible with legacy v2 (single JSON/GZIP) and v1 (single JSON) files.
 
 ---
 
@@ -199,4 +223,3 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed design decisions, component 
 ## License
 
 Apache License 2.0 — Copyright © 2026 Dynamia Soluciones IT S.A.S
-

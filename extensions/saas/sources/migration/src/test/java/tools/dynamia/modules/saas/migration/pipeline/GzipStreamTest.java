@@ -18,8 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+import java.util.zip.*;
 
 /**
  * Verifies the GZIP auto-detection contract relied on by {@code ImportPipeline.detectAndWrapGzip()}.
@@ -102,7 +101,58 @@ public class GzipStreamTest {
         Assert.assertEquals(original, decompressed);
     }
 
+    @Test
+    public void zipMagicBytesAreDetectable() throws IOException {
+        byte[] zipData = zip("manifest.json", "{}");
+
+        // ZIP magic: "PK" = 0x50 0x4B
+        Assert.assertEquals(0x50, zipData[0] & 0xFF);
+        Assert.assertEquals(0x4B, zipData[1] & 0xFF);
+    }
+
+    @Test
+    public void zipMagicDistinguishesFromGzip() throws IOException {
+        byte[] zipData  = zip("manifest.json", "{}");
+        byte[] gzipData = gzip("{}");
+
+        boolean zipIsGzip  = (zipData[0]  == 0x1f && zipData[1]  == 0x8b);
+        boolean gzipIsZip  = (gzipData[0] == 0x50 && gzipData[1] == 0x4B);
+
+        Assert.assertFalse("ZIP must not match GZIP magic", zipIsGzip);
+        Assert.assertFalse("GZIP must not match ZIP magic", gzipIsZip);
+    }
+
+    @Test
+    public void bufferedStreamAllowsZipMagicDetectionWithReset() throws IOException {
+        byte[] zipData = zip("manifest.json", "{}");
+        BufferedInputStream in = new BufferedInputStream(new ByteArrayInputStream(zipData));
+
+        in.mark(4);
+        int b1 = in.read();
+        int b2 = in.read();
+        in.reset();
+
+        Assert.assertEquals(0x50, b1 & 0xFF);
+        Assert.assertEquals(0x4B, b2 & 0xFF);
+
+        // After reset, full ZIP is still readable
+        ZipInputStream zipIn = new ZipInputStream(in);
+        ZipEntry entry = zipIn.getNextEntry();
+        Assert.assertNotNull(entry);
+        Assert.assertEquals("manifest.json", entry.getName());
+    }
+
     // ─── Helper ──────────────────────────────────────────────────────────────
+
+    private static byte[] zip(String entryName, String content) throws IOException {
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        try (ZipOutputStream zipOut = new ZipOutputStream(buf)) {
+            zipOut.putNextEntry(new ZipEntry(entryName));
+            zipOut.write(content.getBytes());
+            zipOut.closeEntry();
+        }
+        return buf.toByteArray();
+    }
 
     private static byte[] gzip(String text) throws IOException {
         ByteArrayOutputStream buf = new ByteArrayOutputStream();

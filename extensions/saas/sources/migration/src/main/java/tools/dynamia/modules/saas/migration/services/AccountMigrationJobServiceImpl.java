@@ -107,7 +107,6 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     @Override
     public AccountMigrationJobDto createBackupJob(Long accountId) {
         AccountExportOptions options = new AccountExportOptions()
-                .compressionEnabled(properties.isCompressionEnabled())
                 .label("backup");
         AccountMigrationJob job = createAndSaveJob(accountId, null, AccountJobType.BACKUP, options);
         launchExportJob(job, accountId, options);
@@ -198,7 +197,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     private void launchExportJob(AccountMigrationJob job, Long accountId, AccountExportOptions options) {
         CancellationToken token = CancellationToken.active();
         activeTokens.put(job.getUuid(), token);
-        Path outputFile = buildOutputPath(job, options.isCompressionEnabled());
+        Path outputFile = buildOutputPath(job);
         ExportWorker worker = new ExportWorker(
                 accountId, outputFile, options, migrationService,
                 buildProgressListener(job), token);
@@ -343,18 +342,19 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
         };
     }
 
-    private Path buildOutputPath(AccountMigrationJob job, boolean compressed) {
+    private Path buildOutputPath(AccountMigrationJob job) {
         String ts = LocalDateTime.now().format(FILE_TS);
-        String fileName = "saas_export_" + job.getAccountId() + "_" + ts
-                + (compressed ? ".json.gz" : ".json");
+        String fileName = "Account" + job.getAccountId() + "_" + ts + ".zip";
         return Paths.get(properties.getOutputDirectory(), fileName);
     }
 
     private Path saveUploadedFile(MultipartFile file, String prefix) {
         try {
             String ts = LocalDateTime.now().format(FILE_TS);
-            String ext = file.getOriginalFilename() != null
-                    && file.getOriginalFilename().endsWith(".gz") ? ".json.gz" : ".json";
+            String original = file.getOriginalFilename() != null ? file.getOriginalFilename() : "";
+            String ext = original.endsWith(".zip") ? ".zip"
+                    : original.endsWith(".json.gz") ? ".json.gz"
+                    : ".json";
             Path dest = Paths.get(properties.getOutputDirectory(), prefix + "_upload_" + ts + ext);
             Files.createDirectories(dest.getParent());
             try (InputStream in = file.getInputStream()) {

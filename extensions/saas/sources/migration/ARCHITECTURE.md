@@ -48,7 +48,7 @@ The Account Migration Module enables full lifecycle management of tenant (Accoun
 ┌──────────────┐      ┌────────────────┐
 │ ExportPipeline│      │ ImportPipeline │
 │  (streaming  │      │  (streaming    │
-│   JSON write)│      │   JSON read)   │
+│   ZIP write) │      │   ZIP / legacy)│
 └──────┬───────┘      └───────┬────────┘
        │                      │
        │ uses                 │ uses
@@ -97,26 +97,61 @@ Account → Customer → Order → OrderItem
 
 ---
 
-## 4. Export Pipeline
+## 4. Export Pipeline (format v3)
+
+### Output: ZIP Archive
+
+Every export produces a single ZIP file containing one JSON entry per entity type, plus a manifest:
+
+```
+Account101_20260616T100500.zip
+├── manifest.json              ← always first entry
+├── Account101_Account.json    ← empty rows; Account data lives in manifest
+├── Account101_Customer.json
+├── Account101_Product.json
+└── Account101_Order.json
+```
+
+ZIP entries use `DEFLATE` at `BEST_SPEED` level. Typical JSON compresses 5–10×.
 
 ### Streaming Strategy
 
 ```
-OutputStream (raw or GZIPOutputStream)
-    └── JsonGenerator (Jackson streaming)
-            ├── Write header: {version, exportedAt, sourceAccountId, identityStrategy}
-            ├── Write "account": AccountDTO object
-            └── Write "entities": {
-                    For each entityClass in topological order:
-                        Write entityClass.getName(): {
-                            "fields": ["id", "name", "category_ref_id", ...],
-                            "rows": [
-                                [1, "John", 3],
-                                [2, "Cindy", null],
-                                ...
-                            ]
-                        }
-                }
+ZipOutputStream (wraps caller's OutputStream, 256 KB buffer)
+    │
+    ├── Entry: manifest.json
+    │       JsonGenerator → {version, exportedAt, sourceAccountId,
+    │                         identityStrategy, account: AccountDTO,
+    │                         entities: [{file, entityClass}, ...]}
+    │
+    └── For each entityClass in topological order:
+            Entry: Account{id}_{SimpleName}.json
+            JsonGenerator → {
+                "entityClass": "com.example.Customer",
+                "fields": ["id", "name", "category_ref_id", ...],
+                "rows": [
+                    [1, "John", 3],
+                    [2, "Cindy", null],
+                    ...
+                ]
+            }
+```
+
+Each `JsonGenerator` is wrapped with a `NoCloseOutputStream` so that `gen.close()` flushes
+without closing the underlying `ZipOutputStream`.
+
+### Keyset Pagination
+
+Entity rows are fetched in pages using keyset pagination (`id > lastId`) to avoid
+`OFFSET`-based degradation on large tables:
+
+```
+lastId = 0
+loop:
+  SELECT ... WHERE accountId = ? AND id > lastId ORDER BY id LIMIT chunkSize
+  → stream rows into current ZIP entry
+  lastId = last row's id
+until page.size() < chunkSize
 ```
 
 ### Serialization of a Single Entity (Columnar Format)
@@ -131,31 +166,54 @@ For each SingularAttribute (excluding id):
 ```
 
 Fields annotated with `@ExportIgnore` are skipped. Missing or inaccessible fields write `null`.
+`Account` entity rows are intentionally empty — account data is in `manifest.json`.
 
 ---
 
 ## 5. Import Pipeline
 
-### Streaming Strategy
+### Format Detection (magic bytes)
 
 ```
-InputStream (auto-detected: raw or GZIPInputStream)
-    └── JsonParser (Jackson streaming)
-            ├── Read header → validate version, note sourceAccountId
-            ├── Read "account" → AccountDTO (optionally create new Account)
-            └── Read "entities" → {
-                    For each entityClassName:
-                        resolve class → Class.forName(entityClassName)
-                        Read "fields": [...] → ordered column names
-                        For each row array (chunked):
-                            reconstruct JsonNode from fields + row values
-                            deserialize → entity instance
-                            resolve _ref_id references via idMappings
-                            set accountId = targetAccountId
-                            persist entity
-                            record originalId → newId in idMappings
-                }
+BufferedInputStream.mark(4) → peek 2 bytes → reset
+  0x50 0x4B ("PK") → ZIP archive → importFromZip()
+  0x1F 0x8B       → GZIP stream  → importLegacy() with GZIPInputStream wrapper
+  anything else   → plain JSON   → importLegacy()
 ```
+
+### ZIP Import Flow (v3)
+
+```
+ZipInputStream (sequential — entries arrive in topological order)
+    │
+    ├── Entry: manifest.json
+    │       Read version + sourceAccountId for logging
+    │       (entity list not required — each entity file is self-describing)
+    │
+    └── For each *.json entry:
+            JsonParser (via NoCloseInputStream wrapper)
+            → read "entityClass" → Class.forName()
+            → read "fields"      → ordered column names
+            → read "rows"        → chunked into List<JsonNode>
+                  persistChunk() [REQUIRES_NEW transaction per chunk]
+                  → deserialize entity
+                  → resolve _ref_id references via idMappings
+                  → set accountId = targetAccountId
+                  → persist + flush (REGENERATE_IDS) or set ID (KEEP_IDS)
+                  → record originalId → newId in idMappings
+            zipIn.closeEntry() — advances stream to next entry
+```
+
+`NoCloseInputStream` prevents `parser.close()` from closing the `ZipInputStream` between entries.
+`ZipInputStream.read()` reports EOF at the end of each entry, so Jackson's parser stops
+naturally without reading into the next entry.
+
+### Legacy Import (v1 / v2)
+
+For files produced by format v1 (per-row objects) or v2 (single JSON/GZIP):
+- GZIP-wrapped streams are unwrapped automatically.
+- The single JSON document is parsed using the original streaming algorithm.
+- This path is maintained for backward compatibility and will not be removed.
 
 ### ID Resolution (Identity Mapper)
 
@@ -172,7 +230,20 @@ REGENERATE_IDS (default for clone):
 
 ---
 
-## 6. Worker Lifecycle
+## 6. Clone Operation
+
+Clone uses a temporary file (not an in-memory buffer) to safely handle tenants with
+hundreds of megabytes of data:
+
+```
+Phase 1: ExportPipeline.export(source, tempFile) → Account{src}_timestamp.zip
+Phase 2: ImportPipeline.importTenant(tempFile, importOptions)
+Phase 3: Files.deleteIfExists(tempFile)   [in finally block]
+```
+
+---
+
+## 7. Worker Lifecycle
 
 ```
 POST /export/{accountId}
@@ -184,7 +255,7 @@ AccountMigrationJobService.createExportJob(accountId, options)
     ├── 2. SchedulerUtil.runWithResult(new ExportWorker(jobId, accountId, options))
     │         └── Virtual Thread starts
     │               ├── Update job status → RUNNING
-    │               ├── Call ExportPipeline.export(...)
+    │               ├── Call ExportPipeline.export(...)  → writes Account{id}_{ts}.zip
     │               │     └── MigrationProgressListener updates job.progress periodically
     │               ├── On success: update job status → COMPLETED, set resultPath
     │               └── On failure: update job status → FAILED, set errorMessage
@@ -200,15 +271,16 @@ Cancellation:
 
 ---
 
-## 7. Export File Format
+## 8. Export File Format (v3)
 
 ```
-saas_export_42_20260614T100500.json[.gz]
+Account42_20260614T100500.zip
 ```
 
+**manifest.json** (first ZIP entry):
 ```json
 {
-  "version": "2",
+  "version": "3",
   "exportedAt": "2026-06-14T10:05:00",
   "sourceAccountId": 42,
   "identityStrategy": "KEEP_IDS",
@@ -216,42 +288,40 @@ saas_export_42_20260614T100500.json[.gz]
     "id": 42,
     "name": "Acme Corp",
     "subdomain": "acme",
-    "email": "admin@acme.com",
-    ...
+    "email": "admin@acme.com"
   },
-  "entities": {
-    "tools.dynamia.modules.saas.jpa.AccountParameter": {
-      "fields": ["id", "accountId", "name", "value"],
-      "rows": [
-        [1, 42, "theme", "dark"]
-      ]
-    },
-    "com.example.Customer": {
-      "fields": ["id", "accountId", "name", "category_ref_id"],
-      "rows": [
-        [10, 42, "John", 3]
-      ]
-    },
-    "com.example.Order": {
-      "fields": ["id", "accountId", "total", "customer_ref_id"],
-      "rows": [
-        [100, 42, 99.99, 10]
-      ]
-    }
-  }
+  "entities": [
+    { "file": "Account42_AccountParameter.json", "entityClass": "tools.dynamia.modules.saas.jpa.AccountParameter" },
+    { "file": "Account42_Customer.json",         "entityClass": "com.example.Customer" },
+    { "file": "Account42_Order.json",            "entityClass": "com.example.Order" }
+  ]
+}
+```
+
+**Account42_Customer.json** (ZIP entry per entity):
+```json
+{
+  "entityClass": "com.example.Customer",
+  "fields": ["id", "accountId", "name", "category_ref_id"],
+  "rows": [
+    [10, 42, "John", 3],
+    [11, 42, "Cindy", null]
+  ]
 }
 ```
 
 **Key conventions:**
-- Each entity section is an object with `fields` (column names) and `rows` (value arrays).
+- Each entity file is a standalone JSON document with `entityClass`, `fields`, and `rows`.
 - `{fieldName}_ref_id` encodes a `@ManyToOne` / `@OneToOne` reference by its primary key.
-- The `account` section makes the package self-describing.
-- Entities appear in topological order (parents before children).
-- Format version `"2"` uses the columnar layout; version `"1"` (legacy) used per-row objects.
+- Entities appear in topological order (parents before children) both in the manifest and as ZIP entries.
+- The `account` section in the manifest makes the archive self-describing.
+- Format version `"3"` uses the ZIP multi-file layout.
+- Format version `"2"` (legacy) uses a single columnar JSON/GZIP document.
+- Format version `"1"` (legacy) uses a single JSON document with per-row objects.
 
 ---
 
-## 8. Identity Mapping SPI
+## 9. Identity Mapping SPI
 
 ```java
 public interface IdentityMapper {
@@ -280,7 +350,7 @@ Register a custom implementation as a Spring bean (`@Component` / `@Service`) to
 
 ---
 
-## 9. Annotaions
+## 10. Annotations
 
 ### `@AccountExportIgnore`
 
@@ -304,7 +374,7 @@ Apply to entity fields that should be skipped during serialization (computed val
 
 ---
 
-## 10. Database Schema
+## 11. Database Schema
 
 The module adds one table:
 
@@ -329,25 +399,28 @@ CREATE TABLE saas_migration_jobs (
 
 ---
 
-## 11. Scalability Notes
+## 12. Scalability Notes
 
 | Concern | Mitigation |
 |---------|------------|
-| Large tables | Chunked pagination (configurable, default 500 rows/page) |
-| Memory | Jackson streaming API: never load all rows |
-| Network / disk | Optional GZIP compression |
+| Large tables | Keyset pagination (`id > lastId`, configurable chunk size, default 500 rows/page) |
+| Memory | Jackson streaming API + ZipOutputStream: never load all rows; one ZIP entry at a time |
+| Disk I/O | 256 KB write buffer on ZipOutputStream; DEFLATE BEST_SPEED compression |
+| Network / disk | ZIP always produced — typically 5–10× smaller than raw JSON |
 | Long-running jobs | Virtual threads, cooperative cancellation via `CancellationToken` |
-| DB load | Read-only paginated queries; imports batched per chunk |
+| DB load | Read-only keyset-paginated queries; imports batched per chunk in isolated transactions |
 | Concurrent jobs | In-memory job registry + DB-backed state; configurable max concurrent |
+| Large clone | Export → temp file → import (avoids OOM from in-memory buffers) |
 
 ---
 
-## 12. Implementation Roadmap
+## 13. Implementation Roadmap
 
 | Phase | Scope |
 |-------|-------|
-| **v1 (current)** | EXPORT, IMPORT, CLONE, BACKUP, RESTORE. `KEEP_IDS` + `REGENERATE_IDS`. REST API. Progress tracking. Cancellation. |
-| **v2** | Cross-environment MIGRATE (HTTP push to remote endpoint). Resume after failure (checkpoint in DB). |
-| **v3** | `UUID7` identity strategy. Partial export (subset of entities). Schema validation on import. Diff/merge strategy. |
-| **v4** | Multi-region database migration. S3/GCS file storage backend. Event-driven progress via SSE/WebSocket. |
-
+| **v1 (legacy)** | EXPORT, IMPORT as single JSON. `KEEP_IDS` + `REGENERATE_IDS`. |
+| **v2 (legacy)** | Columnar format (fields + rows arrays). Optional GZIP. |
+| **v3 (current)** | ZIP multi-file: one JSON per entity. Always compressed. Keyset pagination. Backward-compatible import. Clone via temp file. |
+| **v4** | Cross-environment MIGRATE (HTTP push to remote endpoint). Resume after failure (checkpoint in DB). |
+| **v5** | `UUID7` identity strategy. Partial export (subset of entities). Schema validation on import. |
+| **v6** | Multi-region database migration. S3/GCS file storage backend. Event-driven progress via SSE/WebSocket. |

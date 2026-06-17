@@ -20,8 +20,23 @@ public final class ExportConstants {
     private ExportConstants() {
     }
 
-    /** Current format version written to every export file. */
-    public static final String FORMAT_VERSION = "2";
+    /**
+     * Current format version.
+     * v1 – per-row objects (legacy). v2 – columnar single JSON/GZIP. v3 – ZIP multi-file.
+     */
+    public static final String FORMAT_VERSION = "3";
+
+    /** Name of the manifest entry inside the ZIP archive (always the first entry). */
+    public static final String MANIFEST_FILE = "manifest.json";
+
+    /**
+     * Field written in each entity JSON file and in manifest entity descriptors
+     * to carry the fully-qualified entity class name.
+     */
+    public static final String FIELD_ENTITY_CLASS = "entityClass";
+
+    /** Field inside each manifest entity descriptor that holds the ZIP entry file name. */
+    public static final String MANIFEST_ENTITY_FILE = "file";
 
     /**
      * Suffix appended to field names when serializing {@code @ManyToOne} /

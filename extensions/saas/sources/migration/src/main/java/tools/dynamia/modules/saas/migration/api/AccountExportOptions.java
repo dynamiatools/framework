@@ -27,8 +27,12 @@ public class AccountExportOptions {
     private int chunkSize = DEFAULT_CHUNK_SIZE;
 
     /**
-     * When {@code true}, the output stream is wrapped in GZIP compression.
+     * No longer has any effect — the export always produces a ZIP archive.
+     * Kept for API backward compatibility only.
+     *
+     * @deprecated Since format v3, the output is always a ZIP. This flag is ignored.
      */
+    @Deprecated
     private boolean compressionEnabled = false;
 
     /**
@@ -58,6 +62,10 @@ public class AccountExportOptions {
         return this;
     }
 
+    /**
+     * @deprecated Since format v3, the output is always a ZIP. This method is a no-op.
+     */
+    @Deprecated
     public AccountExportOptions compressionEnabled(boolean compressionEnabled) {
         this.compressionEnabled = compressionEnabled;
         return this;
@@ -86,10 +94,14 @@ public class AccountExportOptions {
         this.chunkSize = chunkSize;
     }
 
+    /** @deprecated Since format v3, always returns {@code false}. Ignored by the pipeline. */
+    @Deprecated
     public boolean isCompressionEnabled() {
         return compressionEnabled;
     }
 
+    /** @deprecated Since format v3, the output is always a ZIP. This setter is a no-op. */
+    @Deprecated
     public void setCompressionEnabled(boolean compressionEnabled) {
         this.compressionEnabled = compressionEnabled;
     }
