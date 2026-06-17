@@ -18,10 +18,7 @@ import jakarta.persistence.metamodel.SingularAttribute;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.ReflectionUtils;
 import tools.dynamia.commons.logger.LoggingService;
-import tools.dynamia.domain.jpa.JpaCrudService;
 import tools.dynamia.domain.jpa.JpaUtils;
-import tools.dynamia.domain.query.QueryConditions;
-import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.modules.saas.api.ExportIgnore;
@@ -38,16 +35,26 @@ import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.BufferedOutputStream;
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -55,16 +62,24 @@ import java.util.zip.ZipOutputStream;
 /**
  * Streaming export pipeline — format v3.
  *
- * <p>Produces a ZIP archive where every tenant entity type is written as a
- * separate JSON entry ({@code Account{id}_{SimpleName}.json}) preceded by a
- * {@code manifest.json} that carries metadata and the ordered entity list.
+ * <h3>Strategy</h3>
+ * <ol>
+ *   <li>Creates a temporary directory for the export session.</li>
+ *   <li>Writes {@code manifest.json} synchronously (entity list known upfront).</li>
+ *   <li>Exports each entity type to its own {@code Account{id}_{Simple}.json} file
+ *       using up to {@link AccountMigrationProperties#getExportParallelism()} concurrent
+ *       virtual threads. Each thread creates its own {@link EntityManager}.</li>
+ *   <li>Zips the temp directory to the caller's {@link OutputStream} in topological
+ *       order (manifest first, then entities parent-before-child).</li>
+ *   <li>Deletes the temp directory unconditionally in a {@code finally} block.</li>
+ * </ol>
  *
- * <p>Each entity JSON file uses the columnar format introduced in v2:
+ * <h3>Per-entity JSON format</h3>
  * <pre>
  * {
  *   "entityClass": "com.example.Customer",
- *   "fields": ["id", "name", "type_ref_id"],
- *   "rows":  [[1,"John",5],[2,"Jane",5]]
+ *   "fields": ["id", "name", "category_ref_id"],
+ *   "rows":  [[1,"John",5],[2,"Jane",null]]
  * }
  * </pre>
  *
@@ -72,13 +87,11 @@ import java.util.zip.ZipOutputStream;
  * <ul>
  *   <li>{@code BASIC} / {@code EMBEDDED} — value written directly.</li>
  *   <li>{@code MANY_TO_ONE} / {@code ONE_TO_ONE} — written as
- *       {@code {fieldName}_ref_id: <pk>}.</li>
+ *       {@code {fieldName}_ref_id: <pk>} (proxy ID extracted without initializing the proxy).</li>
  *   <li>{@code ONE_TO_MANY} / {@code MANY_TO_MANY} — skipped.</li>
  * </ul>
  *
  * <p>Fields annotated with {@link ExportIgnore} are silently skipped.
- * The output is always a ZIP archive; the caller need not add any
- * additional compression layer.
  *
  * @author Mario Serrano Leones
  */
@@ -87,14 +100,21 @@ public class ExportPipeline {
 
     private static final LoggingService logger = LoggingService.get(ExportPipeline.class);
 
-    /** ZIP compression level: BEST_SPEED gives good ratio for JSON with minimal CPU overhead. */
+    /** ZIP compression level — BEST_SPEED gives good ratio for JSON with minimal CPU overhead. */
     private static final int ZIP_LEVEL = Deflater.BEST_SPEED;
 
-    /** Write buffer size for the ZIP output stream. */
-    private static final int BUFFER_SIZE = 256 * 1024;
+    /** ZIP output buffer size. */
+    private static final int ZIP_BUFFER_SIZE = 256 * 1024;
+
+    /** Per-entity file write buffer size. */
+    private static final int ENTITY_BUFFER_SIZE = 64 * 1024;
+
+    /** Standard Jakarta Persistence fetch-graph hint key. */
+    private static final String HINT_FETCH_GRAPH = "jakarta.persistence.fetchgraph";
 
     /**
-     * Column definitions cached per entity class; built once, reused across export runs.
+     * Column definitions cached per entity class; built once on first export,
+     * reused across parallel tasks and subsequent export runs.
      */
     private final Map<Class<?>, List<ColumnDef>> columnCache = new ConcurrentHashMap<>();
 
@@ -122,8 +142,9 @@ public class ExportPipeline {
     /**
      * Exports all tenant data for {@code accountId} to {@code output} as a ZIP archive.
      *
-     * <p>The archive always starts with {@code manifest.json} followed by one
-     * JSON entry per entity type in topological dependency order (parents first).
+     * <p>Entity JSON files are written in parallel to a temporary directory, then
+     * zipped to {@code output} in topological order. The temp directory is always
+     * deleted before this method returns.
      *
      * @param accountId ID of the account to export
      * @param output    destination stream; ownership is NOT transferred — the caller must close it
@@ -149,49 +170,37 @@ public class ExportPipeline {
         }
 
         List<Class<?>> ordered = dependencyGraph.topologicalSort(candidates);
-        long totalTypes = ordered.size();
+        int parallelism = Math.max(1, properties.getExportParallelism());
 
-        logger.info("[Migration/Export] Starting export for accountId={} — {} entity types", accountId, totalTypes);
+        logger.info("[Migration/Export] Starting export accountId={} — {} entity types, parallelism={}",
+                accountId, ordered.size(), parallelism);
 
-        ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(output, BUFFER_SIZE));
-        zipOut.setLevel(ZIP_LEVEL);
+        Path tempDir;
+        try {
+            tempDir = Files.createTempDirectory("saas-export-" + accountId + "-");
+        } catch (IOException e) {
+            throw new MigrationException("Cannot create temp directory for export", e);
+        }
 
         try {
-            // ── Manifest (first entry) ────────────────────────────────────────
-            zipOut.putNextEntry(new ZipEntry(ExportConstants.MANIFEST_FILE));
-            writeManifest(zipOut, account, accountId, options, ordered);
-            zipOut.closeEntry();
+            // ── 1. Manifest (synchronous, entity list is known upfront) ────────
+            writeManifestToFile(tempDir.resolve(ExportConstants.MANIFEST_FILE),
+                    account, accountId, options, ordered);
 
-            // ── Entity entries ────────────────────────────────────────────────
-            long processedTypes = 0;
-            long totalRecords = 0;
+            // ── 2. Entity files in parallel ────────────────────────────────────
+            exportEntitiesInParallel(tempDir, ordered, accountId, options, token,
+                    parallelism, listener);
 
-            for (Class<?> entityClass : ordered) {
-                if (token != null && token.isCancelled()) {
-                    logger.info("[Migration/Export] Cancelled at entity: {}", entityClass.getSimpleName());
-                    break;
-                }
-
-                String entryName = "Account" + accountId + "_" + entityClass.getSimpleName() + ".json";
-                zipOut.putNextEntry(new ZipEntry(entryName));
-                long count = exportEntityToEntry(zipOut, entityClass, accountId, options, token);
-                zipOut.closeEntry();
-
-                totalRecords += count;
-                processedTypes++;
-
-                if (listener != null) {
-                    listener.onProgress(new MigrationProgress(processedTypes, totalTypes,
-                            "Exported " + entityClass.getSimpleName() + " (" + count + " records)",
-                            totalRecords));
-                }
+            // ── 3. Zip temp dir → output (topological order) ──────────────────
+            if (token == null || !token.isCancelled()) {
+                zipToOutput(tempDir, ordered, accountId, output);
+                logger.info("[Migration/Export] ZIP written successfully for accountId={}", accountId);
             }
 
-            zipOut.finish(); // write ZIP central directory without closing the caller's stream
-            logger.info("[Migration/Export] ZIP complete: {} types, {} total records", processedTypes, totalRecords);
-
         } catch (IOException e) {
-            throw new MigrationException("Export failed while writing ZIP", e);
+            throw new MigrationException("Export failed", e);
+        } finally {
+            deleteDirectory(tempDir);
         }
     }
 
@@ -199,10 +208,13 @@ public class ExportPipeline {
     // Manifest
     // ─────────────────────────────────────────────────────────────────────────
 
-    private void writeManifest(ZipOutputStream zipOut, Account account, Long accountId,
-                               AccountExportOptions options, List<Class<?>> ordered) throws IOException {
-        // NoCloseOutputStream prevents gen.close() from closing the ZipOutputStream
-        try (JsonGenerator gen = objectMapper.createGenerator(new NoCloseOutputStream(zipOut))) {
+    private void writeManifestToFile(Path manifestPath, Account account, Long accountId,
+                                     AccountExportOptions options, List<Class<?>> ordered)
+            throws IOException {
+
+        try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(manifestPath));
+             JsonGenerator gen = objectMapper.createGenerator(out)) {
+
             gen.writeStartObject();
             gen.writeStringProperty(ExportConstants.FIELD_VERSION, ExportConstants.FORMAT_VERSION);
             gen.writeStringProperty(ExportConstants.FIELD_EXPORTED_AT, LocalDateTime.now().toString());
@@ -216,7 +228,7 @@ public class ExportPipeline {
             gen.writeName(ExportConstants.FIELD_ENTITIES);
             gen.writeStartArray();
             for (Class<?> entityClass : ordered) {
-                String fileName = "Account" + accountId + "_" + entityClass.getSimpleName() + ".json";
+                String fileName = entityFileName(accountId, entityClass);
                 gen.writeStartObject();
                 gen.writeStringProperty(ExportConstants.MANIFEST_ENTITY_FILE, fileName);
                 gen.writeStringProperty(ExportConstants.FIELD_ENTITY_CLASS, entityClass.getName());
@@ -229,83 +241,175 @@ public class ExportPipeline {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Entity entry
+    // Parallel entity export
     // ─────────────────────────────────────────────────────────────────────────
 
-    private long exportEntityToEntry(ZipOutputStream zipOut, Class<?> entityClass,
-                                     Long accountId, AccountExportOptions options,
-                                     CancellationToken token) throws IOException {
+    private void exportEntitiesInParallel(Path tempDir,
+                                          List<Class<?>> ordered,
+                                          Long accountId,
+                                          AccountExportOptions options,
+                                          CancellationToken token,
+                                          int parallelism,
+                                          MigrationProgressListener listener) {
 
-        try (JsonGenerator gen = objectMapper.createGenerator(new NoCloseOutputStream(zipOut))) {
-            gen.writeStartObject();
-            gen.writeStringProperty(ExportConstants.FIELD_ENTITY_CLASS, entityClass.getName());
+        ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
+        Semaphore semaphore = new Semaphore(parallelism);
+        List<Future<Long>> futures = new ArrayList<>(ordered.size());
 
+        for (Class<?> entityClass : ordered) {
+            futures.add(pool.submit(() -> {
+                semaphore.acquire();
+                try {
+                    if (token != null && token.isCancelled()) return 0L;
+                    return exportEntityToFile(tempDir, entityClass, accountId, options, token);
+                } finally {
+                    semaphore.release();
+                }
+            }));
+        }
+        pool.shutdown();
+
+        // Collect results in topological order (for progress reporting)
+        long processedTypes = 0;
+        long totalTypes = ordered.size();
+        long totalRecords = 0;
+
+        for (int i = 0; i < ordered.size(); i++) {
+            Class<?> entityClass = ordered.get(i);
+            try {
+                long count = futures.get(i).get();
+                totalRecords += count;
+                processedTypes++;
+
+                if (listener != null) {
+                    listener.onProgress(new MigrationProgress(processedTypes, totalTypes,
+                            "Exported " + entityClass.getSimpleName() + " (" + count + " records)",
+                            totalRecords));
+                }
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause();
+                logger.error("[Migration/Export] Failed to export {}: {}",
+                        entityClass.getSimpleName(), cause.getMessage(), cause);
+                if (properties.isFailOnEntityError()) {
+                    pool.shutdownNow();
+                    throw new MigrationException(
+                            "Export failed for entity " + entityClass.getSimpleName(), cause);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                pool.shutdownNow();
+                throw new MigrationException("Export interrupted", e);
+            }
+        }
+
+        logger.info("[Migration/Export] All entities exported — {} types, {} total records",
+                processedTypes, totalRecords);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Single entity → file
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Writes one entity JSON file to {@code tempDir}.
+     * Opens its own {@link EntityManager} so this method is safe to call
+     * concurrently from multiple virtual threads.
+     */
+    private long exportEntityToFile(Path tempDir, Class<?> entityClass,
+                                    Long accountId, AccountExportOptions options,
+                                    CancellationToken token) throws IOException {
+
+        Path filePath = tempDir.resolve(entityFileName(accountId, entityClass));
+        EntityManager localEm = emf.createEntityManager();
+        try {
             EntityType<?> entityType;
             try {
-                entityType = emf.getMetamodel().entity(entityClass);
+                entityType = localEm.getMetamodel().entity(entityClass);
             } catch (IllegalArgumentException e) {
-                logger.warn("[Migration/Export] Entity not in JPA metamodel, skipping: {}", entityClass.getName());
-                gen.writeName(ExportConstants.FIELD_FIELDS);
-                gen.writeStartArray();
-                gen.writeEndArray();
-                gen.writeName(ExportConstants.FIELD_ROWS);
-                gen.writeStartArray();
-                gen.writeEndArray();
-                gen.writeEndObject();
+                logger.warn("[Migration/Export] Entity not in JPA metamodel, skipping: {}",
+                        entityClass.getName());
+                writeEmptyEntityFile(filePath, entityClass);
                 return 0;
             }
 
             List<ColumnDef> columns = buildColumns(entityType);
 
+            try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(filePath), ENTITY_BUFFER_SIZE);
+                 JsonGenerator gen = objectMapper.createGenerator(out)) {
+
+                gen.writeStartObject();
+                gen.writeStringProperty(ExportConstants.FIELD_ENTITY_CLASS, entityClass.getName());
+
+                gen.writeName(ExportConstants.FIELD_FIELDS);
+                gen.writeStartArray();
+                for (ColumnDef col : columns) {
+                    gen.writeString(col.columnName());
+                }
+                gen.writeEndArray();
+
+                gen.writeName(ExportConstants.FIELD_ROWS);
+                gen.writeStartArray();
+                long processed = writeEntityRows(gen, entityClass, accountId, options, token, localEm, columns);
+                gen.writeEndArray();
+
+                gen.writeEndObject();
+
+                logger.debug("[Migration/Export] {} → {} records written", entityClass.getSimpleName(), processed);
+                return processed;
+            }
+        } finally {
+            localEm.close();
+        }
+    }
+
+    private void writeEmptyEntityFile(Path filePath, Class<?> entityClass) throws IOException {
+        try (OutputStream out = Files.newOutputStream(filePath);
+             JsonGenerator gen = objectMapper.createGenerator(out)) {
+            gen.writeStartObject();
+            gen.writeStringProperty(ExportConstants.FIELD_ENTITY_CLASS, entityClass.getName());
             gen.writeName(ExportConstants.FIELD_FIELDS);
             gen.writeStartArray();
-            for (ColumnDef col : columns) {
-                gen.writeString(col.columnName());
-            }
             gen.writeEndArray();
-
             gen.writeName(ExportConstants.FIELD_ROWS);
             gen.writeStartArray();
-            long processed = writeEntityRows(gen, entityClass, accountId, options, token);
             gen.writeEndArray();
-
             gen.writeEndObject();
-            return processed;
         }
     }
 
     /**
-     * Writes all rows for {@code entityClass} using keyset pagination to avoid
-     * OFFSET degradation on large tables.
-     * {@link Account} is skipped — its data lives in the manifest.
+     * Pages through all rows for {@code entityClass} using keyset pagination
+     * ({@code id > lastId}) and writes each row to {@code gen}.
+     *
+     * <p>{@link Account} is skipped — its data lives in the manifest.
+     * Each parallel task passes its own {@code localEm} so there is no
+     * cross-thread EntityManager sharing.
      */
-    private long writeEntityRows(JsonGenerator gen, Class<?> entityClass, Long accountId,
-                                 AccountExportOptions options, CancellationToken token)
-            throws IOException {
-
+    private long writeEntityRows(JsonGenerator gen,
+                                 Class<?> entityClass,
+                                 Long accountId,
+                                 AccountExportOptions options,
+                                 CancellationToken token,
+                                 EntityManager localEm,
+                                 List<ColumnDef> columns) throws IOException {
         if (Account.class.equals(entityClass)) {
             return 0;
         }
 
         int chunkSize = resolveChunkSize(options);
-        EntityManager em = (EntityManager) crudService.getDelgate();
-        List<ColumnDef> columns = columnCache.get(entityClass); // already cached at this point
-
         long lastId = 0;
         long processed = 0;
-        List<Object> page;
 
         do {
-            QueryParameters qp = QueryParameters.with("accountId", accountId)
-                    .add("id", QueryConditions.gt(lastId))
-                    .paginate(chunkSize)
-                    .setHint(JpaCrudService.HINT_FETCH_GRAPH, em.createEntityGraph(entityClass))
-                    .setReadOnly(true)
-                    .orderBy("id", true);
-
             @SuppressWarnings("unchecked")
-            List<Object> fetched = (List<Object>) crudService.findReadOnly(entityClass, qp);
-            page = fetched != null ? fetched : List.of();
+            List<Object> page = localEm.createQuery(
+                            "SELECT e FROM " + entityClass.getSimpleName() +
+                            " e WHERE e.accountId = :accountId AND e.id > :lastId ORDER BY e.id ASC")
+                    .setParameter("accountId", accountId)
+                    .setParameter("lastId", lastId)
+                    .setMaxResults(chunkSize)
+                    .setHint(HINT_FETCH_GRAPH, localEm.createEntityGraph(entityClass))
+                    .getResultList();
 
             for (Object entity : page) {
                 if (token != null && token.isCancelled()) break;
@@ -319,12 +423,47 @@ public class ExportPipeline {
                 processed++;
             }
 
-            em.clear();
+            localEm.clear();
 
-        } while (page.size() == chunkSize && (token == null || !token.isCancelled()));
+            if (page.size() < chunkSize || (token != null && token.isCancelled())) break;
 
-        logger.debug("[Migration/Export] {} records exported for {}", processed, entityClass.getSimpleName());
+        } while (true);
+
         return processed;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // ZIP assembly
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Streams the temp directory contents to {@code output} as a ZIP archive.
+     * Entries are added in topological order: manifest first, then entities.
+     */
+    private void zipToOutput(Path tempDir, List<Class<?>> ordered, Long accountId,
+                             OutputStream output) throws IOException {
+
+        ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(output, ZIP_BUFFER_SIZE));
+        zipOut.setLevel(ZIP_LEVEL);
+
+        addFileToZip(zipOut, tempDir.resolve(ExportConstants.MANIFEST_FILE), ExportConstants.MANIFEST_FILE);
+
+        for (Class<?> entityClass : ordered) {
+            String fileName = entityFileName(accountId, entityClass);
+            Path filePath = tempDir.resolve(fileName);
+            if (Files.exists(filePath)) {
+                addFileToZip(zipOut, filePath, fileName);
+            }
+        }
+
+        zipOut.finish(); // writes ZIP central directory; does not close the caller's stream
+    }
+
+    private static void addFileToZip(ZipOutputStream zipOut, Path file, String entryName)
+            throws IOException {
+        zipOut.putNextEntry(new ZipEntry(entryName));
+        Files.copy(file, zipOut); // streams without loading file into RAM
+        zipOut.closeEntry();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -333,7 +472,7 @@ public class ExportPipeline {
 
     /**
      * Describes one exported column. The {@link Field} is resolved and made accessible once
-     * (in {@link #buildColumns}) and cached — never looked up again per row.
+     * and cached — never looked up again per row.
      */
     private record ColumnDef(String columnName, Field field, PersistentAttributeType type) {
     }
@@ -401,6 +540,14 @@ public class ExportPipeline {
         gen.writeEndArray();
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // Utilities
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private static String entityFileName(Long accountId, Class<?> entityClass) {
+        return "Account" + accountId + "_" + entityClass.getSimpleName() + ".json";
+    }
+
     private boolean hasExportIgnore(Class<?> clazz, String fieldName) {
         Field field = ReflectionUtils.findField(clazz, fieldName);
         return field != null && field.isAnnotationPresent(ExportIgnore.class);
@@ -411,28 +558,23 @@ public class ExportPipeline {
         return size > 0 ? size : properties.getChunkSize();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Internal utilities
-    // ─────────────────────────────────────────────────────────────────────────
+    private static void deleteDirectory(Path dir) {
+        try {
+            Files.walkFileTree(dir, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
 
-    /**
-     * Wraps an {@link OutputStream} and swallows {@link #close()} calls.
-     * Used to prevent a {@link JsonGenerator} from closing the underlying
-     * {@link ZipOutputStream} when the generator itself is closed.
-     */
-    private static final class NoCloseOutputStream extends FilterOutputStream {
-        NoCloseOutputStream(OutputStream out) {
-            super(out);
-        }
-
-        @Override
-        public void write(byte[] b, int off, int len) throws IOException {
-            out.write(b, off, len);
-        }
-
-        @Override
-        public void close() throws IOException {
-            out.flush(); // flush but do not close
+                @Override
+                public FileVisitResult postVisitDirectory(Path directory, IOException exc) throws IOException {
+                    Files.delete(directory);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            logger.warn("[Migration/Export] Could not delete temp directory {}: {}", dir, e.getMessage());
         }
     }
 }

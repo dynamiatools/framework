@@ -27,12 +27,15 @@ import tools.dynamia.modules.saas.migration.config.AccountMigrationProperties;
 import tools.dynamia.modules.saas.migration.identity.KeepIdsIdentityMapper;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static org.mockito.Mockito.when;
+
 
 /**
  * Verifies that {@link ImportPipeline} correctly resolves the identity mapper:
@@ -44,7 +47,8 @@ import static org.mockito.Mockito.when;
  * </ul>
  *
  * <p>These tests reach {@code resolveIdentityMapper} indirectly by calling
- * {@code importTenant} with a minimal but valid JSON stream and observing behaviour.
+ * {@code importTenant} with a minimal valid ZIP stream (manifest only, no entities)
+ * and observing behaviour.
  */
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ImportPipelineMapperResolutionTest {
@@ -164,17 +168,31 @@ public class ImportPipelineMapperResolutionTest {
         }
     }
 
+    /**
+     * Returns a minimal v3 ZIP stream: just a manifest.json entry, no entity files.
+     * The ImportPipeline will read the manifest for logging and then finish cleanly.
+     */
     private static ByteArrayInputStream emptyExportStream() {
-        String json = """
+        String manifest = """
                 {
-                  "version": "1",
+                  "version": "3",
                   "exportedAt": "2026-06-15T10:00:00",
                   "sourceAccountId": 1,
                   "identityStrategy": "KEEP_IDS",
                   "account": {},
-                  "entities": {}
+                  "entities": []
                 }
                 """;
-        return new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
+        try {
+            ByteArrayOutputStream buf = new ByteArrayOutputStream();
+            try (ZipOutputStream zip = new ZipOutputStream(buf)) {
+                zip.putNextEntry(new ZipEntry("manifest.json"));
+                zip.write(manifest.getBytes());
+                zip.closeEntry();
+            }
+            return new ByteArrayInputStream(buf.toByteArray());
+        } catch (Exception e) {
+            throw new RuntimeException("Could not build empty export ZIP", e);
+        }
     }
 }

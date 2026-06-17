@@ -47,8 +47,8 @@ The Account Migration Module enables full lifecycle management of tenant (Accoun
     ▼                        ▼
 ┌──────────────┐      ┌────────────────┐
 │ ExportPipeline│      │ ImportPipeline │
-│  (streaming  │      │  (streaming    │
-│   ZIP write) │      │   ZIP / legacy)│
+│  (parallel   │      │  (streaming    │
+│   ZIP write) │      │   ZIP v3)      │
 └──────┬───────┘      └───────┬────────┘
        │                      │
        │ uses                 │ uses
@@ -114,31 +114,27 @@ Account101_20260616T100500.zip
 
 ZIP entries use `DEFLATE` at `BEST_SPEED` level. Typical JSON compresses 5–10×.
 
-### Streaming Strategy
+### Parallel Temp-Directory Strategy
+
+Entity files are written in parallel to a temporary directory, then assembled into a ZIP in topological order:
 
 ```
-ZipOutputStream (wraps caller's OutputStream, 256 KB buffer)
-    │
-    ├── Entry: manifest.json
-    │       JsonGenerator → {version, exportedAt, sourceAccountId,
-    │                         identityStrategy, account: AccountDTO,
-    │                         entities: [{file, entityClass}, ...]}
-    │
-    └── For each entityClass in topological order:
-            Entry: Account{id}_{SimpleName}.json
-            JsonGenerator → {
-                "entityClass": "com.example.Customer",
-                "fields": ["id", "name", "category_ref_id", ...],
-                "rows": [
-                    [1, "John", 3],
-                    [2, "Cindy", null],
-                    ...
-                ]
-            }
+1. Files.createTempDirectory("saas-export-{accountId}-")
+2. Write manifest.json to temp dir (synchronous — entity list is known upfront)
+3. For each entityClass (up to exportParallelism=4 concurrent virtual threads):
+       EntityManager localEm = emf.createEntityManager()   ← one per thread, thread-safe
+       write Account{id}_{SimpleName}.json to temp dir
+       localEm.close()
+4. ZipOutputStream → output stream:
+       addEntry(manifest.json)                              ← always first
+       For each entityClass in topological order:
+           addEntry(Account{id}_{SimpleName}.json)          ← Files.copy(), no heap allocation
+       zipOut.finish()
+5. deleteDirectory(tempDir)                                 ← always, in finally
 ```
 
-Each `JsonGenerator` is wrapped with a `NoCloseOutputStream` so that `gen.close()` flushes
-without closing the underlying `ZipOutputStream`.
+The column definition cache (`Map<Class<?>, List<ColumnDef>>`) is built once per entity type
+and reused across all parallel tasks via a `ConcurrentHashMap`.
 
 ### Keyset Pagination
 
@@ -172,14 +168,7 @@ Fields annotated with `@ExportIgnore` are skipped. Missing or inaccessible field
 
 ## 5. Import Pipeline
 
-### Format Detection (magic bytes)
-
-```
-BufferedInputStream.mark(4) → peek 2 bytes → reset
-  0x50 0x4B ("PK") → ZIP archive → importFromZip()
-  0x1F 0x8B       → GZIP stream  → importLegacy() with GZIPInputStream wrapper
-  anything else   → plain JSON   → importLegacy()
-```
+Input must be a ZIP archive (format v3). Legacy JSON and GZIP formats are no longer supported.
 
 ### ZIP Import Flow (v3)
 
@@ -207,13 +196,6 @@ ZipInputStream (sequential — entries arrive in topological order)
 `NoCloseInputStream` prevents `parser.close()` from closing the `ZipInputStream` between entries.
 `ZipInputStream.read()` reports EOF at the end of each entry, so Jackson's parser stops
 naturally without reading into the next entry.
-
-### Legacy Import (v1 / v2)
-
-For files produced by format v1 (per-row objects) or v2 (single JSON/GZIP):
-- GZIP-wrapped streams are unwrapped automatically.
-- The single JSON document is parsed using the original streaming algorithm.
-- This path is maintained for backward compatibility and will not be removed.
 
 ### ID Resolution (Identity Mapper)
 
@@ -315,9 +297,7 @@ Account42_20260614T100500.zip
 - `{fieldName}_ref_id` encodes a `@ManyToOne` / `@OneToOne` reference by its primary key.
 - Entities appear in topological order (parents before children) both in the manifest and as ZIP entries.
 - The `account` section in the manifest makes the archive self-describing.
-- Format version `"3"` uses the ZIP multi-file layout.
-- Format version `"2"` (legacy) uses a single columnar JSON/GZIP document.
-- Format version `"1"` (legacy) uses a single JSON document with per-row objects.
+- Format version `"3"` is the only supported format. Versions `"1"` and `"2"` (legacy JSON / GZIP) are no longer accepted by the importer.
 
 ---
 
@@ -404,8 +384,9 @@ CREATE TABLE saas_migration_jobs (
 | Concern | Mitigation |
 |---------|------------|
 | Large tables | Keyset pagination (`id > lastId`, configurable chunk size, default 500 rows/page) |
-| Memory | Jackson streaming API + ZipOutputStream: never load all rows; one ZIP entry at a time |
-| Disk I/O | 256 KB write buffer on ZipOutputStream; DEFLATE BEST_SPEED compression |
+| Memory | Jackson streaming API; entity files written to temp dir, then streamed into ZIP via `Files.copy()` |
+| Parallel export | Up to `exportParallelism` (default 4) entity types exported concurrently via virtual threads; each uses its own `EntityManager` |
+| Disk I/O | 256 KB ZIP buffer, 64 KB per-entity file buffer; DEFLATE BEST_SPEED compression |
 | Network / disk | ZIP always produced — typically 5–10× smaller than raw JSON |
 | Long-running jobs | Virtual threads, cooperative cancellation via `CancellationToken` |
 | DB load | Read-only keyset-paginated queries; imports batched per chunk in isolated transactions |
@@ -420,7 +401,7 @@ CREATE TABLE saas_migration_jobs (
 |-------|-------|
 | **v1 (legacy)** | EXPORT, IMPORT as single JSON. `KEEP_IDS` + `REGENERATE_IDS`. |
 | **v2 (legacy)** | Columnar format (fields + rows arrays). Optional GZIP. |
-| **v3 (current)** | ZIP multi-file: one JSON per entity. Always compressed. Keyset pagination. Backward-compatible import. Clone via temp file. |
+| **v3 (current)** | ZIP multi-file: one JSON per entity. Always compressed. Keyset pagination. Parallel entity export (virtual threads). Clone via temp file. |
 | **v4** | Cross-environment MIGRATE (HTTP push to remote endpoint). Resume after failure (checkpoint in DB). |
 | **v5** | `UUID7` identity strategy. Partial export (subset of entities). Schema validation on import. |
 | **v6** | Multi-region database migration. S3/GCS file storage backend. Event-driven progress via SSE/WebSocket. |

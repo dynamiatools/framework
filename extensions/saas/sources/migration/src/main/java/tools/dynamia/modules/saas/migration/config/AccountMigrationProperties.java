@@ -21,8 +21,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * <pre>
  * dynamia.saas.migration.chunk-size=500
  * dynamia.saas.migration.output-directory=/var/data/saas-migration
- * dynamia.saas.migration.compression-enabled=false
  * dynamia.saas.migration.max-concurrent-jobs=5
+ * dynamia.saas.migration.export-parallelism=4
  * dynamia.saas.migration.fail-on-entity-error=false
  * </pre>
  *
@@ -49,6 +49,12 @@ public class AccountMigrationProperties {
      * Default: 5.
      */
     private int maxConcurrentJobs = 5;
+
+    /**
+     * Number of entity types exported concurrently during a single export job.
+     * Each parallel slot opens its own {@code EntityManager}. Default: 4.
+     */
+    private int exportParallelism = 4;
 
     /**
      * If {@code true}, the import pipeline stops immediately when any entity
@@ -89,6 +95,14 @@ public class AccountMigrationProperties {
 
     public void setMaxConcurrentJobs(int maxConcurrentJobs) {
         this.maxConcurrentJobs = maxConcurrentJobs;
+    }
+
+    public int getExportParallelism() {
+        return exportParallelism;
+    }
+
+    public void setExportParallelism(int exportParallelism) {
+        this.exportParallelism = exportParallelism;
     }
 
     public boolean isFailOnEntityError() {

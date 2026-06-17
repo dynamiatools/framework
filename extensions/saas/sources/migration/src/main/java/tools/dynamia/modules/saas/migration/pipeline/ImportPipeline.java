@@ -41,7 +41,6 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
-import java.io.BufferedInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,20 +51,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
- * Streaming import pipeline — supports format v3 (ZIP multi-file) and legacy
- * v1/v2 (single JSON or GZIP).
- *
- * <h3>Format detection (by magic bytes)</h3>
- * <ul>
- *   <li>{@code PK} (0x50 0x4B) → ZIP archive — v3 format.</li>
- *   <li>{@code \x1f\x8b} → GZIP stream — legacy v2.</li>
- *   <li>{@code {}} or any other byte → plain JSON — legacy v1.</li>
- * </ul>
+ * Streaming import pipeline — format v3 (ZIP multi-file).
  *
  * <h3>ZIP import flow</h3>
  * <ol>
@@ -89,9 +79,6 @@ import java.util.zip.ZipInputStream;
 public class ImportPipeline {
 
     private static final Logger log = LoggerFactory.getLogger(ImportPipeline.class);
-
-    /** Number of bytes to buffer for magic-byte detection (must be ≥ 4). */
-    private static final int DETECT_BUFFER = 4096;
 
     @PersistenceContext
     private EntityManager em;
@@ -123,9 +110,9 @@ public class ImportPipeline {
     /**
      * Imports all entity data from {@code input} into the target account.
      *
-     * <p>The format is auto-detected: ZIP (v3), GZIP-wrapped JSON (v2), or plain JSON (v1).
+     * <p>Input must be a ZIP archive in format v3 (produced by {@link ExportPipeline}).
      *
-     * @param input    export stream (auto-detected format)
+     * @param input    ZIP export stream
      * @param options  import configuration
      * @param listener optional progress callback
      * @param token    optional cancellation token
@@ -138,34 +125,11 @@ public class ImportPipeline {
         IdentityMapper identityMapper = resolveIdentityMapper(options);
         Map<String, Map<Object, Object>> idMappings = new HashMap<>();
 
-        // Ensure we can peek at magic bytes without losing them
-        BufferedInputStream buffered = input instanceof BufferedInputStream bi
-                ? bi
-                : new BufferedInputStream(input, DETECT_BUFFER);
-
         try {
-            if (isZip(buffered)) {
-                log.info("[Migration/Import] Detected ZIP format (v3)");
-                importFromZip(buffered, options, identityMapper, idMappings, listener, token);
-            } else {
-                log.info("[Migration/Import] Detected legacy format (v1/v2 JSON or GZIP)");
-                importLegacy(buffered, options, identityMapper, idMappings, listener, token);
-            }
+            importFromZip(input, options, identityMapper, idMappings, listener, token);
         } catch (IOException e) {
             throw new MigrationException("Import failed", e);
         }
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Format detection
-    // ─────────────────────────────────────────────────────────────────────────
-
-    private static boolean isZip(BufferedInputStream in) throws IOException {
-        in.mark(4);
-        int b1 = in.read();
-        int b2 = in.read();
-        in.reset();
-        return b1 == 0x50 && b2 == 0x4B; // ZIP magic: "PK"
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -355,143 +319,6 @@ public class ImportPipeline {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Legacy import (v1 / v2 single JSON or GZIP)
-    // ─────────────────────────────────────────────────────────────────────────
-
-    private void importLegacy(InputStream input,
-                              AccountImportOptions options,
-                              IdentityMapper identityMapper,
-                              Map<String, Map<Object, Object>> idMappings,
-                              MigrationProgressListener listener,
-                              CancellationToken token) throws IOException {
-
-        InputStream source = detectAndWrapGzip(input);
-
-        try (JsonParser parser = objectMapper.createParser(source)) {
-            expectToken(parser, JsonToken.START_OBJECT, "root object");
-            long totalProcessed = 0;
-            long records = 0;
-
-            while (parser.nextToken() != JsonToken.END_OBJECT) {
-                if (token != null && token.isCancelled()) break;
-
-                String fieldName = parser.currentName();
-                parser.nextToken();
-
-                switch (fieldName) {
-                    case ExportConstants.FIELD_VERSION,
-                         ExportConstants.FIELD_EXPORTED_AT,
-                         ExportConstants.FIELD_SOURCE_ACCOUNT_ID,
-                         ExportConstants.FIELD_IDENTITY_STRATEGY -> { /* skip header metadata */ }
-                    case ExportConstants.FIELD_ACCOUNT -> parser.skipChildren();
-                    case ExportConstants.FIELD_ENTITIES -> {
-                        totalProcessed = importLegacyEntitiesSection(
-                                parser, options, identityMapper, idMappings, listener, token);
-                        records += totalProcessed;
-                    }
-                    default -> parser.skipChildren();
-                }
-            }
-
-            if (listener != null) {
-                listener.onProgress(new MigrationProgress(
-                        totalProcessed, totalProcessed, "Import complete", records));
-            }
-        }
-    }
-
-    private long importLegacyEntitiesSection(JsonParser parser,
-                                             AccountImportOptions options,
-                                             IdentityMapper identityMapper,
-                                             Map<String, Map<Object, Object>> idMappings,
-                                             MigrationProgressListener listener,
-                                             CancellationToken token) throws IOException {
-
-        expectToken(parser, JsonToken.START_OBJECT, "entities object");
-        long total = 0;
-
-        while (parser.nextToken() != JsonToken.END_OBJECT) {
-            if (token != null && token.isCancelled()) {
-                log.info("[Migration/Import] Cancelled");
-                break;
-            }
-
-            String entityClassName = parser.currentName();
-            parser.nextToken();
-
-            try {
-                Class<?> entityClass = Class.forName(entityClassName);
-                long count = importLegacyEntitySection(
-                        parser, entityClass, options, identityMapper, idMappings, listener, token);
-                total += count;
-                log.info("[Migration/Import] Imported {} records for {}", count, entityClass.getSimpleName());
-
-                if (listener != null) {
-                    listener.onProgress(new MigrationProgress(total, 0,
-                            "Imported " + entityClass.getSimpleName() + " (" + count + " records)", total));
-                }
-
-            } catch (ClassNotFoundException e) {
-                log.warn("[Migration/Import] Entity class not found, skipping: {}", entityClassName);
-                parser.skipChildren();
-            }
-        }
-
-        return total;
-    }
-
-    private long importLegacyEntitySection(JsonParser parser,
-                                           Class<?> entityClass,
-                                           AccountImportOptions options,
-                                           IdentityMapper identityMapper,
-                                           Map<String, Map<Object, Object>> idMappings,
-                                           MigrationProgressListener listener,
-                                           CancellationToken token) throws IOException {
-
-        expectToken(parser, JsonToken.START_OBJECT, "entity section for " + entityClass.getSimpleName());
-
-        int chunkSize = options.getChunkSize() > 0 ? options.getChunkSize() : properties.getChunkSize();
-        List<JsonNode> chunk = new ArrayList<>(chunkSize);
-        List<String> fields = null;
-        long total = 0;
-
-        while (parser.nextToken() != JsonToken.END_OBJECT) {
-            String sectionName = parser.currentName();
-            parser.nextToken();
-
-            if (ExportConstants.FIELD_FIELDS.equals(sectionName)) {
-                expectToken(parser, JsonToken.START_ARRAY, "fields array");
-                fields = new ArrayList<>();
-                while (parser.nextToken() != JsonToken.END_ARRAY) {
-                    fields.add(parser.getText());
-                }
-            } else if (ExportConstants.FIELD_ROWS.equals(sectionName)) {
-                if (fields == null) {
-                    throw new MigrationException("'rows' appeared before 'fields' for " + entityClass.getName());
-                }
-                expectToken(parser, JsonToken.START_ARRAY, "rows array");
-                while (parser.nextToken() != JsonToken.END_ARRAY) {
-                    if (token != null && token.isCancelled()) break;
-
-                    chunk.add(rowToObjectNode(parser, fields));
-
-                    if (chunk.size() >= chunkSize) {
-                        total += persistChunk(chunk, entityClass, options, identityMapper, idMappings);
-                        chunk.clear();
-                    }
-                }
-                if (!chunk.isEmpty()) {
-                    total += persistChunk(chunk, entityClass, options, identityMapper, idMappings);
-                }
-            } else {
-                parser.skipChildren();
-            }
-        }
-
-        return total;
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────
     // Chunk persistence (transactional boundary)
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -663,20 +490,6 @@ public class ImportPipeline {
             }
         }
         return id;
-    }
-
-    private static InputStream detectAndWrapGzip(InputStream in) throws IOException {
-        if (!in.markSupported()) {
-            return in;
-        }
-        in.mark(2);
-        int b1 = in.read();
-        int b2 = in.read();
-        in.reset();
-        if (b1 == 0x1f && b2 == 0x8b) {
-            return new GZIPInputStream(in);
-        }
-        return in;
     }
 
     private IdentityMapper resolveIdentityMapper(AccountImportOptions options) {

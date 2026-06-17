@@ -14,7 +14,7 @@ All operations run as **async background jobs** via virtual threads, so long-run
 | Operation | Description |
 |-----------|-------------|
 | `EXPORT`  | Serialize all tenant data to a versioned ZIP archive (one JSON file per entity) |
-| `IMPORT`  | Restore tenant data from a previously exported ZIP (or legacy JSON/GZIP) |
+| `IMPORT`  | Restore tenant data from a previously exported ZIP archive |
 | `CLONE`   | Duplicate a tenant in the same system (different accountId) |
 | `BACKUP`  | Alias for EXPORT tagged as backup |
 | `RESTORE` | Alias for IMPORT that replaces existing data |
@@ -140,10 +140,17 @@ Content-Type: application/json
 dynamia.saas.migration.chunk-size=500
 dynamia.saas.migration.output-directory=${java.io.tmpdir}/saas-migration
 dynamia.saas.migration.max-concurrent-jobs=5
+dynamia.saas.migration.export-parallelism=4
 dynamia.saas.migration.fail-on-entity-error=false
 ```
 
-> `compression-enabled` has been removed. All exports now produce a ZIP archive by default.
+| Property | Default | Description |
+|----------|---------|-------------|
+| `chunk-size` | `500` | Records per pagination page |
+| `output-directory` | `${tmpdir}/saas-migration` | Where export files are stored |
+| `max-concurrent-jobs` | `5` | Max simultaneous running jobs |
+| `export-parallelism` | `4` | Entity types exported concurrently per job |
+| `fail-on-entity-error` | `false` | Stop on first error vs. log and continue |
 
 ---
 
@@ -200,7 +207,8 @@ Relationship fields (`@ManyToOne`, `@OneToOne`) are serialized as `{fieldName}_r
 Collections (`@OneToMany`, `@ManyToMany`) are reconstructed naturally when child entities
 reference their parents.
 
-The importer is backward-compatible with legacy v2 (single JSON/GZIP) and v1 (single JSON) files.
+Entity files are written in parallel (up to `export-parallelism` concurrent virtual threads)
+to a temporary directory, then assembled into the ZIP in topological order.
 
 ---
 

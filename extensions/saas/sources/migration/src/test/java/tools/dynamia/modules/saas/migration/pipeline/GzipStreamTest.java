@@ -17,113 +17,42 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.zip.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 /**
- * Verifies the GZIP auto-detection contract relied on by {@code ImportPipeline.detectAndWrapGzip()}.
+ * Verifies ZIP stream properties relied on by {@link ImportPipeline} and {@link ExportPipeline}.
  *
- * <p>The fix (P1) requires that {@code ImportWorker} wraps the {@code FileInputStream} with a
- * {@code BufferedInputStream} before passing it to the pipeline, so that {@code mark()} is
- * supported and GZIP detection can read the magic bytes and reset the position.
+ * <p>The export pipeline writes a temp-directory ZIP; the import pipeline reads it.
+ * These tests confirm the ZIP contract: magic bytes, entry ordering, and that
+ * {@link BufferedInputStream} supports {@code mark()} so the format can be detected
+ * without consuming the stream.
  */
 public class GzipStreamTest {
 
     @Test
     public void bufferedInputStreamSupportsMark() {
-        InputStream raw = new ByteArrayInputStream(new byte[]{1, 2, 3});
-        BufferedInputStream buffered = new BufferedInputStream(raw);
+        var raw = new ByteArrayInputStream(new byte[]{1, 2, 3});
+        var buffered = new BufferedInputStream(raw);
         Assert.assertTrue("BufferedInputStream must support mark()", buffered.markSupported());
     }
 
     @Test
-    public void plainByteArrayInputStreamSupportsMark() {
-        // ByteArrayInputStream also supports mark — used for in-memory (clone) paths
-        ByteArrayInputStream bais = new ByteArrayInputStream(new byte[]{1, 2, 3});
+    public void byteArrayInputStreamSupportsMark() {
+        var bais = new ByteArrayInputStream(new byte[]{1, 2, 3});
         Assert.assertTrue(bais.markSupported());
-    }
-
-    @Test
-    public void gzipMagicBytesAreDetectable() throws IOException {
-        byte[] gzipData = gzip("{}");
-
-        // Verify magic bytes 0x1f 0x8b
-        Assert.assertEquals(0x1f, gzipData[0] & 0xFF);
-        Assert.assertEquals(0x8b, gzipData[1] & 0xFF);
-    }
-
-    @Test
-    public void gzipWrappedInBufferedStreamIsReadable() throws IOException {
-        String json = "{\"key\":\"value\"}";
-        byte[] gzipData = gzip(json);
-
-        InputStream in = new BufferedInputStream(new ByteArrayInputStream(gzipData));
-        in.mark(2);
-        int b1 = in.read();
-        int b2 = in.read();
-        in.reset(); // must be able to reset for detection to work
-
-        Assert.assertEquals(0x1f, b1 & 0xFF);
-        Assert.assertEquals(0x8b, b2 & 0xFF);
-
-        // Now read the full content via GZIP
-        String decompressed = new String(new GZIPInputStream(in).readAllBytes());
-        Assert.assertEquals(json, decompressed);
-    }
-
-    @Test
-    public void plainJsonInBufferedStreamIsPassedThrough() throws IOException {
-        String json = "{\"hello\":\"world\"}";
-        byte[] jsonBytes = json.getBytes();
-
-        InputStream in = new BufferedInputStream(new ByteArrayInputStream(jsonBytes));
-        in.mark(2);
-        int b1 = in.read();
-        int b2 = in.read();
-        in.reset();
-
-        // Not GZIP magic bytes
-        boolean isGzip = (b1 == 0x1f && b2 == 0x8b);
-        Assert.assertFalse("Plain JSON must not match GZIP magic", isGzip);
-
-        // After reset, the full content is still readable
-        String content = new String(in.readAllBytes());
-        Assert.assertEquals(json, content);
-    }
-
-    @Test
-    public void gzipRoundTrip() throws IOException {
-        String original = "{\"version\":\"1\",\"entities\":{}}";
-        byte[] compressed = gzip(original);
-
-        InputStream in = new GZIPInputStream(new ByteArrayInputStream(compressed));
-        String decompressed = new String(in.readAllBytes());
-        Assert.assertEquals(original, decompressed);
     }
 
     @Test
     public void zipMagicBytesAreDetectable() throws IOException {
         byte[] zipData = zip("manifest.json", "{}");
-
-        // ZIP magic: "PK" = 0x50 0x4B
-        Assert.assertEquals(0x50, zipData[0] & 0xFF);
-        Assert.assertEquals(0x4B, zipData[1] & 0xFF);
+        Assert.assertEquals("ZIP magic byte 0", 0x50, zipData[0] & 0xFF);
+        Assert.assertEquals("ZIP magic byte 1", 0x4B, zipData[1] & 0xFF);
     }
 
     @Test
-    public void zipMagicDistinguishesFromGzip() throws IOException {
-        byte[] zipData  = zip("manifest.json", "{}");
-        byte[] gzipData = gzip("{}");
-
-        boolean zipIsGzip  = (zipData[0]  == 0x1f && zipData[1]  == 0x8b);
-        boolean gzipIsZip  = (gzipData[0] == 0x50 && gzipData[1] == 0x4B);
-
-        Assert.assertFalse("ZIP must not match GZIP magic", zipIsGzip);
-        Assert.assertFalse("GZIP must not match ZIP magic", gzipIsZip);
-    }
-
-    @Test
-    public void bufferedStreamAllowsZipMagicDetectionWithReset() throws IOException {
+    public void bufferedStreamPreservesZipAfterMagicPeek() throws IOException {
         byte[] zipData = zip("manifest.json", "{}");
         BufferedInputStream in = new BufferedInputStream(new ByteArrayInputStream(zipData));
 
@@ -135,30 +64,67 @@ public class GzipStreamTest {
         Assert.assertEquals(0x50, b1 & 0xFF);
         Assert.assertEquals(0x4B, b2 & 0xFF);
 
-        // After reset, full ZIP is still readable
+        // After reset the full ZIP is still readable
         ZipInputStream zipIn = new ZipInputStream(in);
         ZipEntry entry = zipIn.getNextEntry();
-        Assert.assertNotNull(entry);
+        Assert.assertNotNull("Entry must exist after reset", entry);
         Assert.assertEquals("manifest.json", entry.getName());
     }
 
-    // ─── Helper ──────────────────────────────────────────────────────────────
+    @Test
+    public void zipEntriesAreReadInInsertionOrder() throws IOException {
+        byte[] zipData = zip3("manifest.json", "{}", "Account1_Customer.json", "[]", "Account1_Order.json", "[]");
+        ZipInputStream zipIn = new ZipInputStream(new ByteArrayInputStream(zipData));
 
-    private static byte[] zip(String entryName, String content) throws IOException {
+        Assert.assertEquals("manifest.json",        zipIn.getNextEntry().getName());
+        Assert.assertEquals("Account1_Customer.json", zipIn.getNextEntry().getName());
+        Assert.assertEquals("Account1_Order.json",    zipIn.getNextEntry().getName());
+        Assert.assertNull("No more entries", zipIn.getNextEntry());
+    }
+
+    @Test
+    public void zipEntryReportsEofAtEntryBoundary() throws IOException {
+        byte[] content = "hello".getBytes();
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        try (ZipOutputStream zipOut = new ZipOutputStream(buf)) {
-            zipOut.putNextEntry(new ZipEntry(entryName));
-            zipOut.write(content.getBytes());
-            zipOut.closeEntry();
+        try (ZipOutputStream out = new ZipOutputStream(buf)) {
+            out.putNextEntry(new ZipEntry("a.json"));
+            out.write(content);
+            out.closeEntry();
+            out.putNextEntry(new ZipEntry("b.json"));
+            out.write("world".getBytes());
+            out.closeEntry();
+        }
+
+        ZipInputStream zipIn = new ZipInputStream(new ByteArrayInputStream(buf.toByteArray()));
+        zipIn.getNextEntry();
+        byte[] read = zipIn.readAllBytes(); // reads only "a.json" content
+        Assert.assertArrayEquals("entry content", content, read);
+
+        // second entry is still accessible
+        Assert.assertNotNull("b.json must follow", zipIn.getNextEntry());
+    }
+
+    // ─── Helpers ─────────────────────────────────────────────────────────────
+
+    private static byte[] zip(String name, String content) throws IOException {
+        return zip3(name, content, null, null, null, null);
+    }
+
+    private static byte[] zip3(String n1, String c1, String n2, String c2, String n3, String c3)
+            throws IOException {
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        try (ZipOutputStream out = new ZipOutputStream(buf)) {
+            writeEntry(out, n1, c1);
+            if (n2 != null) writeEntry(out, n2, c2);
+            if (n3 != null) writeEntry(out, n3, c3);
         }
         return buf.toByteArray();
     }
 
-    private static byte[] gzip(String text) throws IOException {
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        try (GZIPOutputStream gz = new GZIPOutputStream(buf)) {
-            gz.write(text.getBytes());
-        }
-        return buf.toByteArray();
+    private static void writeEntry(ZipOutputStream out, String name, String content)
+            throws IOException {
+        out.putNextEntry(new ZipEntry(name));
+        out.write(content.getBytes());
+        out.closeEntry();
     }
 }
