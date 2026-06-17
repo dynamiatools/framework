@@ -57,7 +57,7 @@
 
     <properties>
         <main.baseUri>${project.baseUri}</main.baseUri>
-        <springboot.version>4.0.5</springboot.version>
+        <springboot.version>4.1.0</springboot.version>
         <swagger.version>2.2.46</swagger.version>
         <mongodb.version>1</mongodb.version>
 
