@@ -11,11 +11,13 @@
 package tools.dynamia.modules.saas.migration.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.domain.jpa.SimpleEntity;
 import tools.dynamia.modules.entityfile.domain.EntityFile;
 import tools.dynamia.modules.saas.migration.api.AccountExportOptions;
 import tools.dynamia.modules.saas.migration.api.AccountImportOptions;
+import tools.dynamia.modules.saas.migration.api.MigrationProgress;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -31,7 +33,8 @@ import java.time.LocalDateTime;
  * @author Mario Serrano Leones
  */
 @Entity
-@Table(name = "saas_migration_jobs")
+@Table(name = "saas_migration_jobs", indexes = @Index(name = "idx_saas_migration_jobs_uuid", columnList = "uuid"))
+@DynamicUpdate
 public class AccountMigrationJob extends SimpleEntity {
 
     // ─── Identity ──────────────────────────────────────────────────────────────
@@ -140,10 +143,16 @@ public class AccountMigrationJob extends SimpleEntity {
     /**
      * Update running progress (0-100) and an optional human-readable message.
      */
-    public void updateProgress(int progress, String message, long records) {
-        this.progress = Math.min(100, Math.max(0, progress));
-        this.progressMessage = StringUtils.truncate(message, 1999);
-        this.records = records;
+    public void updateProgress(MigrationProgress progress) {
+
+        if (progress.partial()) {
+            this.records += progress.processedRecords();
+        } else {
+            this.progress = progress.percentage();
+            this.progressMessage = StringUtils.truncate(progress.message(), 1999);
+            this.records = progress.processedRecords();
+        }
+
     }
 
     /**

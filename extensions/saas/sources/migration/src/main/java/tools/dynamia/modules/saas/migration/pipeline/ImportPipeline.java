@@ -168,12 +168,14 @@ public class ImportPipeline {
         }
 
         if (listener != null) {
-            listener.onProgress(new MigrationProgress(total, total, "Import complete", total));
+            listener.onProgress(MigrationProgress.of(total, total, "Import complete", total));
         }
         log.info("[Migration/Import] ZIP import complete — {} total records", total);
     }
 
-    /** Reads and logs metadata from manifest.json without loading it into memory. */
+    /**
+     * Reads and logs metadata from manifest.json without loading it into memory.
+     */
     private void logManifestInfo(ZipInputStream zipIn) {
         try {
             JsonParser parser = objectMapper.createParser(new NoCloseInputStream(zipIn));
@@ -313,7 +315,7 @@ public class ImportPipeline {
 
         log.info("[Migration/Import] Imported {} records for {}", total, entityClass.getSimpleName());
         if (listener != null) {
-            listener.onProgress(new MigrationProgress(total, 0,
+            listener.onProgress(MigrationProgress.of(total, 0,
                     "Imported " + entityClass.getSimpleName() + " (" + total + " records)", total));
         }
 

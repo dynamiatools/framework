@@ -19,13 +19,22 @@ package tools.dynamia.modules.saas.migration.api;
  * @param processedRecords  Total records processed so far (across all entities).
  * @author Mario Serrano Leones
  */
-public record MigrationProgress(long processedEntities, long totalEntities, String message, long processedRecords) {
+public record MigrationProgress(long processedEntities, long totalEntities, String message, long processedRecords,
+                                boolean partial) {
+
+    public static MigrationProgress partial(long processed) {
+        return new MigrationProgress(0, 0, null, processed, true);
+    }
+
+    public static MigrationProgress of(long processedEntities, long totalEntities, String message, long processedRecords) {
+        return new MigrationProgress(processedEntities, totalEntities, message, processedRecords, false);
+    }
 
     /**
      * Returns the progress as a percentage (0–100), or -1 if total is unknown.
      */
     public int percentage() {
-        if (totalEntities <= 0) return -1;
+        if (totalEntities <= 0) return 0;
         return (int) Math.min(100, (processedEntities * 100L) / totalEntities);
     }
 

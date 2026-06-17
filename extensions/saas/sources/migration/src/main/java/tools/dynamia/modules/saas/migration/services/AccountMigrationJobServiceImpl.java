@@ -14,6 +14,7 @@ import org.springframework.core.io.InputStreamSource;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
+import tools.dynamia.navigation.Page;
 import tools.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.multipart.MultipartFile;
@@ -75,7 +76,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
 
     private static final LoggingService log = LoggingService.get(AccountMigrationJobServiceImpl.class);
     private static final DateTimeFormatter FILE_TS = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
-    private static final long PROGRESS_THROTTLE_MS = 500;
+    private static final long PROGRESS_THROTTLE_MS = 2000;
 
     /**
      * In-memory token registry: jobUuid → CancellationToken. Cleaned up when job finishes.
@@ -350,8 +351,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
                     AccountMigrationJob j = findByUuid(job.getUuid());
                     if (j != null && !j.isFinished()) {
                         if (isFirst) j.markRunning();
-                        j.updateProgress(p.percentage() >= 0 ? p.percentage() : j.getProgress(),
-                                p.message(), p.processedRecords());
+                        j.updateProgress(p);
                         crudService.update(j);
                     }
                 });
@@ -364,6 +364,11 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     private Path buildOutputPath(AccountMigrationJob job) {
         String ts = LocalDateTime.now().format(FILE_TS);
         String fileName = "Account" + job.getAccountId() + "_" + ts + ".zip";
+        try {
+            Files.createDirectories(Paths.get(properties.getOutputDirectory()));
+        } catch (IOException ignore) {
+
+        }
         return Paths.get(properties.getOutputDirectory(), fileName);
     }
 

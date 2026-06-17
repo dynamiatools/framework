@@ -12,6 +12,7 @@ package tools.dynamia.modules.saas.migration;
 
 import org.junit.Assert;
 import org.junit.Test;
+import tools.dynamia.modules.saas.migration.api.MigrationProgress;
 import tools.dynamia.modules.saas.migration.domain.AccountJobStatus;
 import tools.dynamia.modules.saas.migration.domain.AccountMigrationJob;
 
@@ -85,13 +86,13 @@ public class AccountMigrationJobTest {
     public void updateProgressClampsTo0_100Range() {
         AccountMigrationJob job = new AccountMigrationJob();
 
-        job.updateProgress(-5, "below zero", 0);
+        job.updateProgress(MigrationProgress.of(-5L, 0L, "below zero", 0));
         Assert.assertEquals(0, job.getProgress());
 
-        job.updateProgress(150, "above hundred", 0);
+        job.updateProgress(MigrationProgress.of(130, 5, "above hundred", 0));
         Assert.assertEquals(100, job.getProgress());
 
-        job.updateProgress(42, "normal", 0);
+        job.updateProgress(MigrationProgress.of(42, 100, "normal", 0));
         Assert.assertEquals(42, job.getProgress());
         Assert.assertEquals("normal", job.getProgressMessage());
     }

@@ -19,6 +19,7 @@ import jakarta.persistence.metamodel.SingularAttribute;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.ReflectionUtils;
+import tools.dynamia.commons.StopWatch;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.jpa.JpaUtils;
 import tools.dynamia.domain.services.CrudService;
@@ -280,15 +281,13 @@ public class ExportPipeline {
                 semaphore.acquire();
                 try {
                     if (token != null && token.isCancelled()) return 0L;
-                    long count = exportEntityToFile(tempDir, entityClass, accountId, options, token);
+                    long count = exportEntityToFile(tempDir, entityClass, accountId, options, token, listener);
 
                     // Report progress immediately upon completion, not waiting for topological order
                     long processed = processedTypes.incrementAndGet();
                     long records = totalRecords.addAndGet(count);
                     if (listener != null) {
-                        listener.onProgress(new MigrationProgress(processed, totalTypes,
-                                "Exported " + entityClass.getSimpleName() + " (" + count + " records)",
-                                records));
+                        listener.onProgress(MigrationProgress.of(processed, totalTypes, "Exported " + entityClass.getSimpleName(), records));
                     }
                     return count;
                 } finally {
@@ -334,7 +333,8 @@ public class ExportPipeline {
      */
     private long exportEntityToFile(Path tempDir, Class<?> entityClass,
                                     Serializable accountId, AccountExportOptions options,
-                                    CancellationToken token) throws IOException {
+                                    CancellationToken token,
+                                    MigrationProgressListener listener) throws IOException {
 
         Path filePath = tempDir.resolve(entityFileName(accountId, entityClass));
         EntityManager localEm = emf.createEntityManager();
@@ -353,6 +353,8 @@ public class ExportPipeline {
             localEm.clear();
             localEm.close();
 
+
+            logger.info("[Migration/Export] {} with {} columns", entityClass.getSimpleName(), columns.size());
             try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(filePath), ENTITY_BUFFER_SIZE);
                  JsonGenerator gen = objectMapper.createGenerator(out)) {
 
@@ -368,12 +370,14 @@ public class ExportPipeline {
 
                 gen.writeName(ExportConstants.FIELD_ROWS);
                 gen.writeStartArray();
-                long processed = writeEntityRows(gen, entityClass, accountId, options, token, columns);
+                long startTime = System.currentTimeMillis();
+                long processed = writeEntityRows(gen, entityClass, accountId, options, token, columns, listener);
+                long endTime = System.currentTimeMillis();
                 gen.writeEndArray();
 
                 gen.writeEndObject();
 
-                logger.info("[Migration/Export] {} → {} records written", entityClass.getSimpleName(), processed);
+                logger.info("[Migration/Export] {} → {} records written in {}ms", entityClass.getSimpleName(), processed, (endTime - startTime));
                 return processed;
             }
         } finally {
@@ -411,7 +415,8 @@ public class ExportPipeline {
                                  Serializable accountId,
                                  AccountExportOptions options,
                                  CancellationToken token,
-                                 List<ColumnDef> columns) throws IOException {
+                                 List<ColumnDef> columns,
+                                 MigrationProgressListener listener) throws IOException {
         if (Account.class.equals(entityClass)) {
             return 0;
         }
@@ -424,10 +429,12 @@ public class ExportPipeline {
 
 
         do {
+            long qStartTime = System.currentTimeMillis();
             List<Object> page = queryEntityDataPage(entityClass, accountId, lastId, simpleName, chunkSize);
-            logger.info("[Migration/Export] {} - page {} with {} records. Rows processed {}", simpleName, pageNum, page.size(), processed);
+            long qEndTime = System.currentTimeMillis();
             pageNum++;
 
+            long startTime = System.currentTimeMillis();
             for (Object entity : page) {
                 if (token != null && token.isCancelled()) break;
                 if (entity != null) {
@@ -438,6 +445,14 @@ public class ExportPipeline {
                     }
                 }
                 processed++;
+            }
+            long endTime = System.currentTimeMillis();
+
+            logger.info("[Migration/Export] {} - page {} with {} records. Query={}ms  Write={}ms. Rows={} ",
+                    simpleName, pageNum, page.size(), (qEndTime - qStartTime), (endTime - startTime), processed);
+
+            if (listener != null) {
+                listener.onProgress(MigrationProgress.partial(processed));
             }
             if (page.size() < chunkSize || (token != null && token.isCancelled())) break;
 
@@ -560,32 +575,30 @@ public class ExportPipeline {
 
     private void writeEntityRow(JsonGenerator gen, Object entity, List<ColumnDef> columns)
             throws IOException {
-        gen.writeStartArray();
-        for (ColumnDef col : columns) {
+
+
+        Object[] row = new Object[columns.size()];
+
+        for (int i = 0; i < columns.size(); i++) {
+            ColumnDef col = columns.get(i);
+
             try {
                 Object value = col.field().get(entity);
 
                 if (col.type() == PersistentAttributeType.MANY_TO_ONE
                         || col.type() == PersistentAttributeType.ONE_TO_ONE) {
-                    if (value != null) {
-                        gen.writePOJO(JpaUtils.getJPAIdValue(value));
-                    } else {
-                        gen.writeNull();
-                    }
+                    row[i] = value != null
+                            ? JpaUtils.getJPAIdValue(value)
+                            : null;
                 } else {
-                    objectMapper.writeValue(gen, value);
+                    row[i] = value;
                 }
-            } catch (IllegalAccessException e) {
-                logger.debug("[Migration/Export] Cannot access field {} on {}: {}",
-                        col.field().getName(), entity.getClass().getSimpleName(), e.getMessage());
-                gen.writeNull();
             } catch (Exception e) {
-                logger.debug("[Migration/Export] Skipping field {} due to: {}",
-                        col.field().getName(), e.getMessage());
-                gen.writeNull();
+                row[i] = null;
             }
         }
-        gen.writeEndArray();
+
+        gen.writePOJO(row);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
