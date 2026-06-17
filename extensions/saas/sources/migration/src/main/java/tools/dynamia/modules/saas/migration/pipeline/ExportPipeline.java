@@ -10,6 +10,7 @@
  */
 package tools.dynamia.modules.saas.migration.pipeline;
 
+import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.metamodel.Attribute.PersistentAttributeType;
@@ -46,7 +47,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -100,17 +100,21 @@ public class ExportPipeline {
 
     private static final LoggingService logger = LoggingService.get(ExportPipeline.class);
 
-    /** ZIP compression level — BEST_SPEED gives good ratio for JSON with minimal CPU overhead. */
+    /**
+     * ZIP compression level — BEST_SPEED gives good ratio for JSON with minimal CPU overhead.
+     */
     private static final int ZIP_LEVEL = Deflater.BEST_SPEED;
 
-    /** ZIP output buffer size. */
+    /**
+     * ZIP output buffer size.
+     */
     private static final int ZIP_BUFFER_SIZE = 256 * 1024;
 
-    /** Per-entity file write buffer size. */
+    /**
+     * Per-entity file write buffer size.
+     */
     private static final int ENTITY_BUFFER_SIZE = 64 * 1024;
-
-    /** Standard Jakarta Persistence fetch-graph hint key. */
-    private static final String HINT_FETCH_GRAPH = "jakarta.persistence.fetchgraph";
+    public static final String JAKARTA_PERSISTENCE_FETCHGRAPH = "jakarta.persistence.fetchgraph";
 
     /**
      * Column definitions cached per entity class; built once on first export,
@@ -378,12 +382,14 @@ public class ExportPipeline {
     }
 
     /**
-     * Pages through all rows for {@code entityClass} using keyset pagination
-     * ({@code id > lastId}) and writes each row to {@code gen}.
+     * Pages through all rows for {@code entityClass} using keyset pagination and writes
+     * each row to {@code gen}.
      *
-     * <p>{@link Account} is skipped — its data lives in the manifest.
-     * Each parallel task passes its own {@code localEm} so there is no
-     * cross-thread EntityManager sharing.
+     * <p>ID type-agnostic: {@code null} is used as the first-page sentinel so no
+     * type-specific "zero" value is required. The JPA provider receives the actual
+     * ID object (Long, UUID, String, …) on subsequent pages and handles coercion.
+     *
+     * <p>{@link Account} rows are skipped — account data lives in the manifest.
      */
     private long writeEntityRows(JsonGenerator gen,
                                  Class<?> entityClass,
@@ -396,19 +402,31 @@ public class ExportPipeline {
             return 0;
         }
 
+        String simpleName = entityClass.getSimpleName();
         int chunkSize = resolveChunkSize(options);
-        long lastId = 0;
+        Object lastId = null;   // null = first page; avoids assuming ID type
         long processed = 0;
+
+        EntityGraph<?> emptyGraph = localEm.createEntityGraph(entityClass); //to avoid errors with multiple eagers calls
+
 
         do {
             @SuppressWarnings("unchecked")
-            List<Object> page = localEm.createQuery(
-                            "SELECT e FROM " + entityClass.getSimpleName() +
+            List<Object> page = (lastId == null)
+                    ? localEm.createQuery(
+                            "SELECT e FROM " + simpleName +
+                            " e WHERE e.accountId = :accountId ORDER BY e.id ASC")
+                    .setParameter("accountId", accountId)
+                    .setMaxResults(chunkSize)
+                    .setHint(JAKARTA_PERSISTENCE_FETCHGRAPH, emptyGraph)
+                    .getResultList()
+                    : localEm.createQuery(
+                            "SELECT e FROM " + simpleName +
                             " e WHERE e.accountId = :accountId AND e.id > :lastId ORDER BY e.id ASC")
                     .setParameter("accountId", accountId)
                     .setParameter("lastId", lastId)
                     .setMaxResults(chunkSize)
-                    .setHint(HINT_FETCH_GRAPH, localEm.createEntityGraph(entityClass))
+                    .setHint(JAKARTA_PERSISTENCE_FETCHGRAPH, emptyGraph)
                     .getResultList();
 
             for (Object entity : page) {
@@ -416,8 +434,8 @@ public class ExportPipeline {
                 if (entity != null) {
                     writeEntityRow(gen, entity, columns);
                     Object idVal = JpaUtils.getJPAIdValue(entity);
-                    if (idVal instanceof Number n) {
-                        lastId = n.longValue();
+                    if (idVal != null) {
+                        lastId = idVal; // preserve exact type: Long, UUID, String, …
                     }
                 }
                 processed++;
@@ -443,7 +461,12 @@ public class ExportPipeline {
     private void zipToOutput(Path tempDir, List<Class<?>> ordered, Long accountId,
                              OutputStream output) throws IOException {
 
-        ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(output, ZIP_BUFFER_SIZE));
+        // Keep reference to the buffer so we can flush it after finish().
+        // ZipOutputStream.finish() writes the central directory into the BufferedOutputStream
+        // buffer but does NOT flush it — without the explicit flush() below the last bytes
+        // never reach `output` and the ZIP is corrupt.
+        BufferedOutputStream buffered = new BufferedOutputStream(output, ZIP_BUFFER_SIZE);
+        ZipOutputStream zipOut = new ZipOutputStream(buffered);
         zipOut.setLevel(ZIP_LEVEL);
 
         addFileToZip(zipOut, tempDir.resolve(ExportConstants.MANIFEST_FILE), ExportConstants.MANIFEST_FILE);
@@ -456,7 +479,8 @@ public class ExportPipeline {
             }
         }
 
-        zipOut.finish(); // writes ZIP central directory; does not close the caller's stream
+        zipOut.finish();   // writes ZIP central directory into buffered
+        buffered.flush();  // pushes buffered bytes to the caller's output stream
     }
 
     private static void addFileToZip(ZipOutputStream zipOut, Path file, String entryName)
