@@ -76,6 +76,13 @@ public class SLF4JLoggingService implements LoggingService, Serializable {
         }
     }
 
+    @Override
+    public void debug(String message, Object... params) {
+        if (isDebugEnabled()) {
+            logger.debug(prefix + message, params);
+        }
+    }
+
     /*
      * (non-Javadoc)
      *

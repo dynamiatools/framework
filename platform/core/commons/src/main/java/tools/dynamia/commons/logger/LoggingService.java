@@ -53,6 +53,8 @@ public interface LoggingService {
      */
     void debug(String message);
 
+    void debug(String message, Object... params);
+
     /**
      * Info.
      *
