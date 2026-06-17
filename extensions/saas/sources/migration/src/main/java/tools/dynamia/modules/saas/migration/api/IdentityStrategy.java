@@ -36,9 +36,14 @@ public enum IdentityStrategy {
     REGENERATE_IDS,
 
     /**
-     * Assign UUIDv7 values as new IDs.
-     * <p>
-     * Planned for v3.
+     * Assign UUIDv7 values (RFC 9562, time-ordered) as new IDs.
+     *
+     * <p>A fresh UUID7 is generated for every imported entity. Foreign-key references
+     * are resolved via the internal ID mapping table ({@code originalId → uuid7}).
+     *
+     * <p>Only applicable when the entity {@code id} field is of type {@link java.util.UUID}
+     * or {@link String}. Entities with {@code Long} IDs will receive a type-mismatch
+     * error at persist time; use {@code REGENERATE_IDS} for those.
      */
     UUID7
 }

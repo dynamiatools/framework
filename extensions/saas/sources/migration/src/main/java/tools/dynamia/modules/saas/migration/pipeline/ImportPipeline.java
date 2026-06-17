@@ -35,6 +35,7 @@ import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
 import tools.dynamia.modules.saas.migration.config.AccountMigrationProperties;
 import tools.dynamia.modules.saas.migration.identity.KeepIdsIdentityMapper;
 import tools.dynamia.modules.saas.migration.identity.RegenerateIdsIdentityMapper;
+import tools.dynamia.modules.saas.migration.identity.Uuid7IdentityMapper;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
 import tools.jackson.databind.JsonNode;
@@ -45,6 +46,7 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.UUID;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -177,14 +179,14 @@ public class ImportPipeline {
             JsonParser parser = objectMapper.createParser(new NoCloseInputStream(zipIn));
             // Read only version and sourceAccountId for logging; skip everything else
             String version = null;
-            Long sourceAccountId = null;
+            String sourceAccountId = null;
             if (parser.nextToken() == JsonToken.START_OBJECT) {
                 while (parser.nextToken() != JsonToken.END_OBJECT) {
                     String field = parser.currentName();
                     parser.nextToken();
                     switch (field) {
                         case ExportConstants.FIELD_VERSION -> version = parser.getText();
-                        case ExportConstants.FIELD_SOURCE_ACCOUNT_ID -> sourceAccountId = parser.getLongValue();
+                        case ExportConstants.FIELD_SOURCE_ACCOUNT_ID -> sourceAccountId = parser.getValueAsString();
                         default -> parser.skipChildren();
                     }
                     if (version != null && sourceAccountId != null) break;
@@ -469,7 +471,7 @@ public class ImportPipeline {
         cached.ifPresent(field -> {
             try {
                 field.set(entity, value);
-            } catch (IllegalAccessException e) {
+            } catch (IllegalAccessException | IllegalArgumentException e) {
                 log.debug("[Migration/Import] Cannot set field {}: {}", fieldName, e.getMessage());
             }
         });
@@ -488,17 +490,16 @@ public class ImportPipeline {
                 return Long.parseLong(s);
             } catch (NumberFormatException ignored) {
             }
+            try {
+                return UUID.fromString(s);
+            } catch (IllegalArgumentException ignored) {
+            }
         }
         return id;
     }
 
     private IdentityMapper resolveIdentityMapper(AccountImportOptions options) {
         IdentityStrategy strategy = options.getIdentityStrategy();
-        if (strategy == IdentityStrategy.UUID7) {
-            throw new MigrationException(
-                    "IdentityStrategy.UUID7 is not yet supported (planned for v3). " +
-                            "Use KEEP_IDS or REGENERATE_IDS.");
-        }
         if (customMappers != null) {
             for (IdentityMapper mapper : customMappers) {
                 if (mapper.getStrategy() == strategy) {
@@ -508,6 +509,7 @@ public class ImportPipeline {
         }
         return switch (strategy) {
             case KEEP_IDS -> new KeepIdsIdentityMapper();
+            case UUID7 -> new Uuid7IdentityMapper();
             default -> new RegenerateIdsIdentityMapper();
         };
     }
