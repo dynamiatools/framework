@@ -26,11 +26,15 @@ public class AccountImportOptions {
      */
     private Serializable targetAccountId;
 
-    /** How to handle primary keys when persisting imported entities. */
+    /**
+     * How to handle primary keys when persisting imported entities.
+     */
     private IdentityStrategy identityStrategy = IdentityStrategy.REGENERATE_IDS;
 
-    /** Number of entities to persist per transaction batch. Default: 500. */
-    private int chunkSize = 500;
+    /**
+     * Number of entities to persist per transaction batch. Default: 500.
+     */
+    private int chunkSize = AccountExportOptions.DEFAULT_CHUNK_SIZE;
 
     /**
      * When {@code true}, the import fails immediately if any entity cannot be
@@ -79,6 +83,9 @@ public class AccountImportOptions {
     }
 
     public int getChunkSize() {
+        if (chunkSize <= 0) {
+            chunkSize = AccountExportOptions.DEFAULT_CHUNK_SIZE;
+        }
         return chunkSize;
     }
 

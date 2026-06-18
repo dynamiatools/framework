@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class AccountExportOptions {
 
-    public static final int DEFAULT_CHUNK_SIZE = 5000;
+    public static final int DEFAULT_CHUNK_SIZE = 1000;
 
     /**
      * Number of records to read from DB per pagination page. Default: 5000.

@@ -19,10 +19,14 @@ import java.io.Serializable;
  */
 public class AccountCloneOptions {
 
-    /** ID of the account to clone data from. Required. */
+    /**
+     * ID of the account to clone data from. Required.
+     */
     private Serializable sourceAccountId;
 
-    /** ID of the (already existing) target account. Required. */
+    /**
+     * ID of the (already existing) target account. Required.
+     */
     private Serializable targetAccountId;
 
     /**
@@ -32,8 +36,10 @@ public class AccountCloneOptions {
      */
     private IdentityStrategy identityStrategy = IdentityStrategy.REGENERATE_IDS;
 
-    /** Records per page during export/import. Default: 500. */
-    private int chunkSize = 5000;
+    /**
+     * Records per page during export/import. Default: 500.
+     */
+    private int chunkSize = AccountExportOptions.DEFAULT_CHUNK_SIZE;
 
     /**
      * When {@code true}, entity errors are fatal. When {@code false}, they are
@@ -90,6 +96,9 @@ public class AccountCloneOptions {
     }
 
     public int getChunkSize() {
+        if (chunkSize <= 0) {
+            chunkSize = AccountExportOptions.DEFAULT_CHUNK_SIZE;
+        }
         return chunkSize;
     }
 
