@@ -22,7 +22,7 @@ public class AccountExportOptions {
     public static final int DEFAULT_CHUNK_SIZE = 1000;
 
     /**
-     * Number of records to read from DB per pagination page. Default: 5000.
+     * Number of records to read from DB per pagination page. Default: 1000.
      */
     private int chunkSize = DEFAULT_CHUNK_SIZE;
 
@@ -62,14 +62,6 @@ public class AccountExportOptions {
         return this;
     }
 
-    /**
-     * @deprecated Since format v3, the output is always a ZIP. This method is a no-op.
-     */
-    @Deprecated
-    public AccountExportOptions compressionEnabled(boolean compressionEnabled) {
-        this.compressionEnabled = compressionEnabled;
-        return this;
-    }
 
     public AccountExportOptions identityStrategy(IdentityStrategy identityStrategy) {
         this.identityStrategy = identityStrategy;
@@ -94,17 +86,6 @@ public class AccountExportOptions {
         this.chunkSize = chunkSize;
     }
 
-    /** @deprecated Since format v3, always returns {@code false}. Ignored by the pipeline. */
-    @Deprecated
-    public boolean isCompressionEnabled() {
-        return compressionEnabled;
-    }
-
-    /** @deprecated Since format v3, the output is always a ZIP. This setter is a no-op. */
-    @Deprecated
-    public void setCompressionEnabled(boolean compressionEnabled) {
-        this.compressionEnabled = compressionEnabled;
-    }
 
     public IdentityStrategy getIdentityStrategy() {
         if (identityStrategy == null) {
