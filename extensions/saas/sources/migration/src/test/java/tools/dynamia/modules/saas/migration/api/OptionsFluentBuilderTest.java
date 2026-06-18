@@ -36,7 +36,6 @@ public class OptionsFluentBuilderTest {
     public void exportOptionsDefaults() {
         AccountExportOptions opts = new AccountExportOptions();
         Assert.assertEquals(AccountExportOptions.DEFAULT_CHUNK_SIZE, opts.getChunkSize());
-        Assert.assertFalse(opts.isCompressionEnabled());
         Assert.assertEquals(IdentityStrategy.KEEP_IDS, opts.getIdentityStrategy());
     }
 
@@ -44,21 +43,18 @@ public class OptionsFluentBuilderTest {
     public void exportOptionsFluentBuilder() {
         AccountExportOptions opts = new AccountExportOptions()
                 .chunkSize(200)
-                .compressionEnabled(true)
                 .identityStrategy(IdentityStrategy.REGENERATE_IDS)
                 .label("my-export");
 
         Assert.assertEquals(200, opts.getChunkSize());
-        Assert.assertTrue(opts.isCompressionEnabled());
         Assert.assertEquals(IdentityStrategy.REGENERATE_IDS, opts.getIdentityStrategy());
         Assert.assertEquals("my-export", opts.getLabel());
     }
 
     @Test
-    public void exportOptionsIsJsonSerializable() throws Exception {
+    public void exportOptionsIsJsonSerializable() {
         AccountExportOptions opts = new AccountExportOptions()
                 .chunkSize(100)
-                .compressionEnabled(true)
                 .identityStrategy(IdentityStrategy.KEEP_IDS);
 
         String json = objectMapper.writeValueAsString(opts);
@@ -68,7 +64,6 @@ public class OptionsFluentBuilderTest {
 
         AccountExportOptions roundtrip = objectMapper.readValue(json, AccountExportOptions.class);
         Assert.assertEquals(100, roundtrip.getChunkSize());
-        Assert.assertTrue(roundtrip.isCompressionEnabled());
     }
 
     // ─── AccountImportOptions ────────────────────────────────────────────────
@@ -78,7 +73,7 @@ public class OptionsFluentBuilderTest {
         AccountImportOptions opts = new AccountImportOptions();
         Assert.assertNull(opts.getTargetAccountId());
         Assert.assertEquals(IdentityStrategy.REGENERATE_IDS, opts.getIdentityStrategy());
-        Assert.assertEquals(500, opts.getChunkSize());
+        Assert.assertEquals(AccountExportOptions.DEFAULT_CHUNK_SIZE, opts.getChunkSize());
         Assert.assertFalse(opts.isFailOnEntityError());
     }
 
