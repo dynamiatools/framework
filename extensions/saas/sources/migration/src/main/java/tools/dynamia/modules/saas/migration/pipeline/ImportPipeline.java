@@ -20,10 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ReflectionUtils;
 import tools.dynamia.domain.jpa.JpaUtils;
+import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.modules.saas.migration.api.AccountImportOptions;
 import tools.dynamia.modules.saas.migration.api.CancellationToken;
@@ -54,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -326,13 +326,13 @@ public class ImportPipeline {
     // Chunk persistence (transactional boundary)
     // ─────────────────────────────────────────────────────────────────────────
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+
     public int persistChunk(List<JsonNode> chunk,
                             Class<?> entityClass,
                             AccountImportOptions options,
                             IdentityMapper identityMapper,
                             Map<String, Map<Object, Object>> idMappings) {
-        int count = 0;
+        AtomicInteger count = new AtomicInteger();
         EntityType<?> entityType;
         try {
             entityType = emf.getMetamodel().entity(entityClass);
@@ -341,42 +341,47 @@ public class ImportPipeline {
             return 0;
         }
 
-        for (JsonNode node : chunk) {
-            try {
-                Object entity = deserializeEntity(node, entityClass, entityType,
-                        options.getTargetAccountId(), identityMapper, idMappings);
+        if (chunk.isEmpty()) return 0;
 
-                Object originalId = readId(node);
-                Object mappedId = identityMapper.mapId(originalId, entityClass);
+        var crud = DomainUtils.lookupCrudService();
+        crud.executeWithinTransaction(() -> {
+            for (JsonNode node : chunk) {
+                try {
+                    Object entity = deserializeEntity(node, entityClass, entityType,
+                            options.getTargetAccountId(), identityMapper, idMappings);
 
-                if (mappedId != null) {
-                    setField(entity, "id", mappedId);
-                    em.persist(entity);
-                } else {
-                    setField(entity, "id", null);
-                    em.persist(entity);
-                    em.flush();
+                    Object originalId = readId(node);
+                    Object mappedId = identityMapper.mapId(originalId, entityClass);
+
+                    if (mappedId != null) {
+                        setField(entity, "id", mappedId);
+                        em.persist(entity);
+                    } else {
+                        setField(entity, "id", null);
+                        em.persist(entity);
+                        em.flush();
+                    }
+
+                    Object generatedId = JpaUtils.getJPAIdValue(entity);
+                    if (originalId != null && generatedId != null) {
+                        idMappings.computeIfAbsent(entityClass.getName(), k -> new HashMap<>())
+                                .put(originalId, generatedId);
+                    }
+
+                    count.getAndIncrement();
+
+                } catch (Exception e) {
+                    if (options.isFailOnEntityError()) {
+                        throw new MigrationException(
+                                "Error persisting " + entityClass.getSimpleName(), e);
+                    }
+                    log.warn("[Migration/Import] Skipping entity due to error in {}: {}",
+                            entityClass.getSimpleName(), e.getMessage());
+                    log.debug("[Migration/Import] Stack trace:", e);
                 }
-
-                Object generatedId = JpaUtils.getJPAIdValue(entity);
-                if (originalId != null && generatedId != null) {
-                    idMappings.computeIfAbsent(entityClass.getName(), k -> new HashMap<>())
-                            .put(originalId, generatedId);
-                }
-
-                count++;
-
-            } catch (Exception e) {
-                if (options.isFailOnEntityError()) {
-                    throw new MigrationException(
-                            "Error persisting " + entityClass.getSimpleName(), e);
-                }
-                log.warn("[Migration/Import] Skipping entity due to error in {}: {}",
-                        entityClass.getSimpleName(), e.getMessage());
-                log.debug("[Migration/Import] Stack trace:", e);
             }
-        }
-        return count;
+        });
+        return count.get();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
