@@ -175,7 +175,7 @@ public class ExportPipeline {
         List<Class<?>> candidates = discovery.discoverExportableEntities();
         if (options.getEntities() != null && !options.getEntities().isEmpty()) {
             candidates.removeIf(c -> !options.getEntities().contains(c.getSimpleName()));
-            logger.info("[Migration/Export] Filtered entities, {} remaining", candidates.size());
+            logger.info("[Migration/Export]  Account {}: Filtered entities, {} remaining", accountId, candidates.size());
         }
 
         List<Class<?>> ordered = dependencyGraph.topologicalSort(candidates);
@@ -203,7 +203,7 @@ public class ExportPipeline {
             // ── 3. Zip temp dir → output (topological order) ──────────────────
             if (token == null || !token.isCancelled()) {
                 zipToOutput(tempDir, ordered, accountId, output);
-                logger.info("[Migration/Export] ZIP written successfully for accountId={}", accountId);
+                logger.info("[Migration/Export]  ZIP written successfully for accountId={}", accountId);
 
 
             }
@@ -318,8 +318,8 @@ public class ExportPipeline {
             }
         }
 
-        logger.info("[Migration/Export] All entities exported — {} types, {} total records",
-                processedTypes.get(), totalRecords.get());
+        logger.info("[Migration/Export]  Account {}: All entities exported — {} types, {} total records",
+                accountId, processedTypes.get(), totalRecords.get());
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -354,7 +354,7 @@ public class ExportPipeline {
             localEm.close();
 
 
-            logger.info("[Migration/Export] {} with {} columns", entityClass.getSimpleName(), columns.size());
+            logger.info("[Migration/Export]  Account {}: {} with {} columns", accountId, entityClass.getSimpleName(), columns.size());
             try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(filePath), ENTITY_BUFFER_SIZE);
                  JsonGenerator gen = objectMapper.createGenerator(out)) {
 
@@ -377,7 +377,7 @@ public class ExportPipeline {
 
                 gen.writeEndObject();
 
-                logger.info("[Migration/Export] {} → {} records written in {}ms", entityClass.getSimpleName(), processed, (endTime - startTime));
+                logger.info("[Migration/Export]  Account {}: {} → {} records written in {}ms", accountId, entityClass.getSimpleName(), processed, (endTime - startTime));
                 return processed;
             }
         } finally {
@@ -448,8 +448,8 @@ public class ExportPipeline {
             }
             long endTime = System.currentTimeMillis();
 
-            logger.info("[Migration/Export] {} - page {} with {} records. Query={}ms  Write={}ms. Rows={} ",
-                    simpleName, pageNum, page.size(), (qEndTime - qStartTime), (endTime - startTime), processed);
+            logger.info("[Migration/Export] Account {}:  {} - page {} with {} records. Query={}ms  Write={}ms. Rows={} ",
+                    accountId, simpleName, pageNum, page.size(), (qEndTime - qStartTime), (endTime - startTime), processed);
 
             if (listener != null) {
                 listener.onProgress(MigrationProgress.partial(processed));

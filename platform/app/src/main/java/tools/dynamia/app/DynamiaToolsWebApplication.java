@@ -72,10 +72,4 @@ public class DynamiaToolsWebApplication extends DynamiaBaseConfiguration {
                 .build();
     }
 
-    @Bean
-    public PWAManifestController pwaManifestController(PWAManifest manifest) {
-        return new PWAManifestController(manifest);
-    }
-
-
 }

@@ -13,6 +13,7 @@ package tools.dynamia.modules.saas.migration.services;
 import org.springframework.core.io.InputStreamSource;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.query.QueryConditions;
+import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
 import tools.dynamia.navigation.Page;
 import tools.jackson.databind.ObjectMapper;
@@ -49,9 +50,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -76,7 +79,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
 
     private static final LoggingService log = LoggingService.get(AccountMigrationJobServiceImpl.class);
     private static final DateTimeFormatter FILE_TS = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
-    private static final long PROGRESS_THROTTLE_MS = 2000;
+    private static final long PROGRESS_THROTTLE_MS = 8000;
 
     /**
      * In-memory token registry: jobUuid → CancellationToken. Cleaned up when job finishes.
@@ -336,27 +339,51 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     private MigrationProgressListener buildProgressListener(AccountMigrationJob job) {
         AtomicBoolean started = new AtomicBoolean(false);
         AtomicLong lastPersistedAt = new AtomicLong(0);
+        AtomicLong partialSum = new AtomicLong(0);
 
         return (MigrationProgress p) -> {
             boolean isFirst = started.compareAndSet(false, true);
-            long now = System.currentTimeMillis();
-            boolean throttleExpired = (now - lastPersistedAt.get()) >= PROGRESS_THROTTLE_MS;
-            boolean isFinal = p.totalEntities() > 0 && p.processedEntities() >= p.totalEntities();
 
-            if (!isFirst && !throttleExpired && !isFinal) return;
+            if (isFirst || !p.partial()) {
+                try {
+                    crudService.executeWithinTransaction(() -> {
+                        AccountMigrationJob j = findByUuid(job.getUuid());
+                        if (j != null && !j.isFinished()) {
+                            Map<String, Object> fields = new HashMap<>();
+                            if (isFirst) {
+                                j.markRunning();
+                                fields.put("status", j.getStatus());
+                                fields.put("startedAt", j.getStartedAt());
+                            }
 
-            lastPersistedAt.set(now);
-            try {
-                crudService.executeWithinTransaction(() -> {
-                    AccountMigrationJob j = findByUuid(job.getUuid());
-                    if (j != null && !j.isFinished()) {
-                        if (isFirst) j.markRunning();
-                        j.updateProgress(p);
-                        crudService.update(j);
-                    }
-                });
-            } catch (Exception e) {
-                log.debug("[Migration/Jobs] Progress update error for {}: {}", job.getUuid(), e.getMessage());
+                            fields.put("progress", p.percentage());
+                            fields.put("progressMessage", p.message());
+                            fields.put("records", p.processedRecords());
+                            crudService.batchUpdate(AccountMigrationJob.class, fields, QueryParameters.with("id", job.getId()));
+                        }
+                    });
+                } catch (Exception e) {
+                    log.debug("[Migration/Jobs] Progress update error for {}: {}", job.getUuid(), e.getMessage());
+                }
+            } else {
+                long now = System.currentTimeMillis();
+                boolean throttleExpired = (now - lastPersistedAt.get()) >= PROGRESS_THROTTLE_MS;
+                boolean isFinal = p.totalEntities() > 0 && p.processedEntities() >= p.totalEntities();
+                partialSum.addAndGet(p.processedRecords());
+
+                if (!throttleExpired && !isFinal) return;
+
+                lastPersistedAt.set(now);
+                try {
+                    var sum = partialSum.getAndSet(0);
+                    crudService.executeWithinTransaction(() -> {
+                        crudService.execute("UPDATE AccountMigrationJob j SET j.records = j.records + :partial where j.id = :id", QueryParameters.with("id", job.getId())
+                                .add("partial", sum));
+                    });
+
+                } catch (Exception e) {
+                    log.debug("[Migration/Jobs] Progress update error for {}: {}", job.getUuid(), e.getMessage());
+                }
             }
         };
     }

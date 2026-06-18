@@ -4,6 +4,7 @@ autofields: false
 
 fields:
   name:
+  subdomain:
   contact:
   identification:
   type:
