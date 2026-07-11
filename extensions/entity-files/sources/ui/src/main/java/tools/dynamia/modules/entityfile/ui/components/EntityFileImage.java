@@ -76,11 +76,8 @@ public class EntityFileImage extends Image {
         if (entityFile != null) {
             Long key = entityFile.getId();
             try {
-                StoredEntityFile sef = entityFile.getStoredEntityFile();
-
                 if (isThumbnail()) {
-                    String thumbUrl = URL_THUMB_CACHE.getOrLoad(key, k -> entityFile.getStoredEntityFile().getThumbnailUrl(thumbnailWidth, thumbnailHeight));
-                    setSrc(thumbUrl);
+                    setSrc(URL_THUMB_CACHE.getOrLoad(key, k -> entityFile.toThumbnailURL(thumbnailWidth, thumbnailHeight)));
                 } else {
                     setSrc(URL_CACHE.getOrLoad(key, k -> entityFile.toURL()));
                 }

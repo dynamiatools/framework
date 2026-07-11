@@ -34,9 +34,11 @@ import java.util.List;
 public class ViewDescriptorInterceptorUtils {
 
     /**
-     * Fire interceptors for.
+     * Fires all applicable {@link ViewDescriptorInterceptor} instances for the given
+     * {@link ViewDescriptor}. Each matching interceptor's
+     * {@link ViewDescriptorInterceptor#intercepted(ViewDescriptor)} method is called in order.
      *
-     * @param viewDescriptor the view descriptor
+     * @param viewDescriptor the view descriptor to pass to each interceptor
      */
     public static void fireInterceptorsFor(ViewDescriptor viewDescriptor) {
         for (ViewDescriptorInterceptor vdi : filter(viewDescriptor)) {
@@ -45,10 +47,13 @@ public class ViewDescriptorInterceptorUtils {
     }
 
     /**
-     * Filter.
+     * Filters all registered {@link ViewDescriptorInterceptor} instances to those applicable to
+     * the given {@link ViewDescriptor}. An interceptor is included if its target is
+     * {@link ViewDescriptorTarget#ALL}, or if the target matches the descriptor's view type name,
+     * descriptor ID, or bean class.
      *
-     * @param vd the vd
-     * @return the list
+     * @param vd the view descriptor to match interceptors against
+     * @return a list of interceptors that apply to the given view descriptor
      */
     private static List<ViewDescriptorInterceptor> filter(ViewDescriptor vd) {
         List<ViewDescriptorInterceptor> f = new ArrayList<>();

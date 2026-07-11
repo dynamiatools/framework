@@ -17,6 +17,7 @@
 
 package mybookstore.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -72,6 +73,7 @@ public class Book extends BaseEntity {
     private double discount;//percent
 
     @Transient
+    @JsonIgnore
     private boolean selected;
 
 

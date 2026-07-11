@@ -22,9 +22,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
+import software.amazon.awssdk.core.async.AsyncResponseTransformer;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -41,7 +47,6 @@ import tools.dynamia.modules.entityfile.domain.EntityFile;
 import tools.dynamia.modules.entityfile.enums.EntityFileType;
 
 import java.io.File;
-import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,6 +55,9 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static tools.dynamia.modules.entityfile.remote.BuckieEntityFileStorage.getAccountFolderName;
+import static tools.dynamia.modules.entityfile.remote.BuckieEntityFileStorage.getFileName;
 
 /**
  * {@link EntityFileStorage} implementation that store files in Amazon S3 service.
@@ -64,6 +72,7 @@ public class S3EntityFileStorage implements EntityFileStorage {
     public static final String AWS_S3_ENDPOINT = "AWS_S3_ENDPOINT";
     public static final String AWS_S3_REGION = "AWS_S3_REGION";
     public static final String AWS_S3_BUCKET = "AWS_S3_BUCKET";
+    public static final String AWS_S3_OVERRIDE_ENDPOINT = "AWS_S3_OVERRIDE_ENDPOINT";
     private static final Logger log = LoggerFactory.getLogger(S3EntityFileStorage.class);
     public static final int PRESIGNED_URL_TIMEOUT = 30;
     private final LoggingService logger = new SLF4JLoggingService(S3EntityFileStorage.class, "S3: ");
@@ -148,10 +157,10 @@ public class S3EntityFileStorage implements EntityFileStorage {
 
             AsyncRequestBody body = null;
             if (fileToUpload != null && fileToUpload.exists()) {
-                logger.info("Uploading file " + fileToUpload.getPath() + " to " + key);
+                logger.info("Uploading file " + fileToUpload.getPath() + " to bucket [" + bucket + "] key=" + key);
                 body = AsyncRequestBody.fromFile(fileToUpload);
             } else if (fileInfo.hasInputStream()) {
-                logger.info("Uploading input stream from " + fileInfo.getFullName() + " to " + key);
+                logger.info("Uploading input stream from " + fileInfo.getFullName() + " to bucket  [" + bucket + "]  key=" + key);
                 body = AsyncRequestBody.fromInputStream(fileInfo.getInputStream(), length, executorService);
             }
             entityFile.setUploading(true);
@@ -182,10 +191,9 @@ public class S3EntityFileStorage implements EntityFileStorage {
         String urlKey = entityFile.getUuid();
         String url = URL_CACHE.get(urlKey);
         String fileName = getFileName(entityFile);
-
+        String folder = getAccountFolderName(entityFile.getAccountId());
         if (url == null) {
 
-            String folder = getAccountFolderName(entityFile.getAccountId());
             if (entityFile.isShared()) {
                 url = generateStaticURL(getBucketName(), folder + fileName);
                 URL_CACHE.add(urlKey, url);
@@ -194,7 +202,7 @@ public class S3EntityFileStorage implements EntityFileStorage {
             }
         }
 
-        return new S3StoredEntityFile(entityFile, url, new File(fileName));
+        return new S3StoredEntityFile(entityFile, url, new File(fileName), folder + fileName);
     }
 
     protected String generateSignedURL(String bucketName, String fileName) {
@@ -214,29 +222,6 @@ public class S3EntityFileStorage implements EntityFileStorage {
     }
 
 
-    private String getFileName(EntityFile entityFile) {
-        String subfolder = "";
-        if (entityFile.getSubfolder() != null) {
-            subfolder = entityFile.getSubfolder() + "/";
-        }
-
-        var name = entityFile.getName().toLowerCase().trim()
-                .replace(" ", "_")
-                .replace("-", "_")
-                .replace("\u00F1", "n")
-                .replace("\u00E1", "a")
-                .replace("\u00E9", "e")
-                .replace("\u00ED", "i")
-                .replace("\u00F3", "o")
-                .replace("\u00FA", "u");
-        String storedFileName = entityFile.getUuid() + "_" + name;
-        if (entityFile.getStoredFileName() != null && !entityFile.getStoredFileName().isEmpty()) {
-            storedFileName = entityFile.getStoredFileName();
-        }
-
-        return subfolder + storedFileName;
-    }
-
     /**
      * Get or build a S3 async client using static credentials
      *
@@ -245,17 +230,20 @@ public class S3EntityFileStorage implements EntityFileStorage {
     protected S3AsyncClient getClient() {
 
         if (s3Client == null) {
-            s3Client = S3Utils.buildS3AsyncClient(getAccessKey(), getSecretKey(), getRegion())
-                    .build();
+            var endpoint = getOverrideEndpoint();
+            if (endpoint != null && !endpoint.isBlank()) {
+                s3Client = S3Utils.buildGenericClient(getAccessKey(), getSecretKey(), endpoint);
+            } else {
+                s3Client = S3Utils.buildS3AsyncClient(getAccessKey(), getSecretKey(), getRegion())
+                        .build();
+            }
         }
         return s3Client;
 
 
     }
 
-    protected String getAccountFolderName(Long accountId) {
-        return "account" + accountId + "/";
-    }
+
 
     /**
      * Generate thumbnail url
@@ -300,8 +288,8 @@ public class S3EntityFileStorage implements EntityFileStorage {
 
             File localDestination = File.createTempFile(System.currentTimeMillis() + "file", entityFile.getName());
             File localThumbDestination = File.createTempFile(System.currentTimeMillis() + "thumb", entityFile.getName());
-            var url = download(entityFile).getUrl();
-            Files.copy(new URL(url).openStream(), localDestination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            var resource = entityFile.getStoredEntityFile().toResource();
+            Files.copy(resource.getInputStream(), localDestination.toPath(), StandardCopyOption.REPLACE_EXISTING);
             ImageUtil.resizeImage(localDestination, localThumbDestination, entityFile.getExtension(), w, h);
 
             // metadata
@@ -366,6 +354,10 @@ public class S3EntityFileStorage implements EntityFileStorage {
         return getParameter(AWS_ACCESS_KEY_ID);
     }
 
+    public String getOverrideEndpoint() {
+        return getParameter(AWS_S3_OVERRIDE_ENDPOINT);
+    }
+
     public String getRegion() {
         var region = getParameter(AWS_S3_REGION);
         if (region == null || region.isBlank()) {
@@ -398,13 +390,60 @@ public class S3EntityFileStorage implements EntityFileStorage {
 
     class S3StoredEntityFile extends StoredEntityFile {
 
-        public S3StoredEntityFile(EntityFile entityFile, String url, File realFile) {
+        private final String s3Key;
+
+        public S3StoredEntityFile(EntityFile entityFile, String url, File realFile, String s3Key) {
             super(entityFile, url, realFile);
+            this.s3Key = s3Key;
         }
 
         @Override
         public String getThumbnailUrl(int width, int height) {
             return generateThumbnailURL(getEntityFile(), width, width);
+        }
+
+        @Override
+        public Resource toResource() {
+            ResponseInputStream<GetObjectResponse> stream =
+                    getClient().getObject(
+                            GetObjectRequest.builder()
+                                    .bucket(getBucketName())
+                                    .key(s3Key)
+                                    .build(),
+                            AsyncResponseTransformer.toBlockingInputStream()
+                    ).join();
+
+            return new InputStreamResource(stream);
+        }
+
+        @Override
+        public Resource toThumbnailResource(int width, int height) {
+            var entityFile = getEntityFile();
+            if (entityFile.getType() != EntityFileType.IMAGE && EntityFileType.getFileType(entityFile.getExtension()) != EntityFileType.IMAGE) {
+                return null;
+            }
+
+            String folder = getAccountFolderName(entityFile.getAccountId());
+            String fileName = getFileName(entityFile);
+            String thumbKey = folder + width + "x" + height + "/" + fileName;
+
+            if (!objectExists(getBucketName(), thumbKey)) {
+                generateThumbnailURL(entityFile, width, height);
+                if (!objectExists(getBucketName(), thumbKey)) {
+                    return null;
+                }
+            }
+
+            ResponseInputStream<GetObjectResponse> stream =
+                    s3Client.getObject(
+                            GetObjectRequest.builder()
+                                    .bucket(getBucketName())
+                                    .key(thumbKey)
+                                    .build(),
+                            AsyncResponseTransformer.toBlockingInputStream()
+                    ).join();
+
+            return new InputStreamResource(stream);
         }
     }
 

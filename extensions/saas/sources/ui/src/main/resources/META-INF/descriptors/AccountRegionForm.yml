@@ -17,3 +17,6 @@ fields:
     component: localebox
   parameters:
     component: crudview
+
+layout:
+  columns: 4

@@ -190,7 +190,7 @@ public class Actions {
      * @param request the execution request
      * @return the execution response
      */
-    public static ActionExecutionResponse execute(Action action, ActionExecutionRequest request) {
+    public static ActionExecutionResponse execute(RemoteAction action, ActionExecutionRequest request) {
 
         if (action instanceof ActionSelfFilter filter) {
             filter.beforeActionExecution(request);

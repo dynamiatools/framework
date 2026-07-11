@@ -56,12 +56,24 @@ import static tools.dynamia.viewers.util.ViewersExpressionUtil.$s;
 import static tools.dynamia.viewers.util.ViewersExpressionUtil.isExpression;
 
 /**
- * @author Mario A. Serrano Leones
+ * Default renderer that converts a {@link ViewDescriptor} into a ZK {@link FormView}.
+ * <p>
+ * It renders rows, groups, components, bindings, and descriptor actions while
+ * exposing protected hooks for custom form rendering behavior.
+ *
+ * @param <T> form value type
  */
 public class FormViewRenderer<T> implements ViewRenderer<T> {
 
     private LocalizedMessagesProvider messagesProvider;
 
+    /**
+     * Renders a descriptor into a form view instance.
+     *
+     * @param descriptor descriptor to render
+     * @param value      initial value
+     * @return rendered view
+     */
     @Override
     public View<T> render(ViewDescriptor descriptor, T value) {
 
@@ -85,6 +97,14 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         }
     }
 
+    /**
+     * Renders descriptor fields and actions into an existing form view instance.
+     *
+     * @param view       target form view
+     * @param descriptor descriptor to render
+     * @param value      initial value
+     * @return rendered view
+     */
     public View<T> render(FormView<T> view, ViewDescriptor descriptor, T value) {
 
         view.setSclass(Viewers.ATTRIBUTE_FORM_VIEW);
@@ -105,6 +125,14 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
 
     // protected METHODS
+
+    /**
+     * Calculates effective number of columns used by the form layout.
+     *
+     * @param view form view
+     * @param d    descriptor
+     * @return number of columns in range 1..12
+     */
     protected int renderHeaders(FormView<T> view, ViewDescriptor d) {
         int colNum = 2;
 
@@ -128,6 +156,15 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
     }
 
 
+    /**
+     * Renders ungrouped and grouped fields into form rows.
+     *
+     * @param view     target form view
+     * @param viewDesc descriptor
+     * @param realCols effective columns
+     * @param value    current value
+     * @return root rendered component
+     */
     protected Component renderRows(FormView<T> view, ViewDescriptor viewDesc, int realCols, T value) {
         Div row = null;
         Div panel = new Div();
@@ -140,14 +177,16 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
         for (Field field : ViewRendererUtil.filterRenderableFields(view, viewDesc)) {
 
-            if (!hasSpace(row, realCols, field)) {
-                row = newRow();
-                row.setParent(panelBody);
-                if (panel.getParent() == null) {
-                    panel.setParent(view.getContentArea());
+            if (field.getGroup() == null) {
+                if (!hasSpace(row, realCols, field)) {
+                    row = newRow();
+                    row.setParent(panelBody);
+                    if (panel.getParent() == null) {
+                        panel.setParent(view.getContentArea());
+                    }
                 }
+                renderField(row, field, view.getBinder(), view, value, realCols);
             }
-            renderField(row, field, view.getBinder(), view, value, realCols);
 
         }
 
@@ -250,6 +289,9 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
 
     }
 
+    /**
+     * Renders a single field including label, input component and binding metadata.
+     */
     protected void renderField(Component row, Field field, Binder binder, FormView<T> view, T value, int realCols) {
         boolean showLabel = true;
         Viewers.customizeField("form", field);
@@ -324,6 +366,9 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
     }
 
 
+    /**
+     * Applies default CSS behavior for supported component types.
+     */
     protected void applyComponentCSS(Component component, String labelText, Field field) {
         String styleClass = (String) field.getParams().get(Viewers.PARAM_STYLE_CLASS);
         if (styleClass == null) {
@@ -348,6 +393,9 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
     }
 
 
+    /**
+     * Creates the component instance associated with a field and applies generic setup.
+     */
     protected Component createComponent(Field field, FormView<T> view, T value) {
         Component component = null;
 
@@ -375,6 +423,9 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         return component;
     }
 
+    /**
+     * Creates and applies field-level constraints for input components.
+     */
     protected void applyFieldConstraints(Component comp, Field field) {
 
         try {
@@ -416,6 +467,9 @@ public class FormViewRenderer<T> implements ViewRenderer<T> {
         return fieldConstraint;
     }
 
+    /**
+     * Creates binding expressions for a rendered field component.
+     */
     protected void createBinding(Component comp, Field field, Binder binder, T value) {
         if (field.getViewDescriptor().getParams().get(Viewers.PARAM_IGNORE_BINDINGS) == Boolean.TRUE) {
             return;

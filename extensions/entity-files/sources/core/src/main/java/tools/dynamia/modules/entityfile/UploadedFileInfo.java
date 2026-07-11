@@ -55,6 +55,11 @@ public class UploadedFileInfo {
         this.fullName = info.getName();
         this.length = info.getFile().length();
         this.source = info.getFile();
+        try {
+            this.contentType = Files.probeContentType(info.getFile().toPath());
+        } catch (IOException e) {
+
+        }
     }
 
     public UploadedFileInfo(Path path) {
@@ -81,6 +86,10 @@ public class UploadedFileInfo {
         this.contentType = contentType;
         this.inputStream = inputStream;
         this.source = inputStream;
+    }
+
+    public void detectContentType() {
+
     }
 
     public String getStoredFileName() {

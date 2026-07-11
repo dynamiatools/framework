@@ -2,6 +2,7 @@ package tools.dynamia.navigation;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({"id", "name", "longName", "type", "description", "icon", "internalPath", "path", "position", "featured", "file", "attributes", "children"})
 public class NavigationNode implements Serializable {
 
 

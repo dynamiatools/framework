@@ -44,7 +44,7 @@ import tools.dynamia.commons.ObjectOperations;
  *
  * @author Mario A. Serrano Leones
  */
-public class FastAction extends AbstractAction {
+public class FastAction extends AbstractLocalAction {
 
     /**
      * Functional interface to handle action performed events.

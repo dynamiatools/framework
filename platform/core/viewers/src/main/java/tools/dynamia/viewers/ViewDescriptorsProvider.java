@@ -19,16 +19,30 @@ package tools.dynamia.viewers;
 import java.util.Collection;
 
 /**
- * Interface for providing a collection of view descriptors.
+ * Contributes a collection of {@link ViewDescriptor}s to the application descriptor registry.
  *
- * @author Ing. Mario Serrano Leones
+ * <p>A {@code ViewDescriptorsProvider} is a pluggable source of descriptors. Instead of (or in
+ * addition to) loading descriptors from classpath resource files, modules can implement this
+ * interface to supply descriptors that are built programmatically or loaded from an external
+ * store (e.g., a database, a remote configuration service).</p>
+ *
+ * <p>Implementations are discovered by the framework via the service container during the
+ * loading phase triggered by {@link ViewDescriptorFactory#loadViewDescriptors()}. All descriptors
+ * returned by {@link #getDescriptors()} are registered alongside those loaded from files.</p>
+ *
+ * @see ViewDescriptorFactory#loadViewDescriptors()
+ * @see ViewDescriptor
  */
 public interface ViewDescriptorsProvider {
 
     /**
-     * Gets the collection of view descriptors.
+     * Returns the descriptors that this provider contributes to the registry.
      *
-     * @return the collection of view descriptors
+     * <p>This method may be called multiple times (e.g., on hot-reload). Implementations should
+     * return a fresh, consistent snapshot each time. An empty collection is valid and simply
+     * means this provider contributes no descriptors.</p>
+     *
+     * @return a non-null, possibly empty collection of {@link ViewDescriptor}s
      */
     Collection<ViewDescriptor> getDescriptors();
 

@@ -26,6 +26,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringJoiner;
@@ -420,6 +421,34 @@ public class HttpUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Load request parameters in to map
+     *
+     * @param request request
+     * @return parameters map
+     */
+    public static Map<String, String> loadParams(HttpServletRequest request) {
+        Map<String, String> params = new HashMap<>();
+        request.getParameterNames().asIterator().forEachRemaining(name -> {
+            params.put(name, request.getParameter(name));
+        });
+        return params;
+    }
+
+    /**
+     * Load request headers in to a map
+     *
+     * @param request request
+     * @return headers
+     */
+    public static Map<String, String> loadHeaders(HttpServletRequest request) {
+        Map<String, String> headers = new HashMap<>();
+        request.getHeaderNames().asIterator().forEachRemaining(name -> {
+            headers.put(name, request.getHeader(name));
+        });
+        return headers;
     }
 }
 

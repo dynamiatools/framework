@@ -275,6 +275,14 @@ public class Viewers {
 
     }
 
+    /**
+     * Applies all registered {@link FieldCustomizer} instances to the given field for the
+     * specified view type. Customizers may modify field parameters, visibility, or other
+     * attributes before the field is rendered.
+     *
+     * @param viewTypeName the name of the view type (e.g., {@code "form"}, {@code "table"})
+     * @param field        the field to customize
+     */
     public static void customizeField(String viewTypeName, Field field) {
         Collection<FieldCustomizer> customizers = Containers.get().findObjects(FieldCustomizer.class);
         if (customizers != null) {
@@ -285,11 +293,30 @@ public class Viewers {
 
     }
 
+    /**
+     * Configures the given view by applying the provided parameter map as bean properties.
+     * Each key in the map corresponds to a property name on the view, and the associated
+     * value is set via reflection.
+     *
+     * @param view   the view instance to configure
+     * @param params a map of property names to values to apply to the view
+     */
     public static void setupView(View view, Map<String, Object> params) {
         ObjectOperations.setupBean(view, params);
 
     }
 
+    /**
+     * Searches for a {@link Descriptor} annotation on the given class that matches the specified
+     * view type name. When the class is annotated with {@link Descriptors}, the first descriptor
+     * whose type equals {@code viewTypeName} is returned; if none matches, the first descriptor
+     * with an empty type is used as a fallback. When the class is annotated with a single
+     * {@link Descriptor}, it is returned only if its type is empty or matches {@code viewTypeName}.
+     *
+     * @param targetClass  the class to inspect for descriptor annotations
+     * @param viewTypeName the view type name to match (e.g., {@code "form"}, {@code "table"})
+     * @return the matching {@link Descriptor}, or {@code null} if no suitable annotation is found
+     */
     public static Descriptor findClassDescriptor(Class<?> targetClass, String viewTypeName) {
         Descriptor classDescriptor = null;
         if (targetClass.isAnnotationPresent(Descriptors.class)) {
@@ -306,6 +333,18 @@ public class Viewers {
     }
 
 
+    /**
+     * Searches for a {@link Descriptor} annotation on the given property that matches the
+     * specified view type name. When the property is annotated with {@link Descriptors}, the first
+     * descriptor whose type equals {@code viewTypeName} is returned; if none matches, the first
+     * descriptor with an empty type is used as a fallback. When the property is annotated with a
+     * single {@link Descriptor}, it is returned only if its type is empty or matches
+     * {@code viewTypeName}.
+     *
+     * @param property     the property to inspect for descriptor annotations
+     * @param viewTypeName the view type name to match (e.g., {@code "form"}, {@code "table"})
+     * @return the matching {@link Descriptor}, or {@code null} if no suitable annotation is found
+     */
     public static Descriptor findPropertyDescriptor(PropertyInfo property, String viewTypeName) {
         Descriptor propertyDescriptor = null;
 
@@ -322,6 +361,15 @@ public class Viewers {
         return propertyDescriptor;
     }
 
+    /**
+     * Finds a {@link Descriptor} within a {@link Descriptors} container that matches the given
+     * view type name. First looks for an exact type match; if not found, falls back to the first
+     * descriptor with an empty type.
+     *
+     * @param descriptors  the container annotation holding multiple descriptors
+     * @param viewTypeName the view type name to match
+     * @return the matching {@link Descriptor}, or {@code null} if none is found
+     */
     private static Descriptor findDescriptor(Descriptors descriptors, String viewTypeName) {
         Descriptor descriptor;
         descriptor = Stream.of(descriptors.value()).filter(d -> d.type().equals(viewTypeName)).findFirst().orElse(null);

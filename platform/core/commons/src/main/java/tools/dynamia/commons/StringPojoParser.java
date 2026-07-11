@@ -17,13 +17,14 @@
 
 package tools.dynamia.commons;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.dataformat.xml.XmlMapper;
 
 import java.io.IOException;
 import java.util.List;
@@ -54,7 +55,7 @@ public class StringPojoParser {
             }
             var jsonMapper = createJsonMapper();
             return jsonMapper.writeValueAsString(map);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new JsonParsingException(e);
         }
     }
@@ -68,7 +69,7 @@ public class StringPojoParser {
         return JsonMapper.builder()
                 .enable(SerializationFeature.INDENT_OUTPUT)
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-                .addModule(new JavaTimeModule())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .build();
 
     }
@@ -86,7 +87,7 @@ public class StringPojoParser {
             }
             var jsonMapper = createJsonMapper();
             return jsonMapper.writeValueAsString(pojo);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new JsonParsingException(e);
         }
     }
@@ -131,7 +132,6 @@ public class StringPojoParser {
      *
      * @param json
      * @param pojoType
-     *
      * @return object of type or null if json is null or empty
      */
     public static <T> T parseJsonToPojo(String json, Class<T> pojoType) {
@@ -142,7 +142,7 @@ public class StringPojoParser {
 
             var jsonMapper = createJsonMapper();
             return jsonMapper.readerFor(pojoType).readValue(json);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new JsonParsingException(e);
         }
     }
@@ -150,6 +150,7 @@ public class StringPojoParser {
 
     /**
      * Parse JSON map to java type (java bean)
+     *
      * @param map
      * @param pojoType
      * @return object of type or null if json is null or empty
@@ -177,14 +178,13 @@ public class StringPojoParser {
             }
             var xmlMapper = createXmlMapper();
             return xmlMapper.writeValueAsString(pojo);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new XmlParsingException(e);
         }
     }
 
     /**
      * Create a xml {@link XmlMapper} with enable IDENT_OUTPUT and disabled FAIL_ON_EMPTY_BEANS. Also add support
-     * to {@link JavaTimeModule} from JSR310 dependency
      *
      * @return xml mapper
      */
@@ -192,7 +192,6 @@ public class StringPojoParser {
         return XmlMapper.builder()
                 .enable(SerializationFeature.INDENT_OUTPUT)
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-                .addModule(new JavaTimeModule())
                 .build();
 
     }
@@ -207,7 +206,7 @@ public class StringPojoParser {
             }
             var xmlMap = createXmlMapper();
             return xmlMap.readerFor(pojoType).readValue(xml);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new XmlParsingException(e);
         }
     }
@@ -228,7 +227,7 @@ public class StringPojoParser {
                     constructCollectionType(List.class, pojoType);
 
             return jsonMapper.readerFor(type).readValue(json);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new JsonParsingException(e);
         }
     }
@@ -245,7 +244,7 @@ public class StringPojoParser {
             }
             var jsonMapper = createJsonMapper();
             return jsonMapper.writeValueAsString(list);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new JsonParsingException(e);
         }
     }

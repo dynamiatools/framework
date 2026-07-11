@@ -1,0 +1,30 @@
+@baseUrl=http://localhost:8484/api/library/categories
+
+### List categories
+GET {{baseUrl}}
+
+### Create category
+POST {{baseUrl}}
+content-type: application/json
+
+{
+  "name": "{{$random.book.genre}}",
+  "parent": {
+     "id": 1
+  }
+}
+
+### Get category by id
+GET {{baseUrl}}/1
+
+
+### Get category by id not found
+GET {{baseUrl}}/133333333
+
+
+### List categories metadata
+GET {{baseUrl}}?_metadata
+
+
+### Filter categories by name
+GET {{baseUrl}}?name=Programmin

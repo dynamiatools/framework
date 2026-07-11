@@ -18,6 +18,7 @@
 
 package tools.dynamia.modules.email.services.impl;
 
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -34,7 +35,6 @@ import tools.dynamia.domain.contraints.EmailValidator;
 import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
-import tools.dynamia.domain.util.CrudServiceListenerAdapter;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.scheduling.SchedulerUtil;
 import tools.dynamia.integration.scheduling.TaskException;
@@ -62,7 +62,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 /**
  * @author Mario Serrano Leones
@@ -191,7 +190,7 @@ public class EmailServiceImpl implements EmailService {
                 helper.setTo(mailMessage.getTo().split(","));
             } else {
                 if (!mailMessage.getTos().isEmpty())
-                    helper.setTo(tosAsArray[0].toString());
+                    helper.setTo(tosAsArray[0]);
             }
 
             if (!mailMessage.getTos().isEmpty()) {
@@ -222,8 +221,24 @@ public class EmailServiceImpl implements EmailService {
                 helper.setReplyTo(mailMessage.getReplyTo());
             }
 
-            for (EmailAttachment archivo : mailMessage.getAttachments()) {
-                helper.addAttachment(archivo.getName(), archivo.getFile());
+            if (mailMessage.getAttachments() != null) {
+                for (EmailAttachment attachment : mailMessage.getAttachments()) {
+                    if (attachment.getFile() != null && attachment.getFile().exists()) {
+                        helper.addAttachment(attachment.getName(), attachment.getFile());
+                    } else if (attachment.getInputStreamSource() != null) {
+                        helper.addAttachment(attachment.getName(), attachment.getInputStreamSource());
+                    }
+                }
+            }
+
+            if (mailMessage.getHeaders() != null && !mailMessage.getHeaders().isEmpty()) {
+                mailMessage.getHeaders().forEach((k, v) -> {
+                    try {
+                        mimeMessage.addHeader(k, v);
+                    } catch (MessagingException e) {
+                        logger.warn("Error adding header " + k + " to email message " + mailMessage, e);
+                    }
+                });
             }
 
             fireOnMailSending(mailMessage);
@@ -346,7 +361,7 @@ public class EmailServiceImpl implements EmailService {
         return getTemplateByName(name, true);
     }
 
-    private MailSender createMailSender(EmailAccount account) {
+    protected MailSender createMailSender(EmailAccount account) {
         JavaMailSenderImpl mailSender = (JavaMailSenderImpl) MAIL_SENDERS.get(account.getId());
         if (mailSender == null) {
             logger.info("Creating Mail Sender for: " + account);
@@ -506,7 +521,6 @@ public class EmailServiceImpl implements EmailService {
             listener.onMailSendFail(message, cause);
         }
     }
-
 
 
     @Override

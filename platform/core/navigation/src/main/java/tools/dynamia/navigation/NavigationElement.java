@@ -239,6 +239,7 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
         ne.customLabel = customLabel;
         ne.customLabelSupplier = customLabelSupplier;
 
+
         return ne;
     }
 
@@ -388,6 +389,30 @@ public class NavigationElement<T extends NavigationElement> implements Serializa
 
     public T customLabelSupplier(Supplier<String> customLabelSupplier) {
         setCustomLabelSupplier(customLabelSupplier);
+        //noinspection unchecked
+        return (T) this;
+    }
+
+    public T visible(boolean visible) {
+        setVisible(visible);
+        //noinspection unchecked
+        return (T) this;
+    }
+
+    public T enable(boolean enable) {
+        setEnable(enable);
+        //noinspection unchecked
+        return (T) this;
+    }
+
+    public T renderOnUserRoles(String renderOnUserRoles) {
+        setRenderOnUserRoles(renderOnUserRoles);
+        //noinspection unchecked
+        return (T) this;
+    }
+
+    public T alwaysAllowed(boolean alwaysAllowed) {
+        setAlwaysAllowed(alwaysAllowed);
         //noinspection unchecked
         return (T) this;
     }

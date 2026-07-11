@@ -16,6 +16,7 @@
  */
 package tools.dynamia.domain.services;
 
+import org.springframework.transaction.annotation.Transactional;
 import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.commons.Callback;
 import tools.dynamia.domain.query.DataPaginator;
@@ -239,6 +240,16 @@ public interface CrudService {
     <T> List<T> find(Class<T> type, QueryParameters parameters);
 
     /**
+     * Find entities using parameters, the returned entities are in read only mode, this is usefull for reports and read only data.
+     *
+     * @param <T>        the generic type
+     * @param type       the type
+     * @param parameters the parameters
+     * @return the list
+     */
+    <T> List<T> findReadOnly(Class<T> type, QueryParameters parameters);
+
+    /**
      * Execute query.
      *
      * @param <T>          the generic type
@@ -438,6 +449,14 @@ public interface CrudService {
      * @return the t
      */
     <T> T findSingle(Class<T> entityClass, QueryParameters params);
+
+    /**
+     * Find using query metadata
+     *
+     * @param queryMetadata metada
+     * @return result
+     */
+    List findReadOnly(QueryMetadata queryMetadata);
 
     /**
      * find objects using fields.

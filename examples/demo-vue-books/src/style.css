@@ -1,0 +1,401 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --bg: #0b1220;
+  --surface: #111827;
+  --surface-2: #0f172a;
+  --border: #273449;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --primary: #38bdf8;
+  --primary-soft: rgba(56, 189, 248, 0.18);
+  --danger: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.sidebar {
+  overflow: auto;
+  padding: 1rem;
+  border-right: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.brand {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  color: #f8fafc;
+}
+
+.workspace {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+}
+
+.topbar {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.content {
+  overflow: auto;
+  padding: 1rem;
+}
+
+.panel-state {
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+  padding: 1rem;
+  border: 1px dashed #41526e;
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.panel-state-error {
+  border-color: var(--danger);
+}
+
+.small {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+code {
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+button {
+  width: fit-content;
+  border: 1px solid #4b5f80;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  background: #1e293b;
+  color: var(--text);
+  cursor: pointer;
+}
+
+button:hover {
+  background: #273449;
+}
+
+/* Improve dark look for built-in navigation components */
+.dynamia-nav-menu {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.dynamia-nav-module-header,
+.dynamia-nav-group-header {
+  color: #f1f5f9;
+}
+
+.dynamia-nav-group-header {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.dynamia-nav-pages {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dynamia-nav-page {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.125rem 0;
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.dynamia-nav-page:hover {
+  background: #1a2435;
+}
+
+.dynamia-nav-page-active {
+  background: var(--primary-soft);
+  color: #e0f2fe;
+}
+
+.dynamia-breadcrumb {
+  color: #cbd5e1;
+}
+
+.dynamia-breadcrumb-list {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dynamia-breadcrumb-separator {
+  color: var(--muted);
+}
+
+.dynamia-breadcrumb-page {
+  color: #e0f2fe;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CRUD PAGE / CRUD wrapper
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dynamia-crud-page,
+.dynamia-crud {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dynamia-crud-page-loading,
+.dynamia-crud-loading,
+.dynamia-crud-page-error {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.dynamia-crud-page-error {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.dynamia-crud-error {
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  font-size: 0.875rem;
+}
+
+.dynamia-crud-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TABLE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dynamia-table {
+  overflow-x: auto;
+}
+
+.dynamia-table-loading {
+  padding: 1rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.dynamia-table-grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.dynamia-table-header {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.dynamia-table-header:hover {
+  color: var(--text);
+}
+
+.dynamia-table-actions-header {
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+.dynamia-table-row {
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.dynamia-table-row:hover {
+  background: #1a2435;
+}
+
+.dynamia-table-row-selected {
+  background: var(--primary-soft) !important;
+}
+
+.dynamia-table-cell {
+  padding: 0.5rem 0.75rem;
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.dynamia-table-actions-cell {
+  padding: 0.35rem 0.75rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.dynamia-table-empty {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.dynamia-table-pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FORM
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dynamia-form {
+  width: 100%;
+}
+
+.dynamia-form-loading {
+  padding: 1rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* ── Field group ─────────────────────────────────────────────────────────── */
+.dynamia-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.dynamia-form-group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--primary);
+  padding: 0.4rem 0 0.45rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Grid (--columns is set inline by Form.vue) ──────────────────────────── */
+.dynamia-form-row {
+  display: grid;
+  grid-template-columns: repeat(var(--columns, 2), 1fr);
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.dynamia-form-cell {
+  min-width: 0;         /* prevent grid blowout */
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+/* ── Label ───────────────────────────────────────────────────────────────── */
+.dynamia-form-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.dynamia-required {
+  color: var(--danger);
+  margin-left: 0.15rem;
+}
+
+/* ── Inputs ──────────────────────────────────────────────────────────────── */
+.dynamia-form input[type='text'],
+.dynamia-form input[type='number'],
+.dynamia-form input[type='email'],
+.dynamia-form input[type='password'],
+.dynamia-form input[type='date'],
+.dynamia-form input[type='datetime-local'],
+.dynamia-form input[type='time'],
+.dynamia-form select,
+.dynamia-form textarea {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.dynamia-form input:focus,
+.dynamia-form select:focus,
+.dynamia-form textarea:focus {
+  border-color: var(--primary);
+}
+
+/* ── Validation error ────────────────────────────────────────────────────── */
+.dynamia-field-error {
+  font-size: 0.75rem;
+  color: var(--danger);
+}
+
+/* ── Actions bar ─────────────────────────────────────────────────────────── */
+.dynamia-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  justify-content: flex-end;
+}
+
+

@@ -18,12 +18,33 @@
 
 package tools.dynamia.modules.entityfile;
 
+import tools.dynamia.modules.entityfile.domain.EntityFile;
+
 /**
- *
- * @author Mario Serrano Leones
+ * Resolves tenant/account context for entity-file operations.
+ * Implementations provide the current account id and can validate whether
+ * a specific {@link EntityFile} belongs to a valid account scope.
  */
 public interface EntityFileAccountProvider {
 
+    /**
+     * Returns the current tenant account identifier.
+     *
+     * @return the current account id
+     */
     Long getAccountId();
+
+
+    /**
+     * Validates whether the given entity file has a usable account id.
+     * The default implementation checks that the entity file is not null,
+     * account id is not null, and account id is greater than zero.
+     *
+     * @param entityFile the entity file to validate
+     * @return {@code true} when the file has a valid account id
+     */
+    default boolean isValidEntityFile(EntityFile entityFile) {
+        return entityFile != null && entityFile.getAccountId() != null && entityFile.getAccountId() > 0;
+    }
 
 }

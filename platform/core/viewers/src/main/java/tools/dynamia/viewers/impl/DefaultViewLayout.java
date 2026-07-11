@@ -16,6 +16,7 @@
  */
 package tools.dynamia.viewers.impl;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import tools.dynamia.integration.sterotypes.Component;
 import tools.dynamia.viewers.ViewLayout;
 
@@ -29,19 +30,21 @@ import java.util.Map;
  * @author Mario A. Serrano Leones
  */
 @Component
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DefaultViewLayout implements ViewLayout {
 
     /**
      * The map.
      */
-    private final Map<String, Object> map = new HashMap<>();
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private final Map<String, Object> params = new HashMap<>();
 
     /* (non-Javadoc)
      * @see com.dynamia.tools.viewers.ViewLayout#getParams()
      */
     @Override
     public Map<String, Object> getParams() {
-        return map;
+        return params;
     }
 
     /* (non-Javadoc)
@@ -49,13 +52,13 @@ public class DefaultViewLayout implements ViewLayout {
      */
     @Override
     public void addParam(String name, Object value) {
-        map.put(name, value);
+        params.put(name, value);
     }
 
     @Override
     public void addParams(Map<String, Object> params) {
         if (params != null && !params.isEmpty()) {
-            map.putAll(params);
+            this.params.putAll(params);
         }
     }
 }

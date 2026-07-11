@@ -73,6 +73,8 @@ public class EmailMessage implements Serializable {
     private boolean notification;
     private String notificationUuid;
 
+    private Map<String, String> headers = new HashMap<>();
+
     /**
      * Represents an email message that can be sent.
      */
@@ -319,5 +321,17 @@ public class EmailMessage implements Serializable {
         all.addAll(getCcs());
         all.addAll(getBccs());
         return all;
+    }
+
+    public void addHeader(String name, String value) {
+        headers.put(name, value);
+    }
+
+    public String getHeader(String name) {
+        return headers.get(name);
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 }

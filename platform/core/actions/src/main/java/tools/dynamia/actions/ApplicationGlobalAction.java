@@ -29,7 +29,7 @@ package tools.dynamia.actions;
  * for implementing custom global actions.
  * </p>
  */
-public abstract class ApplicationGlobalAction extends AbstractAction {
+public abstract class ApplicationGlobalAction extends AbstractLocalAction {
 
     // No additional methods or fields. Subclasses should implement specific global actions.
 }

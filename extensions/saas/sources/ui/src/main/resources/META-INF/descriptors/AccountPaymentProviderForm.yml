@@ -14,9 +14,32 @@ fields:
   merchantId:
   apiKey:
   apiSecret:
+  webCheckoutSecret:
+    label: Webcheckout URL
+  integritySecret:
+
   serviceURL:
+    label: Service URL
   testMode:
   active:
 
+  extra0:
+    label: Extra 0
+  extra1:
+    label: Extra 1
+  extra2:
+    label: Extra 2
+  extra3:
+    label: Extra 3
+
+groups:
+  extraProperties:
+    label: Extra Properties
+    fields:
+      - extra0
+      - extra1
+      - extra2
+      - extra3
+
 layout:
-  columns: 1
+  columns: 2

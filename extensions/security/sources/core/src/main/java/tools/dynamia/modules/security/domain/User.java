@@ -16,8 +16,7 @@ package tools.dynamia.modules.security.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -37,6 +36,8 @@ import tools.dynamia.modules.entityfile.domain.EntityFile;
 import tools.dynamia.modules.saas.api.AccountAware;
 import tools.dynamia.modules.security.services.JWTService;
 import tools.dynamia.modules.security.services.UserService;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
 
 import java.time.Duration;
 import java.util.ArrayList;

@@ -20,7 +20,7 @@ package tools.dynamia.modules.email.ui.actions;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zkoss.zul.Messagebox;
-import tools.dynamia.actions.AbstractAction;
+import tools.dynamia.actions.AbstractLocalAction;
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionRenderer;
 import tools.dynamia.actions.InstallAction;
@@ -54,15 +54,16 @@ import static tools.dynamia.viewers.ViewDescriptorBuilder.viewDescriptor;
 @InstallAction
 public class TestEmailAccountAction extends AbstractCrudAction {
 
-    @Autowired
-    private EmailService service;
+    private final EmailService service;
 
-    public TestEmailAccountAction() {
+    public TestEmailAccountAction(EmailService service) {
         setName("Test Account");
         setDescription("Send a test message using this email account");
         setImage("mail");
         setMenuSupported(true);
+        setApplicableStates(CrudState.get(CrudState.READ, CrudState.CREATE, CrudState.UPDATE));
 
+        this.service = service;
     }
 
     @Override
@@ -109,7 +110,7 @@ public class TestEmailAccountAction extends AbstractCrudAction {
 
     }
 
-    private static class SendTestEmailAction extends AbstractAction {
+    private static class SendTestEmailAction extends AbstractLocalAction {
 
         private EmailService service;
 

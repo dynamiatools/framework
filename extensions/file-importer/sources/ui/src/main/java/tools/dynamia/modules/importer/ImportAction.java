@@ -19,6 +19,7 @@
 package tools.dynamia.modules.importer;
 
 import tools.dynamia.actions.AbstractAction;
+import tools.dynamia.actions.AbstractLocalAction;
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionRenderer;
 import tools.dynamia.integration.ProgressMonitor;
@@ -29,7 +30,7 @@ import tools.dynamia.zk.actions.ToolbarbuttonActionRenderer;
  *
  * @author Mario Serrano Leones
  */
-public abstract class ImportAction extends AbstractAction {
+public abstract class ImportAction extends AbstractLocalAction {
 
 	private ProgressMonitor monitor;
 	private boolean procesable = true;

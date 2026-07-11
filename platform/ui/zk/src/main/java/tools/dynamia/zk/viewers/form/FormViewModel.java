@@ -19,12 +19,24 @@
 package tools.dynamia.zk.viewers.form;
 
 /**
- * @author Mario A. Serrano Leones
+ * Defines the value contract for form view models.
+ *
+ * @param <T> the value type managed by the form model
  */
 public interface FormViewModel<T> {
 
+    /**
+     * Returns the current model value bound to the form.
+     *
+     * @return the current value
+     */
     T getValue();
 
+    /**
+     * Updates the model value bound to the form.
+     *
+     * @param value the new value to set
+     */
     void setValue(T value);
 
 

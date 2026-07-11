@@ -46,6 +46,7 @@ public class FieldGroup implements Serializable, Indexable, Cloneable {
     private int index;
     private boolean collapse;
 
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private final Map<String, Object> params = new HashMap<>();
 
     /**

@@ -26,17 +26,23 @@ import tools.dynamia.viewers.ViewRendererCustomizer;
 import java.util.List;
 
 /**
- * Util class for ViewRenderers implementation to call {@link ViewRendererCustomizer} methods
+ * Utility class for {@link tools.dynamia.viewers.ViewRenderer} implementations that provides
+ * convenience methods for invoking {@link ViewRendererCustomizer} callbacks at the appropriate
+ * points during the view rendering lifecycle (before render, after render, per-field render) and
+ * for filtering the set of renderable fields.
  */
 public class ViewRendererUtil {
 
     private ViewRendererUtil() {
-
     }
 
     /**
-     * Find first applicable {@link ViewRendererCustomizer}
+     * Finds the first {@link ViewRendererCustomizer} registered in the container that matches
+     * both the bean class and the view type declared in the given {@link ViewDescriptor}.
      *
+     * @param viewDescriptor the descriptor of the view being rendered; may be {@code null}
+     * @return the matching {@link ViewRendererCustomizer}, or {@code null} if none is found or
+     *         if {@code viewDescriptor} or its bean class is {@code null}
      */
     public static ViewRendererCustomizer findViewRendererCustomizer(ViewDescriptor viewDescriptor) {
         if (viewDescriptor == null || viewDescriptor.getBeanClass() == null) {
@@ -49,8 +55,12 @@ public class ViewRendererUtil {
     }
 
     /**
-     * Call this method before render a field, if return false dont render the field
+     * Determines whether a given field should be rendered. Call this method before rendering
+     * each field; if it returns {@code false}, skip rendering for that field.
      *
+     * @param descriptor the view descriptor that contains the field
+     * @param field      the field to evaluate
+     * @return {@code true} if the field should be rendered, {@code false} otherwise
      */
     public static boolean isFieldRenderable(ViewDescriptor descriptor, Field field) {
         ViewRendererCustomizer customizer = findViewRendererCustomizer(descriptor);
@@ -58,8 +68,12 @@ public class ViewRendererUtil {
     }
 
     /**
-     * Call this method after all the view is rendered
+     * Invokes the {@link ViewRendererCustomizer#afterRender(View)} callback after the entire view
+     * has been rendered. Any {@link ClassCastException} thrown by the customizer is silently ignored
+     * to handle generic type mismatches gracefully.
      *
+     * @param descriptor the view descriptor associated with the rendered view
+     * @param view       the fully rendered view instance
      */
     public static void afterRender(ViewDescriptor descriptor, View view) {
         ViewRendererCustomizer customizer = findViewRendererCustomizer(descriptor);
@@ -74,8 +88,12 @@ public class ViewRendererUtil {
     }
 
     /**
-     * Call this method before starting render view internals
+     * Invokes the {@link ViewRendererCustomizer#beforeRender(View)} callback before the view
+     * rendering process begins. Any {@link ClassCastException} thrown by the customizer is
+     * silently ignored to handle generic type mismatches gracefully.
      *
+     * @param descriptor the view descriptor associated with the view about to be rendered
+     * @param view       the view instance that is about to be rendered
      */
     public static void beforeRender(ViewDescriptor descriptor, View view) {
         ViewRendererCustomizer customizer = findViewRendererCustomizer(descriptor);
@@ -90,8 +108,12 @@ public class ViewRendererUtil {
     }
 
     /**
-     * Call this method for each field rendered
+     * Invokes the {@link ViewRendererCustomizer#afterFieldRender(Field, Object)} callback
+     * after a single field has been rendered, passing along the rendered UI component.
      *
+     * @param descriptor the view descriptor that owns the field
+     * @param field      the field that was just rendered
+     * @param component  the UI component produced by rendering the field
      */
     public static void afterFieldRender(ViewDescriptor descriptor, Field field, Object component) {
         ViewRendererCustomizer customizer = findViewRendererCustomizer(descriptor);

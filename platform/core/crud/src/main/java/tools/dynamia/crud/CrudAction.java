@@ -17,6 +17,7 @@
 package tools.dynamia.crud;
 
 import tools.dynamia.actions.ClassAction;
+import tools.dynamia.actions.LocalAction;
 
 /**
  * The Interface CrudAction. Represents actions that can be performed in CRUD operations.
@@ -29,25 +30,25 @@ import tools.dynamia.actions.ClassAction;
  * <br>
  * <code>
  * public class DeleteUserAction implements CrudAction {
- *     
- *     public CrudState[] getApplicableStates() {
- *         return new CrudState[]{CrudState.READ};
- *     }
- *     
- *     public boolean isMenuSupported() {
- *         return true;
- *     }
- *     
- *     public void actionPerformed(ActionEvent evt) {
- *         User user = (User) evt.getData();
- *         userService.delete(user);
- *     }
+ * <p>
+ * public CrudState[] getApplicableStates() {
+ * return new CrudState[]{CrudState.READ};
+ * }
+ * <p>
+ * public boolean isMenuSupported() {
+ * return true;
+ * }
+ * <p>
+ * public void actionPerformed(ActionEvent evt) {
+ * User user = (User) evt.getData();
+ * userService.delete(user);
+ * }
  * }
  * </code>
  *
  * @author Mario A. Serrano Leones
  */
-public interface CrudAction extends ClassAction {
+public interface CrudAction extends LocalAction, ClassAction {
 
     /**
      * Gets the states where this action is applicable.

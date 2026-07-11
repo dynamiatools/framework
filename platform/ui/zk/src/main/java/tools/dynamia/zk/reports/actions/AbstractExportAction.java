@@ -18,35 +18,27 @@ package tools.dynamia.zk.reports.actions;
 
 import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.TreeModel;
-import tools.dynamia.actions.AbstractAction;
-import tools.dynamia.actions.AbstractClassAction;
+import tools.dynamia.actions.AbstractLocalAction;
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionGroup;
 import tools.dynamia.actions.ReadableOnly;
-import tools.dynamia.commons.ApplicableClass;
 import tools.dynamia.commons.ClassMessages;
 import tools.dynamia.commons.Messages;
-import tools.dynamia.crud.AbstractCrudAction;
-import tools.dynamia.crud.CrudActionEvent;
-import tools.dynamia.crud.CrudState;
 import tools.dynamia.domain.query.DataSet;
 import tools.dynamia.reports.ReportOutputType;
 import tools.dynamia.reports.SimpleReportDescriptor;
 import tools.dynamia.ui.MessageType;
 import tools.dynamia.ui.UIMessages;
-import tools.dynamia.viewers.DataSetView;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.zk.crud.CrudController;
-import tools.dynamia.zk.crud.CrudView;
-import tools.dynamia.zk.crud.ui.EntityTreeModel;
 import tools.dynamia.zk.util.ZKUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
-public abstract class AbstractExportAction extends AbstractAction implements ReadableOnly {
+public abstract class AbstractExportAction extends AbstractLocalAction implements ReadableOnly {
 
     protected CrudController crudController;
     protected final int LARGE = 5000;

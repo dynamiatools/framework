@@ -17,6 +17,7 @@
 package tools.dynamia.viewers.impl;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import tools.dynamia.viewers.ViewLayout;
 
 
@@ -26,8 +27,9 @@ import tools.dynamia.viewers.ViewLayout;
  * @author Mario A. Serrano Leones
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({"id", "beanClass", "viewTypeName", "device", "autofields", "fields", "fieldGroups", "layout", "params"})
 @SuppressWarnings({"rawtypes"})
-public class DefaultViewDescriptor extends AbstractViewDescriptor{
+public class DefaultViewDescriptor extends AbstractViewDescriptor {
 
     /**
      * The layout.

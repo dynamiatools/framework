@@ -1,13 +1,21 @@
-
 [![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia/tools.dynamia.app)](https://search.maven.org/search?q=tools.dynamia)
 ![Java Version Required](https://img.shields.io/badge/java-25-blue)
 ![CalVer](https://img.shields.io/badge/versioning-CalVer%20YY.MM.MINOR-blue)
 [![Java CI with Maven](https://github.com/dynamiatools/framework/actions/workflows/maven.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/maven.yml)
 [![Release and Deploy](https://github.com/dynamiatools/framework/actions/workflows/release.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/release.yml)
+[![Publish NPM Packages](https://github.com/dynamiatools/framework/actions/workflows/publish-npm.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/publish-npm.yml)
 [![DynamiaTools Documentation](https://img.shields.io/badge/DynamiaTools-Documentation-orange)](https://dynamia.tools/getting-started/)
 
 
-<h1 align="center">Dynamia Platform</h1>
+
+
+<h1 align="center">
+<img src="https://raw.githubusercontent.com/dynamiatools/website/main/public/icon.png" alt="Dynamia Logo" width="150"/>
+
+Dynamia Platform
+</h1>
+
+
 
 > **The Next Generation of DynamiaTools**
 
@@ -15,16 +23,16 @@
 
 ### 📅 CalVer Versioning
 
-Starting with version **26.2.2**, Dynamia Platform adopts **Calendar Versioning (CalVer)** with the format `YY.MM.MINOR`. This means:
+Starting with version **26.2.0**, Dynamia Platform adopts **Calendar Versioning (CalVer)** with the format `YY.MM.MINOR`. This means:
 - **All modules share the same version**: Core, extensions, starters, themes—everything is released together
-- **26.2.2** = First release of February 2026 (Year 26, Month 02, Release 0)
+- **26.2.0** = First release of February 2026 (Year 26, Month 02, Release 0)
 - **26.2.1** = Second release of February 2026
 - **26.3.0** = First release of March 2026
 - **Unified releases** ensure compatibility and simplify dependency management
 - No more version mismatches between platform components!
 
 **Examples**:
-- `26.2.2` → February 2026, first release
+- `26.2.0` → February 2026, first release
 - `26.2.1` → February 2026, second release (hotfix or minor update)
 - `26.12.3` → December 2026, fourth release
 
@@ -42,7 +50,7 @@ Dynamia Platform represents a major evolution from DynamiaTools, bringing togeth
 
 By default, **Dynamia Platform automatically generates full-featured web interfaces** using **ZK Framework**, a powerful server-side component framework that eliminates the need to write JavaScript, HTML, or CSS manually. Simply define your entities and view descriptors, and ZK renders responsive, interactive UIs with zero frontend code.
 
-**Coming Soon**: In upcoming releases, Dynamia Platform will support **modern frontend frameworks** like **React**, **Vue**, and **Angular**, giving you the flexibility to choose your preferred technology stack while maintaining the same automatic generation capabilities. You'll be able to leverage our **TypeScript SDK** and pre-built components to build modern, decoupled SPAs that consume Dynamia's RESTful APIs.
+**Coming Soon**: In upcoming releases, Dynamia Platform will support additional **modern frontend frameworks** like **React** and **Angular**. **Vue 3** is already supported via [`@dynamia-tools/vue`](https://www.npmjs.com/package/@dynamia-tools/vue). You can leverage our **TypeScript SDK** and pre-built components to build modern, decoupled SPAs that consume Dynamia's RESTful APIs.
 
 ## ✨ Core Capabilities
 
@@ -77,19 +85,34 @@ We're actively working on making Dynamia Platform more accessible, flexible, and
 - Better search and navigation
 
 #### 📦 **TypeScript SDK**
-A complete TypeScript/JavaScript package ecosystem for frontend development:
-- **`@dynamia/client`** - Core client library for REST API interaction
-- **`@dynamia/types`** - TypeScript type definitions for all API responses
-- **`@dynamia/hooks`** - React hooks for common operations
-- **`@dynamia/composables`** - Vue composables for reactive integration
+A complete TypeScript/JavaScript package ecosystem for frontend development, available on npm:
+
+| Package | Description |
+|---|---|
+| **[`@dynamia-tools/sdk`](https://www.npmjs.com/package/@dynamia-tools/sdk)** | Core client library for REST API interaction |
+| **[`@dynamia-tools/ui-core`](https://www.npmjs.com/package/@dynamia-tools/ui-core)** | Framework-agnostic view/viewer/renderer core |
+| **[`@dynamia-tools/vue`](https://www.npmjs.com/package/@dynamia-tools/vue)** | Vue 3 composables and components for reactive integration |
+| **[`@dynamia-tools/cli`](https://www.npmjs.com/package/@dynamia-tools/cli)** | CLI tool for scaffolding Dynamia Platform projects |
+
+```bash
+# Install the core SDK
+npm install @dynamia-tools/sdk
+
+# Install the Vue adapter
+npm install @dynamia-tools/vue
+
+# Install the CLI globally
+npm install -g @dynamia-tools/cli
+```
+
 - Full type safety and IntelliSense support
 - Automatic API client generation from backend schema
 - WebSocket support for real-time features
 
-#### 🎨 **Vue Template**
-Modern frontend template with:
+#### 🎨 **Vue Integration** ✅ Available
+Modern Vue 3 frontend integration with:
 - Vue 3 + TypeScript + Vite
-- Pre-configured integration with Dynamia Platform APIs
+- Pre-configured integration with Dynamia Platform APIs via `@dynamia-tools/vue`
 - Responsive design with Tailwind CSS
 - Authentication and authorization out of the box
 - CRUD components library
@@ -109,7 +132,7 @@ Seamless integration with popular frameworks:
 - Built-in authentication flows
 
 #### ⚡ **Automation & Developer Experience**
-- CLI tool for scaffolding projects and modules
+- **[`@dynamia-tools/cli`](https://www.npmjs.com/package/@dynamia-tools/cli)** ✅ CLI tool for scaffolding projects and modules
 - Code generators for entities, views, and endpoints
 - Hot reload for view descriptors
 - Development dashboard for monitoring
@@ -146,13 +169,16 @@ Full-featured SaaS support with:
 - Payment and subscription handling
 - Per-tenant data segregation
 - Status monitoring and control
+- 📦 **npm:** [`@dynamia-tools/saas-sdk`](https://www.npmjs.com/package/@dynamia-tools/saas-sdk) — TypeScript/JavaScript client SDK for the SaaS REST API
 
 ### **Entity File Management**
 Attach files to any entity with:
 - Local disk storage
 - **AWS S3 integration** for cloud storage
+- **[Buckie](https://dynamia.tools/buckie/) integration** — the lightweight, filesystem-native file server built by Dynamia (see [GitHub](https://github.com/dynamiatools/buckie) · [npm `@dynamia-tools/buckie`](https://www.npmjs.com/package/@dynamia-tools/buckie))
 - Metadata persistence
 - Automatic file handling
+- 📦 **npm:** [`@dynamia-tools/files-sdk`](https://www.npmjs.com/package/@dynamia-tools/files-sdk) — TypeScript/JavaScript client SDK for the Entity Files REST API
 
 ### **Email & SMS**
 Professional communication capabilities:
@@ -177,6 +203,7 @@ Comprehensive reporting framework:
 - Email delivery
 - Chart visualization
 - Embeddable reports
+- 📦 **npm:** [`@dynamia-tools/reports-sdk`](https://www.npmjs.com/package/@dynamia-tools/reports-sdk) — TypeScript/JavaScript client SDK for the Reports REST API
 
 ### **Finance Framework**
 Domain-driven financial calculations for:
@@ -229,19 +256,19 @@ Enterprise authentication and authorization:
        <dependency>
            <groupId>tools.dynamia</groupId>
            <artifactId>tools.dynamia.app</artifactId>
-           <version>26.2.2</version>
+           <version>26.5.2</version>
        </dependency>
    
        <dependency>
            <groupId>tools.dynamia</groupId>
            <artifactId>tools.dynamia.zk</artifactId>
-           <version>26.2.2</version>
+           <version>26.5.2</version>
        </dependency>
    
        <dependency>
            <groupId>tools.dynamia</groupId>
            <artifactId>tools.dynamia.domain.jpa</artifactId>
-           <version>26.2.2</version>
+           <version>26.5.2</version>
        </dependency>
    </dependencies>
    ```
@@ -249,9 +276,9 @@ Enterprise authentication and authorization:
    **Gradle** (`build.gradle`)
    ```groovy
    dependencies {
-       implementation 'tools.dynamia:tools.dynamia.app:26.2.2'
-       implementation 'tools.dynamia:tools.dynamia.zk:26.2.2'
-       implementation 'tools.dynamia:tools.dynamia.domain.jpa:26.2.2'
+       implementation 'tools.dynamia:tools.dynamia.app:26.5.2'
+       implementation 'tools.dynamia:tools.dynamia.zk:26.5.2'
+       implementation 'tools.dynamia:tools.dynamia.domain.jpa:26.5.2'
    }
    ```
 
@@ -290,67 +317,83 @@ Enterprise authentication and authorization:
 
 ### Adding Extensions
 
-To use any of the built-in extensions, simply add their dependencies. **All extensions now share the same version (26.2.2)** thanks to unified CalVer:
+To use any of the built-in extensions, simply add their dependencies. **All extensions now share the same version (26.5.2)** thanks to unified CalVer:
 
 ```xml
 <!-- Multi-tenancy / SaaS -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.saas</artifactId>
-    <version>26.2.2</version>
+    <version>26.5.2</version>
 </dependency>
 
 <!-- Email & SMS -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.email</artifactId>
-    <version>26.2.2</version>
+    <version>26.5.2</version>
 </dependency>
 
 <!-- Entity Files with S3 Support -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.entityfiles</artifactId>
-    <version>26.2.2</version>
+    <version>26.5.2</version>
 </dependency>
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.entityfiles.s3</artifactId>
-    <version>26.2.2</version>
+    <version>26.5.2</version>
 </dependency>
 
 <!-- Dashboard -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.dashboard</artifactId>
-    <version>26.2.2</version>
+    <version>26.5.2</version>
 </dependency>
 
 <!-- Reporting -->
 <dependency>
     <groupId>tools.dynamia.reports</groupId>
     <artifactId>tools.dynamia.reports.core</artifactId>
-    <version>26.2.2</version>
+    <version>26.5.2</version>
 </dependency>
 
 <!-- File Importer -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.fileimporter</artifactId>
-    <version>26.2.2</version>
+    <version>26.5.2</version>
 </dependency>
 
 <!-- Security -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.security</artifactId>
-    <version>26.2.2</version>
+    <version>26.5.2</version>
 </dependency>
 ```
 
-> **💡 Pro Tip**: With CalVer, all Dynamia Platform components use the same version. Just use `26.2.2` for everything!
+For extensions that expose a REST API, install their **TypeScript/JavaScript SDK** from npm:
 
-> **Note**: All artifacts are available on [Maven Central](https://search.maven.org/search?q=tools.dynamia)
+```bash
+# Multi-tenancy / SaaS SDK
+npm install @dynamia-tools/saas-sdk
+
+# Entity Files SDK (works with local, S3 and Buckie storage)
+npm install @dynamia-tools/files-sdk
+
+# Reporting SDK
+npm install @dynamia-tools/reports-sdk
+
+# Buckie file server (standalone or as Dynamia storage backend)
+npm install @dynamia-tools/buckie
+```
+
+> **💡 Pro Tip**: With CalVer, all Dynamia Platform components use the same version. Just use `26.5.2` for everything!
+
+> **Note**: All artifacts are available on [Maven Central](https://search.maven.org/search?q=tools.dynamia) and npm packages on [npmjs.com](https://www.npmjs.com/search?q=%40dynamia-tools)
 
 ## 📚 Documentation
 
@@ -471,7 +514,7 @@ Java 11+ and ecosystem update:
 - 🚀 **Spring Boot 4** - Next-gen Spring ecosystem
 - 🎨 **ZK 10+** - Modern web UI capabilities
 - 🔄 **Synchronized Releases** - Core, extensions, starters, and themes share the same version
-- 🎯 **Simplified Dependencies** - One version to rule them all (e.g., 26.2.2 for February 2026)
+- 🎯 **Simplified Dependencies** - One version to rule them all (e.g., 26.5.2 for February 2026)
 - ⚡ **Enhanced Performance** - Optimized for modern JVM and cloud environments
 - 🛡️ **Production Hardened** - Battle-tested in enterprise environments
 

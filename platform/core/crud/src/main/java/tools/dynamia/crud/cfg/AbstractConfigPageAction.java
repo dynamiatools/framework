@@ -16,9 +16,9 @@
  */
 package tools.dynamia.crud.cfg;
 
-import tools.dynamia.actions.AbstractAction;
+import tools.dynamia.actions.AbstractLocalAction;
 
-public abstract class AbstractConfigPageAction extends AbstractAction {
+public abstract class AbstractConfigPageAction extends AbstractLocalAction {
 
     private String applicableConfig;
 

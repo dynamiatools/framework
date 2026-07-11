@@ -19,31 +19,46 @@ package tools.dynamia.viewers;
 import java.io.Serializable;
 import java.util.Map;
 
-
 /**
- * Interface for managing layout parameters of a view.
+ * Defines the layout configuration of a {@link ViewDescriptor}.
+ *
+ * <p>A {@code ViewLayout} holds a set of named parameters that control how a view is arranged
+ * visually (e.g., number of columns, spacing, orientation). These parameters are interpreted by
+ * the concrete {@link ViewRenderer} when building the UI component.</p>
+ *
+ * <p>Parameters can be set individually via {@link #addParam(String, Object)} or in bulk via
+ * {@link #addParams(Map)}, and are retrieved collectively through {@link #getParams()}.</p>
+ *
+ * @see ViewDescriptor
+ * @see ViewRenderer
  */
 public interface ViewLayout extends Serializable {
 
     /**
-     * Gets the layout parameters.
+     * Returns all layout parameters as an unmodifiable (or live) map.
      *
-     * @return the parameters map
+     * <p>Keys are parameter names (e.g., {@code "columns"}, {@code "orientation"}) and values
+     * are the corresponding configuration objects.</p>
+     *
+     * @return a non-null map of layout parameters; may be empty
      */
     Map<String, Object> getParams();
 
     /**
-     * Adds a single parameter to the layout.
+     * Adds or replaces a single layout parameter.
      *
-     * @param name the parameter name
-     * @param value the parameter value
+     * @param name  the parameter name; must not be {@code null}
+     * @param value the parameter value; may be {@code null} to clear the parameter
      */
     void addParam(String name, Object value);
 
     /**
-     * Adds multiple parameters to the layout.
+     * Adds or replaces multiple layout parameters in a single call.
      *
-     * @param params the parameters map
+     * <p>Entries in the provided map are merged into the existing parameters, overwriting any
+     * previously set values for the same keys.</p>
+     *
+     * @param params a map of parameter names to values; must not be {@code null}
      */
     void addParams(Map<String, Object> params);
 }

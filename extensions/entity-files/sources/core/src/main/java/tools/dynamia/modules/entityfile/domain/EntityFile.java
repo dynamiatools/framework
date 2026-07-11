@@ -19,15 +19,18 @@ package tools.dynamia.modules.entityfile.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.BatchSize;
+import org.springframework.core.io.Resource;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.commons.URLable;
 import tools.dynamia.domain.contraints.NotEmpty;
 import tools.dynamia.domain.jpa.BaseEntity;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.io.IOUtils;
+import tools.dynamia.modules.entityfile.EntityFileCache;
 import tools.dynamia.modules.entityfile.StoredEntityFile;
 import tools.dynamia.modules.entityfile.domain.enums.EntityFileState;
 import tools.dynamia.modules.entityfile.enums.EntityFileType;
+import tools.dynamia.modules.entityfile.local.LocalEntityFileStorage;
 import tools.dynamia.modules.entityfile.service.EntityFileService;
 
 import jakarta.persistence.*;
@@ -37,7 +40,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "mod_entity_files", indexes = {
-        @Index(name = "idx_uuid", columnList = "uuid")
+        @Index(name = "idx_uuid", columnList = "uuid"),
+        @Index(name = "idx_accountId", columnList = "accountId"),
+        @Index(name = "idx_target_entity", columnList = "targetEntity,targetEntityId"),
+        @Index(name = "idx_subfolder", columnList = "subfolder")
+
 })
 @BatchSize(size = 80)
 public class EntityFile extends BaseEntity implements URLable {
@@ -55,7 +62,7 @@ public class EntityFile extends BaseEntity implements URLable {
     private EntityFileType type;
     private String extension = "dir";
     private String contentType;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     private EntityFile parent;
     private boolean shared;
@@ -68,15 +75,17 @@ public class EntityFile extends BaseEntity implements URLable {
     private EntityFileState state;
     @NotEmpty
     private String uuid = StringUtils.randomString();
-    @Column(length = 1000)
+    @Column(name = "storageInfo", length = 1000)
     private String storageInfo;
 
+    @Column(name = "subfolder")
     private String subfolder;
     private String storedFileName;
 
     @Column(length = 500)
     private String remoteURL;
 
+    @Column(name = "accountId")
     private Long accountId;
     private String externalRef;
 
@@ -263,7 +272,7 @@ public class EntityFile extends BaseEntity implements URLable {
     public StoredEntityFile getStoredEntityFile() {
         EntityFileService service = Containers.get().findObject(EntityFileService.class);
         if (service == null) {
-            throw new NullPointerException("No EntityService was found to download Entity File");
+            return null;
         }
         return service.download(this);
     }
@@ -273,7 +282,28 @@ public class EntityFile extends BaseEntity implements URLable {
         if (remoteURL != null && !remoteURL.isBlank()) {
             return remoteURL;
         }
-        return getStoredEntityFile().getUrl();
+        LocalEntityFileStorage storage = Containers.get().findObject(LocalEntityFileStorage.class);
+        return storage.generateURL(this);
+    }
+
+    public String toThumbnailURL(int w, int h) {
+        String url = toURL();
+        return url + "?w=" + w + "&h=" + h;
+    }
+
+    @Transient
+    public String getUrl() {
+        return toURL();
+    }
+
+    @Transient
+    public String getThumbnailUrl() {
+        return toThumbnailURL(200, 200);
+    }
+
+    @Transient
+    public String getThumbnailUrl(int w, int h) {
+        return toThumbnailURL(w, h);
     }
 
     public String getExternalRef() {
@@ -309,4 +339,31 @@ public class EntityFile extends BaseEntity implements URLable {
     public void setUploading(boolean uploading) {
         this.uploading = uploading;
     }
+
+    public String etag() {
+        return "v" + currentVersion();
+    }
+
+    /**
+     * Load entity file resource using {@link EntityFileCache}. If the file is not in cache, it will be downloaded and stored in cache.
+     * Returns null if the file is not available for download or cache is not present.
+     *
+     * @return entity resource of null if not available
+     */
+    public Resource loadResourceFromCache() {
+        EntityFileCache cache = Containers.get().findObject(EntityFileCache.class);
+        if (cache == null || getUuid() == null) {
+            return null;
+        }
+        return cache.get(getUuid(), etag())
+                .orElseGet(() -> {
+                    StoredEntityFile storedFile = getStoredEntityFile();
+                    if (storedFile != null) {
+                        return cache.put(getUuid(), etag(), storedFile.toResource());
+                    } else {
+                        return null;
+                    }
+                });
+    }
+
 }

@@ -16,413 +16,213 @@
  */
 package tools.dynamia.web.navigation;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import tools.dynamia.commons.ObjectOperations;
-import tools.dynamia.commons.StringPojoParser;
-import tools.dynamia.commons.collect.PagedList;
-import tools.dynamia.commons.logger.AbstractLoggable;
-import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.crud.CrudPage;
 import tools.dynamia.domain.query.DataPaginator;
-import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.navigation.ModuleContainer;
-import tools.dynamia.navigation.NavigationRestrictions;
-import tools.dynamia.navigation.Page;
-import tools.dynamia.navigation.PageNotFoundException;
-import tools.dynamia.viewers.Field;
-import tools.dynamia.viewers.JsonView;
-import tools.dynamia.viewers.JsonViewDescriptorDeserializer;
 import tools.dynamia.viewers.ViewDescriptor;
-import tools.dynamia.viewers.util.Viewers;
+import tools.dynamia.web.navigation.RestNavigationContext.ListResult;
+import tools.dynamia.web.navigation.RestNavigationContext.SimpleResult;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 /**
- * Controller responsible for handling RESTful API requests related to CRUD operations on entities defined in the application. It provides endpoints for reading, creating, updating, and deleting entities based on the paths defined in the application's navigation structure. The controller utilizes the CrudService to perform database operations and returns JSON responses with the appropriate data and metadata for each request. It also handles pagination and query parameters for listing entities, as well as access restrictions based on the navigation configuration.
+ * REST controller that handles CRUD operations on entities exposed through the application's
+ * navigation structure. Each entity's path is derived from its corresponding {@link CrudPage}
+ * definition, and this controller maps HTTP requests to the appropriate persistence operations
+ * via {@link CrudService}.
+ *
+ * <p>This class acts as a <em>thin delegator</em>: all logic is implemented in focused
+ * operation classes and shared utilities:</p>
+ * <ul>
+ *   <li>{@link RestNavigationContext} — shared state, descriptor lookup, response builders</li>
+ *   <li>{@link RestNavigationQuerySupport} — filters, sorting, pagination helpers</li>
+ *   <li>{@link RestNavigationReadOperation} — GET (list) and GET (single)</li>
+ *   <li>{@link RestNavigationCreateOperation} — POST</li>
+ *   <li>{@link RestNavigationUpdateOperation} — PUT</li>
+ *   <li>{@link RestNavigationDeleteOperation} — DELETE</li>
+ * </ul>
+ *
+ * <p>All public {@code static} methods are preserved for backward compatibility with external
+ * callers (e.g., {@link RestApiNavigationConfiguration}, custom REST customizers).</p>
  *
  * @author Mario A. Serrano Leones
  */
 @RestController("restNavigationController")
 @Order(1000)
-public class RestNavigationController extends AbstractLoggable {
+public class RestNavigationController {
 
+    private final RestNavigationContext ctx;
+    private final RestNavigationReadOperation readOp;
+    private final RestNavigationCreateOperation createOp;
+    private final RestNavigationUpdateOperation updateOp;
+    private final RestNavigationDeleteOperation deleteOp;
 
-    private final static int DEFAULT_PAGINATION_SIZE = 50;
-    private static final String JSON_FORM = "json-form";
-    private static final String JSON = "json";
-    private static final String FORM = "form";
-
-
-    private final ModuleContainer moduleContainer;
-    private final CrudService crudService;
-
+    /**
+     * Constructs a new {@code RestNavigationController} and initialises all operation delegates.
+     *
+     * @param moduleContainer the container used to resolve navigation pages by path
+     * @param crudService     the service used to perform CRUD operations on entities
+     */
     public RestNavigationController(ModuleContainer moduleContainer, CrudService crudService) {
-        this.moduleContainer = moduleContainer;
-        this.crudService = crudService;
+        this.ctx = new RestNavigationContext(moduleContainer, crudService);
+        this.readOp = new RestNavigationReadOperation(ctx);
+        this.createOp = new RestNavigationCreateOperation(ctx);
+        this.updateOp = new RestNavigationUpdateOperation(ctx);
+        this.deleteOp = new RestNavigationDeleteOperation(ctx);
     }
 
-    private String getPath(HttpServletRequest request) {
-        var path = request.getRequestURI();
-        if (path.startsWith("/api/")) {
-            path = path.replaceFirst("/api/", "");
-        }
-        return path;
-    }
+    // -------------------------------------------------------------------------
+    // Route entry points
+    // -------------------------------------------------------------------------
 
-
+    /**
+     * Entry point for reading all entities at the resolved path.
+     *
+     * @param request the current HTTP request
+     * @return a JSON response containing the paginated entity list
+     */
     public ResponseEntity<String> routeReadAll(HttpServletRequest request) {
-        String path = getPath(request);
-        return readAll(path, request);
+        return readOp.readAll(ctx.getPath(request), request);
     }
 
+    /**
+     * Entry point for reading a single entity by its ID.
+     *
+     * @param id      the entity identifier
+     * @param request the current HTTP request
+     * @return a JSON response containing the requested entity
+     */
     public ResponseEntity<String> routeReadOne(@PathVariable Long id, HttpServletRequest request) {
-        return readOne(getPath(request).replace("/" + id, ""), id, request);
+        return readOp.readOne(ctx.getPath(request).replace("/" + id, ""), id, request);
     }
 
-
+    /**
+     * Entry point for creating a new entity from the supplied JSON body.
+     *
+     * @param jsonData the JSON representation of the entity to create
+     * @param request  the current HTTP request
+     * @return a JSON response containing the persisted entity
+     */
     public ResponseEntity<String> routeCreate(@RequestBody String jsonData, HttpServletRequest request) {
-        String path = getPath(request);
-        return create(path, jsonData, request);
-
+        return createOp.create(ctx.getPath(request), jsonData, request);
     }
 
+    /**
+     * Entry point for updating an existing entity identified by {@code id}.
+     *
+     * @param id       the entity identifier
+     * @param jsonData the JSON patch data with updated field values
+     * @param request  the current HTTP request
+     * @return a JSON response containing the updated entity
+     */
     public ResponseEntity<String> routeUpdate(@PathVariable Long id, @RequestBody String jsonData, HttpServletRequest request) {
-        String path = getPath(request).replace("/" + id, "");
-        return update(path, id, jsonData, request);
+        return updateOp.update(ctx.getPath(request).replace("/" + id, ""), id, jsonData, request);
     }
 
+    /**
+     * Entry point for deleting an entity identified by {@code id}.
+     *
+     * @param id      the entity identifier
+     * @param request the current HTTP request
+     * @return a JSON response containing the deleted entity's last known state
+     */
     public ResponseEntity<String> routeDelete(@PathVariable Long id, HttpServletRequest request) {
-        String path = getPath(request).replace("/" + id, "");
-        return delete(path, id, request);
-
+        return deleteOp.delete(ctx.getPath(request).replace("/" + id, ""), id, request);
     }
 
+    // -------------------------------------------------------------------------
+    // Public static API — preserved for backward compatibility
+    // -------------------------------------------------------------------------
 
-    //INTERNAL OPERATIONS
-
-    private ResponseEntity<String> readAll(String path, HttpServletRequest request) {
-
-        CrudPage page = findCrudPage(path);
-        Class entityClass = page.getEntityClass();
-
-        ViewDescriptor readDescriptor = getJsonTableDescriptor(entityClass);
-        ResponseEntity<String> metadata = getMetadata(request, readDescriptor);
-        if (metadata != null) {
-            return metadata;
-        }
-
-        QueryBuilder query = QueryBuilder.select().from(entityClass, "e");
-        if (page.getAttribute("queryParameters") != null) {
-            QueryParameters pageParams = (QueryParameters) page.getAttribute("queryParameters");
-            query.where(pageParams);
-        }
-        parseConditions(query, readDescriptor);
-
-        int pageSize = getParameterNumber(request, "size");
-        int currentPage = getParameterNumber(request, "page");
-        if (pageSize == 0) {
-            pageSize = DEFAULT_PAGINATION_SIZE;
-        }
-        if (pageSize > 0) {
-            query.getQueryParameters().paginate(pageSize);
-        }
-
-
-        List content = crudService.executeQuery(query);
-        var paginator = query.getQueryParameters().getPaginator();
-        if (paginator != null) {
-            paginator.setPage(currentPage);
-        }
-
-        ListResult result = buildListResult(content, paginator, currentPage);
-
-
-        return buildJsonResponse(readDescriptor, result, "OK");
-    }
-
-    public static ListResult buildListResult(List content, DataPaginator paginator, int currenPage) {
-        ListResult result = new ListResult();
-        if (content instanceof PagedList pagedList && paginator != null) {
-            if (currenPage > 0) {
-                pagedList.getDataSource().setActivePage(currenPage);
-
-            }
-            result.setData(pagedList.getDataSource().getPageData());
-            result.setPageable(paginator);
-        } else {
-            result.setData(content);
-        }
-        result.setResponse("OK");
-        return result;
-    }
-
-
-    private ResponseEntity<String> readOne(String path, Long id, HttpServletRequest request) {
-
-        CrudPage page = findCrudPage(path);
-        Class entityClass = page.getEntityClass();
-
-        ViewDescriptor readDescriptor = getJsonFormDescriptor(entityClass);
-        ResponseEntity<String> metadata = getMetadata(request, readDescriptor);
-        if (metadata != null) {
-            return metadata;
-        }
-
-        @SuppressWarnings("unchecked") Object result = crudService.find(entityClass, id);
-        if (result == null) {
-            return new ResponseEntity<>("Entity " + entityClass.getSimpleName() + " with id " + id + " not found\n", HttpStatus.NOT_FOUND);
-        }
-
-        return buildJsonResponse(readDescriptor, result, "OK");
-    }
-
+    /**
+     * @see RestNavigationContext#buildJsonResponse(Object)
+     */
     public static ResponseEntity<String> buildJsonResponse(Object result) {
-        var descriptor = getJsonFormDescriptor(result.getClass());
-        return buildJsonResponse(descriptor, result, "ok");
+        return RestNavigationContext.buildJsonResponse(result);
     }
 
-    public static ResponseEntity<String> buildJsonResponse(ViewDescriptor readDescriptor, Object result, String message) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        SimpleResult resultWrapper = new SimpleResult(result, message);
-
-        if (readDescriptor != null) {
-            return new ResponseEntity<>(new JsonView<>(resultWrapper, readDescriptor).renderJson(), headers, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(StringPojoParser.convertPojoToJson(result), headers, HttpStatus.OK);
-        }
+    /**
+     * @see RestNavigationContext#buildJsonResponse(ViewDescriptor, Object, String)
+     */
+    public static ResponseEntity<String> buildJsonResponse(ViewDescriptor descriptor, Object result, String message) {
+        return RestNavigationContext.buildJsonResponse(descriptor, result, message);
     }
 
-    public static ResponseEntity<String> buildJsonResponse(ViewDescriptor readDescriptor, ListResult result, String message) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        if (readDescriptor != null) {
-            return new ResponseEntity<>(new JsonView<>(result, readDescriptor).renderJson(), headers, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(StringPojoParser.convertPojoToJson(result), headers, HttpStatus.OK);
-        }
+    /**
+     * @see RestNavigationContext#buildJsonResponse(ViewDescriptor, ListResult, String)
+     */
+    public static ResponseEntity<String> buildJsonResponse(ViewDescriptor descriptor, ListResult result, String message) {
+        return RestNavigationContext.buildJsonResponse(descriptor, result, message);
     }
 
+    /**
+     * @see RestNavigationContext#getJsonFormDescriptor(Class)
+     */
     public static ViewDescriptor getJsonFormDescriptor(Class entityClass) {
-        return getJsonFormDescriptor(entityClass, false);
+        return RestNavigationContext.getJsonFormDescriptor(entityClass);
     }
 
+    /**
+     * @see RestNavigationContext#getJsonFormDescriptor(Class, boolean)
+     */
     public static ViewDescriptor getJsonFormDescriptor(Class entityClass, boolean autocreate) {
-        ViewDescriptor readDescriptor = Viewers.findViewDescriptor(entityClass, JSON_FORM);
-
-        if (readDescriptor == null) {
-            readDescriptor = Viewers.findViewDescriptor(entityClass, JSON);
-        }
-
-        if (readDescriptor == null) {
-            readDescriptor = Viewers.findViewDescriptor(entityClass, FORM);
-        }
-
-        if (readDescriptor == null && autocreate) {
-            readDescriptor = Viewers.getViewDescriptor(entityClass, FORM);
-        }
-        return readDescriptor;
+        return RestNavigationContext.getJsonFormDescriptor(entityClass, autocreate);
     }
 
+    /**
+     * @see RestNavigationContext#getJsonTableDescriptor(Class)
+     */
     public static ViewDescriptor getJsonTableDescriptor(Class entityClass) {
-        ViewDescriptor readDescriptor = Viewers.findViewDescriptor(entityClass, JSON);
-        if (readDescriptor == null) {
-            readDescriptor = Viewers.findViewDescriptor(entityClass, "tree");
-        }
-
-        if (readDescriptor == null) {
-            readDescriptor = Viewers.findViewDescriptor(entityClass, "table");
-        }
-        return readDescriptor;
+        return RestNavigationContext.getJsonTableDescriptor(entityClass);
     }
 
-
-    private ResponseEntity<String> create(String path, String jsonData, HttpServletRequest request) {
-
-        CrudPage page = findCrudPage(path);
-        Class entityClass = page.getEntityClass();
-
-
-        ViewDescriptor descriptor = getJsonFormDescriptor(entityClass, true);
-        JsonView jsonView = new JsonView(descriptor);
-        jsonView.parse(jsonData);
-        Object newEntity = jsonView.getValue();
-        newEntity = crudService.create(newEntity);
-
-        return buildJsonResponse(descriptor, newEntity, "Created Successfully");
+    /**
+     * @see RestNavigationReadOperation#buildListResult(List, DataPaginator, int)
+     */
+    public static ListResult buildListResult(List content, DataPaginator paginator, int currentPage) {
+        return RestNavigationReadOperation.buildListResult(content, paginator, currentPage);
     }
 
-    private ResponseEntity<String> update(String path, Long id, String jsonData, HttpServletRequest request) {
-
-        CrudPage page = findCrudPage(path);
-        Class entityClass = page.getEntityClass();
-
-        @SuppressWarnings("unchecked") final Object entity = crudService.find(entityClass, id);
-        if (entity == null) {
-            return new ResponseEntity<>("Entity " + entityClass.getSimpleName() + " with id " + id + " not found", HttpStatus.NOT_FOUND);
-        }
-        ViewDescriptor descriptor = getJsonFormDescriptor(entityClass, true);
-
-        var mapper = StringPojoParser.createJsonMapper();
-        try {
-            final ViewDescriptor desc = descriptor;
-            JsonNode node = mapper.readTree(jsonData);
-            System.out.println("TYPE: " + node.getNodeType());
-            node.properties().forEach(entry -> {
-                Field field = desc.getField(entry.getKey());
-                if (field != null) {
-                    Object fieldValue = JsonViewDescriptorDeserializer.getNodeValue(field.getPropertyInfo(), entry.getValue());
-                    ObjectOperations.invokeSetMethod(entity, field.getPropertyInfo(), fieldValue);
-                }
-            });
-        } catch (IOException e) {
-            log("Error updating entity", e);
-        }
-
-
-        Object updatedEntity = crudService.update(entity);
-        return buildJsonResponse(descriptor, updatedEntity, "Updated Successfully");
-    }
-
-    private ResponseEntity<String> delete(String path, Long id, HttpServletRequest request) {
-
-        CrudPage page = findCrudPage(path);
-        Class entityClass = page.getEntityClass();
-
-        Object result = crudService.find(entityClass, id);
-        if (result == null) {
-            return new ResponseEntity<>("Entity " + entityClass.getSimpleName() + " with id " + id + " not found\n", HttpStatus.NOT_FOUND);
-        }
-        crudService.delete(entityClass, id);
-
-        ViewDescriptor readDescriptor = getJsonFormDescriptor(entityClass);
-        return buildJsonResponse(readDescriptor, result, "Deleted Successfully");
-    }
-
-
+    /**
+     * @see RestNavigationQuerySupport#parseConditions(QueryBuilder, ViewDescriptor)
+     */
     public static void parseConditions(QueryBuilder query, ViewDescriptor descriptor) {
-        try {
-            if (descriptor.getParams().containsKey("conditions")) {
-                @SuppressWarnings("unchecked") Map<String, String> conditions = (Map<String, String>) descriptor.getParams().get("conditions");
-                conditions.forEach((k, v) -> query.and(v));
-            }
-        } catch (Exception ignored) {
-            LoggingService.get(RestNavigationController.class).error("Error parsing conditions", ignored);
-        }
+        RestNavigationQuerySupport.parseConditions(query, descriptor);
     }
 
+    /**
+     * @see RestNavigationQuerySupport#applyRequestFilters(HttpServletRequest, QueryBuilder, ViewDescriptor)
+     */
+    public static void applyRequestFilters(HttpServletRequest request, QueryBuilder query, ViewDescriptor descriptor) {
+        RestNavigationQuerySupport.applyRequestFilters(request, query, descriptor);
+    }
+
+    /**
+     * @see RestNavigationQuerySupport#applyRequestSorting(HttpServletRequest, QueryBuilder, ViewDescriptor)
+     */
+    public static void applyRequestSorting(HttpServletRequest request, QueryBuilder query, ViewDescriptor descriptor) {
+        RestNavigationQuerySupport.applyRequestSorting(request, query, descriptor);
+    }
+
+    /**
+     * @see RestNavigationQuerySupport#getParameterNumber(HttpServletRequest, String)
+     */
     public static int getParameterNumber(HttpServletRequest request, String name) {
-        int param = 0;
-        if (request.getParameter(name) != null) {
-            try {
-                param = Integer.parseInt(request.getParameter(name));
-            } catch (NumberFormatException ignored) {
-
-            }
-        }
-        return param;
+        return RestNavigationQuerySupport.getParameterNumber(request, name);
     }
 
+    /**
+     * @see RestNavigationContext#getMetadata(HttpServletRequest, ViewDescriptor)
+     */
     public static ResponseEntity<String> getMetadata(HttpServletRequest request, ViewDescriptor viewDescriptor) {
-        if (viewDescriptor != null && request.getParameter("_metadata") != null) {
-            var mapper = StringPojoParser.createJsonMapper();
-
-            try {
-                return new ResponseEntity<>(mapper.writeValueAsString(viewDescriptor), HttpStatus.OK);
-            } catch (JsonProcessingException e) {
-                return new ResponseEntity<>("ERROR: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
-        return null;
+        return RestNavigationContext.getMetadata(request, viewDescriptor);
     }
-
-
-    private CrudPage findCrudPage(String path) {
-
-        Page page = null;
-        try {
-            page = moduleContainer.findPage(path);
-        } catch (PageNotFoundException e) {
-            page = moduleContainer.findPageByPrettyVirtualPath(path);
-        }
-        if (page instanceof CrudPage) {
-            NavigationRestrictions.verifyAccess(page);
-            return (CrudPage) page;
-        }
-        throw new PageNotFoundException("Invalid Path " + path);
-    }
-
-    static class SimpleResult {
-        private Object data;
-        private String response;
-
-        public SimpleResult(Object content, String response) {
-            this.data = content;
-            this.response = response;
-        }
-
-        public Object getData() {
-            return data;
-        }
-
-        public void setData(Object data) {
-            this.data = data;
-        }
-
-        public String getResponse() {
-            return response;
-        }
-
-        public void setResponse(String response) {
-            this.response = response;
-        }
-    }
-
-    static class ListResult {
-        private List data;
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        private DataPaginator pageable;
-        private String response;
-
-        public String getResponse() {
-            return response;
-        }
-
-        public void setResponse(String response) {
-            this.response = response;
-        }
-
-        public List getData() {
-            return data;
-        }
-
-        public void setData(List data) {
-            this.data = data;
-        }
-
-        public DataPaginator getPageable() {
-            return pageable;
-        }
-
-        public void setPageable(DataPaginator pageable) {
-            this.pageable = pageable;
-        }
-    }
-
 }

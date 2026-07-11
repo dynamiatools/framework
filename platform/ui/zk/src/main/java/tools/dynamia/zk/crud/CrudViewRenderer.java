@@ -30,16 +30,30 @@ import tools.dynamia.viewers.util.Viewers;
 import java.util.Map;
 
 /**
- * @author Mario A. Serrano Leones
+ * Renderer that creates and configures {@link CrudView} instances from descriptors.
+ * <p>
+ * It wires controller class selection, descriptor actions, bean setup and initial state.
+ *
+ * @param <T> entity type managed by the rendered CRUD view
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class CrudViewRenderer<T> extends AbstractLoggable implements ViewRenderer<T> {
 
+    /**
+     * Renders a CRUD view using descriptor metadata and optional initial value.
+     *
+     * @param descriptor descriptor to render
+     * @param value initial value
+     * @return rendered view
+     */
     @Override
     public View<T> render(ViewDescriptor descriptor, T value) {
         return render(descriptor, value, null);
     }
 
+    /**
+     * Applies controller selection rules and binds the resolved controller to the view.
+     */
     private void configure(CrudView crudView, CrudController crudController) {
         Class<? extends CrudController> preferredController = null;
         CrudDataSetViewBuilder cdsvb = CrudView.getDataSetViewBuilder(crudView.getDataSetViewType());
@@ -69,6 +83,14 @@ public class CrudViewRenderer<T> extends AbstractLoggable implements ViewRendere
 
     }
 
+    /**
+     * Renders a CRUD view using an externally provided controller when available.
+     *
+     * @param descriptor descriptor to render
+     * @param value initial value
+     * @param crudController optional external controller
+     * @return configured CRUD view
+     */
     public CrudView<T> render(ViewDescriptor descriptor, T value, CrudController crudController) {
         CrudView<T> crudView = newCrudView();
         crudView.setViewDescriptor(descriptor);
@@ -90,6 +112,9 @@ public class CrudViewRenderer<T> extends AbstractLoggable implements ViewRendere
         return crudView;
     }
 
+    /**
+     * Loads additional CRUD actions declared inside descriptor parameters.
+     */
     private void loadDescriptorActions(ViewDescriptor descriptor, CrudView<T> crudView) {
         try {
             Map actions = (Map) descriptor.getParams().get(Viewers.PARAM_ACTIONS);
@@ -111,6 +136,11 @@ public class CrudViewRenderer<T> extends AbstractLoggable implements ViewRendere
 
     }
 
+    /**
+     * Factory method for creating CRUD view instances.
+     *
+     * @return new CRUD view
+     */
     protected CrudView<T> newCrudView() {
         return new CrudView<>();
     }

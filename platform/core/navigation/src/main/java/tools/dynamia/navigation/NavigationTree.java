@@ -3,6 +3,7 @@ package tools.dynamia.navigation;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class NavigationTree implements Serializable {
 
@@ -28,6 +29,23 @@ public class NavigationTree implements Serializable {
 
     public void setNavigation(List<NavigationNode> nodes) {
         this.navigation = nodes;
+    }
+
+    public void forEachNode(Consumer<NavigationNode> action) {
+        if (navigation != null) {
+            traverse(action, navigation);
+        }
+    }
+
+    private void traverse(Consumer<NavigationNode> action, List<NavigationNode> nodes) {
+        if (navigation != null) {
+            for (NavigationNode node : nodes) {
+                action.accept(node);
+                if (node.getChildren() != null) {
+                    traverse(action, node.getChildren());
+                }
+            }
+        }
     }
 
     /**

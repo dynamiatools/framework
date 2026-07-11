@@ -157,13 +157,13 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     private boolean useTempPaymentDay;
     private AccountStatus oldStatus;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private AccountCategory category;
 
     @ManyToOne
     private AccountReseller reseller;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private AccountResellerAgent resellerAgent;
 
     @Lob
@@ -184,7 +184,7 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     private long closedTicketsCount;
     private boolean autoInit = true;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     private Account parentAccount;
     private int freeTrial;
@@ -194,8 +194,11 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
 
     private String activationCoupon;
     private String redirect;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private AccountSaleChannel channel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private AccountPaymentProvider customPaymentProvider;
 
     public Account() {
         initLocale();
@@ -410,7 +413,7 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     public void setLogo(EntityFile logo) {
         this.logo = logo;
         if (logo != null && logo.getName() != null) {
-            logoURL = logo.getStoredEntityFile().getThumbnailUrl();
+            logoURL = logo.getThumbnailUrl();
             if (logoURL != null && logoURL.length() > 600) {
                 logoURL = null;
             }
@@ -535,7 +538,7 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
 
         String logoURL = null;
         if (logo != null) {
-            logoURL = logo.getStoredEntityFile().getThumbnailUrl(200, 200);
+            logoURL = logo.getThumbnailUrl(200, 200);
         }
         dto.setLogo(logoURL);
         dto.setType(getType().toDTO());
@@ -884,7 +887,7 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
 
     public String getLogoURL() {
         if (logoURL == null && logo != null) {
-            logoURL = logo.getStoredEntityFile().getThumbnailUrl();
+            logoURL = logo.getThumbnailUrl();
         }
         return logoURL;
     }
@@ -947,5 +950,13 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
 
     public void setResellerInvoiceDate(Date resellerInvoiceDate) {
         this.resellerInvoiceDate = resellerInvoiceDate;
+    }
+
+    public AccountPaymentProvider getCustomPaymentProvider() {
+        return customPaymentProvider;
+    }
+
+    public void setCustomPaymentProvider(AccountPaymentProvider customPaymentProvider) {
+        this.customPaymentProvider = customPaymentProvider;
     }
 }

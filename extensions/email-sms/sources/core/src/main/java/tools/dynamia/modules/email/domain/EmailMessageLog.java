@@ -4,10 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tools.dynamia.modules.email.EmailMessage;
+import tools.dynamia.modules.saas.api.AccountExportIgnore;
 import tools.dynamia.modules.saas.jpa.BaseEntitySaaS;
 
 @Entity
 @Table(name = "email_log")
+@AccountExportIgnore
 public class EmailMessageLog extends BaseEntitySaaS {
 
     @Column(length = 1000)

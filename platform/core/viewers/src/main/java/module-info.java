@@ -8,9 +8,10 @@ open module tools.dynamia.viewers {
     requires jakarta.validation;
     requires tools.dynamia.integration;
     requires tools.dynamia.io;
-    requires com.fasterxml.jackson.databind;
     requires spring.beans;
     requires org.yaml.snakeyaml;
     requires spring.expression;
     requires tools.dynamia.actions;
+    requires tools.jackson.core;
+    requires tools.jackson.databind;
 }

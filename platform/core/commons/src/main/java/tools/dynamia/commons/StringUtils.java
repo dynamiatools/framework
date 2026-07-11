@@ -1485,6 +1485,7 @@ public abstract class StringUtils {
 
     /**
      * Truncate string to max lenght
+     *
      * @param text
      * @param maxlength
      * @return
@@ -1499,6 +1500,7 @@ public abstract class StringUtils {
 
     /**
      * Remove special characters from string
+     *
      * @param input
      * @return
      */
@@ -1513,5 +1515,36 @@ public abstract class StringUtils {
         withoutAccents = withoutAccents.replaceAll("\\p{So}|\\p{Cn}", "");
 
         return withoutAccents;
+    }
+
+    /**
+     * Takes characters from a string.
+     * <p>
+     * length > 0  -> first N characters
+     * length < 0  -> last N characters
+     * length == 0 -> empty string
+     */
+    public static String take(String str, int length) {
+        if (str == null) {
+            return null;
+        }
+
+        if (length == 0) {
+            return "";
+        }
+
+        int strLength = str.length();
+
+        if (length > 0) {
+            return strLength <= length
+                    ? str
+                    : str.substring(0, length);
+        }
+
+        int abs = Math.abs(length);
+
+        return strLength <= abs
+                ? str
+                : str.substring(strLength - abs);
     }
 }

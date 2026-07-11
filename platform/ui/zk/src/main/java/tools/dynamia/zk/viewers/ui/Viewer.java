@@ -54,17 +54,25 @@ import tools.dynamia.zk.ui.CanBeReadonly;
 import tools.dynamia.zk.util.ZKUtil;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("rawtypes")
+/**
+ * ZK container that resolves and hosts a Dynamia {@link View} instance.
+ * <p>
+ * The view is created lazily from a descriptor id, descriptor instance, or view type and bean class.
+ * This component also exposes helper APIs for actions, read-only propagation, and dialog rendering.
+ */
 public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
 
     /**
-     *
+     * Serialization identifier.
      */
+    @Serial
     private static final long serialVersionUID = 1L;
     private View<Object> view;
     private String viewType;
@@ -91,14 +99,28 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
     private ViewDescriptor descriptor;
     private Boolean readOnly;
 
+    /**
+     * Creates an empty viewer. The hosted view is resolved when rendering is triggered.
+     */
     public Viewer() {
         init();
     }
 
+    /**
+     * Creates a viewer from a descriptor.
+     *
+     * @param descriptor descriptor used to create the internal view
+     */
     public Viewer(ViewDescriptor descriptor) {
         this(descriptor, null);
     }
 
+    /**
+     * Creates a viewer from a descriptor and initial value.
+     *
+     * @param descriptor descriptor used to create the internal view
+     * @param value initial value for the view
+     */
     public Viewer(ViewDescriptor descriptor, Object value) {
         this.descriptor = descriptor;
         this.beanClass = descriptor.getBeanClass();
@@ -107,21 +129,45 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         init();
     }
 
+    /**
+     * Creates a viewer from a descriptor id and initial value.
+     *
+     * @param descriptorId id used to locate a {@link ViewDescriptor}
+     * @param value initial value for the view
+     */
     public Viewer(String descriptorId, Object value) {
         this.descriptorId = descriptorId;
         this.value = value;
         init();
     }
 
+    /**
+     * Creates a viewer from a descriptor id.
+     *
+     * @param descriptorId id used to locate a {@link ViewDescriptor}
+     */
     public Viewer(String descriptorId) {
         this.descriptorId = descriptorId;
         init();
     }
 
+    /**
+     * Creates a viewer from a view type and bean class.
+     *
+     * @param viewType view type name
+     * @param objectClass bean type used by the view
+     */
     public Viewer(String viewType, Class objectClass) {
         this(viewType, objectClass, null);
     }
 
+    /**
+     * Creates a viewer from a view type, bean class, and initial value.
+     *
+     * @param viewType view type name
+     * @param objectClass bean type used by the view
+     * @param value initial value for the view
+     */
     public Viewer(String viewType, Class objectClass, Object value) {
         super();
         this.viewType = viewType;
@@ -130,12 +176,18 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         init();
     }
 
+    /**
+     * Applies ZK properties and triggers lazy view rendering.
+     */
     @Override
     public void applyProperties() {
         super.applyProperties();
         render();
     }
 
+    /**
+     * Resolves and renders the internal view into the content region.
+     */
     private void render() {
 
         ViewFactory viewFactory = Containers.get().findObject(ViewFactory.class);
@@ -196,6 +248,9 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         updateReadOnly();
     }
 
+    /**
+     * Renders action components for command actions associated with the current value and explicit actions.
+     */
     private void renderActions() {
 
         List<Action> allActions = ActionLoader.loadActionCommands(value);
@@ -232,37 +287,77 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
 
     }
 
+    /**
+     * Returns the configured view type name.
+     *
+     * @return view type name
+     */
     public String getViewType() {
         return viewType;
     }
 
+    /**
+     * Sets the view type and re-renders the hosted view.
+     *
+     * @param viewType view type name
+     */
     public void setViewType(String viewType) {
         this.viewType = viewType;
         render();
     }
 
+    /**
+     * Alias for {@link #setViewType(String)}.
+     *
+     * @param viewType view type name
+     */
     public void setType(String viewType) {
         setViewType(viewType);
     }
 
+    /**
+     * Returns the bean class used to resolve the view.
+     *
+     * @return bean class
+     */
     public Class getBeanClass() {
         return beanClass;
     }
 
+    /**
+     * Sets the bean class and re-renders the hosted view.
+     *
+     * @param beanClass bean class
+     */
     public void setBeanClass(Class beanClass) {
         this.beanClass = beanClass;
         render();
     }
 
+    /**
+     * Returns the descriptor id used to resolve the view.
+     *
+     * @return descriptor id
+     */
     public String getDescriptorId() {
         return descriptorId;
     }
 
+    /**
+     * Sets the descriptor id and re-renders the hosted view.
+     *
+     * @param descriptorId descriptor id
+     */
     public void setDescriptorId(String descriptorId) {
         this.descriptorId = descriptorId;
         render();
     }
 
+    /**
+     * Resolves and sets the bean class by fully qualified class name.
+     *
+     * @param beanClass fully qualified class name
+     */
     public void setBeanClass(String beanClass) {
         try {
             setBeanClass(Class.forName(beanClass));
@@ -271,6 +366,11 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         }
     }
 
+    /**
+     * Returns the current value from the rendered view when available.
+     *
+     * @return current value
+     */
     public Object getValue() {
         if (view != null) {
             return view.getValue();
@@ -279,6 +379,11 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         }
     }
 
+    /**
+     * Sets the current value. String literal {@code "null"} is converted to {@code null}.
+     *
+     * @param value new value
+     */
     public void setValue(Object value) {
         if ("null".equals(value)) {
             value = null;
@@ -293,6 +398,11 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
 
     }
 
+    /**
+     * Returns the selected item when the hosted view is a {@link DataSetView}.
+     *
+     * @return selected item, or {@code null} if selection is not supported
+     */
     public Object getSelected() {
         if (view instanceof DataSetView) {
             return ((DataSetView) view).getSelected();
@@ -301,12 +411,26 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         }
     }
 
+    /**
+     * Updates the selected item when the hosted view is a {@link DataSetView}.
+     *
+     * @param selected selected item
+     */
     public void setSelected(Object selected) {
         if (view instanceof DataSetView) {
             ((DataSetView) view).setSelected(selected);
         }
     }
 
+    /**
+     * Adds an event listener directly to the rendered view component when available.
+     * <p>
+     * If the view is not rendered yet, the listener is queued and attached during rendering.
+     *
+     * @param evtnm event name
+     * @param listener listener instance
+     * @return {@code true} when attached immediately, otherwise {@code false}
+     */
     @Override
     public boolean addEventListener(String evtnm, EventListener<? extends Event> listener) {
         if (view != null && view instanceof Component) {
@@ -317,6 +441,11 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         }
     }
 
+    /**
+     * Returns the hosted view, rendering it first if needed.
+     *
+     * @return hosted view instance
+     */
     public View getView() {
         if (view == null) {
             render();
@@ -325,11 +454,22 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
     }
 
 
+    /**
+     * Renders component properties to the client.
+     *
+     * @param renderer ZK content renderer
+     * @throws IOException if rendering fails
+     */
     @Override
     protected void renderProperties(ContentRenderer renderer) throws IOException {
         super.renderProperties(renderer);
     }
 
+    /**
+     * Sets the parent component and ensures the hosted view is rendered.
+     *
+     * @param parent new parent component
+     */
     @Override
     public void setParent(Component parent) {
         super.setParent(parent);
@@ -337,34 +477,76 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
     }
 
 
+    /**
+     * Sets the content region vertical flex.
+     *
+     * @param vflex vertical flex value
+     */
     public void setContentVflex(String vflex) {
         contentRegion.setVflex(vflex);
     }
 
+    /**
+     * Returns the content region vertical flex.
+     *
+     * @return content region vertical flex
+     */
     public String getContentVflex() {
         return contentRegion.getVflex();
     }
 
+    /**
+     * Sets the CSS class of the content region.
+     *
+     * @param sclass CSS class
+     */
     public void setContentSclass(String sclass) {
         contentRegion.setSclass(sclass);
     }
 
+    /**
+     * Returns the CSS class of the content region.
+     *
+     * @return content region CSS class
+     */
     public String getContentSclass() {
         return contentRegion.getSclass();
     }
 
+    /**
+     * Sets inline style of the content region.
+     *
+     * @param style inline style
+     */
     public void setContentStyle(String style) {
         contentRegion.setStyle(style);
     }
 
+    /**
+     * Returns inline style of the content region.
+     *
+     * @return content region style
+     */
     public String getContentStyle() {
         return contentRegion.getStyle();
     }
 
+    /**
+     * Returns the current toolbar instance.
+     *
+     * @return toolbar component
+     */
     public Toolbar getToolbar() {
         return toolbar;
     }
 
+    /**
+     * Sets the toolbar component in the toolbar region.
+     * <p>
+     * When the toolbar is an {@link ActionToolbar}, this viewer is injected as event builder if missing.
+     *
+     * @param toolbar toolbar component
+     */
     public void setToolbar(Toolbar toolbar) {
         this.toolbar = toolbar;
 
@@ -378,6 +560,9 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         toolbarRegion.appendChild(toolbar);
     }
 
+    /**
+     * Initializes base layout regions used by this component.
+     */
     private void init() {
         setStyle("overflow-y:auto;overflow-x:hidden");
         setSclass("viewer");
@@ -395,6 +580,9 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
 
     }
 
+    /**
+     * Creates the action area container.
+     */
     private void renderActionRegions() {
         Div actions = new Div();
         actions.setSclass("viewer-actions-reg");
@@ -405,10 +593,20 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         actionsRegion = actionLayout;
     }
 
+    /**
+     * Adds an explicit action to the viewer.
+     *
+     * @param action action to add
+     */
     public void addAction(Action action) {
         actions.add(action);
     }
 
+    /**
+     * Returns the action region container, creating it if needed.
+     *
+     * @return action region component
+     */
     public Component getActionsRegion() {
         if (actionsRegion == null) {
             renderActionRegions();
@@ -416,6 +614,13 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         return actionsRegion;
     }
 
+    /**
+     * Builds an action event enriched with viewer context parameters.
+     *
+     * @param source ignored source parameter; the event source is this viewer
+     * @param params custom event parameters, can be {@code null}
+     * @return populated action event
+     */
     @Override
     public ActionEvent buildActionEvent(Object source, Map<String, Object> params) {
         if (params == null) {
@@ -430,10 +635,22 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         return new ActionEvent(getValue(), this, params);
     }
 
+    /**
+     * Indicates whether auto-height mode is enabled.
+     *
+     * @return {@code true} if auto-height is enabled
+     */
     public boolean isAutoheight() {
         return autoheight;
     }
 
+    /**
+     * Enables or disables auto-height mode.
+     * <p>
+     * When enabled, fixed component style and content vflex are cleared.
+     *
+     * @param autoheight auto-height flag
+     */
     public void setAutoheight(boolean autoheight) {
         if (this.autoheight != autoheight) {
             this.autoheight = autoheight;
@@ -444,6 +661,16 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         }
     }
 
+    /**
+     * Creates and shows a dialog with a viewer for the given value.
+     * <p>
+     * Layout is adjusted for smartphone and non-smartphone devices.
+     *
+     * @param title dialog title
+     * @param viewType view type name
+     * @param value value shown by the viewer
+     * @return created dialog window
+     */
     public static Window showDialog(String title, String viewType, Object value) {
         Window win = showDialog(title, viewType, value.getClass(), value);
 
@@ -458,6 +685,15 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         return win;
     }
 
+    /**
+     * Creates and shows a dialog with a viewer for the given type and value class.
+     *
+     * @param title dialog title
+     * @param viewType view type name
+     * @param valueClass bean class associated with the view
+     * @param value value shown by the viewer
+     * @return created dialog window
+     */
     public static Window showDialog(String title, String viewType, Class valueClass, Object value) {
         Viewer viewer = new Viewer(viewType, valueClass, value);
         String height = null;
@@ -468,6 +704,11 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
     }
 
 
+    /**
+     * Returns a string representation that includes descriptor id when available.
+     *
+     * @return string representation
+     */
     @Override
     public String toString() {
         if (descriptorId != null) {
@@ -476,22 +717,49 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         return super.toString();
     }
 
+    /**
+     * Returns inline style applied to the hosted view component.
+     *
+     * @return hosted view style
+     */
     public String getViewStyle() {
         return viewStyle;
     }
 
+    /**
+     * Sets inline style to apply to the hosted view component when it is HTML-based.
+     *
+     * @param viewStyle hosted view style
+     */
     public void setViewStyle(String viewStyle) {
         this.viewStyle = viewStyle;
     }
 
+    /**
+     * Returns CSS class applied to the hosted view component.
+     *
+     * @return hosted view CSS class
+     */
     public String getViewSclass() {
         return viewSclass;
     }
 
+    /**
+     * Sets CSS class to apply to the hosted view component when it is HTML-based.
+     *
+     * @param viewSclass hosted view CSS class
+     */
     public void setViewSclass(String viewSclass) {
         this.viewSclass = viewSclass;
     }
 
+    /**
+     * Shows a form inside a viewer dialog and closes the dialog when the form closes.
+     *
+     * @param title dialog title
+     * @param form form to display
+     * @return created dialog window
+     */
     public static Window showForm(String title, Form form) {
         Window win = showDialog(title, "form", form);
         form.onClose(win::detach);
@@ -499,18 +767,31 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
     }
 
 
+    /**
+     * Sets read-only mode and propagates the state to the hosted view when supported.
+     *
+     * @param readOnly read-only flag
+     */
     @Override
     public void setReadonly(boolean readOnly) {
         this.readOnly = true;
         updateReadOnly();
     }
 
+    /**
+     * Applies read-only mode to the hosted view when it implements {@link CanBeReadonly}.
+     */
     private void updateReadOnly() {
         if (readOnly != null && view != null && view instanceof CanBeReadonly) {
             ((CanBeReadonly) view).setReadonly(this.readOnly);
         }
     }
 
+    /**
+     * Indicates whether this viewer is marked as read-only.
+     *
+     * @return {@code true} if read-only mode is enabled
+     */
     @Override
     public boolean isReadonly() {
         if (readOnly == null) {
@@ -519,10 +800,20 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         return readOnly;
     }
 
+    /**
+     * Returns the custom source object forwarded to the hosted view.
+     *
+     * @return source object
+     */
     public Object getSource() {
         return source;
     }
 
+    /**
+     * Sets a custom source object and forwards it to the hosted view when available.
+     *
+     * @param source source object
+     */
     public void setSource(Object source) {
         this.source = source;
         if (view != null) {
@@ -530,6 +821,11 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         }
     }
 
+    /**
+     * Sets component height and enables content region vflex when a height is provided.
+     *
+     * @param height component height
+     */
     @Override
     public void setHeight(String height) {
         super.setHeight(height);
@@ -539,6 +835,11 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
     }
 
 
+    /**
+     * Sets vertical flex and mirrors full-flex values to the content region.
+     *
+     * @param flex vertical flex value
+     */
     @Override
     public void setVflex(String flex) {
         super.setVflex(flex);
@@ -547,12 +848,22 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         }
     }
 
+    /**
+     * Returns the resolved descriptor used by the hosted view.
+     *
+     * @return resolved view descriptor
+     */
     public ViewDescriptor getViewDescriptor() {
         return descriptor;
     }
 
     /**
-     * Show this viewer as a modal window
+     * Shows this viewer in a modal dialog.
+     *
+     * @param title dialog title
+     * @param autoscroll whether to enable auto scrolling in dialog content
+     * @param onClose optional close listener
+     * @return created dialog window
      */
     public Window showModal(String title, boolean autoscroll, EventListener<Event> onClose) {
         var win = ZKUtil.showDialog(title, this);
@@ -566,7 +877,10 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
     }
 
     /**
-     * Show this viewer as a modal Window
+     * Shows this viewer in a modal dialog with auto-scroll enabled.
+     *
+     * @param title dialog title
+     * @return created dialog window
      */
     public Window showModal(String title) {
         return showModal(title, true, null);

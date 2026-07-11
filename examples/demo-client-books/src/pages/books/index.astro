@@ -1,0 +1,127 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { getBooks, getCategories, getCoverUrl, formatPrice, stockLabel } from '@/lib/api';
+import type { Book } from '@/lib/types';
+
+const page = Number(Astro.url.searchParams.get('page') ?? 1);
+const categoryId = Astro.url.searchParams.get('category') ?? '';
+// Dynamia Platform REST filter for CrudPage: field name "title" mapped as query param
+const title = Astro.url.searchParams.get('title') ?? '';
+const PAGE_SIZE = 12;
+
+const [booksResult, categoriesResult] = await Promise.all([
+  getBooks({
+    page,
+    pageSize: PAGE_SIZE,
+    ...(categoryId ? { 'category.id': categoryId } : {}),
+    ...(title ? { title } : {}),
+  }),
+  getCategories(),
+]).catch(() => [
+  { content: [] as Book[], total: 0, page: 1, pageSize: PAGE_SIZE, totalPages: 1 },
+  { content: [] as Awaited<ReturnType<typeof getCategories>>['content'], total: 0, page: 1, pageSize: 20, totalPages: 1 },
+]);
+
+const books = booksResult.content;
+const categories = categoriesResult.content;
+const totalPages = booksResult.totalPages;
+
+/** Build a query string keeping current filters, overriding specific keys. */
+function buildQuery(overrides: Record<string, string | number>) {
+  const p = new URLSearchParams();
+  if (categoryId) p.set('category', categoryId);
+  if (title) p.set('title', title);
+  Object.entries(overrides).forEach(([k, v]) => p.set(k, String(v)));
+  return '?' + p.toString();
+}
+
+/** "All" link — keep only current filters except category */
+function allLink() {
+  const p = new URLSearchParams();
+  if (title) p.set('title', title);
+  p.set('page', '1');
+  const qs = p.toString();
+  return '/books' + (qs ? '?' + qs : '');
+}
+---
+
+<Layout title="Books">
+  <div class="section-header">
+    <h2>📚 All Books</h2>
+    <span style="color:var(--muted);font-size:.9rem">{booksResult.total} titles found</span>
+  </div>
+
+  <!-- Search bar — uses "title" query param (Dynamia Platform field filter) -->
+  <form method="get" action="/books" style="margin-bottom:1.5rem;display:flex;gap:.75rem;flex-wrap:wrap">
+    <input
+      type="text"
+      name="title"
+      value={title}
+      placeholder="Search by title…"
+      style="flex:1;min-width:200px;padding:.5rem 1rem;border:1px solid var(--border);border-radius:50px;font-size:.95rem;outline:none"
+    />
+    {categoryId && <input type="hidden" name="category" value={categoryId} />}
+    <button type="submit" style="background:var(--accent);color:#fff;border:none;padding:.5rem 1.4rem;border-radius:50px;font-weight:700;cursor:pointer;font-size:.95rem">
+      Search
+    </button>
+    {(title || categoryId) && (
+      <a href="/books" style="padding:.5rem 1rem;color:var(--muted);font-size:.9rem;align-self:center">Clear</a>
+    )}
+  </form>
+
+  <!-- Category filter -->
+  <div class="filter-bar">
+    <a href={allLink()} class={`filter-btn ${!categoryId ? 'active' : ''}`}>All</a>
+    {categories.map(cat => (
+      <a
+        href={`/books?category=${cat.id}${title ? `&title=${encodeURIComponent(title)}` : ''}&page=1`}
+        class={`filter-btn ${categoryId === String(cat.id) ? 'active' : ''}`}
+      >
+        {cat.name}
+      </a>
+    ))}
+  </div>
+
+  {books.length === 0 ? (
+    <div class="empty">
+      <span class="icon">📭</span>
+      <p>No books found{title ? ` for "${title}"` : ''}. Try a different filter or check the backend.</p>
+    </div>
+  ) : (
+    <div class="books-grid">
+      {books.map((book) => {
+        const cover = getCoverUrl(book);
+        const stock = stockLabel(book.stockStatus);
+        return (
+          <a href={`/books/${book.id}`} class="book-card">
+            <div class="book-cover">
+              {cover ? <img src={cover} alt={book.title} loading="lazy" /> : '📕'}
+            </div>
+            <div class="book-info">
+              <div class="book-title">{book.title}</div>
+              {book.category && <div class="book-category">{book.category.name}</div>}
+              <div class="book-year">{book.year > 0 ? book.year : ''}</div>
+              <div class="book-price">
+                {formatPrice(book.price, book.onSale, book.salePrice)}
+                {book.onSale && <span class="badge badge-sale">SALE</span>}
+              </div>
+              <span class={`badge badge-${stock.color}`}>{stock.label}</span>
+            </div>
+          </a>
+        );
+      })}
+    </div>
+  )}
+
+  <!-- Pagination -->
+  {totalPages > 1 && (
+    <div class="pagination">
+      {page > 1 && <a href={buildQuery({ page: page - 1 })}>← Prev</a>}
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+        <a href={buildQuery({ page: p })} class={p === page ? 'current' : ''}>{p}</a>
+      ))}
+      {page < totalPages && <a href={buildQuery({ page: page + 1 })}>Next →</a>}
+    </div>
+  )}
+</Layout>
+

@@ -1,7 +1,6 @@
 package tools.dynamia.modules.security;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
@@ -19,6 +18,7 @@ import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.commons.StringPojoParser;
 import tools.dynamia.modules.security.domain.User;
 import tools.dynamia.modules.security.listeners.SpringSecurtyApplicationListener;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;

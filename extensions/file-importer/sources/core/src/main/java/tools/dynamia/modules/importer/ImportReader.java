@@ -19,9 +19,19 @@ package tools.dynamia.modules.importer;
 
 import org.apache.poi.ss.usermodel.Row;
 
+/**
+ * Functional callback invoked for each imported spreadsheet {@link Row}.
+ * Implementations typically perform side effects such as validation,
+ * persistence, or aggregation.
+ */
 @FunctionalInterface
 public interface ImportReader {
 
+	/**
+	 * Processes a spreadsheet row.
+	 *
+	 * @param row the row to process
+	 */
 	void read(Row row);
 
 }

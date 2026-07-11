@@ -1,38 +1,48 @@
 package tools.dynamia.domain.util;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+
 import tools.dynamia.commons.URLable;
 import tools.dynamia.domain.AbstractEntity;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
-import java.io.IOException;
-
-public class BasicEntityJsonSerializer extends JsonSerializer<AbstractEntity> {
+public class BasicEntityJsonSerializer extends ValueSerializer<Object> {
 
     public static final String NAME = "name";
     public static final String ID = "id";
     public static final String CLASS = "class";
     public static final String URL = "url";
 
+    public BasicEntityJsonSerializer() {
+    }
+
     @Override
-    public void serialize(AbstractEntity value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-        if (value != null && value.getId() != null) {
+    public void serialize(Object value,
+                          JsonGenerator gen,
+                          SerializationContext context) {
+
+        if (value instanceof AbstractEntity<?> entity
+                && entity.getId() != null) {
+
             gen.writeStartObject();
-            gen.writeStringField(CLASS, value.getClass().getName());
-            gen.writeStringField(NAME, value.toName());
-            if (value.getId() instanceof Long) {
-                gen.writeNumberField(ID, (Long) value.getId());
+
+            gen.writeStringProperty(CLASS, entity.getClass().getName());
+            gen.writeStringProperty(NAME, entity.toName());
+
+            if (entity.getId() instanceof Long l) {
+                gen.writeNumberProperty(ID, l);
             } else {
-                gen.writeStringField(ID, value.getId().toString());
+                gen.writeStringProperty(ID, entity.getId().toString());
             }
 
-            if (value instanceof URLable) {
-                gen.writeStringField(URL, ((URLable) value).toURL());
+            if (value instanceof URLable urlable) {
+                gen.writeStringProperty(URL, urlable.toURL());
             }
-
 
             gen.writeEndObject();
+        } else {
+            gen.writeNull();
         }
     }
 }

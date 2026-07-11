@@ -7,6 +7,8 @@ public class DefaultActionRunner implements ActionRunner {
 
     @Override
     public void run(Action action, ActionEvent evt) {
-        action.actionPerformed(evt);
+        if(action instanceof LocalAction localAction) {
+            localAction.actionPerformed(evt);
+        }
     }
 }

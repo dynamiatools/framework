@@ -25,21 +25,22 @@ import tools.dynamia.viewers.ViewRenderer;
 import tools.dynamia.viewers.ViewType;
 
 /**
- * Represents the table view type in the viewers framework.
- * Provides the name and renderer for table views.
+ * View type registration for table-based views in the ZK viewers module.
+ * <p>
+ * Provides the canonical type name and creates the default {@link TableViewRenderer}.
  */
 @Component
 public class TableViewType implements ViewType {
 
     /**
-     * The name identifier for the table view type.
+     * Canonical identifier used to request table views.
      */
     public static final String NAME = "table";
 
     /**
-     * Returns the name of this view type.
+     * Returns the registered view type identifier.
      *
-     * @return the name of the view type.
+     * @return {@link #NAME}
      */
     @Override
     public String getName() {
@@ -47,9 +48,9 @@ public class TableViewType implements ViewType {
     }
 
     /**
-     * Returns the renderer associated with this view type.
+     * Creates the renderer responsible for table view instances.
      *
-     * @return the view renderer for table views.
+     * @return table view renderer
      */
     @Override
     public ViewRenderer getViewRenderer() {

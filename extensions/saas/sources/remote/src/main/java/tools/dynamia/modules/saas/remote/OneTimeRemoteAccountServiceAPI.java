@@ -17,14 +17,15 @@
 
 package tools.dynamia.modules.saas.remote;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.modules.saas.api.dto.AccountDTO;
 import tools.dynamia.modules.saas.api.enums.AccountStatus;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -100,7 +101,7 @@ public class OneTimeRemoteAccountServiceAPI extends RemoteAccountServiceAPI {
                 if (accountDTO != null) {
                     accountDTO.setMaxUsers(maxUsers);
                 }
-            } catch (IOException e) {
+            } catch (JacksonException e) {
                 e.printStackTrace();
             }
         }
@@ -115,7 +116,7 @@ public class OneTimeRemoteAccountServiceAPI extends RemoteAccountServiceAPI {
                     pref.put(key, accountJson);
                     pref.putLong(key2, System.currentTimeMillis());
                     pref.sync();
-                } catch (JsonProcessingException e) {
+                } catch (JacksonException e) {
                     e.printStackTrace();
                 } catch (BackingStoreException e) {
                     e.printStackTrace();

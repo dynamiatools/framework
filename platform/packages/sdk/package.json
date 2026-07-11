@@ -1,0 +1,72 @@
+{
+  "name": "@dynamia-tools/sdk",
+  "version": "26.6.0",
+  "website": "https://dynamia.tools",
+  "description": "Official JavaScript / TypeScript client SDK for Dynamia Platform REST APIs",
+  "keywords": [
+    "dynamia",
+    "dynamia-platform",
+    "sdk",
+    "rest",
+    "typescript",
+    "client"
+  ],
+  "homepage": "https://dynamia.tools",
+  "bugs": {
+    "url": "https://github.com/dynamiatools/framework/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dynamiatools/framework.git",
+    "directory": "platform/packages/sdk"
+  },
+  "license": "Apache-2.0",
+  "author": "Dynamia Soluciones IT SAS",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm run build && pnpm run test"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^8.0.0",
+    "vite-plugin-dts": "^5.0.0",
+    "vitest": "^4.0.0",
+    "@vitest/coverage-v8": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

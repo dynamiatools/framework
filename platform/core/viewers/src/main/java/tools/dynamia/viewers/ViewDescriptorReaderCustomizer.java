@@ -18,24 +18,48 @@ package tools.dynamia.viewers;
 
 
 /**
- * Interface for customizing the reading of view descriptors.
+ * Extension point that allows post-processing of raw parsed content during descriptor loading.
  *
- * @param <T> the type of content to customize
+ * <p>A {@code ViewDescriptorReaderCustomizer} is paired with a specific
+ * {@link ViewDescriptorReader} implementation and is invoked by that reader after it has
+ * parsed the source file content (e.g., the YAML document or XML DOM). This lets third-party
+ * modules augment or transform the descriptor without modifying the reader itself.</p>
+ *
+ * <p>Typical use cases include:
+ * <ul>
+ *   <li>Injecting additional field definitions from an external source.</li>
+ *   <li>Applying security or tenant-specific overrides to the raw content.</li>
+ *   <li>Translating proprietary format nodes into standard descriptor constructs.</li>
+ * </ul>
+ * </p>
+ *
+ * <p>Implementations are discovered by the framework through the service container and are
+ * automatically applied when their {@link #getTargetReader() target reader} is used.</p>
+ *
+ * @param <T> the type of the raw parsed content (e.g., a YAML {@code Map}, a DOM {@code Document})
+ * @see ViewDescriptorReader
  */
 public interface ViewDescriptorReaderCustomizer<T> {
 
     /**
-     * Gets the target reader class for customization.
+     * Returns the {@link ViewDescriptorReader} class this customizer is associated with.
      *
-     * @return the target reader class
+     * <p>The framework passes this customizer to the {@link ViewDescriptorReader#read} method
+     * only when the reader's runtime type matches the class returned here.</p>
+     *
+     * @return the target reader class; never {@code null}
      */
     Class<? extends ViewDescriptorReader> getTargetReader();
 
     /**
-     * Customizes the view descriptor based on the content.
+     * Applies customization logic using the raw parsed {@code content} and the partially or
+     * fully built {@code viewDescriptor}.
      *
-     * @param content the content to use for customization
-     * @param viewDescriptor the view descriptor to customize
+     * <p>Implementations may modify the {@code viewDescriptor} in-place (e.g., add fields,
+     * change parameters) based on information found in {@code content}.</p>
+     *
+     * @param content        the raw parsed content from the descriptor resource; never {@code null}
+     * @param viewDescriptor the descriptor being built; never {@code null}
      */
     void customize(T content, ViewDescriptor viewDescriptor);
 

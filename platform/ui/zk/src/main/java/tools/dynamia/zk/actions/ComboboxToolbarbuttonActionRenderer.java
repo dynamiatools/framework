@@ -24,6 +24,7 @@ import org.zkoss.zul.Toolbarbutton;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionEventBuilder;
+import tools.dynamia.actions.LocalAction;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.zk.util.ZKUtil;
@@ -81,9 +82,9 @@ public class ComboboxToolbarbuttonActionRenderer extends ZKActionRenderer<Compon
         }
 
         btn.addEventListener(Events.ON_CLICK, event -> {
-            if (combo.getSelectedItem() != null) {
+            if (combo.getSelectedItem() != null && action instanceof LocalAction localAction) {
                 ActionEvent evt = new ActionEvent(combo.getSelectedItem().getValue(), actionEventBuilder);
-                action.actionPerformed(evt);
+                localAction.actionPerformed(evt);
             }
         });
         super.configureProperties(htl, action);

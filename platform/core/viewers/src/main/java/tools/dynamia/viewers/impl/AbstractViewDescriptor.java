@@ -108,7 +108,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
     private Class<? extends ViewRenderer> customViewRenderer;
 
     private String device = "screen";
-
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private List<ActionReference> actions = new ArrayList<>();
 
     /**

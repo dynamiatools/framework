@@ -41,7 +41,7 @@ public class AccountReseller extends BaseEntity {
     private ContactInfo contactInfo = new ContactInfo();
     private boolean enabled;
     private Long externalId;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Account mainAccount;
     private double comissionRate;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "reseller")

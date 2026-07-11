@@ -18,6 +18,7 @@
 package tools.dynamia.modules.saas.api;
 
 import tools.dynamia.actions.AbstractAction;
+import tools.dynamia.actions.AbstractLocalAction;
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionSelfFilter;
 import tools.dynamia.integration.Containers;
@@ -52,7 +53,7 @@ import tools.dynamia.integration.Containers;
  * @see AccountAdminActionAuthorizationProvider
  * @see AbstractAction
  */
-public abstract class AccountAdminAction extends AbstractAction implements ActionSelfFilter {
+public abstract class AccountAdminAction extends AbstractLocalAction implements ActionSelfFilter {
 
     private boolean authorizationRequired;
 

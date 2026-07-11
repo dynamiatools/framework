@@ -455,7 +455,7 @@ public class DefaultEntityReferenceRepository<ID extends Serializable> extends C
                     ref.getAttributes().putAll(((Mappable) entity).toMap());
                 } else {
                     //noinspection unchecked
-                    ref.getAttributes().putAll(ObjectOperations.getValuesMaps(entity));
+                    ref.getAttributes().putAll(ObjectOperations.getNonNullValuesMaps(entity));
                 }
             }
             //noinspection unchecked

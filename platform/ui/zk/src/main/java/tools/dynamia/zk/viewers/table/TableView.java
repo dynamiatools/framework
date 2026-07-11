@@ -54,7 +54,12 @@ import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
 /**
- * @author Mario A. Serrano Leones
+ * Table-oriented {@link tools.dynamia.viewers.View} implementation backed by a ZK {@link Listbox}.
+ * <p>
+ * It manages list models, selection, optional pagination offsets, row renderers,
+ * footer computations, and source propagation for external context.
+ *
+ * @param <T> row value type
  */
 @SuppressWarnings("unchecked")
 public class TableView<T> extends Listbox implements TableViewComponent<T>, CanBeReadonly {
@@ -69,7 +74,7 @@ public class TableView<T> extends Listbox implements TableViewComponent<T>, CanB
      */
     private static final long serialVersionUID = 1L;
     /**
-     * Event to listen double click events in ListItmes
+     * Event fired when a row is double-clicked.
      */
     public static final String ON_ITEM_DOUBLE_CLICK = "onItemDoubleClick";
     public static final String ON_ITEM_CLICK = "onItemDoubleClick";
@@ -94,14 +99,28 @@ public class TableView<T> extends Listbox implements TableViewComponent<T>, CanB
     private MultiFunctionProcessor multiFunctionProcesor;
 
 
+    /**
+     * Creates an empty table view.
+     */
     public TableView() {
 
     }
 
+    /**
+     * Creates a table view bound to a descriptor.
+     *
+     * @param viewDescriptor descriptor that defines headers, footers and row fields
+     */
     public TableView(ViewDescriptor viewDescriptor) {
         this.viewDescriptor = viewDescriptor;
     }
 
+    /**
+     * Returns the one-based absolute row index, including page offset when paging is enabled.
+     *
+     * @param item rendered row item
+     * @return absolute row index
+     */
     public int getAbsoluteIndex(Listitem item) {
         int ai = item.getIndex() + 1;
         if (pageList != null) {
@@ -112,16 +131,33 @@ public class TableView<T> extends Listbox implements TableViewComponent<T>, CanB
         return ai;
     }
 
+    /**
+     * Returns the current value list, reflecting displayed rows.
+     *
+     * @return value list
+     */
     @Override
     public List<T> getValue() {
         return value;
     }
 
+    /**
+     * Accepts a dataset wrapper and forwards the internal list to {@link #setValue(List)}.
+     *
+     * @param dataSet dataset containing row data
+     */
     @Override
     public void setValue(DataSet<List<T>> dataSet) {
         setValue(dataSet.getData());
     }
 
+    /**
+     * Replaces table rows and refreshes the underlying list model.
+     * <p>
+     * Supports {@link PagedList} values and emits {@link #ON_VALUE_CHANGED} when a change is detected.
+     *
+     * @param value rows to display
+     */
     @Override
     public void setValue(List<T> value) {
         if (value instanceof PagedList) {
@@ -163,6 +199,11 @@ public class TableView<T> extends Listbox implements TableViewComponent<T>, CanB
         }
     }
 
+    /**
+     * Returns selected row value or {@code null} when no selection exists.
+     *
+     * @return selected row value
+     */
     @Override
     public T getSelected() {
         if (getSelectedItem() != null) {
@@ -172,6 +213,11 @@ public class TableView<T> extends Listbox implements TableViewComponent<T>, CanB
         }
     }
 
+    /**
+     * Selects a row value in the model when present.
+     *
+     * @param selected value to mark as selected
+     */
     @Override
     public void setSelected(Object selected) {
         if (selected != null && getModel() instanceof AbstractListModel model) {
@@ -317,6 +363,9 @@ public class TableView<T> extends Listbox implements TableViewComponent<T>, CanB
         return null;
     }
 
+    /**
+     * Posts model and value changed events so listeners can refresh derived state.
+     */
     public void updateUI() {
         Events.postEvent(ON_MODEL_CHANGED, this, this.value);
 
@@ -334,6 +383,11 @@ public class TableView<T> extends Listbox implements TableViewComponent<T>, CanB
         return source;
     }
 
+    /**
+     * Updates source context and optionally subscribes to source property changes for footer recomputation.
+     *
+     * @param source source context object
+     */
     @Override
     public void setSource(Object source) {
         this.source = source;
@@ -362,11 +416,21 @@ public class TableView<T> extends Listbox implements TableViewComponent<T>, CanB
         this.projection = projection;
     }
 
+    /**
+     * Returns whether this component is in read-only mode.
+     *
+     * @return read-only state
+     */
     @Override
     public boolean isReadonly() {
         return readonly;
     }
 
+    /**
+     * Toggles read-only mode and re-renders visible rows when state changes.
+     *
+     * @param readonly read-only flag
+     */
     @Override
     public void setReadonly(boolean readonly) {
         boolean old = this.readonly;
@@ -392,6 +456,11 @@ public class TableView<T> extends Listbox implements TableViewComponent<T>, CanB
         }
     }
 
+    /**
+     * Registers a callback invoked when source is updated.
+     *
+     * @param onSourceChange source listener
+     */
     public void onSourceChanged(Consumer onSourceChange) {
         this.onSourceChange = onSourceChange;
     }
@@ -436,6 +505,11 @@ public class TableView<T> extends Listbox implements TableViewComponent<T>, CanB
         }
     }
 
+    /**
+     * Configures the processor used to evaluate multiple footer aggregate functions at once.
+     *
+     * @param multiFunctionProcesor aggregate function processor
+     */
     public void setMultiFunctionProcesor(MultiFunctionProcessor multiFunctionProcesor) {
         this.multiFunctionProcesor = multiFunctionProcesor;
     }

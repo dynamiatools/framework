@@ -120,6 +120,8 @@ fields:
       multiline: true
       height: 80px
 
+  customPaymentProvider:
+
 
 groups:
   contactInfo:
@@ -130,7 +132,7 @@ groups:
     fields: [ reseller, resellerAgent, resellerInvoice, resellerInvoiceDate, resellerComments ]
 
   configuration:
-    fields: [ locale, timeZone,skin, maxUsers,statusDescription,uuid,instanceUuid,creationDate,remote,autoInit,requiredInstanceUuid,redirect,templateAccount ]
+    fields: [ locale, timeZone,skin, maxUsers,statusDescription,uuid,instanceUuid,creationDate,customPaymentProvider,remote,autoInit,requiredInstanceUuid,redirect,templateAccount, ]
 
   notification:
     fields: [ globalMessage,globalMessageType,showGlobalMessage ]

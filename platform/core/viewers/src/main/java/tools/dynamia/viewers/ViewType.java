@@ -20,21 +20,34 @@ package tools.dynamia.viewers;
 import java.io.Serializable;
 
 /**
- * Interface representing a type of view, providing its name and renderer.
+ * Represents a named type of view in the DynamiaTools viewer framework.
+ *
+ * <p>A {@code ViewType} acts as a descriptor for a specific category of UI view (e.g., form,
+ * table, tree). It provides both a unique name to identify the type and the corresponding
+ * {@link ViewRenderer} responsible for building the visual representation.</p>
+ *
+ * <p>Implementations are typically registered in the application context and resolved through
+ * a {@link ViewTypeFactory}.</p>
+ *
+ * @see ViewRenderer
+ * @see ViewTypeFactory
  */
 public interface ViewType extends Serializable {
 
     /**
-     * Gets the name of the view type.
+     * Returns the unique name that identifies this view type (e.g., {@code "form"}, {@code "table"}).
      *
-     * @return the name
+     * @return the non-null, non-empty name of this view type
      */
     String getName();
 
     /**
-     * Gets the renderer for this view type.
+     * Returns the {@link ViewRenderer} responsible for rendering views of this type.
      *
-     * @return the view renderer
+     * <p>The renderer is used by the {@link ViewFactory} to build the actual UI component
+     * from a {@link ViewDescriptor}.</p>
+     *
+     * @return the view renderer associated with this view type; never {@code null}
      */
     @SuppressWarnings("rawtypes")
     ViewRenderer getViewRenderer();

@@ -31,14 +31,18 @@ import tools.dynamia.modules.entityfile.StoredEntityFile;
 import tools.dynamia.modules.entityfile.UploadedFileInfo;
 import tools.dynamia.modules.entityfile.domain.EntityFile;
 import tools.dynamia.modules.entityfile.domain.enums.EntityFileState;
+import tools.dynamia.modules.entityfile.service.EntityFileService;
 import tools.dynamia.web.util.HttpUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
+import java.net.URI;
 
 @Service
 public class LocalEntityFileStorage implements EntityFileStorage {
 
+    public static final String LOCAL_STORAGE_DEFAULT_CDN = "LOCAL_STORAGE_DEFAULT_CDN";
     private final LoggingService logger = new SLF4JLoggingService(LocalEntityFileStorage.class, "Local: ");
 
     public static final String ID = "LocalStorage";
@@ -54,10 +58,12 @@ public class LocalEntityFileStorage implements EntityFileStorage {
 
     private final Environment environment;
 
+
     public LocalEntityFileStorage(Parameters appParams, CrudService crudService, Environment environment) {
         this.appParams = appParams;
         this.crudService = crudService;
         this.environment = environment;
+
     }
 
     @Override
@@ -93,7 +99,7 @@ public class LocalEntityFileStorage implements EntityFileStorage {
         return sef;
     }
 
-    private String generateURL(EntityFile entityFile) {
+    public String generateURL(EntityFile entityFile) {
 
         String serverPath = HttpUtils.getServerPath();
         boolean useHttps = isUseHttps();
@@ -101,6 +107,18 @@ public class LocalEntityFileStorage implements EntityFileStorage {
         if (useHttps && serverPath.startsWith("http:")) {
             serverPath = serverPath.replace("http:", "https:");
         }
+
+        if (serverPath == null || serverPath.isBlank()) {
+            String cdn = environment.getProperty(LOCAL_STORAGE_DEFAULT_CDN);
+            try {
+                if (cdn != null && !cdn.isBlank()) {
+                    serverPath = URI.create(cdn).toURL().toString();
+                }
+            } catch (Exception e) {
+                logger.warn("Error generating local storage url for default CDN: " + cdn, e);
+            }
+        }
+
 
         String context = getContextPath();
 
@@ -111,9 +129,8 @@ public class LocalEntityFileStorage implements EntityFileStorage {
 
         String fileName = entityFile.getName();
         fileName = fileName.replace(" ", "%20");
-        String url = serverPath + context + LOCAL_FILE_HANDLER + fileName + "?uuid=" + entityFile.getUuid();
 
-        return url;
+        return serverPath + context + LOCAL_FILE_HANDLER + entityFile.getUuid() + "/" + fileName;
     }
 
     private String getContextPath() {
@@ -192,21 +209,26 @@ public class LocalEntityFileStorage implements EntityFileStorage {
         }
     }
 
-    private class LocalStoredEntityFile extends StoredEntityFile {
+    public static class LocalStoredEntityFile extends StoredEntityFile {
 
         /**
          *
          */
+        @Serial
         private static final long serialVersionUID = -6295813096900514353L;
 
         public LocalStoredEntityFile(EntityFile entityFile, String url, File realFile) {
             super(entityFile, url, realFile);
-            // TODO Auto-generated constructor stub
         }
 
         @Override
         public String getThumbnailUrl(int width, int height) {
             return getUrl() + "&w=" + width + "&h=" + height;
+        }
+
+        @Override
+        public File getThumbnailFile(int width, int height) {
+            return LocalEntityFileStorageHandler.createThumbnail(getRealFile(), getEntityFile(), width, height);
         }
 
     }

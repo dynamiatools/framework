@@ -46,12 +46,12 @@ public interface Mappable {
     /**
      * Converts the current object to a {@link Map} of property names and values.
      * <p>
-     * Uses {@link ObjectOperations#getValuesMaps(Object)} to extract all standard properties.
+     * Uses {@link ObjectOperations#getNonNullValuesMaps(Object)} to extract all standard properties but excluding non-null values.
      *
      * @return a map containing property names as keys and their corresponding values
      */
     default Map<String, Object> toMap() {
-        return ObjectOperations.getValuesMaps(this);
+        return ObjectOperations.getNonNullValuesMaps(this);
     }
 
 }

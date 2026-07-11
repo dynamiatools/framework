@@ -72,20 +72,4 @@ public class DynamiaToolsWebApplication extends DynamiaBaseConfiguration {
                 .build();
     }
 
-    @Bean
-    public PWAManifestController pwaManifestController(PWAManifest manifest) {
-        return new PWAManifestController(manifest);
-    }
-
-    /**
-     * Provides an empty {@link ModuleProvider} bean if none is registered.
-     *
-     * @return a ModuleProvider that returns a dummy module with a random name and message
-     */
-    @Bean
-    @ConditionalOnMissingBean(ModuleProvider.class)
-    public ModuleProvider emptyModuleProvider() {
-        return () -> new Module(StringUtils.randomString(), "No modules registered");
-    }
-
 }

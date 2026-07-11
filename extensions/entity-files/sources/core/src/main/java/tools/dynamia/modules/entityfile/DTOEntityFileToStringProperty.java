@@ -37,7 +37,7 @@ public class DTOEntityFileToStringProperty implements DataTransferObjectProperty
             PropertyInfo dtoProperty = ObjectOperations.getPropertyInfo(dto.getClass(), propertyInfo.getName());
             if (dtoProperty != null && dtoProperty.is(String.class)) {
                 try {
-                    String url = entityFile.getStoredEntityFile().getUrl();
+                    String url = entityFile.getUrl();
                     ObjectOperations.setFieldValue(dtoProperty, dto, url);
                     return true;
                 } catch (Exception e) {

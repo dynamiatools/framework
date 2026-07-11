@@ -43,12 +43,22 @@ metadata are store in the database in table `mod_entity_files` using JPA entity 
     </dependency>
 ```
 
+#### MinIO Support
+```xml
+    <dependency>
+        <groupId>tools.dynamia.modules</groupId>
+        <artifactId>tools.dynamia.modules.entityfiles.minio</artifactId>
+        <version>7.4.0</version>
+    </dependency>
+```
+
 ### Gradle
 
 ```groovy
 compile 'tools.dynamia.modules:tools.dynamia.modules.entityfiles:7.4.0'
 compile 'tools.dynamia.modules:tools.dynamia.modules.entityfiles.ui:7.4.0'
 compile 'tools.dynamia.modules:tools.dynamia.modules.entityfiles.s3:7.4.0'
+compile 'tools.dynamia.modules:tools.dynamia.modules.entityfiles.minio:7.4.0'
 ```
 
 ## Usage
@@ -115,6 +125,7 @@ files.
 
 - `LocalEntityFileStorage` is the default implementation and store files in local file system
 - `S3EntityFileStorage` in module S3 can upload files to AWS S3 buckets
+- `MinioEntityFileStorage` in module MinIO can upload files to MinIO buckets using the MinIO Java SDK
 
 ## License
 
