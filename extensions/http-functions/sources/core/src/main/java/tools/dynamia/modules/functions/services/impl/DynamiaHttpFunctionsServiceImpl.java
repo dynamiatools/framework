@@ -13,6 +13,7 @@ import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.AbstractService;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.modules.functions.FunctionExecutionException;
+import tools.dynamia.modules.functions.FunctionInactiveException;
 import tools.dynamia.modules.functions.FunctionNotFoundException;
 import tools.dynamia.modules.functions.FunctionResult;
 import tools.dynamia.modules.functions.domain.DynamiaHttpFunction;
@@ -83,14 +84,32 @@ public class DynamiaHttpFunctionsServiceImpl extends AbstractService implements 
 
     @Override
     public FunctionResult call(String name, Map<String, Object> params) {
-        return call(name, null, params);
+        return call(name, null, params, false);
     }
 
     @Override
     public FunctionResult call(String name, Integer version, Map<String, Object> params) {
-        DynamiaHttpFunction function = findVersion(name, version);
-        if (function == null || !function.isActive()) {
-            throw new FunctionNotFoundException(name, version);
+        return call(name, version, params, false);
+    }
+
+    @Override
+    public FunctionResult call(String name, Map<String, Object> params, boolean autoCreate) {
+        return call(name, null, params, autoCreate);
+    }
+
+    @Override
+    public FunctionResult call(String name, Integer version, Map<String, Object> params, boolean autoCreate) {
+        DynamiaHttpFunction function = resolveAnyStatus(name, version);
+
+        if (function == null) {
+            if (!autoCreate) {
+                throw new FunctionNotFoundException(name, version);
+            }
+            function = registerDraft(name, version);
+        }
+
+        if (!function.isActive()) {
+            throw new FunctionInactiveException(name, function.getFunctionVersion());
         }
 
         validateParameters(function, params);
@@ -104,6 +123,34 @@ public class DynamiaHttpFunctionsServiceImpl extends AbstractService implements 
             logger.error("Error executing function [" + name + "] version [" + function.getFunctionVersion() + "]", e);
             throw new FunctionExecutionException(name, function.getFunctionVersion(), e);
         }
+    }
+
+    /**
+     * Resolves a function by name/version regardless of its {@link FunctionStatus}, so callers can tell
+     * apart a missing function from one that simply is not active yet.
+     */
+    private DynamiaHttpFunction resolveAnyStatus(String name, Integer version) {
+        checkName(name);
+        if (version != null) {
+            return crudService().findSingle(DynamiaHttpFunction.class,
+                    QueryParameters.with("name", name).add("functionVersion", version));
+        }
+
+        List<DynamiaHttpFunction> versions = crudService().find(DynamiaHttpFunction.class,
+                QueryParameters.with("name", name).orderBy("functionVersion", false));
+        return versions.isEmpty() ? null : versions.get(0);
+    }
+
+    /**
+     * Creates a placeholder {@code DRAFT} function so it shows up for later configuration (url, method,
+     * body template, headers, etc.) instead of failing integration code with a hard "not found" error.
+     */
+    private DynamiaHttpFunction registerDraft(String name, Integer version) {
+        DynamiaHttpFunction function = new DynamiaHttpFunction();
+        function.setName(name);
+        function.setFunctionVersion(version != null ? version : 1);
+        function.setStatus(FunctionStatus.DRAFT);
+        return crudService().create(function);
     }
 
     /**

@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.modules.functions.FunctionExecutionException;
+import tools.dynamia.modules.functions.FunctionInactiveException;
 import tools.dynamia.modules.functions.FunctionNotFoundException;
 import tools.dynamia.modules.functions.FunctionResult;
 import tools.dynamia.modules.functions.services.DynamiaHttpFunctionsService;
@@ -55,7 +56,7 @@ public class DynamiaHttpFunctionsController {
         try {
             FunctionResult result = functionsService.call(functionName, version, params);
             return toResponseEntity(result);
-        } catch (FunctionNotFoundException e) {
+        } catch (FunctionNotFoundException | FunctionInactiveException e) {
             return errorResponse(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (ValidationError e) {
             return errorResponse(HttpStatus.BAD_REQUEST, e.getMessage());

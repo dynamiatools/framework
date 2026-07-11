@@ -48,6 +48,9 @@ public interface DynamiaHttpFunctionsService {
      * @param name   the function name
      * @param params the call parameters
      * @return the execution result
+     * @throws tools.dynamia.modules.functions.FunctionNotFoundException if the function does not exist
+     * @throws tools.dynamia.modules.functions.FunctionInactiveException if the function exists but is
+     *                                                                    not {@code ACTIVE}
      *
      * Example:
      * <pre>{@code
@@ -63,6 +66,41 @@ public interface DynamiaHttpFunctionsService {
      * @param version the requested version, or {@code null} to resolve the latest active version
      * @param params  the call parameters
      * @return the execution result
+     * @throws tools.dynamia.modules.functions.FunctionNotFoundException if the function/version does not exist
+     * @throws tools.dynamia.modules.functions.FunctionInactiveException if the function exists but is
+     *                                                                    not {@code ACTIVE}
      */
     FunctionResult call(String name, Integer version, Map<String, Object> params);
+
+    /**
+     * Calls the highest active version of a function, auto-registering it as a {@code DRAFT} placeholder
+     * (version 1, inactive) when it does not exist yet, so it can be configured later (url, method, body
+     * template, etc.) instead of failing integration code with a hard "not found" error. The call itself
+     * still fails with {@link tools.dynamia.modules.functions.FunctionInactiveException} until someone
+     * configures and activates the function.
+     *
+     * @param name       the function name
+     * @param params     the call parameters
+     * @param autoCreate when {@code true}, a missing function is auto-registered as {@code DRAFT} instead
+     *                   of throwing {@link tools.dynamia.modules.functions.FunctionNotFoundException}
+     * @return the execution result
+     * @throws tools.dynamia.modules.functions.FunctionNotFoundException if the function does not exist
+     *                                                                    and {@code autoCreate} is {@code false}
+     * @throws tools.dynamia.modules.functions.FunctionInactiveException if the function exists (or was
+     *                                                                    just auto-created) but is not {@code ACTIVE}
+     */
+    FunctionResult call(String name, Map<String, Object> params, boolean autoCreate);
+
+    /**
+     * Calls a specific version of a function, auto-registering it as a {@code DRAFT} placeholder when it
+     * does not exist yet. See {@link #call(String, Map, boolean)}.
+     *
+     * @param name       the function name
+     * @param version    the requested version, or {@code null} to resolve/create version 1
+     * @param params     the call parameters
+     * @param autoCreate when {@code true}, a missing function is auto-registered as {@code DRAFT} instead
+     *                   of throwing {@link tools.dynamia.modules.functions.FunctionNotFoundException}
+     * @return the execution result
+     */
+    FunctionResult call(String name, Integer version, Map<String, Object> params, boolean autoCreate);
 }

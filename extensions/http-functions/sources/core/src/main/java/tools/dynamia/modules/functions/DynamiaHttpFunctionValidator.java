@@ -8,11 +8,15 @@ import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.modules.functions.domain.DynamiaHttpFunction;
+import tools.dynamia.modules.functions.domain.enums.FunctionStatus;
 
 /**
  * Enforces the versioning rules described in the extension's README for
  * {@link DynamiaHttpFunction}: versions start at 1, {@code (name, functionVersion)} is unique, and a
- * new version of an existing function must be strictly greater than the current maximum version.
+ * new version of an existing function must be strictly greater than the current maximum version. The
+ * {@code url} is only required once the function is {@code ACTIVE}, so it can be auto-registered as a
+ * {@code DRAFT} placeholder pending configuration (see {@code DynamiaHttpFunctionsService#call} auto
+ * registration overloads).
  *
  * @author Mario A. Serrano Leones
  */
@@ -22,7 +26,9 @@ public class DynamiaHttpFunctionValidator implements Validator<DynamiaHttpFuncti
     @Override
     public void validate(DynamiaHttpFunction function) throws ValidationError {
         ValidatorUtil.validateEmpty(function.getName(), "Function name is required");
-        ValidatorUtil.validateEmpty(function.getUrl(), "Function url is required");
+        if (function.getStatus() == FunctionStatus.ACTIVE) {
+            ValidatorUtil.validateEmpty(function.getUrl(), "Function url is required");
+        }
 
         if (function.getFunctionVersion() < 1) {
             throw new ValidationError("Function version must start at 1");
