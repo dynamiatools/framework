@@ -27,7 +27,6 @@
         <module>reports/sources</module>
         <module>finances/sources</module>
         <module>http-functions/sources</module>
-        <module>http-functions/sources/core</module>
     </modules>
 
 

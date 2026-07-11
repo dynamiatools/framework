@@ -1,0 +1,6 @@
+view: crud
+beanClass: tools.dynamia.modules.functions.domain.DynamiaHttpFunction
+autofields: false
+
+params:
+  queryProjection: true

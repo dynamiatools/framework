@@ -163,6 +163,21 @@ FunctionResult result = DynamiaFunctions.call("WhatsApp.sendMessage",
 
 ------------------------------------------------------------------------
 
+## UI Module
+
+The `ui` submodule (`tools.dynamia.modules.functions.ui`, ZK-based) adds a back office CRUD for
+`DynamiaHttpFunction`/`DynamiaHttpFunctionParameter`:
+
+-   Navigation: a "Http Functions" page group is contributed to the existing `saas` module (see
+    `DynamiaHttpFunctionsModuleProvider`), listing all registered functions.
+-   View descriptors (`META-INF/descriptors/`): form/table/crud for the function itself, plus a nested
+    `crudview` for its parameters and a form/table pair for `DynamiaHttpFunctionParameter`.
+-   `TestHttpFunctionAction`: a crud action ("Test") that opens a dialog to edit call parameters as JSON
+    and immediately invokes the selected function through `DynamiaHttpFunctionsService`, showing the
+    resulting `FunctionResult` (or the validation/execution error) without leaving the browser.
+
+------------------------------------------------------------------------
+
 ## Design Principles
 
 -   Deterministic version resolution
