@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents the outcome of a {@link DynamiaHttpFunction} execution. A result is either a structured
+ * Represents the outcome of a {@link tools.dynamia.modules.functions.domain.DynamiaHttpFunction} execution. A result is either a structured
  * JSON-like payload ({@link #getData()}) or raw binary content ({@link #getBinaryData()}) with an
  * associated content type, matching the response model described in the extension's README.
  *

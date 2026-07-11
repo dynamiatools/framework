@@ -41,8 +41,18 @@ public class DynamiaHttpFunctionsServiceImpl extends AbstractService implements 
     private static final String DEFAULT_CONTENT_TYPE = "application/json";
 
     private final LoggingService logger = new SLF4JLoggingService(getClass());
-    private final RestClient restClient = RestClient.create();
+    private RestClient restClient = RestClient.create();
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    /**
+     * Replaces the {@link RestClient} used to issue function calls. Package-private: intended for tests
+     * that need to bind a {@code MockRestServiceServer} instead of performing real HTTP calls.
+     *
+     * @param restClient the rest client to use
+     */
+    void setRestClient(RestClient restClient) {
+        this.restClient = restClient;
+    }
 
     @Override
     public DynamiaHttpFunction findLatestVersion(String name) {
