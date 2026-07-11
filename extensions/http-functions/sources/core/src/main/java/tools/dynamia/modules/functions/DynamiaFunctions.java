@@ -1,9 +1,11 @@
 package tools.dynamia.modules.functions;
 
 import tools.dynamia.integration.Containers;
+import tools.dynamia.integration.scheduling.SchedulerUtil;
 import tools.dynamia.modules.functions.services.DynamiaHttpFunctionsService;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Static entry point to call {@link tools.dynamia.modules.functions.domain.DynamiaHttpFunction}s from
@@ -78,6 +80,67 @@ public class DynamiaFunctions {
      */
     public static FunctionResult call(String name, int version, Map<String, Object> params, boolean autoCreate) {
         return service().call(name, version, params, autoCreate);
+    }
+
+    /**
+     * Calls the highest active version of a function asynchronously, on a Virtual Thread (see
+     * {@link SchedulerUtil#runWithResult(java.util.function.Supplier)}), without blocking the caller.
+     *
+     * @param name   the function name
+     * @param params the call parameters
+     * @return a future completed with the execution result, or completed exceptionally if the call fails
+     *
+     * Example:
+     * <pre>{@code
+     * DynamiaFunctions.callAsync("WhatsApp.sendMessage", Map.of("number", "123", "message", "Hello"))
+     *         .thenAccept(result -> log.info("sent: " + result.isSuccess()));
+     * }</pre>
+     */
+    public static CompletableFuture<FunctionResult> callAsync(String name, Map<String, Object> params) {
+        return SchedulerUtil.runWithResult(() -> call(name, params));
+    }
+
+    /**
+     * Calls a specific version of a function asynchronously, on a Virtual Thread. See
+     * {@link #callAsync(String, Map)}.
+     *
+     * @param name    the function name
+     * @param version the requested version
+     * @param params  the call parameters
+     * @return a future completed with the execution result, or completed exceptionally if the call fails
+     */
+    public static CompletableFuture<FunctionResult> callAsync(String name, int version, Map<String, Object> params) {
+        return SchedulerUtil.runWithResult(() -> call(name, version, params));
+    }
+
+    /**
+     * Calls the highest active version of a function asynchronously, auto-registering it as a
+     * {@code DRAFT} placeholder when it does not exist yet. See {@link #callAsync(String, Map)} and
+     * {@link #call(String, Map, boolean)}.
+     *
+     * @param name       the function name
+     * @param params     the call parameters
+     * @param autoCreate when {@code true}, a missing function is auto-registered as {@code DRAFT} instead
+     *                   of failing the future with {@link FunctionNotFoundException}
+     * @return a future completed with the execution result, or completed exceptionally if the call fails
+     */
+    public static CompletableFuture<FunctionResult> callAsync(String name, Map<String, Object> params, boolean autoCreate) {
+        return SchedulerUtil.runWithResult(() -> call(name, params, autoCreate));
+    }
+
+    /**
+     * Calls a specific version of a function asynchronously, auto-registering it as a {@code DRAFT}
+     * placeholder when it does not exist yet. See {@link #callAsync(String, Map, boolean)}.
+     *
+     * @param name       the function name
+     * @param version    the requested version
+     * @param params     the call parameters
+     * @param autoCreate when {@code true}, a missing function is auto-registered as {@code DRAFT} instead
+     *                   of failing the future with {@link FunctionNotFoundException}
+     * @return a future completed with the execution result, or completed exceptionally if the call fails
+     */
+    public static CompletableFuture<FunctionResult> callAsync(String name, int version, Map<String, Object> params, boolean autoCreate) {
+        return SchedulerUtil.runWithResult(() -> call(name, version, params, autoCreate));
     }
 
     private static DynamiaHttpFunctionsService service() {
