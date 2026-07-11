@@ -31,12 +31,17 @@ Each function includes:
 
 -   name (e.g., WhatsApp.sendMessage)
 -   functionVersion (integer, starting at 1)
--   executorBean or implementation reference
--   active flag
--   Metadata (optional JSON)
+-   method, url, contentType and bodyTemplate describing the external HTTP call to perform
+-   headers (optional, one `Header-Name: value` per line, supports `${param}` placeholders)
+-   status (DRAFT, ACTIVE, INACTIVE, DELETED)
+-   metadata (optional free-form JSON, informative/extensible)
 -   Parameter definitions
 
-Constraint: (name, functionVersion) must be unique.
+`url`, `bodyTemplate` and `headers` are rendered with the call parameters before the request is
+issued, using `${paramName}` placeholders (e.g. `{"to":"${number}","text":"${message}"}`).
+
+Constraint: (name, functionVersion) is unique per account, enforced both by a database index and by
+`DynamiaHttpFunctionValidator`.
 
 ------------------------------------------------------------------------
 
@@ -141,15 +146,20 @@ When returning binary:
 
 ## Execution Model
 
-Functions are resolved through a registry:
+Functions are resolved through `DynamiaHttpFunctionsService` (registry + execution engine), and can be
+called either over HTTP or directly from Java code via `DynamiaFunctions.call(...)`:
 
--   Lookup by (name, version)
--   Resolve executor implementation
--   Validate parameters
--   Execute
--   Return structured response
+-   Lookup by (name, version), defaulting to the highest ACTIVE version
+-   Validate parameters against their declared definitions (required/type coercion)
+-   Render `url`, `bodyTemplate` and `headers` templates with the call parameters
+-   Issue the configured HTTP request
+-   Convert the response into a `FunctionResult` (JSON payload or binary content, based on the response
+    content type) and return it
 
-Executors should be stateless and deterministic.
+```java
+FunctionResult result = DynamiaFunctions.call("WhatsApp.sendMessage",
+        Map.of("number", "123456789", "message", "Hello"));
+```
 
 ------------------------------------------------------------------------
 
@@ -176,13 +186,15 @@ Executors should be stateless and deterministic.
 
 ## Roadmap (Future Enhancements)
 
--   Draft vs Active lifecycle states
+-   Dynamic Java interface proxies backed by functions (`interfaceName`/`methodName` fields are
+    reserved for this, not yet implemented)
 -   Deprecation metadata
 -   Automatic version suggestions
 -   Function observability (metrics, execution time)
 -   Caching support
 -   Async execution support
 -   Script-based execution sandbox
+-   401/403 enforcement at the function level (currently delegated to the application's security layer)
 
 ------------------------------------------------------------------------
 
