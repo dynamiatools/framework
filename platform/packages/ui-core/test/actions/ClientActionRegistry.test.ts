@@ -180,6 +180,6 @@ describe('ClientActionRegistry.findApplicable', () => {
     registerClientAction({ id: 'B', execute: vi.fn() });
     const withRenderer = ClientActionRegistry.filter(a => a.renderer === 'custom');
     expect(withRenderer).toHaveLength(1);
-    expect(withRenderer[0].id).toBe('A');
+    expect(withRenderer[0]?.id).toBe('A');
   });
 });

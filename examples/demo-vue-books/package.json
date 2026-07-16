@@ -14,12 +14,12 @@
     "@dynamia-tools/sdk": "file:../../platform/packages/sdk",
     "@dynamia-tools/ui-core": "file:../../platform/packages/ui-core",
     "@dynamia-tools/vue": "file:../../platform/packages/vue",
-    "vue": "^3.5.13"
+    "vue": "^3.5.39"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.0",
-    "typescript": "^5.7.3",
-    "vite": "^8.0.0",
-    "vue-tsc": "^2.2.0"
+    "@vitejs/plugin-vue": "^6.0.8",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.4",
+    "vue-tsc": "^2.2.12"
   }
 }
