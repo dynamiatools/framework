@@ -55,14 +55,15 @@ public class ShowAccountAdminActions extends AbstractCrudAction {
 
     @Override
     public void actionPerformed(CrudActionEvent evt) {
-        Account account = (Account) evt.getData();
-        if (account != null) {
-            account = crudService().reload(account);
-            AccountDTO info = account.toDTO();
-            ActionEventBuilder evtBuilder = (source, params) -> {
 
-                return new ActionEvent(info, this);
-            };
+        if (evt.getData() instanceof Account account) {
+            account = crudService().find(Account.class, account.getId());
+            if (account == null) {
+                UIMessages.showMessage("Account not found", MessageType.CRITICAL);
+                return;
+            }
+            AccountDTO info = account.toDTO();
+            ActionEventBuilder evtBuilder = (source, params) -> new ActionEvent(info, this);
 
             ActionLoader<AccountAdminAction> loader = new ActionLoader<>(AccountAdminAction.class);
             loader.setIgnoreRestrictions(true);
