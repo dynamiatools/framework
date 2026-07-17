@@ -15,8 +15,9 @@ fields:
   apiKey:
   apiSecret:
   webCheckoutSecret:
-    label: Webcheckout URL
   integritySecret:
+  eventsSecret:
+  webhooksSecret:
 
   serviceURL:
     label: Service URL
@@ -42,4 +43,4 @@ groups:
       - extra3
 
 layout:
-  columns: 2
+  columns: 4
