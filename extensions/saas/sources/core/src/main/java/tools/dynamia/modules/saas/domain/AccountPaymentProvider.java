@@ -22,6 +22,12 @@ public class AccountPaymentProvider extends SimpleEntity {
 
     @Column(length = 500)
     private String webCheckoutSecret;
+
+    @Column(length = 500)
+    private String eventsSecret;
+
+    @Column(length = 500)
+    private String webhooksSecret;
     @Column(length = 500)
     private String serviceURL;
     private String merchantId;
@@ -137,6 +143,22 @@ public class AccountPaymentProvider extends SimpleEntity {
 
     public void setExtra3(String extra3) {
         this.extra3 = extra3;
+    }
+
+    public String getEventsSecret() {
+        return eventsSecret;
+    }
+
+    public void setEventsSecret(String eventsSecret) {
+        this.eventsSecret = eventsSecret;
+    }
+
+    public String getWebhooksSecret() {
+        return webhooksSecret;
+    }
+
+    public void setWebhooksSecret(String webhooksSecret) {
+        this.webhooksSecret = webhooksSecret;
     }
 
     @Override
