@@ -63,7 +63,7 @@
 
         <!-- Web -->
         <zk.version>10.2.1-jakarta</zk.version>
-        <dynamia.zk.version>1.2.0</dynamia.zk.version>
+        <dynamia.zk.version>1.3.0</dynamia.zk.version>
         <aws.version>2.44.5</aws.version>
         <minio.version>8.5.17</minio.version>
 
