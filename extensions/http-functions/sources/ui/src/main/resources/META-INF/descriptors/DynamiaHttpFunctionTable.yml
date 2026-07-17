@@ -1,0 +1,30 @@
+view: table
+beanClass: tools.dynamia.modules.functions.domain.DynamiaHttpFunction
+autofields: false
+
+fields:
+  name:
+  functionVersion:
+    label: Version
+    params:
+      header: { width: 90px, align: center }
+  method:
+    params:
+      header: { width: 90px }
+  url:
+  status:
+    component: enumlabel
+    params:
+      defaultSclass: functionStatus
+      sclassPrefix: status
+      header: { width: 110px }
+
+params:
+  enumColors:
+    name: status
+    colors:
+      ACTIVE: "#e6f7e6"
+      DRAFT: "#fff7e0"
+      INACTIVE: "#f0f0f0"
+      DELETED: "#fde8e8"
+  orderBy: name

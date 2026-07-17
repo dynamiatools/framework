@@ -1,0 +1,73 @@
+view: form
+beanClass: tools.dynamia.modules.functions.domain.DynamiaHttpFunction
+autofields: false
+
+fields:
+  name:
+    params:
+      span: 2
+  functionVersion:
+    params:
+      span: 1
+  status:
+    params:
+      span: 1
+  description:
+    params:
+      span: 4
+      multiline: true
+      height: 60px
+
+  method:
+    params:
+      span: 1
+  url:
+    params:
+      span: 3
+  contentType:
+    params:
+      span: 2
+  headers:
+    params:
+      span: 2
+      multiline: true
+      height: 100px
+  bodyTemplate:
+    label: Body Template
+    params:
+      span: 4
+      multiline: true
+      height: 140px
+
+  parameters:
+    component: crudview
+    params:
+      inplace: true
+      height: 300px
+      span: 4
+
+  interfaceName:
+    params:
+      span: 2
+  methodName:
+    params:
+      span: 2
+  metadata:
+    params:
+      span: 4
+      multiline: true
+      height: 100px
+
+groups:
+  request:
+    label: Request
+    fields: [method, url, contentType, headers, bodyTemplate]
+  parameters:
+    label: Parameters
+    fields: [parameters]
+  advanced:
+    label: Advanced
+    fields: [interfaceName, methodName, metadata]
+
+layout:
+  columns: 4

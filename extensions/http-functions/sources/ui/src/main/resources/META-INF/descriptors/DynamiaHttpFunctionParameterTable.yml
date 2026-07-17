@@ -1,0 +1,21 @@
+view: table
+beanClass: tools.dynamia.modules.functions.domain.DynamiaHttpFunctionParameter
+autofields: false
+
+fields:
+  position:
+    params:
+      header: { width: 60px, align: center }
+  name:
+  type:
+    params:
+      header: { width: 110px }
+  required:
+    params:
+      header: { width: 90px, align: center }
+  defaultValue:
+    label: Default
+  description:
+
+params:
+  orderBy: position

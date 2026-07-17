@@ -1,0 +1,28 @@
+view: form
+beanClass: tools.dynamia.modules.functions.domain.DynamiaHttpFunctionParameter
+autofields: false
+
+fields:
+  name:
+    params:
+      span: 2
+  type:
+    params:
+      span: 1
+  required:
+    params:
+      span: 1
+  defaultValue:
+    params:
+      span: 2
+  position:
+    params:
+      span: 1
+  description:
+    params:
+      span: 4
+      multiline: true
+      height: 60px
+
+layout:
+  columns: 4
