@@ -533,7 +533,6 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
 
     @Override
     public AccountDTO toDTO() {
-        System.out.println("Loading Account DTO: " + this);
         AccountDTO dto = DomainUtils.autoDataTransferObject(this, AccountDTO.class);
 
         String logoURL = null;
