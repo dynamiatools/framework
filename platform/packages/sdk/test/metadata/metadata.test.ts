@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, type Mock } from 'vitest';
 import { DynamiaClient } from '../../src/index.js';
 import { mockFetch, makeClient } from '../helpers.js';
 
 describe('MetadataApi', () => {
-  let fetchMock: ReturnType<typeof vi.fn>;
+  let fetchMock: Mock<typeof fetch>;
   let client: DynamiaClient;
   beforeEach(() => {
     fetchMock = mockFetch(200, { name: 'Demo App', version: '1.0.0' });

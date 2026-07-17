@@ -6,7 +6,8 @@
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "types": ["node"]
   },
   "include": ["src"]
 }

@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi, type Mock } from 'vitest';
 import { DynamiaClient } from '../src/index.js';
 
 export function rawPageResponse<T>(items: T[], page = 1, pageSize = 50) {
@@ -9,7 +9,7 @@ export function rawPageResponse<T>(items: T[], page = 1, pageSize = 50) {
   };
 }
 
-export function mockFetch(status: number, body: unknown, contentType = 'application/json') {
+export function mockFetch(status: number, body: unknown, contentType = 'application/json'): Mock<typeof fetch> {
   return vi.fn().mockResolvedValue({
     ok: status >= 200 && status < 300,
     status,
@@ -18,9 +18,9 @@ export function mockFetch(status: number, body: unknown, contentType = 'applicat
     json: () => Promise.resolve(body),
     text: () => Promise.resolve(String(body)),
     blob: () => Promise.resolve(new Blob()),
-  } as unknown as Response);
+  } as unknown as Response) as unknown as Mock<typeof fetch>;
 }
 
-export function makeClient(fetchMock: ReturnType<typeof vi.fn>) {
+export function makeClient(fetchMock: Mock<typeof fetch>) {
   return new DynamiaClient({ baseUrl: 'https://app.example.com', token: 'test-token', fetch: fetchMock });
 }

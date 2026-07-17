@@ -5,7 +5,8 @@
     "noEmit": true,
     "jsx": "preserve",
     "lib": ["ES2022", "DOM"],
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "types": ["node"]
   },
   "include": ["src"]
 }
