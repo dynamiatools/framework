@@ -24,7 +24,7 @@
     <parent>
         <groupId>tools.dynamia.modules</groupId>
         <artifactId>tools.dynamia.modules.saas.parent</artifactId>
-        <version>26.6.0</version>
+        <version>26.7.0</version>
     </parent>
 
     <name>DynamiaModules - SaaS Migration</name>
@@ -57,35 +57,35 @@
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.saas</artifactId>
-            <version>26.6.0</version>
+            <version>26.7.0</version>
         </dependency>
 
         <!-- SaaS API: AccountAware, AccountExportIgnore annotations -->
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.saas.api</artifactId>
-            <version>26.6.0</version>
+            <version>26.7.0</version>
         </dependency>
 
         <!-- SaaS JPA: SimpleEntitySaaS base classes -->
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.saas.jpa</artifactId>
-            <version>26.6.0</version>
+            <version>26.7.0</version>
         </dependency>
 
         <!-- Dynamia Integration: SchedulerUtil, VT, Containers -->
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.integration</artifactId>
-            <version>26.6.0</version>
+            <version>26.7.0</version>
         </dependency>
 
         <!-- Dynamia Domain JPA: CrudService, SimpleEntity, JpaUtils -->
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.domain.jpa</artifactId>
-            <version>26.6.0</version>
+            <version>26.7.0</version>
         </dependency>
 
         <!-- Hibernate ORM: EntityManagerFactory, Metamodel -->
