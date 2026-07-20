@@ -199,6 +199,17 @@ function dynamiaResolveApp(appRoot) {
 }
 
 /**
+ * Sends a named event with a data payload from a MicroFrontend ZK component's container back to
+ * its server-side component.
+ * @param {string} containerId - Id of the component's container element (its ZK uuid).
+ * @param {string} name - Event name, e.g. "onMicrofrontendReady"/"onMicrofrontendError".
+ * @param {*} data - Event data, or null.
+ */
+function dynamiaFireHostEvent(containerId, name, data) {
+    zAu.send(new zk.Event(zk.Widget.$(containerId), name, data));
+}
+
+/**
  * Loads (if needed) and mounts a microfrontend bundle into the container element of a
  * MicroFrontend ZK component. Injects a {@code dynamiaEmit(data)} function into the mounted
  * bundle's props so it can notify the server-side ZK component, which fires "onMicrofrontendEvent"
@@ -221,25 +232,33 @@ function dynamiaResolveApp(appRoot) {
  * just reassigns the existing element's properties; "mount-fn" calls "updateFn" if configured,
  * otherwise it tears the old instance down (via unmountFn) and mounts fresh, same as any other
  * structural change (src/app/tag/mountFn/shadow actually changing).
+ *
+ * Fires "onMicrofrontendReady" once mounting/updating succeeds, or "onMicrofrontendError" (with
+ * {message} data) if loading or mounting fails for any reason, both bindable server-side with
+ * onMicrofrontendReady/onMicrofrontendError="@command(...)".
  * @param {string} containerId - Id of the component's container element (its ZK uuid).
  * @param {object} config - {src, css, app, type, mode, tag, mountFn, unmountFn, updateFn, shadow, props}.
  */
 function dynamiaMountMicrofrontend(containerId, config) {
     if (config.mode === 'auto') {
         if (config.shadow) {
-            console.error('Dynamia Microfrontend: shadow=true is not supported with "auto" mode — the bundle finds ' +
+            var shadowAutoMsg = 'Dynamia Microfrontend: shadow=true is not supported with "auto" mode — the bundle finds ' +
                 'its mount target via a page-level document.getElementById() call it makes itself, which cannot see ' +
-                'inside a shadow root. Use tag= (custom element) or mountFn=/unmountFn= instead.');
+                'inside a shadow root. Use tag= (custom element) or mountFn=/unmountFn= instead.';
+            console.error(shadowAutoMsg);
+            dynamiaFireHostEvent(containerId, 'onMicrofrontendError', {message: shadowAutoMsg});
             return;
         }
         DynamiaMicrofrontends.autoMounted = DynamiaMicrofrontends.autoMounted || {};
         var owner = DynamiaMicrofrontends.autoMounted[config.app];
         if (owner && owner !== containerId && document.getElementById(owner)) {
-            console.error('Dynamia Microfrontend: "' + config.app + '" is already auto-mounted on this page. ' +
+            var duplicateAppMsg = 'Dynamia Microfrontend: "' + config.app + '" is already auto-mounted on this page. ' +
                 'Auto mode self-mounts via a hardcoded id from the bundle\'s own index.html and its script ' +
                 'only runs once, so it cannot support a second simultaneous instance of the same app. ' +
                 'Rebuild it as a custom element (use tag=) or expose mount/unmount functions ' +
-                '(mountFn=/unmountFn=) if you need more than one instance.');
+                '(mountFn=/unmountFn=) if you need more than one instance.';
+            console.error(duplicateAppMsg);
+            dynamiaFireHostEvent(containerId, 'onMicrofrontendError', {message: duplicateAppMsg});
             return;
         }
         DynamiaMicrofrontends.autoMounted[config.app] = containerId;
@@ -254,7 +273,7 @@ function dynamiaMountMicrofrontend(containerId, config) {
         if (config.mode === 'auto') {
             container.innerHTML = bundle.bodyHtml || '';
             return Promise.all([dynamiaLoadScript(bundle.src, config.type), dynamiaLoadStyles(bundle.css)]).then(function () {
-                return null;
+                return {auto: true};
             });
         }
 
@@ -300,9 +319,13 @@ function dynamiaMountMicrofrontend(containerId, config) {
         if (!result) {
             return;
         }
+        if (result.auto) {
+            dynamiaFireHostEvent(containerId, 'onMicrofrontendReady', null);
+            return;
+        }
         var props = config.props || {};
         props.dynamiaEmit = function (data) {
-            zAu.send(new zk.Event(zk.Widget.$(containerId), 'onMicrofrontendEvent', data));
+            dynamiaFireHostEvent(containerId, 'onMicrofrontendEvent', data);
         };
 
         if (result.update) {
@@ -312,7 +335,10 @@ function dynamiaMountMicrofrontend(containerId, config) {
                 if (typeof updateFn === 'function') {
                     updateFn(prev.mountTarget, props);
                 } else {
-                    console.error('Dynamia Microfrontend: update function "' + config.updateFn + '" not found on window');
+                    var noUpdateFnMsg = 'Dynamia Microfrontend: update function "' + config.updateFn + '" not found on window';
+                    console.error(noUpdateFnMsg);
+                    dynamiaFireHostEvent(containerId, 'onMicrofrontendError', {message: noUpdateFnMsg});
+                    return;
                 }
             } else {
                 Object.keys(props).forEach(function (key) {
@@ -324,6 +350,7 @@ function dynamiaMountMicrofrontend(containerId, config) {
                 });
             }
             prev.unmountFn = config.unmountFn;
+            dynamiaFireHostEvent(containerId, 'onMicrofrontendReady', null);
             return;
         }
 
@@ -337,7 +364,10 @@ function dynamiaMountMicrofrontend(containerId, config) {
             if (typeof mountFn === 'function') {
                 mountFn(mountTarget, props);
             } else {
-                console.error('Dynamia Microfrontend: mount function "' + config.mountFn + '" not found on window');
+                var noMountFnMsg = 'Dynamia Microfrontend: mount function "' + config.mountFn + '" not found on window';
+                console.error(noMountFnMsg);
+                dynamiaFireHostEvent(containerId, 'onMicrofrontendError', {message: noMountFnMsg});
+                return;
             }
         } else {
             var el = document.createElement(config.tag);
@@ -352,8 +382,10 @@ function dynamiaMountMicrofrontend(containerId, config) {
             instance.el = el;
         }
         DynamiaMicrofrontends.instances[containerId] = instance;
+        dynamiaFireHostEvent(containerId, 'onMicrofrontendReady', null);
     }).catch(function (err) {
         console.error(err);
+        dynamiaFireHostEvent(containerId, 'onMicrofrontendError', {message: err && err.message ? err.message : String(err)});
     });
 }
 

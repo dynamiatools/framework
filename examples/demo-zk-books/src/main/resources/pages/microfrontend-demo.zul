@@ -11,8 +11,20 @@
             Clients.showNotification("onMicrofrontendEvent: " + event.getData());
         }
 
+        void handleMicrofrontendReady(org.zkoss.zk.ui.event.Event event) {
+            System.out.println("[MicroFrontend] onMicrofrontendReady: " + event.getTarget());
+        }
+
+        void handleMicrofrontendError(org.zkoss.zk.ui.event.Event event) {
+            Clients.showNotification("onMicrofrontendError: " + event.getData(), "error", null, "top_center", 4000);
+        }
+
         void randomizeMountFnUserId() {
             mountFnDemo.addProp("userId", (int) (Math.random() * 1000));
+        }
+
+        void breakBundle() {
+            brokenDemo.setSrc("/static/js/does-not-exist.js");
         }
     ]]></zscript>
 
@@ -21,10 +33,11 @@
 
         <div id="wrapper" hflex="1">
             <groupbox width="50%">
-                <caption label="custom-element mode"/>
+                <caption label="custom-element mode (see server console for onMicrofrontendReady)"/>
                 <microfrontend src="/static/js/microfrontend-demo.js" css="/static/css/microfrontend-demo.css"
                                tag="demo-widget" mode="custom-element" userId="42" theme="dark"
-                               onMicrofrontendEvent="handleMicrofrontendEvent(event)"/>
+                               onMicrofrontendEvent="handleMicrofrontendEvent(event)"
+                               onMicrofrontendReady="handleMicrofrontendReady(event)"/>
             </groupbox>
             <groupbox width="50%">
                 <caption label="mount-fn mode, shadow DOM isolated, update in place"/>
@@ -49,6 +62,12 @@
                     <button label="Randomize user" onClick="@command('randomizeUser')"/>
                 </hbox>
                 <label value="@load(vm.lastEvent)"/>
+            </groupbox>
+            <groupbox width="50%">
+                <caption label="onMicrofrontendError demo"/>
+                <microfrontend id="brokenDemo" src="/static/js/microfrontend-demo.js" tag="demo-widget"
+                               onMicrofrontendError="handleMicrofrontendError(event)"/>
+                <button label="Point src at a missing file (fires onMicrofrontendError)" onClick="breakBundle()"/>
             </groupbox>
         </div>
 

@@ -109,7 +109,10 @@ import java.util.Map;
  * {@code src="@bind(vm.bundleUrl)"} or {@code userId="@bind(vm.userId)"}. For the reverse
  * direction, the mounted microfrontend can call the {@code dynamiaEmit(data)} function injected
  * into its props to notify the server, which fires {@value #ON_EVENT} and can be bound with
- * {@code onMicrofrontendEvent="@command('handleIt', data=event.data)"}.
+ * {@code onMicrofrontendEvent="@command('handleIt', data=event.data)"}. {@value #ON_READY} fires
+ * once the bundle has (re)mounted successfully (e.g. to hide a loading indicator), and
+ * {@value #ON_ERROR} fires if loading/mounting fails for any reason (e.g. to show a retry button),
+ * with {@code event.getData()} a {@code Map} containing a {@code message} entry.
  * <p>
  * Every registered {@link MicroFrontendHostContextProvider} bean is automatically merged into a
  * {@code dynamiaHost} prop on every mount (except {@link #MODE_AUTO}), so cross-cutting values
@@ -141,11 +144,22 @@ public class MicroFrontend extends Div implements DynamicPropertied, AfterCompos
     public static final String MODE_AUTO = "auto";
     /** Event fired when the mounted microfrontend calls the injected {@code dynamiaEmit(data)} function. */
     public static final String ON_EVENT = "onMicrofrontendEvent";
+    /** Event fired once the bundle/stylesheet(s) have loaded and the microfrontend has (re)mounted successfully. */
+    public static final String ON_READY = "onMicrofrontendReady";
+    /**
+     * Event fired when loading or mounting the bundle fails (script/stylesheet 404, missing
+     * index.html in {@link #MODE_AUTO}, missing {@link #mountFn}/{@link #tag} on window, an
+     * exception thrown by the bundle itself, etc). {@link org.zkoss.zk.ui.event.Event#getData()} is
+     * a {@code Map} with a {@code message} entry.
+     */
+    public static final String ON_ERROR = "onMicrofrontendError";
     /** Internal, server-only event used to coalesce bursts of {@link #mount()} calls; never sent by the client. */
     private static final String EVT_MOUNT = "onMicrofrontendMount";
 
     static {
         addClientEvent(MicroFrontend.class, ON_EVENT, ComponentCtrl.CE_IMPORTANT);
+        addClientEvent(MicroFrontend.class, ON_READY, ComponentCtrl.CE_IMPORTANT);
+        addClientEvent(MicroFrontend.class, ON_ERROR, ComponentCtrl.CE_IMPORTANT);
     }
 
     private String src;
