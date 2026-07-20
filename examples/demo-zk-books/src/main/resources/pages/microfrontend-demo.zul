@@ -10,6 +10,10 @@
         void handleMicrofrontendEvent(org.zkoss.zk.ui.event.Event event) {
             Clients.showNotification("onMicrofrontendEvent: " + event.getData());
         }
+
+        void randomizeMountFnUserId() {
+            mountFnDemo.addProp("userId", (int) (Math.random() * 1000));
+        }
     ]]></zscript>
 
     <div hflex="1" vflex="1">
@@ -23,10 +27,11 @@
                                onMicrofrontendEvent="handleMicrofrontendEvent(event)"/>
             </groupbox>
             <groupbox width="50%">
-                <caption label="mount-fn mode, shadow DOM isolated"/>
-                <microfrontend src="/static/js/microfrontend-demo.js" css="/static/css/microfrontend-demo.css"
-                               mode="mount-fn" mountFn="mountDemoApp" unmountFn="unmountDemoApp" userId="99"
-                               shadow="true" onMicrofrontendEvent="handleMicrofrontendEvent(event)"/>
+                <caption label="mount-fn mode, shadow DOM isolated, update in place"/>
+                <microfrontend id="mountFnDemo" src="/static/js/microfrontend-demo.js" css="/static/css/microfrontend-demo.css"
+                               mode="mount-fn" mountFn="mountDemoApp" unmountFn="unmountDemoApp" updateFn="updateDemoApp"
+                               userId="99" shadow="true" onMicrofrontendEvent="handleMicrofrontendEvent(event)"/>
+                <button label="Change userId (updates in place, no remount)" onClick="randomizeMountFnUserId()"/>
             </groupbox>
             <groupbox width="50%">
                 <caption label="app auto-discovery mode, self-mounting (no tag/mountFn)"/>

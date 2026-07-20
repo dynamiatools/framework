@@ -42,17 +42,34 @@
         customElements.define('demo-widget', DemoWidget);
     }
 
-    window.mountDemoApp = function (container, props) {
+    function renderMountDemoApp(container, props) {
         container.innerHTML =
             '<div style="padding:1rem;border:2px solid #00b894;border-radius:8px">' +
             '<strong>mount-fn mode</strong><br/>userId: ' + props.userId + '<br/>' +
+            'in-place updates: ' + (container._dynamiaUpdateCount || 0) + '<br/>' +
             '<button id="emit" class="demo-widget-emit-btn">emit event to server</button></div>';
         container.querySelector('#emit').addEventListener('click', function () {
             if (typeof props.dynamiaEmit === 'function') {
                 props.dynamiaEmit({from: 'mount-fn', userId: props.userId});
             }
         });
+    }
+
+    window.mountDemoApp = function (container, props) {
+        container._dynamiaUpdateCount = 0;
+        renderMountDemoApp(container, props);
         console.log('[demo-app] mounted via mount-fn', props);
+    };
+
+    /**
+     * Optional single-spa-style "update" hook (MicroFrontend's updateFn=): called instead of
+     * unmount+mount when only props changed, so the bundle can preserve its own state. Here we
+     * just bump a counter on the container to prove in the UI/console that no full remount happened.
+     */
+    window.updateDemoApp = function (container, props) {
+        container._dynamiaUpdateCount = (container._dynamiaUpdateCount || 0) + 1;
+        renderMountDemoApp(container, props);
+        console.log('[demo-app] updated in place via updateFn (#' + container._dynamiaUpdateCount + ')', props);
     };
 
     window.unmountDemoApp = function (container) {

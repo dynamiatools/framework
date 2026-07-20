@@ -213,8 +213,16 @@ function dynamiaResolveApp(appRoot) {
  * a shadow root attached to the container (its stylesheet(s) inlined into that root instead of
  * document head) for CSS/DOM isolation from the host page; "auto" cannot be combined with shadow
  * since its bundle looks up its mount target with a page-level document.getElementById() call.
+ *
+ * When a previous instance is already mounted in this container with the same shape (mode, resolved
+ * bundle src, tag/mountFn, shadow), only props changed: the existing instance is updated in place
+ * instead of destroyed and recreated (important once props are MVVM-bound, since every single
+ * @bind-ed property change would otherwise wipe any state the mounted app holds). "custom-element"
+ * just reassigns the existing element's properties; "mount-fn" calls "updateFn" if configured,
+ * otherwise it tears the old instance down (via unmountFn) and mounts fresh, same as any other
+ * structural change (src/app/tag/mountFn/shadow actually changing).
  * @param {string} containerId - Id of the component's container element (its ZK uuid).
- * @param {object} config - {src, css, app, type, mode, tag, mountFn, unmountFn, shadow, props}.
+ * @param {object} config - {src, css, app, type, mode, tag, mountFn, unmountFn, updateFn, shadow, props}.
  */
 function dynamiaMountMicrofrontend(containerId, config) {
     if (config.mode === 'auto') {
@@ -236,6 +244,7 @@ function dynamiaMountMicrofrontend(containerId, config) {
         }
         DynamiaMicrofrontends.autoMounted[config.app] = containerId;
     }
+    DynamiaMicrofrontends.instances = DynamiaMicrofrontends.instances || {};
     var resolved = config.app ? dynamiaResolveApp(config.app) : Promise.resolve({src: config.src, css: config.css, bodyHtml: ''});
     resolved.then(function (bundle) {
         var container = document.getElementById(containerId);
@@ -248,6 +257,28 @@ function dynamiaMountMicrofrontend(containerId, config) {
                 return null;
             });
         }
+
+        var prev = DynamiaMicrofrontends.instances[containerId];
+        var canUpdateInPlace = prev && prev.mode === config.mode && prev.src === bundle.src &&
+            prev.shadow === !!config.shadow &&
+            (config.mode === 'mount-fn'
+                ? prev.mountFn === config.mountFn && !!config.updateFn
+                : prev.tag === config.tag);
+        if (canUpdateInPlace) {
+            return {update: true, prev: prev};
+        }
+
+        if (prev && prev.mode === 'mount-fn' && prev.unmountFn) {
+            var oldUnmount = window[prev.unmountFn];
+            if (typeof oldUnmount === 'function') {
+                try {
+                    oldUnmount(prev.mountTarget);
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        }
+
         var root = container;
         var cssPromise;
         if (config.shadow) {
@@ -263,16 +294,43 @@ function dynamiaMountMicrofrontend(containerId, config) {
             root.appendChild(mountTarget);
         }
         return Promise.all([dynamiaLoadScript(bundle.src, config.type), cssPromise]).then(function () {
-            return {root: root, mountTarget: mountTarget};
+            return {update: false, root: root, mountTarget: mountTarget, src: bundle.src};
         });
     }).then(function (result) {
         if (!result) {
             return;
         }
-        var root = result.root, mountTarget = result.mountTarget;
         var props = config.props || {};
         props.dynamiaEmit = function (data) {
             zAu.send(new zk.Event(zk.Widget.$(containerId), 'onMicrofrontendEvent', data));
+        };
+
+        if (result.update) {
+            var prev = result.prev;
+            if (config.mode === 'mount-fn') {
+                var updateFn = window[config.updateFn];
+                if (typeof updateFn === 'function') {
+                    updateFn(prev.mountTarget, props);
+                } else {
+                    console.error('Dynamia Microfrontend: update function "' + config.updateFn + '" not found on window');
+                }
+            } else {
+                Object.keys(props).forEach(function (key) {
+                    var value = props[key];
+                    prev.el[key] = value;
+                    if (typeof value !== 'function') {
+                        prev.el.setAttribute(key, typeof value === 'object' ? JSON.stringify(value) : value);
+                    }
+                });
+            }
+            prev.unmountFn = config.unmountFn;
+            return;
+        }
+
+        var root = result.root, mountTarget = result.mountTarget;
+        var instance = {
+            mode: config.mode, src: result.src, tag: config.tag, mountFn: config.mountFn,
+            unmountFn: config.unmountFn, shadow: !!config.shadow, root: root, mountTarget: mountTarget
         };
         if (config.mode === 'mount-fn') {
             var mountFn = window[config.mountFn];
@@ -291,22 +349,27 @@ function dynamiaMountMicrofrontend(containerId, config) {
                 }
             });
             root.appendChild(el);
+            instance.el = el;
         }
+        DynamiaMicrofrontends.instances[containerId] = instance;
     }).catch(function (err) {
         console.error(err);
     });
 }
 
 /**
- * Unmounts a microfrontend previously mounted with {@link dynamiaMountMicrofrontend} in
- * "mount-fn" mode. Components using "custom-element" mode are cleaned up automatically by the
- * browser when their DOM node is removed (disconnectedCallback), so this is a no-op for them. With
- * {@code config.shadow}, passes the same shadow-root-scoped <div> that was originally passed to
- * mountFn, not the container itself.
+ * Unmounts a microfrontend previously mounted with {@link dynamiaMountMicrofrontend} and clears its
+ * update-in-place tracking. In "mount-fn" mode it calls "unmountFn" explicitly. Components using
+ * "custom-element" mode are cleaned up automatically by the browser when their DOM node is removed
+ * (disconnectedCallback). With {@code config.shadow}, passes the same shadow-root-scoped <div> that
+ * was originally passed to mountFn, not the container itself.
  * @param {string} containerId - Id of the component's container element (its ZK uuid).
  * @param {object} config - {mode, unmountFn, shadow}.
  */
 function dynamiaUnmountMicrofrontend(containerId, config) {
+    if (DynamiaMicrofrontends.instances) {
+        delete DynamiaMicrofrontends.instances[containerId];
+    }
     if (config.mode !== 'mount-fn' || !config.unmountFn) {
         return;
     }

@@ -45,7 +45,10 @@ import java.util.Map;
  *     element's own {@code connectedCallback}/{@code disconnectedCallback}.</li>
  *     <li>{@link #MODE_MOUNT_FN}: the bundle exposes global mount/unmount functions (a convention
  *     similar to single-spa), invoked explicitly as {@code window[mountFn](container, props)} and
- *     {@code window[unmountFn](container)} when this component is rendered and detached.</li>
+ *     {@code window[unmountFn](container)} when this component is rendered and detached. If the
+ *     bundle also exposes {@link #setUpdateFn}, prop-only changes call
+ *     {@code window[updateFn](container, props)} instead of unmounting/remounting, so the bundle
+ *     can preserve its internal state (e.g. an in-progress form) across a reactive prop update.</li>
  *     <li>{@link #MODE_AUTO}: for a bundle that self-mounts into a hardcoded selector at import
  *     time, as a default {@code vite build} of an app (not a custom-element library) does, e.g.
  *     {@code createApp(App).mount('#app')}. Selected automatically when {@link #setApp(String)} is
@@ -67,6 +70,16 @@ import java.util.Map;
  * </ul>
  * Any extra ZUL attribute not matching a bean property (via {@link DynamicPropertied}) is
  * forwarded as a prop to the mounted microfrontend, e.g. {@code userId="${user.id}"}.
+ * <p>
+ * When only {@link #setProps}/dynamic props change and everything else ({@link #src}/{@link #app},
+ * {@link #tag}/{@link #mountFn}, {@link #isShadow}) stays the same, the client updates the already
+ * mounted instance in place instead of destroying and recreating it — important once props are
+ * driven by MVVM (each {@code @bind}-ed property change would otherwise wipe any state the mounted
+ * app holds, e.g. a form the user is filling in). For {@link #MODE_CUSTOM_ELEMENT} this just
+ * reassigns the element's properties (the browser/framework's own reactivity takes it from there);
+ * for {@link #MODE_MOUNT_FN} it calls {@link #setUpdateFn} if provided, otherwise it falls back to
+ * a full unmount+remount. Any actual change to {@code src}/{@code app}/{@code tag}/{@code mountFn}/
+ * {@code shadow} still tears down the previous instance and mounts fresh.
  * <p>
  * {@link #setShadow(boolean)} mounts the bundle inside a
  * <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM">shadow
@@ -137,6 +150,7 @@ public class MicroFrontend extends Div implements DynamicPropertied, AfterCompos
     private String tag;
     private String mountFn;
     private String unmountFn;
+    private String updateFn;
     private final Map<String, Object> props = new LinkedHashMap<>();
     private boolean shadow;
     private boolean composed;
@@ -300,6 +314,23 @@ public class MicroFrontend extends Div implements DynamicPropertied, AfterCompos
         this.unmountFn = unmountFn;
     }
 
+    public String getUpdateFn() {
+        return updateFn;
+    }
+
+    /**
+     * Sets the name of an optional global function used to update an already-mounted
+     * {@link #MODE_MOUNT_FN} instance in place when only props change, instead of a full
+     * unmount+remount. Invoked as {@code window[updateFn](container, props)}. If not set, prop-only
+     * changes fall back to unmount+remount.
+     *
+     * @param updateFn global update function name
+     */
+    public void setUpdateFn(String updateFn) {
+        this.updateFn = updateFn;
+        mount();
+    }
+
     public Map<String, Object> getProps() {
         return props;
     }
@@ -393,6 +424,7 @@ public class MicroFrontend extends Div implements DynamicPropertied, AfterCompos
         config.put("tag", tag);
         config.put("mountFn", mountFn);
         config.put("unmountFn", unmountFn);
+        config.put("updateFn", updateFn);
         config.put("shadow", shadow);
         config.put("props", props);
         return StringPojoParser.convertMapToJson(config);
