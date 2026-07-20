@@ -12,6 +12,7 @@ package tools.dynamia.modules.saas.migration.api;
 
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.web.multipart.MultipartFile;
+import tools.dynamia.modules.entityfile.StoredEntityFile;
 import tools.dynamia.modules.saas.migration.domain.AccountMigrationJob;
 
 import java.io.Serializable;
@@ -87,7 +88,7 @@ public interface AccountMigrationJobService {
     AccountMigrationJobDto getJob(String jobUuid);
 
     /**
-     * Returns the raw {@link AccountMigrationJob} entity for internal use (e.g. file download).
+     * Returns the raw {@link AccountMigrationJob} entity for internal/advanced use.
      *
      * @param jobUuid UUID of the job
      * @return entity or {@code null}
@@ -101,6 +102,17 @@ public interface AccountMigrationJobService {
      * @return list of jobs ordered by creation date descending
      */
     List<AccountMigrationJobDto> listJobs(Serializable accountId);
+
+    /**
+     * Resolves the persisted result archive of a completed EXPORT/BACKUP job for download.
+     * The file is read from wherever {@code EntityFileStorage} is configured
+     * (local safe directory, S3, Buckie, etc.) — never from a raw local/container path.
+     *
+     * @param jobUuid UUID of the job
+     * @return the stored file, or {@code null} if the job has no result (not found, not
+     *         finished, failed, or has no downloadable output)
+     */
+    StoredEntityFile downloadResult(String jobUuid);
 
     /**
      * Requests cooperative cancellation of a running job.

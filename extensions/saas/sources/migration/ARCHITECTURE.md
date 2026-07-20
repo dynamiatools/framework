@@ -21,7 +21,7 @@ The Account Migration Module enables full lifecycle management of tenant (Accoun
                               │ delegates to
 ┌─────────────────────────────▼────────────────────────────────────────┐
 │                   AccountMigrationJobService                            │
-│   createJob() · cancelJob() · getJob() · listJobs()                  │
+│   createJob() · cancelJob() · getJob() · listJobs() · downloadResult()  │
 │   Persists AccountMigrationJob entity in DB                            │
 └──────┬───────────────────────────────────────────┬───────────────────┘
        │  launches via                              │ saves progress via
@@ -57,6 +57,14 @@ The Account Migration Module enables full lifecycle management of tenant (Accoun
     │  EntityDependencyGraph     │   topological sort via JPA metamodel
     │  IdentityMapper SPI        │   KEEP_IDS / REGENERATE_IDS
     └────────────────────────────┘
+
+EXPORT / BACKUP only, after the pipeline finishes successfully:
+
+┌─────────────────────────┐        ┌─────────────────────────────────┐
+│  local working ZIP file  │──────▶│  EntityFileService.createEntityFile│
+│  (properties.output-dir) │  upload │  → EntityFileStorage (local/S3/  │
+│  deleted right after     │        │     Buckie/…) — the durable copy │
+└─────────────────────────┘        └─────────────────────────────────┘
 ```
 
 ---
@@ -114,6 +122,11 @@ Account101_20260616T100500.zip
 
 ZIP entries use `DEFLATE` at `BEST_SPEED` level. Typical JSON compresses 5–10×.
 
+> **Durability:** the ZIP built by this pipeline is written to a **local, transient working
+> file** (`AccountMigrationProperties.outputDirectory`) — it is not the durable artifact.
+> Only after the ZIP finishes writing does `AccountMigrationJobServiceImpl.finalizeJob()`
+> upload it to `EntityFileService` and delete the local copy. See §7 and §9.1.
+
 ### Parallel Temp-Directory Strategy
 
 Entity files are written in parallel to a temporary directory, then assembled into a ZIP in topological order:
@@ -125,12 +138,12 @@ Entity files are written in parallel to a temporary directory, then assembled in
        EntityManager localEm = emf.createEntityManager()   ← one per thread, thread-safe
        write Account{id}_{SimpleName}.json to temp dir
        localEm.close()
-4. ZipOutputStream → output stream:
+4. ZipOutputStream → output stream (the local working ZIP file):
        addEntry(manifest.json)                              ← always first
        For each entityClass in topological order:
            addEntry(Account{id}_{SimpleName}.json)          ← Files.copy(), no heap allocation
        zipOut.finish()
-5. deleteDirectory(tempDir)                                 ← always, in finally
+5. deleteDirectory(tempDir)                                 ← always, in finally (entity JSON scratch files)
 ```
 
 The column definition cache (`Map<Class<?>, List<ColumnDef>>`) is built once per entity type
@@ -237,10 +250,15 @@ AccountMigrationJobService.createExportJob(accountId, options)
     ├── 2. SchedulerUtil.runWithResult(new ExportWorker(jobId, accountId, options))
     │         └── Virtual Thread starts
     │               ├── Update job status → RUNNING
-    │               ├── Call ExportPipeline.export(...)  → writes Account{id}_{ts}.zip
+    │               ├── Call ExportPipeline.export(...)  → writes local working ZIP
     │               │     └── MigrationProgressListener updates job.progress periodically
-    │               ├── On success: update job status → COMPLETED, set resultPath
-    │               └── On failure: update job status → FAILED, set errorMessage
+    │               ├── finalizeJob():
+    │               │     ├── On success: upload working ZIP → EntityFileService.createEntityFile()
+    │               │     │     ├── upload OK   → job status → COMPLETED, resultFile = EntityFile
+    │               │     │     └── upload FAILS → job status → FAILED (never reports success
+    │               │     │                         without a persisted, downloadable result)
+    │               │     ├── On pipeline failure: job status → FAILED, set errorMessage
+    │               │     └── delete the local working ZIP — always, regardless of outcome
     └── 3. Return jobId to caller (non-blocking)
 
 Cancellation:
@@ -250,6 +268,47 @@ Cancellation:
         ├── token.cancel()
         └── Worker's main loop checks token.isCancelled() between chunks → exits gracefully
 ```
+
+---
+
+## 7.1 Result Persistence (EntityFileStorage integration)
+
+The ZIP produced by an EXPORT or BACKUP job is never kept as a "final" file on local or
+container disk. It is built in a local, transient working file
+(`AccountMigrationProperties.outputDirectory`, default `${java.io.tmpdir}/saas-migration`)
+purely as scratch space while the pipeline runs — the same directory a container image or its
+ephemeral volume could lose at any restart/redeploy.
+
+```
+ExportWorker writes ──▶ local working ZIP ──▶ finalizeJob() on completion
+                                                    │
+                                                    ▼
+                                    EntityFileService.createEntityFile(
+                                        fileInfo, /* target */ job, description)
+                                                    │
+                                                    ▼
+                                   EntityFileStorage (LocalStorage / AWSS3Storage / Buckie / …)
+                                                    │
+                                                    ▼
+                                  AccountMigrationJob.resultFile = EntityFile   (FK, eager)
+                                  local working ZIP deleted
+```
+
+- The `EntityFile` is associated with the `AccountMigrationJob` itself
+  (`targetEntity = AccountMigrationJob`, `targetEntityId = job.id`), not with the tenant Account —
+  it is an operational artifact of the migration system, not tenant data.
+- Which backend actually stores the bytes (local safe directory, S3, Buckie, …) is controlled by
+  the host application's `EntityFileStorage` configuration (`DEFAULT_STORAGE_ID` app parameter) —
+  the migration module has zero storage-specific code.
+- `GET /jobs/{jobId}/download` resolves the result via
+  `AccountMigrationJobService.downloadResult(jobUuid)` → `EntityFileService.download(entityFile)`
+  → `StoredEntityFile.toResource()`, streaming from whatever backend is configured. The controller
+  never touches a raw filesystem path.
+- If the upload to `EntityFileStorage` fails, the job is marked **FAILED** (not COMPLETED) — a
+  job never reports success without a durable, downloadable result.
+- CLONE does not go through this path: its export phase writes to a JVM temp file
+  (`Files.createTempFile`, OS temp dir) that is deleted in a `finally` block once the import phase
+  finishes — it is a pure intermediate buffer, never exposed for download (see §6).
 
 ---
 
@@ -372,10 +431,15 @@ CREATE TABLE saas_migration_jobs (
   started_at     DATETIME,
   finished_at    DATETIME,
   error_message  TEXT,
-  result_path    VARCHAR(1000),
+  result_file_id BIGINT REFERENCES mod_entity_files(id),
   options_json   VARCHAR(2000)
 );
 ```
+
+`result_file_id` is a nullable FK into `mod_entity_files` (owned by the `entity-files` module,
+see [`entity-files/README.md`](../../../entity-files/README.md)) — it is only set once the
+result ZIP has been durably persisted via `EntityFileService`. There is no raw filesystem path
+column: a job with `status = COMPLETED` and `result_file_id IS NULL` should not occur (see §7.1).
 
 ---
 
@@ -388,6 +452,7 @@ CREATE TABLE saas_migration_jobs (
 | Parallel export | Up to `exportParallelism` (default 4) entity types exported concurrently via virtual threads; each uses its own `EntityManager` |
 | Disk I/O | 256 KB ZIP buffer, 64 KB per-entity file buffer; DEFLATE BEST_SPEED compression |
 | Network / disk | ZIP always produced — typically 5–10× smaller than raw JSON |
+| Result durability | Result ZIP persisted via `EntityFileService`/`EntityFileStorage` (local safe dir, S3, Buckie, …), not on container-local disk — survives restarts/redeploys and is never subject to image/volume size limits (see §7.1) |
 | Long-running jobs | Virtual threads, cooperative cancellation via `CancellationToken` |
 | DB load | Read-only keyset-paginated queries; imports batched per chunk in isolated transactions |
 | Concurrent jobs | In-memory job registry + DB-backed state; configurable max concurrent |
@@ -402,6 +467,7 @@ CREATE TABLE saas_migration_jobs (
 | **v1 (legacy)** | EXPORT, IMPORT as single JSON. `KEEP_IDS` + `REGENERATE_IDS`. |
 | **v2 (legacy)** | Columnar format (fields + rows arrays). Optional GZIP. |
 | **v3 (current)** | ZIP multi-file: one JSON per entity. Always compressed. Keyset pagination. Parallel entity export (virtual threads). Clone via temp file. |
+| **v3.1 (current)** | Result ZIP persisted via `EntityFileService`/`EntityFileStorage` (local safe dir, S3, Buckie, …) instead of raw container-local disk. Built as a transient working file, uploaded and locally deleted only after the pipeline succeeds. See §7.1. |
 | **v4** | Cross-environment MIGRATE (HTTP push to remote endpoint). Resume after failure (checkpoint in DB). |
 | **v5** | `UUID7` identity strategy. Partial export (subset of entities). Schema validation on import. |
-| **v6** | Multi-region database migration. S3/GCS file storage backend. Event-driven progress via SSE/WebSocket. |
+| **v6** | Multi-region database migration. Event-driven progress via SSE/WebSocket. |

@@ -10,7 +10,6 @@
  */
 package tools.dynamia.modules.saas.migration.controllers;
 
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,15 +23,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import tools.dynamia.modules.entityfile.StoredEntityFile;
+import tools.dynamia.modules.entityfile.domain.EntityFile;
 import tools.dynamia.modules.saas.migration.api.AccountCloneOptions;
 import tools.dynamia.modules.saas.migration.api.AccountExportOptions;
 import tools.dynamia.modules.saas.migration.api.AccountImportOptions;
 import tools.dynamia.modules.saas.migration.api.AccountMigrationJobDto;
 import tools.dynamia.modules.saas.migration.api.AccountMigrationJobService;
-import tools.dynamia.modules.saas.migration.domain.AccountMigrationJob;
 
-import java.io.File;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -219,32 +217,33 @@ public class AccountMigrationRestController {
 
     /**
      * Download the result file of a completed EXPORT or BACKUP job.
+     * The file is streamed from wherever {@code EntityFileStorage} is configured
+     * (local safe directory, S3, Buckie, etc.) — never from a raw local/container path.
      * Returns 404 if the job is not found, not completed, or has no result file.
      */
     @GetMapping("/jobs/{jobId}/download")
     public ResponseEntity<Resource> downloadResult(@PathVariable String jobId) {
-        AccountMigrationJob job = jobService.getJobEntity(jobId);
-        if (job == null || job.getResultPath() == null) {
+        StoredEntityFile stored = jobService.downloadResult(jobId);
+        if (stored == null) {
             return ResponseEntity.notFound().build();
         }
 
-        File resultFile = Paths.get(job.getResultPath()).toFile();
-        if (!resultFile.exists()) {
+        Resource resource = stored.toResource();
+        if (resource == null) {
             return ResponseEntity.notFound().build();
         }
 
-        String contentType = job.getResultPath().endsWith(".gz")
-                ? "application/gzip"
-                : "application/json";
+        EntityFile entityFile = stored.getEntityFile();
+        String contentType = entityFile.getContentType() != null ? entityFile.getContentType() : "application/zip";
 
-        String filename = resultFile.getName();
-
-        return ResponseEntity.ok()
+        ResponseEntity.BodyBuilder response = ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + filename + "\"")
-                .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(resultFile.length()))
-                .body(new FileSystemResource(resultFile));
+                        "attachment; filename=\"" + entityFile.getName() + "\"");
+        if (entityFile.getSize() != null) {
+            response.header(HttpHeaders.CONTENT_LENGTH, String.valueOf(entityFile.getSize()));
+        }
+        return response.body(resource);
     }
 }
 

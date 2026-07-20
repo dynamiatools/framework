@@ -74,6 +74,13 @@
             <version>26.7.0</version>
         </dependency>
 
+        <!-- Entity Files: durable storage (local/S3/Buckie) for the final export/backup ZIP -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.entityfiles</artifactId>
+            <version>26.7.0</version>
+        </dependency>
+
         <!-- Dynamia Integration: SchedulerUtil, VT, Containers -->
         <dependency>
             <groupId>tools.dynamia</groupId>

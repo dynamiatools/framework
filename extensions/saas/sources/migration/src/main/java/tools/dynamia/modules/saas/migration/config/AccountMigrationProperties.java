@@ -35,8 +35,12 @@ public class AccountMigrationProperties {
     private int chunkSize = 500;
 
     /**
-     * Directory where export/backup files are stored.
-     * Defaults to {@code ${java.io.tmpdir}/saas-migration}.
+     * Local, transient working directory used while an export/backup ZIP is being assembled.
+     * <p>
+     * This is <strong>not</strong> the durable storage location — once the ZIP finishes writing,
+     * it is uploaded to {@code EntityFileService} (local safe storage, S3, Buckie, etc.) and the
+     * file here is deleted, so nothing built from tenant data is ever left behind on
+     * local/container disk. Defaults to {@code ${java.io.tmpdir}/saas-migration}.
      */
     private String outputDirectory = System.getProperty("java.io.tmpdir") + "/saas-migration";
 
