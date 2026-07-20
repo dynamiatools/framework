@@ -13,7 +13,7 @@ This documentation is organized into the following sections:
 
 ### Development & Best Practices
 - **[Development Patterns](./DEVELOPMENT_PATTERNS.md)** - Common patterns, anti-patterns, and best practices
-- **[Advanced Topics](./ADVANCED_TOPICS.md)** - Spring integration, modularity, custom extensions, and security
+- **[Advanced Topics](./ADVANCED_TOPICS.md)** - Spring integration, modularity, custom extensions, microfrontend integration, and security
 - **[Examples & Integration](./EXAMPLES.md)** - Code examples for common tasks and real-world scenarios
 
 ## 🎯 Quick Navigation

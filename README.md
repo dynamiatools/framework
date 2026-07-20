@@ -62,6 +62,7 @@ By default, **Dynamia Platform automatically generates full-featured web interfa
 - **Modern Web Stack**: HTML5, CSS3, Bootstrap via ZK Framework
 - **Flexible Patterns**: Use MVC or MVVM as per your preference
 - **Theme Support**: Customize look and feel with pluggable themes
+- **Microfrontend Embedding**: Drop a Vue/React/Svelte bundle into any ZK page with `<microfrontend>`, MVVM binding included
 - **Seamless Integration**: Works with any Java framework or library
 
 ## 🗺️ Roadmap
@@ -92,6 +93,7 @@ A complete TypeScript/JavaScript package ecosystem for frontend development, ava
 | **[`@dynamia-tools/sdk`](https://www.npmjs.com/package/@dynamia-tools/sdk)** | Core client library for REST API interaction |
 | **[`@dynamia-tools/ui-core`](https://www.npmjs.com/package/@dynamia-tools/ui-core)** | Framework-agnostic view/viewer/renderer core |
 | **[`@dynamia-tools/vue`](https://www.npmjs.com/package/@dynamia-tools/vue)** | Vue 3 composables and components for reactive integration |
+| **[`@dynamia-tools/microfrontend-bridge`](https://www.npmjs.com/package/@dynamia-tools/microfrontend-bridge)** | Typed helpers for bundles embedded via `<microfrontend>` |
 | **[`@dynamia-tools/cli`](https://www.npmjs.com/package/@dynamia-tools/cli)** | CLI tool for scaffolding Dynamia Platform projects |
 
 ```bash
@@ -119,6 +121,13 @@ Modern Vue 3 frontend integration with:
 - Form validation and data binding
 - Real-time updates with WebSocket
 - Dashboard and reporting components
+
+#### 🧩 **Microfrontend Embedding** ✅ Available
+Drop external JS bundles (Vue, React, Svelte, plain JS) directly into a ZK page via `<microfrontend>`, no iframe:
+- Three mounting modes: custom element, single-spa-style `mountFn`/`unmountFn`, and auto-discovery of a Vite-style `dist/` build
+- Full ZK MVVM support — `@bind`/`@command` work out of the box, including binding whole Java objects as JSON
+- Update-in-place on prop changes, shadow-DOM CSS isolation, server↔bundle events, and automatic tenant/locale/auth context injection
+- Typed bundle-side helpers via [`@dynamia-tools/microfrontend-bridge`](https://www.npmjs.com/package/@dynamia-tools/microfrontend-bridge)
 
 #### 🔗 **Frontend Framework Integration**
 Seamless integration with popular frameworks:

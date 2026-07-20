@@ -173,6 +173,7 @@ fetch('/api/data', {
 - `@dynamia-tools/sdk` — Core client (`platform/packages/sdk/README.md`)
 - `@dynamia-tools/vue` — Vue adapter (`platform/packages/vue/README.md`)
 - `@dynamia-tools/ui-core` — UI framework (`platform/packages/ui-core/README.md`)
+- `@dynamia-tools/microfrontend-bridge` — Typed helpers for bundles embedded via `tools.dynamia.zk.ui.MicroFrontend` (`platform/packages/microfrontend-bridge/README.md`)
 - Extension SDKs:
   - Reports: `extensions/reports/packages/reports-sdk/README.md`
   - SaaS: `extensions/saas/packages/saas-sdk/README.md`
