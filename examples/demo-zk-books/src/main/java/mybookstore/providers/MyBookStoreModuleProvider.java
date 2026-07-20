@@ -45,6 +45,7 @@ public class MyBookStoreModuleProvider implements ModuleProvider { // <1>
                         .addPage(
                                 new Page("components", "Custom Components", "classpath:/pages/custom-components.zul"),
                                 new Page("vue", "Vue Example", "classpath:/pages/vue-integration.zul"),
+                                new Page("microfrontend", "MicroFrontend", "classpath:/pages/microfrontend-demo.zul"),
                                 new Page("mvvm", "Standard ZK MVVM", "classpath:/pages/standard-mvvm.zul"),
                                 new Page("chartjs", "Charts for ZK", "classpath:/pages/chartjs.zul"),
                                 new Page("aceditor", "Ace Code Editor", "classpath:/pages/aceditor.zul"),

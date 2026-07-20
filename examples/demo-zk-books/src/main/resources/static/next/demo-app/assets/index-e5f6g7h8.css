@@ -1,0 +1,6 @@
+/* Fake hashed Vite CSS chunk, loaded automatically via MicroFrontend's "app" discovery. */
+.demo-app-widget-box {
+    padding: 1rem;
+    border: 2px dotted #e17055;
+    border-radius: 8px;
+}

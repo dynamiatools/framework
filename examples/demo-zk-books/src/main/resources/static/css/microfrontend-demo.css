@@ -1,0 +1,10 @@
+/* Loaded via the MicroFrontend "css" attribute, proves external stylesheets ship with a bundle. */
+.demo-widget-emit-btn {
+    margin-top: .5rem;
+    background: #6c5ce7;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: .4rem .8rem;
+    cursor: pointer;
+}

@@ -1,0 +1,76 @@
+<zk xmlns:n="native">
+
+    <zscript><![CDATA[
+        void toggle() {
+            if (wrapper.getParent() != null) {
+                wrapper.detach();
+            }
+        }
+
+        void handleMicrofrontendEvent(org.zkoss.zk.ui.event.Event event) {
+            Clients.showNotification("onMicrofrontendEvent: " + event.getData());
+        }
+
+        void handleMicrofrontendReady(org.zkoss.zk.ui.event.Event event) {
+            System.out.println("[MicroFrontend] onMicrofrontendReady: " + event.getTarget());
+        }
+
+        void handleMicrofrontendError(org.zkoss.zk.ui.event.Event event) {
+            Clients.showNotification("onMicrofrontendError: " + event.getData(), "error", null, "top_center", 4000);
+        }
+
+        void randomizeMountFnUserId() {
+            mountFnDemo.addProp("userId", (int) (Math.random() * 1000));
+        }
+
+        void breakBundle() {
+            brokenDemo.setSrc("/static/js/does-not-exist.js");
+        }
+    ]]></zscript>
+
+    <div hflex="1" vflex="1">
+        <n:h3>MicroFrontend Component Demo</n:h3>
+
+        <div id="wrapper" hflex="1">
+            <groupbox width="50%">
+                <caption label="custom-element mode (see server console for onMicrofrontendReady)"/>
+                <microfrontend src="/static/js/microfrontend-demo.js" css="/static/css/microfrontend-demo.css"
+                               tag="demo-widget" mode="custom-element" userId="42" theme="dark"
+                               onMicrofrontendEvent="handleMicrofrontendEvent(event)"
+                               onMicrofrontendReady="handleMicrofrontendReady(event)"/>
+            </groupbox>
+            <groupbox width="50%">
+                <caption label="mount-fn mode, shadow DOM isolated, update in place"/>
+                <microfrontend id="mountFnDemo" src="/static/js/microfrontend-demo.js" css="/static/css/microfrontend-demo.css"
+                               mode="mount-fn" mountFn="mountDemoApp" unmountFn="unmountDemoApp" updateFn="updateDemoApp"
+                               userId="99" shadow="true" onMicrofrontendEvent="handleMicrofrontendEvent(event)"/>
+                <button label="Change userId (updates in place, no remount)" onClick="randomizeMountFnUserId()"/>
+            </groupbox>
+            <groupbox width="50%">
+                <caption label="app auto-discovery mode, self-mounting (no tag/mountFn)"/>
+                <microfrontend app="/static/next/demo-app"/>
+            </groupbox>
+            <groupbox width="50%" viewModel="@id('vm') @init('mybookstore.viewmodel.MicroFrontendDemoVM')">
+                <caption label="MVVM mode: @bind, @command, POJO bound as JSON"/>
+                <microfrontend src="/static/js/microfrontend-demo.js" css="/static/css/microfrontend-demo.css"
+                               tag="demo-widget" theme="@bind(vm.theme)" shadow="@bind(vm.shadow)"
+                               user="@bind(vm.user)"
+                               onMicrofrontendEvent="@command('handleMicrofrontendEvent', data=event.data)"/>
+                <hbox>
+                    <button label="Toggle theme" onClick="@command('toggleTheme')"/>
+                    <button label="Toggle shadow" onClick="@command('toggleShadow')"/>
+                    <button label="Randomize user" onClick="@command('randomizeUser')"/>
+                </hbox>
+                <label value="@load(vm.lastEvent)"/>
+            </groupbox>
+            <groupbox width="50%">
+                <caption label="onMicrofrontendError demo"/>
+                <microfrontend id="brokenDemo" src="/static/js/microfrontend-demo.js" tag="demo-widget"
+                               onMicrofrontendError="handleMicrofrontendError(event)"/>
+                <button label="Point src at a missing file (fires onMicrofrontendError)" onClick="breakBundle()"/>
+            </groupbox>
+        </div>
+
+        <button label="Detach wrapper (verify unmount in console)" onClick="toggle()"/>
+    </div>
+</zk>

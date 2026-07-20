@@ -258,6 +258,17 @@
         </mold>
     </component>
 
+    <component>
+        <component-name>microfrontend</component-name>
+        <component-class>tools.dynamia.zk.ui.MicroFrontend</component-class>
+        <widget-class>zul.wgt.Div</widget-class>
+
+        <mold>
+            <mold-name>default</mold-name>
+            <mold-uri>mold/div.js</mold-uri>
+        </mold>
+    </component>
+
 
     <component>
         <component-name>enumiconimage</component-name>

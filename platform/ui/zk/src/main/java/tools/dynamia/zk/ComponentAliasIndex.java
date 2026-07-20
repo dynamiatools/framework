@@ -86,6 +86,7 @@ public class ComponentAliasIndex extends HashMap<String, Class<? extends Compone
         getInstance().add("enumlabel", EnumLabel.class);
         getInstance().add(EnumListbox.class);
         getInstance().add(Import.class);
+        getInstance().add(MicroFrontend.class);
         getInstance().add(Infobox.class);
         getInstance().add("localebox", LocaleCombobox.class);
         getInstance().add("timezonebox", TimeZoneCombobox.class);
