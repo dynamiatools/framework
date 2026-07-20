@@ -6,21 +6,44 @@
                 wrapper.detach();
             }
         }
+
+        void handleMicrofrontendEvent(org.zkoss.zk.ui.event.Event event) {
+            Clients.showNotification("onMicrofrontendEvent: " + event.getData());
+        }
     ]]></zscript>
 
     <div hflex="1" vflex="1">
         <n:h3>MicroFrontend Component Demo</n:h3>
 
         <div id="wrapper" hflex="1">
-            <groupbox title="custom-element mode" width="50%">
+            <groupbox width="50%">
                 <caption label="custom-element mode"/>
-                <microfrontend src="/static/js/microfrontend-demo.js" tag="demo-widget"
-                               mode="custom-element" userId="42" theme="dark"/>
+                <microfrontend src="/static/js/microfrontend-demo.js" css="/static/css/microfrontend-demo.css"
+                               tag="demo-widget" mode="custom-element" userId="42" theme="dark"
+                               onMicrofrontendEvent="handleMicrofrontendEvent(event)"/>
             </groupbox>
-            <groupbox title="mount-fn mode" width="50%">
-                <caption label="mount-fn mode"/>
-                <microfrontend src="/static/js/microfrontend-demo.js" mode="mount-fn"
-                               mountFn="mountDemoApp" unmountFn="unmountDemoApp" userId="99"/>
+            <groupbox width="50%">
+                <caption label="mount-fn mode, shadow DOM isolated"/>
+                <microfrontend src="/static/js/microfrontend-demo.js" css="/static/css/microfrontend-demo.css"
+                               mode="mount-fn" mountFn="mountDemoApp" unmountFn="unmountDemoApp" userId="99"
+                               shadow="true" onMicrofrontendEvent="handleMicrofrontendEvent(event)"/>
+            </groupbox>
+            <groupbox width="50%">
+                <caption label="app auto-discovery mode, self-mounting (no tag/mountFn)"/>
+                <microfrontend app="/static/next/demo-app"/>
+            </groupbox>
+            <groupbox width="50%" viewModel="@id('vm') @init('mybookstore.viewmodel.MicroFrontendDemoVM')">
+                <caption label="MVVM mode: @bind, @command, POJO bound as JSON"/>
+                <microfrontend src="/static/js/microfrontend-demo.js" css="/static/css/microfrontend-demo.css"
+                               tag="demo-widget" theme="@bind(vm.theme)" shadow="@bind(vm.shadow)"
+                               user="@bind(vm.user)"
+                               onMicrofrontendEvent="@command('handleMicrofrontendEvent', data=event.data)"/>
+                <hbox>
+                    <button label="Toggle theme" onClick="@command('toggleTheme')"/>
+                    <button label="Toggle shadow" onClick="@command('toggleShadow')"/>
+                    <button label="Randomize user" onClick="@command('randomizeUser')"/>
+                </hbox>
+                <label value="@load(vm.lastEvent)"/>
             </groupbox>
         </div>
 

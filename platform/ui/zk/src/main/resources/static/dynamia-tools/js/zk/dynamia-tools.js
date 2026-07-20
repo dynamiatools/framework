@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
  *
@@ -17,9 +17,10 @@
 
 /**
  * Registry used by the MicroFrontend ZK component (tools.dynamia.zk.ui.MicroFrontend) to cache
- * bundle loading promises across component instances sharing the same "src".
+ * bundle/stylesheet/app-discovery loading promises across component instances sharing the same
+ * "src"/"css"/"app".
  */
-var DynamiaMicrofrontends = window.DynamiaMicrofrontends || {scripts: {}};
+var DynamiaMicrofrontends = window.DynamiaMicrofrontends || {scripts: {}, styles: {}, styleTexts: {}, apps: {}};
 
 /**
  * Loads a JavaScript bundle once and caches the loading promise so multiple microfrontend
@@ -48,23 +49,235 @@ function dynamiaLoadScript(src, type) {
 }
 
 /**
+ * Loads a stylesheet once and caches the loading promise, the same way {@link dynamiaLoadScript}
+ * does for bundles.
+ * @param {string} href - Stylesheet URL.
+ * @returns {Promise<void>} Resolves once the stylesheet has loaded (or failed, which only logs).
+ */
+function dynamiaLoadStyle(href) {
+    if (!DynamiaMicrofrontends.styles[href]) {
+        DynamiaMicrofrontends.styles[href] = new Promise(function (resolve) {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            link.onload = function () {
+                resolve();
+            };
+            link.onerror = function () {
+                delete DynamiaMicrofrontends.styles[href];
+                console.error('Dynamia Microfrontend: failed to load stylesheet ' + href);
+                resolve();
+            };
+            document.head.appendChild(link);
+        });
+    }
+    return DynamiaMicrofrontends.styles[href];
+}
+
+/**
+ * Loads every stylesheet in a comma-separated list, e.g. a Vite/webpack build's separate CSS
+ * chunk(s) shipped alongside the JS bundle.
+ * @param {string} css - Comma-separated stylesheet URL(s), may be null/empty.
+ * @returns {Promise<void>} Resolves once every stylesheet has loaded.
+ */
+function dynamiaLoadStyles(css) {
+    if (!css) {
+        return Promise.resolve();
+    }
+    var hrefs = css.split(',').map(function (href) {
+        return href.trim();
+    }).filter(Boolean);
+    return Promise.all(hrefs.map(dynamiaLoadStyle));
+}
+
+/**
+ * Fetches a stylesheet's text once and caches the promise, so it can be inlined as a
+ * {@code <style>} into any number of shadow roots (a {@code <link>} element, unlike a fetched
+ * text, can only ever live in one place in the DOM).
+ * @param {string} href - Stylesheet URL.
+ * @returns {Promise<string>} Resolves to the stylesheet text, or "" if it failed to load (logged).
+ */
+function dynamiaFetchStyleText(href) {
+    if (!DynamiaMicrofrontends.styleTexts[href]) {
+        DynamiaMicrofrontends.styleTexts[href] = fetch(href).then(function (res) {
+            if (!res.ok) {
+                throw new Error('Dynamia Microfrontend: failed to fetch stylesheet ' + href + ' (' + res.status + ')');
+            }
+            return res.text();
+        }).catch(function (err) {
+            delete DynamiaMicrofrontends.styleTexts[href];
+            console.error(err);
+            return '';
+        });
+    }
+    return DynamiaMicrofrontends.styleTexts[href];
+}
+
+/**
+ * Loads every stylesheet in a comma-separated list as inline {@code <style>} tags appended to a
+ * shadow root, the shadow-DOM equivalent of {@link dynamiaLoadStyles}.
+ * @param {string} css - Comma-separated stylesheet URL(s), may be null/empty.
+ * @param {ShadowRoot} root - Shadow root to append the resulting <style> tags to.
+ * @returns {Promise<void>} Resolves once every stylesheet has been inlined.
+ */
+function dynamiaLoadStylesIntoShadow(css, root) {
+    if (!css) {
+        return Promise.resolve();
+    }
+    var hrefs = css.split(',').map(function (href) {
+        return href.trim();
+    }).filter(Boolean);
+    return Promise.all(hrefs.map(dynamiaFetchStyleText)).then(function (texts) {
+        texts.forEach(function (text) {
+            if (text) {
+                var style = document.createElement('style');
+                style.textContent = text;
+                root.appendChild(style);
+            }
+        });
+    });
+}
+
+/**
+ * Resolves a URL found in a build's index.html against its app root: absolute (starting with "/"
+ * or a scheme) URLs are used as-is, relative ones (e.g. "assets/x.js" or "./assets/x.js") are
+ * joined to the app root, matching how the browser itself would resolve them relative to that
+ * index.html.
+ * @param {string} appRoot - App root URL, e.g. "/static/next/subscription" (no trailing slash).
+ * @param {string} url - URL found in the index.html.
+ * @returns {string} Resolved absolute-path URL.
+ */
+function dynamiaResolveAppUrl(appRoot, url) {
+    if (/^([a-z]+:)?\//i.test(url)) {
+        return url;
+    }
+    return appRoot + '/' + url.replace(/^\.\//, '');
+}
+
+/**
+ * Auto-discovers the bundle, stylesheet(s) and self-mount target of a bundler production build
+ * (e.g. Vite's {@code dist/}) by fetching its {@code index.html} and extracting the entry
+ * {@code <script type="module">}, {@code <link rel="stylesheet">} tags, and {@code <body>} markup
+ * (stripped of any {@code <script>} tags) it contains, so hashed output filenames never need to be
+ * hardcoded and self-mounting bundles (e.g. {@code createApp(App).mount('#app')}) find their
+ * target. Only verified against Vite output.
+ * @param {string} appRoot - App root URL, e.g. "/static/next/subscription".
+ * @returns {Promise<{src: string, css: string, bodyHtml: string}>} Discovered bundle/stylesheet URLs and body markup.
+ */
+function dynamiaResolveApp(appRoot) {
+    if (!DynamiaMicrofrontends.apps[appRoot]) {
+        var base = appRoot.replace(/\/$/, '');
+        DynamiaMicrofrontends.apps[appRoot] = fetch(base + '/index.html').then(function (res) {
+            if (!res.ok) {
+                throw new Error('Dynamia Microfrontend: failed to fetch ' + base + '/index.html (' + res.status + ')');
+            }
+            return res.text();
+        }).then(function (html) {
+            var scriptTag = (html.match(/<script[^>]*type=["']module["'][^>]*>/i) || [])[0];
+            var src = scriptTag && (scriptTag.match(/\ssrc=["']([^"']+)["']/i) || [])[1];
+            if (!src) {
+                throw new Error('Dynamia Microfrontend: no <script type="module" src="..."> found in ' + base + '/index.html');
+            }
+            var css = (html.match(/<link[^>]*rel=["']stylesheet["'][^>]*>/gi) || [])
+                .map(function (tag) {
+                    return (tag.match(/\shref=["']([^"']+)["']/i) || [])[1];
+                })
+                .filter(Boolean)
+                .map(function (href) {
+                    return dynamiaResolveAppUrl(base, href);
+                })
+                .join(',');
+            var bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+            var bodyHtml = bodyMatch ? bodyMatch[1].replace(/<script[\s\S]*?<\/script>/gi, '') : '';
+            return {src: dynamiaResolveAppUrl(base, src), css: css, bodyHtml: bodyHtml};
+        }).catch(function (err) {
+            delete DynamiaMicrofrontends.apps[appRoot];
+            throw err;
+        });
+    }
+    return DynamiaMicrofrontends.apps[appRoot];
+}
+
+/**
  * Loads (if needed) and mounts a microfrontend bundle into the container element of a
- * MicroFrontend ZK component.
+ * MicroFrontend ZK component. Injects a {@code dynamiaEmit(data)} function into the mounted
+ * bundle's props so it can notify the server-side ZK component, which fires "onMicrofrontendEvent"
+ * (bindable in MVVM with {@code onMicrofrontendEvent="@command(...)"}). In "auto" mode the bundle
+ * self-mounts, so its discovered index.html body markup is placed into the container before the
+ * bundle loads, and nothing further is done once it loads. Auto mode only supports one live
+ * instance of a given "app" per page at a time (its bundle runs once and self-mounts via a
+ * hardcoded id from its own index.html): remounting the same container (e.g. a ZK MVVM prop
+ * change, or the page redrawing the same component) is allowed, but a genuinely different,
+ * still-live container for the same app is refused with a console error instead of silently
+ * rendering nothing. With {@code config.shadow}, "custom-element"/"mount-fn" mount inside
+ * a shadow root attached to the container (its stylesheet(s) inlined into that root instead of
+ * document head) for CSS/DOM isolation from the host page; "auto" cannot be combined with shadow
+ * since its bundle looks up its mount target with a page-level document.getElementById() call.
  * @param {string} containerId - Id of the component's container element (its ZK uuid).
- * @param {object} config - {src, type, mode, tag, mountFn, unmountFn, props}.
+ * @param {object} config - {src, css, app, type, mode, tag, mountFn, unmountFn, shadow, props}.
  */
 function dynamiaMountMicrofrontend(containerId, config) {
-    dynamiaLoadScript(config.src, config.type).then(function () {
-        var container = document.getElementById(containerId);
-        if (!container) {
+    if (config.mode === 'auto') {
+        if (config.shadow) {
+            console.error('Dynamia Microfrontend: shadow=true is not supported with "auto" mode — the bundle finds ' +
+                'its mount target via a page-level document.getElementById() call it makes itself, which cannot see ' +
+                'inside a shadow root. Use tag= (custom element) or mountFn=/unmountFn= instead.');
             return;
         }
+        DynamiaMicrofrontends.autoMounted = DynamiaMicrofrontends.autoMounted || {};
+        var owner = DynamiaMicrofrontends.autoMounted[config.app];
+        if (owner && owner !== containerId && document.getElementById(owner)) {
+            console.error('Dynamia Microfrontend: "' + config.app + '" is already auto-mounted on this page. ' +
+                'Auto mode self-mounts via a hardcoded id from the bundle\'s own index.html and its script ' +
+                'only runs once, so it cannot support a second simultaneous instance of the same app. ' +
+                'Rebuild it as a custom element (use tag=) or expose mount/unmount functions ' +
+                '(mountFn=/unmountFn=) if you need more than one instance.');
+            return;
+        }
+        DynamiaMicrofrontends.autoMounted[config.app] = containerId;
+    }
+    var resolved = config.app ? dynamiaResolveApp(config.app) : Promise.resolve({src: config.src, css: config.css, bodyHtml: ''});
+    resolved.then(function (bundle) {
+        var container = document.getElementById(containerId);
+        if (!container) {
+            return null;
+        }
+        if (config.mode === 'auto') {
+            container.innerHTML = bundle.bodyHtml || '';
+            return Promise.all([dynamiaLoadScript(bundle.src, config.type), dynamiaLoadStyles(bundle.css)]).then(function () {
+                return null;
+            });
+        }
+        var root = container;
+        var cssPromise;
+        if (config.shadow) {
+            root = container.shadowRoot || container.attachShadow({mode: 'open'});
+            cssPromise = dynamiaLoadStylesIntoShadow(bundle.css, root);
+        } else {
+            cssPromise = dynamiaLoadStyles(bundle.css);
+        }
+        root.innerHTML = '';
+        var mountTarget = root;
+        if (config.shadow) {
+            mountTarget = document.createElement('div');
+            root.appendChild(mountTarget);
+        }
+        return Promise.all([dynamiaLoadScript(bundle.src, config.type), cssPromise]).then(function () {
+            return {root: root, mountTarget: mountTarget};
+        });
+    }).then(function (result) {
+        if (!result) {
+            return;
+        }
+        var root = result.root, mountTarget = result.mountTarget;
         var props = config.props || {};
-        container.innerHTML = '';
+        props.dynamiaEmit = function (data) {
+            zAu.send(new zk.Event(zk.Widget.$(containerId), 'onMicrofrontendEvent', data));
+        };
         if (config.mode === 'mount-fn') {
             var mountFn = window[config.mountFn];
             if (typeof mountFn === 'function') {
-                mountFn(container, props);
+                mountFn(mountTarget, props);
             } else {
                 console.error('Dynamia Microfrontend: mount function "' + config.mountFn + '" not found on window');
             }
@@ -73,9 +286,11 @@ function dynamiaMountMicrofrontend(containerId, config) {
             Object.keys(props).forEach(function (key) {
                 var value = props[key];
                 el[key] = value;
-                el.setAttribute(key, typeof value === 'object' ? JSON.stringify(value) : value);
+                if (typeof value !== 'function') {
+                    el.setAttribute(key, typeof value === 'object' ? JSON.stringify(value) : value);
+                }
             });
-            container.appendChild(el);
+            root.appendChild(el);
         }
     }).catch(function (err) {
         console.error(err);
@@ -85,9 +300,11 @@ function dynamiaMountMicrofrontend(containerId, config) {
 /**
  * Unmounts a microfrontend previously mounted with {@link dynamiaMountMicrofrontend} in
  * "mount-fn" mode. Components using "custom-element" mode are cleaned up automatically by the
- * browser when their DOM node is removed (disconnectedCallback), so this is a no-op for them.
+ * browser when their DOM node is removed (disconnectedCallback), so this is a no-op for them. With
+ * {@code config.shadow}, passes the same shadow-root-scoped <div> that was originally passed to
+ * mountFn, not the container itself.
  * @param {string} containerId - Id of the component's container element (its ZK uuid).
- * @param {object} config - {mode, unmountFn}.
+ * @param {object} config - {mode, unmountFn, shadow}.
  */
 function dynamiaUnmountMicrofrontend(containerId, config) {
     if (config.mode !== 'mount-fn' || !config.unmountFn) {
@@ -97,10 +314,14 @@ function dynamiaUnmountMicrofrontend(containerId, config) {
     if (!container) {
         return;
     }
+    var target = container;
+    if (config.shadow && container.shadowRoot) {
+        target = container.shadowRoot.firstElementChild || container.shadowRoot;
+    }
     var unmountFn = window[config.unmountFn];
     if (typeof unmountFn === 'function') {
         try {
-            unmountFn(container);
+            unmountFn(target);
         } catch (err) {
             console.error(err);
         }
