@@ -25,6 +25,7 @@ import org.zkoss.zk.ui.sys.ComponentCtrl;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Div;
 import tools.dynamia.commons.StringPojoParser;
+import tools.dynamia.integration.Containers;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -109,6 +110,11 @@ import java.util.Map;
  * direction, the mounted microfrontend can call the {@code dynamiaEmit(data)} function injected
  * into its props to notify the server, which fires {@value #ON_EVENT} and can be bound with
  * {@code onMicrofrontendEvent="@command('handleIt', data=event.data)"}.
+ * <p>
+ * Every registered {@link MicroFrontendHostContextProvider} bean is automatically merged into a
+ * {@code dynamiaHost} prop on every mount (except {@link #MODE_AUTO}), so cross-cutting values
+ * (tenant, locale, current user, API base URL, auth token) reach every microfrontend without each
+ * ZUL author wiring them by hand.
  *
  * Example:
  * <pre>{@code
@@ -426,8 +432,32 @@ public class MicroFrontend extends Div implements DynamicPropertied, AfterCompos
         config.put("unmountFn", unmountFn);
         config.put("updateFn", updateFn);
         config.put("shadow", shadow);
-        config.put("props", props);
+        config.put("props", resolveProps());
         return StringPojoParser.convertMapToJson(config);
+    }
+
+    /**
+     * Merges every registered {@link MicroFrontendHostContextProvider}'s context into a
+     * {@code dynamiaHost} entry alongside the regular props, without mutating {@link #props}
+     * itself. Skipped for {@link #MODE_AUTO}, which has no prop channel to the bundle at all.
+     */
+    private Map<String, Object> resolveProps() {
+        if (MODE_AUTO.equals(effectiveMode())) {
+            return props;
+        }
+        Map<String, Object> host = new LinkedHashMap<>();
+        for (MicroFrontendHostContextProvider provider : Containers.get().findObjects(MicroFrontendHostContextProvider.class)) {
+            Map<String, Object> context = provider.getHostContext();
+            if (context != null) {
+                host.putAll(context);
+            }
+        }
+        if (host.isEmpty()) {
+            return props;
+        }
+        Map<String, Object> merged = new LinkedHashMap<>(props);
+        merged.put("dynamiaHost", host);
+        return merged;
     }
 
     /**
