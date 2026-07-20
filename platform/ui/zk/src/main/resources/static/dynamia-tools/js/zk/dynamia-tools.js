@@ -16,6 +16,98 @@
  */
 
 /**
+ * Registry used by the MicroFrontend ZK component (tools.dynamia.zk.ui.MicroFrontend) to cache
+ * bundle loading promises across component instances sharing the same "src".
+ */
+var DynamiaMicrofrontends = window.DynamiaMicrofrontends || {scripts: {}};
+
+/**
+ * Loads a JavaScript bundle once and caches the loading promise so multiple microfrontend
+ * instances pointing to the same src share a single <script> tag/network request.
+ * @param {string} src - Bundle URL.
+ * @param {string} type - Script type, e.g. "module" or "text/javascript".
+ * @returns {Promise<void>} Resolves once the bundle has loaded.
+ */
+function dynamiaLoadScript(src, type) {
+    if (!DynamiaMicrofrontends.scripts[src]) {
+        DynamiaMicrofrontends.scripts[src] = new Promise(function (resolve, reject) {
+            var script = document.createElement('script');
+            script.src = src;
+            script.type = type || 'module';
+            script.onload = function () {
+                resolve();
+            };
+            script.onerror = function () {
+                delete DynamiaMicrofrontends.scripts[src];
+                reject(new Error('Dynamia Microfrontend: failed to load bundle ' + src));
+            };
+            document.head.appendChild(script);
+        });
+    }
+    return DynamiaMicrofrontends.scripts[src];
+}
+
+/**
+ * Loads (if needed) and mounts a microfrontend bundle into the container element of a
+ * MicroFrontend ZK component.
+ * @param {string} containerId - Id of the component's container element (its ZK uuid).
+ * @param {object} config - {src, type, mode, tag, mountFn, unmountFn, props}.
+ */
+function dynamiaMountMicrofrontend(containerId, config) {
+    dynamiaLoadScript(config.src, config.type).then(function () {
+        var container = document.getElementById(containerId);
+        if (!container) {
+            return;
+        }
+        var props = config.props || {};
+        container.innerHTML = '';
+        if (config.mode === 'mount-fn') {
+            var mountFn = window[config.mountFn];
+            if (typeof mountFn === 'function') {
+                mountFn(container, props);
+            } else {
+                console.error('Dynamia Microfrontend: mount function "' + config.mountFn + '" not found on window');
+            }
+        } else {
+            var el = document.createElement(config.tag);
+            Object.keys(props).forEach(function (key) {
+                var value = props[key];
+                el[key] = value;
+                el.setAttribute(key, typeof value === 'object' ? JSON.stringify(value) : value);
+            });
+            container.appendChild(el);
+        }
+    }).catch(function (err) {
+        console.error(err);
+    });
+}
+
+/**
+ * Unmounts a microfrontend previously mounted with {@link dynamiaMountMicrofrontend} in
+ * "mount-fn" mode. Components using "custom-element" mode are cleaned up automatically by the
+ * browser when their DOM node is removed (disconnectedCallback), so this is a no-op for them.
+ * @param {string} containerId - Id of the component's container element (its ZK uuid).
+ * @param {object} config - {mode, unmountFn}.
+ */
+function dynamiaUnmountMicrofrontend(containerId, config) {
+    if (config.mode !== 'mount-fn' || !config.unmountFn) {
+        return;
+    }
+    var container = document.getElementById(containerId);
+    if (!container) {
+        return;
+    }
+    var unmountFn = window[config.unmountFn];
+    if (typeof unmountFn === 'function') {
+        try {
+            unmountFn(container);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+}
+
+/**
  * Changes the browser URL hash or history state.
  * @param {string} value - The new hash value or page identifier.
  */
