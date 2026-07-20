@@ -1134,6 +1134,14 @@ public class CustomViewRenderer implements ViewRenderer {
 }
 ```
 
+### Embedding Microfrontends
+
+`tools.dynamia.zk.ui.MicroFrontend` (module `tools.dynamia.zk`) embeds an external JS bundle — Vue,
+React, Svelte, or plain JS — as a component inside any ZK view, with ZK MVVM binding, a
+server↔bundle event channel, and shadow-DOM CSS isolation. See
+[Advanced Topics → Microfrontend Integration](./ADVANCED_TOPICS.md#microfrontend-integration) for
+the full guide.
+
 ### When to Use Viewers Module
 
 - Render views from descriptors

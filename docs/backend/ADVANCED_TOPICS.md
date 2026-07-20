@@ -7,13 +7,14 @@ This document covers advanced concepts for building enterprise-grade application
 1. [Advanced Spring Integration](#advanced-spring-integration)
 2. [Custom Extension Development](#custom-extension-development)
 3. [Custom View Renderers](#custom-view-renderers)
-4. [Security Integration](#security-integration)
-5. [Caching & Performance](#caching--performance)
-6. [Event System](#event-system)
-7. [Scheduled Tasks](#scheduled-tasks)
-8. [REST API Development](#rest-api-development)
-9. [Progressive Web Apps (PWA)](#progressive-web-apps-pwa)
-10. [Modularity & Microservices](#modularity--microservices)
+4. [Microfrontend Integration](#microfrontend-integration)
+5. [Security Integration](#security-integration)
+6. [Caching & Performance](#caching--performance)
+7. [Event System](#event-system)
+8. [Scheduled Tasks](#scheduled-tasks)
+9. [REST API Development](#rest-api-development)
+10. [Progressive Web Apps (PWA)](#progressive-web-apps-pwa)
+11. [Modularity & Microservices](#modularity--microservices)
 
 ---
 
@@ -407,6 +408,111 @@ fields:
     params:
       inplace: true
 ```
+
+---
+
+## Microfrontend Integration
+
+`tools.dynamia.zk.ui.MicroFrontend` (module `tools.dynamia.zk`) embeds an external JS bundle — Vue, React, Svelte, or plain JS — inside a ZUL page, loaded and cached client-side, without an iframe.
+
+### Mounting Modes
+
+```xml
+<!-- 1. custom-element: the bundle registers a Web Component (e.g. Vue's defineCustomElement) -->
+<microfrontend src="/bundles/my-app.js" css="/bundles/my-app.css" tag="my-vue-app"
+               userId="${user.id}"/>
+
+<!-- 2. mount-fn: single-spa style window.mountFn(container, props)/unmountFn(container) -->
+<microfrontend src="/bundles/my-app.js" mode="mount-fn"
+               mountFn="mount" unmountFn="unmount" updateFn="update"/>
+
+<!-- 3. auto: a self-mounting SPA build (default `vite build`, not a custom-element library) -->
+<microfrontend app="/static/next/subscription"/>
+```
+
+`app=` points at a bundler's production build root (e.g. Vite's `dist/` copied as-is into a static
+folder); the browser fetches `{app}/index.html` and extracts the entry `<script type="module">`
+and `<link rel="stylesheet">` tags, so hashed output filenames never need to be hardcoded. If
+`index.html`'s `<body>` self-mounts to a hardcoded selector (`createApp(App).mount('#app')`), that
+markup is replicated into the container first so the bundle finds its target with no `tag`/`mountFn`
+needed — only one live instance of a given `app` is supported at a time in this mode.
+
+`shadow="true"` mounts `custom-element`/`mount-fn` bundles inside a shadow root (CSS/DOM isolated
+from the host page in both directions); not supported with `auto`, since its bundle looks up its
+mount target with a page-level `document.getElementById()` call.
+
+### MVVM Binding
+
+Every property is a plain bean/dynamic property, so ZK data binding works with zero extra code,
+including binding a whole Java object — it's serialized to real nested JSON (via Jackson), not
+`toString()`:
+
+```xml
+<microfrontend src="/bundles/my-app.js" tag="my-vue-app"
+               userId="@bind(vm.userId)" user="@bind(vm.currentUser)"
+               onMicrofrontendEvent="@command('handleEvent', data=event.data)"/>
+```
+
+Prop-only changes (the common case once bound via `@bind`) update the mounted instance in place
+instead of destroying and recreating it, so the bundle doesn't lose internal state (e.g. a form the
+user is filling in) on every reactive update.
+
+### Server ↔ Bundle Communication
+
+The mounted bundle receives a `dynamiaEmit(data)` function in its props to notify the server:
+
+```js
+// inside the bundle
+props.dynamiaEmit({ type: 'checkout', total: 42 });
+```
+
+```xml
+<microfrontend ... onMicrofrontendEvent="@command('handleCheckout', data=event.data)"/>
+```
+
+`onMicrofrontendReady` / `onMicrofrontendError` fire around every mount/update (the latter with a
+`{message}` payload) so the ZUL page can show a loading indicator or a retry button:
+
+```xml
+<microfrontend ... onMicrofrontendReady="@command('hideSpinner')"
+               onMicrofrontendError="@command('showRetry', message=event.data.message)"/>
+```
+
+### Host Context
+
+Register one or more `MicroFrontendHostContextProvider` beans to automatically deliver cross-cutting
+values (tenant, locale, API base URL, auth token) to **every** mounted microfrontend as a
+`dynamiaHost` prop, without wiring them by hand on each `<microfrontend>` tag:
+
+```java
+@Component
+public class TenantHostContextProvider implements MicroFrontendHostContextProvider {
+    @Override
+    public Map<String, Object> getHostContext() {
+        Account account = AccountServiceAPI.getCurrentAccount();
+        return Map.of(
+            "tenantId", account.getId(),
+            "locale", LocaleUtils.getCurrentLocale().toLanguageTag(),
+            "apiBaseUrl", "/api"
+        );
+    }
+}
+```
+
+### Bundle-Side Helpers
+
+`@dynamia-tools/microfrontend-bridge` (npm) wraps the `dynamiaEmit`/`dynamiaHost` protocol in typed
+helpers so bundle authors don't have to duck-type props by hand:
+
+```ts
+import { emitToHost, getHostContext } from '@dynamia-tools/microfrontend-bridge';
+
+emitToHost(this, { type: 'checkout', total: 42 });     // custom element (this === element instance)
+const host = getHostContext(props);                     // mount-fn (props argument)
+```
+
+A full working demo of every mode lives in `examples/demo-zk-books` (Library → More Examples →
+MicroFrontend).
 
 ---
 
