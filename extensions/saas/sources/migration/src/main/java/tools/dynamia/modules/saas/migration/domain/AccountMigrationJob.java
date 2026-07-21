@@ -91,10 +91,20 @@ public class AccountMigrationJob extends SimpleEntity {
     private String errorMessage;
 
     /**
-     * Absolute path to the result file on disk (EXPORT / BACKUP jobs).
+     * Persisted result archive for EXPORT / BACKUP jobs.
+     *
+     * <p>Uploaded to {@link tools.dynamia.modules.entityfile.service.EntityFileService}
+     * only after the export pipeline finishes successfully, so no intermediate ZIP is
+     * ever left behind as a "final" artifact on local/container disk. Actual bytes live
+     * wherever {@code EntityFileStorage} is configured (local safe directory, S3, Buckie, etc.).
+     *
+     * <p>Fetched eagerly (this is a single-row lookup, not a bulk listing) so
+     * {@code getResultFile()} is always safe to call outside the loading transaction/session —
+     * needed by {@code downloadResult()}, which runs after {@code findByUuid} returns.
      */
-    @Column(length = 1000)
-    private String resultPath;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "result_file_id")
+    private EntityFile resultFile;
 
     /**
      * Serialized {@link AccountExportOptions}
@@ -280,12 +290,12 @@ public class AccountMigrationJob extends SimpleEntity {
         this.errorMessage = errorMessage;
     }
 
-    public String getResultPath() {
-        return resultPath;
+    public EntityFile getResultFile() {
+        return resultFile;
     }
 
-    public void setResultPath(String resultPath) {
-        this.resultPath = resultPath;
+    public void setResultFile(EntityFile resultFile) {
+        this.resultFile = resultFile;
     }
 
     public String getOptionsJson() {

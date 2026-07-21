@@ -24,6 +24,10 @@ import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.integration.scheduling.SchedulerUtil;
 import tools.dynamia.integration.scheduling.TaskWithResult;
 import tools.dynamia.integration.sterotypes.Service;
+import tools.dynamia.modules.entityfile.StoredEntityFile;
+import tools.dynamia.modules.entityfile.UploadedFileInfo;
+import tools.dynamia.modules.entityfile.domain.EntityFile;
+import tools.dynamia.modules.entityfile.service.EntityFileService;
 import tools.dynamia.modules.saas.migration.api.CancellationToken;
 import tools.dynamia.modules.saas.migration.api.IdentityStrategy;
 import tools.dynamia.modules.saas.migration.api.MigrationProgress;
@@ -90,16 +94,19 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     private final AccountMigrationService migrationService;
     private final AccountMigrationProperties properties;
     private final ObjectMapper objectMapper;
+    private final EntityFileService entityFileService;
     private final Semaphore concurrencyLimit;
 
     public AccountMigrationJobServiceImpl(CrudService crudService,
                                           AccountMigrationService migrationService,
                                           AccountMigrationProperties properties,
-                                          @Qualifier("migrationObjectMapper") ObjectMapper objectMapper) {
+                                          @Qualifier("migrationObjectMapper") ObjectMapper objectMapper,
+                                          EntityFileService entityFileService) {
         this.crudService = crudService;
         this.migrationService = migrationService;
         this.properties = properties;
         this.objectMapper = objectMapper;
+        this.entityFileService = entityFileService;
         this.concurrencyLimit = new Semaphore(Math.max(1, properties.getMaxConcurrentJobs()));
     }
 
@@ -201,6 +208,15 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     }
 
     @Override
+    public StoredEntityFile downloadResult(String jobUuid) {
+        AccountMigrationJob job = findByUuid(jobUuid);
+        if (job == null || job.getResultFile() == null) {
+            return null;
+        }
+        return entityFileService.download(job.getResultFile());
+    }
+
+    @Override
     public List<AccountMigrationJobDto> getLastJobs() {
         var jobs = crudService.findReadOnly(AccountMigrationJob.class, QueryParameters.with("status", QueryConditions.notEq(AccountJobStatus.DELETED))
                 .setMaxResults(100)
@@ -215,11 +231,11 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
     private void launchExportJob(AccountMigrationJob job, Serializable accountId, AccountExportOptions options) {
         CancellationToken token = CancellationToken.active();
         activeTokens.put(job.getUuid(), token);
-        Path outputFile = buildOutputPath(job);
+        Path workFile = buildWorkFile(job);
         ExportWorker worker = new ExportWorker(
-                accountId, outputFile, options, migrationService,
+                accountId, workFile, options, migrationService,
                 buildProgressListener(job), token);
-        scheduleWorker(job, worker, outputFile, null, token);
+        scheduleWorker(job, worker, workFile, null, token);
     }
 
     private void launchImportJob(AccountMigrationJob job, Path inputFile, AccountImportOptions options) {
@@ -246,12 +262,14 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
      * Workers that cannot immediately acquire a slot park the virtual thread
      * (cheap) until a running job finishes.
      *
-     * @param resultFile  written to the job on success (may be null)
-     * @param cleanupPath deleted after the job completes (uploaded temp files; may be null)
+     * @param exportedZipFile local working ZIP written by an {@code ExportWorker}; on success it is
+     *                        uploaded to {@link EntityFileService} and always deleted afterward (may be null)
+     * @param cleanupPath     deleted after the job completes, never uploaded (uploaded import/restore
+     *                        input files; may be null)
      */
     private void scheduleWorker(AccountMigrationJob job,
                                 TaskWithResult<Boolean> worker,
-                                Path resultFile,
+                                Path exportedZipFile,
                                 Path cleanupPath,
                                 CancellationToken token) {
         SchedulerUtil.runWithResult(new TaskWithResult<Boolean>(worker.getName() + "#queued") {
@@ -271,7 +289,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
             }
         }).whenComplete((result, ex) -> {
             activeTokens.remove(job.getUuid());
-            finalizeJob(job.getUuid(), ex, resultFile, token);
+            finalizeJob(job.getUuid(), ex, exportedZipFile, token);
             if (cleanupPath != null) {
                 try {
                     Files.deleteIfExists(cleanupPath);
@@ -314,7 +332,31 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
         });
     }
 
-    private void finalizeJob(String jobUuid, Throwable ex, Path resultFile, CancellationToken token) {
+    /**
+     * Finalizes a job after its worker completes.
+     *
+     * <p>On success, {@code exportedZipFile} (a local working file — never the durable artifact)
+     * is uploaded to {@link EntityFileService} <strong>before</strong> the job status transitions
+     * to COMPLETED, so a job never reports success without a persisted, downloadable result.
+     * The local file is always deleted afterward, regardless of outcome, so nothing is left
+     * behind on local/container disk.
+     */
+    private void finalizeJob(String jobUuid, Throwable ex, Path exportedZipFile, CancellationToken token) {
+        boolean cancelled = token != null && token.isCancelled();
+        EntityFile uploadedResult = null;
+        String uploadError = null;
+
+        if (ex == null && !cancelled && exportedZipFile != null) {
+            try {
+                uploadedResult = persistResultFile(jobUuid, exportedZipFile);
+            } catch (Exception uploadEx) {
+                uploadError = uploadEx.getMessage() != null ? uploadEx.getMessage() : uploadEx.getClass().getSimpleName();
+                log.error("[Migration/Jobs] Job {} failed to persist result file: {}", jobUuid, uploadError, uploadEx);
+            }
+        }
+
+        EntityFile finalResult = uploadedResult;
+        String finalUploadError = uploadError;
         crudService.executeWithinTransaction(() -> {
             AccountMigrationJob job = findByUuid(jobUuid);
             if (job == null) return;
@@ -322,18 +364,49 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
             if (ex != null) {
                 job.markFailed(ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName());
                 log.error("[Migration/Jobs] Job {} FAILED: {}", jobUuid, ex.getMessage());
-            } else if (token != null && token.isCancelled()) {
+            } else if (cancelled) {
                 job.markCancelled(token.getReason());
                 log.info("[Migration/Jobs] Job {} CANCELLED: {}", jobUuid, token.getReason());
+            } else if (finalUploadError != null) {
+                job.markFailed("Result file could not be persisted: " + finalUploadError);
             } else {
                 job.markCompleted();
-                if (resultFile != null) {
-                    job.setResultPath(resultFile.toAbsolutePath().toString());
+                if (finalResult != null) {
+                    job.setResultFile(finalResult);
                 }
                 log.info("[Migration/Jobs] Job {} COMPLETED", jobUuid);
             }
             crudService.update(job);
         });
+
+        if (exportedZipFile != null) {
+            try {
+                Files.deleteIfExists(exportedZipFile);
+            } catch (IOException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Uploads the finished export/backup ZIP to {@link EntityFileService}, associating it
+     * with the {@link AccountMigrationJob} itself so it can be resolved later for download.
+     */
+    private EntityFile persistResultFile(String jobUuid, Path zipFile) throws IOException {
+        AccountMigrationJob job = findByUuid(jobUuid);
+        if (job == null) {
+            throw new IOException("Job " + jobUuid + " no longer exists");
+        }
+
+        UploadedFileInfo fileInfo = new UploadedFileInfo(zipFile);
+        fileInfo.setContentType("application/zip");
+        try {
+            fileInfo.setAccountId(Long.valueOf(job.getAccountId()));
+        } catch (NumberFormatException | NullPointerException ignored) {
+            // non-numeric/absent account id (e.g. UUID tenants) — storage falls back to the current account provider
+        }
+
+        return entityFileService.createEntityFile(fileInfo, job,
+                "Account migration " + job.getJobType() + " result for account " + job.getAccountId());
     }
 
     private MigrationProgressListener buildProgressListener(AccountMigrationJob job) {
@@ -388,7 +461,13 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
         };
     }
 
-    private Path buildOutputPath(AccountMigrationJob job) {
+    /**
+     * Builds the path of the local, transient working file an {@link ExportWorker} streams
+     * the ZIP into while an export/backup job runs. This file is never the durable artifact —
+     * once the pipeline finishes, {@link #finalizeJob} uploads it to {@link EntityFileService}
+     * and deletes it, so it never lingers on local/container disk.
+     */
+    private Path buildWorkFile(AccountMigrationJob job) {
         String ts = LocalDateTime.now().format(FILE_TS);
         String fileName = "Account" + job.getAccountId() + "_" + ts + ".zip";
         try {
@@ -421,7 +500,7 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
 
     private AccountMigrationJobDto toDto(AccountMigrationJob job) {
         String downloadUrl = null;
-        if (job.getResultPath() != null) {
+        if (job.getResultFile() != null) {
             downloadUrl = "/api/saas/migration/jobs/" + job.getUuid() + "/download";
         }
         return new AccountMigrationJobDto(
