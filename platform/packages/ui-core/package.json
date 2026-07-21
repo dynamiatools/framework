@@ -33,6 +33,17 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
+    },
+    "./embed": {
+      "development": "./src/embed/index.ts",
+      "import": {
+        "types": "./dist/embed.d.ts",
+        "default": "./dist/embed.js"
+      },
+      "require": {
+        "types": "./dist/embed.d.cts",
+        "default": "./dist/embed.cjs"
+      }
     }
   },
   "files": [
@@ -41,7 +52,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && vite build --config vite.standalone.config.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",

@@ -13,10 +13,12 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
-      name: 'DynamiaUiCore',
+      entry: {
+        index: resolve(__dirname, 'src/index.ts'),
+        embed: resolve(__dirname, 'src/embed/index.ts'),
+      },
       formats: ['es', 'cjs'],
-      fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs'),
+      fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'js' : 'cjs'}`,
     },
     rollupOptions: {
       external: ['@dynamia-tools/sdk'],
