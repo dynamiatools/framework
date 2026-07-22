@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+/*
+ * Skins: DynamicalVueTemplate.java registers "blue" (default), "dynamia" and "dark" — each
+ * maps to one of the attribute blocks below via `data-skin` on <html> (see src/main.ts /
+ * src/login.ts). Add a new skin in both places together.
+ *
+ * Shared by both bundles (app shell + login) — keep this file free of anything the login page
+ * doesn't need (icon fonts, .dynamia-* component rules); see app.css for those.
+ */
+:root {
+  --skin-primary: #2563eb;
+  --skin-primary-soft: #2563eb26;
+  --skin-primary-fg: #ffffff;
+}
+
+[data-skin='dynamia'] {
+  --skin-primary: #00709c;
+  --skin-primary-soft: #00709c26;
+  --skin-primary-fg: #ffffff;
+}
+
+[data-skin='dark'] {
+  --skin-primary: #1e293b;
+  --skin-primary-soft: #1e293b40;
+  --skin-primary-fg: #e2e8f0;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}

@@ -55,6 +55,8 @@ const componentMap: Record<string, () => Promise<Component>> = {
   [FieldComponents.EntityPicker]: () => import('./fields/EntityPicker.vue'),
   [FieldComponents.EntityRefPicker]: () => import('./fields/EntityRefPicker.vue'),
   [FieldComponents.EntityRefLabel]: () => import('./fields/EntityRefLabel.vue'),
+  [FieldComponents.Label]: () => import('./fields/Label.vue'),
+  [FieldComponents.EnumLabel]: () => import('./fields/EnumLabel.vue'),
   [FieldComponents.CoolLabel]: () => import('./fields/CoolLabel.vue'),
   [FieldComponents.Link]: () => import('./fields/Link.vue'),
   [FieldComponents.Textareabox]: () => import('./fields/Textareabox.vue'),
