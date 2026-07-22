@@ -19,6 +19,7 @@
 
     <modules>
         <module>theme-dynamical/sources</module>
+        <module>theme-dynamical-vue/sources</module>
     </modules>
 
 

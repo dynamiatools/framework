@@ -3,6 +3,8 @@ packages:
   - 'platform/packages/*'
   # Extension SDK packages
   - 'extensions/*/packages/*'
+  # Theme frontends (Maven module frontend-maven-plugin builds via corepack/pnpm)
+  - 'themes/*/sources/src/main/frontend'
 
 allowBuilds:
   argon2: true

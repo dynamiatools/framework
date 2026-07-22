@@ -67,8 +67,9 @@ export type { ClientAction, ClientActionContext, ClientActionRegistryClass } fro
 // ── Utils ─────────────────────────────────────────────────────────────────────
 export {
   currencyConverter, currencySimpleConverter, decimalConverter, dateConverter, dateTimeConverter,
-  builtinConverters,
+  entityDisplayLabel, resolveConverter, builtinConverters,
 } from './utils/converters.js';
+export { resolveIconClass } from './utils/icons.js';
 export { requiredValidator, constraintValidator, builtinValidators } from './utils/validators.js';
 
 // ── Page resolvers ────────────────────────────────────────────────────────────

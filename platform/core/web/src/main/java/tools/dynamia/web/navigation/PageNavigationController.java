@@ -103,6 +103,18 @@ public class PageNavigationController {
     }
 
     public static ModelAndView navigate(String path, HttpServletRequest request, HttpServletResponse response) {
+        return navigate(path, "index", request, response);
+    }
+
+    /**
+     * Same page-resolution logic as {@link #navigate(String, HttpServletRequest, HttpServletResponse)},
+     * but rendering into an arbitrary view name instead of the hardcoded {@code "index"} app shell.
+     * Used by {@link PageEmbedController} to render a page with the {@code "embed"} view (just the
+     * workspace, no header/sidebar/footer) for iframe-style embedding from non-ZK frontends.
+     *
+     * @param viewName logical Spring view name to render the resolved page into
+     */
+    public static ModelAndView navigate(String path, String viewName, HttpServletRequest request, HttpServletResponse response) {
         if (new File(request.getRequestURI()).isFile()) {
             return null;
         }
@@ -116,7 +128,7 @@ public class PageNavigationController {
                 }
             }
         }
-        ModelAndView mv = new ModelAndView("index");
+        ModelAndView mv = new ModelAndView(viewName);
         if (request.getParameter("zoom") != null) {
             mv.addObject("zoom", "zoom: " + request.getParameter("zoom") + ";");
         }

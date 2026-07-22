@@ -59,6 +59,7 @@
 </template>
 
 <script setup lang="ts">
+import { entityDisplayLabel } from '@dynamia-tools/ui-core';
 import type { VueTableView } from '../views/VueTableView.js';
 
 defineProps<{
@@ -69,9 +70,10 @@ defineProps<{
 }>();
 
 function getCellValue(row: unknown, field: string): unknown {
-  if (row && typeof row === 'object') {
-    return (row as Record<string, unknown>)[field];
-  }
-  return '';
+  if (!row || typeof row !== 'object') return '';
+  const value = (row as Record<string, unknown>)[field];
+  // Entity-reference columns (e.g. a @ManyToOne) carry the whole referenced object — display
+  // its name instead of Vue's default toDisplayString, which JSON-stringifies plain objects.
+  return value && typeof value === 'object' ? entityDisplayLabel(value) : value;
 }
 </script>
