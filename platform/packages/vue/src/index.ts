@@ -48,6 +48,10 @@ export type { UseEntityPickerOptions } from './composables/useEntityPicker.js';
 export { useNavigation } from './composables/useNavigation.js';
 export type { UseNavigationOptions } from './composables/useNavigation.js';
 export { useDynamiaClient, DYNAMIA_CLIENT_KEY } from './composables/useDynamiaClient.js';
+export { useToast } from './composables/useToast.js';
+export type { UseToastReturn } from './composables/useToast.js';
+export { useConfirm } from './composables/useConfirm.js';
+export type { UseConfirmReturn } from './composables/useConfirm.js';
 
 // ── Plugin ─────────────────────────────────────────────────────────────────
 export { DynamiaVue } from './plugin.js';
@@ -69,3 +73,6 @@ export { default as FieldComponent } from './components/Field.vue';
 export { default as ActionsComponent } from './components/Actions.vue';
 export { default as NavMenuComponent } from './components/NavMenu.vue';
 export { default as NavBreadcrumbComponent } from './components/NavBreadcrumb.vue';
+export { default as DynamiaDialog } from './components/Dialog.vue';
+export { default as DynamiaConfirmHost } from './components/ConfirmHost.vue';
+export { default as DynamiaToastHost } from './components/ToastHost.vue';

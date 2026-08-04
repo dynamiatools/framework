@@ -85,3 +85,10 @@ export {
 } from './navigation/NavigationResolver.js';
 export type { ActiveNavigationPath } from './navigation/NavigationResolver.js';
 
+// ── Feedback (toast / confirm) ────────────────────────────────────────────────
+export type { FeedbackVariant, ToastOptions, ToastItem, ConfirmOptions, ConfirmRequest } from './feedback/types.js';
+export { ToastManager, toastManager } from './feedback/ToastManager.js';
+export type { ToastChangeHandler } from './feedback/ToastManager.js';
+export { ConfirmManager, confirmManager } from './feedback/ConfirmManager.js';
+export type { ConfirmChangeHandler } from './feedback/ConfirmManager.js';
+

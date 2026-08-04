@@ -363,3 +363,89 @@
 .dynamia-enum-label {
   @apply inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700;
 }
+
+/* ── Dialog (generic modal shell, used directly and by ConfirmHost) ──────────── */
+
+.dynamia-dialog-backdrop {
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4;
+}
+.dynamia-dialog {
+  @apply flex w-full max-w-md flex-col gap-4 rounded-lg bg-white p-5 shadow-xl;
+}
+.dynamia-dialog-header {
+  @apply flex items-center justify-between gap-3;
+}
+.dynamia-dialog-title {
+  @apply text-base font-semibold text-slate-800;
+}
+.dynamia-dialog-close {
+  @apply -m-1 rounded-md p-1 text-lg leading-none text-slate-400 hover:bg-slate-100 hover:text-slate-600;
+}
+.dynamia-dialog-body {
+  @apply text-sm text-slate-600;
+}
+.dynamia-dialog-footer {
+  @apply flex items-center justify-end gap-2;
+}
+
+/* ── Confirm (ConfirmHost — one at a time, driven by useConfirm()) ───────────── */
+
+.dynamia-confirm-message {
+  @apply text-sm text-slate-700;
+}
+.dynamia-confirm-cancel,
+.dynamia-confirm-confirm {
+  @apply rounded-md px-4 py-2 text-sm font-medium transition-colors;
+}
+.dynamia-confirm-cancel {
+  @apply bg-slate-100 text-slate-600 hover:bg-slate-200;
+}
+.dynamia-confirm-confirm {
+  background-color: var(--skin-primary);
+  color: var(--skin-primary-fg);
+}
+.dynamia-confirm-confirm:hover {
+  filter: brightness(0.92);
+}
+/* Destructive confirms (delete, etc.) get a red confirm button instead of the skin accent. */
+.dynamia-confirm-warning .dynamia-confirm-confirm,
+.dynamia-confirm-error .dynamia-confirm-confirm {
+  @apply bg-red-600 text-white;
+}
+.dynamia-confirm-warning .dynamia-confirm-confirm:hover,
+.dynamia-confirm-error .dynamia-confirm-confirm:hover {
+  filter: brightness(0.92);
+}
+
+/* ── Toast (ToastHost — stacked queue, driven by useToast()) ──────────────────── */
+
+.dynamia-toast-stack {
+  @apply fixed top-4 right-4 z-50 flex w-80 flex-col gap-2;
+}
+.dynamia-toast {
+  @apply flex items-start gap-3 rounded-lg border bg-white p-3 text-sm shadow-lg;
+}
+.dynamia-toast-content {
+  @apply flex flex-1 flex-col gap-0.5;
+}
+.dynamia-toast-title {
+  @apply font-semibold text-slate-800;
+}
+.dynamia-toast-message {
+  @apply text-slate-600;
+}
+.dynamia-toast-close {
+  @apply -m-1 rounded-md p-1 text-base leading-none text-slate-400 hover:bg-slate-100 hover:text-slate-600;
+}
+.dynamia-toast-info {
+  @apply border-slate-200;
+}
+.dynamia-toast-success {
+  @apply border-green-200 bg-green-50;
+}
+.dynamia-toast-warning {
+  @apply border-amber-200 bg-amber-50;
+}
+.dynamia-toast-error {
+  @apply border-red-200 bg-red-50;
+}

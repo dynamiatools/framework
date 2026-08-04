@@ -43,6 +43,10 @@
 
       <AppFooter :app-info="appInfo" />
     </div>
+
+    <!-- Mounted once here: every useConfirm()/useToast() call anywhere in the app shares these. -->
+    <DynamiaConfirmHost />
+    <DynamiaToastHost />
   </div>
 </template>
 

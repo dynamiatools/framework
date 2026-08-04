@@ -72,6 +72,13 @@
             <artifactId>tools.dynamia.commons</artifactId>
             <version>26.8.0</version>
         </dependency>
+        <!-- Reuses MessageType (NORMAL/ERROR/WARNING/INFO/CRITICAL/SPECIAL) on ActionFlowStep instead of
+             duplicating a second UI-severity enum; ui-shared has no dependency back on actions. -->
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.ui</artifactId>
+            <version>26.7.0</version>
+        </dependency>
 
     </dependencies>
 </project>

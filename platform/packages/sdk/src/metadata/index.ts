@@ -14,6 +14,8 @@ export type {
     ActionMetadata,
     ActionExecutionRequest,
     ActionExecutionResponse,
+    ActionFlowStepType,
+    ActionFlowStep,
     ViewDescriptorMetadata,
     ActionReference,
     ViewLayout,

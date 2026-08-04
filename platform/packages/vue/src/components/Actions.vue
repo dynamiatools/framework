@@ -17,7 +17,13 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 import type { Component } from 'vue';
-import type { ActionExecutionRequest, ActionMetadata, DynamiaClient } from '@dynamia-tools/sdk';
+import type {
+  ActionExecutionRequest,
+  ActionExecutionResponse,
+  ActionFlowStep,
+  ActionMetadata,
+  DynamiaClient,
+} from '@dynamia-tools/sdk';
 import {
   ActionRendererRegistry,
   ClientActionRegistry,
@@ -25,9 +31,12 @@ import {
   type ActionExecutionErrorEvent,
   type ActionExecutionEvent,
   type ActionTriggerPayload,
+  type FeedbackVariant,
   type View,
 } from '@dynamia-tools/ui-core';
 import { VueButtonActionRenderer } from '../action-renderers/VueButtonActionRenderer.js';
+import { useConfirm } from '../composables/useConfirm.js';
+import { useToast } from '../composables/useToast.js';
 import {
   isCancelCrudAction,
   isCreateCrudAction,
@@ -66,6 +75,8 @@ const emit = defineEmits<{
 }>();
 
 const executing = reactive<Record<string, boolean>>({});
+const { confirm } = useConfirm();
+const { show: showToast } = useToast();
 
 function resolveRenderer(action: ActionMetadata): Component {
   return ActionRendererRegistry.get<Component>(action.renderer) ?? VueButtonActionRenderer;
@@ -98,9 +109,7 @@ async function handleTrigger(action: ActionMetadata, payload?: ActionTriggerPayl
     }
 
     executing[action.id] = true;
-    const response = await props.client.actions.execute(action, request, {
-      className: resolveEntityClassName(request),
-    });
+    const response = await runFlow(props.client, action, request);
     emit('action-executed', action);
     emit('action-response', { action, request, response, local: false });
   } catch (error) {
@@ -204,5 +213,76 @@ async function tryHandleCrudActionLocally(
   }
 
   return false;
+}
+
+/**
+ * Drives a `FlowRemoteAction` to completion: calls `execute()`, and for as long as the response carries
+ * a non-`DONE` `flow` step, renders it (confirm dialog, toast...) and calls `execute()` again with the
+ * user's answer plus the step's `flowId`/`resumeToken`, until a terminal `DONE` step comes back.
+ *
+ * For a plain, non-flow `RemoteAction` (no `flow` in the response at all) this resolves on the very
+ * first call, unchanged from before — see `docs/design/SERVER_DRIVEN_ACTION_FLOWS.md`.
+ */
+async function runFlow(
+  client: DynamiaClient,
+  action: ActionMetadata,
+  request: ActionExecutionRequest,
+): Promise<ActionExecutionResponse> {
+  const className = resolveEntityClassName(request);
+  let response = await client.actions.execute(action, request, { className });
+
+  while (response.flow && response.flow.type !== 'DONE') {
+    const answer = await renderFlowStep(response.flow);
+    response = await client.actions.execute(action, {
+      ...request,
+      flowId: response.flow.flowId,
+      data: answer,
+      ...(response.flow.resumeToken !== undefined ? { resumeToken: response.flow.resumeToken } : {}),
+    }, { className });
+  }
+
+  if (response.flow?.message) {
+    showToast({ message: response.flow.message, variant: mapMessageTypeToVariant(response.flow.messageType) });
+  }
+
+  return response;
+}
+
+/**
+ * Renders one `ActionFlowStep` and resolves with the client's answer (`request.getData()` on the next
+ * call). Only `CONFIRM` and `NOTIFY` are wired to a renderer today (the Phase-0 primitives —
+ * `useConfirm`/`useToast`); `INPUT`/`DIALOG`/`REDIRECT`/`CALL`/`CUSTOM` are a documented future step.
+ */
+async function renderFlowStep(step: ActionFlowStep): Promise<unknown> {
+  switch (step.type) {
+    case 'CONFIRM':
+      return confirm({
+        message: step.message ?? '',
+        ...(step.title !== undefined ? { title: step.title } : {}),
+      });
+
+    case 'NOTIFY':
+      showToast({
+        message: step.message ?? '',
+        variant: mapMessageTypeToVariant(step.messageType),
+        ...(step.title !== undefined ? { title: step.title } : {}),
+      });
+      return undefined; // fire-and-forget — the flow auto-continues with no user answer
+
+    default:
+      throw new Error(`Actions.vue: no renderer wired yet for flow step type "${step.type}"`);
+  }
+}
+
+function mapMessageTypeToVariant(messageType?: string): FeedbackVariant {
+  switch (messageType) {
+    case 'ERROR':
+    case 'CRITICAL':
+      return 'error';
+    case 'WARNING':
+      return 'warning';
+    default:
+      return 'info';
+  }
 }
 </script>

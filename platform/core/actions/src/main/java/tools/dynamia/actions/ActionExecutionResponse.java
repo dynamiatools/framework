@@ -88,6 +88,15 @@ public class ActionExecutionResponse {
     private String dataName;
 
     /**
+     * The next step of a {@link FlowRemoteAction} flow the client must perform, or {@code null} for a
+     * plain, one-shot {@link RemoteAction} response (exactly today's behavior — this field is absent from
+     * every response that doesn't come from a {@link FlowRemoteAction}). When present with
+     * {@link ActionFlowStepType#DONE}, the flow is finished — {@link #getData()} mirrors
+     * {@link ActionFlowStep#getData()} either way.
+     */
+    private ActionFlowStep flow;
+
+    /**
      * Default constructor.
      */
     public ActionExecutionResponse() {
@@ -257,5 +266,24 @@ public class ActionExecutionResponse {
      */
     public void setStatusCode(int statusCode) {
         this.statusCode = statusCode;
+    }
+
+    /**
+     * Returns the next {@link FlowRemoteAction} step the client must perform, or {@code null} if this is
+     * a plain, one-shot response.
+     *
+     * @return the flow step
+     */
+    public ActionFlowStep getFlow() {
+        return flow;
+    }
+
+    /**
+     * Sets the next {@link FlowRemoteAction} step the client must perform.
+     *
+     * @param flow the flow step to set
+     */
+    public void setFlow(ActionFlowStep flow) {
+        this.flow = flow;
     }
 }

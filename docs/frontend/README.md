@@ -49,6 +49,13 @@ This folder is organized to help frontend developers understand:
   - Testing strategy
   - Deployment checklist
 
+#### 4. **[Server-Driven Action Flows](../design/SERVER_DRIVEN_ACTION_FLOWS.md)** (design proposal, not implemented)
+- **Purpose:** Extend `RemoteAction`/`ActionExecutionResponse` so a backend action can drive a multi-step
+  frontend flow (confirm, input, dialog) instead of one request/response
+- **For:** Anyone implementing interactive actions in `theme-dynamical-vue` or any SDK/Vue consumer
+- **Contains:** wire protocol, stateless `resumeToken` design, `FlowRemoteAction` Java API, frontend rollout
+  plan — and calls out that confirm/toast/dialog primitives don't exist yet in `ui-core`/`vue`
+
 ---
 
 ## 🎯 How to Use This Documentation
