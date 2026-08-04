@@ -2,10 +2,14 @@
 
 import { ref, shallowRef, onMounted } from 'vue';
 import type { Ref } from 'vue';
-import type { NavigationNode, DynamiaClient } from '@dynamia-tools/sdk';
+import type { ActionExecutionRequest, NavigationNode, DynamiaClient } from '@dynamia-tools/sdk';
 import type { TreeNode } from '@dynamia-tools/ui-core';
 import { CrudPageResolver } from '@dynamia-tools/ui-core';
 import { VueCrudView } from '../views/VueCrudView.js';
+import { useConfirm } from './useConfirm.js';
+import { useToast } from './useToast.js';
+import { runActionFlow } from '../actions/runActionFlow.js';
+import { isDeleteCrudAction, isSaveCrudAction } from '../actions/crudActionUtils.js';
 
 /** Options for the {@link useCrudPage} composable */
 export interface UseCrudPageOptions {
@@ -43,6 +47,12 @@ export function useCrudPage(options: UseCrudPageOptions) {
   // even when the component re-uses the same instance across navigation changes.
   let activeNode = options.node;
   const { client } = options;
+
+  // Called at composable-setup time (required for onUnmounted inside useConfirm/useToast to
+  // work) — the returned confirm/showToast functions are used later, inside the save/delete
+  // handlers registered below.
+  const { confirm } = useConfirm();
+  const { show: showToast } = useToast();
 
   const loading: Ref<boolean> = ref(false);
   const error: Ref<string | null> = ref(null);
@@ -105,13 +115,21 @@ export function useCrudPage(options: UseCrudPageOptions) {
         });
       }
 
-      // 5. Wire save handler (create or update)
+      // 5. Wire save handler (create or update) — action-aware: if the entity has a registered
+      // "save" CrudRemoteAction (see docs/design/SERVER_DRIVEN_ACTION_FLOWS.md §7), drive it
+      // through the Actions framework (ActionFilter hooks, optional confirm flow) instead of
+      // calling the plain REST verb directly. An entity with no such action behaves exactly as
+      // before — this is fully opt-in per entity.
+      const saveAction = context.entityMetadata?.actions?.find(isSaveCrudAction);
       crudView.on('save', (payload) => {
         const { mode, data } = payload as { mode: 'create' | 'edit'; data: Record<string, unknown> };
         const persist = async () => {
           crudView.isLoading.value = true;
           try {
-            if (mode === 'create') {
+            if (saveAction) {
+              const request: ActionExecutionRequest = { data, dataType: context.entityClass };
+              await runActionFlow(client, saveAction, request, { confirm, showToast }, context.entityClass);
+            } else if (mode === 'create') {
               await api.create(data);
             } else {
               const id = data['id'] as string | number | undefined;
@@ -128,7 +146,9 @@ export function useCrudPage(options: UseCrudPageOptions) {
         void persist();
       });
 
-      // 6. Wire delete handler
+      // 6. Wire delete handler — same action-aware pattern as save (typically resolves to
+      // DeleteFlowRemoteAction, which confirms before deleting).
+      const deleteAction = context.entityMetadata?.actions?.find(isDeleteCrudAction);
       crudView.on('delete', (entity) => {
         const rec = entity as Record<string, unknown>;
         const id = rec['id'] as string | number | undefined;
@@ -136,7 +156,12 @@ export function useCrudPage(options: UseCrudPageOptions) {
           crudView.isLoading.value = true;
           try {
             if (id == null) throw new Error(`Cannot delete entity: "id" field is missing`);
-            await api.delete(id);
+            if (deleteAction) {
+              const request: ActionExecutionRequest = { dataId: String(id), dataType: context.entityClass };
+              await runActionFlow(client, deleteAction, request, { confirm, showToast }, context.entityClass);
+            } else {
+              await api.delete(id);
+            }
             await crudView.dataSetView.load();
           } catch (e) {
             crudView.errorMessage.value = String(e);

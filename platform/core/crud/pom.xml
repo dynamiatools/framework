@@ -81,5 +81,12 @@
             <version>26.8.0</version>
             <scope>test</scope>
         </dependency>
+        <!-- Reuses MessageType on FlowRemoteAction results (SaveFlowRemoteAction/DeleteFlowRemoteAction),
+             same rationale as tools.dynamia.actions' own dependency on this module. -->
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.ui</artifactId>
+            <version>26.7.0</version>
+        </dependency>
     </dependencies>
 </project>

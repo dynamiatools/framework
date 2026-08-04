@@ -18,6 +18,7 @@ package tools.dynamia.actions;
 
 import tools.dynamia.commons.StringPojoParser;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,6 +92,17 @@ public final class ActionFlowContext {
     /** Accumulates {@code value} under {@code key} into the next signed {@code resumeToken}. */
     public void put(String key, Object value) {
         data.put(key, value);
+    }
+
+    /**
+     * A read-only snapshot of every key currently accumulated in this flow — on the first call, this is
+     * the triggering request's {@code data} spread flat (when it was itself a map, e.g. a whole entity
+     * payload) plus {@code dataId}/{@code dataType}/{@code dataName}/{@code params}; see
+     * {@link ActionFlows#dispatch}. Useful when an implementation needs the whole accumulated payload
+     * rather than one key at a time (e.g. {@code SaveFlowRemoteAction} re-collecting an edited entity).
+     */
+    public Map<String, Object> asMap() {
+        return Collections.unmodifiableMap(new HashMap<>(data));
     }
 
     /** @internal used by {@link ActionFlows} to build the next signed token. */

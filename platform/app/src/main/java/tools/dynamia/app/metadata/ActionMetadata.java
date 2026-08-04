@@ -94,6 +94,8 @@ public class ActionMetadata extends BasicMetadata {
 
         if (action instanceof CrudAction crudAction) {
             this.applicableStates = Streams.mapAndCollect(crudAction.getApplicableStates(), Enum::name);
+        } else if (action instanceof CrudRemoteAction crudRemoteAction) {
+            this.applicableStates = Streams.mapAndCollect(crudRemoteAction.getApplicableStates(), Enum::name);
         }
 
         if (action instanceof ClassAction classAction) {
