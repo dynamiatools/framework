@@ -1,18 +1,29 @@
 package tools.dynamia.app.controllers;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockHttpServletRequest;
 import tools.dynamia.actions.AbstractAction;
 import tools.dynamia.actions.AbstractRemoteAction;
 import tools.dynamia.actions.ActionExecutionRequest;
 import tools.dynamia.actions.ActionExecutionResponse;
+import tools.dynamia.app.metadata.ActionMetadata;
 import tools.dynamia.commons.ApplicableClass;
 import tools.dynamia.crud.CrudRemoteAction;
 import tools.dynamia.crud.CrudState;
+import tools.dynamia.domain.ValidationError;
+import tools.dynamia.integration.Containers;
+import tools.dynamia.integration.SimpleObjectContainer;
+import tools.dynamia.web.navigation.ErrorResult;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -21,6 +32,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * {@link CrudState} isn't declared applicable must be rejected before the action ever runs.
  */
 class ApplicationMetadataControllerTest {
+
+    @BeforeEach
+    void setUp() {
+        Containers.get().removeAllContainers();
+    }
+
+    @AfterEach
+    void tearDown() {
+        Containers.get().removeAllContainers();
+    }
 
     private static class FakeCrudRemoteAction extends AbstractAction implements CrudRemoteAction {
 
@@ -135,5 +156,68 @@ class ApplicationMetadataControllerTest {
         assertFalse(ApplicationMetadataController.hasEntityId(new ActionExecutionRequest(Map.of("title", "x"))));
         assertFalse(ApplicationMetadataController.hasEntityId(new ActionExecutionRequest(Map.of("ids", List.of()))));
         assertFalse(ApplicationMetadataController.hasEntityId(new ActionExecutionRequest(List.of())));
+    }
+
+    // ── #82: 422/ErrorResult for ValidationError, unchanged 200/ActionExecutionResponse otherwise ──────
+
+    private static class SucceedingAction extends AbstractRemoteAction {
+        @Override
+        public ActionExecutionResponse execute(ActionExecutionRequest request) {
+            return new ActionExecutionResponse("ok");
+        }
+    }
+
+    private static class ValidationFailingAction extends AbstractRemoteAction {
+        @Override
+        public ActionExecutionResponse execute(ActionExecutionRequest request) {
+            throw new ValidationError("Name is required", null, "name", Object.class);
+        }
+    }
+
+    private static void install(Object action) {
+        var container = new SimpleObjectContainer();
+        container.addObject(action);
+        Containers.get().installObjectContainer(container);
+    }
+
+    @Test
+    void successfulExecutionStaysHttp200WithActionExecutionResponseBody() {
+        var action = new SucceedingAction();
+        install(action);
+        var metadata = new ActionMetadata(action);
+
+        var response = ApplicationMetadataController.executeAction(
+                metadata.getId(), new ActionExecutionRequest(), metadata, new MockHttpServletRequest());
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertInstanceOf(ActionExecutionResponse.class, response.getBody());
+    }
+
+    @Test
+    void validationErrorBecomesHttp422WithErrorResultBody() {
+        var action = new ValidationFailingAction();
+        install(action);
+        var metadata = new ActionMetadata(action);
+        var httpRequest = new MockHttpServletRequest("POST", "/api/app/metadata/actions/" + metadata.getId());
+
+        var response = ApplicationMetadataController.executeAction(
+                metadata.getId(), new ActionExecutionRequest(), metadata, httpRequest);
+
+        assertEquals(422, response.getStatusCode().value());
+        var body = assertInstanceOf(ErrorResult.class, response.getBody());
+        assertEquals("VALIDATION_ERROR", body.getError());
+        assertEquals("Name is required", body.getMessage());
+        assertEquals("/api/app/metadata/actions/" + metadata.getId(), body.getPath());
+        assertEquals("name", body.getDetails().get("invalidProperty"));
+    }
+
+    @Test
+    void unknownActionStaysHttp200WithNotFoundEmbeddedInBody() {
+        var response = ApplicationMetadataController.executeAction(
+                "doesNotExist", new ActionExecutionRequest(), null, new MockHttpServletRequest());
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        var body = assertInstanceOf(ActionExecutionResponse.class, response.getBody());
+        assertEquals(404, body.getStatusCode());
     }
 }
