@@ -16,9 +16,9 @@
  */
 package tools.dynamia.web;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.servlet.View;
@@ -26,9 +26,9 @@ import org.springframework.web.servlet.ViewResolver;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests for {@link MicroFrontendView}, covering both server-side resolution strategies:
@@ -40,14 +40,14 @@ public class MicroFrontendViewTest {
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Containers.get().removeAllContainers();
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         Containers.get().removeAllContainers();
     }
