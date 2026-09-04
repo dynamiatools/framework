@@ -32,6 +32,11 @@ export {
 export { ClientActionRegistry, registerClientAction, isClientActionApplicable } from '@dynamia-tools/ui-core';
 export type { ClientAction, ClientActionContext } from '@dynamia-tools/ui-core';
 
+// ── Flow step renderers (re-exported from ui-core for convenience) ─────────
+// Register a handler for a FlowRemoteAction's CUSTOM step — see docs/design/SERVER_DRIVEN_ACTION_FLOWS.md §6.
+export { FlowStepRendererRegistry, registerFlowStepRenderer } from '@dynamia-tools/ui-core';
+export type { FlowStepRenderer } from '@dynamia-tools/ui-core';
+
 // ── Composables ────────────────────────────────────────────────────────────
 export { useViewer } from './composables/useViewer.js';
 export { useView } from './composables/useView.js';
@@ -52,6 +57,10 @@ export { useToast } from './composables/useToast.js';
 export type { UseToastReturn } from './composables/useToast.js';
 export { useConfirm } from './composables/useConfirm.js';
 export type { UseConfirmReturn } from './composables/useConfirm.js';
+export { useInput } from './composables/useInput.js';
+export type { UseInputReturn } from './composables/useInput.js';
+export { useFormDialog } from './composables/useFormDialog.js';
+export type { UseFormDialogReturn } from './composables/useFormDialog.js';
 
 // ── Plugin ─────────────────────────────────────────────────────────────────
 export { DynamiaVue } from './plugin.js';
@@ -76,3 +85,5 @@ export { default as NavBreadcrumbComponent } from './components/NavBreadcrumb.vu
 export { default as DynamiaDialog } from './components/Dialog.vue';
 export { default as DynamiaConfirmHost } from './components/ConfirmHost.vue';
 export { default as DynamiaToastHost } from './components/ToastHost.vue';
+export { default as DynamiaPromptHost } from './components/PromptHost.vue';
+export { default as DynamiaFormDialogHost } from './components/FormDialogHost.vue';

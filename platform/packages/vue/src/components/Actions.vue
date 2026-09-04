@@ -34,6 +34,8 @@ import {
 import { VueButtonActionRenderer } from '../action-renderers/VueButtonActionRenderer.js';
 import { useConfirm } from '../composables/useConfirm.js';
 import { useToast } from '../composables/useToast.js';
+import { useInput } from '../composables/useInput.js';
+import { useFormDialog } from '../composables/useFormDialog.js';
 import { runActionFlow } from '../actions/runActionFlow.js';
 import {
   isCancelCrudAction,
@@ -75,6 +77,8 @@ const emit = defineEmits<{
 const executing = reactive<Record<string, boolean>>({});
 const { confirm } = useConfirm();
 const { show: showToast } = useToast();
+const { prompt } = useInput();
+const { showForm: showFormDialog } = useFormDialog();
 
 function resolveRenderer(action: ActionMetadata): Component {
   return ActionRendererRegistry.get<Component>(action.renderer) ?? VueButtonActionRenderer;
@@ -111,7 +115,7 @@ async function handleTrigger(action: ActionMetadata, payload?: ActionTriggerPayl
       props.client,
       action,
       request,
-      { confirm, showToast },
+      { confirm, showToast, prompt, showFormDialog },
       resolveEntityClassName(request),
     );
     emit('action-executed', action);

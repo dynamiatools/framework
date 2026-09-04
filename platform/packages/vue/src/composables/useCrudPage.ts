@@ -8,6 +8,8 @@ import { CrudPageResolver } from '@dynamia-tools/ui-core';
 import { VueCrudView } from '../views/VueCrudView.js';
 import { useConfirm } from './useConfirm.js';
 import { useToast } from './useToast.js';
+import { useInput } from './useInput.js';
+import { useFormDialog } from './useFormDialog.js';
 import { runActionFlow } from '../actions/runActionFlow.js';
 import { isDeleteCrudAction, isSaveCrudAction } from '../actions/crudActionUtils.js';
 
@@ -48,11 +50,13 @@ export function useCrudPage(options: UseCrudPageOptions) {
   let activeNode = options.node;
   const { client } = options;
 
-  // Called at composable-setup time (required for onUnmounted inside useConfirm/useToast to
-  // work) — the returned confirm/showToast functions are used later, inside the save/delete
-  // handlers registered below.
+  // Called at composable-setup time (required for onUnmounted inside these composables to
+  // work) — the returned functions are used later, inside the save/delete handlers registered
+  // below, as runActionFlow's FlowStepHandlers.
   const { confirm } = useConfirm();
   const { show: showToast } = useToast();
+  const { prompt } = useInput();
+  const { showForm: showFormDialog } = useFormDialog();
 
   const loading: Ref<boolean> = ref(false);
   const error: Ref<string | null> = ref(null);
@@ -128,7 +132,7 @@ export function useCrudPage(options: UseCrudPageOptions) {
           try {
             if (saveAction) {
               const request: ActionExecutionRequest = { data, dataType: context.entityClass };
-              await runActionFlow(client, saveAction, request, { confirm, showToast }, context.entityClass);
+              await runActionFlow(client, saveAction, request, { confirm, showToast, prompt, showFormDialog }, context.entityClass);
             } else if (mode === 'create') {
               await api.create(data);
             } else {
@@ -158,7 +162,7 @@ export function useCrudPage(options: UseCrudPageOptions) {
             if (id == null) throw new Error(`Cannot delete entity: "id" field is missing`);
             if (deleteAction) {
               const request: ActionExecutionRequest = { dataId: String(id), dataType: context.entityClass };
-              await runActionFlow(client, deleteAction, request, { confirm, showToast }, context.entityClass);
+              await runActionFlow(client, deleteAction, request, { confirm, showToast, prompt, showFormDialog }, context.entityClass);
             } else {
               await api.delete(id);
             }

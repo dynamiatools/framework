@@ -449,3 +449,33 @@
 .dynamia-toast-error {
   @apply border-red-200 bg-red-50;
 }
+
+/* ── Prompt (PromptHost — single-value input, driven by useInput(), the INPUT flow step) ────── */
+
+.dynamia-prompt-message {
+  @apply text-sm text-slate-700;
+}
+.dynamia-prompt-input {
+  @apply mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--skin-primary)];
+}
+.dynamia-prompt-cancel,
+.dynamia-prompt-confirm {
+  @apply rounded-md px-4 py-2 text-sm font-medium transition-colors;
+}
+.dynamia-prompt-cancel {
+  @apply bg-slate-100 text-slate-600 hover:bg-slate-200;
+}
+.dynamia-prompt-confirm {
+  background-color: var(--skin-primary);
+  color: var(--skin-primary-fg);
+}
+.dynamia-prompt-confirm:hover {
+  filter: brightness(0.92);
+}
+
+/* ── Form dialog (FormDialogHost — renders a DynamiaForm, driven by useFormDialog(), the DIALOG
+   flow step) — wider than the plain confirm/prompt dialog to fit a full form layout. ─────────── */
+
+.dynamia-form-dialog {
+  @apply max-w-2xl;
+}

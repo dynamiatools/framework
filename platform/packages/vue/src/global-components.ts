@@ -15,6 +15,8 @@ import type ActionsComponent from './components/Actions.vue';
 import type DialogComponent from './components/Dialog.vue';
 import type ConfirmHostComponent from './components/ConfirmHost.vue';
 import type ToastHostComponent from './components/ToastHost.vue';
+import type PromptHostComponent from './components/PromptHost.vue';
+import type FormDialogHostComponent from './components/FormDialogHost.vue';
 
 declare module 'vue' {
   export interface GlobalComponents {
@@ -31,6 +33,8 @@ declare module 'vue' {
     DynamiaDialog: typeof DialogComponent;
     DynamiaConfirmHost: typeof ConfirmHostComponent;
     DynamiaToastHost: typeof ToastHostComponent;
+    DynamiaPromptHost: typeof PromptHostComponent;
+    DynamiaFormDialogHost: typeof FormDialogHostComponent;
   }
 }
 

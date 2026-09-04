@@ -45,6 +45,8 @@ import CrudPageComponent from './components/CrudPage.vue';
 import DialogComponent from './components/Dialog.vue';
 import ConfirmHostComponent from './components/ConfirmHost.vue';
 import ToastHostComponent from './components/ToastHost.vue';
+import PromptHostComponent from './components/PromptHost.vue';
+import FormDialogHostComponent from './components/FormDialogHost.vue';
 
 /**
  * Vue plugin for Dynamia Tools.
@@ -115,5 +117,7 @@ export const DynamiaVue = {
     app.component('DynamiaDialog', DialogComponent);
     app.component('DynamiaConfirmHost', ConfirmHostComponent);
     app.component('DynamiaToastHost', ToastHostComponent);
+    app.component('DynamiaPromptHost', PromptHostComponent);
+    app.component('DynamiaFormDialogHost', FormDialogHostComponent);
   },
 };

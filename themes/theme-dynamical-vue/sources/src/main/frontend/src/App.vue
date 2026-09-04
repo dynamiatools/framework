@@ -44,9 +44,13 @@
       <AppFooter :app-info="appInfo" />
     </div>
 
-    <!-- Mounted once here: every useConfirm()/useToast() call anywhere in the app shares these. -->
+    <!-- Mounted once here: every useConfirm()/useToast()/useInput()/useFormDialog() call anywhere in
+         the app shares these — also what renders a FlowRemoteAction's CONFIRM/NOTIFY/INPUT/DIALOG
+         steps, see runActionFlow in @dynamia-tools/vue. -->
     <DynamiaConfirmHost />
     <DynamiaToastHost />
+    <DynamiaPromptHost />
+    <DynamiaFormDialogHost />
   </div>
 </template>
 
