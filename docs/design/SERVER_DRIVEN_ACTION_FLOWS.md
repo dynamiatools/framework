@@ -1,6 +1,9 @@
 # Server-Driven Action Flows for `RemoteAction`
 
-**Status:** Draft / proposal — not implemented.
+**Status:** Phases 0–4 implemented (commits `0ddfbe66` "Phases 0-3" and `d03b14c5` "Phase 4", Aug 2026). Still open:
+`REDIRECT`/`CALL` semantics, `INPUT`/`DIALOG`/`CUSTOM` step renderers on the Vue side, the 422-vs-406
+validation-error shape reconciliation, and generic `CrudState` enforcement in the controller for arbitrary
+future `FlowRemoteAction`s. See §10 for the delta between this design and what actually shipped.
 **Scope:** `platform/core/actions`, `platform/core/crud`, `platform/app` (controller), `platform/packages/sdk`, `platform/packages/ui-core`, `platform/packages/vue`.
 **Author context:** design discussion between Mario A. Serrano Leones and Claude, July 2026.
 
@@ -156,12 +159,20 @@ the realistic use cases (confirm dialogs, short wizards, a handful of accumulate
 genuinely needs to hide a large or sensitive payload from the client is out of scope for this design — solve
 that case specifically if/when it comes up, not by reintroducing a general server-side store here.
 
-**Security requirement, non-negotiable:** the token **must be signed** (HMAC, reusing the signing key already
-backing the `DYNAMIA_JWT` cookie — see `theme-dynamical-vue`'s `POST /login/json` contract). Without a
-signature, a client could forge a `resumeToken` to jump straight to a `DONE` step with fabricated `data`, or
+**Security requirement, non-negotiable:** the token **must be signed** (HMAC-SHA256). Without a signature, a
+client could forge a `resumeToken` to jump straight to a `DONE` step with fabricated `data`, or
 replay/tamper with accumulated answers (e.g. change which entity ids a confirmed bulk-delete applies to).
 Signing prevents tampering; it does not provide secrecy — see the paragraph above for why that's an accepted
 trade-off here, not a gap to patch with encryption by default.
+
+**As implemented, this does *not* reuse the JWT cookie's signing key** — `platform/core/actions` cannot
+depend on the security extension that owns it. `FlowTokenSigner`
+(`platform/core/actions/src/main/java/tools/dynamia/actions/flow/FlowTokenSigner.java`) manages its own
+independent secret, read from `dynamia.actions.flow.secret` (min 32 chars); if unset/too short it falls back
+to a random per-JVM secret with a logged warning — fine for dev, but flows won't resume across a
+restart/rolling deploy in that mode, so **this property must be set explicitly in production**. Token TTL is
+`dynamia.actions.flow.token-ttl` (ISO-8601 duration), defaulting to `PT10M` — this settles the "timeout
+policy" open question from the original draft.
 
 ### Server-side shape
 
@@ -174,11 +185,13 @@ public class ActionFlowContext {
 }
 ```
 
-`ActionFlows.decode(request)` verifies the signature and rejects/`401`s a tampered or expired token before any
-implementor code runs — same shape as `ActionRequestAutoconvertDataFilter`
-(`tools/dynamia/app/metadata/ActionRequestAutoconvertDataFilter.java`) already plugging into
-`Actions.execute()` via the existing `ActionFilter` hook (`Actions.java:193-210`). A flow-token verification
-filter is a natural second use of that same extension point — no new dispatch mechanism needed.
+`ActionFlows.dispatch(action, request)` verifies the signature and rejects/`401`s a tampered or expired token
+before any implementor code runs. **As implemented this is not an `ActionFilter` hook** (the
+`ActionRequestAutoconvertDataFilter` extension point Phase 1 originally intended to reuse) — verification
+happens inline inside `ActionFlows.dispatch()`, which `FlowRemoteAction.execute()`'s default method calls
+directly. Simpler than routing through the filter chain, and it still satisfies "zero controller changes":
+`Actions.execute()`/`ApplicationMetadataController` call `action.execute(request)` exactly as before and
+never know a flow is happening.
 
 ---
 
@@ -225,12 +238,19 @@ public class BulkDeleteAction extends AbstractCrudAction implements FlowRemoteAc
     public ActionFlowStep resume(ActionFlowContext ctx, Object answer) {
         if (Boolean.TRUE.equals(answer)) {
             crudService().delete(ctx.get("ids", List.class));
-            return ActionFlowStep.notify("Deleted.", MessageType.INFO).thenDone();
+            return ActionFlowStep.done(null, "Deleted.", MessageType.INFO); // DONE + a toast on the way out
         }
         return ActionFlowStep.done("cancelled");
     }
 }
 ```
+
+> As shipped: `ActionFlowStep` has no `.thenDone()` chaining — `done(Object data, String message,
+> MessageType messageType)` is the actual overload for "terminal step plus a toast" (see
+> `DeleteFlowRemoteAction`/`SaveFlowRemoteAction` in `platform/core/crud/.../actions/remote/` for the real
+> equivalents of this example, renamed per §7.2). `ActionFlowContext` also gained an `asMap()` accessor in
+> Phase 4 (a read-only snapshot of everything accumulated so far) — needed once `SaveFlowRemoteAction` had
+> to recover a whole entity payload across `start()`/`resume()`, not just one key at a time.
 
 No new endpoint, no new controller code — `POST /api/app/metadata/entities/{class}/action/bulkDelete` handles
 both the initial call and every continuation, distinguished only by the presence of `resumeToken` in the
@@ -273,6 +293,14 @@ async function runFlow(action: ActionMetadata, request: ActionExecutionRequest) 
 `renderStep` for `CUSTOM` looks up a client-registered handler — same registry shape as the existing
 `ClientActionRegistry` (`platform/packages/ui-core/src/actions/ClientAction.ts`), just keyed by
 `data.component` instead of action id.
+
+> **As shipped, this paragraph is still aspirational.** The loop exists — as `runActionFlow`
+> (`platform/packages/vue/src/actions/runActionFlow.ts`, extracted out of `Actions.vue` in Phase 4 so
+> `useCrudPage`'s save/delete handlers could share it per §7.5) — but its step renderer only handles
+> `CONFIRM` and `NOTIFY`. `INPUT`/`DIALOG`/`REDIRECT`/`CALL`/`CUSTOM` all hit
+> `throw new Error('runActionFlow: no renderer wired yet for flow step type "...")`; no `CUSTOM` registry
+> parallel to `ClientActionRegistry` has been built. Any `FlowRemoteAction` that returns one of those step
+> types today will hard-fail on the Vue side — this is real, not theoretical, work still open.
 
 ---
 
@@ -377,38 +405,56 @@ entity, not a behavior change for existing apps.
    never serializes to the client for any `CrudRemoteAction`, including the new ones. Needs
    `if (action instanceof CrudAction crudAction) { ... } else if (action instanceof CrudRemoteAction crudRemoteAction) { ... }`
    (or unify both branches) before `applicableStates`-based toolbar filtering can work for these at all.
+   **Fixed in Phase 4** (`d03b14c5`) exactly as described.
 2. **`CrudState` is not enforced server-side.** `ApplicationMetadataController.executeAction(...)`
    (lines 155-177) only checks `ActionRestrictions.allowAccess(...)` before calling `execute()` — never
    `CrudRemoteAction.getApplicableStates()`. Today that's harmless because no action does a real mutation from
    this endpoint; once `SaveRemoteAction`/`DeleteFlowRemoteAction` exist, add a cheap state check there (or
    inside each action) so a hand-crafted request can't invoke `delete` while the declared applicable state is
-   `CREATE`, etc.
+   `CREATE`, etc. **Fixed in Phase 4, but scoped narrower than written here**: `SaveSupport.persist` enforces
+   `applicableStates` for `SaveRemoteAction`/`SaveFlowRemoteAction` specifically, not a generic check inside
+   `ApplicationMetadataController` that would cover *any* future `CrudRemoteAction`. A hand-crafted request
+   against a `CrudRemoteAction` that doesn't go through `SaveSupport` is still unguarded at the controller
+   level — noted as a real open item in the Phase 4 commit message, not silently dropped.
 3. **Validation-error response shape differs between the two entry points** — plain REST CRUD writes surface
    `ValidationError` as HTTP 422 with an `ErrorResult` body
    (`RestApiExceptionHandler.handleValidationError`), while the Action-framework path wraps the same exception
    as HTTP 406 inside an `ActionExecutionResponse` (`ApplicationMetadataController.executeAction`, lines
    168-169). Once `SaveRemoteAction` exists side-by-side with plain `client.crud(path).create()` for the same
    entity, this inconsistency becomes visible to the same frontend form — worth reconciling (pick one shape)
-   before Phase 4 below, not left as an accidental difference.
+   before Phase 4 below, not left as an accidental difference. **Not addressed** — the Phase 4 commit
+   explicitly left this open (see §9), so `SaveRemoteAction`/`client.crud(path).create()` now coexist with
+   two different validation-error shapes for the same entity, exactly the situation this point warned about.
 
 ---
 
 ## 8. Rollout plan
 
-1. **Phase 0** — `useConfirm`/`useToast`/`DynamiaDialog` in `ui-core` + `vue`. Useful immediately, independent
-   of everything else.
-2. **Phase 1** — `ActionFlowStep`/`ActionFlowStepType`/`ActionFlowContext`/`FlowRemoteAction`/`ActionFlows` in
-   `platform/core/actions`, resumeToken signing (reuse existing JWT signing key), unit tests for
-   tamper/expiry rejection. No controller/SDK changes yet — verifiable in isolation with plain HTTP calls.
-3. **Phase 2** — SDK/TS type additions + the `runFlow` loop in `@dynamia-tools/vue`, wired into `Actions.vue`.
-4. **Phase 3** — one real `FlowRemoteAction` example (bulk-delete-with-confirm is the natural first candidate)
-   in `demo-vue-books` or `theme-dynamical-vue`'s test app, end-to-end, before opening this up as a general
-   pattern for other actions.
-5. **Phase 4** — the CRUD parity actions from §7: fix the two latent bugs (§7.6), add
+1. **Phase 0** — ✅ done (`0ddfbe66`). `ConfirmManager`/`ToastManager` in `ui-core`
+   (`platform/packages/ui-core/src/feedback/`), `Dialog.vue`/`ConfirmHost.vue`/`ToastHost.vue` +
+   `useConfirm`/`useToast` in `vue`.
+2. **Phase 1** — ✅ done (`0ddfbe66`). `ActionFlowStep`/`ActionFlowStepType`/`ActionFlowContext`/
+   `FlowRemoteAction`/`ActionFlows` in `platform/core/actions`, resumeToken signing, unit tests for
+   tamper/expiry rejection (`ActionFlowsTest`, `FlowTokenSignerTest`). **Deviation:** the signer does not
+   reuse the JWT cookie's key as originally planned — see §4's inline note.
+3. **Phase 2** — ✅ done (`0ddfbe66`). SDK/TS type additions + the flow-driving loop, wired into `Actions.vue`
+   (later extracted to `runActionFlow.ts` in Phase 4). **Deviation:** only `CONFIRM`/`NOTIFY` steps are
+   rendered — see §6's inline note.
+4. **Phase 3** — ✅ done (`0ddfbe66`). One real `FlowRemoteAction` example, `MarkOutOfStockAction`
+   (`examples/demo-zk-books/.../actions/MarkOutOfStockAction.java`). Landed in `demo-zk-books` rather than
+   `demo-vue-books`/`theme-dynamical-vue` as this section originally called for, but that's cosmetic, not a
+   gap: the action's own javadoc confirms it's reached through the REST/Vue generic actions toolbar via
+   `ApplicationMetadataController` (part of `platform/app`, present regardless of which theme module a demo
+   happens to bundle), and its implementation notes a real bug found while verifying it end-to-end (a
+   `Book`'s lazy JPA associations aren't serializable once the Hibernate session closes — worth being aware
+   of for any other `FlowRemoteAction` returning a managed entity directly instead of a flat projection).
+5. **Phase 4** — ✅ done (`d03b14c5`). §7.6 bugs #1 and #2 fixed (scoped per the note there, not generically);
    `SaveRemoteAction`/`SaveFlowRemoteAction`/`DeleteRemoteAction`/`DeleteFlowRemoteAction`
-   (`tools.dynamia.crud.actions.remote`), wire `useCrudPage`'s save/delete handlers per §7.5, verify against
-   `demo-vue-books` that an entity with no registered action still behaves exactly as before (regression check
-   for every other entity in that demo).
+   (`tools.dynamia.crud.actions.remote`) added; `useCrudPage`'s save/delete handlers wired per §7.5.
+   §7.6 bug #3 (validation-error shape) explicitly **not** addressed — still open, see §9.
+
+**Not done, no phase currently owns it:** `INPUT`/`DIALOG`/`REDIRECT`/`CALL`/`CUSTOM` step renderers on the
+Vue side (§6), and generic controller-level `CrudState` enforcement for any `CrudRemoteAction` (§7.6 #2).
 
 ---
 
@@ -417,10 +463,19 @@ entity, not a behavior change for existing apps.
 - **ZK/`LocalAction` parity**: deliberately out of scope, and settled — see §7.1. ZK actions already have full
   synchronous UI power (§1) and gain nothing from this protocol; forcing them through it would be a
   regression, not an improvement.
-- **`REDIRECT`/`CALL` step semantics**: whether the client resumes the *same* flow after a redirect/nested call
-  or whether those are always terminal needs to be pinned down against a real use case before Phase 3, not
-  designed in the abstract.
-- **Timeout/expiry policy for `resumeToken`**: needs a concrete TTL decision (tied to session length? fixed
-  5-minute window regardless of session?) before Phase 1 ships.
-- **Validation-error shape reconciliation** (§7.6, point 3): pick 422/`ErrorResult` or 406/`ActionExecutionResponse`
-  as the one shape before Phase 4, rather than shipping both.
+- **`REDIRECT`/`CALL` step semantics**: still unresolved. Not just undesigned — `runActionFlow` has no
+  renderer for either type at all (§6), so as of Phase 4 no `FlowRemoteAction` can actually use them.
+- **`INPUT`/`DIALOG`/`CUSTOM` step renderers**: same status — designed in §3/§6, not implemented client-side.
+  Any of these three step types will throw at runtime today (§6's inline note). Should be tracked alongside
+  `REDIRECT`/`CALL` as the real remaining Phase-2/3 work, not treated as done because Phase 2/3 are marked
+  complete in §8.
+- **Timeout/expiry policy for `resumeToken`**: ✅ resolved — 10-minute default, configurable via
+  `dynamia.actions.flow.token-ttl` (§4).
+- **Validation-error shape reconciliation** (§7.6, point 3): still open. Phase 4 shipped without addressing
+  it — `SaveRemoteAction` and plain `client.crud(path).create()` now genuinely coexist for the same entity
+  with two different validation-error shapes (422/`ErrorResult` vs 406/`ActionExecutionResponse`). This is
+  no longer a hypothetical to reconcile "before Phase 4" — it's a live inconsistency to fix.
+- **Signer key source**: not an original open question, but became one in practice — `FlowTokenSigner` uses
+  an independent secret (`dynamia.actions.flow.secret`) rather than the JWT cookie key the design assumed
+  (§4). Worth deciding whether that's the permanent answer or a placeholder; either way, deployments must set
+  that property explicitly or flows silently stop surviving restarts.
