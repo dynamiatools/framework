@@ -1,10 +1,11 @@
 # Server-Driven Action Flows for `RemoteAction`
 
 **Status:** Phases 0–4 implemented (commits `0ddfbe66` "Phases 0-3" and `d03b14c5` "Phase 4", Aug 2026), plus
-follow-up hardening: generic `CrudState` enforcement (#83, closed — see §7.6 point 2) and `INPUT`/`DIALOG`/
-`CUSTOM` flow step renderers on the Vue side (#81, closed — see §6). Tracked in #79. Still open:
-`REDIRECT`/`CALL` semantics (#81) and the 422-vs-406 validation-error shape reconciliation (#82). See inline
-notes throughout (§4, §6, §7.6, §8, §9) for the delta between this design and what actually shipped.
+follow-up hardening: generic `CrudState` enforcement (#83, closed — see §7.6 point 2), `INPUT`/`DIALOG`/
+`CUSTOM` flow step renderers on the Vue side (#81, scoped down to `REDIRECT`/`CALL` — see §6), and the
+422-vs-406 validation-error shape reconciliation (#82, closed — see §7.6 point 3). Tracked in #79. Only
+remaining gap: `REDIRECT`/`CALL` step semantics (#81, see §9). See inline notes throughout (§4, §6, §7.6,
+§8, §9) for the delta between this design and what actually shipped.
 **Scope:** `platform/core/actions`, `platform/core/crud`, `platform/app` (controller), `platform/packages/sdk`, `platform/packages/ui-core`, `platform/packages/vue`.
 **Author context:** design discussion between Mario A. Serrano Leones and Claude, July 2026.
 
@@ -448,9 +449,20 @@ entity, not a behavior change for existing apps.
    as HTTP 406 inside an `ActionExecutionResponse` (`ApplicationMetadataController.executeAction`, lines
    168-169). Once `SaveRemoteAction` exists side-by-side with plain `client.crud(path).create()` for the same
    entity, this inconsistency becomes visible to the same frontend form — worth reconciling (pick one shape)
-   before Phase 4 below, not left as an accidental difference. **Not addressed** — the Phase 4 commit
-   explicitly left this open (see §9), so `SaveRemoteAction`/`client.crud(path).create()` now coexist with
-   two different validation-error shapes for the same entity, exactly the situation this point warned about.
+   before Phase 4 below, not left as an accidental difference. The Phase 4 commit explicitly left this open
+   (see §9) — **resolved afterwards (#82)**: `ApplicationMetadataController.executeAction` now returns a
+   genuine HTTP `422` with an `ErrorResult` body for `ValidationError`, byte-for-byte matching
+   `RestApiExceptionHandler.handleValidationError`'s shape (same `VALIDATION_ERROR` code,
+   `invalidProperty`/`invalidValue` detail keys). Every other outcome (success, 403/404/409/500) is
+   unchanged — still a real HTTP `200` carrying an `ActionExecutionResponse` whose own
+   `status`/`statusCode` fields describe the result, exactly as before; only the validation-error case
+   moved. This is a breaking change for `ApplicationMetadataController`'s two `execute*Action` endpoints
+   — deliberately: any client awaiting `client.actions.execute(...)` now has that call *throw*
+   `DynamiaApiError` on a validation failure (same as `client.crud(path).create()` already did) instead of
+   resolving with `response.statusCode === 406`. No SDK/frontend code changes were needed to support this:
+   `HttpClient.request` already throws `DynamiaApiError` uniformly for any non-2xx response regardless of
+   body shape, and `useCrudPage.ts`'s save/delete handlers already catch generically
+   (`catch (e) { crudView.errorMessage.value = String(e); }`).
 
 ---
 
@@ -485,9 +497,14 @@ entity, not a behavior change for existing apps.
    implemented on the Vue side (`useInput`/`PromptManager`, `useFormDialog`/`DialogFormManager`,
    `FlowStepRendererRegistry`) — see §6's updated note. `REDIRECT`/`CALL` deliberately left unimplemented;
    their semantics are still an open design question, see §9.
+8. **Post-Phase-4 hardening (#82)** — ✅ done. §7.6 bug #3 resolved: `ApplicationMetadataController`'s
+   `execute*Action` endpoints now return a genuine HTTP `422`/`ErrorResult` for `ValidationError`, matching
+   plain REST CRUD writes byte-for-byte — a deliberate breaking change to those two endpoints' error
+   contract, approved explicitly rather than shipped as a silent side effect of other work. See §7.6's
+   updated note for what changed and why no SDK/frontend changes were needed.
 
 **Not done, no phase currently owns it:** `REDIRECT`/`CALL` step renderers/semantics (§6, §9, tracked as
-#81), and the validation-error shape reconciliation (§7.6 #3, tracked as #82).
+#81).
 
 ---
 
@@ -504,10 +521,8 @@ entity, not a behavior change for existing apps.
 - **`INPUT`/`DIALOG`/`CUSTOM` step renderers**: ✅ resolved (#81) — see §6's updated note.
 - **Timeout/expiry policy for `resumeToken`**: ✅ resolved — 10-minute default, configurable via
   `dynamia.actions.flow.token-ttl` (§4).
-- **Validation-error shape reconciliation** (§7.6, point 3): still open. Phase 4 shipped without addressing
-  it — `SaveRemoteAction` and plain `client.crud(path).create()` now genuinely coexist for the same entity
-  with two different validation-error shapes (422/`ErrorResult` vs 406/`ActionExecutionResponse`). This is
-  no longer a hypothetical to reconcile "before Phase 4" — it's a live inconsistency to fix.
+- **Validation-error shape reconciliation** (§7.6, point 3): ✅ resolved (#82) — both entry points now
+  return 422/`ErrorResult` for a failed validation. See §7.6's updated note.
 - **Signer key source**: ✅ resolved (see #80) — `FlowTokenSigner`'s independent secret
   (`dynamia.actions.flow.secret`) is the permanent answer, not a placeholder: it deliberately mirrors the
   established `JWT_SECRET`/`JWTServiceImpl` convention already in this codebase (§4), rather than reusing
