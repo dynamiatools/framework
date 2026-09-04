@@ -237,7 +237,11 @@ function dynamiaFireHostEvent(containerId, name, data) {
  * {message} data) if loading or mounting fails for any reason, both bindable server-side with
  * onMicrofrontendReady/onMicrofrontendError="@command(...)".
  * @param {string} containerId - Id of the component's container element (its ZK uuid).
- * @param {object} config - {src, css, app, type, mode, tag, mountFn, unmountFn, updateFn, shadow, props}.
+ * @param {object} config - {src, css, app, bodyHtml, type, mode, tag, mountFn, unmountFn, updateFn, shadow, props}.
+ *   When {@code src} is already set, it (plus {@code css}/{@code bodyHtml}) is used as-is instead of
+ *   discovering it from {@code app} — the server already resolved a "view:"/"classpath:" {@code app}
+ *   itself (see {@code tools.dynamia.web.MicroFrontendView}); {@code app} is still sent for the
+ *   "auto" mode dedup key.
  */
 function dynamiaMountMicrofrontend(containerId, config) {
     if (config.mode === 'auto') {
@@ -264,7 +268,11 @@ function dynamiaMountMicrofrontend(containerId, config) {
         DynamiaMicrofrontends.autoMounted[config.app] = containerId;
     }
     DynamiaMicrofrontends.instances = DynamiaMicrofrontends.instances || {};
-    var resolved = config.app ? dynamiaResolveApp(config.app) : Promise.resolve({src: config.src, css: config.css, bodyHtml: ''});
+    // config.src is already populated when the server resolved a "view:"/"classpath:" app itself
+    // (see tools.dynamia.web.MicroFrontendView) — skip client-side discovery entirely in that case.
+    var resolved = config.src
+        ? Promise.resolve({src: config.src, css: config.css, bodyHtml: config.bodyHtml || ''})
+        : dynamiaResolveApp(config.app);
     resolved.then(function (bundle) {
         var container = document.getElementById(containerId);
         if (!container) {

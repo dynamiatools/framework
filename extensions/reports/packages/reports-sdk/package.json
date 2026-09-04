@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/reports-sdk",
-  "version": "26.7.0",
+  "version": "26.8.0",
   "website": "https://dynamia.tools",
   "description": "TypeScript/JavaScript client SDK for the Dynamia Reports extension REST API",
   "keywords": [
@@ -63,12 +63,12 @@
   },
   "devDependencies": {
     "@dynamia-tools/sdk": "workspace:*",
-    "@types/node": "^26.1.1",
-    "@vitest/coverage-v8": "^4.1.10",
+    "@types/node": "^26.4.1",
+    "@vitest/coverage-v8": "^4.1.11",
     "typescript": "^6.0.3",
-    "vite": "^8.1.4",
-    "vite-plugin-dts": "^5.0.3",
-    "vitest": "^4.1.10"
+    "vite": "^8.2.2",
+    "vite-plugin-dts": "^5.1.0",
+    "vitest": "^4.1.11"
   },
   "engines": {
     "node": ">=24"

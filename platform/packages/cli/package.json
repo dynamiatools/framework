@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/cli",
-  "version": "26.7.0",
+  "version": "26.8.0",
   "description": "Dynamia Tools CLI — Scaffold new Dynamia Platform projects",
   "keywords": [
     "dynamia",
@@ -40,13 +40,13 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@inquirer/prompts": "^8.5.2",
+    "@inquirer/prompts": "^8.7.1",
     "chalk": "^5.6.2",
     "execa": "^9.6.1",
     "ora": "^9.4.1"
   },
   "devDependencies": {
-    "@types/node": "^26.1.1",
+    "@types/node": "^26.4.1",
     "typescript": "^6.0.3"
   },
   "publishConfig": {

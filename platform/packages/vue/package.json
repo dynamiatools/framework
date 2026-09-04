@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/vue",
-  "version": "26.7.0",
+  "version": "26.8.0",
   "description": "Vue 3 adapter for Dynamia Platform UI",
   "keywords": [
     "dynamia",
@@ -56,12 +56,12 @@
   "devDependencies": {
     "@dynamia-tools/sdk": "workspace:*",
     "@dynamia-tools/ui-core": "workspace:*",
-    "@types/node": "^26.1.1",
+    "@types/node": "^26.4.1",
     "@vitejs/plugin-vue": "^6.0.8",
     "typescript": "^6.0.3",
-    "vite": "^8.1.4",
-    "vite-plugin-dts": "^5.0.3",
-    "vue": "^3.5.39",
+    "vite": "^8.2.2",
+    "vite-plugin-dts": "^5.1.0",
+    "vue": "^3.5.42",
     "vue-tsc": "^2.2.12"
   },
   "publishConfig": {

@@ -16,8 +16,13 @@
  */
 package tools.dynamia.zk.ui;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.IdSpace;
 import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.WrongValueException;
+import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.ext.AfterCompose;
 import org.zkoss.zk.ui.ext.DynamicPropertied;
@@ -25,7 +30,9 @@ import org.zkoss.zk.ui.sys.ComponentCtrl;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Div;
 import tools.dynamia.commons.StringPojoParser;
+import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.integration.Containers;
+import tools.dynamia.web.MicroFrontendView;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -104,6 +111,23 @@ import java.util.Map;
  * has only been verified against Vite output — check the generated {@code index.html} manually if
  * you use another bundler.
  * <p>
+ * Prefixing {@link #setApp} with {@code view:} or {@code classpath:} resolves that entry HTML
+ * server-side, in process, instead of the client fetching a static file — see
+ * {@link tools.dynamia.web.MicroFrontendView} for the resolution details and constraints (in
+ * particular: script/stylesheet URLs found in the resolved HTML must be absolute or root-relative,
+ * since no real folder backs a {@code view:}/{@code classpath:} app for relative ones to resolve
+ * against). No dedicated HTTP endpoint is exposed for this — resolution happens inside the current
+ * request, under whatever security context already guards the ZK page embedding it.
+ * <ul>
+ *     <li>{@code app="view:someapp/index"} resolves {@code someapp/index} as a Spring MVC view name
+ *     through the application's registered {@code ViewResolver} chain (e.g.
+ *     {@code tools.dynamia.web.ClassPathViewResolver}, which resolves a classpath
+ *     {@code views/someapp/index.html} — so the bundle can ship inside any module's jar, no
+ *     {@code src/main/resources/static/} copy required).</li>
+ *     <li>{@code app="classpath:microfrontends/someapp/index.html"} reads that classpath resource
+ *     directly, bypassing the {@code ViewResolver} chain.</li>
+ * </ul>
+ * <p>
  * All bean properties ({@link #setSrc}, {@link #setMode}, {@link #setProps}, dynamic props, etc.)
  * are plain getter/setter pairs, so they work with ZK MVVM data binding out of the box, e.g.
  * {@code src="@bind(vm.bundleUrl)"} or {@code userId="@bind(vm.userId)"}. For the reverse
@@ -128,13 +152,17 @@ import java.util.Map;
  *
  * <microfrontend app="/static/next/subscription" userId="${user.id}"/>
  *
+ * <microfrontend app="view:someapp/index" userId="${user.id}"/>
+ *
+ * <microfrontend app="classpath:microfrontends/someapp/index.html" userId="${user.id}"/>
+ *
  * <microfrontend src="/bundles/my-vue-app.js" css="/bundles/my-vue-app.css" mode="mount-fn"
  *                mountFn="mount" unmountFn="unmount" shadow="true"/>
  * }</pre>
  *
  * @author Mario A. Serrano Leones
  */
-public class MicroFrontend extends Div implements DynamicPropertied, AfterCompose {
+public class MicroFrontend extends Div implements DynamicPropertied, AfterCompose, IdSpace {
 
     /** Mounts the bundle's custom element (default mode). */
     public static final String MODE_CUSTOM_ELEMENT = "custom-element";
@@ -155,6 +183,8 @@ public class MicroFrontend extends Div implements DynamicPropertied, AfterCompos
     public static final String ON_ERROR = "onMicrofrontendError";
     /** Internal, server-only event used to coalesce bursts of {@link #mount()} calls; never sent by the client. */
     private static final String EVT_MOUNT = "onMicrofrontendMount";
+
+    private static final LoggingService logger = LoggingService.get(MicroFrontend.class);
 
     static {
         addClientEvent(MicroFrontend.class, ON_EVENT, ComponentCtrl.CE_IMPORTANT);
@@ -237,9 +267,14 @@ public class MicroFrontend extends Div implements DynamicPropertied, AfterCompos
      * Sets the root folder of a bundler production build (e.g. Vite's {@code dist/}) to
      * auto-discover the bundle and stylesheet(s) from, instead of setting {@link #setSrc} /
      * {@link #setCss} manually. See the class Javadoc for how discovery works and its
-     * limitations. When set, it takes precedence over {@link #src} / {@link #css}.
+     * limitations. When set, it takes precedence over {@link #src} / {@link #css}. Prefixed with
+     * {@code view:} or {@code classpath:}, the entry HTML is resolved server-side instead of fetched
+     * as a static file — see the class Javadoc and {@link tools.dynamia.web.MicroFrontendView}.
      *
-     * @param app root URL of the build output, e.g. {@code /static/next/subscription}
+     * @param app root URL of the build output (e.g. {@code /static/next/subscription}), a
+     *            {@code view:}-prefixed Spring view name (e.g. {@code view:someapp/index}), or a
+     *            {@code classpath:}-prefixed resource path (e.g.
+     *            {@code classpath:microfrontends/someapp/index.html})
      */
     public void setApp(String app) {
         this.app = app;
@@ -402,7 +437,20 @@ public class MicroFrontend extends Div implements DynamicPropertied, AfterCompos
     }
 
     private void doMount() {
-        Clients.evalJavaScript("dynamiaMountMicrofrontend('" + getUuid() + "', " + buildConfig() + ");");
+        try {
+            Clients.evalJavaScript("dynamiaMountMicrofrontend('" + getUuid() + "', " + buildConfig(true) + ");");
+        } catch (RuntimeException e) {
+            logger.error("Error resolving microfrontend app '" + app + "': " + e.getMessage(), e);
+            Events.postEvent(new Event(ON_ERROR, this, Map.of("message", String.valueOf(e.getMessage()))));
+        }
+    }
+
+    private HttpServletRequest nativeRequest() {
+        return (HttpServletRequest) Executions.getCurrent().getNativeRequest();
+    }
+
+    private HttpServletResponse nativeResponse() {
+        return (HttpServletResponse) Executions.getCurrent().getNativeResponse();
     }
 
     /**
@@ -434,11 +482,38 @@ public class MicroFrontend extends Div implements DynamicPropertied, AfterCompos
         return tag != null;
     }
 
-    private String buildConfig() {
+    /**
+     * Builds the JSON config sent to {@code dynamiaMountMicrofrontend}/{@code dynamiaUnmountMicrofrontend}.
+     * When {@code resolveServerApp} is true and {@link #app} uses the {@code view:}/{@code classpath:}
+     * prefix (see class Javadoc), it's resolved server-side via {@link MicroFrontendView} into concrete
+     * {@code src}/{@code css}/{@code bodyHtml} values, so the client skips its own fetch-based
+     * discovery entirely (it uses {@code src} as-is whenever present). {@link #app} itself is still
+     * sent unchanged either way — the client still needs it as the {@code MODE_AUTO} dedup key.
+     * Unmounting never needs any of this — the unmount script only reads
+     * {@code mode}/{@code unmountFn}/{@code shadow} — so {@link #onPageDetached} passes {@code false}
+     * to avoid a pointless (and potentially now-stale) re-resolution.
+     *
+     * @param resolveServerApp whether to resolve a {@code view:}/{@code classpath:} {@link #app} now
+     * @throws IllegalArgumentException if {@link #app}'s prefix is unrecognized, see {@link MicroFrontendView}
+     * @throws IllegalStateException    if the view/resource can't be resolved or rendered, see {@link MicroFrontendView}
+     */
+    private String buildConfig(boolean resolveServerApp) {
+        String effectiveSrc = src;
+        String effectiveCss = css;
+        String bodyHtml = null;
+
+        if (resolveServerApp && MicroFrontendView.isServerResolved(app)) {
+            MicroFrontendView.Result resolved = MicroFrontendView.resolve(app, nativeRequest(), nativeResponse());
+            effectiveSrc = resolved.src();
+            effectiveCss = resolved.css();
+            bodyHtml = resolved.bodyHtml();
+        }
+
         Map<String, Object> config = new LinkedHashMap<>();
-        config.put("src", src);
-        config.put("css", css);
+        config.put("src", effectiveSrc);
+        config.put("css", effectiveCss);
         config.put("app", app);
+        config.put("bodyHtml", bodyHtml);
         config.put("type", type);
         config.put("mode", effectiveMode());
         config.put("tag", tag);
@@ -485,7 +560,7 @@ public class MicroFrontend extends Div implements DynamicPropertied, AfterCompos
     @Override
     public void onPageDetached(Page page) {
         if (MODE_MOUNT_FN.equals(mode) && unmountFn != null) {
-            Clients.evalJavaScript("dynamiaUnmountMicrofrontend('" + getUuid() + "', " + buildConfig() + ");");
+            Clients.evalJavaScript("dynamiaUnmountMicrofrontend('" + getUuid() + "', " + buildConfig(false) + ");");
         }
         super.onPageDetached(page);
     }
