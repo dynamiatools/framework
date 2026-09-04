@@ -184,26 +184,42 @@ public class FilterBookByBuyDateAction extends AbstractCrudAction {
 
 - `@InstallAction` registers the action automatically (no `@Provider` needed).
 - `setApplicableClass(Entity.class)` restricts the action to that entity in CRUD tables/toolbars.
+- `setGroup(ActionGroup.get("CRUD"))` places it alongside the standard CRUD toolbar actions.
 - Override `isEnabled(Object entity)` / `isVisible()` for conditional rules (role, status).
 - Access the controller via `CrudActionEvent.getController()` to refresh queries, get the selected entity, etc.
+- Inside the action, use the inherited `crudService()` helper (lazily resolved via `DomainUtils.lookupCrudService()`) instead of injecting `CrudService` again.
 
 ## 6. Validators
 
+`Validator<T>.validate(T t)` is `void` and reports failure by **throwing** `ValidationError` — it does not
+return a list, and there is no `getValidatedClass()` method. The framework invokes all applicable
+validators on `CrudService.create/update/save`. Real-world code (and the interface's own Javadoc)
+registers validators with `@Provider`, not `@InstallValidator` (that annotation exists and works —
+prototype-scoped — but isn't the convention actually used):
+
 ```java
-@InstallValidator
-public class ContactEmailValidator implements Validator<Contact> {
-    @Override
-    public List<ValidationError> validate(Contact contact) {
-        List<ValidationError> errors = new ArrayList<>();
-        if (contact.getEmail() == null) {
-            errors.add(new ValidationError("email", "Email is required"));
-        }
-        return errors;
+@Provider
+public class ContactValidator implements Validator<Contact> {
+
+    private final CrudService crudService;
+
+    public ContactValidator(CrudService crudService) {
+        this.crudService = crudService;
     }
 
     @Override
-    public Class<Contact> getValidatedClass() {
-        return Contact.class;
+    public void validate(Contact contact) throws ValidationError {
+        if (contact.getEmail() == null) {
+            throw new ValidationError("Email is required", null, "email", Contact.class);
+        }
+
+        QueryParameters params = QueryParameters.with("email", contact.getEmail());
+        if (contact.getId() != null) {
+            params.add("id", QueryParameters.NOT_EQUALS, contact.getId());
+        }
+        if (crudService.count(Contact.class, params) > 0) {
+            throw new ValidationError("Email already exists: %s", contact.getEmail());
+        }
     }
 }
 ```

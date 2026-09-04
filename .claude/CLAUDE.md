@@ -5,70 +5,71 @@ The focus is on keeping the codebase consistent, maintainable, and well-document
 
 ## Claude Code / IntelliJ MCP Integration
 
-- Always prefer the `idea` MCP server tools over generic file/shell exploration when working inside this repo:
-  - **Finding references** — use `mcp__idea__search_symbol` / symbol-aware search instead of grep/ripgrep.
-  - **Reading symbol info** — use `mcp__idea__get_symbol_info` for accurate type/member info instead of guessing from text.
-  - **Renaming symbols** — use `mcp__idea__rename_refactoring` for safe, project-wide renames instead of manual find/replace.
-  - **Structural search** — use `mcp__idea__search_structural` / `mcp__idea__get_structural_patterns` for pattern-based code search.
-  - **Diagnostics/problems** — use `mcp__idea__get_file_problems` / `mcp__idea__get_inspections` instead of manually re-reading files for errors.
-  - **Navigating files** — use `mcp__idea__find_files_by_name_keyword`, `mcp__idea__find_files_by_glob`, `mcp__idea__list_directory_tree` before falling back to `find`/`ls`.
-  - **Editing** — use `mcp__idea__replace_text_in_file` / `mcp__idea__apply_patch` so changes go through the IDE and stay in sync with its indices.
-- **Never excavate `.jar` files** (unzipping, extracting classes, browsing decompiled sources from `~/.m2` or `~/.gradle` caches, etc.) to inspect a dependency's API. IntelliJ already indexes all project dependencies — use `mcp__idea__search_symbol`, `mcp__idea__get_symbol_info`, or `mcp__idea__find_files_by_name_keyword` to resolve classes/methods from JARs directly through the IDE index. Only fall back to raw shell/grep exploration if the MCP server is unavailable or the target is genuinely outside the IDE's index (e.g. a file outside the project).
-- The IDE's semantic understanding is far more accurate than text-based search — treat grep/ripgrep/manual file scanning as a last resort for symbol-level work in this repo.
+**If the `idea` MCP server (`mcp__idea__*` tools) is available in this session, it takes priority over generic file/shell/grep exploration for everything below.** Check for it before falling back to Bash/Grep/Read. Only use the generic tools when the MCP server is unavailable, or the target is genuinely outside the IDE's index (e.g. a file outside the project).
+
+- **Finding references** — `mcp__idea__search_symbol` (symbol-aware) instead of grep/ripgrep.
+- **Reading symbol info** — `mcp__idea__get_symbol_info` for accurate type/member info instead of guessing from text.
+- **Renaming symbols** — `mcp__idea__rename_refactoring` for safe, project-wide renames instead of manual find/replace.
+- **Structural search** — `mcp__idea__search_structural` / `mcp__idea__get_structural_patterns` for pattern-based code search.
+- **Diagnostics/problems** — `mcp__idea__get_file_problems` / `mcp__idea__get_inspections` instead of manually re-reading files for errors.
+- **Navigating files** — `mcp__idea__search_file`, `mcp__idea__list_directory_tree`, `mcp__idea__search_text` / `mcp__idea__search_regex` before falling back to `find`/`ls`/`grep`.
+- **Reading files** — `mcp__idea__read_file` so content stays in sync with the IDE's live buffers (unsaved changes included).
+- **Editing** — `mcp__idea__apply_patch` (existing files) / `mcp__idea__create_new_file` (new files) so changes go through the IDE and stay in sync with its indices; `mcp__idea__apply_quick_fix` for IDE-suggested fixes.
+- **Never excavate `.jar` files** (unzipping, extracting classes, browsing decompiled sources from `~/.m2` or `~/.gradle` caches, etc.) to inspect a dependency's API. IntelliJ already indexes all project dependencies — use `mcp__idea__search_symbol`, `mcp__idea__get_symbol_info`, or `mcp__idea__search_file` to resolve classes/methods from JARs directly through the IDE index.
+
+The IDE's semantic understanding is far more accurate than text-based search — treat grep/ripgrep/manual file scanning as a last resort for symbol-level work in this repo, and only when the MCP server isn't available.
 
 ---
 
 ## Project Structure
 
-The framework is organized into modules. Each module has a specific responsibility:
+Monorepo: Maven reactor (Java, `tools.dynamia.*`) + pnpm workspace (TS, `@dynamia-tools/*`). `deps` = internal deps only, read from `pom.xml`/`package.json`; a change in a module ripples forward to everything depending on it (transitively). Usage patterns/best practices per module: `dynamia-tools` skill (`.claude/skills/dynamia-tools/SKILL.md`).
 
-- **actions**
-  Handles platform actions, implementing operations users can perform (create, update, delete entities).
+### Backend `platform/core/*`
 
-- **app**
-  Main application module, orchestrating the integration of all other modules and providing the entry point.
+| module | deps | role |
+|---|---|---|
+| commons | — | shared utils/base classes |
+| integration | commons | registry/providers/listeners (`Containers`) |
+| io | commons, integration | file/stream I/O |
+| actions | commons, integration | `Action`/`ActionExecutionRequest` framework |
+| navigation | commons, integration, actions | menu/module/page nav model |
+| templates | commons, integration | UI/email/doc templates |
+| domain | commons, integration, io | entities, `CrudService`/`Validator` contracts (persistence-agnostic) |
+| domain-jpa | domain | JPA impl (`EntityManager`-backed `CrudService`) |
+| viewers | commons, integration, io, domain, actions | view/viewer model (form/table/tree/json) |
+| reports | domain, io | report generation/export |
+| crud | actions, viewers, navigation, domain-jpa | `CrudPage`/`ModuleProvider` orchestration |
+| web | commons, integration, navigation, viewers, crud | REST endpoints, top of core stack |
 
-- **commons**
-  Contains shared utilities and common code used across multiple modules to avoid duplication.
+### App/UI `platform/app`, `platform/ui/*`, `platform/starters/*`
 
-- **crud**
-  Provides generic Create, Read, Update, Delete functionalities for entities, simplifying data management.
+| module | deps | role |
+|---|---|---|
+| app | all of the above | Spring Boot entry point, wires core |
+| ui-shared (artifact `tools.dynamia.ui`) | integration, commons, io | UI-backend-agnostic presentation contracts |
+| zk | web, navigation, ui-shared, domain, viewers, crud, reports, templates | ZK framework UI impl |
+| zk-starter | app, commons, zk, domain-jpa | Spring Boot starter (autoconfig) |
 
-- **domain**
-  Defines core business entities and domain logic, serving as the foundation for other modules.
+### Frontend `platform/packages/*` (pnpm)
 
-- **domain-jpa**
-  Adds JPA (Java Persistence API) support for domain entities, enabling ORM and database integration.
+| package | deps | role |
+|---|---|---|
+| sdk | — | `DynamiaClient` REST client, no framework |
+| ui-core | — | framework-agnostic view/viewer core (frontend analogue of `viewers`) |
+| vue | sdk, ui-core | Vue 3 adapter/plugin |
+| microfrontend-bridge | — | bridges JS bundles ↔ backend `tools.dynamia.zk.ui.MicroFrontend` |
+| cli | — | scaffolds new projects |
+| mcp | — | MCP server package |
 
-- **integration**
-  Manages integration with external systems and services, handling communication and data exchange.
+### Other
 
-- **io**
-  Responsible for input/output operations, such as file handling and data streams.
+| dir | contents | note |
+|---|---|---|
+| `extensions/*` | dashboard, email-sms, entity-files, file-importer, finances, http-functions, reports, saas, security | optional add-ons, deps vary per module — check each `pom.xml` |
+| `themes/*` | theme-dynamical (ZK), theme-dynamical-vue | presentation only, no business logic |
 
-- **navigation**
-  Implements navigation logic and structures for the application's user interface.
-
-- **reports**
-  Generates and manages reports, providing tools for data analysis and export.
-
-- **starter**
-  Offers starter templates and configurations to bootstrap new projects or modules.
-
-- **templates**
-  Contains reusable templates for UI, emails, or documents.
-
-- **ui**
-  Manages user interface components and visual elements.
-
-- **viewers**
-  Provides components for viewing and presenting data in various formats.
-
-- **web**
-  Exposes web functionalities, including REST endpoints and web resources.
-
-- **zk**
-  Integrates ZK framework components for building rich web interfaces.
+`extensions/*`/`themes/*` consume `platform/*`, never the reverse.
 
 ---
 
@@ -115,6 +116,23 @@ When generating frontend code for Dynamia Platform, prefer the current APIs from
 - Do not invent SDK or Vue APIs that are not exported from the package `index.ts` files.
 - Keep examples aligned with real return types (for example `CrudListResult`, `NavigationNode`).
 - If an API is uncertain, prefer a short TODO comment over guessing a method/signature.
+
+---
+
+## Work Tracking — GitHub Issues
+
+- **GitHub Issues are the source of truth** for work to be done in this repo (improvements, new features, bugs, progress tracking). Do not build a parallel task-tracking system (TODO files, ad-hoc markdown checklists, etc.) when Issues already cover it.
+- Given a task: identify the active Issue → read its title, description, labels, comments, and relevant linked issues/PRs → inspect the affected module(s) (see Project Structure above) → clarify important ambiguities with Mario before implementing.
+- Keep the implementation traceable to the Issue through the branch name, commits, and/or PR.
+- Update the Issue when there's meaningful progress, a decision, a blocker, or a validation result — don't let it go stale.
+- Before calling work done, make sure the Issue and the PR both reflect the final state.
+- No Issue number given: simple, self-contained task → proceed. Substantial task → search first for an existing Issue (`gh issue list`). If none exists and creating one is clearly appropriate, create it autonomously; if it requires a product/business decision, ask Mario first. Never invent an Issue number.
+
+## Project Knowledge — docs/
+
+- GitHub Issues track work status; `docs/backend/` and `docs/frontend/` store durable project knowledge — architecture, module responsibilities, development patterns, extension SDK, coherence notes.
+- Persist to `docs/` when the information is useful beyond the current task. Don't duplicate task status between Issues and `docs/`.
+- Prefer updating an existing document (e.g. `docs/backend/ARCHITECTURE.md`, `docs/backend/CORE_MODULES.md`, `docs/frontend/API_CLIENT_STANDARDS.md`) over creating a new one when the knowledge belongs there. Don't document what's directly obvious from the code — keep `docs/` concise and focused on knowledge that's hard to reconstruct from the code alone.
 
 ---
 
