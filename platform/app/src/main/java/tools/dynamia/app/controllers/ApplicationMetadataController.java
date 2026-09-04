@@ -8,6 +8,8 @@ import tools.dynamia.actions.*;
 import tools.dynamia.app.metadata.*;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.crud.CrudRemoteAction;
+import tools.dynamia.crud.CrudState;
 import tools.dynamia.domain.EntityReference;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.util.DomainUtils;
@@ -15,8 +17,10 @@ import tools.dynamia.integration.Containers;
 import tools.dynamia.navigation.NavigationTree;
 import tools.dynamia.viewers.ViewDescriptor;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -159,12 +163,15 @@ public class ApplicationMetadataController {
                 if (actionMetadata.getAction() != null) {
                     actionInstance = Containers.get().findObject(actionMetadata.getAction().getClass());
                 }
-                if (ActionRestrictions.allowAccess(actionInstance)) {
-                    logger.info("Executing action " + action);
-                    return Actions.execute(actionInstance, request);
-                } else {
+                if (!ActionRestrictions.allowAccess(actionInstance)) {
                     return new ActionExecutionResponse("Action " + action + " not allowed", HttpStatus.FORBIDDEN.getReasonPhrase(), 403);
                 }
+                if (!isApplicableState(actionInstance, request)) {
+                    return new ActionExecutionResponse("Action " + action + " is not applicable to the current state",
+                            HttpStatus.CONFLICT.getReasonPhrase(), HttpStatus.CONFLICT.value());
+                }
+                logger.info("Executing action " + action);
+                return Actions.execute(actionInstance, request);
             } catch (ValidationError e) {
                 return new ActionExecutionResponse(e.getMessage(), HttpStatus.NOT_ACCEPTABLE.getReasonPhrase(), HttpStatus.NOT_ACCEPTABLE.value());
             } catch (Exception e) {
@@ -174,6 +181,56 @@ public class ApplicationMetadataController {
         } else {
             return new ActionExecutionResponse("Action " + action + " not found", HttpStatus.NOT_FOUND.getReasonPhrase(), 404);
         }
+    }
+
+    /**
+     * Generic, cheap server-side guard for {@link CrudRemoteAction#getApplicableStates()}: rejects a
+     * request whose inferred {@link CrudState} isn't one the action declared itself applicable to, before
+     * {@code execute()}/{@code start()} ever runs — so a hand-crafted request can't invoke, say, a
+     * delete-only action ({@code applicableStates = {READ}}) while pretending to be in a {@code CREATE}
+     * context, or vice versa.
+     * <p>
+     * The inference deliberately mirrors {@code SaveSupport}'s own heuristic rather than hitting the
+     * database: an entity id present anywhere the client is expected to carry one ({@code dataId}, a
+     * {@code data.id}, a non-empty {@code data.ids}, or a raw list body) means "this request targets an
+     * existing entity" — allowed when the action declares {@code READ}, {@code UPDATE}, or {@code DELETE}
+     * applicable; no id means "this request targets a new entity" — allowed only when {@code CREATE} is
+     * declared applicable. This only distinguishes "existing" from "new", not the finer READ/UPDATE/DELETE
+     * distinction a specific action may still need to enforce itself (as {@code SaveSupport} already does
+     * for CREATE vs UPDATE) — see {@code docs/design/SERVER_DRIVEN_ACTION_FLOWS.md} §7.6 point 2.
+     * <p>
+     * Non-{@link CrudRemoteAction} actions, or ones declaring no {@code applicableStates} at all, are
+     * unaffected.
+     */
+    static boolean isApplicableState(RemoteAction actionInstance, ActionExecutionRequest request) {
+        if (!(actionInstance instanceof CrudRemoteAction crudRemoteAction)) {
+            return true;
+        }
+        CrudState[] applicableStates = crudRemoteAction.getApplicableStates();
+        if (applicableStates == null || applicableStates.length == 0) {
+            return true;
+        }
+        if (hasEntityId(request)) {
+            return CrudState.isApplicable(CrudState.READ, applicableStates)
+                    || CrudState.isApplicable(CrudState.UPDATE, applicableStates)
+                    || CrudState.isApplicable(CrudState.DELETE, applicableStates);
+        }
+        return CrudState.isApplicable(CrudState.CREATE, applicableStates);
+    }
+
+    static boolean hasEntityId(ActionExecutionRequest request) {
+        if (request.getDataId() != null && !request.getDataId().isBlank()) {
+            return true;
+        }
+        Object data = request.getData();
+        if (data instanceof Map<?, ?> map) {
+            if (map.get("id") != null) {
+                return true;
+            }
+            Object ids = map.get("ids");
+            return ids instanceof Collection<?> collection && !collection.isEmpty();
+        }
+        return data instanceof Collection<?> collection && !collection.isEmpty();
     }
 
 
