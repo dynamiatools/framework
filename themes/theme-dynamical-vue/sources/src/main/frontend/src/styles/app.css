@@ -479,3 +479,36 @@
 .dynamia-form-dialog {
   @apply max-w-2xl;
 }
+
+/* ── Star rating (StarRatingHost — app-specific renderer for RateBookAction's "star-rating" CUSTOM
+   flow step, registered in main.ts; not part of @dynamia-tools/ui-core or vue, see §3/§6). ─────── */
+
+.dynamia-star-rating-message {
+  @apply text-sm text-slate-700;
+}
+.dynamia-star-rating-stars {
+  @apply mt-2 flex gap-1 text-3xl;
+}
+.dynamia-star-rating-star {
+  @apply text-slate-300 transition-colors hover:text-amber-400;
+}
+.dynamia-star-rating-star-filled {
+  @apply text-amber-400;
+}
+.dynamia-star-rating-cancel,
+.dynamia-star-rating-confirm {
+  @apply rounded-md px-4 py-2 text-sm font-medium transition-colors;
+}
+.dynamia-star-rating-cancel {
+  @apply bg-slate-100 text-slate-600 hover:bg-slate-200;
+}
+.dynamia-star-rating-confirm {
+  background-color: var(--skin-primary);
+  color: var(--skin-primary-fg);
+}
+.dynamia-star-rating-confirm:hover {
+  filter: brightness(0.92);
+}
+.dynamia-star-rating-confirm:disabled {
+  @apply cursor-not-allowed opacity-50;
+}

@@ -51,6 +51,8 @@
     <DynamiaToastHost />
     <DynamiaPromptHost />
     <DynamiaFormDialogHost />
+    <!-- App-specific CUSTOM flow step renderer, registered under "star-rating" in main.ts. -->
+    <StarRatingHost />
   </div>
 </template>
 
@@ -65,6 +67,7 @@ import AppSidebar from './layout/AppSidebar.vue';
 import AppTopbar from './layout/AppTopbar.vue';
 import AppFooter from './layout/AppFooter.vue';
 import ContentArea from './layout/ContentArea.vue';
+import StarRatingHost from './components/StarRatingHost.vue';
 
 const { nodes, currentPath, currentModule, currentGroup, currentPage, loading, error, navigateTo, reload } =
   useNavigation(client, { autoSelectFirst: true });

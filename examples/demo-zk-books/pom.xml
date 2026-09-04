@@ -63,6 +63,15 @@
             <artifactId>tools.dynamia.themes.dynamical</artifactId>
             <version>${tools.version}</version>
         </dependency>
+        <!-- theme-dynamical-vue: on the classpath alongside theme-dynamical so this demo can boot
+             either template — pick it with dynamia.app.template (see the "vue" Spring profile in
+             application.yml). Used to exercise the Server-Driven Action Flows system (#79) end-to-end
+             against a real ZK-free frontend, per #84. -->
+        <dependency>
+            <groupId>tools.dynamia.themes</groupId>
+            <artifactId>tools.dynamia.themes.dynamical-vue</artifactId>
+            <version>${tools.version}</version>
+        </dependency>
 
 
         <!-- Spring Boot -->

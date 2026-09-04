@@ -42,3 +42,17 @@ dynamia:
     url: @project.url@
     web-cache-enabled: false
 
+---
+# Boots the same app with theme-dynamical-vue instead of theme-dynamical (both are on the classpath,
+# see pom.xml) — used to exercise the Server-Driven Action Flows system (#79) end-to-end through a
+# real ZK-free frontend, per #84. Run with: mvn spring-boot:run -Dspring-boot.run.profiles=vue
+spring:
+  config:
+    activate:
+      on-profile: vue
+
+dynamia:
+  app:
+    defaultSkin: Blue
+    template: DynamicalVue
+
