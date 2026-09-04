@@ -1,9 +1,10 @@
 # Server-Driven Action Flows for `RemoteAction`
 
-**Status:** Phases 0–4 implemented (commits `0ddfbe66` "Phases 0-3" and `d03b14c5` "Phase 4", Aug 2026). Still open:
-`REDIRECT`/`CALL` semantics, `INPUT`/`DIALOG`/`CUSTOM` step renderers on the Vue side, the 422-vs-406
-validation-error shape reconciliation, and generic `CrudState` enforcement in the controller for arbitrary
-future `FlowRemoteAction`s. See §10 for the delta between this design and what actually shipped.
+**Status:** Phases 0–4 implemented (commits `0ddfbe66` "Phases 0-3" and `d03b14c5` "Phase 4", Aug 2026), plus
+follow-up hardening (#83, generic `CrudState` enforcement — see §7.6 point 2 and §8). Tracked in #79. Still
+open: `REDIRECT`/`CALL` semantics and `INPUT`/`DIALOG`/`CUSTOM` step renderers on the Vue side (#81), and the
+422-vs-406 validation-error shape reconciliation (#82). See inline notes throughout (§4, §6, §7.6, §8, §9)
+for the delta between this design and what actually shipped.
 **Scope:** `platform/core/actions`, `platform/core/crud`, `platform/app` (controller), `platform/packages/sdk`, `platform/packages/ui-core`, `platform/packages/vue`.
 **Author context:** design discussion between Mario A. Serrano Leones and Claude, July 2026.
 
@@ -173,6 +174,17 @@ to a random per-JVM secret with a logged warning — fine for dev, but flows won
 restart/rolling deploy in that mode, so **this property must be set explicitly in production**. Token TTL is
 `dynamia.actions.flow.token-ttl` (ISO-8601 duration), defaulting to `PT10M` — this settles the "timeout
 policy" open question from the original draft.
+
+This WARN-and-fall-back-to-an-ephemeral-secret pattern is not special-cased or improvised: it's the same
+pattern `JWTServiceImpl.getJwtSecretKey()` already uses for `JWT_SECRET`
+(`extensions/security/.../JWTServiceImpl.java`) — same 32-char minimum, same log-and-continue instead of
+failing startup. `dynamia.actions.flow.secret` follows that established repo convention deliberately, so
+there's nothing to reconcile between the two; deploying either without its secret set has the identical
+failure mode (works fine single-pod/dev, silently stops surviving a restart/rolling deploy/multi-pod
+routing in production) and the identical fix (set the property). No fail-fast startup check was added here
+for the same reason none exists for `JWT_SECRET`: introducing one only for flow tokens would be a new,
+unprecedented pattern in this codebase rather than a bug fix — worth revisiting for *both* properties
+together if stricter startup validation is ever wanted, not as a one-off for this feature.
 
 ### Server-side shape
 
@@ -411,11 +423,16 @@ entity, not a behavior change for existing apps.
    `CrudRemoteAction.getApplicableStates()`. Today that's harmless because no action does a real mutation from
    this endpoint; once `SaveRemoteAction`/`DeleteFlowRemoteAction` exist, add a cheap state check there (or
    inside each action) so a hand-crafted request can't invoke `delete` while the declared applicable state is
-   `CREATE`, etc. **Fixed in Phase 4, but scoped narrower than written here**: `SaveSupport.persist` enforces
-   `applicableStates` for `SaveRemoteAction`/`SaveFlowRemoteAction` specifically, not a generic check inside
-   `ApplicationMetadataController` that would cover *any* future `CrudRemoteAction`. A hand-crafted request
-   against a `CrudRemoteAction` that doesn't go through `SaveSupport` is still unguarded at the controller
-   level — noted as a real open item in the Phase 4 commit message, not silently dropped.
+   `CREATE`, etc. **Fixed in two steps.** Phase 4 (`d03b14c5`) fixed it scoped narrower than written here:
+   `SaveSupport.persist` enforced `applicableStates` for `SaveRemoteAction`/`SaveFlowRemoteAction`
+   specifically, not any `CrudRemoteAction` — noted as a real open item in that commit message, not silently
+   dropped. **Generalized afterwards (#83)**: `ApplicationMetadataController.executeAction` now enforces
+   `getApplicableStates()` for every `CrudRemoteAction`, inferring existing-vs-new from the request the same
+   way `SaveSupport` does (entity id present → existing, allowed when READ/UPDATE/DELETE is declared; absent
+   → new, allowed only when CREATE is declared) rather than hitting the database. This only distinguishes
+   existing-vs-new — an action needing the finer READ/UPDATE/DELETE distinction (as `SaveRemoteAction` does
+   for CREATE-vs-UPDATE) still enforces that itself; see `ApplicationMetadataController.isApplicableState`'s
+   javadoc for the full reasoning.
 3. **Validation-error response shape differs between the two entry points** — plain REST CRUD writes surface
    `ValidationError` as HTTP 422 with an `ErrorResult` body
    (`RestApiExceptionHandler.handleValidationError`), while the Action-framework path wraps the same exception
@@ -435,8 +452,8 @@ entity, not a behavior change for existing apps.
    `useConfirm`/`useToast` in `vue`.
 2. **Phase 1** — ✅ done (`0ddfbe66`). `ActionFlowStep`/`ActionFlowStepType`/`ActionFlowContext`/
    `FlowRemoteAction`/`ActionFlows` in `platform/core/actions`, resumeToken signing, unit tests for
-   tamper/expiry rejection (`ActionFlowsTest`, `FlowTokenSignerTest`). **Deviation:** the signer does not
-   reuse the JWT cookie's key as originally planned — see §4's inline note.
+   tamper/expiry rejection (`ActionFlowsTest`, `FlowTokenSignerTest`). The signer does not reuse the JWT
+   cookie's key as originally planned — resolved deliberately, not a gap; see §4's inline note and #80.
 3. **Phase 2** — ✅ done (`0ddfbe66`). SDK/TS type additions + the flow-driving loop, wired into `Actions.vue`
    (later extracted to `runActionFlow.ts` in Phase 4). **Deviation:** only `CONFIRM`/`NOTIFY` steps are
    rendered — see §6's inline note.
@@ -448,13 +465,16 @@ entity, not a behavior change for existing apps.
    happens to bundle), and its implementation notes a real bug found while verifying it end-to-end (a
    `Book`'s lazy JPA associations aren't serializable once the Hibernate session closes — worth being aware
    of for any other `FlowRemoteAction` returning a managed entity directly instead of a flat projection).
-5. **Phase 4** — ✅ done (`d03b14c5`). §7.6 bugs #1 and #2 fixed (scoped per the note there, not generically);
-   `SaveRemoteAction`/`SaveFlowRemoteAction`/`DeleteRemoteAction`/`DeleteFlowRemoteAction`
+5. **Phase 4** — ✅ done (`d03b14c5`). §7.6 bug #1 fixed generically; bug #2 fixed scoped to `SaveSupport` only
+   at the time; `SaveRemoteAction`/`SaveFlowRemoteAction`/`DeleteRemoteAction`/`DeleteFlowRemoteAction`
    (`tools.dynamia.crud.actions.remote`) added; `useCrudPage`'s save/delete handlers wired per §7.5.
    §7.6 bug #3 (validation-error shape) explicitly **not** addressed — still open, see §9.
+6. **Post-Phase-4 hardening (#83)** — ✅ done. §7.6 bug #2 generalized: `ApplicationMetadataController`
+   now enforces `CrudRemoteAction.getApplicableStates()` for *any* such action, not just ones routed through
+   `SaveSupport` — see §7.6's updated note.
 
 **Not done, no phase currently owns it:** `INPUT`/`DIALOG`/`REDIRECT`/`CALL`/`CUSTOM` step renderers on the
-Vue side (§6), and generic controller-level `CrudState` enforcement for any `CrudRemoteAction` (§7.6 #2).
+Vue side (§6, tracked as #81), and the validation-error shape reconciliation (§7.6 #3, tracked as #82).
 
 ---
 
@@ -475,7 +495,9 @@ Vue side (§6), and generic controller-level `CrudState` enforcement for any `Cr
   it — `SaveRemoteAction` and plain `client.crud(path).create()` now genuinely coexist for the same entity
   with two different validation-error shapes (422/`ErrorResult` vs 406/`ActionExecutionResponse`). This is
   no longer a hypothetical to reconcile "before Phase 4" — it's a live inconsistency to fix.
-- **Signer key source**: not an original open question, but became one in practice — `FlowTokenSigner` uses
-  an independent secret (`dynamia.actions.flow.secret`) rather than the JWT cookie key the design assumed
-  (§4). Worth deciding whether that's the permanent answer or a placeholder; either way, deployments must set
-  that property explicitly or flows silently stop surviving restarts.
+- **Signer key source**: ✅ resolved (see #80) — `FlowTokenSigner`'s independent secret
+  (`dynamia.actions.flow.secret`) is the permanent answer, not a placeholder: it deliberately mirrors the
+  established `JWT_SECRET`/`JWTServiceImpl` convention already in this codebase (§4), rather than reusing
+  the JWT cookie key as the original draft assumed. Deployments must set the property explicitly or flows
+  silently stop surviving restarts/rolling deploys — identical to the existing `JWT_SECRET` requirement, not
+  a new deployment burden.
