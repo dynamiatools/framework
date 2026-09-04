@@ -63,6 +63,8 @@ export {
 // ── Client actions ────────────────────────────────────────────────────────────
 export { ClientActionRegistry, registerClientAction, isClientActionApplicable } from './actions/ClientAction.js';
 export type { ClientAction, ClientActionContext, ClientActionRegistryClass } from './actions/ClientAction.js';
+export { FlowStepRendererRegistry, registerFlowStepRenderer } from './actions/FlowStepRenderer.js';
+export type { FlowStepRenderer, FlowStepRendererRegistryClass } from './actions/FlowStepRenderer.js';
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
 export {
@@ -86,9 +88,11 @@ export {
 export type { ActiveNavigationPath } from './navigation/NavigationResolver.js';
 
 // ── Feedback (toast / confirm) ────────────────────────────────────────────────
-export type { FeedbackVariant, ToastOptions, ToastItem, ConfirmOptions, ConfirmRequest } from './feedback/types.js';
+export type { FeedbackVariant, ToastOptions, ToastItem, ConfirmOptions, ConfirmRequest, PromptOptions, PromptRequest } from './feedback/types.js';
 export { ToastManager, toastManager } from './feedback/ToastManager.js';
 export type { ToastChangeHandler } from './feedback/ToastManager.js';
 export { ConfirmManager, confirmManager } from './feedback/ConfirmManager.js';
 export type { ConfirmChangeHandler } from './feedback/ConfirmManager.js';
+export { PromptManager, promptManager } from './feedback/PromptManager.js';
+export type { PromptChangeHandler } from './feedback/PromptManager.js';
 

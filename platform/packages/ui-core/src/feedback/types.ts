@@ -47,3 +47,33 @@ export interface ConfirmRequest extends Required<Pick<ConfirmOptions, 'message' 
   /** Optional short title/heading. */
   title?: string;
 }
+
+/** Options accepted by {@link PromptManager.prompt}. */
+export interface PromptOptions {
+  /** Question/message shown to the user. */
+  message: string;
+  /** Optional short title/heading. */
+  title?: string;
+  /** Pre-filled value. */
+  defaultValue?: string;
+  /** Placeholder shown in the empty input. */
+  placeholder?: string;
+  /** `'text'` (default) or `'number'` — mirrors the flow's `INPUT` step answer being a String/Number. */
+  inputType?: 'text' | 'number';
+  /** Label for the confirming button. Defaults to `'OK'`. */
+  confirmLabel?: string;
+  /** Label for the cancelling button. Defaults to `'Cancel'`. */
+  cancelLabel?: string;
+}
+
+/** A queued/current prompt request, as tracked internally by {@link PromptManager}. */
+export interface PromptRequest extends Required<Pick<PromptOptions, 'message' | 'confirmLabel' | 'cancelLabel' | 'inputType'>> {
+  /** Unique id, generated when the request is queued. */
+  id: string;
+  /** Optional short title/heading. */
+  title?: string;
+  /** Pre-filled value. */
+  defaultValue?: string;
+  /** Placeholder shown in the empty input. */
+  placeholder?: string;
+}
