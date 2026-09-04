@@ -1,10 +1,10 @@
 # Server-Driven Action Flows for `RemoteAction`
 
 **Status:** Phases 0–4 implemented (commits `0ddfbe66` "Phases 0-3" and `d03b14c5` "Phase 4", Aug 2026), plus
-follow-up hardening (#83, generic `CrudState` enforcement — see §7.6 point 2 and §8). Tracked in #79. Still
-open: `REDIRECT`/`CALL` semantics and `INPUT`/`DIALOG`/`CUSTOM` step renderers on the Vue side (#81), and the
-422-vs-406 validation-error shape reconciliation (#82). See inline notes throughout (§4, §6, §7.6, §8, §9)
-for the delta between this design and what actually shipped.
+follow-up hardening: generic `CrudState` enforcement (#83, closed — see §7.6 point 2) and `INPUT`/`DIALOG`/
+`CUSTOM` flow step renderers on the Vue side (#81, closed — see §6). Tracked in #79. Still open:
+`REDIRECT`/`CALL` semantics (#81) and the 422-vs-406 validation-error shape reconciliation (#82). See inline
+notes throughout (§4, §6, §7.6, §8, §9) for the delta between this design and what actually shipped.
 **Scope:** `platform/core/actions`, `platform/core/crud`, `platform/app` (controller), `platform/packages/sdk`, `platform/packages/ui-core`, `platform/packages/vue`.
 **Author context:** design discussion between Mario A. Serrano Leones and Claude, July 2026.
 
@@ -306,13 +306,22 @@ async function runFlow(action: ActionMetadata, request: ActionExecutionRequest) 
 `ClientActionRegistry` (`platform/packages/ui-core/src/actions/ClientAction.ts`), just keyed by
 `data.component` instead of action id.
 
-> **As shipped, this paragraph is still aspirational.** The loop exists — as `runActionFlow`
+> **Update (#81): `CONFIRM`/`NOTIFY`/`INPUT`/`DIALOG`/`CUSTOM` are now all wired.** `runActionFlow`
 > (`platform/packages/vue/src/actions/runActionFlow.ts`, extracted out of `Actions.vue` in Phase 4 so
-> `useCrudPage`'s save/delete handlers could share it per §7.5) — but its step renderer only handles
-> `CONFIRM` and `NOTIFY`. `INPUT`/`DIALOG`/`REDIRECT`/`CALL`/`CUSTOM` all hit
-> `throw new Error('runActionFlow: no renderer wired yet for flow step type "...")`; no `CUSTOM` registry
-> parallel to `ClientActionRegistry` has been built. Any `FlowRemoteAction` that returns one of those step
-> types today will hard-fail on the Vue side — this is real, not theoretical, work still open.
+> `useCrudPage`'s save/delete handlers could share it per §7.5):
+> - `INPUT` → `useInput()`/`promptManager` (ui-core `PromptManager`, mirrors `ConfirmManager`) +
+>   `<DynamiaPromptHost>`.
+> - `DIALOG` → `runActionFlow` itself fetches `step.viewDescriptor` for the request's `dataType` via
+>   `client.metadata.getEntityView`/`getEntity`, builds and prefills a `VueFormView` from `step.data`, and
+>   hands it to `useFormDialog()`/`dialogFormManager` + `<DynamiaFormDialogHost>` (renders it as a
+>   `<DynamiaForm>` inside a `<DynamiaDialog>`) — closing the loop on §2's "no new form-description
+>   language" constraint exactly as originally planned.
+> - `CUSTOM` → `FlowStepRendererRegistry`/`registerFlowStepRenderer` (ui-core), the registry this
+>   paragraph describes, keyed by `step.data.component` — same shape as `ClientActionRegistry`.
+>
+> `REDIRECT`/`CALL` are still not wired — deliberately: their semantics (does the client resume the
+> *same* flow after a redirect/nested call, or are they always terminal?) are still an open question, see
+> §9. Implementing a renderer ahead of that decision would bake in an answer by accident.
 
 ---
 
@@ -472,9 +481,13 @@ entity, not a behavior change for existing apps.
 6. **Post-Phase-4 hardening (#83)** — ✅ done. §7.6 bug #2 generalized: `ApplicationMetadataController`
    now enforces `CrudRemoteAction.getApplicableStates()` for *any* such action, not just ones routed through
    `SaveSupport` — see §7.6's updated note.
+7. **Post-Phase-4 hardening (#81)** — ✅ done, partially. `INPUT`/`DIALOG`/`CUSTOM` flow step renderers
+   implemented on the Vue side (`useInput`/`PromptManager`, `useFormDialog`/`DialogFormManager`,
+   `FlowStepRendererRegistry`) — see §6's updated note. `REDIRECT`/`CALL` deliberately left unimplemented;
+   their semantics are still an open design question, see §9.
 
-**Not done, no phase currently owns it:** `INPUT`/`DIALOG`/`REDIRECT`/`CALL`/`CUSTOM` step renderers on the
-Vue side (§6, tracked as #81), and the validation-error shape reconciliation (§7.6 #3, tracked as #82).
+**Not done, no phase currently owns it:** `REDIRECT`/`CALL` step renderers/semantics (§6, §9, tracked as
+#81), and the validation-error shape reconciliation (§7.6 #3, tracked as #82).
 
 ---
 
@@ -483,12 +496,12 @@ Vue side (§6, tracked as #81), and the validation-error shape reconciliation (�
 - **ZK/`LocalAction` parity**: deliberately out of scope, and settled — see §7.1. ZK actions already have full
   synchronous UI power (§1) and gain nothing from this protocol; forcing them through it would be a
   regression, not an improvement.
-- **`REDIRECT`/`CALL` step semantics**: still unresolved. Not just undesigned — `runActionFlow` has no
-  renderer for either type at all (§6), so as of Phase 4 no `FlowRemoteAction` can actually use them.
-- **`INPUT`/`DIALOG`/`CUSTOM` step renderers**: same status — designed in §3/§6, not implemented client-side.
-  Any of these three step types will throw at runtime today (§6's inline note). Should be tracked alongside
-  `REDIRECT`/`CALL` as the real remaining Phase-2/3 work, not treated as done because Phase 2/3 are marked
-  complete in §8.
+- **`REDIRECT`/`CALL` step semantics**: still unresolved — this is now the *only* remaining gap in step
+  coverage (see #81). `runActionFlow` has no renderer for either type (§6), so no `FlowRemoteAction` can
+  use them yet. Needs a real use case to pin down whether the client resumes the *same* flow after a
+  redirect/nested call, or whether those are always terminal, before a renderer is built — implementing
+  one ahead of that decision would bake in an answer by accident.
+- **`INPUT`/`DIALOG`/`CUSTOM` step renderers**: ✅ resolved (#81) — see §6's updated note.
 - **Timeout/expiry policy for `resumeToken`**: ✅ resolved — 10-minute default, configurable via
   `dynamia.actions.flow.token-ttl` (§4).
 - **Validation-error shape reconciliation** (§7.6, point 3): still open. Phase 4 shipped without addressing
