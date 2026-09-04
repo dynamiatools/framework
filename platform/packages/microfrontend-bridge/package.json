@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/microfrontend-bridge",
-  "version": "26.7.0",
+  "version": "26.8.0",
   "website": "https://dynamia.tools",
   "description": "Typed helpers for JS/TS bundles (Vue, React, Svelte, plain JS) embedded via tools.dynamia.zk.ui.MicroFrontend",
   "keywords": [
