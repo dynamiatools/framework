@@ -17,15 +17,15 @@
 
 package tools.dynamia.domain.jpa;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import tools.dynamia.domain.services.CrudService;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = JpaTestConfig.class)
 public class JpaConvertersTest {
 
@@ -42,10 +42,10 @@ public class JpaConvertersTest {
 
 
         var other = crudService.find(DummyEntityJson.class, entity.getId());
-        Assert.assertNotNull(other);
-        Assert.assertNotNull(other.getData());
-        Assert.assertEquals("harold", other.getData().get("name"));
-        Assert.assertEquals(20, other.getData().get("age"));
+        Assertions.assertNotNull(other);
+        Assertions.assertNotNull(other.getData());
+        Assertions.assertEquals("harold", other.getData().get("name"));
+        Assertions.assertEquals(20, other.getData().get("age"));
     }
 
     @Test
@@ -58,14 +58,14 @@ public class JpaConvertersTest {
 
 
         var other = crudService.find(DummyEntityJson.class, entity.getId());
-        Assert.assertNotNull(other);
-        Assert.assertNotNull(other.getAddresses());
-        Assert.assertFalse(other.getAddresses().isEmpty());
+        Assertions.assertNotNull(other);
+        Assertions.assertNotNull(other.getAddresses());
+        Assertions.assertFalse(other.getAddresses().isEmpty());
 
         var first = other.getAddresses().stream().findFirst();
-        Assert.assertTrue(first.isPresent());
+        Assertions.assertTrue(first.isPresent());
 
-        Assert.assertEquals("Main Av 123", first.get().getLine1());
+        Assertions.assertEquals("Main Av 123", first.get().getLine1());
 
     }
 }

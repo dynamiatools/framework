@@ -76,7 +76,6 @@
 
         <!--Logging -->
         <slf4j.version>2.0.17</slf4j.version>
-        <junit.version>4.13.2</junit.version>
         <hsqldb.version>1.8.0.10</hsqldb.version>
         <oshi.version>6.5.0</oshi.version>
         <jna.version>5.14.0</jna.version>
@@ -180,8 +179,8 @@
     <dependencies>
         <!-- General dependencies for standard applications -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
 

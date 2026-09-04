@@ -2,8 +2,8 @@ package tools.dynamia.commons;
 
 import my.company.Product;
 import my.company.Producto;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class AliasBeanMapperTest {
 
@@ -14,8 +14,8 @@ public class AliasBeanMapperTest {
 
         AliasBeanMapper.map(producto, product, null);
 
-        Assert.assertEquals("Laptop", product.getName());
-        Assert.assertEquals(1500.0, product.getPrice(), 0.0);
-        Assert.assertEquals("LPT001", product.getSku());
+        Assertions.assertEquals("Laptop", product.getName());
+        Assertions.assertEquals(1500.0, product.getPrice(), 0.0);
+        Assertions.assertEquals("LPT001", product.getSku());
     }
 }

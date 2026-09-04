@@ -10,8 +10,8 @@
  */
 package tools.dynamia.modules.saas.migration.pipeline;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -35,20 +35,20 @@ public class GzipStreamTest {
     public void bufferedInputStreamSupportsMark() {
         var raw = new ByteArrayInputStream(new byte[]{1, 2, 3});
         var buffered = new BufferedInputStream(raw);
-        Assert.assertTrue("BufferedInputStream must support mark()", buffered.markSupported());
+        Assertions.assertTrue(buffered.markSupported(), "BufferedInputStream must support mark()");
     }
 
     @Test
     public void byteArrayInputStreamSupportsMark() {
         var bais = new ByteArrayInputStream(new byte[]{1, 2, 3});
-        Assert.assertTrue(bais.markSupported());
+        Assertions.assertTrue(bais.markSupported());
     }
 
     @Test
     public void zipMagicBytesAreDetectable() throws IOException {
         byte[] zipData = zip("manifest.json", "{}");
-        Assert.assertEquals("ZIP magic byte 0", 0x50, zipData[0] & 0xFF);
-        Assert.assertEquals("ZIP magic byte 1", 0x4B, zipData[1] & 0xFF);
+        Assertions.assertEquals(0x50, zipData[0] & 0xFF, "ZIP magic byte 0");
+        Assertions.assertEquals(0x4B, zipData[1] & 0xFF, "ZIP magic byte 1");
     }
 
     @Test
@@ -61,14 +61,14 @@ public class GzipStreamTest {
         int b2 = in.read();
         in.reset();
 
-        Assert.assertEquals(0x50, b1 & 0xFF);
-        Assert.assertEquals(0x4B, b2 & 0xFF);
+        Assertions.assertEquals(0x50, b1 & 0xFF);
+        Assertions.assertEquals(0x4B, b2 & 0xFF);
 
         // After reset the full ZIP is still readable
         ZipInputStream zipIn = new ZipInputStream(in);
         ZipEntry entry = zipIn.getNextEntry();
-        Assert.assertNotNull("Entry must exist after reset", entry);
-        Assert.assertEquals("manifest.json", entry.getName());
+        Assertions.assertNotNull(entry, "Entry must exist after reset");
+        Assertions.assertEquals("manifest.json", entry.getName());
     }
 
     @Test
@@ -76,10 +76,10 @@ public class GzipStreamTest {
         byte[] zipData = zip3("manifest.json", "{}", "Account1_Customer.json", "[]", "Account1_Order.json", "[]");
         ZipInputStream zipIn = new ZipInputStream(new ByteArrayInputStream(zipData));
 
-        Assert.assertEquals("manifest.json",        zipIn.getNextEntry().getName());
-        Assert.assertEquals("Account1_Customer.json", zipIn.getNextEntry().getName());
-        Assert.assertEquals("Account1_Order.json",    zipIn.getNextEntry().getName());
-        Assert.assertNull("No more entries", zipIn.getNextEntry());
+        Assertions.assertEquals("manifest.json",        zipIn.getNextEntry().getName());
+        Assertions.assertEquals("Account1_Customer.json", zipIn.getNextEntry().getName());
+        Assertions.assertEquals("Account1_Order.json",    zipIn.getNextEntry().getName());
+        Assertions.assertNull(zipIn.getNextEntry(), "No more entries");
     }
 
     @Test
@@ -98,10 +98,10 @@ public class GzipStreamTest {
         ZipInputStream zipIn = new ZipInputStream(new ByteArrayInputStream(buf.toByteArray()));
         zipIn.getNextEntry();
         byte[] read = zipIn.readAllBytes(); // reads only "a.json" content
-        Assert.assertArrayEquals("entry content", content, read);
+        Assertions.assertArrayEquals(content, read, "entry content");
 
         // second entry is still accessible
-        Assert.assertNotNull("b.json must follow", zipIn.getNextEntry());
+        Assertions.assertNotNull(zipIn.getNextEntry(), "b.json must follow");
     }
 
     // ─── Helpers ─────────────────────────────────────────────────────────────

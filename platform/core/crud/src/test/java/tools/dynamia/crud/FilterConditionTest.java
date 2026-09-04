@@ -16,8 +16,8 @@
  */
 package tools.dynamia.crud;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.domain.jpa.JpaParameter;
 import tools.dynamia.domain.query.Parameter;
 
@@ -29,10 +29,10 @@ public class FilterConditionTest {
         Parameter p = new JpaParameter();
 
         FilterCondition[] ac = FilterCondition.getApplicableConditions(p.getClass());
-        Assert.assertEquals(2, ac.length);
+        Assertions.assertEquals(2, ac.length);
 
-        Assert.assertEquals(FilterCondition.EQUALS, ac[0]);
-        Assert.assertEquals(FilterCondition.INLIST, ac[1]);
+        Assertions.assertEquals(FilterCondition.EQUALS, ac[0]);
+        Assertions.assertEquals(FilterCondition.INLIST, ac[1]);
     }
 
 }

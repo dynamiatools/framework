@@ -1,7 +1,7 @@
 package tools.dynamia.domain;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
@@ -20,8 +20,8 @@ public class InMemoryCrudServiceTest {
         entity.setName("Test");
         var r = crudService.create(entity);
 
-        Assert.assertNotNull(r.getId());
-        Assert.assertFalse(crudService.findAll(SomeEntity.class).isEmpty());
+        Assertions.assertNotNull(r.getId());
+        Assertions.assertFalse(crudService.findAll(SomeEntity.class).isEmpty());
     }
 
     @Test
@@ -32,11 +32,11 @@ public class InMemoryCrudServiceTest {
             var entity = new SomeEntity();
             entity.setName("Test " + i);
             var r = crudService.create(entity);
-            Assert.assertNotNull(r.getId());
+            Assertions.assertNotNull(r.getId());
         }
 
         List<SomeEntity> result = crudService.findAll(SomeEntity.class);
-        Assert.assertEquals(result.size(), 10);
+        Assertions.assertEquals(result.size(), 10);
     }
 
     @Test
@@ -50,8 +50,8 @@ public class InMemoryCrudServiceTest {
         }
 
         SomeEntity first = crudService.findFirst(SomeEntity.class);
-        Assert.assertNotNull(first);
-        Assert.assertEquals(first.getName(), "Test 0");
+        Assertions.assertNotNull(first);
+        Assertions.assertEquals(first.getName(), "Test 0");
     }
 
     @Test
@@ -62,9 +62,9 @@ public class InMemoryCrudServiceTest {
                 .add("active", true));
 
 
-        Assert.assertEquals(filtered.size(), 5);
+        Assertions.assertEquals(filtered.size(), 5);
         filtered = crudService.find(SomeEntity.class, QueryParameters.with("age", 41));
-        Assert.assertEquals(filtered.size(), 1);
+        Assertions.assertEquals(filtered.size(), 1);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class InMemoryCrudServiceTest {
                 .add("otherEntity.name", "Other")
                 .add("otherEntity.active", true));
 
-        Assert.assertEquals(result.size(), 1);
+        Assertions.assertEquals(result.size(), 1);
     }
 
     @Test
@@ -96,20 +96,20 @@ public class InMemoryCrudServiceTest {
         CrudService crudService = new InMemoryCrudService();
         createSamples(crudService);
         crudService.deleteAll(SomeEntity.class);
-        Assert.assertTrue(crudService.findAll(SomeEntity.class).isEmpty());
+        Assertions.assertTrue(crudService.findAll(SomeEntity.class).isEmpty());
     }
 
     @Test
     public void shouldUpdateEntity() {
         CrudService crudService = new InMemoryCrudService();
         var entity = crudService.create(new SomeEntity());
-        Assert.assertNotNull(entity.getId());
+        Assertions.assertNotNull(entity.getId());
 
         entity.setName("Test Entity");
         entity.setAge(100);
         var result = crudService.update(entity);
 
-        Assert.assertEquals(result.getAge(), 100);
+        Assertions.assertEquals(result.getAge(), 100);
     }
 
     @Test
@@ -118,19 +118,19 @@ public class InMemoryCrudServiceTest {
         createSamples(crudService);
         List<String> names = crudService.getPropertyValues(SomeEntity.class, "name");
         System.out.println(names);
-        Assert.assertEquals(names.size(), 10);
+        Assertions.assertEquals(names.size(), 10);
     }
 
-    @Test(expected = ValidationError.class)
+    @Test
     public void shouldValidatePersonName() {
         CrudService crudService = new InMemoryCrudService();
-        crudService.create(new Person(null, 19));
+        Assertions.assertThrows(ValidationError.class, () -> crudService.create(new Person(null, 19)));
     }
 
-    @Test(expected = ValidationError.class)
+    @Test
     public void shouldValidatePersonAge() {
         CrudService crudService = new InMemoryCrudService();
-        crudService.create(new Person("Jhon", 15));
+        Assertions.assertThrows(ValidationError.class, () -> crudService.create(new Person("Jhon", 15)));
     }
 
     @Test
@@ -157,9 +157,9 @@ public class InMemoryCrudServiceTest {
         CrudService crudService = new InMemoryCrudService(List.of(fixAgeListener));
         Person young = new Person("Mario", 15);
         crudService.create(young);
-        Assert.assertEquals(young.getAge(), 20);
-        Assert.assertTrue(beforeCreateFired.get());
-        Assert.assertTrue(afterCreateFired.get());
+        Assertions.assertEquals(young.getAge(), 20);
+        Assertions.assertTrue(beforeCreateFired.get());
+        Assertions.assertTrue(afterCreateFired.get());
 
     }
 
@@ -171,27 +171,27 @@ public class InMemoryCrudServiceTest {
         crudService.increaseCounter(entity, "counter");
         crudService.increaseCounter(entity, "counter");
         crudService.increaseCounter(entity, "counter");
-        Assert.assertEquals(entity.getCounter(), 3);
+        Assertions.assertEquals(entity.getCounter(), 3);
 
         crudService.deacreaseCounter(entity, "counter");
-        Assert.assertEquals(entity.getCounter(), 2);
+        Assertions.assertEquals(entity.getCounter(), 2);
 
         crudService.increaseCounter(entity, "otherCounter");
         crudService.increaseCounter(entity, "otherCounter");
         crudService.increaseCounter(entity, "otherCounter");
-        Assert.assertEquals(entity.getOtherCounter(), 3);
+        Assertions.assertEquals(entity.getOtherCounter(), 3);
 
         crudService.deacreaseCounter(entity, "otherCounter");
-        Assert.assertEquals(entity.getOtherCounter(), 2);
+        Assertions.assertEquals(entity.getOtherCounter(), 2);
 
 
         crudService.increaseCounter(entity, "anotherCounter");
         crudService.increaseCounter(entity, "anotherCounter");
         crudService.increaseCounter(entity, "anotherCounter");
-        Assert.assertEquals(entity.getAnotherCounter().longValue(), 3L);
+        Assertions.assertEquals(entity.getAnotherCounter().longValue(), 3L);
 
         crudService.deacreaseCounter(entity, "anotherCounter");
-        Assert.assertEquals(entity.getAnotherCounter().longValue(), 2L);
+        Assertions.assertEquals(entity.getAnotherCounter().longValue(), 2L);
 
     }
 

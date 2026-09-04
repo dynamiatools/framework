@@ -15,12 +15,14 @@ import jakarta.persistence.metamodel.Attribute.PersistentAttributeType;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.Metamodel;
 import jakarta.persistence.metamodel.SingularAttribute;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.List;
 import java.util.Set;
@@ -43,7 +45,8 @@ import static org.mockito.Mockito.when;
  * {@code Set<SingularAttribute<? super X, ?>>}.
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class EntityDependencyGraphTest {
 
     // Marker classes used as stand-ins for real JPA entities
@@ -65,7 +68,7 @@ public class EntityDependencyGraphTest {
 
     private EntityDependencyGraph graph;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         accountType   = mock(EntityType.class);
         categoryType  = mock(EntityType.class);
@@ -114,11 +117,11 @@ public class EntityDependencyGraphTest {
         int idxOrder    = sorted.indexOf(Order.class);
         int idxItem     = sorted.indexOf(OrderItem.class);
 
-        Assert.assertTrue("Account before Order",     idxAccount  < idxOrder);
-        Assert.assertTrue("Account before OrderItem", idxAccount  < idxItem);
-        Assert.assertTrue("Category before Product",  idxCategory < idxProduct);
-        Assert.assertTrue("Order before OrderItem",   idxOrder    < idxItem);
-        Assert.assertTrue("Product before OrderItem", idxProduct  < idxItem);
+        Assertions.assertTrue(idxAccount  < idxOrder, "Account before Order");
+        Assertions.assertTrue(idxAccount  < idxItem, "Account before OrderItem");
+        Assertions.assertTrue(idxCategory < idxProduct, "Category before Product");
+        Assertions.assertTrue(idxOrder    < idxItem, "Order before OrderItem");
+        Assertions.assertTrue(idxProduct  < idxItem, "Product before OrderItem");
     }
 
     @Test
@@ -127,25 +130,25 @@ public class EntityDependencyGraphTest {
                                        Order.class, OrderItem.class);
         List<Class<?>> sorted = graph.topologicalSort(input);
 
-        Assert.assertEquals(input.size(), sorted.size());
-        Assert.assertTrue(sorted.containsAll(input));
+        Assertions.assertEquals(input.size(), sorted.size());
+        Assertions.assertTrue(sorted.containsAll(input));
     }
 
     @Test
     public void emptyInputReturnsEmptyList() {
-        Assert.assertTrue(graph.topologicalSort(List.of()).isEmpty());
+        Assertions.assertTrue(graph.topologicalSort(List.of()).isEmpty());
     }
 
     @Test
     public void nullInputReturnsEmptyList() {
-        Assert.assertTrue(graph.topologicalSort(null).isEmpty());
+        Assertions.assertTrue(graph.topologicalSort(null).isEmpty());
     }
 
     @Test
     public void singleEntityWithNoDepsIsReturnedAsIs() {
         List<Class<?>> sorted = graph.topologicalSort(List.of(Account.class));
-        Assert.assertEquals(1, sorted.size());
-        Assert.assertEquals(Account.class, sorted.get(0));
+        Assertions.assertEquals(1, sorted.size());
+        Assertions.assertEquals(Account.class, sorted.get(0));
     }
 
     @Test
@@ -154,8 +157,8 @@ public class EntityDependencyGraphTest {
         doReturn(Set.of(oneToOne)).when(productType).getSingularAttributes();
 
         List<Class<?>> sorted = graph.topologicalSort(List.of(Account.class, Product.class));
-        Assert.assertTrue("Account before Product (ONE_TO_ONE)",
-                sorted.indexOf(Account.class) < sorted.indexOf(Product.class));
+        Assertions.assertTrue(sorted.indexOf(Account.class) < sorted.indexOf(Product.class),
+                "Account before Product (ONE_TO_ONE)");
     }
 
     @Test
@@ -166,9 +169,9 @@ public class EntityDependencyGraphTest {
 
         // Both are present, no ordering constraint — both orderings are valid
         List<Class<?>> sorted = graph.topologicalSort(List.of(Account.class, Category.class));
-        Assert.assertEquals(2, sorted.size());
-        Assert.assertTrue(sorted.contains(Account.class));
-        Assert.assertTrue(sorted.contains(Category.class));
+        Assertions.assertEquals(2, sorted.size());
+        Assertions.assertTrue(sorted.contains(Account.class));
+        Assertions.assertTrue(sorted.contains(Category.class));
     }
 
     // ─── Helper ──────────────────────────────────────────────────────────────

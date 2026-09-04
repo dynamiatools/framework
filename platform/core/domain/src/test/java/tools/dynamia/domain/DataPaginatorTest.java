@@ -16,10 +16,11 @@
  */
 package tools.dynamia.domain;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.domain.query.DataPaginator;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  *
@@ -97,10 +98,9 @@ public class DataPaginatorTest {
 
     }
 
-    @Test(expected = IndexOutOfBoundsException.class)
+    @Test
     public void testScrollToIndexSecurity() {
         DataPaginator dp = new DataPaginator(18, 4, 1);
-        dp.scrollToIndex(600);
-
+        assertThrows(IndexOutOfBoundsException.class, () -> dp.scrollToIndex(600));
     }
 }

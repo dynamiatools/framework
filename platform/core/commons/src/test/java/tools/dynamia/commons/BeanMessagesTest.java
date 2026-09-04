@@ -18,8 +18,8 @@ package tools.dynamia.commons;
 
 import my.company.ChildDummy;
 import my.company.Dummy;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.commons.reflect.PropertyInfo;
 
 import java.util.List;
@@ -31,15 +31,15 @@ public class BeanMessagesTest {
     @Test
     public void testCanFindBundles() {
         ResourceBundle bundle = ResourceBundle.getBundle(Dummy.class.getName());
-        Assert.assertNotNull(bundle);
+        Assertions.assertNotNull(bundle);
     }
 
     @Test
     public void testAllProperties() {
         BeanMessages msg = new BeanMessages(Dummy.class, Locale.of("es"));
-        Assert.assertEquals("El idiota", msg.getLocalizedName());
-        Assert.assertEquals("nombrecito", msg.getMessage("name"));
-        Assert.assertEquals("edad", msg.getMessage("age"));
+        Assertions.assertEquals("El idiota", msg.getLocalizedName());
+        Assertions.assertEquals("nombrecito", msg.getMessage("name"));
+        Assertions.assertEquals("edad", msg.getMessage("age"));
 
     }
 
@@ -51,6 +51,6 @@ public class BeanMessagesTest {
         for (PropertyInfo propertyInfo : info) {
             System.out.println(propertyInfo);
         }
-        Assert.assertEquals("El idiota hijo", msg.getLocalizedName());
+        Assertions.assertEquals("El idiota hijo", msg.getLocalizedName());
     }
 }

@@ -12,9 +12,9 @@ package tools.dynamia.modules.saas.migration.api;
 
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for the fluent builder APIs on options classes and their Jackson serialization
@@ -24,7 +24,7 @@ public class OptionsFluentBuilderTest {
 
     private ObjectMapper objectMapper;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         objectMapper = JsonMapper.builder()
                 .build();
@@ -35,8 +35,8 @@ public class OptionsFluentBuilderTest {
     @Test
     public void exportOptionsDefaults() {
         AccountExportOptions opts = new AccountExportOptions();
-        Assert.assertEquals(AccountExportOptions.DEFAULT_CHUNK_SIZE, opts.getChunkSize());
-        Assert.assertEquals(IdentityStrategy.KEEP_IDS, opts.getIdentityStrategy());
+        Assertions.assertEquals(AccountExportOptions.DEFAULT_CHUNK_SIZE, opts.getChunkSize());
+        Assertions.assertEquals(IdentityStrategy.KEEP_IDS, opts.getIdentityStrategy());
     }
 
     @Test
@@ -46,9 +46,9 @@ public class OptionsFluentBuilderTest {
                 .identityStrategy(IdentityStrategy.REGENERATE_IDS)
                 .label("my-export");
 
-        Assert.assertEquals(200, opts.getChunkSize());
-        Assert.assertEquals(IdentityStrategy.REGENERATE_IDS, opts.getIdentityStrategy());
-        Assert.assertEquals("my-export", opts.getLabel());
+        Assertions.assertEquals(200, opts.getChunkSize());
+        Assertions.assertEquals(IdentityStrategy.REGENERATE_IDS, opts.getIdentityStrategy());
+        Assertions.assertEquals("my-export", opts.getLabel());
     }
 
     @Test
@@ -58,12 +58,12 @@ public class OptionsFluentBuilderTest {
                 .identityStrategy(IdentityStrategy.KEEP_IDS);
 
         String json = objectMapper.writeValueAsString(opts);
-        Assert.assertNotNull(json);
-        Assert.assertTrue(json.contains("chunkSize"));
-        Assert.assertTrue(json.contains("KEEP_IDS"));
+        Assertions.assertNotNull(json);
+        Assertions.assertTrue(json.contains("chunkSize"));
+        Assertions.assertTrue(json.contains("KEEP_IDS"));
 
         AccountExportOptions roundtrip = objectMapper.readValue(json, AccountExportOptions.class);
-        Assert.assertEquals(100, roundtrip.getChunkSize());
+        Assertions.assertEquals(100, roundtrip.getChunkSize());
     }
 
     // ─── AccountImportOptions ────────────────────────────────────────────────
@@ -71,10 +71,10 @@ public class OptionsFluentBuilderTest {
     @Test
     public void importOptionsDefaults() {
         AccountImportOptions opts = new AccountImportOptions();
-        Assert.assertNull(opts.getTargetAccountId());
-        Assert.assertEquals(IdentityStrategy.REGENERATE_IDS, opts.getIdentityStrategy());
-        Assert.assertEquals(AccountExportOptions.DEFAULT_CHUNK_SIZE, opts.getChunkSize());
-        Assert.assertFalse(opts.isFailOnEntityError());
+        Assertions.assertNull(opts.getTargetAccountId());
+        Assertions.assertEquals(IdentityStrategy.REGENERATE_IDS, opts.getIdentityStrategy());
+        Assertions.assertEquals(AccountExportOptions.DEFAULT_CHUNK_SIZE, opts.getChunkSize());
+        Assertions.assertFalse(opts.isFailOnEntityError());
     }
 
     @Test
@@ -85,10 +85,10 @@ public class OptionsFluentBuilderTest {
                 .chunkSize(250)
                 .failOnEntityError(true);
 
-        Assert.assertEquals(42L, (long) opts.getTargetAccountId());
-        Assert.assertEquals(IdentityStrategy.KEEP_IDS, opts.getIdentityStrategy());
-        Assert.assertEquals(250, opts.getChunkSize());
-        Assert.assertTrue(opts.isFailOnEntityError());
+        Assertions.assertEquals(42L, (long) opts.getTargetAccountId());
+        Assertions.assertEquals(IdentityStrategy.KEEP_IDS, opts.getIdentityStrategy());
+        Assertions.assertEquals(250, opts.getChunkSize());
+        Assertions.assertTrue(opts.isFailOnEntityError());
     }
 
     @Test
@@ -98,13 +98,13 @@ public class OptionsFluentBuilderTest {
                 .identityStrategy(IdentityStrategy.REGENERATE_IDS);
 
         String json = objectMapper.writeValueAsString(opts);
-        Assert.assertNotNull(json);
-        Assert.assertTrue(json.contains("targetAccountId"));
-        Assert.assertTrue(json.contains("REGENERATE_IDS"));
+        Assertions.assertNotNull(json);
+        Assertions.assertTrue(json.contains("targetAccountId"));
+        Assertions.assertTrue(json.contains("REGENERATE_IDS"));
 
         AccountImportOptions roundtrip = objectMapper.readValue(json, AccountImportOptions.class);
         if (roundtrip.getTargetAccountId() instanceof Number id) {
-            Assert.assertEquals(7L, id.longValue());
+            Assertions.assertEquals(7L, id.longValue());
         }
     }
 
@@ -117,7 +117,7 @@ public class OptionsFluentBuilderTest {
         opts.setTargetAccountId(2L);
 
         String json = objectMapper.writeValueAsString(opts);
-        Assert.assertNotNull(json);
-        Assert.assertTrue(json.contains("sourceAccountId") || json.contains("1"));
+        Assertions.assertNotNull(json);
+        Assertions.assertTrue(json.contains("sourceAccountId") || json.contains("1"));
     }
 }

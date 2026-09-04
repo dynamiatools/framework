@@ -16,10 +16,10 @@
  */
 package tools.dynamia.domain.util;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for DataTransferObjectBuilder.
@@ -34,7 +34,7 @@ public class DataTransferObjectBuilderTest {
 
     private TestEntity testEntity;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         // Setup test entity with standard properties
         testEntity = new TestEntity();
@@ -53,11 +53,11 @@ public class DataTransferObjectBuilderTest {
     public void testBuildDTOBasicProperties() {
         TestEntityDTO dto = DataTransferObjectBuilder.buildDTO(testEntity, TestEntityDTO.class);
 
-        assertNotNull("DTO should not be null", dto);
-        assertEquals("Name should be copied", testEntity.getName(), dto.getName());
-        assertEquals("Description should be copied", testEntity.getDescription(), dto.getDescription());
-        assertEquals("Price should be copied", testEntity.getPrice(), dto.getPrice(), 0.001);
-        assertEquals("Active flag should be copied", testEntity.isActive(), dto.isActive());
+        assertNotNull(dto, "DTO should not be null");
+        assertEquals(testEntity.getName(), dto.getName(), "Name should be copied");
+        assertEquals(testEntity.getDescription(), dto.getDescription(), "Description should be copied");
+        assertEquals(testEntity.getPrice(), dto.getPrice(), 0.001, "Price should be copied");
+        assertEquals(testEntity.isActive(), dto.isActive(), "Active flag should be copied");
     }
 
     /**
@@ -67,12 +67,12 @@ public class DataTransferObjectBuilderTest {
     public void testBuildDTOCopiesAllMatchingProperties() {
         TestEntityDTOComplete dto = DataTransferObjectBuilder.buildDTO(testEntity, TestEntityDTOComplete.class);
 
-        assertNotNull("DTO should not be null", dto);
-        assertEquals("ID should be copied", testEntity.getId(), dto.getId());
-        assertEquals("Name should be copied", testEntity.getName(), dto.getName());
-        assertEquals("Description should be copied", testEntity.getDescription(), dto.getDescription());
-        assertEquals("Price should be copied", testEntity.getPrice(), dto.getPrice(), 0.001);
-        assertEquals("Quantity should be copied", testEntity.getQuantity(), dto.getQuantity());
+        assertNotNull(dto, "DTO should not be null");
+        assertEquals(testEntity.getId(), dto.getId(), "ID should be copied");
+        assertEquals(testEntity.getName(), dto.getName(), "Name should be copied");
+        assertEquals(testEntity.getDescription(), dto.getDescription(), "Description should be copied");
+        assertEquals(testEntity.getPrice(), dto.getPrice(), 0.001, "Price should be copied");
+        assertEquals(testEntity.getQuantity(), dto.getQuantity(), "Quantity should be copied");
     }
 
     /**
@@ -82,9 +82,9 @@ public class DataTransferObjectBuilderTest {
     public void testBuildDTOPartialProperties() {
         TestEntityDTOPartial dto = DataTransferObjectBuilder.buildDTO(testEntity, TestEntityDTOPartial.class);
 
-        assertNotNull("DTO should not be null", dto);
-        assertEquals("Name should be copied", testEntity.getName(), dto.getName());
-        assertEquals("Price should be copied", testEntity.getPrice(), dto.getPrice(), 0.001);
+        assertNotNull(dto, "DTO should not be null");
+        assertEquals(testEntity.getName(), dto.getName(), "Name should be copied");
+        assertEquals(testEntity.getPrice(), dto.getPrice(), 0.001, "Price should be copied");
         // Description is not in DTO, so it should be ignored without error
     }
 
@@ -98,10 +98,10 @@ public class DataTransferObjectBuilderTest {
 
         TestEntityDTO dto = DataTransferObjectBuilder.buildDTO(testEntity, TestEntityDTO.class);
 
-        assertNotNull("DTO should not be null", dto);
-        assertNull("Null name should remain null", dto.getName());
-        assertNull("Null description should remain null", dto.getDescription());
-        assertEquals("Non-null price should be copied", testEntity.getPrice(), dto.getPrice(), 0.001);
+        assertNotNull(dto, "DTO should not be null");
+        assertNull(dto.getName(), "Null name should remain null");
+        assertNull(dto.getDescription(), "Null description should remain null");
+        assertEquals(testEntity.getPrice(), dto.getPrice(), 0.001, "Non-null price should be copied");
     }
 
     /**
@@ -113,10 +113,10 @@ public class DataTransferObjectBuilderTest {
 
         TestEntityDTO dto = DataTransferObjectBuilder.buildDTO(emptyEntity, TestEntityDTO.class);
 
-        assertNotNull("DTO should not be null even for empty entity", dto);
-        assertNull("Name should be null", dto.getName());
-        assertNull("Description should be null", dto.getDescription());
-        assertNull("Price should be null", dto.getPrice());
+        assertNotNull(dto, "DTO should not be null even for empty entity");
+        assertNull(dto.getName(), "Name should be null");
+        assertNull(dto.getDescription(), "Description should be null");
+        assertNull(dto.getPrice(), "Price should be null");
     }
 
     /**
@@ -126,9 +126,9 @@ public class DataTransferObjectBuilderTest {
     public void testBuildDTOPreservesPrimitives() {
         TestEntityDTOWithPrimitives dto = DataTransferObjectBuilder.buildDTO(testEntity, TestEntityDTOWithPrimitives.class);
 
-        assertNotNull("DTO should not be null", dto);
-        assertEquals("Active boolean should be copied", testEntity.isActive(), dto.isActive());
-        assertEquals("Quantity int should be copied", testEntity.getQuantity().intValue(), dto.getQuantity());
+        assertNotNull(dto, "DTO should not be null");
+        assertEquals(testEntity.isActive(), dto.isActive(), "Active boolean should be copied");
+        assertEquals(testEntity.getQuantity().intValue(), dto.getQuantity(), "Quantity int should be copied");
     }
 
     /**
@@ -138,11 +138,11 @@ public class DataTransferObjectBuilderTest {
     public void testBuildDTOWithAdditionalProperties() {
         TestEntityDTOWithExtra dto = DataTransferObjectBuilder.buildDTO(testEntity, TestEntityDTOWithExtra.class);
 
-        assertNotNull("DTO should not be null", dto);
-        assertEquals("Name should be copied", testEntity.getName(), dto.getName());
+        assertNotNull(dto, "DTO should not be null");
+        assertEquals(testEntity.getName(), dto.getName(), "Name should be copied");
 
         // Additional property not in source should remain at default value
-        assertNull("Extra property should be null (default)", dto.getExtraField());
+        assertNull(dto.getExtraField(), "Extra property should be null (default)");
     }
 
     /**
@@ -152,16 +152,16 @@ public class DataTransferObjectBuilderTest {
     public void testBuildDTOWithTypeConversion() {
         TestEntityDTOWithConversion dto = DataTransferObjectBuilder.buildDTO(testEntity, TestEntityDTOWithConversion.class);
 
-        assertNotNull("DTO should not be null", dto);
+        assertNotNull(dto, "DTO should not be null");
         // Spring BeanUtils should handle compatible type conversions
-        assertEquals("Name should be copied", testEntity.getName(), dto.getName());
+        assertEquals(testEntity.getName(), dto.getName(), "Name should be copied");
 
         // Note: Integer to Long conversion may not happen automatically with BeanUtils
         // This is expected behavior - BeanUtils only copies matching types
         // For type conversion, use custom converters or transform methods
         if (dto.getQuantity() != null) {
-            assertEquals("Quantity should be converted if Spring supports it",
-                        testEntity.getQuantity().longValue(), dto.getQuantity().longValue());
+            assertEquals(testEntity.getQuantity().longValue(), dto.getQuantity().longValue(),
+                        "Quantity should be converted if Spring supports it");
         }
     }
 
@@ -172,15 +172,15 @@ public class DataTransferObjectBuilderTest {
     public void testBuildDTOCreatesNewInstance() {
         TestEntityDTO dto = DataTransferObjectBuilder.buildDTO(testEntity, TestEntityDTO.class);
 
-        assertNotNull("DTO should not be null", dto);
+        assertNotNull(dto, "DTO should not be null");
 
         // Modify DTO
         dto.setName("Modified Name");
         dto.setPrice(199.99);
 
         // Original should remain unchanged
-        assertEquals("Original name should not change", "Test Product", testEntity.getName());
-        assertEquals("Original price should not change", 99.99, testEntity.getPrice(), 0.001);
+        assertEquals("Test Product", testEntity.getName(), "Original name should not change");
+        assertEquals(99.99, testEntity.getPrice(), 0.001, "Original price should not change");
     }
 
     /**
@@ -192,12 +192,12 @@ public class DataTransferObjectBuilderTest {
 
         TestEntityDTO dto = DataTransferObjectBuilder.buildDTO(testEntity, TestEntityDTO.class);
 
-        assertNotNull("DTO should not be null", dto);
-        assertFalse("False boolean should be copied correctly", dto.isActive());
+        assertNotNull(dto, "DTO should not be null");
+        assertFalse(dto.isActive(), "False boolean should be copied correctly");
 
         testEntity.setActive(true);
         dto = DataTransferObjectBuilder.buildDTO(testEntity, TestEntityDTO.class);
-        assertTrue("True boolean should be copied correctly", dto.isActive());
+        assertTrue(dto.isActive(), "True boolean should be copied correctly");
     }
 
     // ============================================================================

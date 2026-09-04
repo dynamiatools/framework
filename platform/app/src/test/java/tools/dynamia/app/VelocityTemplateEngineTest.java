@@ -16,8 +16,8 @@
  */
 package tools.dynamia.app;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.templates.TemplateEngine;
 
 import java.util.HashMap;
@@ -36,7 +36,7 @@ public class VelocityTemplateEngineTest {
         Map<String, Object> params = new HashMap<>();
         params.put("nombre", "Juan");
         Object obj = templateEngine.evaluate("Hola ${nombre}", params);
-        Assert.assertEquals("Hola Juan", obj);
+        Assertions.assertEquals("Hola Juan", obj);
     }
 
 }

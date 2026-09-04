@@ -16,8 +16,8 @@
  */
 package tools.dynamia.integration;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ProgressMonitorTest {
 
@@ -31,7 +31,7 @@ public class ProgressMonitorTest {
 
         int result = monitor.getPercent();
 
-        Assert.assertEquals(expected, result);
+        Assertions.assertEquals(expected, result);
     }
 
 }

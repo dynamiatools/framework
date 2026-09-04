@@ -12,8 +12,8 @@ package tools.dynamia.modules.saas.migration.pipeline;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,37 +30,37 @@ public class ExportConstantsTest {
 
     @Test
     public void formatVersionIsThree() {
-        Assert.assertEquals("3", ExportConstants.FORMAT_VERSION);
+        Assertions.assertEquals("3", ExportConstants.FORMAT_VERSION);
     }
 
     @Test
     public void refIdSuffixIsUnderscoredRefId() {
-        Assert.assertEquals("_ref_id", ExportConstants.REF_ID_SUFFIX);
+        Assertions.assertEquals("_ref_id", ExportConstants.REF_ID_SUFFIX);
     }
 
     @Test
     public void fieldNamesMatchArchitectureSpec() {
-        Assert.assertEquals("version",          ExportConstants.FIELD_VERSION);
-        Assert.assertEquals("exportedAt",       ExportConstants.FIELD_EXPORTED_AT);
-        Assert.assertEquals("sourceAccountId",  ExportConstants.FIELD_SOURCE_ACCOUNT_ID);
-        Assert.assertEquals("identityStrategy", ExportConstants.FIELD_IDENTITY_STRATEGY);
-        Assert.assertEquals("account",          ExportConstants.FIELD_ACCOUNT);
-        Assert.assertEquals("entities",         ExportConstants.FIELD_ENTITIES);
-        Assert.assertEquals("fields",           ExportConstants.FIELD_FIELDS);
-        Assert.assertEquals("rows",             ExportConstants.FIELD_ROWS);
+        Assertions.assertEquals("version",          ExportConstants.FIELD_VERSION);
+        Assertions.assertEquals("exportedAt",       ExportConstants.FIELD_EXPORTED_AT);
+        Assertions.assertEquals("sourceAccountId",  ExportConstants.FIELD_SOURCE_ACCOUNT_ID);
+        Assertions.assertEquals("identityStrategy", ExportConstants.FIELD_IDENTITY_STRATEGY);
+        Assertions.assertEquals("account",          ExportConstants.FIELD_ACCOUNT);
+        Assertions.assertEquals("entities",         ExportConstants.FIELD_ENTITIES);
+        Assertions.assertEquals("fields",           ExportConstants.FIELD_FIELDS);
+        Assertions.assertEquals("rows",             ExportConstants.FIELD_ROWS);
     }
 
     @Test
     public void v3ConstantsAreCorrect() {
-        Assert.assertEquals("manifest.json", ExportConstants.MANIFEST_FILE);
-        Assert.assertEquals("entityClass",   ExportConstants.FIELD_ENTITY_CLASS);
-        Assert.assertEquals("file",          ExportConstants.MANIFEST_ENTITY_FILE);
+        Assertions.assertEquals("manifest.json", ExportConstants.MANIFEST_FILE);
+        Assertions.assertEquals("entityClass",   ExportConstants.FIELD_ENTITY_CLASS);
+        Assertions.assertEquals("file",          ExportConstants.MANIFEST_ENTITY_FILE);
     }
 
     @Test
     public void refIdSuffixProducesCorrectFieldName() {
         String refField = "category" + ExportConstants.REF_ID_SUFFIX;
-        Assert.assertEquals("category_ref_id", refField);
+        Assertions.assertEquals("category_ref_id", refField);
     }
 
     @Test
@@ -89,16 +89,16 @@ public class ExportConstantsTest {
         gen.close();
 
         JsonNode root = mapper.readTree(out.toByteArray());
-        Assert.assertEquals("3",        root.get(ExportConstants.FIELD_VERSION).asText());
-        Assert.assertEquals(42L,        root.get(ExportConstants.FIELD_SOURCE_ACCOUNT_ID).asLong());
-        Assert.assertEquals("KEEP_IDS", root.get(ExportConstants.FIELD_IDENTITY_STRATEGY).asText());
-        Assert.assertTrue(root.has(ExportConstants.FIELD_ACCOUNT));
-        Assert.assertTrue(root.get(ExportConstants.FIELD_ENTITIES).isArray());
-        Assert.assertEquals(1, root.get(ExportConstants.FIELD_ENTITIES).size());
+        Assertions.assertEquals("3",        root.get(ExportConstants.FIELD_VERSION).asText());
+        Assertions.assertEquals(42L,        root.get(ExportConstants.FIELD_SOURCE_ACCOUNT_ID).asLong());
+        Assertions.assertEquals("KEEP_IDS", root.get(ExportConstants.FIELD_IDENTITY_STRATEGY).asText());
+        Assertions.assertTrue(root.has(ExportConstants.FIELD_ACCOUNT));
+        Assertions.assertTrue(root.get(ExportConstants.FIELD_ENTITIES).isArray());
+        Assertions.assertEquals(1, root.get(ExportConstants.FIELD_ENTITIES).size());
 
         JsonNode entry = root.get(ExportConstants.FIELD_ENTITIES).get(0);
-        Assert.assertEquals("Account42_Customer.json", entry.get(ExportConstants.MANIFEST_ENTITY_FILE).asText());
-        Assert.assertEquals("com.example.Customer",    entry.get(ExportConstants.FIELD_ENTITY_CLASS).asText());
+        Assertions.assertEquals("Account42_Customer.json", entry.get(ExportConstants.MANIFEST_ENTITY_FILE).asText());
+        Assertions.assertEquals("com.example.Customer",    entry.get(ExportConstants.FIELD_ENTITY_CLASS).asText());
     }
 
     @Test
@@ -128,11 +128,11 @@ public class ExportConstantsTest {
         gen.close();
 
         JsonNode root = mapper.readTree(out.toByteArray());
-        Assert.assertEquals("com.example.Customer", root.get(ExportConstants.FIELD_ENTITY_CLASS).asText());
-        Assert.assertTrue(root.get(ExportConstants.FIELD_FIELDS).isArray());
-        Assert.assertEquals(3, root.get(ExportConstants.FIELD_FIELDS).size());
-        Assert.assertTrue(root.get(ExportConstants.FIELD_ROWS).isArray());
-        Assert.assertEquals(1, root.get(ExportConstants.FIELD_ROWS).size());
+        Assertions.assertEquals("com.example.Customer", root.get(ExportConstants.FIELD_ENTITY_CLASS).asText());
+        Assertions.assertTrue(root.get(ExportConstants.FIELD_FIELDS).isArray());
+        Assertions.assertEquals(3, root.get(ExportConstants.FIELD_FIELDS).size());
+        Assertions.assertTrue(root.get(ExportConstants.FIELD_ROWS).isArray());
+        Assertions.assertEquals(1, root.get(ExportConstants.FIELD_ROWS).size());
     }
 
     @Test
@@ -151,7 +151,7 @@ public class ExportConstantsTest {
 
         ZipInputStream zipIn = new ZipInputStream(new ByteArrayInputStream(buf.toByteArray()));
         ZipEntry first = zipIn.getNextEntry();
-        Assert.assertNotNull(first);
-        Assert.assertEquals(ExportConstants.MANIFEST_FILE, first.getName());
+        Assertions.assertNotNull(first);
+        Assertions.assertEquals(ExportConstants.MANIFEST_FILE, first.getName());
     }
 }

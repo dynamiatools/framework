@@ -16,12 +16,12 @@
  */
 package tools.dynamia.domain.jpa;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.services.CrudService;
@@ -34,7 +34,7 @@ import static tools.dynamia.domain.query.QueryConditions.gt;
 import static tools.dynamia.domain.query.QueryConditions.isNotNull;
 import static tools.dynamia.domain.query.QueryParameters.with;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = JpaTestConfig.class)
 public class JpaCrudServiceTest {
 
@@ -50,10 +50,10 @@ public class JpaCrudServiceTest {
         }
 
         int result = crudService.batchUpdate(DummyEntity.class, "name", "THE_DUMMY", with("name", isNotNull()));
-        Assert.assertEquals(4, result);
+        Assertions.assertEquals(4, result);
 
         List<DummyEntity> dummies = crudService.find(DummyEntity.class, with("name", "THE_DUMMY"));
-        Assert.assertEquals(4, dummies.size());
+        Assertions.assertEquals(4, dummies.size());
 
     }
 
@@ -62,7 +62,7 @@ public class JpaCrudServiceTest {
     public void findByFieldsTestResultShouldBeEmpty() {
 
         List<DummyEntity> result = crudService.findByFields(DummyEntity.class, "xxx", with("id", gt(10L)), "name");
-        Assert.assertTrue(result.isEmpty());
+        Assertions.assertTrue(result.isEmpty());
     }
 
     @Test
@@ -74,7 +74,7 @@ public class JpaCrudServiceTest {
         }
 
         List<DummyEntity> result = handle(DummyEntity.class).findAll();
-        Assert.assertEquals(4, result.size());
+        Assertions.assertEquals(4, result.size());
     }
 
     @Test
@@ -86,10 +86,10 @@ public class JpaCrudServiceTest {
         }
 
         List<DummyEntity> result = DummyEntity.findByName("Dummy0");
-        Assert.assertEquals(1, result.size());
+        Assertions.assertEquals(1, result.size());
 
         DummyEntity dummyEntity = result.getFirst();
-        Assert.assertEquals("Dummy0", dummyEntity.getName());
+        Assertions.assertEquals("Dummy0", dummyEntity.getName());
     }
 
     @Test
@@ -118,6 +118,6 @@ public class JpaCrudServiceTest {
                 .having("sum(d.size)", QueryConditions.gt(10));
 
         List<DummyEntity> result = crudService.executeQuery(query);
-        Assert.assertFalse(result.isEmpty());
+        Assertions.assertFalse(result.isEmpty());
     }
 }

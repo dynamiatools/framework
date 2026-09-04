@@ -16,13 +16,13 @@
  */
 package tools.dynamia.io.converters;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Mario A. Serrano Leones
@@ -32,7 +32,7 @@ public class ConvertersTest {
     public ConvertersTest() {
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
         var container = new SimpleObjectContainer();
         container.addObject("int", new IntegerConverter());
@@ -41,7 +41,7 @@ public class ConvertersTest {
         Containers.get().installObjectContainer(container);
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownClass() {
     }
 

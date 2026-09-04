@@ -10,8 +10,8 @@
  */
 package tools.dynamia.modules.saas.migration;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.modules.saas.migration.api.MigrationProgress;
 import tools.dynamia.modules.saas.migration.domain.AccountJobStatus;
 import tools.dynamia.modules.saas.migration.domain.AccountMigrationJob;
@@ -21,19 +21,19 @@ public class AccountMigrationJobTest {
     @Test
     public void newJobIsInPendingStatus() {
         AccountMigrationJob job = new AccountMigrationJob();
-        Assert.assertEquals(AccountJobStatus.PENDING, job.getStatus());
+        Assertions.assertEquals(AccountJobStatus.PENDING, job.getStatus());
     }
 
     @Test
     public void newJobIsNotFinished() {
-        Assert.assertFalse(new AccountMigrationJob().isFinished());
+        Assertions.assertFalse(new AccountMigrationJob().isFinished());
     }
 
     @Test
     public void newJobHasUuid() {
         AccountMigrationJob job = new AccountMigrationJob();
-        Assert.assertNotNull(job.getUuid());
-        Assert.assertFalse(job.getUuid().isEmpty());
+        Assertions.assertNotNull(job.getUuid());
+        Assertions.assertFalse(job.getUuid().isEmpty());
     }
 
     @Test
@@ -41,9 +41,9 @@ public class AccountMigrationJobTest {
         AccountMigrationJob job = new AccountMigrationJob();
         job.markRunning();
 
-        Assert.assertEquals(AccountJobStatus.RUNNING, job.getStatus());
-        Assert.assertNotNull(job.getStartedAt());
-        Assert.assertFalse(job.isFinished());
+        Assertions.assertEquals(AccountJobStatus.RUNNING, job.getStatus());
+        Assertions.assertNotNull(job.getStartedAt());
+        Assertions.assertFalse(job.isFinished());
     }
 
     @Test
@@ -52,10 +52,10 @@ public class AccountMigrationJobTest {
         job.markRunning();
         job.markCompleted();
 
-        Assert.assertEquals(AccountJobStatus.COMPLETED, job.getStatus());
-        Assert.assertEquals(100, job.getProgress());
-        Assert.assertNotNull(job.getFinishedAt());
-        Assert.assertTrue(job.isFinished());
+        Assertions.assertEquals(AccountJobStatus.COMPLETED, job.getStatus());
+        Assertions.assertEquals(100, job.getProgress());
+        Assertions.assertNotNull(job.getFinishedAt());
+        Assertions.assertTrue(job.isFinished());
     }
 
     @Test
@@ -64,10 +64,10 @@ public class AccountMigrationJobTest {
         job.markRunning();
         job.markFailed("DB connection lost");
 
-        Assert.assertEquals(AccountJobStatus.FAILED, job.getStatus());
-        Assert.assertEquals("DB connection lost", job.getErrorMessage());
-        Assert.assertNotNull(job.getFinishedAt());
-        Assert.assertTrue(job.isFinished());
+        Assertions.assertEquals(AccountJobStatus.FAILED, job.getStatus());
+        Assertions.assertEquals("DB connection lost", job.getErrorMessage());
+        Assertions.assertNotNull(job.getFinishedAt());
+        Assertions.assertTrue(job.isFinished());
     }
 
     @Test
@@ -76,10 +76,10 @@ public class AccountMigrationJobTest {
         job.markRunning();
         job.markCancelled("User requested cancellation");
 
-        Assert.assertEquals(AccountJobStatus.CANCELLED, job.getStatus());
-        Assert.assertEquals("User requested cancellation", job.getProgressMessage());
-        Assert.assertNotNull(job.getFinishedAt());
-        Assert.assertTrue(job.isFinished());
+        Assertions.assertEquals(AccountJobStatus.CANCELLED, job.getStatus());
+        Assertions.assertEquals("User requested cancellation", job.getProgressMessage());
+        Assertions.assertNotNull(job.getFinishedAt());
+        Assertions.assertTrue(job.isFinished());
     }
 
     @Test
@@ -87,20 +87,20 @@ public class AccountMigrationJobTest {
         AccountMigrationJob job = new AccountMigrationJob();
 
         job.updateProgress(MigrationProgress.of(-5L, 0L, "below zero", 0));
-        Assert.assertEquals(0, job.getProgress());
+        Assertions.assertEquals(0, job.getProgress());
 
         job.updateProgress(MigrationProgress.of(130, 5, "above hundred", 0));
-        Assert.assertEquals(100, job.getProgress());
+        Assertions.assertEquals(100, job.getProgress());
 
         job.updateProgress(MigrationProgress.of(42, 100, "normal", 0));
-        Assert.assertEquals(42, job.getProgress());
-        Assert.assertEquals("normal", job.getProgressMessage());
+        Assertions.assertEquals(42, job.getProgress());
+        Assertions.assertEquals("normal", job.getProgressMessage());
     }
 
     @Test
     public void twoJobsHaveDifferentUuids() {
         AccountMigrationJob a = new AccountMigrationJob();
         AccountMigrationJob b = new AccountMigrationJob();
-        Assert.assertNotEquals(a.getUuid(), b.getUuid());
+        Assertions.assertNotEquals(a.getUuid(), b.getUuid());
     }
 }

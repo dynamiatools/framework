@@ -16,15 +16,15 @@
  */
 package tools.dynamia.domain;
 
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
 
 public class IdGeneratorsTest {
 
-    @BeforeClass
+    @BeforeAll
     public static void init() {
         SimpleObjectContainer container = new SimpleObjectContainer("IdGeneratorsContainers");
         container.addObject("stringIdGenerator", new StringIdGenerator());
@@ -35,17 +35,17 @@ public class IdGeneratorsTest {
     @Test
     public void shouldGenerateStringId() {
         String id = IdGenerators.createId(String.class);
-        Assert.assertNotNull(id);
+        Assertions.assertNotNull(id);
     }
 
     @Test
     public void shouldGenerateLongId() {
         Long id = IdGenerators.createId(Long.class);
-        Assert.assertNotNull(id);
+        Assertions.assertNotNull(id);
     }
 
-    @Test(expected = IdGeneratorNotFoundException.class)
+    @Test
     public void shouldThrowException() {
-        IdGenerators.createId(Integer.class);
+        Assertions.assertThrows(IdGeneratorNotFoundException.class, () -> IdGenerators.createId(Integer.class));
     }
 }

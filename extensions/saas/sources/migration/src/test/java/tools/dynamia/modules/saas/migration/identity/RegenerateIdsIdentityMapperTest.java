@@ -10,9 +10,9 @@
  */
 package tools.dynamia.modules.saas.migration.identity;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.modules.saas.migration.api.IdentityStrategy;
 
 import java.util.HashMap;
@@ -22,21 +22,21 @@ public class RegenerateIdsIdentityMapperTest {
 
     private RegenerateIdsIdentityMapper mapper;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         mapper = new RegenerateIdsIdentityMapper();
     }
 
     @Test
     public void strategyIsRegenerateIds() {
-        Assert.assertEquals(IdentityStrategy.REGENERATE_IDS, mapper.getStrategy());
+        Assertions.assertEquals(IdentityStrategy.REGENERATE_IDS, mapper.getStrategy());
     }
 
     @Test
     public void mapIdAlwaysReturnsNull() {
-        Assert.assertNull(mapper.mapId(1L, String.class));
-        Assert.assertNull(mapper.mapId(99999L, Object.class));
-        Assert.assertNull(mapper.mapId(null, String.class));
+        Assertions.assertNull(mapper.mapId(1L, String.class));
+        Assertions.assertNull(mapper.mapId(99999L, Object.class));
+        Assertions.assertNull(mapper.mapId(null, String.class));
     }
 
     @Test
@@ -45,7 +45,7 @@ public class RegenerateIdsIdentityMapperTest {
         idMappings.put(String.class.getName(), Map.of(10L, 501L));
 
         Object resolved = mapper.resolveReferenceId(10L, String.class, idMappings);
-        Assert.assertEquals(501L, resolved);
+        Assertions.assertEquals(501L, resolved);
     }
 
     @Test
@@ -54,12 +54,12 @@ public class RegenerateIdsIdentityMapperTest {
         Map<String, Map<Object, Object>> idMappings = new HashMap<>();
 
         Object resolved = mapper.resolveReferenceId(77L, String.class, idMappings);
-        Assert.assertEquals(77L, resolved);
+        Assertions.assertEquals(77L, resolved);
     }
 
     @Test
     public void resolveReferenceIdWithNullRefIdReturnsNull() {
-        Assert.assertNull(mapper.resolveReferenceId(null, String.class, new HashMap<>()));
+        Assertions.assertNull(mapper.resolveReferenceId(null, String.class, new HashMap<>()));
     }
 
     @Test
@@ -72,6 +72,6 @@ public class RegenerateIdsIdentityMapperTest {
 
         // originalRefId=99 not in classMap → fallback to original
         Object resolved = mapper.resolveReferenceId(99L, String.class, idMappings);
-        Assert.assertEquals(99L, resolved);
+        Assertions.assertEquals(99L, resolved);
     }
 }

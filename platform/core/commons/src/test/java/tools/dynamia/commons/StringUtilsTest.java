@@ -16,21 +16,20 @@
  */
 package tools.dynamia.commons;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  *
  * @author Mario A. Serrano Leones
  */
-public class StringUtilsTest extends TestCase {
+public class StringUtilsTest {
 
-    public StringUtilsTest(String testName) {
-        super(testName);
-    }
-
+    @Test
     public void testGetLastCharacterMethod() {
 
         String string = "TheString";
@@ -40,6 +39,7 @@ public class StringUtilsTest extends TestCase {
         assertEquals(expResult, result);
     }
 
+    @Test
     public void testGetFirstCharacterMethod() {
 
         String string = "TheString";
@@ -49,6 +49,7 @@ public class StringUtilsTest extends TestCase {
         assertEquals(expResult, result);
     }
 
+    @Test
     public void testSimpliedString() {
         String expected = "esta-prueba-servira-en-accion";
         String input = "está pruébá SERvirá en acción";
@@ -58,6 +59,7 @@ public class StringUtilsTest extends TestCase {
 
     }
 
+    @Test
     public void testRandomString() {
         Set<String> set = new HashSet<>();
         for (int i = 0; i < 10; i++) {
@@ -69,6 +71,7 @@ public class StringUtilsTest extends TestCase {
 
     }
 
+    @Test
     public void testCapatilizeAllWords() {
         String expected = "This Is Nice";
         String text = "this is NICE";

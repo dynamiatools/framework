@@ -16,7 +16,7 @@
  */
 package tools.dynamia.commons;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.commons.reflect.AccessMode;
 import tools.dynamia.commons.reflect.PropertyInfo;
 
@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *

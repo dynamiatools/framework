@@ -41,7 +41,7 @@ public class CrudTestConfiguration {
     @Bean
     public EntityManagerFactory entityManagerFactory() {
         var emf = new LocalContainerEntityManagerFactoryBean();
-        emf.setPackagesToScan("tools.dynamia.domain.jpa");
+        emf.setPackagesToScan("tools.dynamia.domain.jpa", "tools.dynamia.app.crud");
 
         emf.setDataSource(dataSource());
 
