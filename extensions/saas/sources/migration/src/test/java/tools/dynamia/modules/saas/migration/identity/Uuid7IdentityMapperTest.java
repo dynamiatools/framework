@@ -10,9 +10,9 @@
  */
 package tools.dynamia.modules.saas.migration.identity;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.modules.saas.migration.api.IdentityStrategy;
 
 import java.util.HashMap;
@@ -23,35 +23,35 @@ public class Uuid7IdentityMapperTest {
 
     private Uuid7IdentityMapper mapper;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         mapper = new Uuid7IdentityMapper();
     }
 
     @Test
     public void strategyIsUuid7() {
-        Assert.assertEquals(IdentityStrategy.UUID7, mapper.getStrategy());
+        Assertions.assertEquals(IdentityStrategy.UUID7, mapper.getStrategy());
     }
 
     @Test
     public void mapIdReturnsUuid() {
         Object id = mapper.mapId(1L, Object.class);
-        Assert.assertNotNull(id);
-        Assert.assertTrue(id instanceof UUID);
+        Assertions.assertNotNull(id);
+        Assertions.assertTrue(id instanceof UUID);
     }
 
     @Test
     public void mapIdReturnsDistinctValuesEachCall() {
         UUID a = (UUID) mapper.mapId(1L, Object.class);
         UUID b = (UUID) mapper.mapId(1L, Object.class);
-        Assert.assertNotEquals(a, b);
+        Assertions.assertNotEquals(a, b);
     }
 
     @Test
     public void mapIdIgnoresOriginalId() {
         // UUID7 strategy always generates a new ID regardless of the original
-        Assert.assertNotEquals(mapper.mapId(42L, Object.class), 42L);
-        Assert.assertNotNull(mapper.mapId(null, Object.class));
+        Assertions.assertNotEquals(mapper.mapId(42L, Object.class), 42L);
+        Assertions.assertNotNull(mapper.mapId(null, Object.class));
     }
 
     @Test
@@ -61,19 +61,19 @@ public class Uuid7IdentityMapperTest {
         idMappings.put(String.class.getName(), Map.of(10L, newId));
 
         Object resolved = mapper.resolveReferenceId(10L, String.class, idMappings);
-        Assert.assertEquals(newId, resolved);
+        Assertions.assertEquals(newId, resolved);
     }
 
     @Test
     public void resolveReferenceIdFallsBackToOriginalWhenNotMapped() {
         Map<String, Map<Object, Object>> idMappings = new HashMap<>();
         Object resolved = mapper.resolveReferenceId(77L, String.class, idMappings);
-        Assert.assertEquals(77L, resolved);
+        Assertions.assertEquals(77L, resolved);
     }
 
     @Test
     public void resolveReferenceIdWithNullReturnsNull() {
-        Assert.assertNull(mapper.resolveReferenceId(null, String.class, new HashMap<>()));
+        Assertions.assertNull(mapper.resolveReferenceId(null, String.class, new HashMap<>()));
     }
 
     // ── UUIDv7 structure tests ─────────────────────────────────────────────────
@@ -81,13 +81,13 @@ public class Uuid7IdentityMapperTest {
     @Test
     public void generatedUuidHasVersion7() {
         UUID uuid = Uuid7IdentityMapper.generateUuid7();
-        Assert.assertEquals(7, uuid.version());
+        Assertions.assertEquals(7, uuid.version());
     }
 
     @Test
     public void generatedUuidHasVariant2() {
         UUID uuid = Uuid7IdentityMapper.generateUuid7();
-        Assert.assertEquals(2, uuid.variant());
+        Assertions.assertEquals(2, uuid.variant());
     }
 
     @Test
@@ -96,7 +96,7 @@ public class Uuid7IdentityMapperTest {
         Thread.sleep(2);
         UUID b = Uuid7IdentityMapper.generateUuid7();
         // Higher timestamp → higher MSB → natural UUID ordering matches time order
-        Assert.assertTrue(a.getMostSignificantBits() < b.getMostSignificantBits()
+        Assertions.assertTrue(a.getMostSignificantBits() < b.getMostSignificantBits()
                 || a.compareTo(b) < 0);
     }
 }

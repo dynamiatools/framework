@@ -16,8 +16,8 @@
  */
 package tools.dynamia.zk.viewers;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
 import tools.dynamia.io.converters.ClassConverter;
@@ -29,7 +29,7 @@ import tools.dynamia.viewers.impl.YamlViewDescriptorReader;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static tools.dynamia.zk.viewers.table.TableViewDescriptorBuilder.column;
 import static tools.dynamia.zk.viewers.table.TableViewDescriptorBuilder.f;
 import static tools.dynamia.zk.viewers.table.TableViewDescriptorBuilder.h;
@@ -42,7 +42,7 @@ public class TableViewDescriptorBuilderTest {
 
     private ViewDescriptorFactory factory;
 
-    @Before
+    @BeforeEach
     public void initFactory() {
         factory = new DefaultViewDescriptorFactory();
         var container = new SimpleObjectContainer();

@@ -20,8 +20,8 @@
 
 package tools.dynamia.zk.viewers;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
 import tools.dynamia.io.converters.ClassConverter;
@@ -31,9 +31,9 @@ import tools.dynamia.viewers.ViewDescriptorFactory;
 import tools.dynamia.viewers.impl.DefaultViewDescriptorFactory;
 import tools.dynamia.viewers.impl.YamlViewDescriptorReader;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
@@ -41,7 +41,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class ViewDescriptorTest {
 
-    @Before
+    @BeforeEach
     public void configContainer(){
         var container = new SimpleObjectContainer();
         container.addObject("yml", new YamlViewDescriptorReader());

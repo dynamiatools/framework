@@ -17,8 +17,8 @@
 
 package tools.dynamia.domain;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.query.Parameter;
 import tools.dynamia.integration.Containers;
@@ -27,7 +27,7 @@ import tools.dynamia.integration.SimpleObjectContainer;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TransferableTest {
 
@@ -53,7 +53,7 @@ public class TransferableTest {
 
         SomeEntityDTO dto = entity.toDTO();
 
-        Assert.assertNotNull(dto);
+        Assertions.assertNotNull(dto);
         assertEquals(entity.getId(), dto.getId());
         assertEquals(entity.getAccountId(), dto.getAccountId());
         assertEquals(entity.getName(), dto.getName());

@@ -17,8 +17,8 @@
 
 package tools.dynamia.zk.viewers;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.zkoss.zul.Intbox;
 import org.zkoss.zul.Textbox;
 import tools.dynamia.integration.Containers;
@@ -38,17 +38,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Mario A. Serrano Leones
  */
 public class ViewDescriptorReaderTest {
 
-    @Before
+    @BeforeEach
     public void configContainer() {
         var container = new SimpleObjectContainer();
         container.addObject("yml", new YamlViewDescriptorReader());

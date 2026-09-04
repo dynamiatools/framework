@@ -17,10 +17,10 @@
 
 package tools.dynamia.modules.entityfile.remote;
 
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
 import tools.dynamia.domain.InMemoryCrudService;
 import tools.dynamia.domain.query.Parameter;
@@ -40,13 +40,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration tests for {@link BuckieEntityFileStorage}.
  *
  * <p>Pure-logic tests (buildKey, getFileName, etc.) always run.
- * HTTP tests are skipped automatically via {@code Assume.assumeTrue}
+ * HTTP tests are skipped automatically via {@code Assumptions.assumeTrue}
  * when the SFS server is not reachable.</p>
  *
  * <p>Server configuration via system properties or environment variables:
@@ -70,7 +70,7 @@ public class BuckieEntityFileStorageTest {
 
     // ── Setup ─────────────────────────────────────────────────────────────────
 
-    @BeforeClass
+    @BeforeAll
     public static void readConfiguration() {
         sfsUrl = systemOrEnv(BuckieEntityFileStorage.SFS_URL, "http://localhost:8500");
         sfsBucket = systemOrEnv(BuckieEntityFileStorage.SFS_BUCKET, "test");
@@ -80,7 +80,7 @@ public class BuckieEntityFileStorageTest {
         System.out.println("[SFS Test] URL=" + sfsUrl + " | BUCKET=" + sfsBucket);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockEnvironment env = new MockEnvironment();
         env.setProperty(BuckieEntityFileStorage.SFS_URL, sfsUrl);
@@ -103,7 +103,7 @@ public class BuckieEntityFileStorageTest {
     @Test
     public void testGetName() {
         assertNotNull(storage.getName());
-        assertFalse("Storage name must not be blank", storage.getName().isBlank());
+        assertFalse(storage.getName().isBlank(), "Storage name must not be blank");
     }
 
     @Test
@@ -111,8 +111,8 @@ public class BuckieEntityFileStorageTest {
         EntityFile ef = buildEntityFile("report.pdf", null, 10L);
         String key = storage.buildKey(ef);
 
-        assertTrue("Key must start with account10/", key.startsWith("account10/"));
-        assertTrue("Key must contain the uuid", key.contains(ef.getUuid()));
+        assertTrue(key.startsWith("account10/"), "Key must start with account10/");
+        assertTrue(key.contains(ef.getUuid()), "Key must contain the uuid");
     }
 
     @Test
@@ -120,8 +120,8 @@ public class BuckieEntityFileStorageTest {
         EntityFile ef = buildEntityFile("image.jpg", "photos/2026", 5L);
         String key = storage.buildKey(ef);
 
-        assertTrue("Key must start with account5/", key.startsWith("account5/"));
-        assertTrue("Key must contain the subfolder path", key.contains("photos/2026/"));
+        assertTrue(key.startsWith("account5/"), "Key must start with account5/");
+        assertTrue(key.contains("photos/2026/"), "Key must contain the subfolder path");
     }
 
     @Test
@@ -129,9 +129,9 @@ public class BuckieEntityFileStorageTest {
         EntityFile ef = buildEntityFile("My File-Final.pdf", null, 1L);
         String name = BuckieEntityFileStorage.getFileName(ef);
 
-        assertFalse("File name must not contain spaces", name.contains(" "));
-        assertFalse("File name base must not contain dashes",
-                name.substring(name.lastIndexOf('/') + 1).replace(ef.getUuid(), "").contains("-"));
+        assertFalse(name.contains(" "), "File name must not contain spaces");
+        assertFalse(name.substring(name.lastIndexOf('/') + 1).replace(ef.getUuid(), "").contains("-"),
+                "File name base must not contain dashes");
     }
 
     @Test
@@ -139,10 +139,10 @@ public class BuckieEntityFileStorageTest {
         EntityFile ef = buildEntityFile("Ñoño Ávido Murió.pdf", null, 1L);
         String name = BuckieEntityFileStorage.getFileName(ef);
 
-        assertFalse("File name must not contain ñ", name.contains("ñ"));
-        assertFalse("File name must not contain á", name.contains("á"));
-        assertFalse("File name must not contain ó", name.contains("ó"));
-        assertFalse("File name must not contain spaces", name.contains(" "));
+        assertFalse(name.contains("ñ"), "File name must not contain ñ");
+        assertFalse(name.contains("á"), "File name must not contain á");
+        assertFalse(name.contains("ó"), "File name must not contain ó");
+        assertFalse(name.contains(" "), "File name must not contain spaces");
     }
 
     @Test
@@ -152,7 +152,7 @@ public class BuckieEntityFileStorageTest {
 
         String name = BuckieEntityFileStorage.getFileName(ef);
 
-        assertEquals("Must use storedFileName when it is set", "custom_stored_name.pdf", name);
+        assertEquals("custom_stored_name.pdf", name, "Must use storedFileName when it is set");
     }
 
     @Test
@@ -160,8 +160,8 @@ public class BuckieEntityFileStorageTest {
         EntityFile ef = buildEntityFile("doc.txt", null, 1L);
         String name = BuckieEntityFileStorage.getFileName(ef);
 
-        assertFalse("Without subfolder the name must not start with /", name.startsWith("/"));
-        assertTrue("Name must contain the uuid", name.contains(ef.getUuid()));
+        assertFalse(name.startsWith("/"), "Without subfolder the name must not start with /");
+        assertTrue(name.contains(ef.getUuid()), "Name must contain the uuid");
     }
 
     @Test
@@ -176,10 +176,10 @@ public class BuckieEntityFileStorageTest {
         EntityFile ef = buildEntityFile("document.pdf", null, 3L);
         String url = storage.buildRemoteUrl(ef);
 
-        assertTrue("URL must start with the SFS base URL", url.startsWith(sfsUrl));
-        assertTrue("URL must contain the bucket name", url.contains(sfsBucket));
-        assertTrue("URL must contain the account folder", url.contains("account3/"));
-        assertTrue("URL must contain the file uuid", url.contains(ef.getUuid()));
+        assertTrue(url.startsWith(sfsUrl), "URL must start with the SFS base URL");
+        assertTrue(url.contains(sfsBucket), "URL must contain the bucket name");
+        assertTrue(url.contains("account3/"), "URL must contain the account folder");
+        assertTrue(url.contains(ef.getUuid()), "URL must contain the file uuid");
     }
 
     @Test
@@ -187,9 +187,9 @@ public class BuckieEntityFileStorageTest {
         EntityFile ef = buildEntityFile("file.txt", null, 1L);
         StoredEntityFile stored = storage.download(ef);
 
-        assertNotNull("StoredEntityFile must not be null", stored);
-        assertNotNull("URL must not be null", stored.getUrl());
-        assertNull("Remote file must not have a local real file", stored.getRealFile());
+        assertNotNull(stored, "StoredEntityFile must not be null");
+        assertNotNull(stored.getUrl(), "URL must not be null");
+        assertNull(stored.getRealFile(), "Remote file must not have a local real file");
     }
 
     @Test
@@ -198,12 +198,12 @@ public class BuckieEntityFileStorageTest {
         StoredEntityFile stored = storage.download(ef);
 
         String thumb100 = stored.getThumbnailUrl(100, 100);
-        assertTrue("Thumbnail URL must contain w=100", thumb100.contains("w=100"));
-        assertTrue("Thumbnail URL must contain h=100", thumb100.contains("h=100"));
+        assertTrue(thumb100.contains("w=100"), "Thumbnail URL must contain w=100");
+        assertTrue(thumb100.contains("h=100"), "Thumbnail URL must contain h=100");
 
         String thumb200 = stored.getThumbnailUrl(200, 300);
-        assertTrue("Thumbnail URL must contain w=200", thumb200.contains("w=200"));
-        assertTrue("Thumbnail URL must contain h=300", thumb200.contains("h=300"));
+        assertTrue(thumb200.contains("w=200"), "Thumbnail URL must contain w=200");
+        assertTrue(thumb200.contains("h=300"), "Thumbnail URL must contain h=300");
     }
 
     @Test
@@ -215,12 +215,12 @@ public class BuckieEntityFileStorageTest {
         storage.reloadParams();
 
         // First call after reload must rebuild the client without throwing
-        assertNotNull("Client must be rebuilt after reloadParams", storage.client());
+        assertNotNull(storage.client(), "Client must be rebuilt after reloadParams");
     }
 
     @Test
     public void testToResource_returnsInputStreamResource() {
-        Assume.assumeTrue("SFS server not available at " + sfsUrl, isServerReachable());
+        Assumptions.assumeTrue(isServerReachable(), "SFS server not available at " + sfsUrl);
 
         // Upload a file first so the URL is actually retrievable
         EntityFile ef = buildEntityFile("to-resource-" + System.currentTimeMillis() + ".txt", null, 1L);
@@ -231,12 +231,12 @@ public class BuckieEntityFileStorageTest {
 
         StoredEntityFile stored = storage.download(ef);
         // toResource() must authenticate with SFS and return an InputStreamResource
-        assertNotNull("toResource() must not throw or return null", stored.toResource());
+        assertNotNull(stored.toResource(), "toResource() must not throw or return null");
     }
 
     @Test
     public void testToThumbnailResource_returnsInputStreamResource() {
-        Assume.assumeTrue("SFS server not available at " + sfsUrl, isServerReachable());
+        Assumptions.assumeTrue(isServerReachable(), "SFS server not available at " + sfsUrl);
 
         EntityFile ef = buildEntityFile("to-thumb-" + System.currentTimeMillis() + ".png", null, 1L);
         byte[] bytes = new byte[]{(byte) 0xFF, (byte) 0xD8}; // minimal JPEG-like stub
@@ -246,15 +246,15 @@ public class BuckieEntityFileStorageTest {
 
         StoredEntityFile stored = storage.download(ef);
         // toThumbnailResource() must authenticate with SFS and return an InputStreamResource
-        assertNotNull("toThumbnailResource() must not throw or return null",
-                stored.toThumbnailResource(200, 200));
+        assertNotNull(stored.toThumbnailResource(200, 200),
+                "toThumbnailResource() must not throw or return null");
     }
 
     // ── Integration tests (require a live SFS server) ─────────────────────────
 
     @Test
     public void testUpload_textFile() {
-        Assume.assumeTrue("SFS server not available at " + sfsUrl, isServerReachable());
+        Assumptions.assumeTrue(isServerReachable(), "SFS server not available at " + sfsUrl);
 
         EntityFile ef = buildEntityFile("test-upload-" + System.currentTimeMillis() + ".txt", null, 1L);
         String content = "Hello SFS from automated test - " + System.currentTimeMillis();
@@ -266,12 +266,12 @@ public class BuckieEntityFileStorageTest {
 
         storage.upload(ef, info);
 
-        assertTrue("File size must be > 0 after a successful upload", ef.getSize() > 0);
+        assertTrue(ef.getSize() > 0, "File size must be > 0 after a successful upload");
     }
 
     @Test
     public void testUpload_withSubfolder() {
-        Assume.assumeTrue("SFS server not available at " + sfsUrl, isServerReachable());
+        Assumptions.assumeTrue(isServerReachable(), "SFS server not available at " + sfsUrl);
 
         EntityFile ef = buildEntityFile("document.txt", "subfolder/tests", 1L);
         byte[] bytes = "content with subfolder".getBytes(StandardCharsets.UTF_8);
@@ -283,12 +283,12 @@ public class BuckieEntityFileStorageTest {
         storage.upload(ef, info);
 
         String key = storage.buildKey(ef);
-        assertTrue("Key must include the subfolder path", key.contains("subfolder/tests/"));
+        assertTrue(key.contains("subfolder/tests/"), "Key must include the subfolder path");
     }
 
     @Test
     public void testUpload_nameWithSpacesDoesNotFail() {
-        Assume.assumeTrue("SFS server not available at " + sfsUrl, isServerReachable());
+        Assumptions.assumeTrue(isServerReachable(), "SFS server not available at " + sfsUrl);
 
         EntityFile ef = buildEntityFile("file with spaces and ñ.txt", null, 1L);
         byte[] bytes = "content".getBytes(StandardCharsets.UTF_8);
@@ -303,7 +303,7 @@ public class BuckieEntityFileStorageTest {
 
     @Test
     public void testDelete_changesStateToDeleted() {
-        Assume.assumeTrue("SFS server not available at " + sfsUrl, isServerReachable());
+        Assumptions.assumeTrue(isServerReachable(), "SFS server not available at " + sfsUrl);
 
         // 1. Upload a file first
         EntityFile ef = buildEntityFile("test-delete-" + System.currentTimeMillis() + ".txt", null, 1L);
@@ -319,12 +319,12 @@ public class BuckieEntityFileStorageTest {
         storage.delete(ef);
 
         // 3. Verify state
-        assertEquals("State must change to DELETED", EntityFileState.DELETED, ef.getState());
+        assertEquals(EntityFileState.DELETED, ef.getState(), "State must change to DELETED");
     }
 
     @Test
     public void testUploadAndDownloadUrl_areConsistent() {
-        Assume.assumeTrue("SFS server not available at " + sfsUrl, isServerReachable());
+        Assumptions.assumeTrue(isServerReachable(), "SFS server not available at " + sfsUrl);
 
         EntityFile ef = buildEntityFile("consistency-" + System.currentTimeMillis() + ".txt", null, 1L);
         byte[] bytes = "URL consistency check content".getBytes(StandardCharsets.UTF_8);
@@ -340,8 +340,8 @@ public class BuckieEntityFileStorageTest {
 
         // The URL returned by download() must point to the same resource that was uploaded
         assertNotNull(url);
-        assertTrue("URL must contain the bucket name", url.contains(sfsBucket));
-        assertTrue("URL must contain the key of the uploaded file", url.contains(storage.buildKey(ef)));
+        assertTrue(url.contains(sfsBucket), "URL must contain the bucket name");
+        assertTrue(url.contains(storage.buildKey(ef)), "URL must contain the key of the uploaded file");
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -478,4 +478,3 @@ public class BuckieEntityFileStorageTest {
         };
     }
 }
-

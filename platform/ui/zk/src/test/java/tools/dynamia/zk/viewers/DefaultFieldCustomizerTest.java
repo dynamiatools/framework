@@ -18,7 +18,7 @@
 
 package tools.dynamia.zk.viewers;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Intbox;
@@ -34,8 +34,8 @@ import tools.dynamia.viewers.util.Viewers;
 import java.time.LocalDate;
 import java.util.Date;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Mario A. Serrano Leones

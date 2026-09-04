@@ -16,9 +16,9 @@
  */
 package tools.dynamia.integration.ms;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
 import tools.dynamia.integration.ms.listeners.AllErrorTopicMessageListener;
@@ -28,7 +28,7 @@ import tools.dynamia.integration.ms.listeners.RegexInfoTopicMessageListener;
 
 public class MessagesTopicsTest {
 
-    @Before
+    @BeforeEach
     public void init() {
         SimpleObjectContainer soc = new SimpleObjectContainer();
         soc.addObject("ml1", new ErrorWarnLogMessageListener());
@@ -48,7 +48,7 @@ public class MessagesTopicsTest {
         TextMessage message = new TextMessage("Hello World!!");
         channel.publish(message, "error");
 
-        Assert.assertEquals(3, message.getHeader(Message.HEADER_LISTENER_COUNT));
+        Assertions.assertEquals(3, message.getHeader(Message.HEADER_LISTENER_COUNT));
     }
 
     @Test
@@ -59,7 +59,7 @@ public class MessagesTopicsTest {
         TextMessage message = new TextMessage("Hello World!!");
         channel.publish(message, "warning");
 
-        Assert.assertEquals(2, message.getHeader(Message.HEADER_LISTENER_COUNT));
+        Assertions.assertEquals(2, message.getHeader(Message.HEADER_LISTENER_COUNT));
     }
 
     @Test
@@ -69,7 +69,7 @@ public class MessagesTopicsTest {
         TextMessage message = new TextMessage("Something fail");
         channel.publish(message, "error");
 
-        Assert.assertEquals(1, message.getHeader(Message.HEADER_LISTENER_COUNT));
+        Assertions.assertEquals(1, message.getHeader(Message.HEADER_LISTENER_COUNT));
     }
 
     @Test
@@ -83,6 +83,6 @@ public class MessagesTopicsTest {
             times += (int) message.getHeader(Message.HEADER_LISTENER_COUNT);
         }
 
-        Assert.assertEquals(topics.length, times);
+        Assertions.assertEquals(topics.length, times);
     }
 }

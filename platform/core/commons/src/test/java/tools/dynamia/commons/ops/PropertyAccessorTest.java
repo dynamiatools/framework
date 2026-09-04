@@ -16,9 +16,9 @@
  */
 package tools.dynamia.commons.ops;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for PropertyAccessor class, specifically testing overloaded setter handling.
@@ -133,8 +133,8 @@ public class PropertyAccessorTest {
         // Set using String value
         PropertyAccessor.invokeSetMethod(bean, "address", "123 Main St");
 
-        assertEquals("Address should be set correctly even with overloaded setters",
-            "123 Main St", bean.getAddress());
+        assertEquals("123 Main St", bean.getAddress(),
+            "Address should be set correctly even with overloaded setters");
     }
 
     @Test
@@ -145,8 +145,8 @@ public class PropertyAccessorTest {
         // Set null value - this is where BeanWrapper might fail
         PropertyAccessor.invokeSetMethod(bean, "address", null);
 
-        assertNull("Address should be set to null even with overloaded setters",
-            bean.getAddress());
+        assertNull(bean.getAddress(),
+            "Address should be set to null even with overloaded setters");
     }
 
     @Test
@@ -156,8 +156,8 @@ public class PropertyAccessorTest {
         // Set using Object value (Integer in this case)
         PropertyAccessor.invokeSetMethod(bean, "address", 12345);
 
-        assertEquals("Address should be converted to String even with overloaded setters",
-            "12345", bean.getAddress());
+        assertEquals("12345", bean.getAddress(),
+            "Address should be converted to String even with overloaded setters");
     }
 
     @Test

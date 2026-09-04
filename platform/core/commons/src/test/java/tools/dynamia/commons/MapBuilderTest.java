@@ -16,7 +16,7 @@
  */
 package tools.dynamia.commons;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.commons.collect.ArrayListMultiMap;
 import tools.dynamia.commons.collect.MultiMap;
 
@@ -24,19 +24,19 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
  *
  * @author Mario A. Serrano Leones
  */
-public class MapBuilderTest extends TestCase {
-
-    public MapBuilderTest(String testName) {
-        super(testName);
-    }
+public class MapBuilderTest {
 
     /**
      * Test of put method, of class MapBuilder.
      */
+    @Test
     public void testPut_String_Object() {
         Map<String, Object> map = MapBuilder.put("value", 100);
         assertTrue(map.containsKey("value"));
@@ -46,6 +46,7 @@ public class MapBuilderTest extends TestCase {
     /**
      * Test of put method, of class MapBuilder.
      */
+    @Test
     public void testPut_ObjectArr() {
         Map<String, Object> map = MapBuilder.put("value", 100,
                 "name", "mario",
@@ -55,6 +56,7 @@ public class MapBuilderTest extends TestCase {
         assertEquals("mario", map.get("name"));
     }
 
+    @Test
     public void testMultiMap() {
         MultiMap<String, String> mmap = new ArrayListMultiMap<>();
         mmap.put("names", "Mario");
@@ -70,6 +72,7 @@ public class MapBuilderTest extends TestCase {
 
     }
 
+    @Test
     @SuppressWarnings("rawtypes")
     public void testMultiMapGetKey() {
         MultiMap<String, Class> mm = new ArrayListMultiMap<>();

@@ -16,7 +16,7 @@
  */
 package tools.dynamia.zk.ui;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.zkoss.zul.ListModelList;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
@@ -36,7 +36,7 @@ public class ProviderPickerBoxTest {
         ProviderPickerBox box = new ProviderPickerBox();
         box.setClassName(MyProvider.class.getName());
 
-        Assert.assertEquals(2, box.getModel().getSize());
+        Assertions.assertEquals(2, box.getModel().getSize());
     }
 
     public void shouldSelectProvider() {
@@ -47,9 +47,9 @@ public class ProviderPickerBoxTest {
         box.setSelected(DefaultProvider.ID);
 
         ListModelList model = (ListModelList) box.getModel();
-        Assert.assertFalse(model.getSelection().isEmpty());
+        Assertions.assertFalse(model.getSelection().isEmpty());
         //noinspection unchecked
-        model.getSelection().forEach(p -> Assert.assertEquals(DefaultProvider.class, p.getClass()));
+        model.getSelection().forEach(p -> Assertions.assertEquals(DefaultProvider.class, p.getClass()));
     }
 
     static class DefaultProvider implements MyProvider {

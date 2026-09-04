@@ -1,7 +1,7 @@
 package tools.dynamia.integration;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.integration.scheduling.SchedulerUtil;
 
 import java.time.Duration;
@@ -33,7 +33,7 @@ public class SchedulerUtilTests {
             return "Task Result";
         }).get(); // Wait for the result
 
-        Assert.assertEquals("Task Result", result);
+        Assertions.assertEquals("Task Result", result);
     }
 
     @Test
@@ -62,6 +62,6 @@ public class SchedulerUtilTests {
         );
 
         sequence.get(); // Wait for all tasks to complete
-        Assert.assertEquals(3, counter.get());
+        Assertions.assertEquals(3, counter.get());
     }
 }

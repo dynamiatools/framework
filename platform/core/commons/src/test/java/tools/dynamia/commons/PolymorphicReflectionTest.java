@@ -16,8 +16,8 @@
  */
 package tools.dynamia.commons;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -32,25 +32,25 @@ public class PolymorphicReflectionTest {
         ParentBean cBean = new ChildBean();
 
         String result = (String) ObjectOperations.invokeGetMethod(pbean, "name");
-        Assert.assertEquals("mario", result);
+        Assertions.assertEquals("mario", result);
 
         result = (String) ObjectOperations.invokeGetMethod(cBean, "name");
-        Assert.assertEquals("alejandro", result);
+        Assertions.assertEquals("alejandro", result);
 
         result = (String) ObjectOperations.invokeGetMethod(cBean, "lastName");
-        Assert.assertEquals("serrano", result);
+        Assertions.assertEquals("serrano", result);
 
     }
 
     @Test
     public void testPolymorphicFieldFromChildToParent() throws NoSuchFieldException {
         Field field = ObjectOperations.getField(ChildBean.class, "name");
-        Assert.assertNotNull(field);
+        Assertions.assertNotNull(field);
     }
 
-    @Test(expected = NoSuchFieldException.class)
-    public void testPolymorphicFieldFromParentToChield() throws NoSuchFieldException {
-        ObjectOperations.getField(ParentBean.class, "age");
+    @Test
+    public void testPolymorphicFieldFromParentToChield() {
+        Assertions.assertThrows(NoSuchFieldException.class, () -> ObjectOperations.getField(ParentBean.class, "age"));
     }
 
     @Test
@@ -58,7 +58,7 @@ public class PolymorphicReflectionTest {
         BeanInfo beanInfo = java.beans.Introspector.getBeanInfo(ParentBean.class);
         for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
         }
-        Assert.assertTrue(true);
+        Assertions.assertTrue(true);
     }
 
     @Test
@@ -67,7 +67,7 @@ public class PolymorphicReflectionTest {
         for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
         }
 
-        Assert.assertTrue(true);
+        Assertions.assertTrue(true);
     }
 
     static class ParentBean {

@@ -16,15 +16,18 @@
  */
 package tools.dynamia.domain;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.domain.jdbc.JdbcHelper;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  *
  * @author Mario A. Serrano Leones
  */
-public class JDBCHelperTest extends TestCase {
+public class JDBCHelperTest {
 
+    @Test
     public void testCreateInParameters() {
         String expected = "(?,?,?,?,?)";
         String result = JdbcHelper.createInParameters(5);

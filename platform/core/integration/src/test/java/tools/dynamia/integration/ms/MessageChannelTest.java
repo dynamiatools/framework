@@ -16,9 +16,9 @@
  */
 package tools.dynamia.integration.ms;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
 import tools.dynamia.integration.ms.listeners.AllMessageListener;
@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class MessageChannelTest {
 
-    @Before
+    @BeforeEach
     public void init() {
         SimpleObjectContainer soc = new SimpleObjectContainer();
         soc.addObject("ml1", new DummyMessageListener());
@@ -50,7 +50,7 @@ public class MessageChannelTest {
         channel.publish(msg);
 
         int listenerCount = (Integer) msg.getHeader(Message.HEADER_LISTENER_COUNT);
-        Assert.assertEquals(2, listenerCount);
+        Assertions.assertEquals(2, listenerCount);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class MessageChannelTest {
         channel.publish(msg);
 
         int listenerCount = (Integer) msg.getHeader(Message.HEADER_LISTENER_COUNT);
-        Assert.assertEquals(1, listenerCount);
+        Assertions.assertEquals(1, listenerCount);
 
     }
 
@@ -72,7 +72,7 @@ public class MessageChannelTest {
 
         int listenerCount = (Integer) msg.getHeader(Message.HEADER_LISTENER_COUNT);
 
-        Assert.assertEquals(1, listenerCount);
+        Assertions.assertEquals(1, listenerCount);
     }
 
     @Test
@@ -95,20 +95,20 @@ public class MessageChannelTest {
         });
 
         service.publish("sales", "Some cool stuff");
-        Assert.assertEquals("Some cool stuff", result.get());
+        Assertions.assertEquals("Some cool stuff", result.get());
 
         service.publish("sales", 10, "promotions");
         service.publish("sales", 20, "promotions");
         service.publish("sales", 30, "promotions");
 
-        Assert.assertEquals(3, promotionsCount.get()); //all messages with topic
-        Assert.assertEquals(1, salesCount.get()); //only the first message without topic
+        Assertions.assertEquals(3, promotionsCount.get()); //all messages with topic
+        Assertions.assertEquals(1, salesCount.get()); //only the first message without topic
 
 
         //cancel subscription
         sub.unsubscribe();
         service.publish("sales", "Another sale");
-        Assert.assertEquals("Some cool stuff", result.get()); //should not change
+        Assertions.assertEquals("Some cool stuff", result.get()); //should not change
     }
 
     @Test
@@ -119,9 +119,9 @@ public class MessageChannelTest {
         service.subscribeText("mixedChannel", content -> textMessageReceived.set(true));
 
         service.publish("mixedChannel", new NumberMessage(123));
-        Assert.assertFalse(textMessageReceived.get());
+        Assertions.assertFalse(textMessageReceived.get());
 
         service.publish("mixedChannel", new TextMessage("Hello"));
-        Assert.assertTrue(textMessageReceived.get());
+        Assertions.assertTrue(textMessageReceived.get());
     }
 }

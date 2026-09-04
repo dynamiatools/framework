@@ -16,7 +16,7 @@
  */
 package tools.dynamia.domain;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.domain.query.BooleanOp;
 import tools.dynamia.domain.query.QueryCondition;
@@ -26,7 +26,7 @@ import tools.dynamia.domain.util.QueryBuilder;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  *

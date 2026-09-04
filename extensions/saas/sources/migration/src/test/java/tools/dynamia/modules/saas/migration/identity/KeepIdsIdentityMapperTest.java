@@ -10,9 +10,9 @@
  */
 package tools.dynamia.modules.saas.migration.identity;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.modules.saas.migration.api.IdentityStrategy;
 
 import java.util.HashMap;
@@ -22,25 +22,25 @@ public class KeepIdsIdentityMapperTest {
 
     private KeepIdsIdentityMapper mapper;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         mapper = new KeepIdsIdentityMapper();
     }
 
     @Test
     public void strategyIsKeepIds() {
-        Assert.assertEquals(IdentityStrategy.KEEP_IDS, mapper.getStrategy());
+        Assertions.assertEquals(IdentityStrategy.KEEP_IDS, mapper.getStrategy());
     }
 
     @Test
     public void mapIdReturnsOriginalId() {
-        Assert.assertEquals(42L, mapper.mapId(42L, String.class));
-        Assert.assertEquals("uuid-123", mapper.mapId("uuid-123", Object.class));
+        Assertions.assertEquals(42L, mapper.mapId(42L, String.class));
+        Assertions.assertEquals("uuid-123", mapper.mapId("uuid-123", Object.class));
     }
 
     @Test
     public void mapIdWithNullReturnsNull() {
-        Assert.assertNull(mapper.mapId(null, String.class));
+        Assertions.assertNull(mapper.mapId(null, String.class));
     }
 
     @Test
@@ -50,11 +50,11 @@ public class KeepIdsIdentityMapperTest {
 
         // KEEP_IDS: the ref ID from the file is the correct ID in the target DB
         Object resolved = mapper.resolveReferenceId(1L, String.class, idMappings);
-        Assert.assertEquals(1L, resolved);
+        Assertions.assertEquals(1L, resolved);
     }
 
     @Test
     public void resolveReferenceIdWithNullRefIdReturnsNull() {
-        Assert.assertNull(mapper.resolveReferenceId(null, String.class, new HashMap<>()));
+        Assertions.assertNull(mapper.resolveReferenceId(null, String.class, new HashMap<>()));
     }
 }

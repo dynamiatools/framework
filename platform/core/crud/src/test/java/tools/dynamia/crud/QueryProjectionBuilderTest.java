@@ -1,7 +1,7 @@
 package tools.dynamia.crud;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.viewers.ViewDescriptor;
@@ -19,7 +19,7 @@ public class QueryProjectionBuilderTest {
         QueryBuilder builder = QueryProjectionBuilder.buildFromViewDescriptor(TestEntity.class, descriptor, new QueryParameters());
         String jpql = builder.toString();
         String expected = "select e.id, e.name, e.date, e.description, e.notes, e.subentity, (sub.name) as subentity_name from tools.dynamia.crud.TestEntity as e";
-        Assert.assertEquals(expected, jpql);
+        Assertions.assertEquals(expected, jpql);
     }
 
     private ViewDescriptor buildDescriptor() {

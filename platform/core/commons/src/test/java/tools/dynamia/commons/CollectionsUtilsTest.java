@@ -16,7 +16,7 @@
  */
 package tools.dynamia.commons;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.commons.collect.CollectionWrapper;
 import tools.dynamia.commons.collect.CollectionsUtils;
 
@@ -24,12 +24,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  *
  * @author Mario A. Serrano Leones
  */
-public class CollectionsUtilsTest extends TestCase {
+public class CollectionsUtilsTest {
 
+    @Test
     public void testCollectionGroup() {
         Collection<String> data = new ArrayList<>();
         for (int i = 0; i < 75; i++) {

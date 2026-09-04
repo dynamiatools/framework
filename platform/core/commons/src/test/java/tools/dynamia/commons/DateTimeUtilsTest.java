@@ -17,11 +17,11 @@
 
 package tools.dynamia.commons;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static tools.dynamia.commons.DateTimeUtils.addDays;
 import static tools.dynamia.commons.DateTimeUtils.addMonths;
 import static tools.dynamia.commons.DateTimeUtils.addYears;

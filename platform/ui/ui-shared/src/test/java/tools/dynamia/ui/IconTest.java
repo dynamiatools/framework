@@ -1,6 +1,6 @@
 package tools.dynamia.ui;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.ui.icons.IconName;
 import tools.dynamia.ui.icons.Icons;
 

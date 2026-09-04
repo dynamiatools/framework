@@ -1,14 +1,14 @@
 package tools.dynamia.integration.reactive;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Integer.valueOf;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static tools.dynamia.integration.reactive.Reactive.*;
 
 /**
@@ -147,16 +147,16 @@ public class ReactiveTest {
         // Initial computation (runs twice: once for initialization, once for effect setup)
         assertEquals(valueOf(0), doubled.get());
         int initialComputes = computeCount.get();
-        assertTrue("Expected at least 1 computation", initialComputes >= 1);
+        assertTrue(initialComputes >= 1, "Expected at least 1 computation");
 
         // Getting again without changes should use cached value
         assertEquals(valueOf(0), doubled.get());
-        assertEquals("Should not recompute when getting cached value", initialComputes, computeCount.get());
+        assertEquals(initialComputes, computeCount.get(), "Should not recompute when getting cached value");
 
         // Changing the ref should trigger recomputation
         count.set(5);
         assertEquals(valueOf(10), doubled.get());
-        assertTrue("Should have recomputed after change", computeCount.get() > initialComputes);
+        assertTrue(computeCount.get() > initialComputes, "Should have recomputed after change");
     }
 
     @Test
@@ -234,13 +234,13 @@ public class ReactiveTest {
     @Test
     public void testRefWithNullValue() {
         Ref<String> nullable = ref(null);
-        Assert.assertNull(nullable.get());
+        Assertions.assertNull(nullable.get());
 
         nullable.set("value");
         assertEquals("value", nullable.get());
 
         nullable.set(null);
-        Assert.assertNull(nullable.get());
+        Assertions.assertNull(nullable.get());
     }
 
     @Test
@@ -290,19 +290,19 @@ public class ReactiveTest {
         });
 
         // Initially uses 'a'
-        assertFalse("Effect should run at least once", captured.isEmpty());
+        assertFalse(captured.isEmpty(), "Effect should run at least once");
         assertEquals("A", captured.getLast());
 
         // Changing 'a' should trigger since it's the active branch
         int sizeBefore = captured.size();
         a.set("A2");
-        assertTrue("Effect should have been triggered", captured.size() > sizeBefore);
+        assertTrue(captured.size() > sizeBefore, "Effect should have been triggered");
         assertEquals("A2", captured.getLast());
 
         // Switch condition to use 'b'
         sizeBefore = captured.size();
         condition.set(false);
-        assertTrue("Effect should have been triggered", captured.size() > sizeBefore);
+        assertTrue(captured.size() > sizeBefore, "Effect should have been triggered");
         assertEquals("B", captured.getLast());
     }
 

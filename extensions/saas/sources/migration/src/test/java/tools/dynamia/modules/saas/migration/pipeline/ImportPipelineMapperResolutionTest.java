@@ -13,12 +13,14 @@ package tools.dynamia.modules.saas.migration.pipeline;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import jakarta.persistence.EntityManagerFactory;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import tools.dynamia.modules.saas.migration.api.AccountImportOptions;
 import tools.dynamia.modules.saas.migration.api.IdentityMapper;
 import tools.dynamia.modules.saas.migration.api.IdentityStrategy;
@@ -50,7 +52,8 @@ import static org.mockito.Mockito.when;
  * {@code importTenant} with a minimal valid ZIP stream (manifest only, no entities)
  * and observing behaviour.
  */
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class ImportPipelineMapperResolutionTest {
 
     @Mock private EntityManagerFactory emf;
@@ -58,7 +61,7 @@ public class ImportPipelineMapperResolutionTest {
     private AccountMigrationProperties properties;
     private ObjectMapper objectMapper;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         properties = new AccountMigrationProperties();
         objectMapper = JsonMapper.builder()

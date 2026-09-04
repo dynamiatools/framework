@@ -16,8 +16,8 @@
  */
 package tools.dynamia.web.util;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
@@ -33,7 +33,7 @@ public class HttpUtilsTest {
 
         String result = HttpUtils.formatRequestParams(params);
 
-        Assert.assertTrue(result.contains("id=123"));
-        Assert.assertTrue(result.contains("name=mario"));
+        Assertions.assertTrue(result.contains("id=123"));
+        Assertions.assertTrue(result.contains("name=mario"));
     }
 }

@@ -16,8 +16,8 @@
  */
 package tools.dynamia.actions;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ public class ActionCommandTest {
 
         List<Action> actions = ActionLoader.loadActionCommands(form);
         for (Action action : actions) {
-            Assert.assertTrue(action instanceof FastAction);
+            Assertions.assertTrue(action instanceof FastAction);
 
             if (action.getName().equals("sum")) {
                 FastAction fastAction = (FastAction) action;
@@ -41,7 +41,7 @@ public class ActionCommandTest {
             }
         }
 
-        Assert.assertEquals(expectedResult, form.getR());
+        Assertions.assertEquals(expectedResult, form.getR());
 
     }
 
@@ -55,17 +55,17 @@ public class ActionCommandTest {
 
         List<Action> actions = ActionLoader.loadActionCommands(form);
         for (Action action : actions) {
-            Assert.assertTrue(action instanceof FastAction);
+            Assertions.assertTrue(action instanceof FastAction);
 
             if (action.getName().equals("Subtract")) {
                 FastAction fastAction = (FastAction) action;
-                Assert.assertEquals("minus", fastAction.getImage());
-                Assert.assertNull(fastAction.getRenderer());
+                Assertions.assertEquals("minus", fastAction.getImage());
+                Assertions.assertNull(fastAction.getRenderer());
                 fastAction.execute();
             }
         }
 
-        Assert.assertEquals(expectedResult, form.getR());
+        Assertions.assertEquals(expectedResult, form.getR());
 
     }
 

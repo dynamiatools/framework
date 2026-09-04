@@ -16,9 +16,9 @@
  */
 package tools.dynamia.integration.ms;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.integration.Containers;
@@ -32,7 +32,7 @@ public class MessageCallbakTest {
     private static final String CALLBACK_CHANNEL = "calcClient";
     private static final String HEADER_EXPECTED_RESULT = "expectedResult";
 
-    @Before
+    @BeforeEach
     public void init() {
         SimpleObjectContainer soc = new SimpleObjectContainer();
         ResultMessageListener resultListener = new ResultMessageListener();
@@ -121,7 +121,7 @@ public class MessageCallbakTest {
                 int result = (int) evt.message().getContent();
 
                 String description = (String) evt.message().getHeader(Message.HEADER_DESCRIPTION);
-                Assert.assertEquals(expectedResult, result);
+                Assertions.assertEquals(expectedResult, result);
                 messagesWithoutResult.remove(correlationId);
             }
         }

@@ -1,7 +1,7 @@
 package tools.dynamia.commons;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -12,13 +12,13 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class FormattersTest {
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         Locale.setDefault(Locale.US);
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));

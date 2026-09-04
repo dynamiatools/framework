@@ -16,7 +16,7 @@
  */
 package tools.dynamia.domain;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.domain.query.BooleanOp;
 import tools.dynamia.domain.query.Parameter;
 import tools.dynamia.domain.query.QueryConditions;
@@ -25,7 +25,7 @@ import tools.dynamia.domain.util.QueryBuilder;
 
 import java.util.TreeMap;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static tools.dynamia.domain.query.QueryConditions.eq;
 import static tools.dynamia.domain.query.QueryConditions.in;
 import static tools.dynamia.domain.query.QueryParameters.with;

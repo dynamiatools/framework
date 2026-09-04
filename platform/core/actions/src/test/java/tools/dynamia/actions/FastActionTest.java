@@ -16,8 +16,8 @@
  */
 package tools.dynamia.actions;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class FastActionTest {
 
@@ -30,7 +30,7 @@ public class FastActionTest {
         FastAction changeResultAction = new FastAction("ChangeResult", evt -> result = 1);
         changeResultAction.execute();
 
-        Assert.assertEquals(expected, result);
+        Assertions.assertEquals(expected, result);
 
     }
 }

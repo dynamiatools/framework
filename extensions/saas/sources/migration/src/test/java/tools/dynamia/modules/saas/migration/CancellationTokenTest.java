@@ -10,8 +10,8 @@
  */
 package tools.dynamia.modules.saas.migration;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import tools.dynamia.modules.saas.migration.api.CancellationToken;
 
 import java.util.concurrent.CountDownLatch;
@@ -23,8 +23,8 @@ public class CancellationTokenTest {
     @Test
     public void newTokenIsNotCancelled() {
         CancellationToken token = CancellationToken.active();
-        Assert.assertFalse(token.isCancelled());
-        Assert.assertNull(token.getReason());
+        Assertions.assertFalse(token.isCancelled());
+        Assertions.assertNull(token.getReason());
     }
 
     @Test
@@ -32,8 +32,8 @@ public class CancellationTokenTest {
         CancellationToken token = CancellationToken.active();
         token.cancel();
 
-        Assert.assertTrue(token.isCancelled());
-        Assert.assertNotNull(token.getReason());
+        Assertions.assertTrue(token.isCancelled());
+        Assertions.assertNotNull(token.getReason());
     }
 
     @Test
@@ -41,8 +41,8 @@ public class CancellationTokenTest {
         CancellationToken token = CancellationToken.active();
         token.cancel("Timeout exceeded");
 
-        Assert.assertTrue(token.isCancelled());
-        Assert.assertEquals("Timeout exceeded", token.getReason());
+        Assertions.assertTrue(token.isCancelled());
+        Assertions.assertEquals("Timeout exceeded", token.getReason());
     }
 
     @Test
@@ -51,8 +51,8 @@ public class CancellationTokenTest {
         token.cancel("first");
         token.cancel("second");
 
-        Assert.assertTrue(token.isCancelled());
-        Assert.assertEquals("second", token.getReason());
+        Assertions.assertTrue(token.isCancelled());
+        Assertions.assertEquals("second", token.getReason());
     }
 
     @Test
@@ -70,6 +70,6 @@ public class CancellationTokenTest {
         seen.set(token.isCancelled());
         t.join(1000);
 
-        Assert.assertTrue("Cancel from another thread must be visible", seen.get());
+        Assertions.assertTrue(seen.get(), "Cancel from another thread must be visible");
     }
 }
