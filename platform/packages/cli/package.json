@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/cli",
-  "version": "26.8.0",
+  "version": "26.9.0",
   "description": "Dynamia Tools CLI — Scaffold new Dynamia Platform projects",
   "keywords": [
     "dynamia",

@@ -28,6 +28,16 @@ export {
   matchesActionIdentity,
 } from './actions/crudActionUtils.js';
 
+// Drives a FlowRemoteAction to completion (see docs/design/SERVER_DRIVEN_ACTION_FLOWS.md §6).
+export { runActionFlow } from './actions/runActionFlow.js';
+export type { FlowStepHandlers } from './actions/runActionFlow.js';
+
+// Action-aware save/delete dispatch shared by useCrudPage — reuse it if you're driving a
+// standalone <Crud> (i.e. without useCrudPage) and want the same "use the entity's registered
+// CrudRemoteAction/FlowRemoteAction when present, else plain REST" behavior.
+export { dispatchCrudSave, dispatchCrudDelete } from './actions/crudActionDispatch.js';
+export type { CrudActionDispatchContext } from './actions/crudActionDispatch.js';
+
 // ── Client actions (re-exported from ui-core for convenience) ──────────────
 export { ClientActionRegistry, registerClientAction, isClientActionApplicable } from '@dynamia-tools/ui-core';
 export type { ClientAction, ClientActionContext } from '@dynamia-tools/ui-core';

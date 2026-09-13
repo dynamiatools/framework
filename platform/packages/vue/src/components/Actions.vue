@@ -37,13 +37,7 @@ import { useToast } from '../composables/useToast.js';
 import { useInput } from '../composables/useInput.js';
 import { useFormDialog } from '../composables/useFormDialog.js';
 import { runActionFlow } from '../actions/runActionFlow.js';
-import {
-  isCancelCrudAction,
-  isCreateCrudAction,
-  isDeleteCrudAction,
-  isEditCrudAction,
-  isSaveCrudAction,
-} from '../actions/crudActionUtils.js';
+import { isDeleteCrudAction, isSaveCrudAction } from '../actions/crudActionUtils.js';
 
 const props = withDefaults(defineProps<{
   /** List of resolved actions to display */
@@ -183,24 +177,18 @@ async function tryHandleClientAction(
   return true;
 }
 
+// New/Edit/Cancel used to be hardcoded here too — they're now registered as real ClientActions
+// (see ui-core's registerBuiltinCrudActions, wired by the DynamiaVue plugin) and resolved by
+// tryHandleClientAction above, one step earlier in handleTrigger, so they never reach this
+// function anymore. Save/Delete stay here: they're not ClientActions on purpose — they have real
+// server-side CrudRemoteAction/FlowRemoteAction counterparts and must keep going through
+// props.view.save()/delete(), which route to useCrudPage's action-aware handlers.
 async function tryHandleCrudActionLocally(
   action: ActionMetadata,
   request: ActionExecutionRequest,
 ): Promise<boolean> {
   if (!(props.view instanceof CrudView)) {
     return false;
-  }
-
-  if (isCreateCrudAction(action)) {
-    props.view.startCreate();
-    return true;
-  }
-
-  if (isEditCrudAction(action)) {
-    const entity = request.data ?? props.view.getActionData('READ');
-    if (entity == null) return false;
-    props.view.startEdit(entity);
-    return true;
   }
 
   if (isDeleteCrudAction(action)) {
@@ -212,11 +200,6 @@ async function tryHandleCrudActionLocally(
 
   if (isSaveCrudAction(action)) {
     await props.view.save();
-    return true;
-  }
-
-  if (isCancelCrudAction(action)) {
-    props.view.cancelEdit();
     return true;
   }
 

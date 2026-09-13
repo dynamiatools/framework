@@ -2,7 +2,7 @@
 
 import { ref, shallowRef, onMounted } from 'vue';
 import type { Ref } from 'vue';
-import type { ActionExecutionRequest, NavigationNode, DynamiaClient } from '@dynamia-tools/sdk';
+import type { NavigationNode, DynamiaClient } from '@dynamia-tools/sdk';
 import type { TreeNode } from '@dynamia-tools/ui-core';
 import { CrudPageResolver } from '@dynamia-tools/ui-core';
 import { VueCrudView } from '../views/VueCrudView.js';
@@ -10,8 +10,7 @@ import { useConfirm } from './useConfirm.js';
 import { useToast } from './useToast.js';
 import { useInput } from './useInput.js';
 import { useFormDialog } from './useFormDialog.js';
-import { runActionFlow } from '../actions/runActionFlow.js';
-import { isDeleteCrudAction, isSaveCrudAction } from '../actions/crudActionUtils.js';
+import { dispatchCrudDelete, dispatchCrudSave } from '../actions/crudActionDispatch.js';
 
 /** Options for the {@link useCrudPage} composable */
 export interface UseCrudPageOptions {
@@ -123,23 +122,21 @@ export function useCrudPage(options: UseCrudPageOptions) {
       // "save" CrudRemoteAction (see docs/design/SERVER_DRIVEN_ACTION_FLOWS.md §7), drive it
       // through the Actions framework (ActionFilter hooks, optional confirm flow) instead of
       // calling the plain REST verb directly. An entity with no such action behaves exactly as
-      // before — this is fully opt-in per entity.
-      const saveAction = context.entityMetadata?.actions?.find(isSaveCrudAction);
+      // before — this is fully opt-in per entity. Dispatch logic lives in crudActionDispatch.ts
+      // so other CRUD-invocation surfaces (e.g. a standalone <Crud>) can reuse it.
+      const dispatchCtx = {
+        client,
+        api,
+        entityMetadata: context.entityMetadata,
+        entityClass: context.entityClass,
+        handlers: { confirm, showToast, prompt, showFormDialog },
+      };
       crudView.on('save', (payload) => {
         const { mode, data } = payload as { mode: 'create' | 'edit'; data: Record<string, unknown> };
         const persist = async () => {
           crudView.isLoading.value = true;
           try {
-            if (saveAction) {
-              const request: ActionExecutionRequest = { data, dataType: context.entityClass };
-              await runActionFlow(client, saveAction, request, { confirm, showToast, prompt, showFormDialog }, context.entityClass);
-            } else if (mode === 'create') {
-              await api.create(data);
-            } else {
-              const id = data['id'] as string | number | undefined;
-              if (id == null) throw new Error(`Cannot update entity: "id" field is missing`);
-              await api.update(id, data);
-            }
+            await dispatchCrudSave(dispatchCtx, mode, data);
             await crudView.dataSetView.load();
           } catch (e) {
             crudView.errorMessage.value = String(e);
@@ -152,7 +149,6 @@ export function useCrudPage(options: UseCrudPageOptions) {
 
       // 6. Wire delete handler — same action-aware pattern as save (typically resolves to
       // DeleteFlowRemoteAction, which confirms before deleting).
-      const deleteAction = context.entityMetadata?.actions?.find(isDeleteCrudAction);
       crudView.on('delete', (entity) => {
         const rec = entity as Record<string, unknown>;
         const id = rec['id'] as string | number | undefined;
@@ -160,12 +156,7 @@ export function useCrudPage(options: UseCrudPageOptions) {
           crudView.isLoading.value = true;
           try {
             if (id == null) throw new Error(`Cannot delete entity: "id" field is missing`);
-            if (deleteAction) {
-              const request: ActionExecutionRequest = { dataId: String(id), dataType: context.entityClass };
-              await runActionFlow(client, deleteAction, request, { confirm, showToast, prompt, showFormDialog }, context.entityClass);
-            } else {
-              await api.delete(id);
-            }
+            await dispatchCrudDelete(dispatchCtx, id);
             await crudView.dataSetView.load();
           } catch (e) {
             crudView.errorMessage.value = String(e);

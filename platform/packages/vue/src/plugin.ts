@@ -2,7 +2,7 @@
 
 import type { App } from 'vue';
 import type { DynamiaClient } from '@dynamia-tools/sdk';
-import { ActionRendererRegistry, ViewRendererRegistry, ViewTypes } from '@dynamia-tools/ui-core';
+import { ActionRendererRegistry, ViewRendererRegistry, ViewTypes, registerBuiltinCrudActions } from '@dynamia-tools/ui-core';
 import { DYNAMIA_CLIENT_KEY } from './composables/useDynamiaClient.js';
 
 /**
@@ -64,6 +64,11 @@ export const DynamiaVue = {
     if (options?.client) {
       app.provide(DYNAMIA_CLIENT_KEY, options.client);
     }
+
+    // Register built-in New/Edit/Cancel ClientActions (see docs/design/SERVER_DRIVEN_ACTION_FLOWS.md
+    // §7.5 and ui-core's builtinCrudActions.ts) before anything app-specific can register its own
+    // overrides for the same ids.
+    registerBuiltinCrudActions();
 
     // Register view renderers
     ViewRendererRegistry.register(ViewTypes.Form, new VueFormRenderer());

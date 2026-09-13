@@ -63,6 +63,7 @@ export {
 // ── Client actions ────────────────────────────────────────────────────────────
 export { ClientActionRegistry, registerClientAction, isClientActionApplicable } from './actions/ClientAction.js';
 export type { ClientAction, ClientActionContext, ClientActionRegistryClass } from './actions/ClientAction.js';
+export { registerBuiltinCrudActions } from './actions/builtinCrudActions.js';
 export { FlowStepRendererRegistry, registerFlowStepRenderer } from './actions/FlowStepRenderer.js';
 export type { FlowStepRenderer, FlowStepRendererRegistryClass } from './actions/FlowStepRenderer.js';
 
