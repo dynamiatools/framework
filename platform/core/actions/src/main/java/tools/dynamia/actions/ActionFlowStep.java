@@ -35,6 +35,8 @@ import java.util.Map;
  * <p>
  * See {@code docs/design/SERVER_DRIVEN_ACTION_FLOWS.md} for the full protocol design.
  *
+ * @apiNote <b>Experimental</b>, see {@link FlowRemoteAction}. {@link #redirect} and {@link #call} are the
+ * least settled: the Vue client treats {@code REDIRECT} as terminal and rejects {@code awaitReturn = true}.
  * @author Mario A. Serrano Leones
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -94,7 +96,10 @@ public class ActionFlowStep implements Serializable {
         return step;
     }
 
-    /** The client navigates to {@code url}. */
+    /**
+     * The client navigates to {@code url} and the flow ends there (relative or http(s) URLs only).
+     * <b>Experimental:</b> {@code awaitReturn = true} is rejected by the Vue client for now.
+     */
     public static ActionFlowStep redirect(String url, boolean awaitReturn) {
         var step = new ActionFlowStep();
         step.type = ActionFlowStepType.REDIRECT;
@@ -107,7 +112,11 @@ public class ActionFlowStep implements Serializable {
         return redirect(url, false);
     }
 
-    /** The client invokes {@code actionId} first and feeds its response back as this flow's next answer. */
+    /**
+     * The client invokes {@code actionId} first (add {@code "className"} to {@code data} for an entity-scoped
+     * action; other entries become the called action's request data) and resumes this flow with the called
+     * action's response as the answer. <b>Experimental.</b>
+     */
     public static ActionFlowStep call(String actionId, Map<String, Object> data) {
         var step = new ActionFlowStep();
         step.type = ActionFlowStepType.CALL;

@@ -56,6 +56,43 @@ public class ActionFlowsTest {
         }
     }
 
+    /** CALLs another action, then reports the nested response it was resumed with plus what it remembered. */
+    static class CallThenReportAction extends AbstractRemoteAction implements FlowRemoteAction {
+        @Override
+        public ActionFlowStep start(ActionFlowContext ctx) {
+            ctx.put("remembered", "before-call");
+            return ActionFlowStep.call("lookup", Map.of("q", "abc"));
+        }
+
+        @Override
+        public ActionFlowStep resume(ActionFlowContext ctx, Object answer) {
+            Map<?, ?> nested = (Map<?, ?>) answer;
+            return ActionFlowStep.done(ctx.get("remembered", String.class) + ":" + nested.get("data"));
+        }
+    }
+
+    @Test
+    public void callStepCarriesTheTargetActionAndPayloadAndSurvivesTheRoundTrip() {
+        var action = new CallThenReportAction();
+        var first = ActionFlows.dispatch(action, new ActionExecutionRequest());
+
+        assertEquals(ActionFlowStepType.CALL, first.getFlow().getType());
+        assertEquals(Map.of("action", "lookup", "q", "abc"), first.getFlow().getData());
+        assertNotNull(first.getFlow().getResumeToken());
+
+        var resumeRequest = new ActionExecutionRequest(Map.of("status", "SUCCESS", "data", "nested-result"));
+        resumeRequest.setResumeToken(first.getFlow().getResumeToken());
+        ActionExecutionResponse second = ActionFlows.dispatch(action, resumeRequest);
+
+        assertEquals("before-call:nested-result", second.getData());
+    }
+
+    @Test
+    public void redirectStepCarriesUrlAndAwaitReturnFlag() {
+        assertEquals(Map.of("url", "/books/1", "awaitReturn", false), ActionFlowStep.redirect("/books/1").getData());
+        assertEquals(Map.of("url", "/x", "awaitReturn", true), ActionFlowStep.redirect("/x", true).getData());
+    }
+
     @Test
     public void firstCallReturnsAPendingConfirmStepWithAResumeToken() {
         var action = new ConfirmThenEchoAction();

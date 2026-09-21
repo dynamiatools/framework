@@ -44,6 +44,8 @@
   "scripts": {
     "build": "vite build",
     "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "clean": "rm -rf dist"
   },
   "dependencies": {
@@ -61,6 +63,7 @@
     "typescript": "^6.0.3",
     "vite": "^8.2.2",
     "vite-plugin-dts": "^5.1.0",
+    "vitest": "^4.1.11",
     "vue": "^3.5.42",
     "vue-tsc": "^2.2.12"
   },

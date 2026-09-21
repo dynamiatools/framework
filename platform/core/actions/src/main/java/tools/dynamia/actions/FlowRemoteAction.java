@@ -58,6 +58,8 @@ package tools.dynamia.actions;
  * }
  * }</pre>
  *
+ * @apiNote <b>Experimental.</b> The flow protocol (this interface, {@link ActionFlowStep}, {@link ActionFlows},
+ * the {@code resumeToken} wire format) may still change without a deprecation cycle.
  * @author Mario A. Serrano Leones
  */
 public interface FlowRemoteAction extends RemoteAction {

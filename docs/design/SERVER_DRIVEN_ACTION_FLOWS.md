@@ -3,9 +3,14 @@
 **Status:** Phases 0–4 implemented (commits `0ddfbe66` "Phases 0-3" and `d03b14c5` "Phase 4", Aug 2026), plus
 follow-up hardening: generic `CrudState` enforcement (#83, closed — see §7.6 point 2), `INPUT`/`DIALOG`/
 `CUSTOM` flow step renderers on the Vue side (#81, scoped down to `REDIRECT`/`CALL` — see §6), and the
-422-vs-406 validation-error shape reconciliation (#82, closed — see §7.6 point 3). Tracked in #79. Only
-remaining gap: `REDIRECT`/`CALL` step semantics (#81, see §9). See inline notes throughout (§4, §6, §7.6,
-§8, §9) for the delta between this design and what actually shipped.
+422-vs-406 validation-error shape reconciliation (#82, closed — see §7.6 point 3), and `REDIRECT`/`CALL`
+step renderers (#81, **experimental** — see §6 and §9). Tracked in #79. See inline notes throughout (§4, §6,
+§7.6, §8, §9) for the delta between this design and what actually shipped.
+
+> **Experimental.** The whole flow protocol (`FlowRemoteAction`, `ActionFlowStep`, `resumeToken`, the
+> `runActionFlow` client loop) is experimental: it's implemented and tested, but has had limited real-world
+> use and its API/wire format may still change without a deprecation cycle. `REDIRECT`/`CALL` are the least
+> settled part (see §6 for the semantics chosen and what's deliberately unsupported).
 **Scope:** `platform/core/actions`, `platform/core/crud`, `platform/app` (controller), `platform/packages/sdk`, `platform/packages/ui-core`, `platform/packages/vue`.
 **Author context:** design discussion between Mario A. Serrano Leones and Claude, July 2026.
 
@@ -320,9 +325,22 @@ async function runFlow(action: ActionMetadata, request: ActionExecutionRequest) 
 > - `CUSTOM` → `FlowStepRendererRegistry`/`registerFlowStepRenderer` (ui-core), the registry this
 >   paragraph describes, keyed by `step.data.component` — same shape as `ClientActionRegistry`.
 >
-> `REDIRECT`/`CALL` are still not wired — deliberately: their semantics (does the client resume the
-> *same* flow after a redirect/nested call, or are they always terminal?) are still an open question, see
-> §9. Implementing a renderer ahead of that decision would bake in an answer by accident.
+> **Update (#81, experimental): `REDIRECT`/`CALL` are wired, with deliberately narrow semantics.** They need
+> the loop's control flow rather than a plain renderer, so they live in `runActionFlow`'s `driveFlow`:
+> - `REDIRECT` is **terminal**. The client navigates (`handlers.navigate`, default
+>   `window.location.assign`) and the loop ends; `runActionFlow` resolves with the response carrying the
+>   `REDIRECT` step. Only relative and `http(s)` URLs are followed (`javascript:`/`data:` are refused).
+>   `data.awaitReturn = true` is **rejected** with an explicit error, not silently ignored: resuming a flow
+>   after the page navigates away needs the token persisted somewhere and an app-level "on return" hook,
+>   and no real use case has asked for it yet.
+> - `CALL` runs `data.action` **inside the same loop** (so the called action can itself be a flow), against
+>   the global endpoint, or the entity endpoint when `data.className` is present. Remaining `data`
+>   entries become the nested request's `data`. When the nested flow reaches `DONE`, the calling flow
+>   resumes with the nested `ActionExecutionResponse` **minus its `flow`** as the answer. Nesting is capped
+>   at 5 levels to fail fast on a runaway server-side loop. A nested flow that ends in `REDIRECT` ends the
+>   outer flow too.
+>
+> The server side needed no change: `ActionFlowStep.redirect(...)`/`call(...)` already existed.
 
 ---
 
@@ -503,8 +521,10 @@ entity, not a behavior change for existing apps.
    contract, approved explicitly rather than shipped as a silent side effect of other work. See §7.6's
    updated note for what changed and why no SDK/frontend changes were needed.
 
-**Not done, no phase currently owns it:** `REDIRECT`/`CALL` step renderers/semantics (§6, §9, tracked as
-#81).
+9. **`REDIRECT`/`CALL` (#81)** — ✅ done, **experimental**. Semantics in §6. Unit-tested against a mocked
+   client (`runActionFlow.test.ts`); not yet exercised by a real `FlowRemoteAction` in a browser.
+
+**Not done, no phase currently owns it:** `REDIRECT` with `awaitReturn` (resume after navigating away).
 
 ---
 
@@ -513,11 +533,10 @@ entity, not a behavior change for existing apps.
 - **ZK/`LocalAction` parity**: deliberately out of scope, and settled — see §7.1. ZK actions already have full
   synchronous UI power (§1) and gain nothing from this protocol; forcing them through it would be a
   regression, not an improvement.
-- **`REDIRECT`/`CALL` step semantics**: still unresolved — this is now the *only* remaining gap in step
-  coverage (see #81). `runActionFlow` has no renderer for either type (§6), so no `FlowRemoteAction` can
-  use them yet. Needs a real use case to pin down whether the client resumes the *same* flow after a
-  redirect/nested call, or whether those are always terminal, before a renderer is built — implementing
-  one ahead of that decision would bake in an answer by accident.
+- **`REDIRECT`/`CALL` step semantics**: ✅ provisionally resolved (#81, experimental) — `REDIRECT` is
+  terminal, `CALL` nests and resumes the caller with the nested response; see §6. **Still open:**
+  `REDIRECT` with `awaitReturn: true` (currently rejected). Needs a real use case: where the pending
+  `resumeToken` lives across a page navigation, and what triggers the resume on return.
 - **`INPUT`/`DIALOG`/`CUSTOM` step renderers**: ✅ resolved (#81) — see §6's updated note.
 - **Timeout/expiry policy for `resumeToken`**: ✅ resolved — 10-minute default, configurable via
   `dynamia.actions.flow.token-ttl` (§4).
