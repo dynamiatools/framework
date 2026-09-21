@@ -1,33 +1,48 @@
-@import "tailwindcss";
+/* theme.css (not style.css): same tokens/utilities as the package's stylesheet, minus the Google Fonts
+   request — this app is served by the Spring Boot backend and must work on intranets/strict CSP. */
+@import '@dynamia-tools/tailadmin-vue/theme.css';
+/* Tailwind v4 doesn't scan node_modules: point it at the package's source so the classes used in its
+   .vue templates get generated. */
+@source '../../node_modules/@dynamia-tools/tailadmin-vue/src';
 
 /*
- * Skins: DynamicalVueTemplate.java registers "blue" (default), "dynamia" and "dark" — each
- * maps to one of the attribute blocks below via `data-skin` on <html> (see src/main.ts /
- * src/login.ts). Add a new skin in both places together.
+ * Skins: DynamicalVueTemplate.java registers "blue" (default), "dynamia" and "dark" — each maps to
+ * one of the attribute blocks below via `data-skin` on <html> (see lib/useSkin.ts / src/login.ts).
+ * Add a new skin in both places together.
  *
- * Shared by both bundles (app shell + login) — keep this file free of anything the login page
- * doesn't need (icon fonts, .dynamia-* component rules); see app.css for those.
+ * A skin is just the brand color: everything else comes from @dynamia-tools/tailadmin-vue. The
+ * package's `brand-*` palette is derived from `--skin-primary` below, so its components (sidebar,
+ * buttons, focus rings...) follow the skin. "dark" is the blue brand + the package's dark mode
+ * (`html.dark`, toggled from lib/useSkin.ts), not a separate palette.
+ *
+ * Shared by both bundles (app shell + login) — keep it free of anything the login page doesn't
+ * need (icon fonts, .dynamia-* component rules); see app.css for those.
  */
 :root {
   --skin-primary: #2563eb;
-  --skin-primary-soft: #2563eb26;
   --skin-primary-fg: #ffffff;
 }
 
 [data-skin='dynamia'] {
   --skin-primary: #00709c;
-  --skin-primary-soft: #00709c26;
-  --skin-primary-fg: #ffffff;
 }
 
 [data-skin='dark'] {
-  --skin-primary: #1e293b;
-  --skin-primary-soft: #1e293b40;
-  --skin-primary-fg: #e2e8f0;
+  --skin-primary: #3b82f6;
 }
 
-html,
-body,
-#app {
-  height: 100%;
+:root {
+  --skin-primary-soft: color-mix(in oklab, var(--skin-primary) 15%, transparent);
+
+  --color-brand-25: color-mix(in oklab, var(--skin-primary) 4%, white);
+  --color-brand-50: color-mix(in oklab, var(--skin-primary) 8%, white);
+  --color-brand-100: color-mix(in oklab, var(--skin-primary) 16%, white);
+  --color-brand-200: color-mix(in oklab, var(--skin-primary) 32%, white);
+  --color-brand-300: color-mix(in oklab, var(--skin-primary) 55%, white);
+  --color-brand-400: color-mix(in oklab, var(--skin-primary) 78%, white);
+  --color-brand-500: var(--skin-primary);
+  --color-brand-600: color-mix(in oklab, var(--skin-primary) 88%, black);
+  --color-brand-700: color-mix(in oklab, var(--skin-primary) 74%, black);
+  --color-brand-800: color-mix(in oklab, var(--skin-primary) 60%, black);
+  --color-brand-900: color-mix(in oklab, var(--skin-primary) 46%, black);
 }

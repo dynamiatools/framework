@@ -4,11 +4,20 @@ Vue 3 + Tailwind CSS 4 application template for DynamiaTools, in the same enterp
 as [theme-dynamical](../theme-dynamical) (sidebar navigation, top bar, centered content, footer),
 but with the entire UI client-rendered — no ZK, no server-side view rendering.
 
+The UI shell (layout, sidebar, header, user menu, dark mode, login layout) is not written here: this
+theme is a **client of [`@dynamia-tools/tailadmin-vue`](https://github.com/dynamiatools/tailadmin-vue-template)**
+and uses its components as-is. What lives in this theme is only what's specific to Dynamia — the
+navigation tree → menu mapping, `CrudPage`/embed rendering, the flow-step hosts, skins and login.
+
 ## Features
 
-- 3 skins available (Blue, Dynamia, Dark), same `ApplicationTemplate`/skin contract as every other theme
+- 3 skins available (Blue, Dynamia, Dark), same `ApplicationTemplate`/skin contract as every other theme.
+  A skin is the brand color (the package's `brand-*` palette is derived from it); **Dark** is the Blue brand
+  plus the package's dark mode, and stays in sync with the header's theme toggle
 - Native login page (`POST /login/json`, session + `DYNAMIA_JWT` cookie, no full-page reload)
-- Sidebar + top bar + content + footer enterprise shell, built with `@dynamia-tools/vue` + Tailwind CSS
+- Sidebar + header + content + footer shell from `@dynamia-tools/tailadmin-vue` (`AdminLayout`,
+  `AppSidebar`, `AppHeader`, `UserMenu`, `PageBreadcrumb`), with collapsible sidebar and dark mode
+- Deep links: pages are routed by their navigation path with hash history (`/#/library/books`)
 - **CRUD pages** (`NavigationNode.type === "CrudPage"`) render through `<DynamiaCrudPage>` (full
   client-side CRUD, no iframe)
 - **Every other page type** (`Page`, `ExternalPage`, `ConfigPage`, …) renders through
@@ -84,12 +93,32 @@ app shell like `/page/{path}` would. This only works when the running app actual
 classpath (this theme itself doesn't) — an app with zero ZK views has no fallback and should point
 every non-CrudPage `file` at a real HTTP resource instead.
 
+### How it uses `@dynamia-tools/tailadmin-vue`
+
+The package is published as raw, unbuilt source, so the frontend wires four things up (all in
+`sources/src/main/frontend`):
+
+| What | Where |
+|------|-------|
+| `theme.css` (not `style.css`: no Google Fonts request) + `@source` so Tailwind scans the package's `.vue` files | `src/styles/base.css` |
+| Its layout components need a `vue-router` instance | `src/router.ts` (one catch-all route; `AppShell.vue` resolves the path to a navigation node) |
+| Its layouts reference `/images/logo/*` and `/images/user/*` | `vite.config.ts` → `publicDir` points at the package's own `public/` |
+| `vue-tsc` needs to type its `.vue` imports | `src/vue.shims.d.ts` |
+
+`src/lib/navMenu.ts` maps the Dynamia navigation tree onto the package's `MenuGroup` model
+(Module → section, PageGroup → submenu, Page → item).
+
+Known limitations of the package (not worked around here): `UserMenu` hardcodes its
+"Edit profile / Account settings / Support" entries (they link to a `/profile` route this app doesn't
+have), and the header's theme toggler can't be hidden.
+
 ## Frontend development
 
 ```bash
 cd sources/src/main/frontend
 pnpm install
 pnpm dev       # Vite dev server, proxies /api, /login, /logout to localhost:8080
+               # (DYNAMIA_BACKEND=http://localhost:8484 pnpm dev for another backend)
 pnpm typecheck
 ```
 

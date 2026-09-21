@@ -3,6 +3,7 @@ import { DynamiaVue } from '@dynamia-tools/vue';
 import { registerDynamiaEmbed } from '@dynamia-tools/ui-core/embed';
 import { registerFlowStepRenderer } from '@dynamia-tools/ui-core';
 import App from './App.vue';
+import { router } from './router.js';
 import { client } from './lib/client.js';
 import { askStarRating } from './lib/starRatingManager.js';
 import './styles/app.css';
@@ -14,5 +15,6 @@ registerDynamiaEmbed();
 registerFlowStepRenderer('star-rating', step => askStarRating(step.data));
 
 const app = createApp(App);
+app.use(router);
 app.use(DynamiaVue, { client });
 app.mount('#app');

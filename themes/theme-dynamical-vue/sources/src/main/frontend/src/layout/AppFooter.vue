@@ -1,5 +1,5 @@
 <template>
-  <footer class="flex items-center justify-between border-t border-slate-200 bg-white px-4 py-2 text-xs text-slate-400">
+  <footer class="mt-6 flex items-center justify-between border-t border-gray-200 pt-4 text-xs text-gray-400 dark:border-gray-800 dark:text-gray-500">
     <span>{{ appInfo?.name ?? 'Dynamia' }}<template v-if="appInfo?.version"> · v{{ appInfo.version }}</template></span>
     <span>
       Powered by
