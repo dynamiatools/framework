@@ -90,7 +90,7 @@
                 this module (target/node), it does not touch any Node/pnpm already on the PATH.
               - corepack "pnpm install": installs frontend dependencies (pnpm version is read
                 from src/main/frontend/package.json's "packageManager" field).
-              - corepack "pnpm --filter theme-dynamical-vue-frontend^... run build": builds the workspace packages this frontend
+              - corepack "pnpm run build" filtered to this frontend's workspace deps: builds the workspace packages this frontend
                 depends on (@dynamia-tools/sdk, ui-core, vue). They resolve to their gitignored `dist/`
                 outputs, which don't exist on a clean checkout (CI) — without this step the vite build
                 fails with "failed to resolve import @dynamia-tools/vue". pnpm builds them in
