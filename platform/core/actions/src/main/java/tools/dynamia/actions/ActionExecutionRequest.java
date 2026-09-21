@@ -83,6 +83,19 @@ public class ActionExecutionRequest {
     private String dataName;
 
     /**
+     * Correlation id for a {@link FlowRemoteAction} flow instance. Absent on the first request; echoed
+     * back from the previous {@link ActionExecutionResponse}'s {@code flow.flowId} on every continuation.
+     */
+    private String flowId;
+
+    /**
+     * Opaque, signed continuation token for a {@link FlowRemoteAction} flow — present only on requests
+     * that resume a flow (echoed back verbatim from the previous response's {@code flow.resumeToken}).
+     * Absent/null means "start a new flow" ({@link FlowRemoteAction#start}).
+     */
+    private String resumeToken;
+
+    /**
      * Default constructor.
      */
     public ActionExecutionRequest() {
@@ -203,5 +216,41 @@ public class ActionExecutionRequest {
      */
     public void setDataName(String dataName) {
         this.dataName = dataName;
+    }
+
+    /**
+     * Returns the {@link FlowRemoteAction} flow correlation id, if this request belongs to one.
+     *
+     * @return the flow id
+     */
+    public String getFlowId() {
+        return flowId;
+    }
+
+    /**
+     * Sets the {@link FlowRemoteAction} flow correlation id.
+     *
+     * @param flowId the flow id to set
+     */
+    public void setFlowId(String flowId) {
+        this.flowId = flowId;
+    }
+
+    /**
+     * Returns the opaque, signed continuation token for a {@link FlowRemoteAction} flow, if resuming one.
+     *
+     * @return the resume token
+     */
+    public String getResumeToken() {
+        return resumeToken;
+    }
+
+    /**
+     * Sets the opaque, signed continuation token for a {@link FlowRemoteAction} flow.
+     *
+     * @param resumeToken the resume token to set
+     */
+    public void setResumeToken(String resumeToken) {
+        this.resumeToken = resumeToken;
     }
 }

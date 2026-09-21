@@ -28,9 +28,24 @@ export {
   matchesActionIdentity,
 } from './actions/crudActionUtils.js';
 
+// Drives a FlowRemoteAction to completion (see docs/design/SERVER_DRIVEN_ACTION_FLOWS.md §6).
+export { runActionFlow } from './actions/runActionFlow.js';
+export type { FlowStepHandlers } from './actions/runActionFlow.js';
+
+// Action-aware save/delete dispatch shared by useCrudPage — reuse it if you're driving a
+// standalone <Crud> (i.e. without useCrudPage) and want the same "use the entity's registered
+// CrudRemoteAction/FlowRemoteAction when present, else plain REST" behavior.
+export { dispatchCrudSave, dispatchCrudDelete } from './actions/crudActionDispatch.js';
+export type { CrudActionDispatchContext } from './actions/crudActionDispatch.js';
+
 // ── Client actions (re-exported from ui-core for convenience) ──────────────
 export { ClientActionRegistry, registerClientAction, isClientActionApplicable } from '@dynamia-tools/ui-core';
 export type { ClientAction, ClientActionContext } from '@dynamia-tools/ui-core';
+
+// ── Flow step renderers (re-exported from ui-core for convenience) ─────────
+// Register a handler for a FlowRemoteAction's CUSTOM step — see docs/design/SERVER_DRIVEN_ACTION_FLOWS.md §6.
+export { FlowStepRendererRegistry, registerFlowStepRenderer } from '@dynamia-tools/ui-core';
+export type { FlowStepRenderer } from '@dynamia-tools/ui-core';
 
 // ── Composables ────────────────────────────────────────────────────────────
 export { useViewer } from './composables/useViewer.js';
@@ -48,6 +63,14 @@ export type { UseEntityPickerOptions } from './composables/useEntityPicker.js';
 export { useNavigation } from './composables/useNavigation.js';
 export type { UseNavigationOptions } from './composables/useNavigation.js';
 export { useDynamiaClient, DYNAMIA_CLIENT_KEY } from './composables/useDynamiaClient.js';
+export { useToast } from './composables/useToast.js';
+export type { UseToastReturn } from './composables/useToast.js';
+export { useConfirm } from './composables/useConfirm.js';
+export type { UseConfirmReturn } from './composables/useConfirm.js';
+export { useInput } from './composables/useInput.js';
+export type { UseInputReturn } from './composables/useInput.js';
+export { useFormDialog } from './composables/useFormDialog.js';
+export type { UseFormDialogReturn } from './composables/useFormDialog.js';
 
 // ── Plugin ─────────────────────────────────────────────────────────────────
 export { DynamiaVue } from './plugin.js';
@@ -69,3 +92,8 @@ export { default as FieldComponent } from './components/Field.vue';
 export { default as ActionsComponent } from './components/Actions.vue';
 export { default as NavMenuComponent } from './components/NavMenu.vue';
 export { default as NavBreadcrumbComponent } from './components/NavBreadcrumb.vue';
+export { default as DynamiaDialog } from './components/Dialog.vue';
+export { default as DynamiaConfirmHost } from './components/ConfirmHost.vue';
+export { default as DynamiaToastHost } from './components/ToastHost.vue';
+export { default as DynamiaPromptHost } from './components/PromptHost.vue';
+export { default as DynamiaFormDialogHost } from './components/FormDialogHost.vue';

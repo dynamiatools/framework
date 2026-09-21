@@ -32,6 +32,8 @@ export type {
     // Actions
     ActionExecutionRequest,
     ActionExecutionResponse,
+    ActionFlowStepType,
+    ActionFlowStep,
     // Views
     ViewDescriptorMetadata,
     ActionReference,

@@ -1,0 +1,514 @@
+@import "./base.css";
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+/* ── @dynamia-tools/vue components are intentionally unstyled — themed here ── */
+
+.dynamia-nav-menu {
+  @apply flex flex-col gap-1 p-3 text-sm;
+}
+.dynamia-nav-module {
+  @apply flex flex-col;
+}
+.dynamia-nav-module-header {
+  @apply mt-4 flex items-center gap-2 px-2 py-1.5 text-xs font-semibold tracking-wide text-slate-400 uppercase first:mt-0;
+}
+.dynamia-nav-group {
+  @apply mt-0.5 flex flex-col gap-0.5;
+}
+.dynamia-nav-group-header {
+  @apply px-2 py-1 text-[11px] font-medium tracking-wide text-slate-500 uppercase;
+}
+.dynamia-nav-pages {
+  @apply flex flex-col gap-0.5;
+}
+.dynamia-nav-page {
+  @apply flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-slate-200 hover:bg-white/5;
+}
+/* Pages nested inside a PageGroup get extra indent so the hierarchy reads clearly even when the
+   group has no visible header (Java-side group name can be blank). */
+.dynamia-nav-group .dynamia-nav-page {
+  @apply pl-6;
+}
+.dynamia-nav-page-active {
+  @apply font-medium text-white;
+  background-color: var(--skin-primary-soft);
+}
+.dynamia-nav-icon {
+  @apply w-4 shrink-0 text-center;
+}
+
+.dynamia-breadcrumb-list {
+  @apply flex items-center gap-1.5 text-sm text-slate-500;
+}
+.dynamia-breadcrumb-separator {
+  @apply flex items-center gap-1.5;
+}
+
+.dynamia-crud-page {
+  @apply h-full;
+}
+.dynamia-crud-page-loading,
+.dynamia-crud-page-error {
+  @apply flex h-full items-center justify-center text-sm text-slate-500;
+}
+.dynamia-crud-page-error {
+  @apply text-red-600;
+}
+
+/* ── Form ──────────────────────────────────────────────────────────────────── */
+
+.dynamia-form {
+  @apply flex flex-col gap-6;
+}
+.dynamia-form-loading {
+  @apply flex items-center justify-center py-12 text-sm text-slate-400;
+}
+.dynamia-form-group {
+  @apply flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4;
+}
+.dynamia-form-group-header {
+  @apply flex items-center gap-2 border-b border-slate-100 pb-2 text-sm font-semibold text-slate-700;
+}
+/* Form.vue sets --columns on .dynamia-form-grid; each .dynamia-form-row lays its own fields out
+   in a grid with that many columns (inherits the var), so rows stack as a simple vertical flex. */
+.dynamia-form-grid {
+  @apply flex flex-col gap-4;
+}
+.dynamia-form-row {
+  display: grid;
+  grid-template-columns: repeat(var(--columns, 1), minmax(0, 1fr));
+  @apply gap-4;
+}
+.dynamia-form-cell {
+  @apply flex flex-col gap-1;
+}
+.dynamia-form-label {
+  @apply text-sm font-medium text-slate-600;
+}
+.dynamia-required {
+  @apply ml-0.5 text-red-500;
+}
+.dynamia-field-error {
+  @apply text-xs text-red-600;
+}
+.dynamia-form-actions {
+  @apply flex items-center gap-2 pt-2;
+}
+/* Form.vue's default Save/Cancel buttons carry no class of their own — style by position. */
+.dynamia-form-actions button {
+  @apply rounded-md px-4 py-2 text-sm font-medium transition-colors;
+}
+.dynamia-form-actions button[type='submit'] {
+  background-color: var(--skin-primary);
+  color: var(--skin-primary-fg);
+}
+.dynamia-form-actions button[type='submit']:hover {
+  filter: brightness(0.92);
+}
+.dynamia-form-actions button[type='button'] {
+  @apply bg-slate-100 text-slate-600 hover:bg-slate-200;
+}
+
+/* ── Field inputs ──────────────────────────────────────────────────────────── */
+
+.dynamia-textbox,
+.dynamia-intbox,
+.dynamia-spinner,
+.dynamia-datebox,
+.dynamia-combobox,
+.dynamia-textareabox {
+  @apply w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-800 shadow-sm transition-colors;
+  @apply focus:border-transparent focus:ring-2 focus:ring-[color:var(--skin-primary)] focus:outline-none;
+}
+.dynamia-textareabox {
+  @apply min-h-24;
+}
+
+.dynamia-checkbox-wrapper {
+  @apply inline-flex items-center gap-2;
+}
+.dynamia-checkbox {
+  @apply h-4 w-4 rounded border-slate-300 accent-[var(--skin-primary)];
+}
+.dynamia-checkbox-label {
+  @apply text-sm text-slate-600;
+}
+
+.dynamia-cool-label {
+  @apply flex items-center gap-2;
+}
+.dynamia-cool-label-image {
+  @apply h-8 w-8 rounded object-cover;
+}
+.dynamia-cool-label-content {
+  @apply flex flex-col;
+}
+.dynamia-cool-label-title {
+  @apply text-sm font-medium text-slate-800;
+}
+.dynamia-cool-label-subtitle {
+  @apply text-xs text-slate-500;
+}
+.dynamia-cool-label-description {
+  @apply text-xs text-slate-400;
+}
+
+.dynamia-link {
+  color: var(--skin-primary);
+  @apply underline-offset-2 hover:underline;
+}
+
+.dynamia-entity-ref-label {
+  @apply text-sm text-slate-800;
+}
+
+/* ── EntityPicker / EntityRefPicker (same shape, shared rules) ────────────────── */
+
+.dynamia-entity-picker,
+.dynamia-entity-ref-picker {
+  @apply relative flex flex-col gap-1;
+}
+.dynamia-entity-picker-value,
+.dynamia-entity-ref-picker-value {
+  @apply flex items-center justify-between gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm;
+}
+.dynamia-entity-picker-label,
+.dynamia-entity-ref-picker-label {
+  @apply truncate text-slate-800;
+}
+.dynamia-entity-picker-btn,
+.dynamia-entity-ref-picker-btn {
+  @apply rounded px-1.5 py-0.5 text-xs text-slate-400 hover:bg-slate-100 hover:text-slate-600;
+}
+.dynamia-entity-picker-clear:hover,
+.dynamia-entity-ref-picker-clear:hover,
+.dynamia-entity-ref-cancel:hover {
+  @apply text-red-500;
+}
+.dynamia-entity-picker-search,
+.dynamia-entity-ref-picker-search {
+  @apply relative flex items-center;
+}
+.dynamia-entity-picker-input,
+.dynamia-entity-ref-picker-input {
+  @apply w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 pr-8 text-sm text-slate-800;
+  @apply focus:border-transparent focus:ring-2 focus:ring-[color:var(--skin-primary)] focus:outline-none;
+}
+.dynamia-entity-picker-spinner,
+.dynamia-entity-ref-picker-spinner {
+  @apply absolute right-2 animate-spin text-slate-400;
+}
+.dynamia-entity-ref-cancel {
+  @apply absolute right-2 text-slate-400;
+}
+.dynamia-entity-picker-dropdown,
+.dynamia-entity-ref-picker-dropdown {
+  @apply absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md border border-slate-200 bg-white py-1 text-sm shadow-lg;
+}
+.dynamia-entity-picker-empty,
+.dynamia-entity-ref-picker-empty {
+  @apply px-3 py-2 text-slate-400;
+}
+.dynamia-entity-picker-option,
+.dynamia-entity-ref-picker-option {
+  @apply cursor-pointer px-3 py-1.5 hover:bg-slate-50;
+}
+.dynamia-entity-picker-option.is-highlighted,
+.dynamia-entity-ref-picker-option.is-highlighted {
+  background-color: var(--skin-primary-soft);
+}
+.dynamia-entity-picker-error,
+.dynamia-entity-ref-picker-error {
+  @apply text-xs text-red-600;
+}
+
+/* ── Table ─────────────────────────────────────────────────────────────────── */
+
+.dynamia-table {
+  @apply overflow-x-auto rounded-lg border border-slate-200 bg-white;
+}
+.dynamia-table-loading {
+  @apply flex items-center justify-center py-12 text-sm text-slate-400;
+}
+.dynamia-table-grid {
+  @apply w-full border-collapse text-left text-sm;
+}
+.dynamia-table-header {
+  @apply cursor-pointer border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold tracking-wide text-slate-500 uppercase select-none hover:bg-slate-100;
+}
+.dynamia-table-actions-header {
+  @apply border-b border-slate-200 bg-slate-50 px-3 py-2 text-right text-xs font-semibold tracking-wide text-slate-500 uppercase;
+}
+.dynamia-table-row {
+  @apply cursor-pointer border-b border-slate-100 last:border-0 hover:bg-slate-50;
+}
+.dynamia-table-row-selected {
+  background-color: var(--skin-primary-soft);
+}
+.dynamia-table-cell {
+  @apply px-3 py-2 align-top text-slate-700;
+}
+.dynamia-table-actions-cell {
+  @apply px-3 py-2 text-right whitespace-nowrap;
+}
+/* Crud.vue's row Edit/Delete buttons carry no class — Edit always renders before Delete. */
+.dynamia-table-actions-cell button {
+  @apply ml-2 rounded-md px-2 py-1 text-xs font-medium text-slate-500 first:ml-0 hover:bg-slate-100 hover:text-slate-800;
+}
+.dynamia-table-actions-cell button:last-child {
+  @apply text-red-500 hover:bg-red-50 hover:text-red-700;
+}
+.dynamia-table-empty {
+  @apply px-3 py-8 text-center text-slate-400;
+}
+.dynamia-table-pagination {
+  @apply flex items-center justify-center gap-3 border-t border-slate-200 px-3 py-2 text-sm text-slate-500;
+}
+.dynamia-table-pagination button {
+  @apply rounded-md border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40;
+}
+
+/* ── Actions / Crud toolbar ────────────────────────────────────────────────── */
+
+.dynamia-actions {
+  @apply flex items-center gap-2;
+}
+.dynamia-action-btn {
+  @apply inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.dynamia-crud {
+  @apply flex h-full flex-col gap-3;
+}
+.dynamia-crud-toolbar {
+  @apply flex items-center justify-between gap-2;
+}
+.dynamia-crud-new-btn {
+  @apply rounded-md px-3 py-1.5 text-sm font-medium transition-colors;
+  background-color: var(--skin-primary);
+  color: var(--skin-primary-fg);
+}
+.dynamia-crud-new-btn:hover {
+  filter: brightness(0.92);
+}
+.dynamia-crud-error {
+  @apply rounded-md bg-red-50 px-3 py-2 text-sm text-red-600;
+}
+.dynamia-crud-loading {
+  @apply text-sm text-slate-400;
+}
+
+/* ── Tree (DataSetView: "tree", e.g. a self-referencing Category entity) ─────── */
+
+.dynamia-tree {
+  @apply overflow-auto rounded-lg border border-slate-200 bg-white p-2;
+}
+.dynamia-tree-loading,
+.dynamia-tree-empty {
+  @apply flex items-center justify-center py-12 text-sm text-slate-400;
+}
+.dynamia-tree-list {
+  @apply flex flex-col gap-0.5 text-sm;
+}
+.dynamia-tree-item-row {
+  @apply flex cursor-pointer items-center gap-1 rounded-md px-2 py-1.5 text-slate-700 hover:bg-slate-50;
+}
+.dynamia-tree-item--selected > .dynamia-tree-item-row {
+  background-color: var(--skin-primary-soft);
+  @apply font-medium text-slate-900;
+}
+.dynamia-tree-indent {
+  @apply inline-block w-5 shrink-0;
+}
+.dynamia-tree-toggle,
+.dynamia-tree-toggle-spacer {
+  @apply inline-flex w-5 shrink-0 items-center justify-center text-xs text-slate-400;
+}
+.dynamia-tree-toggle:hover {
+  @apply text-slate-700;
+}
+.dynamia-tree-icon {
+  @apply mr-1 shrink-0;
+}
+.dynamia-tree-label {
+  @apply truncate;
+}
+.dynamia-tree-actions {
+  @apply ml-auto flex items-center gap-1;
+}
+.dynamia-tree-actions button {
+  @apply rounded-md px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800;
+}
+.dynamia-tree-actions button:last-child {
+  @apply text-red-500 hover:bg-red-50 hover:text-red-700;
+}
+.dynamia-tree-error {
+  @apply mt-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600;
+}
+
+/* ── Field.vue's fallback for any FieldComponent not in its componentMap (e.g. Doublespinner,
+   Timebox, ColorPicker, ImageBox, and any legacy/custom component name a descriptor might set,
+   like "enumlabel" or "label" before EnumLabel/Label existed) ────────────────────────────── */
+
+.dynamia-field-default {
+  @apply w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-800 shadow-sm;
+  @apply focus:border-transparent focus:ring-2 focus:ring-[color:var(--skin-primary)] focus:outline-none;
+}
+
+/* ── Label / EnumLabel (read-only scalar / enum display) ──────────────────────── */
+
+.dynamia-label {
+  @apply text-sm text-slate-800;
+}
+.dynamia-enum-label {
+  @apply inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700;
+}
+
+/* ── Dialog (generic modal shell, used directly and by ConfirmHost) ──────────── */
+
+.dynamia-dialog-backdrop {
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4;
+}
+.dynamia-dialog {
+  @apply flex w-full max-w-md flex-col gap-4 rounded-lg bg-white p-5 shadow-xl;
+}
+.dynamia-dialog-header {
+  @apply flex items-center justify-between gap-3;
+}
+.dynamia-dialog-title {
+  @apply text-base font-semibold text-slate-800;
+}
+.dynamia-dialog-close {
+  @apply -m-1 rounded-md p-1 text-lg leading-none text-slate-400 hover:bg-slate-100 hover:text-slate-600;
+}
+.dynamia-dialog-body {
+  @apply text-sm text-slate-600;
+}
+.dynamia-dialog-footer {
+  @apply flex items-center justify-end gap-2;
+}
+
+/* ── Confirm (ConfirmHost — one at a time, driven by useConfirm()) ───────────── */
+
+.dynamia-confirm-message {
+  @apply text-sm text-slate-700;
+}
+.dynamia-confirm-cancel,
+.dynamia-confirm-confirm {
+  @apply rounded-md px-4 py-2 text-sm font-medium transition-colors;
+}
+.dynamia-confirm-cancel {
+  @apply bg-slate-100 text-slate-600 hover:bg-slate-200;
+}
+.dynamia-confirm-confirm {
+  background-color: var(--skin-primary);
+  color: var(--skin-primary-fg);
+}
+.dynamia-confirm-confirm:hover {
+  filter: brightness(0.92);
+}
+/* Destructive confirms (delete, etc.) get a red confirm button instead of the skin accent. */
+.dynamia-confirm-warning .dynamia-confirm-confirm,
+.dynamia-confirm-error .dynamia-confirm-confirm {
+  @apply bg-red-600 text-white;
+}
+.dynamia-confirm-warning .dynamia-confirm-confirm:hover,
+.dynamia-confirm-error .dynamia-confirm-confirm:hover {
+  filter: brightness(0.92);
+}
+
+/* ── Toast (ToastHost — stacked queue, driven by useToast()) ──────────────────── */
+
+.dynamia-toast-stack {
+  @apply fixed top-4 right-4 z-50 flex w-80 flex-col gap-2;
+}
+.dynamia-toast {
+  @apply flex items-start gap-3 rounded-lg border bg-white p-3 text-sm shadow-lg;
+}
+.dynamia-toast-content {
+  @apply flex flex-1 flex-col gap-0.5;
+}
+.dynamia-toast-title {
+  @apply font-semibold text-slate-800;
+}
+.dynamia-toast-message {
+  @apply text-slate-600;
+}
+.dynamia-toast-close {
+  @apply -m-1 rounded-md p-1 text-base leading-none text-slate-400 hover:bg-slate-100 hover:text-slate-600;
+}
+.dynamia-toast-info {
+  @apply border-slate-200;
+}
+.dynamia-toast-success {
+  @apply border-green-200 bg-green-50;
+}
+.dynamia-toast-warning {
+  @apply border-amber-200 bg-amber-50;
+}
+.dynamia-toast-error {
+  @apply border-red-200 bg-red-50;
+}
+
+/* ── Prompt (PromptHost — single-value input, driven by useInput(), the INPUT flow step) ────── */
+
+.dynamia-prompt-message {
+  @apply text-sm text-slate-700;
+}
+.dynamia-prompt-input {
+  @apply mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--skin-primary)];
+}
+.dynamia-prompt-cancel,
+.dynamia-prompt-confirm {
+  @apply rounded-md px-4 py-2 text-sm font-medium transition-colors;
+}
+.dynamia-prompt-cancel {
+  @apply bg-slate-100 text-slate-600 hover:bg-slate-200;
+}
+.dynamia-prompt-confirm {
+  background-color: var(--skin-primary);
+  color: var(--skin-primary-fg);
+}
+.dynamia-prompt-confirm:hover {
+  filter: brightness(0.92);
+}
+
+/* ── Form dialog (FormDialogHost — renders a DynamiaForm, driven by useFormDialog(), the DIALOG
+   flow step) — wider than the plain confirm/prompt dialog to fit a full form layout. ─────────── */
+
+.dynamia-form-dialog {
+  @apply max-w-2xl;
+}
+
+/* ── Star rating (StarRatingHost — app-specific renderer for RateBookAction's "star-rating" CUSTOM
+   flow step, registered in main.ts; not part of @dynamia-tools/ui-core or vue, see §3/§6). ─────── */
+
+.dynamia-star-rating-message {
+  @apply text-sm text-slate-700;
+}
+.dynamia-star-rating-stars {
+  @apply mt-2 flex gap-1 text-3xl;
+}
+.dynamia-star-rating-star {
+  @apply text-slate-300 transition-colors hover:text-amber-400;
+}
+.dynamia-star-rating-star-filled {
+  @apply text-amber-400;
+}
+.dynamia-star-rating-cancel,
+.dynamia-star-rating-confirm {
+  @apply rounded-md px-4 py-2 text-sm font-medium transition-colors;
+}
+.dynamia-star-rating-cancel {
+  @apply bg-slate-100 text-slate-600 hover:bg-slate-200;
+}
+.dynamia-star-rating-confirm {
+  background-color: var(--skin-primary);
+  color: var(--skin-primary-fg);
+}
+.dynamia-star-rating-confirm:hover {
+  filter: brightness(0.92);
+}
+.dynamia-star-rating-confirm:disabled {
+  @apply cursor-not-allowed opacity-50;
+}

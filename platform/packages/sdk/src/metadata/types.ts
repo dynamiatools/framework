@@ -156,6 +156,16 @@ export interface ActionExecutionRequest {
     dataId?: unknown;
     /** Display name of the entity being acted upon */
     dataName?: string;
+    /**
+     * Correlation id for a `FlowRemoteAction` flow instance. Absent on the first request; echo back
+     * `response.flow.flowId` on every continuation.
+     */
+    flowId?: string;
+    /**
+     * Opaque, signed continuation token for a `FlowRemoteAction` flow. Absent means "start a new flow";
+     * echo back `response.flow.resumeToken` verbatim to resume one.
+     */
+    resumeToken?: string;
 }
 
 /**
@@ -186,6 +196,49 @@ export interface ActionExecutionResponse {
     dataId?: unknown;
     /** Display name of the entity that was acted upon */
     dataName?: string;
+    /**
+     * Next step of a `FlowRemoteAction` flow the client must perform, or absent for a plain, one-shot
+     * `RemoteAction` response — existing code that never checks this field keeps working unchanged.
+     * See `docs/design/SERVER_DRIVEN_ACTION_FLOWS.md`.
+     */
+    flow?: ActionFlowStep;
+}
+
+/** Mirrors `tools.dynamia.actions.ActionFlowStepType`. */
+export type ActionFlowStepType =
+    | 'CONFIRM'
+    | 'INPUT'
+    | 'DIALOG'
+    | 'NOTIFY'
+    | 'REDIRECT'
+    | 'CALL'
+    | 'DONE'
+    | 'CUSTOM';
+
+/**
+ * A single step of a `FlowRemoteAction` flow — mirrors `tools.dynamia.actions.ActionFlowStep`.
+ *
+ * `data`'s shape depends on `type`: the result for `DONE`, `{ url, awaitReturn }` for `REDIRECT`,
+ * `{ action, ...}` for `CALL`, `{ component, ... }` for `CUSTOM`, prefill data for `DIALOG`, or absent
+ * for `CONFIRM`/`INPUT`/`NOTIFY`.
+ *
+ * `REDIRECT` (terminal; `awaitReturn: true` unsupported) and `CALL` (`data.action`, optional `data.className`)
+ * are experimental — see `docs/design/SERVER_DRIVEN_ACTION_FLOWS.md` §6.
+ *
+ * @experimental The whole flow protocol may still change.
+ */
+export interface ActionFlowStep {
+    flowId: string;
+    type: ActionFlowStepType;
+    title?: string;
+    message?: string;
+    /** Mirrors `tools.dynamia.ui.MessageType` (NORMAL/ERROR/WARNING/INFO/CRITICAL/SPECIAL). */
+    messageType?: string;
+    /** For `DIALOG`: name of the `ViewDescriptor` to render as a form. */
+    viewDescriptor?: string;
+    data?: unknown;
+    /** Opaque, signed — echo back verbatim as `ActionExecutionRequest.resumeToken` to continue the flow. */
+    resumeToken?: string;
 }
 
 // ── View descriptors ───────────────────────────────────────────────────────

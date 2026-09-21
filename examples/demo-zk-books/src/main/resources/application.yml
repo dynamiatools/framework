@@ -29,8 +29,8 @@ server:
 dynamia:
   app:
     name: @project.name@
-    defaultSkin: Green
-    template: Dynamical
+    defaultSkin: Blue
+    template: DynamicalVue
     defaultLogo: /zkau/web/images/logo.png
     defaultIcon: /zkau/web/images/icon.png
     basePackage: mybookstore
@@ -41,4 +41,6 @@ dynamia:
     author: @author@
     url: @project.url@
     web-cache-enabled: false
+
+
 

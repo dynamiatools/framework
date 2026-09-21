@@ -6,6 +6,11 @@ import type { NavigationNode, DynamiaClient } from '@dynamia-tools/sdk';
 import type { TreeNode } from '@dynamia-tools/ui-core';
 import { CrudPageResolver } from '@dynamia-tools/ui-core';
 import { VueCrudView } from '../views/VueCrudView.js';
+import { useConfirm } from './useConfirm.js';
+import { useToast } from './useToast.js';
+import { useInput } from './useInput.js';
+import { useFormDialog } from './useFormDialog.js';
+import { dispatchCrudDelete, dispatchCrudSave } from '../actions/crudActionDispatch.js';
 
 /** Options for the {@link useCrudPage} composable */
 export interface UseCrudPageOptions {
@@ -43,6 +48,14 @@ export function useCrudPage(options: UseCrudPageOptions) {
   // even when the component re-uses the same instance across navigation changes.
   let activeNode = options.node;
   const { client } = options;
+
+  // Called at composable-setup time (required for onUnmounted inside these composables to
+  // work) — the returned functions are used later, inside the save/delete handlers registered
+  // below, as runActionFlow's FlowStepHandlers.
+  const { confirm } = useConfirm();
+  const { show: showToast } = useToast();
+  const { prompt } = useInput();
+  const { showForm: showFormDialog } = useFormDialog();
 
   const loading: Ref<boolean> = ref(false);
   const error: Ref<string | null> = ref(null);
@@ -105,19 +118,25 @@ export function useCrudPage(options: UseCrudPageOptions) {
         });
       }
 
-      // 5. Wire save handler (create or update)
+      // 5. Wire save handler (create or update) — action-aware: if the entity has a registered
+      // "save" CrudRemoteAction (see docs/design/SERVER_DRIVEN_ACTION_FLOWS.md §7), drive it
+      // through the Actions framework (ActionFilter hooks, optional confirm flow) instead of
+      // calling the plain REST verb directly. An entity with no such action behaves exactly as
+      // before — this is fully opt-in per entity. Dispatch logic lives in crudActionDispatch.ts
+      // so other CRUD-invocation surfaces (e.g. a standalone <Crud>) can reuse it.
+      const dispatchCtx = {
+        client,
+        api,
+        entityMetadata: context.entityMetadata,
+        entityClass: context.entityClass,
+        handlers: { confirm, showToast, prompt, showFormDialog },
+      };
       crudView.on('save', (payload) => {
         const { mode, data } = payload as { mode: 'create' | 'edit'; data: Record<string, unknown> };
         const persist = async () => {
           crudView.isLoading.value = true;
           try {
-            if (mode === 'create') {
-              await api.create(data);
-            } else {
-              const id = data['id'] as string | number | undefined;
-              if (id == null) throw new Error(`Cannot update entity: "id" field is missing`);
-              await api.update(id, data);
-            }
+            await dispatchCrudSave(dispatchCtx, mode, data);
             await crudView.dataSetView.load();
           } catch (e) {
             crudView.errorMessage.value = String(e);
@@ -128,7 +147,8 @@ export function useCrudPage(options: UseCrudPageOptions) {
         void persist();
       });
 
-      // 6. Wire delete handler
+      // 6. Wire delete handler — same action-aware pattern as save (typically resolves to
+      // DeleteFlowRemoteAction, which confirms before deleting).
       crudView.on('delete', (entity) => {
         const rec = entity as Record<string, unknown>;
         const id = rec['id'] as string | number | undefined;
@@ -136,7 +156,7 @@ export function useCrudPage(options: UseCrudPageOptions) {
           crudView.isLoading.value = true;
           try {
             if (id == null) throw new Error(`Cannot delete entity: "id" field is missing`);
-            await api.delete(id);
+            await dispatchCrudDelete(dispatchCtx, id);
             await crudView.dataSetView.load();
           } catch (e) {
             crudView.errorMessage.value = String(e);

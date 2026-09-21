@@ -81,7 +81,18 @@ export class FieldResolver {
     const explicitComponent = params['component'];
     if (typeof explicitComponent === 'string' && explicitComponent) return explicitComponent;
 
-    // 3. Infer from field class
+    // 3. Entity-reference fields (Field.entity === true, e.g. a @ManyToOne pointed at another
+    // domain class). Without this, they fall through to _inferComponent, which doesn't
+    // recognise the target class name and defaults to Textbox — displaying the raw referenced
+    // object stringified ("[object Object]") instead of a proper label or picker.
+    // EntityRefPicker needs params.entityAlias to search `/api/entities/{alias}/search` — only
+    // use it when the descriptor actually configured that; otherwise EntityRefLabel is the safe
+    // default (read-only display of the already-loaded reference, works with zero extra config).
+    if (field.entity) {
+      return params['entityAlias'] ? FieldComponent.EntityRefPicker : FieldComponent.EntityRefLabel;
+    }
+
+    // 4. Infer from field class
     const fieldClass = field.fieldClass ?? '';
     return FieldResolver._inferComponent(fieldClass);
   }

@@ -1,0 +1,18 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+
+<?meta charset="utf-8"?>
+<?meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"?>
+
+<?link href="${contextPath}/static/dynamia-tools/css/default.css?v=${applicationInfo.version}" rel="stylesheet" type="text/css"?>
+
+<!--
+  Bare workspace — no header/sidebar/footer, unlike the "index" view resolved per the active
+  ApplicationTemplate. Rendered by PageEmbedController (/page-embed/**) so a single Page's ZUL
+  content can be iframed on its own (e.g. by a non-ZK theme's <dynamia-embed>) without doubling
+  up on application chrome.
+-->
+<zk>
+    <div id="workspace" vflex="1" apply="${navComposer}">
+        <custom-attributes builderClass="tools.dynamia.zk.workspace.builders.Basic"/>
+    </div>
+</zk>

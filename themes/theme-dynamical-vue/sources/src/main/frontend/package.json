@@ -1,0 +1,29 @@
+{
+  "name": "theme-dynamical-vue-frontend",
+  "version": "26.9.0",
+  "description": "Vue 3 + Tailwind CSS frontend for the DynamicalVue application template",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.13.1",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/copy-shell-views.mjs",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@dynamia-tools/sdk": "workspace:*",
+    "@dynamia-tools/ui-core": "workspace:*",
+    "@dynamia-tools/vue": "workspace:*",
+    "@fortawesome/fontawesome-free": "^7.3.1",
+    "vue": "^3.5.39"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.16",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "tailwindcss": "^4.1.16",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.4",
+    "vue-tsc": "^2.2.12"
+  }
+}

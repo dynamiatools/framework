@@ -11,6 +11,9 @@ This documentation is organized into the following sections:
 - **[Core Modules Reference](./CORE_MODULES.md)** - Detailed explanation of each platform core module
 - **[Extensions Guide](./EXTENSIONS.md)** - Pre-built enterprise extensions and their purposes
 
+### Design Proposals
+- **[Server-Driven Action Flows](../design/SERVER_DRIVEN_ACTION_FLOWS.md)** - Draft protocol extending `RemoteAction` for multi-step, backend-driven UI flows (confirm/input/dialog) over REST
+
 ### Development & Best Practices
 - **[Development Patterns](./DEVELOPMENT_PATTERNS.md)** - Common patterns, anti-patterns, and best practices
 - **[Advanced Topics](./ADVANCED_TOPICS.md)** - Spring integration, modularity, custom extensions, microfrontend integration, and security

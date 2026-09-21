@@ -2,7 +2,7 @@
 
 import type { App } from 'vue';
 import type { DynamiaClient } from '@dynamia-tools/sdk';
-import { ActionRendererRegistry, ViewRendererRegistry, ViewTypes } from '@dynamia-tools/ui-core';
+import { ActionRendererRegistry, ViewRendererRegistry, ViewTypes, registerBuiltinCrudActions } from '@dynamia-tools/ui-core';
 import { DYNAMIA_CLIENT_KEY } from './composables/useDynamiaClient.js';
 
 /**
@@ -42,6 +42,11 @@ import ActionsComponent from './components/Actions.vue';
 import NavMenuComponent from './components/NavMenu.vue';
 import NavBreadcrumbComponent from './components/NavBreadcrumb.vue';
 import CrudPageComponent from './components/CrudPage.vue';
+import DialogComponent from './components/Dialog.vue';
+import ConfirmHostComponent from './components/ConfirmHost.vue';
+import ToastHostComponent from './components/ToastHost.vue';
+import PromptHostComponent from './components/PromptHost.vue';
+import FormDialogHostComponent from './components/FormDialogHost.vue';
 
 /**
  * Vue plugin for Dynamia Tools.
@@ -59,6 +64,11 @@ export const DynamiaVue = {
     if (options?.client) {
       app.provide(DYNAMIA_CLIENT_KEY, options.client);
     }
+
+    // Register built-in New/Edit/Cancel ClientActions (see docs/design/SERVER_DRIVEN_ACTION_FLOWS.md
+    // §7.5 and ui-core's builtinCrudActions.ts) before anything app-specific can register its own
+    // overrides for the same ids.
+    registerBuiltinCrudActions();
 
     // Register view renderers
     ViewRendererRegistry.register(ViewTypes.Form, new VueFormRenderer());
@@ -109,5 +119,10 @@ export const DynamiaVue = {
     app.component('DynamiaNavMenu', NavMenuComponent);
     app.component('DynamiaNavBreadcrumb', NavBreadcrumbComponent);
     app.component('DynamiaCrudPage', CrudPageComponent);
+    app.component('DynamiaDialog', DialogComponent);
+    app.component('DynamiaConfirmHost', ConfirmHostComponent);
+    app.component('DynamiaToastHost', ToastHostComponent);
+    app.component('DynamiaPromptHost', PromptHostComponent);
+    app.component('DynamiaFormDialogHost', FormDialogHostComponent);
   },
 };
