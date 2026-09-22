@@ -90,9 +90,14 @@ export class CrudView extends View {
     return crudModeToActionState(this.getMode());
   }
 
-  /** Returns the entity class name associated with this CRUD view, when known. */
+  /**
+   * Returns the entity identifier associated with this CRUD view, when known.
+   * `entityMetadata.id` is the entity's simple class name (see `EntityMetadata.id`); the
+   * fully-qualified name is never sent to clients, so this falls back to the view descriptor's
+   * `beanClass` (still an FQCN) only when no entity metadata was loaded.
+   */
   getEntityClassName(): string | null {
-    return this.entityMetadata?.className ?? this.descriptor.beanClass ?? null;
+    return this.entityMetadata?.id ?? this.descriptor.beanClass ?? null;
   }
 
   /** Returns the data object that should be used for action execution in the given state. */

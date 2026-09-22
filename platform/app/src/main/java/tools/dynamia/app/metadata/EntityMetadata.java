@@ -19,7 +19,14 @@ public class EntityMetadata extends BasicMetadata {
 
     /**
      * The fully qualified class name of the entity.
+     * <p>
+     * Kept for server-side resolution only — never serialized to clients. The public identifier
+     * for this entity is {@link #getId()} (the class's simple name), which is what appears in
+     * {@code endpoint}/{@code actionsEndpoint}/{@code viewsEndpoint} and in
+     * {@code /api/app/metadata/entities/{id}}. See {@code docs/design} security note on why the
+     * FQCN (package structure) is not sent over the wire.
      */
+    @JsonIgnore
     private String className;
     /**
      * List of action metadata objects associated with this entity.
@@ -59,14 +66,16 @@ public class EntityMetadata extends BasicMetadata {
     public EntityMetadata(Class entityClass) {
         setEntityClass(entityClass);
         setClassName(entityClass.getName());
+        setId(entityClass.getSimpleName());
         setName(entityClass.getSimpleName());
-        setEndpoint(ApplicationMetadataController.PATH + "/entities/" + getClassName());
-        setActionsEndpoint(ApplicationMetadataController.PATH + "/entities/" + getClassName() + "/actions");
-        setViewsEndpoint(ApplicationMetadataController.PATH + "/entities/" + getClassName() + "/views");
+        setEndpoint(ApplicationMetadataController.PATH + "/entities/" + getId());
+        setActionsEndpoint(ApplicationMetadataController.PATH + "/entities/" + getId() + "/actions");
+        setViewsEndpoint(ApplicationMetadataController.PATH + "/entities/" + getId() + "/views");
     }
 
     /**
-     * Returns the fully qualified class name of the entity.
+     * Returns the fully qualified class name of the entity. Server-side use only — {@code @JsonIgnore}d,
+     * never sent to clients. Use {@link #getId()} for the client-facing identifier.
      * @return the class name
      */
     public String getClassName() {

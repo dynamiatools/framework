@@ -2,7 +2,10 @@ import type { HttpClient } from '../http.js';
 import type { ActionExecutionRequest, ActionExecutionResponse, ActionMetadata } from './types.js';
 
 export interface ExecuteActionOptions {
-  /** Explicit entity class name for ClassAction / CrudAction execution. */
+  /**
+   * Explicit entity id for ClassAction / CrudAction execution — the entity's simple class name
+   * (see `EntityMetadata.id`), not a fully-qualified Java class name.
+   */
   className?: string | null;
 }
 
@@ -28,16 +31,19 @@ export class ActionsApi {
   }
 
   /**
-   * POST /api/app/metadata/entities/{className}/action/{action}
+   * POST /api/app/metadata/entities/{id}/action/{action}
    * Execute an entity-scoped action.
+   *
+   * @param entityId - the entity id (its simple class name, e.g. `"Invoice"`), not a
+   *   fully-qualified Java class name.
    */
   executeEntity(
-    className: string,
+    entityId: string,
     action: string,
     request?: ActionExecutionRequest,
   ): Promise<ActionExecutionResponse> {
     return this.http.post<ActionExecutionResponse>(
-      `/api/app/metadata/entities/${encodeURIComponent(className)}/action/${encodeURIComponent(action)}`,
+      `/api/app/metadata/entities/${encodeURIComponent(entityId)}/action/${encodeURIComponent(action)}`,
       request ?? {},
     );
   }

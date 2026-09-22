@@ -55,15 +55,16 @@ public class ApplicationMetadataEntities {
     }
 
     /**
-     * Returns the {@link EntityMetadata} for the specified class name, or {@code null} if not found.
+     * Returns the {@link EntityMetadata} for the specified entity id (the entity class's simple
+     * name — see {@link EntityMetadata#getId()}), or {@code null} if not found.
      *
-     * @param className the class name of the entity to search for
+     * @param id the id of the entity to search for
      * @return the {@link EntityMetadata} if found, otherwise {@code null}
      */
-    public EntityMetadata getEntityMetadata(String className) {
+    public EntityMetadata getEntityMetadata(String id) {
         if (entities == null) {
             return null;
         }
-        return entities.stream().filter(e -> e.getClassName().equals(className)).findFirst().orElse(null);
+        return entities.stream().filter(e -> e.getId().equals(id)).findFirst().orElse(null);
     }
 }

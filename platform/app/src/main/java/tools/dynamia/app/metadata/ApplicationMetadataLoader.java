@@ -15,7 +15,9 @@ import tools.dynamia.viewers.ViewDescriptorFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Loader and factory for application metadata objects.
@@ -77,7 +79,31 @@ public class ApplicationMetadataLoader {
                     var entity = loadEntityMetadata(entityClass);
                     metadata.getEntities().add(entity);
                 });
+        validateUniqueEntityIds(metadata.getEntities());
         return metadata;
+    }
+
+    /**
+     * Fails fast if two entities resolve to the same {@link EntityMetadata#getId()} (the class's
+     * simple name). The {@code /api/app/metadata/entities/{id}} contract requires that id to be
+     * unique across the application — see {@code docs/design} note on entity metadata identifiers
+     * for why the fully qualified class name is no longer used as the wire identifier.
+     *
+     * @param entities the loaded entity metadata list
+     * @throws IllegalStateException if a duplicate id is found, naming the colliding classes
+     */
+    private void validateUniqueEntityIds(List<EntityMetadata> entities) {
+        var duplicates = entities.stream()
+                .collect(Collectors.groupingBy(EntityMetadata::getId))
+                .entrySet().stream()
+                .filter(e -> e.getValue().size() > 1)
+                .map(e -> e.getKey() + " -> " + e.getValue().stream().map(EntityMetadata::getClassName).toList())
+                .collect(Collectors.joining("; "));
+        if (!duplicates.isEmpty()) {
+            throw new IllegalStateException("Duplicate entity simple class names found while building " +
+                    "application metadata: " + duplicates + ". /api/app/metadata/entities/{id} requires each " +
+                    "entity's simple class name to be unique; rename one of the colliding classes.");
+        }
     }
 
     /**
@@ -115,7 +141,7 @@ public class ApplicationMetadataLoader {
                 .load(action -> isApplicable(entityClass, action))
                 .stream().map(a -> {
                     var md = new ActionMetadata(a);
-                    md.setEndpoint(ApplicationMetadataController.PATH + "/entities/" + entityClass.getName() + "/actions/" + a.getId());
+                    md.setEndpoint(ApplicationMetadataController.PATH + "/entities/" + entity.getId() + "/actions/" + a.getId());
                     return md;
                 })
                 .toList());
@@ -129,6 +155,8 @@ public class ApplicationMetadataLoader {
     }
 
     private void loadEnpoint(EntityMetadata entity) {
-        entity.setEndpoint("/api/app/metadata/entity/" + entity.getClassName());
+        // Was "/entity/" + className (singular path segment, wrong mapping, and leaked the FQCN) —
+        // aligned with the constructor's own "/entities/{id}" endpoint and the id-based contract.
+        entity.setEndpoint(ApplicationMetadataController.PATH + "/entities/" + entity.getId());
     }
 }
