@@ -63,8 +63,6 @@ export interface NavigationNode {
     featured?: boolean;
     children?: NavigationNode[];
     attributes?: Record<string, unknown>;
-    /** Source file path for page nodes */
-    file?: string;
 }
 
 // ── Entity metadata ────────────────────────────────────────────────────────
@@ -76,12 +74,16 @@ export interface ApplicationMetadataEntities {
 /**
  * Mirrors `tools.dynamia.app.EntityMetadata`.
  *
+ * `id` (inherited from {@link BasicMetadata}) is the entity's identifier — the entity class's
+ * *simple* name (e.g. `"Invoice"`), used in `/api/app/metadata/entities/{id}` and friends. The
+ * fully-qualified Java class name is intentionally never sent to clients (it leaks internal
+ * package/module structure) — there is no `className` field on this type.
+ *
  * `descriptors` lists lightweight view references for this entity — note that
  * the actual `ViewDescriptor` content must be fetched separately via
  * `MetadataApi.getEntityViews()` or `MetadataApi.getEntityView()`.
  */
 export interface EntityMetadata extends BasicMetadata {
-    className: string;
     actions: ActionMetadata[];
     descriptors: ViewDescriptorMetadata[];
     actionsEndpoint: string;

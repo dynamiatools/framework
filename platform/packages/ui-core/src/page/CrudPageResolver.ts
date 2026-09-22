@@ -18,15 +18,14 @@ export const NavigationPageTypes = {
     Page: 'Page',
     /**
      * Leaf page that is automatically backed by a full CRUD interface for a single entity.
-     * The `file` field contains the fully-qualified Java class name of the entity.
+     * `NavigationNode` carries no entity/class information — {@link CrudPageResolver.resolve}
+     * resolves the entity server-side from the node's `internalPath` via
+     * `GET /api/app/metadata/entities/by-path`.
      */
     CrudPage: 'CrudPage',
-    /**
-     * Leaf page that renders a configuration panel.
-     * The `file` field contains the configuration bean name.
-     */
+    /** Leaf page that renders a configuration panel. Not yet resolved by this module. */
     ConfigPage: 'ConfigPage',
-    /** Leaf page rendered in an external iframe (full URL in `file`). */
+    /** Leaf page rendered in an external iframe. Not yet resolved by this module. */
     ExternalPage: 'ExternalPage',
 } as const;
 
@@ -43,7 +42,10 @@ export type NavigationPageType =
 export interface CrudPageContext {
     /** The original NavigationNode */
     node: NavigationNode;
-    /** Fully-qualified Java class name taken from {@link NavigationNode.file} */
+    /**
+     * Entity id (the entity class's simple name, e.g. `"Invoice"`) resolved server-side from the
+     * node's `internalPath` — see {@link EntityMetadata.id}. Not a fully-qualified Java class name.
+     */
     entityClass: string;
     /**ie
      * Virtual path taken from {@link NavigationNode.internalPath}.
@@ -93,31 +95,29 @@ export class CrudPageResolver {
     /**
      * Resolves a `CrudPage` navigation node into its entity metadata and view descriptor.
      *
-     * - Fetches entity metadata via `client.metadata.getEntity(node.file)`
-     * - Fetches all view descriptors via `client.metadata.getEntityViews(node.file)` and
+     * - Resolves entity metadata via `client.metadata.getEntityByPath(node.internalPath)` — the
+     *   server maps the page's virtual path to its backing entity class; no entity/class
+     *   information needs to travel in the navigation JSON.
+     * - Fetches all view descriptors via `client.metadata.getEntityViews(entityMetadata.id)` and
      *   picks the first descriptor whose view name contains `"crud"` (case-insensitive),
      *   falling back to the first available descriptor.
      *
-     * @param node   - NavigationNode with `type === "CrudPage"`, `file` and `internalPath` set.
+     * @param node   - NavigationNode with `type === "CrudPage"` and `internalPath` set.
      * @param client - {@link DynamiaClient} used to fetch metadata from the backend.
-     * @throws {Error} when `node.file` or `node.internalPath` is missing, or no descriptor exists.
+     * @throws {Error} when `node.internalPath` is missing, no CrudPage is registered at that path,
+     *   or no descriptor exists.
      */
     static async resolve(node: NavigationNode, client: DynamiaClient): Promise<CrudPageContext> {
-        if (!node.file) {
-            throw new Error(`CrudPage node "${node.id}" is missing the "file" field (entity class name)`);
-        }
         if (!node.internalPath) {
             throw new Error(`CrudPage node "${node.id}" is missing "internalPath"`);
         }
 
-        const entityClass = node.file;
         const virtualPath = node.internalPath;
 
-        // Fetch entity metadata and all view descriptors in parallel
-        const [entityMetadata, descriptors] = await Promise.all([
-            client.metadata.getEntity(entityClass),
-            client.metadata.getEntityViews(entityClass),
-        ]);
+        const entityMetadata = await client.metadata.getEntityByPath(virtualPath);
+        const entityClass = entityMetadata.id;
+
+        const descriptors = await client.metadata.getEntityViews(entityClass);
 
         // Prefer a descriptor explicitly typed "crud"; fall back to first available
         const chosen =

@@ -119,7 +119,10 @@ export class Viewer {
     if (this.client && this.beanClass) {
       try {
         const entities = await this.client.metadata.getEntities();
-        const entity = entities.entities.find(e => e.className === this.beanClass);
+        // EntityMetadata only carries the simple-name id (the FQCN is never sent over the
+        // wire — see EntityMetadata.id) — reduce beanClass to its simple name to match it.
+        const beanSimpleName = simpleClassName(this.beanClass);
+        const entity = entities.entities.find(e => e.id === beanSimpleName);
         if (entity) this._actions = entity.actions;
       } catch (_e) {
         // Ignore — actions are optional; entity metadata lookup may fail for dynamic beanClass
@@ -213,16 +216,21 @@ export class Viewer {
       for (const entity of meta.entities) {
         const match = entity.descriptors.find(d => d.id === this.descriptorId);
         if (match) {
-          if (!this.beanClass) this.beanClass = entity.className;
           // Prefer the view name from the metadata reference; fall back to any
           // view available for this entity (picks the first one from /views).
           if (match.view) {
-            this._resolvedDescriptor = await this.client.metadata.getEntityView(entity.className, match.view);
+            this._resolvedDescriptor = await this.client.metadata.getEntityView(entity.id, match.view);
           } else {
-            const views = await this.client.metadata.getEntityViews(entity.className);
+            const views = await this.client.metadata.getEntityViews(entity.id);
             this._resolvedDescriptor = views[0] ?? null;
           }
-          if (this._resolvedDescriptor) return;
+          if (this._resolvedDescriptor) {
+            // beanClass must stay a fully-qualified class name (ViewDescriptor.beanClass still
+            // is one) — take it from the resolved descriptor itself rather than from
+            // EntityMetadata.id, which is only the simple name.
+            if (!this.beanClass) this.beanClass = this._resolvedDescriptor.beanClass;
+            return;
+          }
         }
       }
       throw new Error(`Descriptor with id '${this.descriptorId}' not found`);
@@ -272,4 +280,9 @@ export class Viewer {
     // Return null — callers should always register a factory
     return null;
   }
+}
+
+/** Reduces a (possibly fully-qualified) Java class name to its simple name, e.g. `com.acme.Book` → `Book`. */
+function simpleClassName(className: string): string {
+  return className.includes('.') ? className.slice(className.lastIndexOf('.') + 1) : className;
 }

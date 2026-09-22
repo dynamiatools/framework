@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"id", "name", "longName", "type", "description", "icon", "internalPath", "path", "position", "featured", "file", "attributes", "children"})
+@JsonPropertyOrder({"id", "name", "longName", "type", "description", "icon", "internalPath", "path", "position", "featured", "attributes", "children"})
 public class NavigationNode implements Serializable {
 
 
@@ -33,7 +33,6 @@ public class NavigationNode implements Serializable {
     private List<NavigationNode> children;
 
     private Map<String, Object> attributes;
-    private String file;
 
 
     @JsonIgnore
@@ -61,7 +60,6 @@ public class NavigationNode implements Serializable {
         this.position = element.getPosition() != 0.0 ? element.getPosition() : null;
         this.type = element.getClass().getSimpleName();
         this.featured = element instanceof Page p ? p.isFeatured() : null;
-        this.file = element instanceof Page p ? p.getPath() : null;
         if (element.getAttributes() != null && !element.getAttributes().isEmpty()) {
             this.attributes = new HashMap<>(element.getAttributes());
         }
@@ -210,11 +208,4 @@ public class NavigationNode implements Serializable {
         this.attributes = attributes;
     }
 
-    public String getFile() {
-        return file;
-    }
-
-    public void setFile(String file) {
-        this.file = file;
-    }
 }

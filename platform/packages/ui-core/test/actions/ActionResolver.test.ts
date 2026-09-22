@@ -13,7 +13,6 @@ function createMetadata(actions: ActionMetadata[]): EntityMetadata {
   return {
     id: 'Book',
     name: 'Book',
-    className: 'mybookstore.domain.Book',
     actions,
     descriptors: [],
     actionsEndpoint: '/api/books/actions',
@@ -86,7 +85,7 @@ describe('CrudView action helpers', () => {
     expect(view.buildActionExecutionRequest()).toEqual({
       data: { id: 9, name: 'Refactoring' },
       source: 'crud',
-      dataType: 'mybookstore.domain.Book',
+      dataType: 'Book',
       dataId: 9,
       dataName: 'Refactoring',
     });

@@ -17,7 +17,9 @@ import tools.dynamia.domain.EntityReference;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.integration.Containers;
+import tools.dynamia.navigation.NavigationNode;
 import tools.dynamia.navigation.NavigationTree;
+import tools.dynamia.navigation.Page;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.web.navigation.ErrorResult;
 
@@ -26,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 /**
  * REST controller for exposing application metadata, navigation, entities, and actions.
@@ -40,7 +43,8 @@ import java.util.concurrent.atomic.AtomicReference;
  *   <li>GET /api/app/metadata/actions - Global actions metadata</li>
  *   <li>POST /api/app/metadata/actions/{action} - Execute global action</li>
  *   <li>GET /api/app/metadata/entities - Entities metadata</li>
- *   <li>GET /api/app/metadata/entities/{className} - Metadata for a specific entity</li>
+ *   <li>GET /api/app/metadata/entities/{id} - Metadata for a specific entity, by id (simple class name)</li>
+ *   <li>GET /api/app/metadata/entities/by-path?path={virtualPath} - Metadata for the CrudPage registered at that navigation virtual path</li>
  * </ul>
  *
  * @author Mario A. Serrano Leones
@@ -288,17 +292,19 @@ public class ApplicationMetadataController {
 
 
     /**
-     * Returns metadata for a specific entity by its class name.
+     * Returns metadata for a specific entity by its id (the entity class's simple name, e.g.
+     * {@code "Invoice"} — see {@link EntityMetadata#getId()}). The fully qualified class name is
+     * never accepted nor returned here; it stays server-side.
      *
-     * @param className the fully qualified class name of the entity
+     * @param id the entity id
      * @return the {@link EntityMetadata} object
      */
-    @GetMapping(value = "/entities/{className}", produces = "application/json")
-    public EntityMetadata getEntityMetadata(@PathVariable String className) {
+    @GetMapping(value = "/entities/{id}", produces = "application/json")
+    public EntityMetadata getEntityMetadata(@PathVariable String id) {
         initMetadata();
-        var result = entities.getEntityMetadata(className);
+        var result = entities.getEntityMetadata(id);
         if (result == null) {
-            result = tryToFindEntityClass(className);
+            result = tryToFindEntityClassById(id);
         }
 
         if (result == null) {
@@ -309,34 +315,85 @@ public class ApplicationMetadataController {
 
     }
 
-    private EntityMetadata tryToFindEntityClass(String className) {
+    /**
+     * Resolves entity metadata for a {@code CrudPage} directly from its navigation virtual path
+     * (e.g. {@code "store/catalog/books"}, the same value used to build {@link NavigationNode#getInternalPath()}
+     * and to call {@code client.crud(virtualPath)}), instead of requiring the client to already know
+     * the entity's id.
+     * <p>
+     * This is what lets frontend code (see {@code CrudPageResolver} in {@code @dynamia-tools/ui-core})
+     * resolve a CrudPage without any entity class information ever appearing in the navigation JSON.
+     *
+     * @param path the CrudPage's virtual path
+     * @return the {@link EntityMetadata} object, or {@link #unknowEntity} if no CrudPage is registered at that path
+     */
+    @GetMapping(value = "/entities/by-path", produces = "application/json")
+    public EntityMetadata getEntityMetadataByPath(@RequestParam String path) {
+        initMetadata();
+        var result = tryToFindEntityClass(node -> path.equals(node.getInternalPath()));
+        return result != null ? result : unknowEntity;
+    }
+
+    /**
+     * Server-side resolution of a {@code CrudPage}'s backing entity class, deriving it from the
+     * live {@link Page#getPath()} of the navigation element itself (never from client input) — see
+     * {@code docs/design} note on why {@code NavigationNode} no longer carries a {@code file} field.
+     *
+     * @param id the entity id to look for (its simple class name)
+     * @return the resolved {@link EntityMetadata}, or {@code null} if no matching CrudPage exists
+     */
+    private EntityMetadata tryToFindEntityClassById(String id) {
+        return tryToFindEntityClass(node -> {
+            var clazz = crudPageEntityClass(node);
+            return clazz != null && clazz.getSimpleName().equals(id);
+        });
+    }
+
+    private EntityMetadata tryToFindEntityClass(Predicate<NavigationNode> nodeMatcher) {
         AtomicReference<EntityMetadata> found = new AtomicReference<>();
-        if (ObjectOperations.isValidClassName(className)) {
-
-            getNavigation().forEachNode(node -> {
-                if (node.getType().equals("CrudPage") && node.getFile().equals(className)) {
-                    var clazz = ObjectOperations.findClass(className);
-                    if (clazz != null) {
-                        var entityMetadata = metadataLoader.loadEntityMetadata(clazz);
-                        entities.getEntities().add(entityMetadata);
-                        found.set(entityMetadata);
-                    }
+        getNavigation().forEachNode(node -> {
+            if (found.get() == null && "CrudPage".equals(node.getType()) && nodeMatcher.test(node)) {
+                var clazz = crudPageEntityClass(node);
+                if (clazz != null) {
+                    found.set(registerEntityMetadata(clazz));
                 }
-            });
-
-        }
+            }
+        });
         return found.get();
     }
 
     /**
-     * Returns all view descriptors for a specific entity by its class name.
+     * Extracts the real entity class of a {@code CrudPage} node from its live {@link NavigationNode#getElement()}
+     * (a {@link Page}), never from serialized client data.
+     */
+    private Class<?> crudPageEntityClass(NavigationNode node) {
+        if (node.getElement() instanceof Page page) {
+            return ObjectOperations.findClass(page.getPath());
+        }
+        return null;
+    }
+
+    private EntityMetadata registerEntityMetadata(Class<?> clazz) {
+        var existing = entities.getEntities().stream()
+                .filter(e -> e.getClassName().equals(clazz.getName()))
+                .findFirst().orElse(null);
+        if (existing != null) {
+            return existing;
+        }
+        var entityMetadata = metadataLoader.loadEntityMetadata(clazz);
+        entities.getEntities().add(entityMetadata);
+        return entityMetadata;
+    }
+
+    /**
+     * Returns all view descriptors for a specific entity by its id.
      *
-     * @param className the entity class name
+     * @param id the entity id
      * @return the list of {@link ViewDescriptor} objects
      */
-    @GetMapping(value = "/entities/{className}/views", produces = "application/json")
-    public List<ViewDescriptor> getEntityViewDescriptors(@PathVariable String className) {
-        var entityMetadata = getEntityMetadata(className);
+    @GetMapping(value = "/entities/{id}/views", produces = "application/json")
+    public List<ViewDescriptor> getEntityViewDescriptors(@PathVariable String id) {
+        var entityMetadata = getEntityMetadata(id);
         if (entityMetadata != null) {
             return entityMetadata.getDescriptors().stream().map(ViewDescriptorMetadata::getDescriptor).toList();
         }
@@ -344,15 +401,15 @@ public class ApplicationMetadataController {
     }
 
     /**
-     * Returns a specific view descriptor for an entity by its class name and view ID.
+     * Returns a specific view descriptor for an entity by its id and view ID.
      *
-     * @param className the entity class name
-     * @param view      the view ID
+     * @param id   the entity id
+     * @param view the view ID
      * @return the {@link ViewDescriptor} object
      */
-    @GetMapping(value = "/entities/{className}/views/{view}", produces = "application/json")
-    public ViewDescriptor getEntityViewDescriptor(@PathVariable String className, @PathVariable String view) {
-        var entityMetadata = getEntityMetadata(className);
+    @GetMapping(value = "/entities/{id}/views/{view}", produces = "application/json")
+    public ViewDescriptor getEntityViewDescriptor(@PathVariable String id, @PathVariable String view) {
+        var entityMetadata = getEntityMetadata(id);
         if (entityMetadata != null && entityMetadata.getDescriptors() != null) {
             return entityMetadata.getDescriptors().stream()
                     .filter(d -> d.getView().equals(view))
@@ -363,23 +420,23 @@ public class ApplicationMetadataController {
     }
 
     /**
-     * Executes an action on an entity by its class name and action ID.
+     * Executes an action on an entity by its id and action ID.
      *
-     * @param className   the entity class name
+     * @param id          the entity id
      * @param action      the action ID
      * @param request     the execution request containing parameters and data
      * @param httpRequest the current HTTP request, used only to populate a validation-error body's path
      * @return see {@link #executeAction}
      */
-    @PostMapping(value = "/entities/{className}/action/{action}", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Object> executeEntityAction(@PathVariable String className, @PathVariable String action,
+    @PostMapping(value = "/entities/{id}/action/{action}", produces = "application/json", consumes = "application/json")
+    public ResponseEntity<Object> executeEntityAction(@PathVariable String id, @PathVariable String action,
                                                         @RequestBody ActionExecutionRequest request, HttpServletRequest httpRequest) {
-        var entityMetadata = getEntityMetadata(className);
+        var entityMetadata = getEntityMetadata(id);
         if (entityMetadata != null) {
             var actionMetadata = entityMetadata.getActions().stream().filter(a -> a.getId().equals(action)).findFirst().orElse(null);
             return executeAction(action, request, actionMetadata, httpRequest);
         }
-        return okBody(new ActionExecutionResponse("Entity " + className + " not found", HttpStatus.NOT_FOUND.getReasonPhrase(), 404));
+        return okBody(new ActionExecutionResponse("Entity " + id + " not found", HttpStatus.NOT_FOUND.getReasonPhrase(), 404));
     }
 
     @GetMapping(value = "/entities/ref/{alias}/{id}", produces = "application/json")

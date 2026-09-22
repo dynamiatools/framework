@@ -99,7 +99,9 @@ public class ActionMetadata extends BasicMetadata {
         }
 
         if (action instanceof ClassAction classAction) {
-            this.applicableClasses = Streams.mapAndCollect(classAction.getApplicableClasses(), a -> a.targetClass() == null ? "all" : a.targetClass().getName());
+            // Simple name, not FQCN: must match EntityMetadata#getId() so SDK dispatch
+            // (ActionsApi.resolveEntityClassName -> /entities/{id}/action/{action}) keeps working.
+            this.applicableClasses = Streams.mapAndCollect(classAction.getApplicableClasses(), a -> a.targetClass() == null ? "all" : a.targetClass().getSimpleName());
         }
 
         this.action = action;
