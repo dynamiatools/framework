@@ -34,6 +34,20 @@ describe('replaceTokensInDir', () => {
     expect(readFileSync(join(dir, 'nested', 'deeper', 'a.yml'), 'utf-8')).toBe('name: my-erp')
   })
 
+  // Regression test: frontend templates (Vite/Vue/React) are mostly .ts/.vue/.html/.js files.
+  // Without these in the extension allow-list, {{PROJECT_NAME}} silently survives generation.
+  it('replaces tokens in frontend source/markup files (.ts, .vue, .html, .js)', () => {
+    writeFileSync(join(dir, 'main.ts'), "const name = '{{PROJECT_NAME}}'")
+    writeFileSync(join(dir, 'App.vue'), '<template>{{PROJECT_NAME}}</template>')
+    writeFileSync(join(dir, 'index.html'), '<title>{{PROJECT_NAME}}</title>')
+    writeFileSync(join(dir, 'legacy.js'), "module.exports = '{{PROJECT_NAME}}'")
+    replaceTokensInDir(dir, { '{{PROJECT_NAME}}': 'my-erp' })
+    expect(readFileSync(join(dir, 'main.ts'), 'utf-8')).toBe("const name = 'my-erp'")
+    expect(readFileSync(join(dir, 'App.vue'), 'utf-8')).toBe('<template>my-erp</template>')
+    expect(readFileSync(join(dir, 'index.html'), 'utf-8')).toBe('<title>my-erp</title>')
+    expect(readFileSync(join(dir, 'legacy.js'), 'utf-8')).toBe("module.exports = 'my-erp'")
+  })
+
   it('applies multiple token replacements in one pass', () => {
     writeFileSync(join(dir, 'pom.xml'), '{{GROUP_ID}}:{{ARTIFACT_ID}}')
     replaceTokensInDir(dir, { '{{GROUP_ID}}': 'com.acme', '{{ARTIFACT_ID}}': 'shop' })

@@ -6,6 +6,9 @@ const TEXT_EXTENSIONS = new Set([
   '.java', '.kt', '.groovy',
   '.xml', '.yml', '.yaml', '.properties',
   '.md', '.txt', '.json', '.gradle', '.kts',
+  // Frontend templates (Vite/Vue/React): without these, {{PROJECT_NAME}} and any other
+  // token would be silently left untouched in every source/markup file.
+  '.ts', '.tsx', '.js', '.jsx', '.vue', '.html', '.css', '.scss',
 ])
 
 /**
@@ -141,7 +144,7 @@ export async function renameJavaPackages(options: RenameOptions): Promise<void> 
   replacements['<artifactId>demo</artifactId>'] = `<artifactId>${artifactId}</artifactId>`
   replacements['<version>0.0.1-SNAPSHOT</version>'] = `<version>${version}</version>`
   replacements['<name>DynamiaTools App Backend</name>'] = `<name>${projectName}</name>`
-  replacements['<dynamia.version>26.4.1</dynamia.version>'] = `<dynamia.version>${dynamiaVersion}</dynamia.version>`
+  replacements['<dynamia.version>26.9.0</dynamia.version>'] = `<dynamia.version>${dynamiaVersion}</dynamia.version>`
   replacements['<version>4.0.5</version>'] = `<version>${springBootVersion}</version>`
   replacements['<version>4.0.5.RELEASE</version>'] = `<version>${springBootVersion}</version>`
 
