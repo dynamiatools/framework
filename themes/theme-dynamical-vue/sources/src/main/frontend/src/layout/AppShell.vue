@@ -106,7 +106,7 @@ watch(() => route.path, path => navigateTo(toInternalPath(path)), { immediate: t
 
 // Opened at the bare "/": land on the first page, like the theme always did.
 watch(
-  [nodes, () => route.path],
+  [() => nodes.value, () => route.path],
   ([tree, path]) => {
     if (path !== '/' || !tree.length) return;
     const first = findFirstPage(tree);
