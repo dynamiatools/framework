@@ -1,12 +1,84 @@
 import { input, select, confirm } from '@inquirer/prompts'
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
+import { parseArgs } from 'node:util'
 import { execa } from 'execa'
 import { loadConfig, type CliConfig } from '../utils/config.js'
 import { runChecks } from '../utils/env.js'
 import { banner, info, error, beta, errorMessage, errorWithCode, success, warn } from '../utils/logger.js'
 import { generateBackend } from '../generators/backend.js'
 import { generateFrontend } from '../generators/frontend.js'
+
+// ---------------------------------------------------------------------------
+// Non-interactive flags
+// ---------------------------------------------------------------------------
+
+type ScaffoldChoice = 'both' | 'backend' | 'frontend'
+type PackageManager = 'pnpm' | 'npm' | 'yarn'
+
+export interface NewCommandFlags {
+  name?: string
+  scaffold?: ScaffoldChoice
+  backendLang?: string
+  groupId?: string
+  artifactId?: string
+  version?: string
+  description?: string
+  frontend?: string
+  pm?: PackageManager
+  yes?: boolean
+  git?: boolean
+}
+
+/**
+ * Parse CLI flags for `dynamia new`, allowing scripted/CI usage without prompts.
+ * Any flag left unset falls back to its interactive prompt.
+ */
+export function parseNewFlags(argv: string[]): NewCommandFlags {
+  const { values } = parseArgs({
+    args: argv,
+    options: {
+      name: { type: 'string' },
+      scaffold: { type: 'string' },
+      'backend-lang': { type: 'string' },
+      'group-id': { type: 'string' },
+      'artifact-id': { type: 'string' },
+      version: { type: 'string' },
+      description: { type: 'string' },
+      frontend: { type: 'string' },
+      pm: { type: 'string' },
+      yes: { type: 'boolean' },
+      git: { type: 'boolean' },
+      'no-git': { type: 'boolean' },
+    },
+    allowPositionals: true,
+    strict: false,
+  })
+
+  const scaffold = values.scaffold as string | undefined
+  if (scaffold !== undefined && scaffold !== 'both' && scaffold !== 'backend' && scaffold !== 'frontend') {
+    errorWithCode('DT-COMMAND-003', `--scaffold must be one of: both, backend, frontend (got "${scaffold}")`)
+  }
+
+  const pm = values.pm as string | undefined
+  if (pm !== undefined && pm !== 'pnpm' && pm !== 'npm' && pm !== 'yarn') {
+    errorWithCode('DT-COMMAND-003', `--pm must be one of: pnpm, npm, yarn (got "${pm}")`)
+  }
+
+  return {
+    name: values.name as string | undefined,
+    scaffold: scaffold as ScaffoldChoice | undefined,
+    backendLang: values['backend-lang'] as string | undefined,
+    groupId: values['group-id'] as string | undefined,
+    artifactId: values['artifact-id'] as string | undefined,
+    version: values.version as string | undefined,
+    description: values.description as string | undefined,
+    frontend: values.frontend as string | undefined,
+    pm: pm as PackageManager | undefined,
+    yes: values.yes as boolean | undefined,
+    git: values['no-git'] ? false : (values.git as boolean | undefined),
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -20,7 +92,9 @@ function normalizeSpringBootVersion(version: string): string {
 
 async function fetchSpringBootVersion(_config: CliConfig): Promise<string> {
   try {
-    const metaRes = await fetch('https://start.spring.io/metadata/client')
+    const metaRes = await fetch('https://start.spring.io/metadata/client', {
+      signal: AbortSignal.timeout(4000),
+    })
     if (metaRes.ok) {
       const meta = await metaRes.json() as Record<string, unknown>
       const bootVersion = (meta as { bootVersion?: { default?: string } }).bootVersion?.default
@@ -96,8 +170,10 @@ function printSuccessMessage(opts: {
 // Command entry point
 // ---------------------------------------------------------------------------
 
-export async function runNew(): Promise<void> {
+export async function runNew(argv: string[] = []): Promise<void> {
   banner()
+
+  const flags = parseNewFlags(argv)
 
   // Load configuration from cli.properties
   let config: CliConfig
@@ -113,23 +189,28 @@ export async function runNew(): Promise<void> {
   }
 
   // Environment checks (git missing = hard stop)
-  await runChecks()
+  await runChecks(config)
 
   // --- Step 1: Project name ---
-  const projectName = await input({
-    message: 'Project name:',
-    validate: (value: string) => {
-      if (!value.trim()) return 'Project name cannot be empty'
-      if (!/^[a-z0-9-]+$/.test(value.trim())) {
-        return 'Only lowercase letters, numbers, and hyphens are allowed'
-      }
-      return true
-    },
-  })
+  const validateProjectName = (value: string): true | string => {
+    if (!value.trim()) return 'Project name cannot be empty'
+    if (!/^[a-z0-9-]+$/.test(value.trim())) {
+      return 'Only lowercase letters, numbers, and hyphens are allowed'
+    }
+    return true
+  }
+
+  let projectName: string
+  if (flags.name !== undefined) {
+    const validation = validateProjectName(flags.name)
+    if (validation !== true) errorWithCode('DT-COMMAND-003', `--name: ${validation}`)
+    projectName = flags.name.trim()
+  } else {
+    projectName = await input({ message: 'Project name:', validate: validateProjectName })
+  }
 
   // --- Step 2: What to generate ---
-  type ScaffoldChoice = 'both' | 'backend' | 'frontend'
-  const scaffoldChoice = await select<ScaffoldChoice>({
+  const scaffoldChoice: ScaffoldChoice = flags.scaffold ?? await select<ScaffoldChoice>({
     message: 'What do you want to scaffold?',
     choices: [
       { name: 'Backend + Frontend', value: 'both' },
@@ -161,28 +242,35 @@ export async function runNew(): Promise<void> {
       errorWithCode('DT-BACKEND-005', 'Backend templates are not available yet. Please try frontend only for now.')
     }
 
-    language = await select({
-      message: 'Backend language:',
-      choices: languageChoices,
-    })
+    if (flags.backendLang !== undefined) {
+      const chosen = languageChoices.find((choice) => choice.value === flags.backendLang)
+      if (!chosen) errorWithCode('DT-COMMAND-003', `--backend-lang "${flags.backendLang}" is not a known backend template.`)
+      if (chosen.disabled) errorWithCode('DT-COMMAND-003', `--backend-lang "${flags.backendLang}": ${chosen.disabled}`)
+      language = flags.backendLang
+    } else {
+      language = await select({
+        message: 'Backend language:',
+        choices: languageChoices,
+      })
+    }
 
     // --- Step 4: Maven coordinates ---
-    groupId = await input({
+    groupId = flags.groupId ?? await input({
       message: 'Group ID:',
       default: 'com.example',
     })
 
-    artifactId = await input({
+    artifactId = flags.artifactId ?? await input({
       message: 'Artifact ID:',
       default: projectName,
     })
 
-    version = await input({
+    version = flags.version ?? await input({
       message: 'Version:',
       default: '1.0.0-SNAPSHOT',
     })
 
-    description = await input({
+    description = flags.description ?? await input({
       message: 'Description (optional):',
       default: '',
     })
@@ -205,13 +293,20 @@ export async function runNew(): Promise<void> {
       errorWithCode('DT-FRONTEND-005', 'Frontend templates are not available yet. Please try again soon.')
     }
 
-    framework = await select({
-      message: 'Frontend framework:',
-      choices: frameworkChoices,
-    })
+    if (flags.frontend !== undefined) {
+      const chosen = frameworkChoices.find((choice) => choice.value === flags.frontend)
+      if (!chosen) errorWithCode('DT-COMMAND-003', `--frontend "${flags.frontend}" is not a known frontend template.`)
+      if (chosen.disabled) errorWithCode('DT-COMMAND-003', `--frontend "${flags.frontend}": ${chosen.disabled}`)
+      framework = flags.frontend
+    } else {
+      framework = await select({
+        message: 'Frontend framework:',
+        choices: frameworkChoices,
+      })
+    }
 
     // --- Step 6: Package manager ---
-    packageManager = await select({
+    packageManager = flags.pm ?? await select({
       message: 'Package manager:',
       choices: [
         { name: 'pnpm', value: 'pnpm' },
@@ -239,7 +334,7 @@ export async function runNew(): Promise<void> {
   }
   console.log('')
 
-  const confirmed = await confirm({
+  const confirmed = flags.yes ?? await confirm({
     message: 'Generate project?',
     default: true,
   })
@@ -294,7 +389,7 @@ export async function runNew(): Promise<void> {
     springBootVersion,
   })
 
-  const initGit = await confirm({
+  const initGit = flags.git ?? await confirm({
     message: 'Initialize a Git repository in the project root?',
     default: true,
   })

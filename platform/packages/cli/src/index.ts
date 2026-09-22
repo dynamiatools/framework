@@ -7,7 +7,7 @@ const command = args[0] ?? 'new'
 
 switch (command) {
   case 'new':
-    await runNew()
+    await runNew(args.slice(1))
     break
   default:
     notAvailableYet(`Command "${command}"`, 'DT-COMMAND-001')

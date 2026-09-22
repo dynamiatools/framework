@@ -38,7 +38,7 @@ export interface CliConfig {
 // Parser
 // ---------------------------------------------------------------------------
 
-function parseProperties(content: string): Record<string, string> {
+export function parseProperties(content: string): Record<string, string> {
   const result: Record<string, string> = {}
   for (const raw of content.split('\n')) {
     const line = raw.trim()
