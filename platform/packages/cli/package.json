@@ -36,8 +36,11 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "clean": "rm -rf dist",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build && pnpm run test"
   },
   "dependencies": {
     "@inquirer/prompts": "^8.7.1",
@@ -47,7 +50,9 @@
   },
   "devDependencies": {
     "@types/node": "^26.4.1",
-    "typescript": "^6.0.3"
+    "@vitest/coverage-v8": "^4.1.11",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
   },
   "publishConfig": {
     "access": "public",

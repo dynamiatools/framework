@@ -5,6 +5,7 @@ export type CliErrorCode =
   | 'DT-CONFIG-001'
   | 'DT-COMMAND-001'
   | 'DT-COMMAND-002'
+  | 'DT-COMMAND-003'
   | 'DT-RUN-001'
   | 'DT-BACKEND-001'
   | 'DT-BACKEND-002'
