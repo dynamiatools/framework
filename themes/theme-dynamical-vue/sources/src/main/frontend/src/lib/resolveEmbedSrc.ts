@@ -1,6 +1,7 @@
 import type { NavigationNode } from '@dynamia-tools/sdk';
 
-const NON_BROWSABLE_PREFIXES = ['classpath:'];
+/** `http(s)://…` or root-relative (`/reports/monthly.html`). Anything else in `file` (a `classpath:` ZUL, a ConfigPage's bean name like `discountsCfg`...) is not something a browser can load. */
+const BROWSABLE_URL = /^(https?:\/\/|\/)/i;
 
 /**
  * Resolves a non-CrudPage {@link NavigationNode} into a URL for `<dynamia-embed src="...">`.
@@ -17,7 +18,7 @@ const NON_BROWSABLE_PREFIXES = ['classpath:'];
  */
 export function resolveEmbedSrc(node: NavigationNode): string | null {
   const file = node.file;
-  if (file && !NON_BROWSABLE_PREFIXES.some(prefix => file.startsWith(prefix))) {
+  if (file && BROWSABLE_URL.test(file)) {
     return file;
   }
   return node.path ? `/page-embed/${node.path}` : null;

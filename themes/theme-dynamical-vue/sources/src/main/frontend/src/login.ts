@@ -10,4 +10,11 @@ if (skinCookie) {
   document.documentElement.setAttribute('data-skin', decodeURIComponent(skinCookie));
 }
 
+// Same for dark mode: the app shell persists it in localStorage.theme (see lib/useSkin.ts).
+try {
+  if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+} catch {
+  // storage blocked — light login page
+}
+
 createApp(Login).mount('#app');
