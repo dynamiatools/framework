@@ -27,27 +27,34 @@ import tools.dynamia.navigation.NavigationManagerSession;
 import java.io.IOException;
 
 /**
- * Clears the thread-local {@link NavigationManagerSession} once a request finishes, so pooled
- * request-handling threads don't retain a stale navigation intent (page/params/queued callbacks)
- * across unrelated later requests.
+ * Binds a fresh {@link NavigationManagerSession} to the {@link ScopedValue} scope of the whole
+ * request, so a controller earlier in the chain (e.g. {@code PageNavigationController}/
+ * {@code PageEmbedController}) can stash a pending page/callback and the ZK desktop bootstrap
+ * later in the same request (reached via a server-side forward) can pick it up — see
+ * {@link NavigationManagerSession}'s Javadoc for the full contract.
  * <p>
- * {@link NavigationManagerSession} is populated and consumed within the same request/thread (a
- * controller sets a pending page, then a server-side forward into the ZK desktop's view consumes
- * it on that same thread) — see its Javadoc for the full contract. This filter only guarantees the
- * thread-local is removed afterward regardless of how the request completes.
+ * The binding is torn down automatically by {@link ScopedValue.Carrier#call} once the request
+ * finishes, whether normally or via an exception — no manual cleanup needed, and nothing leaks into
+ * a later, unrelated request even if the servlet container reuses this thread for it.
  *
  * @author Mario A. Serrano Leones
  */
 @Component
-public class NavigationManagerSessionCleanupFilter extends OncePerRequestFilter {
+public class NavigationManagerSessionScopeFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            filterChain.doFilter(request, response);
-        } finally {
-            NavigationManagerSession.clear();
+            ScopedValue.where(NavigationManagerSession.SCOPE, new NavigationManagerSession())
+                    .call(() -> {
+                        filterChain.doFilter(request, response);
+                        return null;
+                    });
+        } catch (ServletException | IOException | RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ServletException(e);
         }
     }
 }

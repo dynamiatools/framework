@@ -11,34 +11,43 @@ import java.util.Queue;
  * Holds a navigation intent (a {@link Page} plus optional params, and/or queued {@link Callback}s)
  * so it can be picked up by the {@link NavigationManager} of a ZK desktop that is about to be built.
  * <p>
- * This is a {@link ThreadLocal} holder, not a session-scoped bean: the only supported flow is a
+ * Backed by a {@link ScopedValue}, not a session-scoped bean: the only supported flow is a
  * server-side forward (e.g. {@code RequestDispatcher.forward()}, as used by
  * {@code PageNavigationController}/{@code PageEmbedController} to render an {@code index}/{@code embed}
  * ZUL view) where the code calling {@link #setPage(Page, Map)}/{@link #runLater(Callback)} and the
  * ZK desktop bootstrap that consumes it ({@code ZKNavigationManager.init()},
- * {@code ZKNavigationComposer.doAfterCompose()}) run on the very same thread, within the very same
- * HTTP request.
+ * {@code ZKNavigationComposer.doAfterCompose()}) run within the same dynamic scope — the whole
+ * request, wrapped by a request-lifecycle filter that binds a fresh instance for its duration (see
+ * {@code NavigationManagerSessionScopeFilter}).
  * </p>
  * <p>
- * <b>Do not</b> call {@link #setPage(Page, Map)}/{@link #runLater(Callback)} before an HTTP
- * <b>redirect</b> expecting a later request to pick it up — a redirect is a new request, possibly
- * served by a different thread, and the thread-local value won't be there. If that use case ever
- * arises it needs a different, explicit hand-off mechanism, not this class.
+ * {@link #getInstance()} throws {@link java.util.NoSuchElementException} if called outside that
+ * scope — e.g. a background job, or test code that hasn't bound one itself via
+ * {@code ScopedValue.where(NavigationManagerSession.SCOPE, new NavigationManagerSession()).run(...)}.
+ * This is intentional: failing fast beats silently creating a throwaway instance whose state would
+ * be lost the moment the call returns.
  * </p>
  * <p>
- * Using a thread-local (instead of the session-scoped bean this class used to be) is what makes it
- * safe for multiple ZK desktops to bootstrap concurrently in the same HTTP session — e.g. several
- * {@code <iframe>}s, each loading its own ZK page, or several real browser tabs opened at once. A
- * session-scoped slot would be shared and overwritten across those concurrent requests; a
- * thread-local is naturally isolated per request/thread.
+ * Using a scoped value (instead of the session-scoped bean this class used to be, or a plain
+ * {@link ThreadLocal}) is what makes it safe for multiple ZK desktops to bootstrap concurrently in
+ * the same HTTP session — e.g. several {@code <iframe>}s, each loading its own ZK page, or several
+ * real browser tabs opened at once — and plays correctly with virtual threads and structured
+ * concurrency: the binding is strictly scoped to the dynamic extent of the request that created it,
+ * torn down automatically (even on exception) with no manual cleanup step, and never leaks into an
+ * unrelated request that happens to reuse the same platform thread.
  * </p>
  *
  * @author Mario A. Serrano Leones
  */
 public class NavigationManagerSession implements Serializable {
 
-    private static final ThreadLocal<NavigationManagerSession> CURRENT =
-            ThreadLocal.withInitial(NavigationManagerSession::new);
+    /**
+     * Scoped-value key binding a {@link NavigationManagerSession} to the dynamic extent of the
+     * request bootstrapping a ZK desktop. Exposed so the request-lifecycle filter that establishes
+     * the binding doesn't need extra indirection; ordinary callers should use {@link #getInstance()}
+     * instead of touching this directly.
+     */
+    public static final ScopedValue<NavigationManagerSession> SCOPE = ScopedValue.newInstance();
 
     private Page page;
     private Map<String, Serializable> pageParams;
@@ -46,19 +55,12 @@ public class NavigationManagerSession implements Serializable {
     private Queue<Callback> runLaterQueue = new LinkedList<>();
 
     /**
-     * Returns the instance bound to the current thread, creating it lazily.
+     * Returns the instance bound to the current scope.
+     *
+     * @throws java.util.NoSuchElementException if called outside a bound scope
      */
     public static NavigationManagerSession getInstance() {
-        return CURRENT.get();
-    }
-
-    /**
-     * Removes the instance bound to the current thread. Must be called once the request that
-     * populated it (and forwarded into the target ZK desktop) has finished, so pooled threads don't
-     * retain a stale instance across unrelated requests.
-     */
-    public static void clear() {
-        CURRENT.remove();
+        return SCOPE.get();
     }
 
     public void setPage(Page page, Map<String, Serializable> params) {

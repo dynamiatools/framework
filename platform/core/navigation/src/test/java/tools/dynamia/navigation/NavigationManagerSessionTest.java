@@ -16,13 +16,13 @@
  */
 package tools.dynamia.navigation;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -31,105 +31,134 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Covers {@link NavigationManagerSession}'s thread-local behavior: it replaced a
+ * Covers {@link NavigationManagerSession}'s {@link ScopedValue}-backed behavior: it replaced a
  * {@code @Scope("session")} bean specifically to isolate concurrent requests (e.g. several ZK
  * desktops/iframes bootstrapping at once in the same HTTP session) from each other, so the key
- * property under test is isolation across threads, not just the plain getter/setter contract.
+ * property under test is isolation across scopes, not just the plain getter/setter contract.
+ * <p>
+ * In production the scope is bound by {@code NavigationManagerSessionScopeFilter} around the whole
+ * request; these tests bind it themselves via {@link #inScope} to exercise the class in isolation.
  */
 public class NavigationManagerSessionTest {
 
-    @AfterEach
-    public void cleanup() {
-        NavigationManagerSession.clear();
+    private void inScope(Runnable body) {
+        ScopedValue.where(NavigationManagerSession.SCOPE, new NavigationManagerSession()).run(body);
     }
 
     @Test
-    public void setPageAndGetPageShouldRoundtripOnSameThread() {
+    public void getInstanceOutsideAScopeShouldThrow() {
+        assertThrows(NoSuchElementException.class, NavigationManagerSession::getInstance);
+    }
+
+    @Test
+    public void setPageAndGetPageShouldRoundtripWithinAScope() {
         Page page = new Page("page", "Page", "the/page");
         Map<String, java.io.Serializable> params = new HashMap<>();
         params.put("k", "v");
 
-        NavigationManagerSession.getInstance().setPage(page, params);
+        inScope(() -> {
+            NavigationManagerSession.getInstance().setPage(page, params);
 
-        assertSame(page, NavigationManagerSession.getInstance().getPage());
-        assertEquals(params, NavigationManagerSession.getInstance().getPageParams());
+            assertSame(page, NavigationManagerSession.getInstance().getPage());
+            assertEquals(params, NavigationManagerSession.getInstance().getPageParams());
+        });
     }
 
     @Test
-    public void getInstanceShouldReturnSameInstanceWithinAThread() {
-        assertSame(NavigationManagerSession.getInstance(), NavigationManagerSession.getInstance());
+    public void getInstanceShouldReturnSameInstanceWithinAScope() {
+        inScope(() -> assertSame(NavigationManagerSession.getInstance(), NavigationManagerSession.getInstance()));
     }
 
     @Test
     public void updateNavManagerShouldConsumeAndClearPendingPage() {
         Page page = new Page("page", "Page", "the/page");
-        NavigationManagerSession.getInstance().setPage(page, null);
 
-        TestNavigationManager navManager = new TestNavigationManager();
-        NavigationManagerSession.getInstance().updateNavManager(navManager);
+        inScope(() -> {
+            NavigationManagerSession.getInstance().setPage(page, null);
 
-        assertSame(page, navManager.getCurrentPage());
-        assertNull(NavigationManagerSession.getInstance().getPage());
-        assertNull(NavigationManagerSession.getInstance().getPageParams());
+            TestNavigationManager navManager = new TestNavigationManager();
+            NavigationManagerSession.getInstance().updateNavManager(navManager);
+
+            assertSame(page, navManager.getCurrentPage());
+            assertNull(NavigationManagerSession.getInstance().getPage());
+            assertNull(NavigationManagerSession.getInstance().getPageParams());
+        });
     }
 
     @Test
     public void runLaterShouldQueueAndExecuteInOrder() {
         List<Integer> executed = new ArrayList<>();
-        NavigationManagerSession.getInstance().runLater(() -> executed.add(1));
-        NavigationManagerSession.getInstance().runLater(() -> executed.add(2));
-        NavigationManagerSession.getInstance().runLater(() -> executed.add(3));
 
-        NavigationManagerSession.getInstance().executeQueue();
+        inScope(() -> {
+            NavigationManagerSession.getInstance().runLater(() -> executed.add(1));
+            NavigationManagerSession.getInstance().runLater(() -> executed.add(2));
+            NavigationManagerSession.getInstance().runLater(() -> executed.add(3));
+
+            NavigationManagerSession.getInstance().executeQueue();
+        });
 
         assertEquals(List.of(1, 2, 3), executed);
     }
 
     @Test
     public void executeQueueShouldDrainTheQueue() {
-        NavigationManagerSession.getInstance().runLater(() -> {
-        });
-        NavigationManagerSession.getInstance().executeQueue();
+        inScope(() -> {
+            NavigationManagerSession.getInstance().runLater(() -> {
+            });
+            NavigationManagerSession.getInstance().executeQueue();
 
-        // a second call must be a no-op, not re-run anything or fail
-        NavigationManagerSession.getInstance().executeQueue();
+            // a second call must be a no-op, not re-run anything or fail
+            NavigationManagerSession.getInstance().executeQueue();
+        });
     }
 
     @Test
-    public void clearShouldDropTheCurrentThreadInstance() {
-        Page page = new Page("page", "Page", "the/page");
-        NavigationManagerSession session = NavigationManagerSession.getInstance();
-        session.setPage(page, null);
+    public void scopeShouldNotLeakOutsideItsDynamicExtent() {
+        inScope(() -> NavigationManagerSession.getInstance().setPage(new Page("page", "Page", "the/page"), null));
 
-        NavigationManagerSession.clear();
-
-        NavigationManagerSession afterClear = NavigationManagerSession.getInstance();
-        assertNull(afterClear.getPage());
+        assertThrows(NoSuchElementException.class, NavigationManagerSession::getInstance);
     }
 
     /**
-     * The whole point of moving away from session scope: a page/params set on one thread must not
-     * leak into a different thread handling a concurrent request (e.g. another tab/iframe
-     * bootstrapping at the same time in the same HTTP session).
+     * The whole point of moving away from session scope: a page bound in one scope must not leak
+     * into a different, concurrently-running scope — e.g. two tabs/iframes bootstrapping at the same
+     * time in the same HTTP session, each on its own thread, each binding its own scope.
      */
     @Test
-    public void pendingPageSetOnOneThreadShouldNotBeVisibleOnAnother() throws Exception {
-        Page page = new Page("page", "Page", "the/page");
-        NavigationManagerSession.getInstance().setPage(page, null);
+    public void pendingPageBoundInOneScopeShouldNotBeVisibleInAnotherConcurrentScope() throws Exception {
+        Page pageA = new Page("a", "A", "the/a");
+        Page pageB = new Page("b", "B", "the/b");
+        java.util.concurrent.CountDownLatch bothBound = new java.util.concurrent.CountDownLatch(2);
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
         try {
-            Future<Page> otherThreadPage = executor.submit(() -> NavigationManagerSession.getInstance().getPage());
-            assertNull(otherThreadPage.get(5, TimeUnit.SECONDS));
+            Future<Page> observedByA = executor.submit(() -> observeOwnPageAfterBothAreBound(pageA, bothBound));
+            Future<Page> observedByB = executor.submit(() -> observeOwnPageAfterBothAreBound(pageB, bothBound));
+
+            assertSame(pageA, observedByA.get(5, TimeUnit.SECONDS));
+            assertSame(pageB, observedByB.get(5, TimeUnit.SECONDS));
         } finally {
             executor.shutdownNow();
             assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
         }
+    }
 
-        // still present on the original thread
-        assertSame(page, NavigationManagerSession.getInstance().getPage());
+    private Page observeOwnPageAfterBothAreBound(Page page, java.util.concurrent.CountDownLatch bothBound) {
+        Page[] observed = new Page[1];
+        inScope(() -> {
+            NavigationManagerSession.getInstance().setPage(page, null);
+            bothBound.countDown();
+            try {
+                bothBound.await(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            observed[0] = NavigationManagerSession.getInstance().getPage();
+        });
+        return observed[0];
     }
 }
