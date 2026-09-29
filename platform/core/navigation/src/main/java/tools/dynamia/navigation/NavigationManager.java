@@ -105,7 +105,12 @@ public interface NavigationManager {
     }
 
     /**
-     * Delegate set current {@link Page} using a {@link NavigationManagerSession} when NavigationManager is builded
+     * Delegate set current {@link Page} using a {@link NavigationManagerSession} when NavigationManager is builded.
+     * <p>
+     * {@link NavigationManagerSession} is thread-local: this must be called on the same thread that
+     * will forward into the target ZK desktop (e.g. from a controller rendering an {@code index}/
+     * {@code embed} ZUL view via a server-side forward), never before an HTTP redirect — a redirect
+     * is a new request on a possibly different thread, so the value would not be picked up.
      *
      * @param page
      */
@@ -114,7 +119,8 @@ public interface NavigationManager {
     }
 
     /**
-     * Delegate set current {@link Page} using a {@link NavigationManagerSession} when NavigationManager is builded
+     * Delegate set current {@link Page} using a {@link NavigationManagerSession} when NavigationManager is builded.
+     * See {@link #setPageLater(Page)} for the thread-affinity requirement.
      *
      * @param page
      * @param params
@@ -132,7 +138,9 @@ public interface NavigationManager {
     }
 
     /**
-     * Delegate callback to run when {@link NavigationManager} are builded. Its store a Queue using {@link NavigationManagerSession}
+     * Delegate callback to run when {@link NavigationManager} are builded. Its store a Queue using {@link NavigationManagerSession}.
+     * See {@link #setPageLater(Page)} for the thread-affinity requirement — this must be called on
+     * the same thread that will build the target {@link NavigationManager}.
      *
      * @param callback
      */
