@@ -23,11 +23,13 @@ import org.springframework.stereotype.Component;
 import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventQueues;
+import org.zkoss.zk.ui.util.DesktopCleanup;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.navigation.BaseNavigationManager;
 import tools.dynamia.navigation.ModuleContainer;
+import tools.dynamia.navigation.NavigationManagerRegistry;
 import tools.dynamia.navigation.NavigationManagerSession;
 import tools.dynamia.navigation.Page;
 import tools.dynamia.navigation.PageEvent;
@@ -72,10 +74,21 @@ public class ZKNavigationManager extends BaseNavigationManager implements Serial
 
     @PostConstruct
     public void init() {
-        LOGGER.info("Initializing new " + getClass().getSimpleName() + " for desktop " + ZKUtil.getCurrentDesktop());
+        Desktop desktop = ZKUtil.getCurrentDesktop();
+        LOGGER.info("Initializing new " + getClass().getSimpleName() + " for desktop " + desktop);
 
         NavigationManagerSession.getInstance().updateNavManager(this);
 
+        if (desktop != null) {
+            String managerId = getId();
+            desktop.addListener((DesktopCleanup) cleanedUpDesktop -> {
+                try {
+                    NavigationManagerRegistry.getInstance().unregister(managerId);
+                } catch (RuntimeException e) {
+                    LOGGER.warn("Unable to unregister NavigationManager " + managerId + " on desktop cleanup: " + e.getMessage());
+                }
+            });
+        }
     }
 
     @Override

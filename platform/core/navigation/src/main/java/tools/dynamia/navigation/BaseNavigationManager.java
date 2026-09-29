@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * <p>
@@ -81,6 +82,7 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
 
     private NavigationBuilder currentNavigationBuilder;
     private Map<String, Serializable> currentPageParams;
+    private final String id;
 
     /**
      * Creates a new BaseNavigationManager with the given {@link ModuleContainer}.
@@ -91,6 +93,22 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
         this.logger = new SLF4JLoggingService(BaseNavigationManager.class);
         this.attributes = new HashMap<>();
         this.container = container;
+        this.id = UUID.randomUUID().toString();
+        var registry = NavigationManagerRegistry.getInstance();
+        if (registry != null) {
+            registry.register(this);
+        }
+    }
+
+    /**
+     * Returns a stable, framework-agnostic identifier for this instance, generated once at
+     * construction time.
+     *
+     * @return an opaque, stable id for this instance
+     */
+    @Override
+    public String getId() {
+        return id;
     }
 
     /**
