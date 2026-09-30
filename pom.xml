@@ -170,6 +170,10 @@
                 <configuration>
                     <publishingServerId>central</publishingServerId>
                     <autoPublish>true</autoPublish>
+                    <!-- Central only requires MD5+SHA1 (SHA256/SHA512 are accepted but optional).
+                         Dropping them cuts published file count per component from 24 to 16 (-33%),
+                         which matters now that Central tracks monthly file-count usage per org. -->
+                    <checksums>required</checksums>
                 </configuration>
             </plugin>
         </plugins>
