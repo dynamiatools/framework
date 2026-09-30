@@ -3,6 +3,7 @@ package tools.dynamia.navigation;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import tools.dynamia.commons.Messages;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -50,9 +51,13 @@ public class NavigationNode implements Serializable {
     public NavigationNode(NavigationElement element) {
         this.element = element;
         this.id = element.getId();
-        this.name = element.getLocalizedName();
+        var locale = Messages.getDefaultLocale();
+        var providers = NavigationLabels.providers();
+        this.name = NavigationLabels.resolve(providers, element.getVirtualPath(), locale, element.getLocalizedName(locale));
         this.longName = element.getLongNameSupplier() != null ? (String) element.getLongNameSupplier().get() : element.getLongName();
-        this.description = element.getLocalizedDescription();
+        var defaultDescription = element.getLocalizedDescription(locale);
+        this.description = defaultDescription == null || defaultDescription.isBlank() ? defaultDescription
+                : NavigationLabels.resolve(providers, element.getVirtualPath() + ".description", locale, defaultDescription);
         this.icon = element.getIcon();
         this.internalPath = element.getVirtualPath();
         this.path = element.getPrettyVirtualPath();
