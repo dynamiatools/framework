@@ -32,6 +32,7 @@
   - [Table.vue](#tablevue)
   - [Crud.vue](#crudvue)
   - [CrudPage.vue](#crudpagevue)
+  - [ZkEmbed.vue](#zkembedvue)
   - [Field.vue](#fieldvue)
   - [Field components](#field-components)
   - [Actions.vue](#actionsvue)
@@ -696,6 +697,21 @@ Renders the current page location as a breadcrumb trail.
   :page="currentPage"
 />
 ```
+
+---
+
+### ZkEmbed.vue
+
+Mounts a server-rendered ZK view/page **inline** (same origin, no iframe). Registered as `<DynamiaZkEmbed>` by the plugin.
+
+```vue
+<DynamiaZkEmbed src="/page-embed/library/books" @load="onLoad" @error="onError" />
+```
+
+Props: `src` (same-origin URL; changing it remounts) and `timeout` (ms). Events: `load` (`{ src, desktopIds }`) and
+`error`. Slots: `loading`, `error` (`{ error }`). The ZK desktop is released when the component unmounts. ZK owns the
+DOM inside the component, so Vue never renders children into it. Constraints and internals:
+[docs/frontend/INLINE_ZK_EMBED.md](../../../docs/frontend/INLINE_ZK_EMBED.md).
 
 ---
 

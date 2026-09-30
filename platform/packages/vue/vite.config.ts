@@ -21,12 +21,13 @@ export default defineConfig({
       fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs'),
     },
     rollupOptions: {
-      external: ['vue', '@dynamia-tools/sdk', '@dynamia-tools/ui-core'],
+      external: ['vue', '@dynamia-tools/sdk', '@dynamia-tools/ui-core', '@dynamia-tools/ui-core/embed'],
       output: {
         globals: {
           vue: 'Vue',
           '@dynamia-tools/sdk': 'DynamiaSdk',
           '@dynamia-tools/ui-core': 'DynamiaUiCore',
+          '@dynamia-tools/ui-core/embed': 'DynamiaUiCoreEmbed',
         },
       },
     },

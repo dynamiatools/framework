@@ -68,6 +68,18 @@ import { DynamiaEmbed, detectEmbedType } from '../../packages/ui-core/src/embed/
 
 Only `src` is reactive; the others are read once per load. Call `.reload()` on the element after changing them to apply.
 
+### Inline mode (`mode="inline"`, same-origin ZK, no iframe)
+
+```html
+<dynamia-embed mode="inline" src="/page-embed/library/books"></dynamia-embed>
+```
+
+Skips type detection and mounts a same-origin, server-rendered ZK view directly in the page (light DOM, no iframe,
+no sandbox). `sandbox`, `height`, `loading` and `no-resize` do not apply; `timeout` does. The `dynamia-embed:load`
+event carries `type: 'inline'` and `desktopIds`. Removing the element (or changing `src`) releases the ZK desktop.
+Cross-origin URLs fail with `dynamia-embed:error`. Programmatic API: `mountInline(container, src)` from
+`@dynamia-tools/ui-core/embed`. Details, constraints and how it works: [docs/frontend/INLINE_ZK_EMBED.md](../../../../docs/frontend/INLINE_ZK_EMBED.md).
+
 ## Events
 
 Both bubble and cross the shadow boundary (`composed: true`):

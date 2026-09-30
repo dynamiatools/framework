@@ -5,6 +5,7 @@
 // consume it only via the `@dynamia-tools/ui-core/embed` subpath.
 
 import { detectEmbedType } from './detectType.js';
+import { mountInline, type InlineHandle } from './inline.js';
 
 const DEFAULT_TIMEOUT_MS = 8000;
 const DEFAULT_SANDBOX = 'allow-scripts';
@@ -31,9 +32,13 @@ const CUSTOM_ELEMENT_NAME_RE = /^[a-z][a-z0-9._-]*-[a-z0-9._-]*$/;
  * - `timeout` — milliseconds before the `HEAD` probe / JS import is abandoned. Defaults to 8000.
  * - `loading` — `"lazy" | "eager"`, passed through to the iframe. Defaults to `"lazy"`.
  * - `no-resize` — boolean attribute; disables the `ResizeObserver` + postMessage auto-resize path.
+ * - `mode="inline"` — same-origin, iframe-less embed of a server-rendered ZK view/page (see `inline.ts`).
+ *   Skips type detection; the content is mounted in the element's light DOM (slotted), NOT inside the
+ *   shadow root, because the ZK client engine needs the host document's global scope. `sandbox`,
+ *   `height`, `loading` and `no-resize` do not apply.
  *
  * Events (bubble, cross shadow boundary):
- * - `dynamia-embed:load` — `{ type, src }`
+ * - `dynamia-embed:load` — `{ type, src }` (`type` is `'html' | 'js' | 'inline'`; inline adds `desktopIds`)
  * - `dynamia-embed:error` — `{ src, error }`
  *
  * Example:
@@ -53,6 +58,7 @@ export class DynamiaEmbed extends HTMLElement {
   private _loadToken = 0;
   private _resizeObserver: ResizeObserver | null = null;
   private _messageListener: ((event: MessageEvent) => void) | null = null;
+  private _inline: { handle: InlineHandle | null; host: HTMLElement; abort: AbortController } | null = null;
 
   constructor() {
     super();
@@ -65,6 +71,7 @@ export class DynamiaEmbed extends HTMLElement {
 
   disconnectedCallback(): void {
     this._cancelPending();
+    this._teardownInline();
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
@@ -94,7 +101,14 @@ export class DynamiaEmbed extends HTMLElement {
 
   private async _load(src: string): Promise<void> {
     this._cancelPending();
+    this._teardownInline();
     const token = ++this._loadToken;
+
+    if (this.getAttribute('mode') === 'inline') {
+      await this._loadInline(src, token);
+      return;
+    }
+
     this._renderLoading();
 
     try {
@@ -117,6 +131,40 @@ export class DynamiaEmbed extends HTMLElement {
       this._renderError('Failed to load embed');
       this._dispatch('dynamia-embed:error', { src, error });
     }
+  }
+
+  // ── Inline (same-origin ZK, no iframe) ──────────────────────────────────────────────
+
+  private async _loadInline(src: string, token: number): Promise<void> {
+    const host = document.createElement('div');
+    host.setAttribute('data-dynamia-embed-inline', '');
+    const abort = new AbortController();
+    this._inline = { handle: null, host, abort };
+    this._shadow.replaceChildren(document.createElement('slot'));
+    this.replaceChildren(host);
+
+    try {
+      const handle = await mountInline(host, src, { timeoutMs: this._timeoutMs, signal: abort.signal });
+      if (token !== this._loadToken || this._inline?.host !== host) {
+        handle.destroy();
+        return;
+      }
+      this._inline.handle = handle;
+      this._dispatch('dynamia-embed:load', { type: 'inline', src, desktopIds: handle.desktopIds });
+    } catch (error) {
+      if (token !== this._loadToken || abort.signal.aborted) return;
+      this._renderError('Failed to load embed');
+      this._dispatch('dynamia-embed:error', { src, error });
+    }
+  }
+
+  private _teardownInline(): void {
+    const inline = this._inline;
+    if (!inline) return;
+    this._inline = null;
+    inline.abort.abort();
+    inline.handle?.destroy();
+    inline.host.remove();
   }
 
   // ── HTML → sandboxed iframe ──────────────────────────────────────────────

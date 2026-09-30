@@ -4,5 +4,7 @@
 
 export { DynamiaEmbed } from './DynamiaEmbed.js';
 export { registerDynamiaEmbed } from './register.js';
+export { mountInline } from './inline.js';
+export type { InlineHandle, InlineMountOptions } from './inline.js';
 export { detectEmbedType } from './detectType.js';
 export type { EmbedContentType, DetectTypeOptions } from './detectType.js';

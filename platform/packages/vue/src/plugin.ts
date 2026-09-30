@@ -43,6 +43,7 @@ import NavMenuComponent from './components/NavMenu.vue';
 import NavBreadcrumbComponent from './components/NavBreadcrumb.vue';
 import CrudPageComponent from './components/CrudPage.vue';
 import DialogComponent from './components/Dialog.vue';
+import ZkEmbedComponent from './components/ZkEmbed.vue';
 import ConfirmHostComponent from './components/ConfirmHost.vue';
 import ToastHostComponent from './components/ToastHost.vue';
 import PromptHostComponent from './components/PromptHost.vue';
@@ -120,6 +121,7 @@ export const DynamiaVue = {
     app.component('DynamiaNavBreadcrumb', NavBreadcrumbComponent);
     app.component('DynamiaCrudPage', CrudPageComponent);
     app.component('DynamiaDialog', DialogComponent);
+    app.component('DynamiaZkEmbed', ZkEmbedComponent);
     app.component('DynamiaConfirmHost', ConfirmHostComponent);
     app.component('DynamiaToastHost', ToastHostComponent);
     app.component('DynamiaPromptHost', PromptHostComponent);
