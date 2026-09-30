@@ -105,7 +105,15 @@ public interface NavigationManager {
     }
 
     /**
-     * Delegate set current {@link Page} using a {@link NavigationManagerSession} when NavigationManager is builded
+     * Delegate set current {@link Page} using a {@link NavigationManagerSession} when NavigationManager is builded.
+     * <p>
+     * {@link NavigationManagerSession} is a {@link ScopedValue}: this must be called within the same
+     * scope that will forward into the target ZK desktop (e.g. from a controller rendering an
+     * {@code index}/{@code embed} ZUL view via a server-side forward, with the scope established by
+     * a request-lifecycle filter around the whole request). If the request ends (e.g. with an HTTP
+     * redirect) before any desktop consumed the value, the filter hands it off through the HTTP
+     * session to the next request. Throws {@link java.util.NoSuchElementException} if no scope is
+     * currently bound.
      *
      * @param page
      */
@@ -114,7 +122,8 @@ public interface NavigationManager {
     }
 
     /**
-     * Delegate set current {@link Page} using a {@link NavigationManagerSession} when NavigationManager is builded
+     * Delegate set current {@link Page} using a {@link NavigationManagerSession} when NavigationManager is builded.
+     * See {@link #setPageLater(Page)} for the scope requirement.
      *
      * @param page
      * @param params
@@ -132,7 +141,9 @@ public interface NavigationManager {
     }
 
     /**
-     * Delegate callback to run when {@link NavigationManager} are builded. Its store a Queue using {@link NavigationManagerSession}
+     * Delegate callback to run when {@link NavigationManager} are builded. Its store a Queue using {@link NavigationManagerSession}.
+     * See {@link #setPageLater(Page)} for the scope requirement — this must be called within the
+     * same scope that will build the target {@link NavigationManager}.
      *
      * @param callback
      */
@@ -331,4 +342,19 @@ public interface NavigationManager {
      * @param navigationBuilder the navigation builder to set
      */
     void setCurrentNavigationBuilder(NavigationBuilder navigationBuilder);
+
+    /**
+     * Returns a stable identifier for this {@link NavigationManager} instance, unique within the
+     * current user session, framework-agnostic (it never references a UI-specific concept such as a
+     * ZK {@code Desktop} id).
+     * <p>
+     * Used to correlate a manager instance with "which tab/iframe/desktop" it belongs to when more
+     * than one instance is active in the same session at once (e.g. several {@code <iframe>}s, each
+     * loading its own page, or several real browser tabs opened concurrently) — for logging,
+     * debugging, and for a session-level registry of active instances (see
+     * {@code NavigationManagerRegistry}).
+     *
+     * @return an opaque, stable id for this instance
+     */
+    String getId();
 }
