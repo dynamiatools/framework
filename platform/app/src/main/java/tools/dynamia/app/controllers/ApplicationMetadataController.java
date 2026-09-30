@@ -68,17 +68,10 @@ public class ApplicationMetadataController {
     private final ApplicationMetadataLoader metadataLoader;
     private final EntityMetadata unknowEntity;
     /**
-     * Cached application metadata.
-     */
-    private ApplicationMetadata cache;
-    /**
-     * Cached entities metadata.
+     * Cached entities metadata. Application metadata and global actions are deliberately not cached because
+     * their texts depend on the request locale (e.g. per-tenant), unlike the much larger entities metadata.
      */
     private ApplicationMetadataEntities entities;
-    /**
-     * Cached global actions metadata.
-     */
-    private ApplicationMetadataActions globalActions;
     /**
      * Cache for individual entity metadata.
      */
@@ -114,10 +107,7 @@ public class ApplicationMetadataController {
      */
     @GetMapping(value = "", produces = "application/json")
     public ApplicationMetadata getMetadata() {
-        if (cache == null) {
-            cache = metadataLoader.load();
-        }
-        return cache;
+        return metadataLoader.load();
     }
 
     /**
@@ -137,10 +127,7 @@ public class ApplicationMetadataController {
      */
     @GetMapping(value = "/actions", produces = "application/json")
     public ApplicationMetadataActions getGlobalActions() {
-        if (globalActions == null) {
-            globalActions = metadataLoader.loadGlobalActions();
-        }
-        return globalActions;
+        return metadataLoader.loadGlobalActions();
     }
 
     /**
