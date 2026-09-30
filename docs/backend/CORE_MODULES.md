@@ -665,6 +665,9 @@ Module (e.g., "CRM")
 - Create module references
 - Organize application features
 
+> Multi-tab / multi-iframe behavior, `setPageLater`/`runLater` contract and cross-request hand-off:
+> see [Navigation Session](./NAVIGATION_SESSION.md).
+
 ---
 
 ## Actions Module
