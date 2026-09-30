@@ -13,6 +13,7 @@ import type CrudComponent from './components/Crud.vue';
 import type FieldComponent from './components/Field.vue';
 import type ActionsComponent from './components/Actions.vue';
 import type DialogComponent from './components/Dialog.vue';
+import type ZkEmbedComponent from './components/ZkEmbed.vue';
 import type ConfirmHostComponent from './components/ConfirmHost.vue';
 import type ToastHostComponent from './components/ToastHost.vue';
 import type PromptHostComponent from './components/PromptHost.vue';
@@ -31,6 +32,7 @@ declare module 'vue' {
     DynamiaNavBreadcrumb: typeof NavBreadcrumbComponent;
     DynamiaCrudPage: typeof CrudPageComponent;
     DynamiaDialog: typeof DialogComponent;
+    DynamiaZkEmbed: typeof ZkEmbedComponent;
     DynamiaConfirmHost: typeof ConfirmHostComponent;
     DynamiaToastHost: typeof ToastHostComponent;
     DynamiaPromptHost: typeof PromptHostComponent;

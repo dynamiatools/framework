@@ -56,6 +56,11 @@ This folder is organized to help frontend developers understand:
 - **Contains:** wire protocol, stateless `resumeToken` design, `FlowRemoteAction` Java API, frontend rollout
   plan — and calls out that confirm/toast/dialog primitives don't exist yet in `ui-core`/`vue`
 
+#### 5. **[Inline ZK Embed](./INLINE_ZK_EMBED.md)**
+- **Purpose:** Embed server-rendered ZK views into a Vue/JS host without an iframe (same origin only)
+- **For:** Frontend developers integrating ZK pages into a Vue shell
+- **Contains:** `<DynamiaZkEmbed>` / `<dynamia-embed mode="inline">` usage, how the mount works, constraints
+
 ---
 
 ## 🎯 How to Use This Documentation

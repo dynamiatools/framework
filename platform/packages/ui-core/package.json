@@ -64,6 +64,7 @@
   "devDependencies": {
     "@dynamia-tools/sdk": "workspace:*",
     "@types/node": "^26.4.1",
+    "happy-dom": "^20.14.5",
     "typescript": "^6.0.3",
     "vite": "^8.2.2",
     "vite-plugin-dts": "^5.1.0",
