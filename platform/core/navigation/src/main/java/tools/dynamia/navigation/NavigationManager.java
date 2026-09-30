@@ -110,9 +110,10 @@ public interface NavigationManager {
      * {@link NavigationManagerSession} is a {@link ScopedValue}: this must be called within the same
      * scope that will forward into the target ZK desktop (e.g. from a controller rendering an
      * {@code index}/{@code embed} ZUL view via a server-side forward, with the scope established by
-     * a request-lifecycle filter around the whole request), never before an HTTP redirect — a
-     * redirect is a new request, possibly with no scope bound at all, so the value would not be
-     * picked up. Throws {@link java.util.NoSuchElementException} if no scope is currently bound.
+     * a request-lifecycle filter around the whole request). If the request ends (e.g. with an HTTP
+     * redirect) before any desktop consumed the value, the filter hands it off through the HTTP
+     * session to the next request. Throws {@link java.util.NoSuchElementException} if no scope is
+     * currently bound.
      *
      * @param page
      */

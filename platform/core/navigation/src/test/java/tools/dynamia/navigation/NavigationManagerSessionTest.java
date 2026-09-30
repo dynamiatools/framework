@@ -117,6 +117,45 @@ public class NavigationManagerSessionTest {
     }
 
     @Test
+    public void hasPendingStateShouldReflectPageAndQueue() {
+        inScope(() -> {
+            var session = NavigationManagerSession.getInstance();
+            assertTrue(!session.hasPendingState());
+
+            session.runLater(() -> {
+            });
+            assertTrue(session.hasPendingState());
+            session.executeQueue();
+            assertTrue(!session.hasPendingState());
+
+            session.setPage(new Page("page", "Page", "the/page"), null);
+            assertTrue(session.hasPendingState());
+        });
+    }
+
+    @Test
+    public void absorbShouldMoveThePageAndAppendTheQueue() {
+        List<Integer> executed = new ArrayList<>();
+        Page page = new Page("page", "Page", "the/page");
+        Map<String, java.io.Serializable> params = new HashMap<>();
+        params.put("k", "v");
+
+        var source = new NavigationManagerSession();
+        source.setPage(page, params);
+        source.runLater(() -> executed.add(2));
+
+        var target = new NavigationManagerSession();
+        target.runLater(() -> executed.add(1));
+        target.absorb(source);
+        target.executeQueue();
+
+        assertSame(page, target.getPage());
+        assertEquals(params, target.getPageParams());
+        assertEquals(List.of(1, 2), executed);
+        assertTrue(!source.hasPendingState());
+    }
+
+    @Test
     public void scopeShouldNotLeakOutsideItsDynamicExtent() {
         inScope(() -> NavigationManagerSession.getInstance().setPage(new Page("page", "Page", "the/page"), null));
 

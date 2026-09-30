@@ -21,10 +21,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockHttpSession;
 import tools.dynamia.navigation.NavigationManagerSession;
 import tools.dynamia.navigation.Page;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -33,6 +36,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -140,5 +146,96 @@ public class NavigationManagerSessionScopeFilterTest {
 
         filter.doFilter(new MockHttpServletRequest(), new MockHttpServletResponse(), chain);
         return observed.get();
+    }
+
+    /** A login-style flow: intent recorded, request ends (redirect) without any desktop consuming it. */
+    @Test
+    public void unconsumedIntentShouldBeHandedOffToTheNextRequestOfTheSameSession() throws ServletException, IOException {
+        var session = new MockHttpSession();
+        Page page = new Page("page", "Page", "the/page");
+        List<String> ran = new ArrayList<>();
+
+        runRequest(session, () -> {
+            NavigationManagerSession.getInstance().setPage(page, null);
+            NavigationManagerSession.getInstance().runLater(() -> ran.add("cb"));
+        });
+
+        AtomicReference<Page> restored = new AtomicReference<>();
+        runRequest(session, () -> {
+            restored.set(NavigationManagerSession.getInstance().getPage());
+            // a desktop bootstrap consumes it
+            NavigationManagerSession.getInstance().updateNavManager(noOpNavigationManager());
+            NavigationManagerSession.getInstance().executeQueue();
+        });
+        assertSame(page, restored.get());
+        assertEquals(List.of("cb"), ran);
+
+        AtomicReference<Page> third = new AtomicReference<>();
+        runRequest(session, () -> third.set(NavigationManagerSession.getInstance().getPage()));
+        assertNull(third.get(), "an intent consumed by a desktop must not be handed off again");
+    }
+
+
+    /** First contact of a browser (no session yet): intent recorded, then a redirect commits the response. */
+    @Test
+    public void intentShouldSurviveRedirectWhenRequestHadNoSessionYet() throws ServletException, IOException {
+        Page page = new Page("page", "Page", "the/page");
+        var firstRequest = new MockHttpServletRequest();
+        var firstResponse = new MockHttpServletResponse() {
+            @Override
+            public void sendRedirect(String location) throws IOException {
+                super.sendRedirect(location);
+                setCommitted(true);
+            }
+        };
+
+        filter.doFilter(firstRequest, firstResponse, new MockFilterChain() {
+            @Override
+            public void doFilter(jakarta.servlet.ServletRequest req, jakarta.servlet.ServletResponse res) throws IOException {
+                NavigationManagerSession.getInstance().setPage(page, null);
+                ((jakarta.servlet.http.HttpServletResponse) res).sendRedirect("/next");
+            }
+        });
+
+        var session = firstRequest.getSession(false);
+        assertNotNull(session, "a session must be created before the redirect commits the response");
+
+        AtomicReference<Page> restored = new AtomicReference<>();
+        runRequest((MockHttpSession) session, () -> restored.set(NavigationManagerSession.getInstance().getPage()));
+        assertSame(page, restored.get());
+    }
+    @Test
+    public void intentShouldNotLeakToAnotherSession() throws ServletException, IOException {
+        runRequest(new MockHttpSession(), () ->
+                NavigationManagerSession.getInstance().setPage(new Page("page", "Page", "the/page"), null));
+
+        AtomicReference<Page> other = new AtomicReference<>();
+        runRequest(new MockHttpSession(), () -> other.set(NavigationManagerSession.getInstance().getPage()));
+        assertNull(other.get());
+    }
+
+    @Test
+    public void filterShouldRunBeforeSpringSecurity() {
+        var order = NavigationManagerSessionScopeFilter.class.getAnnotation(org.springframework.core.annotation.Order.class);
+        assertNotNull(order);
+        assertTrue(order.value() < -100, "must precede the Spring Security filter chain (order -100)");
+    }
+
+    private void runRequest(MockHttpSession session, Runnable body) throws ServletException, IOException {
+        var request = new MockHttpServletRequest();
+        request.setSession(session);
+        filter.doFilter(request, new MockHttpServletResponse(), new MockFilterChain() {
+            @Override
+            public void doFilter(jakarta.servlet.ServletRequest req, jakarta.servlet.ServletResponse res) {
+                body.run();
+            }
+        });
+    }
+
+    private static tools.dynamia.navigation.NavigationManager noOpNavigationManager() {
+        return (tools.dynamia.navigation.NavigationManager) java.lang.reflect.Proxy.newProxyInstance(
+                NavigationManagerSessionScopeFilterTest.class.getClassLoader(),
+                new Class<?>[]{tools.dynamia.navigation.NavigationManager.class},
+                (proxy, method, args) -> method.getReturnType() == boolean.class ? Boolean.TRUE : null);
     }
 }

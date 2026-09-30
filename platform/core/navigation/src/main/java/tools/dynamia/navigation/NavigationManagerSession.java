@@ -21,6 +21,12 @@ import java.util.Queue;
  * {@code NavigationManagerSessionScopeFilter}).
  * </p>
  * <p>
+ * A redirect starts a new request, so an intent recorded right before one (e.g. by a login listener)
+ * would be lost with the scope. The filter therefore carries any still-pending intent across
+ * requests through the HTTP session ({@link #hasPendingState()}/{@link #absorb(NavigationManagerSession)}):
+ * it is restored into the next request's instance and consumed by the first desktop that bootstraps.
+ * </p>
+ * <p>
  * {@link #getInstance()} throws {@link java.util.NoSuchElementException} if called outside that
  * scope — e.g. a background job, or test code that hasn't bound one itself via
  * {@code ScopedValue.where(NavigationManagerSession.SCOPE, new NavigationManagerSession()).run(...)}.
@@ -54,6 +60,26 @@ public class NavigationManagerSession implements Serializable {
 
     private Queue<Callback> runLaterQueue = new LinkedList<>();
 
+    private transient Runnable onPending;
+
+    /**
+     * Registers a hook invoked every time an intent is recorded ({@link #setPage(Page, Map)} or
+     * {@link #runLater(Callback)}). The request-lifecycle filter uses it to make sure an HTTP session
+     * exists <i>before</i> the response may be committed (e.g. by a redirect), because that session is
+     * where an unconsumed intent is parked for the next request.
+     *
+     * @param onPending the hook, or null to clear it
+     */
+    public void setOnPending(Runnable onPending) {
+        this.onPending = onPending;
+    }
+
+    private void notifyPending() {
+        if (onPending != null) {
+            onPending.run();
+        }
+    }
+
     /**
      * Returns the instance bound to the current scope.
      *
@@ -66,6 +92,7 @@ public class NavigationManagerSession implements Serializable {
     public void setPage(Page page, Map<String, Serializable> params) {
         this.page = page;
         this.pageParams = params;
+        notifyPending();
     }
 
     public void updateNavManager(NavigationManager navigationManager) {
@@ -81,6 +108,7 @@ public class NavigationManagerSession implements Serializable {
             runLaterQueue = new LinkedList<>();
         }
         runLaterQueue.add(callback);
+        notifyPending();
     }
 
     public void executeQueue() {
@@ -89,6 +117,41 @@ public class NavigationManagerSession implements Serializable {
             if (callback != null) {
                 callback.doSomething();
             }
+        }
+    }
+
+    /**
+     * Tells whether this instance still holds a navigation intent nobody has consumed: a pending
+     * {@link Page} (not yet handed to a {@link NavigationManager} via {@link #updateNavManager}) or
+     * queued {@link Callback}s (not yet run via {@link #executeQueue()}).
+     *
+     * @return true if there is a pending page or at least one queued callback
+     */
+    public boolean hasPendingState() {
+        return page != null || (runLaterQueue != null && !runLaterQueue.isEmpty());
+    }
+
+    /**
+     * Moves the pending intent of {@code other} into this instance, leaving {@code other} empty.
+     * Used by the request-lifecycle filter to carry an unconsumed intent across requests (e.g. a
+     * login that queues a page and then redirects). A pending page in {@code other} replaces the one
+     * held here; its queued callbacks are appended after the ones already queued.
+     *
+     * @param other the instance to drain; ignored if null or the same instance
+     */
+    public void absorb(NavigationManagerSession other) {
+        if (other == null || other == this) {
+            return;
+        }
+        if (other.page != null) {
+            this.page = other.page;
+            this.pageParams = other.pageParams;
+            other.page = null;
+            other.pageParams = null;
+        }
+        if (other.runLaterQueue != null) {
+            other.runLaterQueue.forEach(this::runLater);
+            other.runLaterQueue.clear();
         }
     }
 
