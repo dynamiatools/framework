@@ -46,7 +46,20 @@ public class DashboardContext extends WidgetContext {
     }
 
     /**
-     * Returns the window hosting the widget.
+     * Creates a headless context that wraps a plain {@link WidgetContext} (same descriptor, field and shared data)
+     * but has no ZK dashboard or window. It is used when a widget is initialized to serve data over REST, so
+     * widgets used that way must not call {@link #getDashboard()} or {@link #getWindow()}.
+     *
+     * @param source the context to wrap
+     */
+    public DashboardContext(WidgetContext source) {
+        super(source);
+        this.dashboard = null;
+        this.window = null;
+    }
+
+    /**
+     * Returns the window hosting the widget, or {@code null} in a headless context.
      *
      * @return the widget window
      */
@@ -55,7 +68,7 @@ public class DashboardContext extends WidgetContext {
     }
 
     /**
-     * Returns the dashboard component.
+     * Returns the dashboard component, or {@code null} in a headless context.
      *
      * @return the dashboard
      */

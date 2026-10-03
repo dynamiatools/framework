@@ -39,6 +39,16 @@ public abstract class ViewerDashboardWidget extends AbstractDashboardWidget<View
     }
 
     @Override
+    public String getType() {
+        return DashboardWidgetTypes.VIEWER;
+    }
+
+    @Override
+    public Object getData(WidgetContext context) {
+        return new ViewerWidgetData(getViewDescriptorId(), getViewType(), viewValue);
+    }
+
+    @Override
     public Viewer getView() {
         Viewer viewer = new Viewer();
         viewer.setDescriptorId(getViewDescriptorId());

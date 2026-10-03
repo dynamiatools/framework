@@ -87,6 +87,27 @@ public interface DashboardWidgetDefinition {
     boolean isTitleVisible();
 
     /**
+     * Returns the widget type, used by a JS frontend to pick the component that renders the widget.
+     *
+     * @return the type, see {@link DashboardWidgetTypes}; {@link DashboardWidgetTypes#CUSTOM} by default
+     */
+    default String getType() {
+        return DashboardWidgetTypes.CUSTOM;
+    }
+
+    /**
+     * Returns the widget data for a JS frontend, after {@link #init(WidgetContext)} has run. The shape depends on
+     * {@link #getType()}, see {@link ChartWidgetData}, {@link KpiWidgetData} and {@link ViewerWidgetData}. The
+     * value must be serializable to JSON.
+     *
+     * @param context the widget context
+     * @return the widget data, or {@code null} if the widget has no data to serve (the default)
+     */
+    default Object getData(WidgetContext context) {
+        return null;
+    }
+
+    /**
      * Loads the data the widget needs. Called before the widget is rendered and again on dashboard reload.
      *
      * @param context the widget context

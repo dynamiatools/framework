@@ -18,6 +18,7 @@
 package tools.dynamia.modules.dashboard;
 
 
+import org.zkoss.json.JSONValue;
 import tools.dynamia.zk.ui.chartjs.Chartjs;
 import tools.dynamia.zk.ui.chartjs.ChartjsColorPalette;
 import tools.dynamia.zk.ui.chartjs.ChartjsData;
@@ -97,6 +98,23 @@ public abstract class ChartjsDashboardWidget extends AbstractDashboardWidget<Cha
         Chartjs chart = new Chartjs(getChartjsType(), data);
         customizeChart(chart);
         return chart;
+    }
+
+    @Override
+    public String getType() {
+        return DashboardWidgetTypes.CHART;
+    }
+
+    /**
+     * Returns the chart type and {@link ChartjsData} as a {@link ChartWidgetData}, ready for Chart.js in a JS
+     * frontend. {@link ChartjsData} fills its labels and datasets lazily and is not a plain bean, so it is
+     * initialized and converted to plain JSON structures (maps and lists). Chart customizations done in
+     * {@link #customizeChart(Chartjs)} are ZK-only and not included.
+     */
+    @Override
+    public Object getData(WidgetContext context) {
+        data.init();
+        return new ChartWidgetData(getChartjsType(), JSONValue.parse(data.toJSONString()));
     }
 
     public abstract ChartjsData initChartjsData(DashboardContext context);
