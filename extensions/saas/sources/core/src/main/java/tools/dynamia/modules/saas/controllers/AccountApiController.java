@@ -77,8 +77,11 @@ public class AccountApiController extends AbstractService {
         if (account != null) {
             newLog(uuid, request, account);
             AccountDTO accountDTO = account.toDTO();
-            if (accountDTO.getRequiredInstanceUuid()) {
+            if (Boolean.TRUE.equals(accountDTO.getRequiredInstanceUuid())) {
                 String uuidhw = request.getParameter("uuid");
+                if (uuidhw == null || uuidhw.isBlank()) {
+                    return ResponseEntity.badRequest().build();
+                }
                 if (!uuidhw.equalsIgnoreCase(accountDTO.getInstanceUuid())) {
                     accountDTO.setStatus(AccountStatus.NEW);
                     accountDTO.setStatusDescription("Licencia invalida");
@@ -164,17 +167,30 @@ public class AccountApiController extends AbstractService {
         }
     }
 
+    /**
+     * Tells whether the current request runs as the system account.
+     *
+     * @param request the current request
+     * @return true only if a system account is configured and it is the current account
+     */
     public boolean isAuthorized(HttpServletRequest request) {
-        if (serviceAPI.getSystemAccountId().equals(serviceAPI.getCurrentAccountId())) {
-            return true;
-        }
-
-        return false;
+        var systemAccountId = serviceAPI.getSystemAccountId();
+        return systemAccountId != null && systemAccountId.equals(serviceAPI.getCurrentAccountId());
     }
 
+    /**
+     * Tells whether {@code uuid} is the account of the request's subdomain.
+     *
+     * @param uuid    the account uuid from the request path
+     * @param request the current request
+     * @return false when the request has no subdomain or no account matches it
+     */
     public boolean isSameAccount(String uuid, HttpServletRequest request) {
         var subdomain = HttpUtils.getSubdomain(request);
+        if (subdomain == null || uuid == null) {
+            return false;
+        }
         var currentAccount = service.getAccount(subdomain);
-        return uuid.equals(currentAccount.getUuid());
+        return currentAccount != null && uuid.equals(currentAccount.getUuid());
     }
 }
