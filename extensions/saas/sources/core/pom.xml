@@ -83,6 +83,11 @@
         </dependency>
 
         <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.web</artifactId>
+            <version>26.10.0</version>
+        </dependency>
+        <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.entityfiles</artifactId>
             <version>26.10.0</version>
