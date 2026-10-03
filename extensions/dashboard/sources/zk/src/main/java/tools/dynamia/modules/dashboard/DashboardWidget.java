@@ -36,18 +36,15 @@ public interface DashboardWidget<V> extends DashboardWidgetDefinition {
     void init(DashboardContext context);
 
     /**
-     * Bridges the UI-agnostic lifecycle to {@link #init(DashboardContext)}.
+     * Bridges the UI-agnostic lifecycle to {@link #init(DashboardContext)}. A plain {@link WidgetContext}, as
+     * used when the widget data is served over REST without ZK, is wrapped in a headless
+     * {@link DashboardContext} that has no dashboard or window.
      *
-     * @param context a context that must be a {@link DashboardContext}
-     * @throws IllegalArgumentException if the context is not a {@link DashboardContext}
+     * @param context the context; a {@link DashboardContext} is used as is
      */
     @Override
     default void init(WidgetContext context) {
-        if (context instanceof DashboardContext dashboardContext) {
-            init(dashboardContext);
-        } else {
-            throw new IllegalArgumentException("ZK dashboard widget " + getId() + " requires a DashboardContext");
-        }
+        init(context instanceof DashboardContext dashboardContext ? dashboardContext : new DashboardContext(context));
     }
 
     /**

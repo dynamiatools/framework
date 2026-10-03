@@ -44,7 +44,7 @@ public class WidgetContext {
 
     private final ViewDescriptor descriptor;
     private final Field field;
-    private final Map<String, Object> data = new HashMap<>();
+    private final Map<String, Object> data;
 
     /**
      * Creates a context for one widget slot of a dashboard.
@@ -55,6 +55,19 @@ public class WidgetContext {
     public WidgetContext(ViewDescriptor descriptor, Field field) {
         this.descriptor = descriptor;
         this.field = field;
+        this.data = new HashMap<>();
+    }
+
+    /**
+     * Creates a context that views another one: same descriptor, field and <em>shared</em> data map. UI-specific
+     * subclasses use it to wrap a plain context.
+     *
+     * @param source the context to wrap
+     */
+    protected WidgetContext(WidgetContext source) {
+        this.descriptor = source.descriptor;
+        this.field = source.field;
+        this.data = source.data;
     }
 
     /**
