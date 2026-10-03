@@ -1,0 +1,96 @@
+{
+  "name": "@dynamia-tools/dashboard-vue",
+  "version": "26.10.0",
+  "website": "https://dynamia.tools",
+  "description": "Vue 3 components and composables to render Dynamia dashboards without ZK",
+  "keywords": [
+    "dynamia",
+    "dynamia-platform",
+    "dashboard",
+    "vue",
+    "widgets",
+    "typescript"
+  ],
+  "homepage": "https://dynamia.tools",
+  "bugs": {
+    "url": "https://github.com/dynamiatools/framework/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dynamiatools/framework.git",
+    "directory": "extensions/dashboard/packages/dashboard-vue"
+  },
+  "license": "Apache-2.0",
+  "author": "Dynamia Soluciones IT SAS",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./dashboard-vue.css": "./dist/dashboard-vue.css"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "vue-tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm run build && pnpm run test"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "peerDependencies": {
+    "@dynamia-tools/sdk": ">=26.3.0",
+    "@dynamia-tools/vue": ">=26.3.0",
+    "chart.js": "^4.0.0",
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@dynamia-tools/sdk": "workspace:*",
+    "@dynamia-tools/vue": "workspace:*",
+    "@types/node": "^26.4.1",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "@vue/test-utils": "^2.4.6",
+    "chart.js": "^4.4.0",
+    "happy-dom": "^20.14.5",
+    "typescript": "^6.0.3",
+    "vite": "^8.2.2",
+    "vite-plugin-dts": "^5.1.0",
+    "vitest": "^4.1.11",
+    "vue": "^3.5.43",
+    "vue-tsc": "^2.2.12"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "@dynamia-tools/dashboard-sdk": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "chart.js": {
+      "optional": true
+    }
+  },
+  "sideEffects": [
+    "**/*.css"
+  ]
+}
