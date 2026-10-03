@@ -21,6 +21,8 @@ import tools.dynamia.navigation.NavigationNode;
 import tools.dynamia.navigation.NavigationTree;
 import tools.dynamia.navigation.Page;
 import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.ViewDescriptorFactory;
+import tools.dynamia.viewers.ViewDescriptorNotFoundException;
 import tools.dynamia.web.navigation.ErrorResult;
 
 import java.util.Collection;
@@ -45,6 +47,7 @@ import java.util.function.Predicate;
  *   <li>GET /api/app/metadata/entities - Entities metadata</li>
  *   <li>GET /api/app/metadata/entities/{id} - Metadata for a specific entity, by id (simple class name)</li>
  *   <li>GET /api/app/metadata/entities/by-path?path={virtualPath} - Metadata for the CrudPage registered at that navigation virtual path</li>
+ *   <li>GET /api/app/metadata/views/{id} - A view descriptor by id, for descriptors not bound to an entity (e.g. dashboards)</li>
  * </ul>
  *
  * @author Mario A. Serrano Leones
@@ -66,6 +69,7 @@ public class ApplicationMetadataController {
      * Loader for application metadata.
      */
     private final ApplicationMetadataLoader metadataLoader;
+    private final ViewDescriptorFactory viewDescriptorFactory;
     private final EntityMetadata unknowEntity;
     /**
      * Cached entities metadata. Application metadata and global actions are deliberately not cached because
@@ -80,10 +84,12 @@ public class ApplicationMetadataController {
     /**
      * Constructs a new {@code ApplicationMetadataController} with the given metadata loader.
      *
-     * @param metadataLoader the loader for application metadata
+     * @param metadataLoader        the loader for application metadata
+     * @param viewDescriptorFactory the factory used to resolve view descriptors by id
      */
-    public ApplicationMetadataController(ApplicationMetadataLoader metadataLoader) {
+    public ApplicationMetadataController(ApplicationMetadataLoader metadataLoader, ViewDescriptorFactory viewDescriptorFactory) {
         this.metadataLoader = metadataLoader;
+        this.viewDescriptorFactory = viewDescriptorFactory;
         this.unknowEntity = new EntityMetadata();
         unknowEntity.setClassName("unknown");
         unknowEntity.setName("Unknown Entity");
@@ -404,6 +410,24 @@ public class ApplicationMetadataController {
                     .orElse(null);
         }
         return null;
+    }
+
+    /**
+     * Returns a view descriptor by its id, without going through an entity. This is how descriptors that are not
+     * bound to an entity (for example {@code view: dashboard}) are reached from a JS frontend. It exposes the
+     * same descriptors that the entity endpoints already serve; access is governed by the application's
+     * web security configuration, like every other metadata endpoint.
+     *
+     * @param id the view descriptor id
+     * @return {@code 200} with the {@link ViewDescriptor}, or {@code 404} if no descriptor has that id
+     */
+    @GetMapping(value = "/views/{id}", produces = "application/json")
+    public ResponseEntity<ViewDescriptor> getViewDescriptor(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(viewDescriptorFactory.getDescriptor(id));
+        } catch (ViewDescriptorNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**
