@@ -136,6 +136,7 @@ view.setLoader(async (params) => {
 
 2. **Composables** — Accept custom loaders or use the injected client
    - `useNavigation(client)` — Fetches via `client.metadata.getNavigation()`
+   - `useDashboard(client, id)` (`@dynamia-tools/dashboard-vue`) — Descriptor via `client.metadata.getView(id)`, widgets via `DashboardApi`
    - `useTable(options)` — Accepts optional `loader` callback
    - `useCrud(options)` — Accepts optional `loader` / `onSave` / `onDelete`
    - `useEntityPicker(options)` — Accepts optional `searcher` callback
@@ -435,3 +436,14 @@ expect(result).toEqual([{ id: 1, name: 'Item' }]);
   - Files: `extensions/entity-files/packages/files-sdk/README.md`
 - **Vue Plugin Usage:** `examples/demo-vue-books/src/App.vue`
 
+---
+
+## View descriptors by id
+
+`MetadataApi` reaches descriptors in two ways:
+
+- `getEntityViews(entityId)` / `getEntityView(entityId, view)` — descriptors **of an entity**.
+- `getView(id)` — a descriptor **by its id**, with no entity. Use it for descriptors that are not bound to an entity,
+  such as `view: dashboard`. Backed by `GET /api/app/metadata/views/{id}` (`404` when unknown).
+
+Both are cached; `client.clearViewDescriptorCache(id?)` clears the entries of an entity id or of a descriptor id.

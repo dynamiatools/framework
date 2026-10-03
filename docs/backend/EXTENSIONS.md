@@ -35,6 +35,49 @@ extensions/
 └── http-functions/          # HTTP functions
 ```
 
+### Module Layout: `core` and `ui`
+
+Extensions are split so a frontend that is not ZK can use them. ZK is being removed from Dynamia in the medium term, so
+new code follows this rule:
+
+- **`core`** (and `api`, `jpa`, ...) holds everything that does not need ZK: entities, services, REST controllers,
+  `ModuleProvider`s and navigation restrictions, actions, view descriptors, listeners. It must have **no ZK
+  dependency**. Each extension that has a `core` guards this with a test that `org.zkoss.zk.ui.Component` is not on the
+  classpath.
+- **`ui`** holds only what needs ZK: ZK components, view models, `CrudController`s, view customizers, zul pages and
+  the descriptors that point to any of those.
+
+Package names do **not** change when code moves from `ui` to `core` (for example `SecurityModuleProvider` is still
+`tools.dynamia.modules.security.ui.SecurityModuleProvider`), so component scanning, descriptor references and user code
+keep working. An application that depends on `ui` still gets everything, because `ui` depends on `core`.
+
+Two things decide whether something can move to `core`:
+
+- **Imports of ZK are not the whole story.** A class also stays in `ui` if it extends or calls a ZK-bound class
+  (for example an action that needs a ZK `CrudController`).
+- **A descriptor stays in `ui` if it names a ZK class** (`controller:`, `customizer:`, `customView: ...zul`, or a
+  `formView` that does). The YAML reader turns `customizer` into a `Class` when it loads the descriptor, so such a
+  descriptor cannot live in a module without ZK. Component hints such as `component: textbox` are only hints and are
+  harmless.
+
+A page that is a zul (`new Page(..., "classpath:zk/.../x.zul")`) must be registered by a provider in `ui`. The
+navigation container merges modules and page groups with the same id, so a `core` and a `ui` provider can both
+contribute to the same group (see `SecurityModuleProvider` and `SecurityProfileModuleProvider`; the zul page uses
+`position = -1` to stay first).
+
+State of the separation:
+
+| extension | in `core` | still ZK-bound in `ui` |
+|---|---|---|
+| security | providers, restrictions, login controller, `UserInterfaceController`, table descriptors | views, view models, crud controllers, customizers, `My Profile` page, form/crud descriptors |
+| saas | provider, restrictions, `HttpAccountResolver`, non-ZK actions, descriptors | controllers, view models, customizer, window-opening actions, 5 descriptors |
+| entity-files | config page provider, cache action, 4 descriptors | field customizers, file actions, explorer controller, icons, components |
+| email-sms | provider, listener, action, all descriptors | OTP dialog, test/preview actions |
+| http-functions | provider, descriptors | test action |
+| reports | 12 descriptors | module classes with a zul viewer page, user module, viewer, crud controller |
+| dashboard | `dashboard-core`: widget contract, context, REST endpoint | `dashboard-zk`: `Dashboard`, renderer, ZK widgets |
+| file-importer | - | everything (the whole module is ZK UI) |
+
 ### Extension Dependency Format
 
 All extensions use CalVer versioning (same as core platform):
@@ -489,6 +532,44 @@ dynamia.sms.aws.secret-key=${AWS_SECRET_KEY}
     <version>26.3.2</version>
 </dependency>
 ```
+
+### Dashboard Modules
+
+The extension has two modules so dashboards can be rendered without ZK:
+
+| artifact | contents |
+|---|---|
+| `tools.dynamia.modules.dashboard.core` | UI-agnostic API: `DashboardWidgetDefinition`, `AbstractDashboardWidgetDefinition`, `WidgetContext`, `DashboardAction`, `UserInfoProvider`, the widget data DTOs and `DashboardRestController`. No ZK. |
+| `tools.dynamia.modules.dashboard` | ZK implementation: `Dashboard`, `DashboardViewRenderer`, `DashboardWidget`, `AbstractDashboardWidget`, `ChartjsDashboardWidget`, `ViewerDashboardWidget`. Depends on `core`. |
+
+Existing applications keep depending on `tools.dynamia.modules.dashboard`. `DashboardWidget`, `AbstractDashboardWidget`
+and `DashboardContext` keep their names and packages and now extend the core types; `DashboardWidget.init(WidgetContext)`
+bridges to `init(DashboardContext)`.
+
+### Dashboards from a JS Frontend
+
+A dashboard is a `view: dashboard` descriptor. A JS client gets the layout (columns, `span`, `span-sm`, `span-xs`) and
+the widget slots from the descriptor with `client.metadata.getView(id)` (`GET /api/app/metadata/views/{id}`), and each
+widget's data from:
+
+```
+GET /api/dashboard/{descriptorId}/widgets/{field}?param=value
+```
+
+- Only widgets declared as a **field of the descriptor** can be loaded; the widget id is read from the field's
+  `widget` param, never from the request. Unknown dashboards, non-dashboard descriptors, fields and widgets answer
+  `404`; a failing widget answers a generic `500` (the cause is only logged).
+- Query parameters are passed to `DashboardWidgetDefinition.update(params)`.
+- A widget chooses how a JS frontend renders it with `getType()` (`chart`, `viewer`, `kpi`, `html`, `custom`, see
+  `DashboardWidgetTypes`) and `getData(WidgetContext)`. `ChartjsDashboardWidget` and `ViewerDashboardWidget` implement
+  them, so existing ZK dashboards work from JS unchanged. `KpiWidgetData` is provided for key indicators.
+- ZK widgets are initialized over REST with a *headless* `DashboardContext` (no `Dashboard`, no
+  `DashboardWidgetWindow`): they must not call `getDashboard()` or `getWindow()` if they are meant to be served this way.
+- `ChartjsData` fills its labels and datasets lazily and does not serialize with Jackson; `ChartjsDashboardWidget`
+  calls `init()` and converts it with ZK's JSON parser.
+
+Frontend side: `@dynamia-tools/dashboard-sdk` (`DashboardApi`, `resolveDashboardLayout`) and
+`@dynamia-tools/dashboard-vue` (`useDashboard`, `<DynamiaDashboard>`, `WidgetRendererRegistry`).
 
 ### Creating Dashboard Widgets
 
