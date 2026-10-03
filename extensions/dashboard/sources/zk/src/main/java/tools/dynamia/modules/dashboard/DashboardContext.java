@@ -18,62 +18,48 @@
 
 package tools.dynamia.modules.dashboard;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import tools.dynamia.integration.Containers;
 import tools.dynamia.viewers.Field;
 
 /**
- * Dashboard context
+ * ZK dashboard context. Extends the UI-agnostic {@link WidgetContext} with the ZK {@link Dashboard} and the
+ * {@link DashboardWidgetWindow} that hosts the widget.
  *
  * @author Mario Serrano Leones
  */
-public class DashboardContext {
+public class DashboardContext extends WidgetContext {
 
-    private Dashboard dashboard;
-    private DashboardWidgetWindow window;
-    private Map<String, Object> data = new HashMap<>();
-    private Field field;
+    private final Dashboard dashboard;
+    private final DashboardWidgetWindow window;
 
+    /**
+     * Creates the context and binds it to the widget window.
+     *
+     * @param dashboard the dashboard component
+     * @param window    the window hosting the widget
+     * @param field     the descriptor field the widget is bound to
+     */
     public DashboardContext(Dashboard dashboard, DashboardWidgetWindow window, Field field) {
+        super(dashboard.getViewDescriptor(), field);
         this.dashboard = dashboard;
         this.window = window;
         this.window.setDashboardContext(this);
-        this.field = field;
     }
 
+    /**
+     * Returns the window hosting the widget.
+     *
+     * @return the widget window
+     */
     public DashboardWidgetWindow getWindow() {
         return window;
     }
 
-    public void add(String name, Object value) {
-        data.put(name, value);
-    }
-
-    public Object get(String name) {
-        return data.get(name);
-    }
-
-    public Map<String, Object> getDataMap() {
-        return data;
-    }
-
+    /**
+     * Returns the dashboard component.
+     *
+     * @return the dashboard
+     */
     public Dashboard getDashboard() {
         return dashboard;
     }
-
-    public Field getField() {
-        return field;
-    }
-
-    /**
-     * Find user info provider or null if not found
-     *
-     * @return
-     */
-    public UserInfoProvider findUserInfo() {
-        return Containers.get().findObject(UserInfoProvider.class);
-    }
-
 }

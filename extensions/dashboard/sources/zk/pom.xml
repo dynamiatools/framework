@@ -22,21 +22,35 @@
 
     <parent>
         <groupId>tools.dynamia.modules</groupId>
-        <artifactId>tools.dynamia.modules.parent</artifactId>
+        <artifactId>tools.dynamia.modules.dashboard.parent</artifactId>
         <version>26.10.0</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <name>DynamiaModules - Dashboard Parent</name>
-    <artifactId>tools.dynamia.modules.dashboard.parent</artifactId>
-    <description>DynamiaTools module to create and show dashboard with widgets support</description>
+    <name>DynamiaModules - Dashboard ZK</name>
+    <artifactId>tools.dynamia.modules.dashboard</artifactId>
+    <description>DynamiaTools module to create and show dashboard with widgets support using ZK</description>
     <url>https://www.dynamia.tools/modules/dashboard</url>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
-    <modules>
-        <module>core</module>
-        <module>zk</module>
-    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.dashboard.core</artifactId>
+            <version>26.10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.zk</artifactId>
+            <version>26.10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.saas.api</artifactId>
+            <version>26.10.0</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -53,5 +67,6 @@
             </plugin>
         </plugins>
     </build>
+
 
 </project>
