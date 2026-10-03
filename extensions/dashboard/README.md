@@ -30,6 +30,15 @@ Add the following dependencies to project classpath
 compile 'tools.dynamia.modules:tools.dynamia.modules.dashboard:26.2.2'
 ```
 
+## Modules
+
+| artifact | contents |
+|---|---|
+| `tools.dynamia.modules.dashboard.core` | UI-agnostic API: `DashboardWidgetDefinition`, `WidgetContext`, `DashboardAction`, `UserInfoProvider`. No ZK dependency. |
+| `tools.dynamia.modules.dashboard` | ZK implementation: `Dashboard`, `DashboardWidget`, `ChartjsDashboardWidget`, `ViewerDashboardWidget`, renderer and styles. Depends on `core`. |
+
+Existing applications keep depending on `tools.dynamia.modules.dashboard` and need no changes.
+
 ## Usage
 
 Create a view descriptor of type `dashboard` and add as fields all the widgets you want to show. This descriptor works

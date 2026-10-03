@@ -22,36 +22,29 @@
 
     <parent>
         <groupId>tools.dynamia.modules</groupId>
-        <artifactId>tools.dynamia.modules.parent</artifactId>
+        <artifactId>tools.dynamia.modules.dashboard.parent</artifactId>
         <version>26.10.0</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <name>DynamiaModules - Dashboard Parent</name>
-    <artifactId>tools.dynamia.modules.dashboard.parent</artifactId>
-    <description>DynamiaTools module to create and show dashboard with widgets support</description>
+    <name>DynamiaModules - Dashboard Core</name>
+    <artifactId>tools.dynamia.modules.dashboard.core</artifactId>
+    <description>UI-agnostic dashboard API: widget contract, context and actions. Has no ZK dependency</description>
     <url>https://www.dynamia.tools/modules/dashboard</url>
-    <packaging>pom</packaging>
 
-    <modules>
-        <module>core</module>
-        <module>zk</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.viewers</artifactId>
+            <version>26.10.0</version>
+        </dependency>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven.compiler}</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <encoding>${source.encoding}</encoding>
-                    <parameters>true</parameters>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+        <!-- TEST DEPENDENCIES -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>

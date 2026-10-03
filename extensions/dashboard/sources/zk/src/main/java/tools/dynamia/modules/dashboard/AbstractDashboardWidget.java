@@ -18,33 +18,13 @@
 
 package tools.dynamia.modules.dashboard;
 
-import java.util.Map;
-
 /**
- * Dashbaord Widget API. New widgets can extend {@link AbstractDashboardWidget} to get basic implementation
+ * Base class for ZK dashboard widgets. The common properties live in {@link AbstractDashboardWidgetDefinition};
+ * subclasses provide the id, {@link #init(DashboardContext)} and {@link #getView()}.
+ *
+ * @param <V> the view type returned by {@link #getView()}
  * @author Mario Serrano Leones
  */
-public interface DashboardWidget<V> {
+public abstract class AbstractDashboardWidget<V> extends AbstractDashboardWidgetDefinition implements DashboardWidget<V> {
 
-    String getId();
-
-    String getName();
-
-    String getTitle();
-
-    boolean isAsyncSupported();
-
-    boolean isMaximizable();
-
-    boolean isClosable();
-
-    boolean isEditable();
-
-    boolean isTitleVisible();
-
-    void init(DashboardContext context);
-
-    void update(Map<String, Object> params);
-
-    V getView();
 }
