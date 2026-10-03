@@ -21,10 +21,13 @@ import tools.dynamia.modules.security.domain.User;
 import tools.dynamia.modules.security.domain.UserAccessToken;
 import tools.dynamia.navigation.Module;
 import tools.dynamia.navigation.ModuleProvider;
-import tools.dynamia.navigation.Page;
 import tools.dynamia.navigation.PageGroup;
 
 /**
+ * Registers the security pages (users, profiles and access tokens) of the {@code system} module. These are plain
+ * {@link CrudPage}s, so they are available to any frontend. The ZK-only "My Profile" page is registered by
+ * {@code SecurityProfileModuleProvider} in the security ui module.
+ *
  * @author Mario Serrano Leones
  */
 @Provider
@@ -39,12 +42,6 @@ public class SecurityModuleProvider implements ModuleProvider {
         PageGroup pg = new PageGroup("security", "Security");
         module.addPageGroup(pg);
 
-        Page perfilPage = new Page("myProfile", "My Profile", "classpath:zk/security/users/userProfile.zul");
-        perfilPage.setAlwaysAllowed(true);
-        perfilPage.setIcon("user-badge");
-        perfilPage.setFeatured(true);
-
-        pg.addPage(perfilPage);
         pg.addPage(new CrudPage("users", "Users", User.class)
                 .icon("users")
                 .featured());
