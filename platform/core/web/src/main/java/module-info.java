@@ -19,6 +19,7 @@ open module tools.dynamia.web {
     requires io.swagger.v3.oas.annotations;
     requires com.fasterxml.jackson.annotation;
     requires tools.jackson.databind;
+    exports tools.dynamia.web;
     exports tools.dynamia.web.navigation;
     exports tools.dynamia.web.util;
 }

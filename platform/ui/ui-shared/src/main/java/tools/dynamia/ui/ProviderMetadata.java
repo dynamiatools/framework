@@ -1,4 +1,4 @@
-package tools.dynamia.zk.ui.model;
+package tools.dynamia.ui;
 
 /**
  * Interface for objects that provide metadata for display in UI components.

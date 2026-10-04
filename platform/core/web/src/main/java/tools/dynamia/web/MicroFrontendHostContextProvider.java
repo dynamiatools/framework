@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tools.dynamia.zk.ui;
+package tools.dynamia.web;
 
 import java.util.Map;
 
 /**
  * Supplies cross-cutting context values (tenant id, locale, current user, API base URL, auth
- * token, feature flags, etc.) that every {@link MicroFrontend} instance on the page automatically
+ * token, feature flags, etc.) that every {@code MicroFrontend} instance on the page automatically
  * receives, so ZUL authors don't have to wire the same values by hand on every
  * {@code <microfrontend>} tag.
  * <p>
@@ -31,7 +31,7 @@ import java.util.Map;
  * mounted microfrontend. The mounted bundle reads it like any other prop, e.g. {@code this.dynamiaHost}
  * in a custom element, or {@code props.dynamiaHost} in a mount-fn.
  * <p>
- * Not delivered when {@link MicroFrontend#getMode()} resolves to {@link MicroFrontend#MODE_AUTO}:
+ * Not delivered when {@code MicroFrontend#getMode()} resolves to {@code MicroFrontend#MODE_AUTO}:
  * that mode has no prop channel at all, since the bundle self-mounts independently.
  *
  * Example:
