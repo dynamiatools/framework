@@ -6,6 +6,11 @@ import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
 import tools.dynamia.integration.scheduling.SchedulerUtil;
 
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import tools.dynamia.modules.saas.api.AccountServiceAPI;
+
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -64,5 +69,29 @@ class AccountTenantContextCapturerTest {
         });
 
         assertEquals(AccountTenants.ROOT_TENANT_ID, seen);
+    }
+
+    @Test
+    void theTenantOfTheRequestIsCarriedToo() throws Exception {
+        registerCapturer();
+        var request = new MockHttpServletRequest();
+        request.setAttribute(AccountServiceAPI.CURRENT_ACCOUNT_ID_ATTRIBUTE, 9L);
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+        try {
+            Long seen = SchedulerUtil.runWithResult(AccountTenants::forcedTenantId).get(5, TimeUnit.SECONDS);
+
+            assertEquals(9L, seen);
+        } finally {
+            RequestContextHolder.resetRequestAttributes();
+        }
+    }
+
+    @Test
+    void theNoTenantSentinelIsNeverCarried() {
+        registerCapturer();
+
+        var binding = AccountTenants.with(AccountTenants.NO_TENANT_ID, () -> new AccountTenantContextCapturer().capture());
+
+        assertNull(binding);
     }
 }

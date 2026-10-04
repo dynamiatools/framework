@@ -57,6 +57,13 @@ public final class AccountTenants {
      */
     public static final Long ROOT_TENANT_ID = 0L;
 
+    /**
+     * Tenant id used when no tenant can be resolved. No account has this id, so under it Hibernate filters every
+     * {@code @TenantId} entity out: tenant resolution fails closed. Only an explicit {@code withRoot},
+     * {@code runAsRoot} or {@code callWithRoot} sees every account.
+     */
+    public static final Long NO_TENANT_ID = -1L;
+
     private static final ScopedValue<Long> TENANT = ScopedValue.newInstance();
 
     private AccountTenants() {

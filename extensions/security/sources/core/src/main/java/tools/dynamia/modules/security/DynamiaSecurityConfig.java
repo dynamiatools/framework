@@ -4,6 +4,7 @@ package tools.dynamia.modules.security;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
@@ -110,8 +111,9 @@ public class DynamiaSecurityConfig {
 
     @Bean
     @Primary
-    public SecurityService securityUserDetailsService(ProfileService profileService, CrudService crudService, PasswordEncoder passwordEncoder) {
-        return new SecurityServiceImpl(profileService, crudService, passwordEncoder);
+    public SecurityService securityUserDetailsService(ProfileService profileService, CrudService crudService, PasswordEncoder passwordEncoder,
+                                                      ObjectProvider<AccountServiceAPI> accountServiceAPI) {
+        return new SecurityServiceImpl(profileService, crudService, passwordEncoder, accountServiceAPI::getIfAvailable);
     }
 
     @Bean

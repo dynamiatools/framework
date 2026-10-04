@@ -18,6 +18,9 @@ package tools.dynamia.domain.jpa;
 
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookupFailureException;
@@ -43,7 +46,7 @@ import java.util.Set;
 /**
  * @author Mario A. Serrano Leones
  */
-public class JpaConfigurationAdapter {
+public class JpaConfigurationAdapter implements ApplicationContextAware {
 
     private final LoggingService logger = new SLF4JLoggingService(getClass());
 
@@ -52,8 +55,22 @@ public class JpaConfigurationAdapter {
 
     private final Set<String> additionalPackagesToScan = new HashSet<>();
 
+    private ApplicationContext applicationContext;
+
     public JpaConfigurationAdapter(PropertiesContainer properties) {
         this.properties = properties;
+    }
+
+    /**
+     * Receives the Spring context that owns this configuration, used to find the application's
+     * {@link CurrentTenantIdentifierResolver} bean while the entity manager factory is being created.
+     *
+     * @param applicationContext the application context
+     * @throws BeansException never thrown here
+     */
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
     public void addPackageToScan(String packageName) {
@@ -292,12 +309,32 @@ public class JpaConfigurationAdapter {
      * @param factory the entity manager factory being configured
      */
     protected void registerTenantIdentifierResolver(LocalContainerEntityManagerFactoryBean factory) {
-        CurrentTenantIdentifierResolver<?> resolver = Containers.get().findObject(CurrentTenantIdentifierResolver.class);
+        CurrentTenantIdentifierResolver<?> resolver = findTenantIdentifierResolver();
         if (resolver == null) {
+            logger.warn("No CurrentTenantIdentifierResolver bean found: falling back to " + RootTenantIdentifierResolver.class.getName()
+                    + ". Entities annotated with @TenantId will NOT be isolated by tenant.");
             resolver = new RootTenantIdentifierResolver();
         }
         factory.getJpaPropertyMap().put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, resolver);
         logger.info("Hibernate tenant identifier resolver: " + resolver.getClass().getName());
+    }
+
+    /**
+     * Looks up the application's tenant resolver. The Spring context of this configuration is used first, because
+     * {@link Containers} may not have a Spring container yet while the entity manager factory is created; the
+     * {@link Containers} lookup is kept as a fallback.
+     *
+     * @return the resolver bean, or null when the application does not publish one
+     */
+    private CurrentTenantIdentifierResolver<?> findTenantIdentifierResolver() {
+        if (applicationContext != null) {
+            var resolver = applicationContext.getBeanProvider(CurrentTenantIdentifierResolver.class)
+                    .orderedStream().findFirst().orElse(null);
+            if (resolver != null) {
+                return resolver;
+            }
+        }
+        return Containers.get().findObject(CurrentTenantIdentifierResolver.class);
     }
 
     protected void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean factory) {

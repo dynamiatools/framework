@@ -16,13 +16,18 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
+import tools.dynamia.integration.context.ObjectsContext;
+import tools.dynamia.integration.scheduling.SchedulerUtil;
+import tools.dynamia.modules.saas.AccountTenantContextCapturer;
 import tools.dynamia.modules.saas.AccountTenantIdentifierResolver;
 import tools.dynamia.modules.saas.AccountTenants;
 import tools.dynamia.modules.saas.api.AccountServiceAPI;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -52,6 +57,7 @@ class HibernateTenancyTest {
 
         var container = new SimpleObjectContainer();
         container.addObject(new JpaTransactionManager(emf));
+        container.addObject(new AccountTenantContextCapturer());
         Containers.get().installObjectContainer(container);
     }
 
@@ -173,9 +179,10 @@ class HibernateTenancyTest {
     }
 
     @Test
-    void resolverUsesTheRequestAttributeAndFallsBackToRoot() {
+    void resolverUsesTheRequestAttributeAndFailsClosedWithoutATenant() {
         var resolver = new AccountTenantIdentifierResolver();
-        assertEquals(AccountTenants.ROOT_TENANT_ID, resolver.resolveCurrentTenantIdentifier());
+        assertEquals(AccountTenants.NO_TENANT_ID, resolver.resolveCurrentTenantIdentifier());
+        assertFalse(resolver.isRoot(AccountTenants.NO_TENANT_ID));
         assertTrue(resolver.isRoot(AccountTenants.ROOT_TENANT_ID));
 
         var request = new MockHttpServletRequest();
@@ -185,6 +192,52 @@ class HibernateTenancyTest {
             assertEquals(71L, resolver.resolveCurrentTenantIdentifier());
         } finally {
             RequestContextHolder.resetRequestAttributes();
+        }
+    }
+
+    @Test
+    void anAsyncTaskInsideAnObjectsContextSeesOnlyItsTenant() throws Exception {
+        create(101L, "async-a");
+        create(102L, "async-b");
+
+        List<String> seen = AccountTenants.with(101L, () -> ObjectsContext.with("some context object").get(() -> {
+            try {
+                return SchedulerUtil.runWithResult(() -> allTexts()).get(5, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        }));
+
+        assertEquals(List.of("async-a"), seen);
+    }
+
+    @Test
+    void aThreadWithoutAnyContextSeesNothing() throws Exception {
+        create(111L, "hidden");
+
+        var seen = new java.util.concurrent.atomic.AtomicReference<List<String>>();
+        Thread.ofVirtual().start(() -> seen.set(allTexts())).join();
+
+        assertTrue(seen.get().isEmpty());
+        assertTrue(allTexts().isEmpty());
+    }
+
+    @Test
+    void withRootSeesEveryAccountInANewSession() {
+        create(121L, "root-a");
+        create(122L, "root-b");
+
+        List<String> seen = AccountTenants.withRoot(() -> allTexts().stream().filter(t -> t.startsWith("root-")).toList());
+
+        assertEquals(List.of("root-a", "root-b"), seen);
+    }
+
+    private static List<String> allTexts() {
+        EntityManager own = emf.createEntityManager();
+        try {
+            return own.createQuery("select n.text from TenantNote n", String.class).getResultList().stream().sorted().toList();
+        } finally {
+            own.close();
         }
     }
 }

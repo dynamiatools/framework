@@ -20,8 +20,12 @@ package tools.dynamia.modules.saas;
 
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.stereotype.Component;
+import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.modules.saas.api.AccountServiceAPI;
 import tools.dynamia.web.util.HttpUtils;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Tells Hibernate which account is the current tenant, so entities that extend the SaaS base classes
@@ -30,17 +34,38 @@ import tools.dynamia.web.util.HttpUtils;
  * <p>
  * The tenant is resolved, in this order, from {@link AccountTenants#runAs(Long, java.util.function.Supplier)}, the
  * current request attribute and the {@link AccountSessionHolder}. It never touches the database, because Hibernate
- * calls it while opening a session. When there is no current account (startup, background jobs) it answers the
- * {@link AccountTenants#ROOT_TENANT_ID root} tenant, which sees every account: the same behaviour as the
- * {@code AccountAwareCrudServiceListener}, which does not filter either when there is no account.
+ * calls it while opening a session. It <strong>fails closed</strong>: when no account can be resolved (startup,
+ * background jobs, a thread that lost its context) it answers {@link AccountTenants#NO_TENANT_ID}, a tenant that does
+ * not exist, so nothing is visible. The {@link AccountTenants#ROOT_TENANT_ID root} tenant, which sees every account,
+ * is only used inside an explicit {@code AccountTenants.withRoot/runAsRoot/callWithRoot}.
  *
  * @author Mario Serrano Leones
  */
 @Component
 public class AccountTenantIdentifierResolver implements CurrentTenantIdentifierResolver<Long> {
 
+    private static final LoggingService LOGGER = new SLF4JLoggingService(AccountTenantIdentifierResolver.class);
+    private static final long WARN_INTERVAL_MILLIS = 60_000;
+    private static final AtomicLong lastWarning = new AtomicLong();
+
     @Override
     public Long resolveCurrentTenantIdentifier() {
+        Long id = effectiveTenantId();
+        if (id != null) {
+            return id;
+        }
+        warnNoTenant();
+        return AccountTenants.NO_TENANT_ID;
+    }
+
+    /**
+     * Resolves the tenant of the code that is running now: the one bound with {@link AccountTenants}, else the
+     * current request attribute, else the {@link AccountSessionHolder}. It never answers the
+     * {@link AccountTenants#NO_TENANT_ID} sentinel.
+     *
+     * @return the tenant id, or {@code null} when none can be resolved
+     */
+    static Long effectiveTenantId() {
         Long forced = AccountTenants.forcedTenantId();
         if (forced != null) {
             return forced;
@@ -50,10 +75,20 @@ public class AccountTenantIdentifierResolver implements CurrentTenantIdentifierR
         if (id == null) {
             id = fromSessionHolder();
         }
-        return id != null ? id : AccountTenants.ROOT_TENANT_ID;
+        return id;
     }
 
-    private Long fromRequest() {
+    private static void warnNoTenant() {
+        long now = System.currentTimeMillis();
+        long last = lastWarning.get();
+        if (now - last >= WARN_INTERVAL_MILLIS && lastWarning.compareAndSet(last, now)) {
+            LOGGER.warn("No tenant could be resolved for this session: using tenant " + AccountTenants.NO_TENANT_ID
+                    + ", which sees no data. Bind one with AccountTenants.runAs/with, or AccountTenants.withRoot for "
+                    + "cross-account work (warning repeated at most once a minute).");
+        }
+    }
+
+    private static Long fromRequest() {
         try {
             if (HttpUtils.isInWebScope()) {
                 var request = HttpUtils.getCurrentRequest();
@@ -67,7 +102,7 @@ public class AccountTenantIdentifierResolver implements CurrentTenantIdentifierR
         return null;
     }
 
-    private Long fromSessionHolder() {
+    private static Long fromSessionHolder() {
         try {
             return AccountSessionHolder.get().getId();
         } catch (Exception e) {

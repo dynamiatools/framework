@@ -14,6 +14,7 @@
 
 package tools.dynamia.modules.security.ui.vm;
 
+import tools.dynamia.modules.security.SecurityTenancy;
 import tools.dynamia.modules.security.domain.User;
 import tools.dynamia.modules.security.services.SecurityService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -153,7 +154,7 @@ public class LoginVM {
             if (usuario != null) {
                 UIMessages.showQuestion("Se generara un nuevo password para " + usuario.getFullname() + " y se enviara al correo. Desea Continuar?", () -> {
                     String newpassword = StringUtils.randomString().substring(0, 8);
-                    service.resetPassword(usuario, newpassword, newpassword);
+                    SecurityTenancy.runWithRootIfNoAccount(() -> service.resetPassword(usuario, newpassword, newpassword));
                     Messagebox.show("Password reiniciado exitosamente, verifique su email para conocer el nuevo password");
                 });
             } else {
