@@ -65,6 +65,9 @@ navigation container merges modules and page groups with the same id, so a `core
 contribute to the same group (see `SecurityModuleProvider` and `SecurityProfileModuleProvider`; the zul page uses
 `position = -1` to stay first).
 
+Moving code from `ui` to `core` changes what is registered in an application that depends on `core` **without** `ui`
+(see [MIGRATION_ZK_SEPARATION.md](./MIGRATION_ZK_SEPARATION.md#2-extensions-zk-free-code-moved-from-ui-to-core)).
+
 State of the separation:
 
 | extension | in `core` | still ZK-bound in `ui` |
