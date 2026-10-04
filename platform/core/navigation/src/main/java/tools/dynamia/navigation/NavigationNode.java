@@ -3,6 +3,7 @@ package tools.dynamia.navigation;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 
 import java.io.Serializable;
@@ -49,10 +50,20 @@ public class NavigationNode implements Serializable {
     }
 
     public NavigationNode(NavigationElement element) {
+        this(element, NavigationLabels.providers());
+    }
+
+    /**
+     * Creates a node reusing already looked up label providers, so a whole tree build finds and sorts the providers
+     * once instead of once per node.
+     *
+     * @param element   the navigation element
+     * @param providers the localized messages providers sorted by priority, see {@code NavigationLabels.providers()}
+     */
+    NavigationNode(NavigationElement element, List<LocalizedMessagesProvider> providers) {
         this.element = element;
         this.id = element.getId();
         var locale = Messages.getDefaultLocale();
-        var providers = NavigationLabels.providers();
         this.name = NavigationLabels.resolve(providers, element.getVirtualPath(), locale, element.getLocalizedName(locale));
         this.longName = element.getLongNameSupplier() != null ? (String) element.getLongNameSupplier().get() : element.getLongName();
         var defaultDescription = element.getLocalizedDescription(locale);

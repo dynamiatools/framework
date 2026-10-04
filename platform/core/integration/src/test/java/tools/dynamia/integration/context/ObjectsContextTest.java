@@ -242,6 +242,40 @@ class ObjectsContextTest {
     }
 
     @Test
+    void aSnapshotKeepsTheLegacyThreadLocalObjectsUnderTheBoundOnes() throws Exception {
+        var legacy = new SimpleObjectContainer();
+        legacy.addObject(new Branch("legacy"));
+        legacy.addObject(new Cashbox("legacy-cashbox"));
+        ThreadLocalObjectContainer.set(legacy);
+
+        var snapshot = ObjectsContext.with(new Branch("bound")).get(ObjectsContext::capture);
+        var seen = new AtomicReference<String>();
+        var thread = new Thread(() -> snapshot.run(() ->
+                seen.set(ObjectsContext.get(Branch.class).name() + "/" + ObjectsContext.get(Cashbox.class).name())));
+        thread.start();
+        thread.join();
+
+        assertEquals("bound/legacy-cashbox", seen.get());
+    }
+
+    @Test
+    void aSnapshotOfNestedScopesKeepsTheLegacyObjectsToo() throws Exception {
+        var legacy = new SimpleObjectContainer();
+        legacy.addObject(new Cashbox("legacy-cashbox"));
+        ThreadLocalObjectContainer.set(legacy);
+
+        var snapshot = ObjectsContext.with(new Branch("outer")).get(
+                () -> ObjectsContext.with(new Branch("inner")).get(ObjectsContext::capture));
+        var seen = new AtomicReference<String>();
+        var thread = new Thread(() -> snapshot.run(() ->
+                seen.set(ObjectsContext.get(Branch.class).name() + "/" + ObjectsContext.get(Cashbox.class).name())));
+        thread.start();
+        thread.join();
+
+        assertEquals("inner/legacy-cashbox", seen.get());
+    }
+
+    @Test
     void theLegacyBridgeCanBeSwitchedOff() {
         ObjectsContext.legacyThreadLocalBridge(false);
         var inside = new AtomicReference<Boolean>();

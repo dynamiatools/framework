@@ -24,6 +24,22 @@ class NavigationLabelsTest {
         assertEquals("Ventas", NavigationLabels.resolve(providers, "store/sales", Locale.of("es"), "Sales"));
     }
 
+    /** Like the ZK provider: answers the default it receives when it has no message of its own. */
+    private static LocalizedMessagesProvider echoingDefault() {
+        return (key, classifier, locale, defaultValue) -> defaultValue;
+    }
+
+    @Test
+    void aProviderThatEchoesTheDefaultDoesNotShortCircuitLowerPriorityProviders() {
+        var providers = List.of(echoingDefault(), provider("Ventas"));
+        assertEquals("Ventas", NavigationLabels.resolve(providers, "store/sales", Locale.of("es"), "Sales"));
+    }
+
+    @Test
+    void defaultIsAppliedAtTheEndWhenOnlyEchoingProvidersExist() {
+        assertEquals("Sales", NavigationLabels.resolve(List.of(echoingDefault()), "store/sales", Locale.ENGLISH, "Sales"));
+    }
+
     @Test
     void fallsBackToDefaultWithoutProviders() {
         assertEquals("Sales", NavigationLabels.resolve(List.of(), "store/sales", Locale.ENGLISH, "Sales"));
