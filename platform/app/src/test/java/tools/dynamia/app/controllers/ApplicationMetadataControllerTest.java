@@ -16,11 +16,15 @@ import tools.dynamia.crud.CrudState;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
+import tools.dynamia.app.metadata.ViewDescriptorMetadata;
+import tools.dynamia.viewers.View;
+import tools.dynamia.viewers.ViewCustomizer;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.impl.DefaultViewDescriptor;
 import tools.dynamia.viewers.ViewDescriptorFactory;
 import tools.dynamia.viewers.ViewDescriptorNotFoundException;
 import tools.dynamia.web.navigation.ErrorResult;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.lang.reflect.Proxy;
 import java.util.List;
@@ -257,5 +261,44 @@ class ApplicationMetadataControllerTest {
         var response = controllerWithDescriptor(null).getViewDescriptor("missing");
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    public static class Book {
+        private String title;
+
+        public String getTitle() {
+            return title;
+        }
+    }
+
+    public static class BookCustomizer implements ViewCustomizer<View> {
+        @Override
+        public void customize(View view) {
+            // nothing to do
+        }
+    }
+
+    @Test
+    void viewDescriptorJsonDoesNotLeakClassNames() {
+        var descriptor = new DefaultViewDescriptor(Book.class, "form");
+        descriptor.setId("bookForm");
+        descriptor.setViewCustomizerClass(BookCustomizer.class);
+
+        var response = controllerWithDescriptor(descriptor).getViewDescriptor("bookForm");
+        var json = JsonMapper.builder().build().writeValueAsString(response.getBody());
+
+        assertFalse(json.contains("tools.dynamia"), json);
+        assertFalse(json.contains("viewCustomizerClass"), json);
+        assertFalse(json.contains("customViewRenderer"), json);
+        assertTrue(json.contains("\"beanClass\":\"Book\""), json);
+    }
+
+    @Test
+    void viewDescriptorMetadataUsesTheEntityIdInsteadOfTheClassName() {
+        var metadata = new ViewDescriptorMetadata(new DefaultViewDescriptor(Book.class, "form"));
+        var json = JsonMapper.builder().build().writeValueAsString(metadata);
+
+        assertFalse(json.contains("tools.dynamia"), json);
+        assertTrue(json.contains("/entities/Book/views/form"), json);
     }
 }

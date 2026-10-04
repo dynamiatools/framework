@@ -263,7 +263,7 @@ export interface ViewDescriptorMetadata {
     view?: string;
     /** Target device class (e.g. `"desktop"`, `"mobile"`) */
     device?: string;
-    /** Fully-qualified Java class name of the view bean */
+    /** Simple class name of the view bean (the entity id) */
     beanClass?: string;
     /** REST endpoint that returns the full ViewDescriptor for this view */
     endpoint?: string;
@@ -311,7 +311,7 @@ export interface ViewFieldGroup {
 /** Mirrors tools.dynamia.viewers.ViewDescriptor */
 export interface ViewDescriptor {
     id: string;
-    /** Fully qualified class name of the target domain class */
+    /** Simple class name of the target domain class (the entity id); the fully-qualified name is never sent */
     beanClass: string;
     /** View type name — matches the JSON "view" key produced by Java's @JsonProperty("view") */
     view: string;
@@ -325,8 +325,6 @@ export interface ViewDescriptor {
     actions?: ActionReference[];
     /** ID of the parent descriptor this one extends */
     extends?: string;
-    viewCustomizerClass?: string;
-    customViewRenderer?: string;
 }
 
 /**

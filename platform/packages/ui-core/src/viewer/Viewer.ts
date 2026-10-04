@@ -11,7 +11,7 @@ import { ViewRendererRegistry } from './ViewRendererRegistry.js';
 export interface ViewerConfig {
   /** View type name or ViewType object */
   viewType?: string | ViewType | null;
-  /** Entity class name (e.g. 'com.example.Book') */
+  /** Entity id: the entity class simple name (e.g. 'Book') */
   beanClass?: string | null;
   /** Pre-loaded view descriptor (skips fetch) */
   descriptor?: ViewDescriptor | null;
@@ -33,7 +33,7 @@ export interface ViewerConfig {
  *
  * Example:
  * <pre>{@code
- * const viewer = new Viewer({ viewType: 'form', beanClass: 'com.example.Book', client });
+ * const viewer = new Viewer({ viewType: 'form', beanClass: 'Book', client });
  * await viewer.initialize();
  * viewer.setValue(book);
  * }</pre>
@@ -225,9 +225,8 @@ export class Viewer {
             this._resolvedDescriptor = views[0] ?? null;
           }
           if (this._resolvedDescriptor) {
-            // beanClass must stay a fully-qualified class name (ViewDescriptor.beanClass still
-            // is one) — take it from the resolved descriptor itself rather than from
-            // EntityMetadata.id, which is only the simple name.
+            // ViewDescriptor.beanClass is the entity's simple class name (the entity id of the
+            // metadata API); the fully-qualified name is never sent to clients.
             if (!this.beanClass) this.beanClass = this._resolvedDescriptor.beanClass;
             return;
           }

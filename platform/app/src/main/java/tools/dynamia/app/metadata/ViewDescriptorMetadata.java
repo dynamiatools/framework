@@ -28,7 +28,7 @@ public class ViewDescriptorMetadata extends BasicMetadata {
      */
     private String device;
     /**
-     * The fully qualified class name of the bean associated with this view.
+     * The simple name of the bean class associated with this view (the entity id); the fully qualified name is never sent to clients.
      */
     private String beanClass;
     /**
@@ -49,7 +49,7 @@ public class ViewDescriptorMetadata extends BasicMetadata {
         this.descriptor = descriptor;
         this.view = descriptor.getViewTypeName();
         this.device = descriptor.getDevice();
-        this.beanClass = descriptor.getBeanClass() != null ? descriptor.getBeanClass().getName() : null;
+        this.beanClass = descriptor.getBeanClass() != null ? descriptor.getBeanClass().getSimpleName() : null;
         if (beanClass != null) {
             setEndpoint(ApplicationMetadataController.PATH + "/entities/" + beanClass + "/views/" + view);
         }
