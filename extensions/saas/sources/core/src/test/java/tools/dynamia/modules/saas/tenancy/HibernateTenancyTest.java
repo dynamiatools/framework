@@ -164,6 +164,15 @@ class HibernateTenancyTest {
     }
 
     @Test
+    void theBindingIsUndoneWhenTheWorkFails() {
+        assertThrows(IllegalStateException.class, () -> AccountTenants.with(91L, () -> {
+            throw new IllegalStateException("boom");
+        }));
+
+        assertNull(AccountTenants.forcedTenantId());
+    }
+
+    @Test
     void resolverUsesTheRequestAttributeAndFallsBackToRoot() {
         var resolver = new AccountTenantIdentifierResolver();
         assertEquals(AccountTenants.ROOT_TENANT_ID, resolver.resolveCurrentTenantIdentifier());

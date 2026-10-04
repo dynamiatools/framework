@@ -62,16 +62,18 @@ endpoint) must say so.
 |---|---|---|
 | `runAs(accountId, work)` | New (`REQUIRES_NEW`), so a new session is opened | Short units of work for one account |
 | `runAsRoot(work)` | New | Short units of work across accounts |
-| `with(accountId, work)`, `withRoot(work)` | None; binds the tenant to the thread | Code that manages its own sessions/transactions, such as long jobs |
+| `with(accountId, work)`, `withRoot(work)` | None; only binds the tenant | Code that manages its own sessions/transactions, such as long jobs |
 | `callWithRoot(callable)` | None | Tasks submitted to executors that throw checked exceptions |
 
 ```java
 AccountTenants.runAs(newAccountId, () -> crudService.create(new Customer("default")));
 ```
 
-The binding is **per thread**. Code that hands work to other threads (executors, virtual threads) has to bind the
-tenant again inside the task; a plain `ThreadLocal` is deliberately not inherited, so a pooled thread cannot leak a
-tenant to later work.
+The tenant is held in a `ScopedValue` (final in Java 25), not in a `ThreadLocal`: it is bound only while the work runs,
+nested bindings shadow the outer one and are undone automatically (also when the work throws), and it can never leak
+to later work on a pooled thread. A scoped value is **not inherited** by threads started inside the scope, except those
+forked with `StructuredTaskScope`. Code that hands work to an executor (including virtual threads) has to bind the
+tenant again inside the task, for example with `callWithRoot`.
 
 **Account migration always runs as root.** `AccountMigrationServiceImpl` binds root around export, import and clone,
 and `ExportPipeline` binds it again in each of its worker threads.

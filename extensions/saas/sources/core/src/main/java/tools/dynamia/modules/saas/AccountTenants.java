@@ -35,10 +35,13 @@ import java.util.function.Supplier;
  *   <li>{@code runAs} / {@code runAsRoot} run the work in its own transaction ({@code REQUIRES_NEW}, which opens a
  *   new session), so it does not share the caller's transaction or persistence context. Use them for short units of
  *   work that touch another account's data: account initializers, administration.</li>
- *   <li>{@code with} / {@code withRoot} only bind the tenant to the current thread, without a transaction, for
- *   code that manages its own sessions and transactions (long running jobs such as account migration). The binding
- *   is per thread: code that hands work to other threads must bind the tenant again inside them.</li>
+ *   <li>{@code with} / {@code withRoot} only bind the tenant, without a transaction, for code that manages its own
+ *   sessions and transactions (long running jobs such as account migration).</li>
  * </ul>
+ * The tenant is held in a {@link ScopedValue}: it is bound only while the work runs, nested bindings shadow the outer
+ * one and are undone automatically, and it can never leak to later work on a pooled thread. A scoped value is not
+ * inherited by threads started inside the scope (except those forked with {@code StructuredTaskScope}), so code that
+ * hands work to an executor must bind the tenant again inside the task.
  *
  * <pre>{@code
  * AccountTenants.runAs(newAccountId, () -> crudService.create(new Customer("default")));
@@ -54,18 +57,19 @@ public final class AccountTenants {
      */
     public static final Long ROOT_TENANT_ID = 0L;
 
-    private static final ThreadLocal<Long> OVERRIDE = new ThreadLocal<>();
+    private static final ScopedValue<Long> TENANT = ScopedValue.newInstance();
 
     private AccountTenants() {
     }
 
     /**
-     * Returns the tenant forced by {@code runAs}, {@code runAsRoot}, {@code with}, {@code withRoot} or {@code callWithRoot} on this thread.
+     * Returns the tenant bound by {@code runAs}, {@code runAsRoot}, {@code with}, {@code withRoot} or
+     * {@code callWithRoot} in the code that is running now.
      *
-     * @return the forced tenant id, or {@code null} when none is forced
+     * @return the bound tenant id, or {@code null} when none is bound
      */
     public static Long forcedTenantId() {
-        return OVERRIDE.get();
+        return TENANT.isBound() ? TENANT.get() : null;
     }
 
     /**
@@ -80,13 +84,7 @@ public final class AccountTenants {
         if (accountId == null) {
             throw new IllegalArgumentException("accountId is required; use runAsRoot to run for every account");
         }
-        Long previous = OVERRIDE.get();
-        OVERRIDE.set(accountId);
-        try {
-            return inNewTransaction(work);
-        } finally {
-            restore(previous);
-        }
+        return ScopedValue.where(TENANT, accountId).call(() -> inNewTransaction(work));
     }
 
     /**
@@ -111,13 +109,7 @@ public final class AccountTenants {
      * @return the result of the work
      */
     public static <T> T runAsRoot(Supplier<T> work) {
-        Long previous = OVERRIDE.get();
-        OVERRIDE.set(ROOT_TENANT_ID);
-        try {
-            return inNewTransaction(work);
-        } finally {
-            restore(previous);
-        }
+        return ScopedValue.where(TENANT, ROOT_TENANT_ID).call(() -> inNewTransaction(work));
     }
 
     /**
@@ -133,7 +125,7 @@ public final class AccountTenants {
     }
 
     /**
-     * Binds the given account as the tenant of the current thread while the work runs, without opening a
+     * Binds the given account as the tenant while the work runs, without opening a
      * transaction. Sessions opened by the work (also by {@code EntityManagerFactory.createEntityManager()}) use it.
      *
      * @param accountId the account id
@@ -145,22 +137,22 @@ public final class AccountTenants {
         if (accountId == null) {
             throw new IllegalArgumentException("accountId is required; use withRoot to run for every account");
         }
-        return bind(accountId, work);
+        return ScopedValue.where(TENANT, accountId).call(work::get);
     }
 
     /**
-     * Binds the root tenant to the current thread while the work runs, without opening a transaction.
+     * Binds the root tenant while the work runs, without opening a transaction.
      *
      * @param work the work
      * @param <T>  the result type
      * @return the result of the work
      */
     public static <T> T withRoot(Supplier<T> work) {
-        return bind(ROOT_TENANT_ID, work);
+        return ScopedValue.where(TENANT, ROOT_TENANT_ID).call(work::get);
     }
 
     /**
-     * Binds the root tenant to the current thread while the work runs, without opening a transaction.
+     * Binds the root tenant while the work runs, without opening a transaction.
      *
      * @param work the work
      */
@@ -181,31 +173,7 @@ public final class AccountTenants {
      * @throws Exception whatever the work throws
      */
     public static <T> T callWithRoot(Callable<T> work) throws Exception {
-        Long previous = OVERRIDE.get();
-        OVERRIDE.set(ROOT_TENANT_ID);
-        try {
-            return work.call();
-        } finally {
-            restore(previous);
-        }
-    }
-
-    private static <T> T bind(Long tenantId, Supplier<T> work) {
-        Long previous = OVERRIDE.get();
-        OVERRIDE.set(tenantId);
-        try {
-            return work.get();
-        } finally {
-            restore(previous);
-        }
-    }
-
-    private static void restore(Long previous) {
-        if (previous == null) {
-            OVERRIDE.remove();
-        } else {
-            OVERRIDE.set(previous);
-        }
+        return ScopedValue.where(TENANT, ROOT_TENANT_ID).call(work::call);
     }
 
     private static <T> T inNewTransaction(Supplier<T> work) {
