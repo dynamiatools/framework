@@ -32,6 +32,7 @@ import tools.dynamia.modules.saas.api.enums.AccountPeriodicity;
 import tools.dynamia.modules.saas.api.enums.AccountStatus;
 import tools.dynamia.modules.saas.domain.Account;
 import tools.dynamia.modules.saas.domain.AccountLog;
+import tools.dynamia.modules.saas.AccountTenants;
 import tools.dynamia.modules.saas.jpa.AccountParameter;
 import tools.dynamia.modules.saas.services.AccountService;
 import tools.dynamia.web.util.HttpUtils;
@@ -135,25 +136,30 @@ public class AccountApiController extends AbstractService {
         String value = null;
         Account account = getAccount(uuid);
         if (account != null) {
-            AccountParameter parameter = crudService().findSingle(AccountParameter.class, QueryParameters.with("name", QueryConditions.eq(name)).add("accountId", account.getId()));
-            if (parameter != null) {
-                value = parameter.getValue();
-            } else if (defautlValue != null) {
-                value = defautlValue;
-                crudService().executeWithinTransaction(() -> {
-                    AccountParameter newParam = new AccountParameter();
-                    newParam.setAccountId(account.getId());
-                    newParam.setName(name);
-                    newParam.setValue(defautlValue);
-                    newParam.save();
-                });
-            }
+            // the parameter belongs to the requested account, which may not be the current tenant (e.g. the system account)
+            value = AccountTenants.runAs(account.getId(), () -> findOrCreateParameter(account, name, defautlValue));
         }
         if (value != null) {
             return ResponseEntity.ok(Map.of("parameter", name, "value", value));
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    private String findOrCreateParameter(Account account, String name, String defaultValue) {
+        AccountParameter parameter = crudService().findSingle(AccountParameter.class, QueryParameters.with("name", QueryConditions.eq(name)).add("accountId", account.getId()));
+        if (parameter != null) {
+            return parameter.getValue();
+        }
+        if (defaultValue != null) {
+            AccountParameter newParam = new AccountParameter();
+            newParam.setAccountId(account.getId());
+            newParam.setName(name);
+            newParam.setValue(defaultValue);
+            newParam.save();
+            return defaultValue;
+        }
+        return null;
     }
 
     private void newLog(String uuid, HttpServletRequest request, Account account) {

@@ -12,6 +12,7 @@ package tools.dynamia.modules.saas.migration.services;
 
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.integration.sterotypes.Service;
+import tools.dynamia.modules.saas.AccountTenants;
 import tools.dynamia.modules.saas.migration.api.AccountCloneOptions;
 import tools.dynamia.modules.saas.migration.api.AccountExportOptions;
 import tools.dynamia.modules.saas.migration.api.AccountImportOptions;
@@ -58,7 +59,7 @@ public class AccountMigrationServiceImpl implements AccountMigrationService {
                              MigrationProgressListener listener,
                              CancellationToken token) {
         log.info("[Migration] Starting export for accountId={}", accountId);
-        exportPipeline.export(accountId, output, options, listener, token);
+        AccountTenants.withRoot(() -> exportPipeline.export(accountId, output, options, listener, token));
         log.info("[Migration] Export complete for accountId={}", accountId);
     }
 
@@ -68,7 +69,7 @@ public class AccountMigrationServiceImpl implements AccountMigrationService {
                              MigrationProgressListener listener,
                              CancellationToken token) {
         log.info("[Migration] Starting import for targetAccountId={}", options.getTargetAccountId());
-        importPipeline.importTenant(input, options, listener, token);
+        AccountTenants.withRoot(() -> importPipeline.importTenant(input, options, listener, token));
         log.info("[Migration] Import complete for targetAccountId={}", options.getTargetAccountId());
     }
 
@@ -76,6 +77,12 @@ public class AccountMigrationServiceImpl implements AccountMigrationService {
     public void cloneTenant(AccountCloneOptions options,
                             MigrationProgressListener listener,
                             CancellationToken token) {
+        AccountTenants.withRoot(() -> doCloneTenant(options, listener, token));
+    }
+
+    private void doCloneTenant(AccountCloneOptions options,
+                               MigrationProgressListener listener,
+                               CancellationToken token) {
         Serializable source = options.getSourceAccountId();
         Serializable target = options.getTargetAccountId();
         log.info("[Migration] Starting clone {} → {}", source, target);
