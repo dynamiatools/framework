@@ -45,7 +45,7 @@ import tools.dynamia.web.util.HttpUtils;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.crud.CrudView;
-import tools.dynamia.zk.crud.actions.FastCrudAction;
+import tools.dynamia.crud.actions.FastCrudAction;
 import tools.dynamia.zk.ui.CanBeReadonly;
 import tools.dynamia.zk.util.ZKUtil;
 import tools.dynamia.zk.viewers.ZKWrapperView;

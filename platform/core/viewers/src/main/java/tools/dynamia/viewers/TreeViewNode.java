@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package tools.dynamia.zk.viewers.tree;
+package tools.dynamia.viewers;
 
 import java.io.Serializable;
 import java.util.ArrayList;

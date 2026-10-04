@@ -18,6 +18,8 @@
 
 package tools.dynamia.zk.viewers.tree;
 
+import tools.dynamia.viewers.TreeViewNode;
+
 import org.zkoss.zul.Frozen;
 import org.zkoss.zul.TreeModel;
 import org.zkoss.zul.Treecol;

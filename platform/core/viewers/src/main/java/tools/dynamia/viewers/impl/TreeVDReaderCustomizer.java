@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package tools.dynamia.zk.viewers.tree;
+package tools.dynamia.viewers.impl;
 
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.ViewDescriptorReader;

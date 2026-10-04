@@ -1,4 +1,4 @@
-package tools.dynamia.zk.viewers.form;
+package tools.dynamia.viewers;
 
 import tools.dynamia.viewers.ViewAction;
 

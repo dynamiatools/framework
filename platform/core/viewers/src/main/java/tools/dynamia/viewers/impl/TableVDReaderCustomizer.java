@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package tools.dynamia.zk.viewers.table;
+package tools.dynamia.viewers.impl;
 
 import tools.dynamia.integration.sterotypes.Provider;
 import tools.dynamia.viewers.ViewDescriptor;

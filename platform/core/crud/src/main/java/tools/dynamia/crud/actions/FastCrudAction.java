@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package tools.dynamia.zk.crud.actions;
+package tools.dynamia.crud.actions;
 
 import tools.dynamia.actions.ActionGroup;
 import tools.dynamia.crud.AbstractCrudAction;
