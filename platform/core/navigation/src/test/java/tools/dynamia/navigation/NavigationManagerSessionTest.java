@@ -69,6 +69,89 @@ public class NavigationManagerSessionTest {
     }
 
     @Test
+    public void currentShouldBeNullOutsideAScopeAndTheBoundInstanceInside() {
+        assertNull(NavigationManagerSession.current());
+
+        inScope(() -> assertSame(NavigationManagerSession.getInstance(), NavigationManagerSession.current()));
+    }
+
+    @Test
+    public void parkedStateShouldBePulledLazilyAndOnlyOnceWhenADesktopConsumes() {
+        Page page = new Page("page", "Page", "the/page");
+        List<Integer> executed = new ArrayList<>();
+        int[] pulls = {0};
+
+        var parked = new NavigationManagerSession();
+        parked.setPage(page, null);
+        parked.runLater(() -> executed.add(1));
+
+        var session = new NavigationManagerSession();
+        session.setParkedStateSupplier(() -> {
+            pulls[0]++;
+            return parked;
+        });
+
+        assertEquals(0, pulls[0], "installing the hook must not pull anything");
+        assertTrue(!session.hasPendingState());
+
+        TestNavigationManager navManager = new TestNavigationManager();
+        session.updateNavManager(navManager);
+        session.executeQueue();
+        session.executeQueue();
+
+        assertEquals(1, pulls[0]);
+        assertSame(page, navManager.getCurrentPage());
+        assertEquals(List.of(1), executed);
+    }
+
+    @Test
+    public void executeQueueShouldPullParkedStateWhenNoPageWasConsumedFirst() {
+        List<Integer> executed = new ArrayList<>();
+        var parked = new NavigationManagerSession();
+        parked.runLater(() -> executed.add(7));
+
+        var session = new NavigationManagerSession();
+        session.setParkedStateSupplier(() -> parked);
+        session.executeQueue();
+
+        assertEquals(List.of(7), executed);
+    }
+
+    @Test
+    public void executeQueueShouldNotLoopForeverWhenACallbackQueuesAnother() {
+        var session = new NavigationManagerSession();
+        int[] runs = {0};
+        session.runLater(new tools.dynamia.commons.Callback() {
+            @Override
+            public void doSomething() {
+                runs[0]++;
+                session.runLater(this);
+            }
+        });
+
+        session.executeQueue();
+
+        assertEquals(1, runs[0]);
+        assertTrue(session.hasPendingState(), "the re-queued callback waits for the next drain");
+    }
+
+    @Test
+    public void executeQueueShouldRunTheRestWhenACallbackFails() {
+        List<Integer> executed = new ArrayList<>();
+        var session = new NavigationManagerSession();
+        session.runLater(() -> executed.add(1));
+        session.runLater(() -> {
+            throw new IllegalStateException("boom");
+        });
+        session.runLater(() -> executed.add(3));
+
+        session.executeQueue();
+
+        assertEquals(List.of(1, 3), executed);
+        assertTrue(!session.hasPendingState());
+    }
+
+    @Test
     public void getInstanceShouldReturnSameInstanceWithinAScope() {
         inScope(() -> assertSame(NavigationManagerSession.getInstance(), NavigationManagerSession.getInstance()));
     }
