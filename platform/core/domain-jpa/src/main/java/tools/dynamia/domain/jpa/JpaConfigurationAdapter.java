@@ -281,20 +281,23 @@ public class JpaConfigurationAdapter {
      * @param factory the factory
      */
     /**
-     * Registers the application's {@link CurrentTenantIdentifierResolver} bean, if there is one, as Hibernate's
-     * tenant identifier resolver ({@code hibernate.tenant_identifier_resolver}). Extensions that provide
-     * multi-tenancy (for example SaaS) only have to publish the resolver as a bean. It runs before
+     * Registers the application's {@link CurrentTenantIdentifierResolver} bean as Hibernate's tenant identifier
+     * resolver ({@code hibernate.tenant_identifier_resolver}). Extensions that provide multi-tenancy (for example
+     * SaaS) only have to publish the resolver as a bean. When there is none, {@link RootTenantIdentifierResolver} is
+     * registered, so entities annotated with {@code @TenantId} also work in applications that are not
+     * multi-tenant (a resolver is harmless when no entity uses {@code @TenantId}). It runs before
      * {@link #configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean)}, so an application can still
      * override the property there.
      *
      * @param factory the entity manager factory being configured
      */
     protected void registerTenantIdentifierResolver(LocalContainerEntityManagerFactoryBean factory) {
-        var resolver = Containers.get().findObject(CurrentTenantIdentifierResolver.class);
-        if (resolver != null) {
-            factory.getJpaPropertyMap().put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, resolver);
-            logger.info("Hibernate tenant identifier resolver: " + resolver.getClass().getName());
+        CurrentTenantIdentifierResolver<?> resolver = Containers.get().findObject(CurrentTenantIdentifierResolver.class);
+        if (resolver == null) {
+            resolver = new RootTenantIdentifierResolver();
         }
+        factory.getJpaPropertyMap().put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, resolver);
+        logger.info("Hibernate tenant identifier resolver: " + resolver.getClass().getName());
     }
 
     protected void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean factory) {

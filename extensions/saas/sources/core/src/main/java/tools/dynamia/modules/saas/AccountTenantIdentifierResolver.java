@@ -41,7 +41,7 @@ public class AccountTenantIdentifierResolver implements CurrentTenantIdentifierR
 
     @Override
     public Long resolveCurrentTenantIdentifier() {
-        Long forced = AccountTenants.getOverride();
+        Long forced = AccountTenants.forcedTenantId();
         if (forced != null) {
             return forced;
         }

@@ -34,6 +34,7 @@ import tools.dynamia.modules.saas.api.AccountAware;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.TenantId;
 
 /**
  * Archivo: Perfil.java Fecha de Creacion: 27/06/2009
@@ -60,6 +61,11 @@ public class Profile extends BaseEntity implements GrantedAuthority, Cloneable, 
     @JsonIgnore
     private List<Permission> permissions = new ArrayList<>();
 
+    /**
+     * The owner account, also Hibernate's tenant discriminator ({@link TenantId}): assigned from the current tenant on
+     * persist and added to every query and load.
+     */
+    @TenantId
     private Long accountId;
 
     public String getDescription() {

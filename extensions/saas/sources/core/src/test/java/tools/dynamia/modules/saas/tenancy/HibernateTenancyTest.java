@@ -139,6 +139,31 @@ class HibernateTenancyTest {
     }
 
     @Test
+    void withRootBindsRootToTheThreadForCodeThatManagesItsOwnSessions() throws Exception {
+        create(81L, "w-a");
+        create(82L, "w-b");
+
+        List<String> seen = AccountTenants.withRoot(() -> {
+            EntityManager own = emf.createEntityManager();
+            try {
+                return own.createQuery("select n.text from TenantNote n where n.text like 'w-%'", String.class).getResultList()
+                        .stream().sorted().toList();
+            } finally {
+                own.close();
+            }
+        });
+        // a worker thread does not inherit the binding: it has to bind again, as the migration export does
+        var inWorker = new java.util.concurrent.atomic.AtomicReference<Long>();
+        var thread = Thread.ofVirtual().start(() -> inWorker.set(AccountTenants.forcedTenantId()));
+        thread.join();
+
+        assertEquals(List.of("w-a", "w-b"), seen);
+        assertNull(AccountTenants.forcedTenantId());
+        assertNull(inWorker.get());
+        assertEquals(AccountTenants.ROOT_TENANT_ID, AccountTenants.callWithRoot(AccountTenants::forcedTenantId));
+    }
+
+    @Test
     void resolverUsesTheRequestAttributeAndFallsBackToRoot() {
         var resolver = new AccountTenantIdentifierResolver();
         assertEquals(AccountTenants.ROOT_TENANT_ID, resolver.resolveCurrentTenantIdentifier());

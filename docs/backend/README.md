@@ -35,6 +35,7 @@ Start with these documents in order:
 - [Architecture Overview](./ARCHITECTURE.md) - Design decisions and layer organization
 - [Advanced Topics](./ADVANCED_TOPICS.md) - Extensibility, modularity, and enterprise patterns
 - [Extensions Guide](./EXTENSIONS.md) - Built-in modules and integration points
+- [SaaS multi-tenancy](./SAAS_MULTITENANCY.md) - Account isolation with Hibernate `@TenantId` (spike)
 
 ### For Extension Developers
 - [Extensions Guide](./EXTENSIONS.md) - Understand existing extensions

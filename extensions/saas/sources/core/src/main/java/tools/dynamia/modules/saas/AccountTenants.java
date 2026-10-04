@@ -23,16 +23,22 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 import tools.dynamia.integration.Containers;
 
+import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 /**
  * Runs work as a given account (tenant), or as the <em>root</em> tenant that sees every account, when Hibernate
  * multi-tenancy is active (see {@link AccountTenantIdentifierResolver}).
  * <p>
- * Hibernate fixes the tenant when a session is opened, so each call runs in its own transaction
- * ({@code REQUIRES_NEW}, which opens a new session); the work therefore does not share the caller's transaction or
- * persistence context. Use it for what must touch another account's data: account initializers, administration,
- * migration, background jobs.
+ * Hibernate fixes the tenant when a session is opened. There are two flavours:
+ * <ul>
+ *   <li>{@code runAs} / {@code runAsRoot} run the work in its own transaction ({@code REQUIRES_NEW}, which opens a
+ *   new session), so it does not share the caller's transaction or persistence context. Use them for short units of
+ *   work that touch another account's data: account initializers, administration.</li>
+ *   <li>{@code with} / {@code withRoot} only bind the tenant to the current thread, without a transaction, for
+ *   code that manages its own sessions and transactions (long running jobs such as account migration). The binding
+ *   is per thread: code that hands work to other threads must bind the tenant again inside them.</li>
+ * </ul>
  *
  * <pre>{@code
  * AccountTenants.runAs(newAccountId, () -> crudService.create(new Customer("default")));
@@ -54,11 +60,11 @@ public final class AccountTenants {
     }
 
     /**
-     * Returns the tenant forced by {@link #runAs(Long, Supplier)} or {@link #runAsRoot(Supplier)} on this thread.
+     * Returns the tenant forced by {@code runAs}, {@code runAsRoot}, {@code with}, {@code withRoot} or {@code callWithRoot} on this thread.
      *
      * @return the forced tenant id, or {@code null} when none is forced
      */
-    static Long getOverride() {
+    public static Long forcedTenantId() {
         return OVERRIDE.get();
     }
 
@@ -124,6 +130,74 @@ public final class AccountTenants {
             work.run();
             return null;
         });
+    }
+
+    /**
+     * Binds the given account as the tenant of the current thread while the work runs, without opening a
+     * transaction. Sessions opened by the work (also by {@code EntityManagerFactory.createEntityManager()}) use it.
+     *
+     * @param accountId the account id
+     * @param work      the work
+     * @param <T>       the result type
+     * @return the result of the work
+     */
+    public static <T> T with(Long accountId, Supplier<T> work) {
+        if (accountId == null) {
+            throw new IllegalArgumentException("accountId is required; use withRoot to run for every account");
+        }
+        return bind(accountId, work);
+    }
+
+    /**
+     * Binds the root tenant to the current thread while the work runs, without opening a transaction.
+     *
+     * @param work the work
+     * @param <T>  the result type
+     * @return the result of the work
+     */
+    public static <T> T withRoot(Supplier<T> work) {
+        return bind(ROOT_TENANT_ID, work);
+    }
+
+    /**
+     * Binds the root tenant to the current thread while the work runs, without opening a transaction.
+     *
+     * @param work the work
+     */
+    public static void withRoot(Runnable work) {
+        withRoot(() -> {
+            work.run();
+            return null;
+        });
+    }
+
+    /**
+     * Same as {@link #withRoot(Supplier)} for work that throws checked exceptions, such as a task submitted to an
+     * executor: bind the root tenant inside the task, because the worker thread does not inherit it.
+     *
+     * @param work the work
+     * @param <T>  the result type
+     * @return the result of the work
+     * @throws Exception whatever the work throws
+     */
+    public static <T> T callWithRoot(Callable<T> work) throws Exception {
+        Long previous = OVERRIDE.get();
+        OVERRIDE.set(ROOT_TENANT_ID);
+        try {
+            return work.call();
+        } finally {
+            restore(previous);
+        }
+    }
+
+    private static <T> T bind(Long tenantId, Supplier<T> work) {
+        Long previous = OVERRIDE.get();
+        OVERRIDE.set(tenantId);
+        try {
+            return work.get();
+        } finally {
+            restore(previous);
+        }
     }
 
     private static void restore(Long previous) {
