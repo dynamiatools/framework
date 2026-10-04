@@ -664,6 +664,20 @@ The `@EnableDynamiaTools` annotation triggers:
 
 ---
 
+## Direction: Removing ZK
+
+ZK is being removed from Dynamia in the medium term, and the TypeScript SDK plus the Vue adapter are the replacement
+frontend. Practical consequences for contributors:
+
+- Code that does not need ZK must not live in a ZK-dependent module. For extensions this is the `core` / `ui` rule in
+  [EXTENSIONS.md](./EXTENSIONS.md#module-layout-core-and-ui).
+- New UI features should be reachable through the REST/metadata API (`/api/app/metadata/*`, `/api/crud/*`, extension
+  endpoints) and described by view descriptors, not only by ZK components.
+- ZK-specific hints in descriptors (`component:`, `controller:`, `customizer:`, `customView:`) are tolerated, but a
+  descriptor that names a ZK class stays in a ZK module.
+
+---
+
 ## Summary
 
 DynamiaTools architecture is built on:

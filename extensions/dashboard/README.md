@@ -30,6 +30,15 @@ Add the following dependencies to project classpath
 compile 'tools.dynamia.modules:tools.dynamia.modules.dashboard:26.2.2'
 ```
 
+## Modules
+
+| artifact | contents |
+|---|---|
+| `tools.dynamia.modules.dashboard.core` | UI-agnostic API: `DashboardWidgetDefinition`, `WidgetContext`, `DashboardAction`, `UserInfoProvider`. No ZK dependency. |
+| `tools.dynamia.modules.dashboard` | ZK implementation: `Dashboard`, `DashboardWidget`, `ChartjsDashboardWidget`, `ViewerDashboardWidget`, renderer and styles. Depends on `core`. |
+
+Existing applications keep depending on `tools.dynamia.modules.dashboard` and need no changes.
+
 ## Usage
 
 Create a view descriptor of type `dashboard` and add as fields all the widgets you want to show. This descriptor works
@@ -180,3 +189,25 @@ re-rendered the `getView()` method is invoked.
 ## License
 
 DynamiaTools Dashboard is available under Apache 2 License
+
+## Dashboards from a JS frontend
+
+The layout of a dashboard (columns, `span`, `span-sm`, `span-xs`) and its widget slots are in the `dashboard` view
+descriptor, which a JS client reads with `client.metadata.getView(id)`. The data of each widget is served by:
+
+```
+GET /api/dashboard/{descriptorId}/widgets/{field}?param=value
+```
+
+The response is a `DashboardWidgetResponse`: `field`, `widget`, `type`, `title`, flags and `data`. Only widgets
+declared as a field of the descriptor can be loaded. Query parameters are passed to `DashboardWidget.update(params)`.
+
+A widget declares how a JS frontend renders it with `getType()` (see `DashboardWidgetTypes`: `chart`, `viewer`, `kpi`,
+`html`, `custom`) and `getData(context)`:
+
+- `ChartjsDashboardWidget` serves a `ChartWidgetData` (Chart.js `type` and `data`) automatically.
+- `ViewerDashboardWidget` serves a `ViewerWidgetData` (descriptor id, view type and value).
+- Other widgets override `getType()` and `getData(WidgetContext)`; `KpiWidgetData` is provided for key indicators.
+
+When served over REST, ZK widgets are initialized with a headless `DashboardContext` that has no `Dashboard` or
+`DashboardWidgetWindow`, so widgets used that way must not call `getDashboard()` or `getWindow()`.

@@ -18,6 +18,8 @@
 
 package tools.dynamia.zk.viewers.tree;
 
+import tools.dynamia.viewers.TreeViewNode;
+
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Menupopup;

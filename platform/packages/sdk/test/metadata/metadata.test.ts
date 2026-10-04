@@ -31,4 +31,30 @@ describe('MetadataApi', () => {
     const [url] = fetchMock.mock.calls[0] as [string];
     expect(url).toContain('/api/app/metadata/entities/com.example.Book');
   });
+  it('getView(id) calls GET /api/app/metadata/views/{id} and caches the result', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true, status: 200,
+      headers: { get: () => 'application/json' },
+      json: () => Promise.resolve({ id: 'main dash', view: 'dashboard', fields: [], params: {} }),
+    } as unknown as Response);
+    const first = await client.metadata.getView('main dash');
+    const second = await client.metadata.getView('main dash');
+    const [url] = fetchMock.mock.calls[0] as [string];
+    expect(url).toContain('/api/app/metadata/views/main%20dash');
+    expect(first.view).toBe('dashboard');
+    expect(second).toBe(first);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+  it('clearViewDescriptorCache(id) invalidates a descriptor fetched with getView', async () => {
+    await client.metadata.getView('mainDashboard');
+    client.clearViewDescriptorCache('mainDashboard');
+    await client.metadata.getView('mainDashboard');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+  it('clearViewDescriptorCache() with no id clears descriptors fetched with getView', async () => {
+    await client.metadata.getView('mainDashboard');
+    client.clearViewDescriptorCache();
+    await client.metadata.getView('mainDashboard');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 });

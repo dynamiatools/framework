@@ -16,6 +16,8 @@
  */
 package tools.dynamia.zk.ui;
 
+import tools.dynamia.web.MicroFrontendHostContextProvider;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.zkoss.zk.ui.Executions;
