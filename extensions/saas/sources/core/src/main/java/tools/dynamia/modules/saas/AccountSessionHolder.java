@@ -25,7 +25,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.integration.CloneableThreadLocalObject;
 import tools.dynamia.integration.Containers;
-import tools.dynamia.integration.ThreadLocalObjectContainer;
+import tools.dynamia.integration.ScopedValueObjectContainer;
 import tools.dynamia.integration.sterotypes.Component;
 import tools.dynamia.modules.saas.api.AccountException;
 import tools.dynamia.modules.saas.api.dto.AccountDTO;
@@ -63,7 +63,7 @@ public class AccountSessionHolder implements Serializable, CloneableThreadLocalO
     public static AccountSessionHolder get() {
         AccountSessionHolder accountSessionHolder = null;
         try {
-            accountSessionHolder = ThreadLocalObjectContainer.getObject(AccountSessionHolder.class);
+            accountSessionHolder = ScopedValueObjectContainer.getObject(AccountSessionHolder.class);
         } catch (Exception e) {
             RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
             if (attributes != null) {

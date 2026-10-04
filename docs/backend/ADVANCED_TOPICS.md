@@ -897,6 +897,31 @@ public class ProcessAllBooksAction extends AbstractCrudAction {
 }
 ```
 
+### Passing context to async tasks
+
+`SchedulerUtil.run`, `runAndWait` and `runWithResult` start the task on a virtual thread and carry the caller's context
+into it: the objects of the caller's `ScopedValueObjectContainer` (or, when there is none, the beans that implement
+`ThreadLocalObjectAware`, cloned if they are `CloneableThreadLocalObject`, plus the `ThreadLocalContextProvider`
+values). Inside the task, read it with `ScopedValueObjectContainer.getObject(...)`; it falls back to the Spring context
+when the bound container has no such object.
+
+`ScopedValueObjectContainer` is built on `ScopedValue` (final in Java 25). It exists only while the code passed to
+`run`/`call`/`get` runs, a nested binding shadows the outer one and is undone automatically (also on exceptions), and
+nothing can leak to a pooled thread. A scoped value is **not inherited** by threads you start yourself, so bind the
+container again inside the task if you hand work to your own executor:
+
+```java
+var context = new SimpleObjectContainer();
+context.addObject(currentUser);
+executor.submit(() -> ScopedValueObjectContainer.run(context, () -> {
+    User user = ScopedValueObjectContainer.getObject(User.class);
+}));
+```
+
+`ThreadLocalObjectContainer` is unchanged and independent. `SchedulerUtil` still fills it inside the task (and restores
+the previous value afterwards) so code that reads it keeps working; new code should use `ScopedValueObjectContainer`.
+The variants that take several tasks (`run(Runnable, Runnable...)` and `run(List<Runnable>)`) do not carry the context.
+
 ---
 
 ## REST API Development
