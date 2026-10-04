@@ -23,6 +23,7 @@ import org.hibernate.annotations.BatchSize;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.jpa.SimpleEntity;
 import tools.dynamia.modules.saas.api.AccountAware;
+import org.hibernate.annotations.TenantId;
 
 /**
  * @author Mario Serrano Leones
@@ -42,6 +43,11 @@ public class Permission extends SimpleEntity implements  Cloneable, AccountAware
     private String description;
     private String source;
     private int level;
+    /**
+     * The owner account, also Hibernate's tenant discriminator ({@link TenantId}): assigned from the current tenant on
+     * persist and added to every query and load.
+     */
+    @TenantId
     private Long accountId;
 
     public Permission() {

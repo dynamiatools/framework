@@ -24,6 +24,7 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.BatchSize;
 import tools.dynamia.domain.jpa.BaseEntity;
 import tools.dynamia.modules.saas.api.AccountAware;
+import org.hibernate.annotations.TenantId;
 
 
 /**
@@ -42,6 +43,11 @@ public class UserProfile extends BaseEntity implements AccountAware {
     @JoinColumn(updatable = false)
     @JsonIgnore
     private User user;
+    /**
+     * The owner account, also Hibernate's tenant discriminator ({@link TenantId}): assigned from the current tenant on
+     * persist and added to every query and load.
+     */
+    @TenantId
     private Long accountId;
 
     public UserProfile() {

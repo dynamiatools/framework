@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.hibernate.annotations.TenantId;
 
 @Entity
 @Table(name = "sec_users", indexes = {@Index(columnList = "username"), @Index(columnList = "email")})
@@ -92,6 +93,11 @@ public class User extends BaseEntity implements UserDetails, AccountAware {
     private String mobileNumber;
 
 
+    /**
+     * The owner account, also Hibernate's tenant discriminator ({@link TenantId}): assigned from the current tenant on
+     * persist and added to every query and load.
+     */
+    @TenantId
     private Long accountId;
 
 

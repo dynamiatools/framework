@@ -16,6 +16,8 @@
  */
 package tools.dynamia.domain.jpa;
 
+import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookupFailureException;
@@ -28,6 +30,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import tools.dynamia.commons.PropertiesContainer;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
+import tools.dynamia.integration.Containers;
 
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -257,6 +260,7 @@ public class JpaConfigurationAdapter {
         factory.setPackagesToScan(packages);
         factory.setDataSource(dataSource());
         factory.setJpaVendorAdapter(jpaVendorAdapter());
+        registerTenantIdentifierResolver(factory);
         configureEntityManagerFactory(factory);
         logger.info("Setting EntityManagerFactory. Datasource: " + factory.getDataSource().toString() + ".  Packages to Scan: " + Arrays.toString(packages));
 
@@ -276,6 +280,26 @@ public class JpaConfigurationAdapter {
      *
      * @param factory the factory
      */
+    /**
+     * Registers the application's {@link CurrentTenantIdentifierResolver} bean as Hibernate's tenant identifier
+     * resolver ({@code hibernate.tenant_identifier_resolver}). Extensions that provide multi-tenancy (for example
+     * SaaS) only have to publish the resolver as a bean. When there is none, {@link RootTenantIdentifierResolver} is
+     * registered, so entities annotated with {@code @TenantId} also work in applications that are not
+     * multi-tenant (a resolver is harmless when no entity uses {@code @TenantId}). It runs before
+     * {@link #configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean)}, so an application can still
+     * override the property there.
+     *
+     * @param factory the entity manager factory being configured
+     */
+    protected void registerTenantIdentifierResolver(LocalContainerEntityManagerFactoryBean factory) {
+        CurrentTenantIdentifierResolver<?> resolver = Containers.get().findObject(CurrentTenantIdentifierResolver.class);
+        if (resolver == null) {
+            resolver = new RootTenantIdentifierResolver();
+        }
+        factory.getJpaPropertyMap().put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, resolver);
+        logger.info("Hibernate tenant identifier resolver: " + resolver.getClass().getName());
+    }
+
     protected void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean factory) {
 
     }
