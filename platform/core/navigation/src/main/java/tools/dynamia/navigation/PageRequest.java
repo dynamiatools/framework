@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
  * Colombia / South America
@@ -15,29 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package tools.dynamia.navigation;
 
-package tools.dynamia.zk.viewers.form;
+import tools.dynamia.navigation.Page;
 
-/**
- * Defines the value contract for form view models.
- *
- * @param <T> the value type managed by the form model
- */
-public interface FormViewModel<T> {
+import java.util.Map;
 
-    /**
-     * Returns the current model value bound to the form.
-     *
-     * @return the current value
-     */
-    T getValue();
-
-    /**
-     * Updates the model value bound to the form.
-     *
-     * @param value the new value to set
-     */
-    void setValue(T value);
-
+public record PageRequest(Page page, Map<String, Object> params) {
 
 }

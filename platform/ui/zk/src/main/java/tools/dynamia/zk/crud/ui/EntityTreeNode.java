@@ -18,7 +18,7 @@ package tools.dynamia.zk.crud.ui;
 
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zul.event.TreeDataEvent;
-import tools.dynamia.zk.viewers.tree.TreeViewNode;
+import tools.dynamia.viewers.TreeViewNode;
 
 import java.io.Serializable;
 import java.util.ArrayList;

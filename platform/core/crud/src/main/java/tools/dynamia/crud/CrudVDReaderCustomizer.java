@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tools.dynamia.zk.crud;
+package tools.dynamia.crud;
 
 import tools.dynamia.integration.sterotypes.Provider;
 import tools.dynamia.viewers.ViewDescriptor;
