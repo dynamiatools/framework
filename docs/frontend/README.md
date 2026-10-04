@@ -190,6 +190,11 @@ fetch('/api/data', {
   - Reports: `extensions/reports/packages/reports-sdk/README.md`
   - SaaS: `extensions/saas/packages/saas-sdk/README.md`
   - Files: `extensions/entity-files/packages/files-sdk/README.md`
+  - HTTP Functions: `extensions/http-functions/packages/http-functions-sdk/README.md`
+  - Dashboard: `extensions/dashboard/packages/dashboard-sdk/README.md` (framework-agnostic) and
+    `extensions/dashboard/packages/dashboard-vue/README.md` (Vue components; kept out of `@dynamia-tools/vue` so
+    platform packages do not depend on extensions)
+  - SaaS is **server-side only** by design; do not add migration/stats/parameter endpoints to it (see its README)
 
 ---
 

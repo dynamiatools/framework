@@ -21,6 +21,8 @@ export class MetadataApi {
 
     /** Cache: `"entityId:viewType"` → single ViewDescriptor */
     private readonly _viewCache = new Map<string, ViewDescriptor>();
+    /** Cache: descriptor id → ViewDescriptor fetched through {@link getView} */
+    private readonly _viewByIdCache = new Map<string, ViewDescriptor>();
     /** Cache: `entityId` → full list of ViewDescriptors */
     private readonly _viewsCache = new Map<string, ViewDescriptor[]>();
 
@@ -125,10 +127,31 @@ export class MetadataApi {
     }
 
     /**
+     * GET /api/app/metadata/views/{id} — A view descriptor by its id, without going through an entity.
+     *
+     * Use it for descriptors that are not bound to an entity, such as `view: dashboard`.
+     * The result is cached after the first successful fetch.
+     *
+     * @param id - the view descriptor id (e.g. `"mainDashboard"`).
+     */
+    async getView(id: string): Promise<ViewDescriptor> {
+        const cached = this._viewByIdCache.get(id);
+        if (cached !== undefined) return cached;
+
+        const descriptor = await this.http.get<ViewDescriptor>(
+            `/api/app/metadata/views/${encodeURIComponent(id)}`,
+        );
+
+        this._viewByIdCache.set(id, descriptor);
+        return descriptor;
+    }
+
+    /**
      * Clears the in-memory ViewDescriptor cache.
      *
-     * @param id - When provided, only the cache entries for that entity id
-     *   are removed. When omitted, the entire cache is cleared.
+     * @param id - When provided, only the cache entries for that entity id (or, for descriptors
+     *   fetched with {@link getView}, that descriptor id) are removed. When omitted, the entire
+     *   cache is cleared.
      *
      * @example
      * // invalidate a single entity after a backend hot-reload
@@ -138,6 +161,7 @@ export class MetadataApi {
      */
     clearViewCache(id?: string): void {
         if (id !== undefined) {
+            this._viewByIdCache.delete(id);
             this._viewsCache.delete(id);
             const prefix = `${id}:`;
             for (const key of this._viewCache.keys()) {
@@ -146,6 +170,7 @@ export class MetadataApi {
         } else {
             this._viewCache.clear();
             this._viewsCache.clear();
+            this._viewByIdCache.clear();
         }
     }
 }

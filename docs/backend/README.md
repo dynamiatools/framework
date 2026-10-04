@@ -10,6 +10,7 @@ This documentation is organized into the following sections:
 - **[Architecture Overview](./ARCHITECTURE.md)** - Understand the layered architecture and design principles of DynamiaTools
 - **[Core Modules Reference](./CORE_MODULES.md)** - Detailed explanation of each platform core module
 - **[Extensions Guide](./EXTENSIONS.md)** - Pre-built enterprise extensions and their purposes
+- **[Migration: ZK separation](./MIGRATION_ZK_SEPARATION.md)** - Class renames and `ui` → `core` moves; read before upgrading (breaking changes)
 
 ### Design Proposals
 - **[Server-Driven Action Flows](../design/SERVER_DRIVEN_ACTION_FLOWS.md)** - Draft protocol extending `RemoteAction` for multi-step, backend-driven UI flows (confirm/input/dialog) over REST

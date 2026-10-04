@@ -27,25 +27,16 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <name>DynamiaModules - Dashboard</name>
-    <artifactId>tools.dynamia.modules.dashboard</artifactId>
+    <name>DynamiaModules - Dashboard Parent</name>
+    <artifactId>tools.dynamia.modules.dashboard.parent</artifactId>
     <description>DynamiaTools module to create and show dashboard with widgets support</description>
     <url>https://www.dynamia.tools/modules/dashboard</url>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
-
-    <dependencies>
-        <dependency>
-            <groupId>tools.dynamia</groupId>
-            <artifactId>tools.dynamia.zk</artifactId>
-            <version>26.10.0</version>
-        </dependency>
-        <dependency>
-            <groupId>tools.dynamia.modules</groupId>
-            <artifactId>tools.dynamia.modules.saas.api</artifactId>
-            <version>26.10.0</version>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>core</module>
+        <module>zk</module>
+    </modules>
 
     <build>
         <plugins>
@@ -62,6 +53,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

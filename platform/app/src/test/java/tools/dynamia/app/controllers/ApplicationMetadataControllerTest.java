@@ -16,8 +16,13 @@ import tools.dynamia.crud.CrudState;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
+import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.impl.DefaultViewDescriptor;
+import tools.dynamia.viewers.ViewDescriptorFactory;
+import tools.dynamia.viewers.ViewDescriptorNotFoundException;
 import tools.dynamia.web.navigation.ErrorResult;
 
+import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
 
@@ -219,5 +224,38 @@ class ApplicationMetadataControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         var body = assertInstanceOf(ActionExecutionResponse.class, response.getBody());
         assertEquals(404, body.getStatusCode());
+    }
+
+    private static ApplicationMetadataController controllerWithDescriptor(ViewDescriptor known) {
+        var factory = (ViewDescriptorFactory) Proxy.newProxyInstance(
+                ViewDescriptorFactory.class.getClassLoader(), new Class[]{ViewDescriptorFactory.class},
+                (proxy, method, args) -> {
+                    if (method.getName().equals("getDescriptor") && args.length == 1 && args[0] instanceof String id) {
+                        if (known != null && id.equals(known.getId())) {
+                            return known;
+                        }
+                        throw new ViewDescriptorNotFoundException("Cannot found view descriptor using id: " + id);
+                    }
+                    throw new UnsupportedOperationException(method.getName());
+                });
+        return new ApplicationMetadataController(null, factory);
+    }
+
+    @Test
+    void viewDescriptorByIdReturnsTheDescriptor() {
+        var descriptor = new DefaultViewDescriptor();
+        descriptor.setId("mainDashboard");
+
+        var response = controllerWithDescriptor(descriptor).getViewDescriptor("mainDashboard");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("mainDashboard", response.getBody().getId());
+    }
+
+    @Test
+    void viewDescriptorByIdReturns404WhenUnknown() {
+        var response = controllerWithDescriptor(null).getViewDescriptor("missing");
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 }
