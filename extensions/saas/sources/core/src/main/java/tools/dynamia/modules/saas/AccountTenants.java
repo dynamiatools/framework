@@ -176,6 +176,21 @@ public final class AccountTenants {
         return ScopedValue.where(TENANT, ROOT_TENANT_ID).call(work::call);
     }
 
+    /**
+     * Binds the given tenant (the root tenant is {@link #ROOT_TENANT_ID}) around the operation, without opening a
+     * transaction. Used to re-apply a tenant captured on another thread, see {@link AccountTenantContextCapturer}.
+     *
+     * @param tenantId the tenant id
+     * @param work     the operation
+     * @param <T>      the result type
+     * @param <X>      the exception type the operation may throw
+     * @return the result of the operation
+     * @throws X whatever the operation throws
+     */
+    public static <T, X extends Throwable> T callBoundTo(Long tenantId, ScopedValue.CallableOp<? extends T, X> work) throws X {
+        return ScopedValue.where(TENANT, tenantId).call(work);
+    }
+
     private static <T> T inNewTransaction(Supplier<T> work) {
         PlatformTransactionManager txManager = Containers.get().findObject(PlatformTransactionManager.class);
         if (txManager == null) {
