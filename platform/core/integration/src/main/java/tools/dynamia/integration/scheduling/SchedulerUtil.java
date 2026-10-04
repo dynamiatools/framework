@@ -24,6 +24,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.integration.*;
+import tools.dynamia.integration.context.ObjectsContext;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -115,80 +116,8 @@ public class SchedulerUtil {
     }
 
     public static Runnable getWithContext(Runnable runnable) {
-
-
-        SimpleObjectContainer context = buildAsyncContext();
-
-        // return runnable that binds the context while it runs
-        return () -> ScopedValueObjectContainer.run(context, () -> withLegacyContext(context, () -> {
-            runnable.run();
-            return null;
-        }));
+        return ObjectsContext.capture().wrap(runnable);
     }
-
-    /**
-     * Runs the task with the context also set in the legacy {@link ThreadLocalObjectContainer}, which existing code
-     * still reads (for example {@code ThreadLocalObjectContainer.getObject(...)}), and puts back whatever it held
-     * before. New code should read {@link ScopedValueObjectContainer}.
-     */
-    private static <T> T withLegacyContext(SimpleObjectContainer context, Supplier<T> task) {
-        ObjectContainer previous = ThreadLocalObjectContainer.get();
-        ThreadLocalObjectContainer.set(context);
-        try {
-            return task.get();
-        } finally {
-            if (previous != null) {
-                ThreadLocalObjectContainer.set(previous);
-            } else {
-                ThreadLocalObjectContainer.clear();
-            }
-        }
-    }
-
-    /**
-     * Build the async context from the current scoped (or legacy thread local) context and
-     * ThreadLocalObjectAware beans in containers
-     *
-     * @return the simple object container
-     */
-    private static SimpleObjectContainer buildAsyncContext() {
-        SimpleObjectContainer context = new SimpleObjectContainer();
-        if (ScopedValueObjectContainer.isBound()) {
-            // copy the scoped context of the current code
-            ScopedValueObjectContainer.copyTo(context);
-        } else if (ThreadLocalObjectContainer.isInitialized()) {
-            // copy current thread context
-            ThreadLocalObjectContainer.copyTo(context);
-        } else {
-            Collection<ThreadLocalObjectAware> sessionBeans = Containers.get().findObjects(ThreadLocalObjectAware.class);
-            if (sessionBeans != null) {
-                sessionBeans.forEach(bean -> {
-                    if (bean instanceof CloneableThreadLocalObject cloneable) {
-                        try {
-                            context.addObject(cloneable.clone());
-                        } catch (Exception e) {
-                            context.addObject(bean); // fallback a referencia
-                        }
-                    } else {
-                        context.addObject(bean);
-                    }
-                });
-            }
-
-            // add context objects from providers
-            Collection<ThreadLocalContextProvider> providers = Containers.get().findObjects(ThreadLocalContextProvider.class);
-            if (providers != null) {
-                providers.forEach(provider -> {
-                    Map<String, Object> contextObjects = provider.getContextObjects();
-                    if (contextObjects != null) {
-                        contextObjects.forEach(context::addObject);
-                    }
-                });
-            }
-        }
-        return context;
-    }
-
 
     /**
      * Run the WorkerTask asynchronously using a Virtual Thread executor from {@link VT} helper class.
@@ -210,10 +139,7 @@ public class SchedulerUtil {
      * @return the future
      */
     public static <T> CompletableFuture<T> runWithResult(Supplier<T> task) {
-        SimpleObjectContainer context = buildAsyncContext();
-        Supplier<T> supplierWithContext = () -> ScopedValueObjectContainer.get(context, () -> withLegacyContext(context, task));
-
-        return CompletableFuture.supplyAsync(supplierWithContext, VT.executor());
+        return CompletableFuture.supplyAsync(ObjectsContext.capture().wrapSupplier(task), VT.executor());
     }
 
     /**

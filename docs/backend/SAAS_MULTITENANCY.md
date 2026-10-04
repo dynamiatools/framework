@@ -73,7 +73,9 @@ The tenant is held in a `ScopedValue` (final in Java 25), not in a `ThreadLocal`
 nested bindings shadow the outer one and are undone automatically (also when the work throws), and it can never leak
 to later work on a pooled thread. A scoped value is **not inherited** by threads started inside the scope, except those
 forked with `StructuredTaskScope`. Code that hands work to an executor (including virtual threads) has to bind the
-tenant again inside the task, for example with `callWithRoot`.
+tenant again inside the task, for example with `callWithRoot`. Tasks started with `SchedulerUtil` (or any
+`ObjectsContext` snapshot) carry the tenant automatically: `AccountTenantContextCapturer` re-applies it inside the task, so
+a task started inside `runAs(5L, ...)` runs as account 5 and not as root.
 
 **Account migration always runs as root.** `AccountMigrationServiceImpl` binds root around export, import and clone,
 and `ExportPipeline` binds it again in each of its worker threads.

@@ -7,6 +7,7 @@ open module tools.dynamia.integration {
     requires spring.beans;
     requires com.fasterxml.jackson.annotation;
     exports tools.dynamia.integration;
+    exports tools.dynamia.integration.context;
     exports tools.dynamia.integration.ms;
     exports tools.dynamia.integration.scheduling;
     exports tools.dynamia.integration.sterotypes;
