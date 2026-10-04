@@ -1,4 +1,4 @@
-package tools.dynamia.zk;
+package tools.dynamia.app;
 
 import tools.dynamia.commons.MapBuilder;
 import tools.dynamia.integration.sterotypes.Provider;
