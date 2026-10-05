@@ -178,6 +178,11 @@ public class AccountServiceAPIImpl extends AbstractService implements AccountSer
     }
 
     @Override
+    public <T> T withAccount(Long accountId, Supplier<T> work) {
+        return AccountTenants.with(accountId, work);
+    }
+
+    @Override
     public AccountDTO getCurrentAccount() {
         try {
             return accountContext.toDTO();
@@ -185,11 +190,6 @@ public class AccountServiceAPIImpl extends AbstractService implements AccountSer
             log("Error loading current account", e);
             return null;
         }
-    }
-
-    @Override
-    public <T> T withAccount(Long accountId, Supplier<T> work) {
-        return AccountTenants.with(accountId, work);
     }
 
     @Override
