@@ -36,11 +36,20 @@ import java.util.concurrent.ConcurrentHashMap;
  * able to reach "the current one" implicitly resolved from whatever request/desktop is executing.
  * </p>
  * <p>
- * Registration happens as soon as a manager instance is built (see {@code BaseNavigationManager}).
+ * Registration happens as soon as a manager instance is built (see {@code BaseNavigationManager}), except for
+ * managers that opt out through {@code BaseNavigationManager#shouldRegister()}: the ZK manager only registers when it
+ * is built inside a desktop, because only a desktop cleanup ever unregisters it.
  * Explicit unregistration (e.g. a ZK desktop being destroyed because its tab/iframe was closed) is
  * best-effort — see the UI-framework-specific wiring for details. It is not required for
  * correctness: since this registry is itself session-scoped, every entry is discarded automatically
  * when the whole session ends, regardless of whether individual instances were unregistered first.
+ * </p>
+ * <p>
+ * The registry holds strong references to desktop-scoped managers, which are only meant to be used inside their own
+ * ZK execution. Code that obtains another desktop's manager here (through {@link #find(String)} or
+ * {@link #getActiveInstances()}) must not manipulate it outside that desktop's own execution (it is not thread-safe
+ * and a desktop may only be touched while it is activated); use the registry to enumerate or identify desktops, not
+ * to drive them from another request or thread.
  * </p>
  *
  * @author Mario A. Serrano Leones

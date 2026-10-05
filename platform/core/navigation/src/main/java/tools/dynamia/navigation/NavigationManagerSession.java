@@ -1,11 +1,16 @@
 package tools.dynamia.navigation;
 
 import tools.dynamia.commons.Callback;
+import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.commons.logger.SLF4JLoggingService;
 
 import java.io.Serializable;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.function.Supplier;
 
 /**
  * Holds a navigation intent (a {@link Page} plus optional params, and/or queued {@link Callback}s)
@@ -25,13 +30,20 @@ import java.util.Queue;
  * would be lost with the scope. The filter therefore carries any still-pending intent across
  * requests through the HTTP session ({@link #hasPendingState()}/{@link #absorb(NavigationManagerSession)}):
  * it is restored into the next request's instance and consumed by the first desktop that bootstraps.
+ * The restoration is <em>lazy</em>: the parked state stays in the HTTP session until a desktop actually consumes it
+ * ({@link #updateNavManager(NavigationManager)} or {@link #executeQueue()}), pulled through the hook installed with
+ * {@link #setParkedStateSupplier(Supplier)}, so concurrent requests that never bootstrap a desktop (static resources,
+ * {@code /zkau}, {@code /api}) cannot take it. Parked state expires after {@link #DEFAULT_PARKED_STATE_TTL}.
  * </p>
  * <p>
  * {@link #getInstance()} throws {@link java.util.NoSuchElementException} if called outside that
  * scope — e.g. a background job, or test code that hasn't bound one itself via
  * {@code ScopedValue.where(NavigationManagerSession.SCOPE, new NavigationManagerSession()).run(...)}.
- * This is intentional: failing fast beats silently creating a throwaway instance whose state would
- * be lost the moment the call returns.
+ * This is intentional for code that <em>records</em> an intent ({@code setPage}/{@code runLater}): failing fast beats
+ * silently creating a throwaway instance whose state would be lost the moment the call returns. Code that merely
+ * <em>consumes</em> an intent (a desktop bootstrap, which may run outside a bound scope: ZK server push,
+ * {@code Executions.activate} from another thread, async/error dispatches) must use {@link #current()}, which returns
+ * null instead of throwing.
  * </p>
  * <p>
  * Using a scoped value (instead of the session-scoped bean this class used to be, or a plain
@@ -55,12 +67,41 @@ public class NavigationManagerSession implements Serializable {
      */
     public static final ScopedValue<NavigationManagerSession> SCOPE = ScopedValue.newInstance();
 
+    /**
+     * How long a parked intent stays valid in the HTTP session before it is discarded instead of firing later in an
+     * unrelated tab.
+     */
+    public static final Duration DEFAULT_PARKED_STATE_TTL = Duration.ofMinutes(2);
+
+    private static final LoggingService LOGGER = new SLF4JLoggingService(NavigationManagerSession.class);
+
     private Page page;
     private Map<String, Serializable> pageParams;
 
     private Queue<Callback> runLaterQueue = new LinkedList<>();
 
     private transient Runnable onPending;
+    private transient Supplier<NavigationManagerSession> parkedStateSupplier;
+
+    /**
+     * Installs the hook that pulls the intent parked by a previous request, called at most once, the first time a
+     * desktop consumes this instance ({@link #updateNavManager(NavigationManager)} or {@link #executeQueue()}). It
+     * must remove the parked state from wherever it is kept (so it is consumed once) and return null when there is
+     * none or it expired. Keeps this module free of servlet dependencies: the request-lifecycle filter provides it.
+     *
+     * @param parkedStateSupplier the hook, or null to clear it
+     */
+    public void setParkedStateSupplier(Supplier<NavigationManagerSession> parkedStateSupplier) {
+        this.parkedStateSupplier = parkedStateSupplier;
+    }
+
+    private void restoreParkedState() {
+        Supplier<NavigationManagerSession> supplier = parkedStateSupplier;
+        if (supplier != null) {
+            parkedStateSupplier = null;
+            absorb(supplier.get());
+        }
+    }
 
     /**
      * Registers a hook invoked every time an intent is recorded ({@link #setPage(Page, Map)} or
@@ -89,6 +130,17 @@ public class NavigationManagerSession implements Serializable {
         return SCOPE.get();
     }
 
+    /**
+     * Returns the instance bound to the current scope, or null when there is none. Use it in code that consumes an
+     * intent and may run outside a request scope (ZK server push, another thread, async/error dispatches); code that
+     * records an intent keeps using {@link #getInstance()} and fails fast.
+     *
+     * @return the bound instance, or null if called outside a bound scope
+     */
+    public static NavigationManagerSession current() {
+        return SCOPE.isBound() ? SCOPE.get() : null;
+    }
+
     public void setPage(Page page, Map<String, Serializable> params) {
         this.page = page;
         this.pageParams = params;
@@ -97,6 +149,7 @@ public class NavigationManagerSession implements Serializable {
 
     public void updateNavManager(NavigationManager navigationManager) {
         if (navigationManager != null) {
+            restoreParkedState();
             navigationManager.setCurrentPage(page, pageParams);
             page = null;
             pageParams = null;
@@ -111,11 +164,25 @@ public class NavigationManagerSession implements Serializable {
         notifyPending();
     }
 
+    /**
+     * Runs the queued callbacks, in order. It drains a snapshot of the queue, so a callback that calls
+     * {@link #runLater(Callback)} queues its callback for the next call instead of looping forever, and an exception
+     * thrown by a callback is logged without preventing the rest from running.
+     */
     public void executeQueue() {
-        while (!runLaterQueue.isEmpty()) {
-            var callback = runLaterQueue.poll();
+        restoreParkedState();
+        if (runLaterQueue == null || runLaterQueue.isEmpty()) {
+            return;
+        }
+        var batch = new ArrayList<>(runLaterQueue);
+        runLaterQueue.clear();
+        for (Callback callback : batch) {
             if (callback != null) {
-                callback.doSomething();
+                try {
+                    callback.doSomething();
+                } catch (Exception e) {
+                    LOGGER.error("Error executing navigation callback: " + e.getMessage(), e);
+                }
             }
         }
     }
