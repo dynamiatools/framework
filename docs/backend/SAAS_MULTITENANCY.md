@@ -22,8 +22,13 @@ core) never touches the database, because Hibernate calls it while opening a ses
 the session opens and it cannot change afterwards.
 
 The **root tenant** (`AccountTenants.ROOT_TENANT_ID`, `0`) is not an account: it sees every account and may persist data
-for any account. When there is no current account (startup, background jobs) the resolver answers root, which is the
-same fail-open behaviour the listener already had. Entities persisted without an `accountId` under root get `0`.
+for any account. It is only used inside an explicit `AccountTenants.withRoot/runAsRoot/callWithRoot`. Tenant
+resolution **fails closed**: when nothing resolves (startup, a background thread that lost its context) the resolver
+answers `AccountTenants.NO_TENANT_ID` (`-1`), a tenant that does not exist, so nothing is visible, and logs a warning
+(at most once a minute). Code that legitimately has no account (login by username/token, startup defaults) uses
+`AccountServiceAPI.withRootIfNoAccount` (security: `SecurityTenancy`), which binds root only when no account is
+current. The tenant is fixed when the session opens, so that wrapper must be applied before a `@Transactional` method
+is entered, not inside it.
 
 ## Making an entity tenant-aware
 
@@ -75,7 +80,8 @@ to later work on a pooled thread. A scoped value is **not inherited** by threads
 forked with `StructuredTaskScope`. Code that hands work to an executor (including virtual threads) has to bind the
 tenant again inside the task, for example with `callWithRoot`. Tasks started with `SchedulerUtil` (or any
 `ObjectsContext` snapshot) carry the tenant automatically: `AccountTenantContextCapturer` re-applies it inside the task, so
-a task started inside `runAs(5L, ...)` runs as account 5 and not as root.
+a task started inside `runAs(5L, ...)`, or from a request of account 5, runs as account 5 (the capturer takes the
+effective tenant: bound, request attribute, session) and not as root.
 
 **Account migration always runs as root.** `AccountMigrationServiceImpl` binds root around export, import and clone,
 and `ExportPipeline` binds it again in each of its worker threads.
@@ -90,8 +96,8 @@ and `ExportPipeline` binds it again in each of its worker threads.
   `runAs`/root.
 - **Cross-account reads of entities that are now tenant-aware** (for example a shared email template owned by the
   system account) need `runAs`/root.
-- **Login.** `User` is tenant-aware. A login request that arrives without a resolved account resolves root and sees all
-  users, as before; with a subdomain-resolved account it only sees that account's users.
+- **Login.** `User` is tenant-aware. A login request that arrives without a resolved account runs as root through
+  `SecurityTenancy` and sees all users, as before; with a subdomain-resolved account it only sees that account's users.
 
 ## Adopting it in an application (checklist)
 
@@ -100,4 +106,4 @@ and `ExportPipeline` binds it again in each of its worker threads.
 3. Review native queries and direct `EntityManager` use.
 4. Review every query that passes an explicit `accountId` for another account.
 5. Review async code and where sessions are opened relative to account resolution.
-6. Decide whether "no current account" should stay root (fail-open, the default) or fail closed.
+6. "No current account" fails closed (`-1`); wrap legitimate cross-account code in `withRoot`/`runAsRoot`.

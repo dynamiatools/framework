@@ -121,7 +121,7 @@ public class UserTokenAuthenticationFilter extends BasicAuthenticationFilter {
 
                 LOGGER.info("Logging user session [" + userToken.getUser() + "] - Account Id [" + userToken.getAccountId() + "] using token [" + userToken.getTokenName() + "]   URI: " + request.getRequestURI());
 
-                service.updateAccessToken(userToken);
+                SecurityTenancy.runWithRootIfNoAccount(() -> service.updateAccessToken(userToken));
                 return buildAuthentication(userToken.getUser());
             } else {
                 throw new ValidationError("Invalid access token. No user found");

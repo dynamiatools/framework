@@ -37,6 +37,7 @@ import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.integration.CacheManagerUtils;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.modules.saas.AccountConfig;
+import tools.dynamia.modules.saas.AccountTenants;
 import tools.dynamia.modules.saas.api.AccountInitializer;
 import tools.dynamia.modules.saas.api.AccountStats;
 import tools.dynamia.modules.saas.api.AccountStatsProvider;
@@ -218,7 +219,10 @@ public class AccountServiceImpl implements AccountService, ApplicationListener<C
             try {
                 logger.info("Executing " + initializer + " for " + accountDTO.getName());
                 crudService.executeWithinTransaction(() -> log(accountRef, "Executing " + initializer.getClass().getSimpleName()));
-                initializer.init(accountDTO);
+                AccountTenants.with(accountDTO.getId(), () -> {
+                    initializer.init(accountDTO);
+                    return null;
+                });
             } catch (Exception e) {
                 logger.error("Error firing account initializer " + initializer.getClass().getSimpleName(), e);
                 crudService.executeWithinTransaction(() -> log(accountRef, "Error at " + initializer.getClass().getSimpleName() + ": " + e.getMessage()));

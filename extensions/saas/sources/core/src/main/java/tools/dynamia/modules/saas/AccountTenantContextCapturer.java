@@ -22,9 +22,11 @@ import org.springframework.stereotype.Component;
 import tools.dynamia.integration.context.ContextCapturer;
 
 /**
- * Carries the tenant bound with {@link AccountTenants} into async tasks started with {@code SchedulerUtil} (or any
- * {@code ObjectsContext.Snapshot}). Without it a task started inside {@code AccountTenants.runAs(5L, ...)} would not
- * see tenant {@code 5}: a scoped value is not inherited by other threads, and the task would resolve the root tenant.
+ * Carries the effective tenant (the one bound with {@link AccountTenants}, else the request or session account) into
+ * async tasks started with {@code SchedulerUtil} (or any {@code ObjectsContext.Snapshot}). Without it a task started
+ * inside {@code AccountTenants.runAs(5L, ...)}, or from a request of account 5, would not see tenant {@code 5}: a
+ * scoped value, the request and the session are not inherited by other threads, and the task would resolve no tenant
+ * (it would see nothing). When no tenant is resolved nothing is captured.
  *
  * @author Mario Serrano Leones
  */
@@ -33,8 +35,8 @@ public class AccountTenantContextCapturer implements ContextCapturer {
 
     @Override
     public Binding capture() {
-        Long tenantId = AccountTenants.forcedTenantId();
-        if (tenantId == null) {
+        Long tenantId = AccountTenantIdentifierResolver.effectiveTenantId();
+        if (tenantId == null || AccountTenants.NO_TENANT_ID.equals(tenantId)) {
             return null;
         }
         return new Binding() {

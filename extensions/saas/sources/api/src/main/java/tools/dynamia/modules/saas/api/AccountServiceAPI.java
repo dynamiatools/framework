@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Core service API for managing SaaS accounts in a multi-tenant environment.
@@ -85,6 +86,22 @@ public interface AccountServiceAPI {
      * @return the unique identifier of the current account, or null if no account is set
      */
     Long getCurrentAccountId();
+
+    /**
+     * Runs work that has to see every account when no account is current: login lookups by username or token,
+     * startup defaults. When an account is current (for example resolved from the subdomain) the work runs as that
+     * account, so it stays isolated. Tenant resolution fails closed, so such code must use this instead of relying on
+     * an implicit root tenant. The tenant is fixed when the Hibernate session opens, so the work must open its own
+     * session (it must not be a method already running inside a transaction). The default implementation just runs
+     * the work.
+     *
+     * @param work the work
+     * @param <T>  the result type
+     * @return the result of the work
+     */
+    default <T> T withRootIfNoAccount(Supplier<T> work) {
+        return work.get();
+    }
 
     /**
      * Retrieves the complete information of the currently active account.
