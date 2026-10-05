@@ -1,5 +1,6 @@
-# Publica el SNAPSHOT de dynamia-tools en GitHub Packages (Dynamia-Soluciones/maven-registry)
-# cada vez que cambia `next`. dynamia-erp lo resuelve desde ahí (dynamiatools.version = *-SNAPSHOT).
+# Publica el SNAPSHOT de dynamia-tools en los GitHub Packages de este mismo repo (público,
+# https://maven.pkg.github.com/dynamiatools/framework) cada vez que cambia `next`.
+# dynamia-erp lo resuelve desde ahí (dynamiatools.version = *-SNAPSHOT).
 # No publica en Maven Central: eso sigue siendo release.yml.
 
 name: Publish Snapshot
@@ -16,6 +17,10 @@ on:
 concurrency:
   group: publish-snapshot
   cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   publish:
@@ -41,7 +46,7 @@ jobs:
       run: >
         mvn -B -T 1C verify
         org.apache.maven.plugins:maven-deploy-plugin:3.1.4:deploy
-        -DaltDeploymentRepository=github::https://maven.pkg.github.com/Dynamia-Soluciones/maven-registry
+        -DaltDeploymentRepository=github::https://maven.pkg.github.com/dynamiatools/framework
       env:
-        MAVEN_USERNAME: ${{ secrets.NEXUS_USER }}
-        MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        MAVEN_USERNAME: ${{ github.actor }}
+        MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
