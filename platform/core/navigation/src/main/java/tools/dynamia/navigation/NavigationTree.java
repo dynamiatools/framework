@@ -56,6 +56,7 @@ public class NavigationTree implements Serializable {
     public static NavigationTree buildDefault() {
 
         try {
+            var labelProviders = NavigationLabels.providers();
             var builder = new DefaultNavigationBuilder() {
                 @Override
                 public void buildNavigation() {
@@ -64,7 +65,7 @@ public class NavigationTree implements Serializable {
                     modules.sort(new ModuleComparator());
                     for (Module module : modules) {
                         if (NavigationRestrictions.allowAccess(module) && hasPagesWithAccess(module)) {
-                            var moduleNode = new NavigationNode(module);
+                            var moduleNode = new NavigationNode(module, labelProviders);
                             getNavigationTree().addNode(moduleNode);
                             buildPages(module.getDefaultPageGroup(), moduleNode);
                             buildPageGroups(module, moduleNode);
@@ -77,7 +78,7 @@ public class NavigationTree implements Serializable {
                     var pages = new ArrayList<>(pageGroup.getPages());
                     for (Page p : pages) {
                         if (NavigationRestrictions.allowAccess(p) && p.isVisible()) {
-                            var pageNode = new NavigationNode(p);
+                            var pageNode = new NavigationNode(p, labelProviders);
                             parentNode.addChild(pageNode);
                         }
                     }

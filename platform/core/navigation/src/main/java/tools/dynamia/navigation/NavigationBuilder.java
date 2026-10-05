@@ -1,5 +1,7 @@
 package tools.dynamia.navigation;
 
+import tools.dynamia.commons.LocalizedMessagesProvider;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +12,7 @@ public abstract class NavigationBuilder {
 
     private Class<NavigationViewBuilder> viewBuilderClass;
     private NavigationViewBuilder viewBuilder;
+    private List<LocalizedMessagesProvider> labelProviders;
 
     private final NavigationTree navigationTree = new NavigationTree();
 
@@ -30,7 +33,7 @@ public abstract class NavigationBuilder {
             if (NavigationRestrictions.allowAccess(module) && hasPagesWithAccess(module)) {
                 viewBuilder.createModuleView(module);
 
-                var moduleNode = new NavigationNode(module);
+                var moduleNode = new NavigationNode(module, labelProviders());
                 navigationTree.addNode(moduleNode);
 
                 buildPages(module.getDefaultPageGroup(), moduleNode);
@@ -41,6 +44,16 @@ public abstract class NavigationBuilder {
     }
 
     protected abstract void showNavigation(Object navigationView);
+
+    /**
+     * Label providers looked up once per builder instead of once per node.
+     */
+    private List<LocalizedMessagesProvider> labelProviders() {
+        if (labelProviders == null) {
+            labelProviders = NavigationLabels.providers();
+        }
+        return labelProviders;
+    }
 
 
     protected boolean hasPagesWithAccess(Module module) {
@@ -67,7 +80,7 @@ public abstract class NavigationBuilder {
 
     protected void buildPageGroupAndSubgroups(PageGroup pageGroup, NavigationNode parentNode) {
         if (NavigationRestrictions.allowAccess(pageGroup) && pageGroup.isVisible()) {
-            var pageGroupNode = new NavigationNode(pageGroup);
+            var pageGroupNode = new NavigationNode(pageGroup, labelProviders());
             parentNode.addChild(pageGroupNode);
 
             viewBuilder.createPageGroupView(pageGroup);
@@ -86,7 +99,7 @@ public abstract class NavigationBuilder {
         for (Page p : pages) {
             if (NavigationRestrictions.allowAccess(p) && p.isVisible()) {
 
-                var pageNode = new NavigationNode(p);
+                var pageNode = new NavigationNode(p, labelProviders());
                 parentNode.addChild(pageNode);
                 viewBuilder.createPageView(p);
                 navManager.addAvailablePage(p);

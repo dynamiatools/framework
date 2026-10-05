@@ -26,11 +26,11 @@ import org.springframework.web.servlet.ModelAndView;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.navigation.*;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import static tools.dynamia.navigation.NavigationElement.PATH_SEPARATOR;
 
@@ -43,6 +43,15 @@ import static tools.dynamia.navigation.NavigationElement.PATH_SEPARATOR;
 @RequestMapping("/page")
 public class PageNavigationController {
 
+    /**
+     * A last path segment with a file extension ({@code logo.png}, {@code app.min.js}) is a static resource.
+     */
+    private static final Pattern STATIC_RESOURCE = Pattern.compile(".*/[^/]*\\.[A-Za-z0-9]{1,10}$");
+
+    /**
+     * Accepted values of the {@code zoom} request parameter: a plain number, optionally a percentage (80, 0.8, 90%).
+     */
+    private static final Pattern ZOOM = Pattern.compile("\\d{1,3}(\\.\\d{1,3})?%?");
 
     @RequestMapping()
     public ModelAndView route(HttpServletRequest request, HttpServletResponse response) {
@@ -107,6 +116,14 @@ public class PageNavigationController {
     }
 
     /**
+     * Tells whether the request URI points to a static resource, judging only by its last path segment (the file
+     * system is never touched, so the answer cannot reveal which files exist on the server).
+     */
+    private static boolean isStaticResource(String requestUri) {
+        return requestUri != null && STATIC_RESOURCE.matcher(requestUri).matches();
+    }
+
+    /**
      * Same page-resolution logic as {@link #navigate(String, HttpServletRequest, HttpServletResponse)},
      * but rendering into an arbitrary view name instead of the hardcoded {@code "index"} app shell.
      * Used by {@link PageEmbedController} to render a page with the {@code "embed"} view (just the
@@ -115,7 +132,7 @@ public class PageNavigationController {
      * @param viewName logical Spring view name to render the resolved page into
      */
     public static ModelAndView navigate(String path, String viewName, HttpServletRequest request, HttpServletResponse response) {
-        if (new File(request.getRequestURI()).isFile()) {
+        if (isStaticResource(request.getRequestURI())) {
             return null;
         }
 
@@ -129,8 +146,10 @@ public class PageNavigationController {
             }
         }
         ModelAndView mv = new ModelAndView(viewName);
-        if (request.getParameter("zoom") != null) {
-            mv.addObject("zoom", "zoom: " + request.getParameter("zoom") + ";");
+        var zoom = request.getParameter("zoom");
+        if (zoom != null && ZOOM.matcher(zoom).matches()) {
+            // only a number reaches the style string; anything else is ignored
+            mv.addObject("zoom", "zoom: " + zoom + ";");
         }
 
         try {

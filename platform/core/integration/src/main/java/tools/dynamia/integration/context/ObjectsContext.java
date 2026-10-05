@@ -277,7 +277,8 @@ public final class ObjectsContext {
     /**
      * Captures the current context so it can be re-applied in another thread.
      * <p>
-     * What is captured: the bound objects (or, when none are bound, the legacy thread-local container; or, when there is
+     * What is captured: the bound objects, on top of the legacy thread-local container when it is initialized (the same
+     * order as {@link #get(Class)}); or, when none are bound, the legacy thread-local container; or, when there is
      * neither, the beans that implement {@link ThreadLocalObjectAware}, cloned if they are
      * {@link CloneableThreadLocalObject}, and the values of the {@link ThreadLocalContextProvider} beans), plus the
      * binding of every {@link ContextCapturer} bean.
@@ -291,10 +292,19 @@ public final class ObjectsContext {
 
         ObjectContainer bound = ScopedValueObjectContainer.current();
         if (bound != null) {
+            ObjectContainer top = bound; // layered containers are immutable
             if (bound instanceof SimpleObjectContainer) {
-                ScopedValueObjectContainer.copyTo(extra); // it is mutable: copy it
+                var copy = new SimpleObjectContainer();
+                ScopedValueObjectContainer.copyTo(copy); // it is mutable: copy it
+                top = copy;
+            }
+            if (ThreadLocalObjectContainer.isInitialized()) {
+                // same order as get(): the bound objects win over the legacy thread-local container
+                var legacy = new SimpleObjectContainer();
+                ThreadLocalObjectContainer.copyTo(legacy);
+                base = new LayeredObjectContainer(legacy, top);
             } else {
-                base = bound; // layered containers are immutable
+                base = top;
             }
         } else if (ThreadLocalObjectContainer.isInitialized()) {
             ThreadLocalObjectContainer.copyTo(extra);

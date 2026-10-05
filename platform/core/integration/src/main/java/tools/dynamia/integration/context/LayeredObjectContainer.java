@@ -31,9 +31,9 @@ import java.util.List;
 final class LayeredObjectContainer implements ObjectContainer {
 
     private final ObjectContainer parent;
-    private final SimpleObjectContainer own;
+    private final ObjectContainer own;
 
-    LayeredObjectContainer(ObjectContainer parent, SimpleObjectContainer own) {
+    LayeredObjectContainer(ObjectContainer parent, ObjectContainer own) {
         this.parent = parent;
         this.own = own;
     }
