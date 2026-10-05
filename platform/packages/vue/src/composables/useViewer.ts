@@ -12,7 +12,7 @@ import { VueViewer } from '../views/VueViewer.js';
  * <pre>{@code
  * const { viewer, loading, error } = useViewer({
  *   viewType: 'form',
- *   beanClass: 'com.example.Book',
+ *   beanClass: 'Book',
  *   client,
  * });
  * }</pre>

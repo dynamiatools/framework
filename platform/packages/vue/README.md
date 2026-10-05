@@ -104,7 +104,7 @@ const client = new DynamiaClient({ baseUrl: '/api', token: 'your-token' });
 
 const { viewer, loading, error } = useViewer({
   viewType: 'crud',
-  beanClass: 'com.example.Book',
+  beanClass: 'Book',
   client,
 });
 </script>
@@ -112,7 +112,7 @@ const { viewer, loading, error } = useViewer({
 <template>
   <DynamiaViewer
     view-type="crud"
-    bean-class="com.example.Book"
+    bean-class="Book"
   />
 </template>
 ```
@@ -125,9 +125,9 @@ const { viewer, loading, error } = useViewer({
 
 ```vue
 <!-- By view type + entity class (descriptor fetched from backend) -->
-<DynamiaViewer view-type="form"  bean-class="com.example.Book" v-model="book" @submit="onSave" />
-<DynamiaViewer view-type="table" bean-class="com.example.Book" />
-<DynamiaViewer view-type="crud"  bean-class="com.example.Book" />
+<DynamiaViewer view-type="form"  bean-class="Book" v-model="book" @submit="onSave" />
+<DynamiaViewer view-type="table" bean-class="Book" />
+<DynamiaViewer view-type="crud"  bean-class="Book" />
 
 <!-- By descriptor ID (fetched by ID from backend) -->
 <DynamiaViewer descriptor-id="BookCustomForm" v-model="book" />
@@ -139,7 +139,7 @@ const { viewer, loading, error } = useViewer({
 <DynamiaViewer view-type="kanban" bean-class="com.example.Task" />
 
 <!-- With custom loading and error slots -->
-<DynamiaViewer view-type="form" bean-class="com.example.Book">
+<DynamiaViewer view-type="form" bean-class="Book">
   <template #loading>
     <MySpinner />
   </template>
@@ -154,7 +154,7 @@ const { viewer, loading, error } = useViewer({
 | Prop | Type | Description |
 |------|------|-------------|
 | `viewType` | `string` | View type name: `'form'`, `'table'`, `'crud'`, `'tree'`, `'kanban'`, … |
-| `beanClass` | `string` | Fully-qualified entity class name |
+| `beanClass` | `string` | Entity id (class simple name) |
 | `descriptor` | `ViewDescriptor` | Pre-loaded descriptor (skips backend fetch) |
 | `descriptorId` | `string` | Descriptor ID to fetch from backend |
 | `readOnly` | `boolean` | Propagates to the inner view |
@@ -190,7 +190,7 @@ const client = new DynamiaClient({ baseUrl: '/api', token: '...' });
 
 const { viewer, view, loading, error, getValue, setValue, setReadonly } = useViewer({
   viewType: 'form',
-  beanClass: 'com.example.Book',
+  beanClass: 'Book',
   client,
   value: { title: 'Clean Code' },   // optional initial value
   readOnly: false,
@@ -442,7 +442,7 @@ All view classes extend their `ui-core` counterparts and replace state with Vue 
 ```typescript
 import { VueViewer } from '@dynamia-tools/vue';
 
-const viewer = new VueViewer({ viewType: 'form', beanClass: 'com.example.Book', client });
+const viewer = new VueViewer({ viewType: 'form', beanClass: 'Book', client });
 await viewer.initialize();
 
 viewer.loading.value        // Ref<boolean>

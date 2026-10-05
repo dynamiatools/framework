@@ -21,6 +21,7 @@ package tools.dynamia.modules.dashboard;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -77,6 +78,7 @@ class DashboardRestControllerTest {
 
     private SalesWidget widget;
     private DashboardRestController controller;
+    private ViewDescriptorFactory controllerFactory;
 
     @BeforeEach
     void setUp() {
@@ -107,6 +109,7 @@ class DashboardRestControllerTest {
                     }
                     throw new UnsupportedOperationException(method.getName());
                 });
+        controllerFactory = factory;
         controller = new DashboardRestController(factory);
     }
 
@@ -122,7 +125,36 @@ class DashboardRestControllerTest {
     }
 
     private ResponseEntity<?> call(String descriptor, String field, Map<String, String> params) {
-        return controller.getWidget(descriptor, field, params, new MockHttpServletRequest("GET", "/api/dashboard"));
+        return controller.getWidget(descriptor, field, params, authenticatedRequest());
+    }
+
+    private static MockHttpServletRequest authenticatedRequest() {
+        var request = new MockHttpServletRequest("GET", "/api/dashboard");
+        request.setUserPrincipal(() -> "user");
+        return request;
+    }
+
+    @Test
+    void anonymousCallerIs401() {
+        var response = controller.getWidget("mainDashboard", "totalSales", Map.of(), new MockHttpServletRequest("GET", "/api/dashboard"));
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertNull(widget.updated);
+    }
+
+    @Test
+    void aSharedSingletonWidgetIsNotUsedByTheRequest() {
+        try (var context = new GenericApplicationContext()) {
+            context.registerBean("salesWidget", SalesWidget.class, () -> widget);
+            context.refresh();
+            var perRequest = new DashboardRestController(controllerFactory, context);
+
+            var response = perRequest.getWidget("mainDashboard", "totalSales", Map.of("range", "lastMonth"), authenticatedRequest());
+
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            assertInstanceOf(DashboardWidgetResponse.class, response.getBody());
+            assertNull(widget.updated, "the shared singleton must not receive the request state");
+        }
     }
 
     @Test

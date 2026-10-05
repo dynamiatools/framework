@@ -83,8 +83,11 @@ public interface ViewDescriptor extends Serializable {
      * <p>This class is used by the renderer to introspect field types and apply default
      * type-based configurations.</p>
      *
-     * @return the target bean class; never {@code null}
+     * @return the target bean class; never {@code null}. Not serialized to JSON, because a fully-qualified class
+     * name must not reach clients: the JSON {@code beanClass} property carries the class simple name, which is the
+     * entity id of the metadata API
      */
+    @JsonIgnore
     Class<?> getBeanClass();
 
     /**
@@ -155,16 +158,18 @@ public interface ViewDescriptor extends Serializable {
      * <p>Customizers can post-process the resulting component (e.g., add event listeners,
      * adjust styles) in a renderer-agnostic way.</p>
      *
-     * @return the customizer class, or {@code null} if no customizer is configured
+     * @return the customizer class, or {@code null} if no customizer is configured. Not serialized to JSON
      */
+    @JsonIgnore
     Class<? extends ViewCustomizer> getViewCustomizerClass();
 
     /**
      * Returns a custom {@link ViewRenderer} class that overrides the default renderer registered
      * for this descriptor's view type.
      *
-     * @return the custom renderer class, or {@code null} to use the default renderer
+     * @return the custom renderer class, or {@code null} to use the default renderer. Not serialized to JSON
      */
+    @JsonIgnore
     Class<? extends ViewRenderer> getCustomViewRenderer();
 
     /**

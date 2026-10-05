@@ -295,7 +295,7 @@ const client = new DynamiaClient({ baseUrl: 'https://app.example.com', token: '.
 // By view type + entity class (fetches descriptor from backend)
 const viewer = new Viewer({
   viewType: 'form',
-  beanClass: 'com.example.Book',
+  beanClass: 'Book',
   client,
 });
 await viewer.initialize();

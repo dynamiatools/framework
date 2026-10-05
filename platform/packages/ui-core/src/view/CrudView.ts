@@ -94,7 +94,7 @@ export class CrudView extends View {
    * Returns the entity identifier associated with this CRUD view, when known.
    * `entityMetadata.id` is the entity's simple class name (see `EntityMetadata.id`); the
    * fully-qualified name is never sent to clients, so this falls back to the view descriptor's
-   * `beanClass` (still an FQCN) only when no entity metadata was loaded.
+   * `beanClass` (also the simple name) only when no entity metadata was loaded.
    */
   getEntityClassName(): string | null {
     return this.entityMetadata?.id ?? this.descriptor.beanClass ?? null;

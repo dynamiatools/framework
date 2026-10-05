@@ -563,6 +563,14 @@ GET /api/dashboard/{descriptorId}/widgets/{field}?param=value
   `widget` param, never from the request. Unknown dashboards, non-dashboard descriptors, fields and widgets answer
   `404`; a failing widget answers a generic `500` (the cause is only logged).
 - Query parameters are passed to `DashboardWidgetDefinition.update(params)`.
+- Each request gets its **own widget instance** (prototype beans, such as `@InstallDashboardWidget`, are new per lookup;
+  a singleton widget bean is replaced by a new instance from the bean factory), so concurrent users never share widget
+  state.
+- The caller must be **authenticated** (`401` otherwise). A dashboard descriptor is not linked to the navigation pages
+  that show it, so `NavigationRestrictions` cannot be applied: any authenticated user can read any dashboard's widgets.
+  Restrict `/api/dashboard/**` in the web security configuration for per-dashboard authorization.
+- View descriptors served by the metadata API never include class names: `beanClass` is the entity simple name (the
+  entity id), and `viewCustomizerClass` / `customViewRenderer` are not serialized.
 - A widget chooses how a JS frontend renders it with `getType()` (`chart`, `viewer`, `kpi`, `html`, `custom`, see
   `DashboardWidgetTypes`) and `getData(WidgetContext)`. `ChartjsDashboardWidget` and `ViewerDashboardWidget` implement
   them, so existing ZK dashboards work from JS unchanged. `KpiWidgetData` is provided for key indicators.
