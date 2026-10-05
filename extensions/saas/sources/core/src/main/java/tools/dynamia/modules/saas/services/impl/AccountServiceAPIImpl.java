@@ -182,6 +182,11 @@ public class AccountServiceAPIImpl extends AbstractService implements AccountSer
     }
 
     @Override
+    public <T> T withAccount(Long accountId, Supplier<T> work) {
+        return AccountTenants.with(accountId, work);
+    }
+
+    @Override
     public AccountDTO setCurrentAccount(Long accountId) {
         if (HttpUtils.isInWebScope()) {
             var current = getCurrentAccount();

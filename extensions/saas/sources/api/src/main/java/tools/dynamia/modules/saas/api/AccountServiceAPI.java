@@ -104,6 +104,22 @@ public interface AccountServiceAPI {
     }
 
     /**
+     * Runs the work as the given account, whatever the current account is. It is meant for administration done from
+     * another account (for example the system account working on a customer account), where queries must see the
+     * data of the target account. The tenant is only bound while the work runs and no transaction is opened, so the
+     * work opens its own sessions and transactions. It must be bound again inside any callback that runs later.
+     * The default implementation just runs the work.
+     *
+     * @param accountId the account the work runs as
+     * @param work      the work
+     * @param <T>       the result type
+     * @return the result of the work
+     */
+    default <T> T withAccount(Long accountId, Supplier<T> work) {
+        return work.get();
+    }
+
+    /**
      * Retrieves the complete information of the currently active account.
      *
      * @return an {@link AccountDTO} with the current account details
