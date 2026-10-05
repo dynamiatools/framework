@@ -24,6 +24,7 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.modules.saas.api.dto.AccountDTO;
 import tools.dynamia.modules.saas.domain.Account;
+import tools.dynamia.modules.saas.services.AccountService;
 import tools.dynamia.web.util.HttpUtils;
 
 import java.util.List;
@@ -47,8 +48,18 @@ public class AccountContext {
         return Containers.get().findObject(AccountContext.class);
     }
 
+    /**
+     * Returns the account of the code that is running now. The account bound with {@link AccountTenants} (administration
+     * of another account, background work) wins over the session and the resolvers, so it always matches the tenant
+     * Hibernate filters by.
+     *
+     * @return the current account, or null when there is none
+     */
     public Account getAccount() {
-        Account account = null;
+        Account account = accountBoundToTenant();
+        if (account != null) {
+            return account;
+        }
 
         try {
             account = AccountSessionHolder.get().getCurrent();
@@ -76,6 +87,10 @@ public class AccountContext {
     }
 
     public AccountDTO toDTO() {
+        Account bound = accountBoundToTenant();
+        if (bound != null) {
+            return bound.toDTO();
+        }
         AccountDTO dto = null;
         if (HttpUtils.isInWebScope()) {
             dto = AccountSessionHolder.get().toDTO();
@@ -99,4 +114,17 @@ public class AccountContext {
     }
 
 
+
+    /**
+     * The account bound with {@code AccountTenants.runAs/with}. The root tenant and the no-tenant sentinel are not
+     * accounts, so they resolve to none.
+     */
+    private Account accountBoundToTenant() {
+        Long tenantId = AccountTenants.forcedTenantId();
+        if (tenantId == null || tenantId <= 0) {
+            return null;
+        }
+        var service = Containers.get().findObject(AccountService.class);
+        return service != null ? service.getAccountById(tenantId) : null;
+    }
 }

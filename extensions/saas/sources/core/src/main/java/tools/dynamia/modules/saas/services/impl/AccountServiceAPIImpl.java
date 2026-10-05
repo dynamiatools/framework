@@ -132,6 +132,12 @@ public class AccountServiceAPIImpl extends AbstractService implements AccountSer
 
     @Override
     public Long getCurrentAccountId() {
+        Long bound = AccountTenants.forcedTenantId();
+        if (bound != null && bound > 0) {
+            // runAs/with: the account the work runs as, not the one of the request or session
+            return bound;
+        }
+
         Long id = null;
 
         try {
