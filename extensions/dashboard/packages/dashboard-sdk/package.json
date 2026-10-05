@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/dashboard-sdk",
-  "version": "26.10.0",
+  "version": "26.10.1",
   "website": "https://dynamia.tools",
   "description": "TypeScript/JavaScript client SDK for the Dynamia Dashboard extension REST API",
   "keywords": [
