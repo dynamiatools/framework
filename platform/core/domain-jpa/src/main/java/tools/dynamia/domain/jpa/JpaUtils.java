@@ -18,6 +18,7 @@ package tools.dynamia.domain.jpa;
 
 import jakarta.persistence.*;
 import org.hibernate.Hibernate;
+import org.hibernate.proxy.HibernateProxy;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.Identifiable;
 import tools.dynamia.commons.reflect.PropertyInfo;
@@ -141,7 +142,8 @@ public abstract class JpaUtils {
     /**
      * Gets the identifier value of an entity.
      * <p>
-     * If the entity implements {@link Identifiable} its {@code getId()} is used. Otherwise the first field
+     * Hibernate proxies answer with the identifier they already hold, without being initialized. If the entity
+     * implements {@link Identifiable} its {@code getId()} is used. Otherwise the first field
      * annotated with {@link Id} (searching the whole class hierarchy) is read reflectively, even if it is
      * private.
      *
@@ -151,6 +153,10 @@ public abstract class JpaUtils {
      *                              cannot be read
      */
     public static Serializable getJPAIdValue(Object entity) {
+        if (entity instanceof HibernateProxy proxy) {
+            return (Serializable) proxy.getHibernateLazyInitializer().getIdentifier();
+        }
+
         if (entity instanceof Identifiable) {
             return ((Identifiable) entity).getId();
         }
@@ -211,6 +217,58 @@ public abstract class JpaUtils {
         }
         Serializable idA = getJPAIdValue(a);
         return idA != null && idA.equals(getJPAIdValue(b));
+    }
+
+    /**
+     * Hibernate proxy friendly implementation of {@link Object#equals(Object)} for JPA entities, based on the
+     * entity identifier.
+     * <p>
+     * Two references are equal when they are the same instance, or when both are JPA entities of the same real
+     * class (proxies are resolved with {@link Hibernate#getClass(Object)}, which initializes an uninitialized
+     * proxy) and have the same non-null identifier. A transient entity (without identifier) is only equal to
+     * itself. Unlike {@code getClass() != obj.getClass()}, a proxy and its real instance are equal.
+     * <p>
+     * Use it together with {@link #entityHashCode(Object)}:
+     * <pre>{@code
+     * public boolean equals(Object obj) {
+     *     return JpaUtils.entityEquals(this, obj);
+     * }
+     *
+     * public int hashCode() {
+     *     return JpaUtils.entityHashCode(this);
+     * }
+     * }</pre>
+     *
+     * @param self  the entity on which {@code equals} was invoked, may be {@code null}
+     * @param other the object to compare with, may be {@code null}
+     * @return {@code true} if both references are the same instance or the same persisted entity
+     * @see #isSameEntity(Object, Object)
+     */
+    public static boolean entityEquals(Object self, Object other) {
+        return self == other || isSameEntity(self, other);
+    }
+
+    /**
+     * Hibernate proxy friendly implementation of {@link Object#hashCode()} for JPA entities, based only on the
+     * entity identifier, so a proxy and its real instance have the same hash code. The value is computed with
+     * the same formula as {@code AbstractEntity.hashCode()}, and the identifier is read without initializing
+     * proxies.
+     * <p>
+     * As with any identifier based hash code, it changes when a transient entity is persisted and receives its
+     * identifier: do not keep transient entities in hash based collections across a save.
+     *
+     * @param entity the entity, may be {@code null}
+     * @return the hash code, constant for entities without identifier and for {@code null}
+     * @throws PersistenceException if the object is not a JPA entity or has no {@link Id} field
+     * @see #entityEquals(Object, Object)
+     */
+    public static int entityHashCode(Object entity) {
+        if (entity == null) {
+            return 0;
+        }
+        Serializable id = getJPAIdValue(entity);
+        int hash = 7;
+        return 83 * hash + (id != null ? id.hashCode() : 0);
     }
 
     /**
@@ -380,8 +438,8 @@ public abstract class JpaUtils {
      * @param entity the entity to initialize, may be {@code null}
      * @see #initializeEntity(Object, boolean)
      */
-    public static void initializeEntity(Object entity) {
-        initializeEntity(entity, false);
+    public static <T> T initializeEntity(T entity) {
+        return initializeEntity(entity, false);
     }
 
     /**
@@ -402,19 +460,20 @@ public abstract class JpaUtils {
      * @param entity        the entity to initialize, does nothing if {@code null}
      * @param includeToMany whether to-many collections should be initialized too
      */
-    public static void initializeEntity(Object entity, boolean includeToMany) {
+    public static <T> T initializeEntity(T entity, boolean includeToMany) {
         if (entity == null) {
-            return;
+            return null;
         }
 
-        Hibernate.initialize(entity);
+        entity = unproxy(entity);
         var properties = ObjectOperations.getPropertiesInfo(entity.getClass());
 
-        properties.forEach(p -> {
+        for (PropertyInfo p : properties) {
             if (isToOne(p)) {
                 var property = ObjectOperations.invokeGetMethod(entity, p);
                 if (property != null) {
-                    Hibernate.initialize(property);
+                    property = Hibernate.unproxy(property);
+                    ObjectOperations.invokeSetMethod(entity, p, property);
                 }
             }
 
@@ -424,6 +483,7 @@ public abstract class JpaUtils {
                     Hibernate.initialize(collection);
                 }
             }
-        });
+        }
+        return entity;
     }
 }

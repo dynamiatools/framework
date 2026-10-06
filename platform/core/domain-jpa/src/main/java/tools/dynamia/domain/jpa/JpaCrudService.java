@@ -182,7 +182,7 @@ public class JpaCrudService extends AbstractCrudService {
         if (targetId == null) return null;
         var entity = em.find(type, targetId);
         if (entity != null && isFullyLoadEntities()) {
-            JpaUtils.initializeEntity(entity);
+            entity = JpaUtils.initializeEntity(entity);
         }
 
         return entity;
@@ -196,10 +196,8 @@ public class JpaCrudService extends AbstractCrudService {
         }
 
         var entity = find(type, id);
-        JpaUtils.initializeEntity(entity);
+        return JpaUtils.initializeEntity(entity);
 
-
-        return entity;
     }
 
     /*
@@ -633,6 +631,7 @@ public class JpaCrudService extends AbstractCrudService {
             params.sort(defaultParams.getSorter());
             params.paginate(defaultParams.getPaginator());
             params.setMaxResults(defaultParams.getMaxResults());
+            params.mapWith(defaultParams.getMapper());
             params.putAll(defaultParams);
         }
 

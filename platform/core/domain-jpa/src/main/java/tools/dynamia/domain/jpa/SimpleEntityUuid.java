@@ -59,4 +59,14 @@ public abstract class SimpleEntityUuid extends AbstractEntity<String> implements
     public void setRemoteId(String remoteId) {
         this.remoteId = remoteId;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return JpaUtils.entityEquals(this, obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return JpaUtils.entityHashCode(this);
+    }
 }

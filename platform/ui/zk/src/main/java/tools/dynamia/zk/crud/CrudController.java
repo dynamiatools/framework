@@ -468,7 +468,6 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
                 var projectionResult = crudService.executeQuery(queryProjection, getParams());
                 setQueryResult(new ListDataSet(projectionResult));
             } else {
-                configureEntityMapper(getParams());
                 setQueryResult(new ListDataSet(crudService.find(entityClass, getParams())));
             }
 
@@ -512,7 +511,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
      */
     protected Object toEntity(Object row) {
         if (row instanceof BeanMap beanMap && beanMap.getId() != null) {
-            return crudService.find(beanMap.getBeanClass(), (java.io.Serializable) beanMap.getId());
+            return crudService.load(beanMap.getBeanClass(), (java.io.Serializable) beanMap.getId());
         }
         return row;
     }
@@ -785,7 +784,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     @Override
     public QueryParameters getParams() {
         if (params == null) {
-            params = new QueryParameters();
+            initParams();
         }
         return params;
     }
@@ -796,9 +795,11 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
      */
     @Override
     public void setParams(QueryParameters params) {
-        this.params = params;
-        if (this.getParams() == null) {
-            this.params = new QueryParameters();
+        if (params == null) {
+            initParams();
+        } else {
+            this.params = params;
+            configureEntityMapper(params);
         }
     }
 
@@ -923,6 +924,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
      */
     public void setDataSetView(DataSetView dataSetView) {
         this.dataSetView = dataSetView;
+        configureEntityMapper(getParams());
     }
 
     /**
@@ -986,7 +988,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
             logger = new SLF4JLoggingService(CrudController.class);
         }
 
-        params = new QueryParameters();
+        initParams();
         if (entityClass == null) {
             try {
                 setEntityClass(ObjectOperations.getGenericTypeClass(this));
@@ -998,6 +1000,11 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
 
         newEntity();
         afterInit();
+    }
+
+    private void initParams() {
+        params = new QueryParameters();
+        configureEntityMapper(params);
     }
 
     /**
@@ -1207,7 +1214,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
             beforeEdit();
             var entityId = DomainUtils.findEntityId(ent);
             if (entityId != null) {
-                setEntity(crudService.find(entityClass, entityId));
+                setEntity(crudService.load(entityClass, entityId));
             } else {
                 setEntity((E) ent);
             }
@@ -1299,7 +1306,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     @Override
     public void clear() {
         queryResult = null;
-        params = new QueryParameters();
+        initParams();
     }
 
     /**
@@ -1314,7 +1321,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     /**
      * Logs an error message with exception details using the controller's logger.
      *
-     * @param messsage the error message
+     * @param messsage  the error message
      * @param exception the exception to log
      */
     protected void log(String messsage, Throwable exception) {

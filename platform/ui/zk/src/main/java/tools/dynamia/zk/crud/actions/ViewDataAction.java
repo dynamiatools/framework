@@ -80,7 +80,7 @@ public class ViewDataAction extends AbstractCrudAction implements ReadableOnly {
             Object entity = data;
             Serializable id = DomainUtils.findEntityId(entity);
             if (id != null) {
-                entity = crudService.find(entity.getClass(), id);
+                entity = crudService.load(entity.getClass(), id);
             }
 
             view(entity);

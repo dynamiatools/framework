@@ -84,6 +84,45 @@ class JpaUtilsTest {
     }
 
     @Test
+    void entityEqualsComparesClassAndId() {
+        var a = new DummyEntity("a");
+        var b = new DummyEntity("b");
+        a.setId(1L);
+        b.setId(1L);
+        assertTrue(JpaUtils.entityEquals(a, b));
+
+        b.setId(2L);
+        assertFalse(JpaUtils.entityEquals(a, b));
+        assertFalse(JpaUtils.entityEquals(a, new MapperCategory()));
+        assertFalse(JpaUtils.entityEquals(a, null));
+        assertFalse(JpaUtils.entityEquals(a, "other type"));
+    }
+
+    @Test
+    void entityEqualsTransientEntityIsOnlyEqualToItself() {
+        var a = new DummyEntity("a");
+        assertTrue(JpaUtils.entityEquals(a, a));
+        assertFalse(JpaUtils.entityEquals(a, new DummyEntity("a")));
+        assertTrue(JpaUtils.entityEquals(null, null));
+    }
+
+    @Test
+    void entityHashCodeDependsOnlyOnId() {
+        var a = new DummyEntity("a");
+        var b = new DummyEntity("b");
+        a.setId(1L);
+        b.setId(1L);
+        assertEquals(JpaUtils.entityHashCode(a), JpaUtils.entityHashCode(b));
+
+        b.setId(2L);
+        assertNotEquals(JpaUtils.entityHashCode(a), JpaUtils.entityHashCode(b));
+
+        assertEquals(0, JpaUtils.entityHashCode(null));
+        assertEquals(JpaUtils.entityHashCode(new DummyEntity("x")), JpaUtils.entityHashCode(new DummyEntity("y")));
+        assertThrows(PersistenceException.class, () -> JpaUtils.entityHashCode(new NotEntity()));
+    }
+
+    @Test
     void getEntityClassHandlesNullAndPlainObjects() {
         assertNull(JpaUtils.getEntityClass(null));
         assertEquals(DummyEntity.class, JpaUtils.getEntityClass(new DummyEntity()));
