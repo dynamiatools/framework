@@ -51,6 +51,15 @@ public final class ModuleContainer implements Serializable {
     private final SimpleCache<String, Page> PAGE_PATH_INDEX = new SimpleCache<>();
     private final SimpleCache<String, Page> PAGE_PRETTY_PATH_INDEX = new SimpleCache<>();
 
+    /**
+     * Pages of dynamic groups may differ per user/tenant, so they never go into the global indexes above.
+     */
+    @Autowired(required = false)
+    private transient DynamicPageCache dynamicPageCache;
+
+    private static final String PATH_KEY = "path:";
+    private static final String PRETTY_KEY = "pretty:";
+
     private String defaultPagePath;
 
 
@@ -85,6 +94,10 @@ public final class ModuleContainer implements Serializable {
                 installModule(moduleRef);
             }
         }
+    }
+
+    public void setDynamicPageCache(DynamicPageCache dynamicPageCache) {
+        this.dynamicPageCache = dynamicPageCache;
     }
 
     public List<ModuleProvider> getModulesProviders() {
@@ -173,6 +186,13 @@ public final class ModuleContainer implements Serializable {
     }
 
     protected void index(Page page) {
+        if (isDynamic(page)) {
+            if (dynamicPageCache != null) {
+                dynamicPageCache.put(PATH_KEY + page.getVirtualPath(), page);
+                dynamicPageCache.put(PRETTY_KEY + page.getPrettyVirtualPath(), page);
+            }
+            return;
+        }
         PAGE_PATH_INDEX.add(page.getVirtualPath(), page);
         PAGE_PRETTY_PATH_INDEX.add(page.getPrettyVirtualPath(), page);
         if (page.isFeatured()) {
@@ -182,6 +202,21 @@ public final class ModuleContainer implements Serializable {
         if (page.isMain()) {
 
         }
+    }
+
+    private static boolean isDynamic(Page page) {
+        PageGroup group = page.getPageGroup();
+        while (group != null) {
+            if (group.isDynamic()) {
+                return true;
+            }
+            group = group.getParentGroup();
+        }
+        return false;
+    }
+
+    private Page cachedDynamic(String prefix, String path) {
+        return dynamicPageCache != null ? dynamicPageCache.get(prefix + path) : null;
     }
 
     void reloadModule(Module module) {
@@ -221,6 +256,9 @@ public final class ModuleContainer implements Serializable {
 
     public Page findPage(String path) {
         Page page = PAGE_PATH_INDEX.get(path);
+        if (page == null) {
+            page = cachedDynamic(PATH_KEY, path);
+        }
 
         try {
             if (page == null) {
@@ -245,6 +283,9 @@ public final class ModuleContainer implements Serializable {
 
     public Page findPageByPrettyVirtualPath(String prettyPath) {
         Page page = PAGE_PRETTY_PATH_INDEX.get(prettyPath);
+        if (page == null) {
+            page = cachedDynamic(PRETTY_KEY, prettyPath);
+        }
 
         try {
             if (page == null) {
@@ -306,6 +347,9 @@ public final class ModuleContainer implements Serializable {
 
     public NavigationElement findElement(String path) {
         NavigationElement elem = PAGE_PATH_INDEX.get(path);
+        if (elem == null) {
+            elem = cachedDynamic(PATH_KEY, path);
+        }
         if (elem != null) {
             return elem;
         }
