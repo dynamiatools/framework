@@ -18,6 +18,7 @@
 package tools.dynamia.domain.jpa;
 
 import jakarta.persistence.Transient;
+import org.hibernate.Hibernate;
 import tools.dynamia.domain.EntityUtilsProvider;
 import tools.dynamia.domain.query.Parameter;
 import tools.dynamia.integration.sterotypes.Provider;
@@ -50,5 +51,15 @@ public class JpaEntityUtilsProvider implements EntityUtilsProvider {
     @Override
     public Class<? extends Parameter> getDefaultParameterClass() {
         return JpaParameter.class;
+    }
+
+    @Override
+    public Object unproxy(Object entity) {
+        return Hibernate.unproxy(entity);
+    }
+
+    @Override
+    public Class<?> getEntityClass(Object entity) {
+        return Hibernate.getClass(entity);
     }
 }

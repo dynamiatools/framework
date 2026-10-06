@@ -39,6 +39,10 @@ import tools.dynamia.domain.query.ListDataSet;
 import tools.dynamia.domain.query.QueryExecuter;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
+import tools.dynamia.commons.BeanMap;
+import tools.dynamia.crud.ViewDescriptorProperties;
+import tools.dynamia.domain.OpenPersistenceInViewProvider;
+import tools.dynamia.domain.query.BeanMapEntityMapper;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.integration.Containers;
@@ -431,7 +435,9 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
      */
     @Override
     public void delete() {
-        if (DomainUtils.isEntity(getSelected())) {
+        if (getSelected() instanceof BeanMap beanMap) {
+            crudService.delete(beanMap.getBeanClass(), (java.io.Serializable) beanMap.getId());
+        } else if (DomainUtils.isEntity(getSelected())) {
             crudService.delete(getSelected().getClass(), DomainUtils.findEntityId(getSelected()));
         } else {
             crudService.delete(getSelected());
@@ -462,6 +468,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
                 var projectionResult = crudService.executeQuery(queryProjection, getParams());
                 setQueryResult(new ListDataSet(projectionResult));
             } else {
+                configureEntityMapper(getParams());
                 setQueryResult(new ListDataSet(crudService.find(entityClass, getParams())));
             }
 
@@ -478,6 +485,41 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
             logger.error(e);
             UIMessages.showException(messages.get("searchErrorMessage", e.getMessage()), e);
         }
+    }
+
+    /**
+     * When Open Persistence In View is disabled, attaches a mapper built from the data set view descriptor so the
+     * CrudService returns read-only {@link BeanMap}s created while the persistence context is still open.
+     * A mapper set explicitly by the application is never replaced.
+     *
+     * @param params the query parameters to configure
+     */
+    protected void configureEntityMapper(QueryParameters params) {
+        if (dataSetView == null || !isOpenPersistenceInViewDisabled()) {
+            return;
+        }
+        if (params.getMapper() == null || params.getMapper() instanceof BeanMapEntityMapper) {
+            params.mapWith(new BeanMapEntityMapper(ViewDescriptorProperties.propertiesOf(dataSetView.getViewDescriptor())));
+        }
+    }
+
+    /**
+     * Returns the real entity for a row that may be a read-only {@link BeanMap} (see {@link #configureEntityMapper}),
+     * reloading it by id. Any other object is returned unchanged.
+     *
+     * @param row an entity or a BeanMap row
+     * @return the entity
+     */
+    protected Object toEntity(Object row) {
+        if (row instanceof BeanMap beanMap && beanMap.getId() != null) {
+            return crudService.find(beanMap.getBeanClass(), (java.io.Serializable) beanMap.getId());
+        }
+        return row;
+    }
+
+    private boolean isOpenPersistenceInViewDisabled() {
+        OpenPersistenceInViewProvider provider = Containers.get().findObject(OpenPersistenceInViewProvider.class);
+        return provider == null || provider.isDisabled();
     }
 
     /**

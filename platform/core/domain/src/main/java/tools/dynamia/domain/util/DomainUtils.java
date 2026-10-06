@@ -512,6 +512,29 @@ public abstract class DomainUtils {
     }
 
     /**
+     * Returns the real entity behind a persistence proxy using the registered {@link EntityUtilsProvider}. Call it while
+     * the persistence context is open. Returns the object unchanged if no provider is registered.
+     *
+     * @param entity the entity or proxy, may be null
+     * @return the real entity
+     */
+    public static Object unproxy(Object entity) {
+        EntityUtilsProvider provider = entity != null ? Containers.get().findObject(EntityUtilsProvider.class) : null;
+        return provider != null ? provider.unproxy(entity) : entity;
+    }
+
+    /**
+     * Returns the real entity class (never a proxy subclass) using the registered {@link EntityUtilsProvider}.
+     *
+     * @param entity the entity or proxy, never null
+     * @return the entity class
+     */
+    public static Class<?> getEntityClass(Object entity) {
+        EntityUtilsProvider provider = Containers.get().findObject(EntityUtilsProvider.class);
+        return provider != null ? provider.getEntityClass(entity) : entity.getClass();
+    }
+
+    /**
      * Determines whether the provided object is a domain entity.
      * Uses the registered {@link EntityUtilsProvider} to check entity status.
      *

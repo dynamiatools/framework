@@ -29,8 +29,9 @@ server:
 dynamia:
   app:
     name: @project.name@
+    open-persistence-in-view: false
     defaultSkin: Blue
-    template: DynamicalVue
+    template: Dynamical
     defaultLogo: /zkau/web/images/logo.png
     defaultIcon: /zkau/web/images/icon.png
     basePackage: mybookstore

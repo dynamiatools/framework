@@ -188,6 +188,15 @@ public class BeanMap extends HashMap<String, Object> implements Serializable {
     }
 
     /**
+     * Sets the string representation returned by {@link #toString()}, usually the bean's own {@code toString()}.
+     *
+     * @param stringRepresentation the string representation
+     */
+    public void setStringRepresentation(String stringRepresentation) {
+        this.stringRepresentation = stringRepresentation;
+    }
+
+    /**
      * Returns a string representation of this bean map.
      * <p>
      * If {@code stringRepresentation} is set, returns it; otherwise, returns the bean name or the default map string.

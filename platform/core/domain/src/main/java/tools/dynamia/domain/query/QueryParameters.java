@@ -49,6 +49,7 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
     private QueryParameters nestedParameters;
 
     private boolean readOnly;
+    private EntityMapper<?> mapper;
 
     public QueryParameters() {
     }
@@ -480,6 +481,7 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
         clone.hints.putAll(hints);
         clone.depth = depth;
         clone.maxResults = maxResults;
+        clone.mapper = mapper;
         clone.sortedKeys.addAll(sortedKeys);
         if (nestedParameters != null) {
             clone.setNestedParameters(nestedParameters.clone());
@@ -554,6 +556,23 @@ public class QueryParameters extends HashMap<String, Object> implements Serializ
 
     public QueryParameters setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
+        return this;
+    }
+
+    /**
+     * Gets the mapper applied by the CrudService to every entity returned by the query, or null if none.
+     */
+    public EntityMapper<?> getMapper() {
+        return mapper;
+    }
+
+    /**
+     * Sets the mapper applied by the CrudService to every entity returned by the query.
+     *
+     * @param mapper the mapper, null to disable mapping
+     */
+    public QueryParameters mapWith(EntityMapper<?> mapper) {
+        this.mapper = mapper;
         return this;
     }
 }

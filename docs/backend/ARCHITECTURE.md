@@ -678,6 +678,31 @@ frontend. Practical consequences for contributors:
 
 ---
 
+## Running Without Open Persistence In View
+
+By default a ZK execution keeps one `EntityManager` open while views render (`ZKOpenPersistenceInViewListener` +
+`OpenEntityManagerInViewPattern`), so views can lazy-load relations. It can be turned off:
+
+```yaml
+dynamia:
+  app:
+    open-persistence-in-view: false   # default: true
+```
+
+`spring.jpa.open-in-view` does not affect this; it only configures Spring MVC.
+
+When disabled, `CrudController.query()` attaches a `BeanMapEntityMapper` (built from the properties the table/list
+`ViewDescriptor` needs, see `ViewDescriptorProperties`) to the `QueryParameters`. `JpaCrudService` applies any
+`QueryParameters.getMapper()` to its results inside the transaction, including every page of a `PagedList`.
+
+- Rows are **read-only `BeanMap`s**. Nested paths are stored under flat keys (`category.name`); related entities are
+  kept as already-loaded objects; collections are copied to plain collections; `@Transient` values are included.
+- Actions that need the entity must reload it by id (`CrudView.buildActionEvent` already does).
+- A mapper set explicitly on the parameters is never replaced. Use `new BeanMapEntityMapper("name", "category.name")`
+  in your own queries: `QueryParameters.with(...).mapWith(mapper)`.
+- Anything the view reads that is not a descriptor field (e.g. `row.getX().getY()` in a customizer) is not available
+  on a `BeanMap`.
+
 ## Summary
 
 DynamiaTools architecture is built on:
