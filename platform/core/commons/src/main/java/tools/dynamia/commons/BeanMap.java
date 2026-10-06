@@ -19,6 +19,7 @@ package tools.dynamia.commons;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * Represents a POJO object as a map, where each property is a key-value pair.
@@ -38,11 +39,12 @@ import java.util.HashMap;
  * <p>
  * Thread safety: This class is not thread-safe.
  * <p>
- * Serialization: Implements {@link Serializable} for persistence and data transfer.
+ * Serialization: Implements {@link Serializable} for persistence and data transfer, and {@link Jsonable} and
+ * {@link Xmlable} to export the entries as JSON or XML (see {@link #toJson()} and {@link #toXml()}).
  *
  * @author Mario A. Serrano Leones
  */
-public class BeanMap extends HashMap<String, Object> implements Serializable {
+public class BeanMap extends HashMap<String, Object> implements Serializable, Jsonable, Xmlable {
 
     /**
      * Optional identifier for the bean.
@@ -57,7 +59,7 @@ public class BeanMap extends HashMap<String, Object> implements Serializable {
      */
     private Class beanClass;
     /**
-     * Optional string representation of the bean (usually from {@code toString()}).
+     * Optional string representation of the bean (from the {@link InstanceName} member of the bean, or its {@code toString()}).
      */
     private String stringRepresentation;
     /**
@@ -81,7 +83,7 @@ public class BeanMap extends HashMap<String, Object> implements Serializable {
     public void load(Object bean) {
         beanClass = bean.getClass();
         name = beanClass.getSimpleName();
-        stringRepresentation = bean.toString();
+        stringRepresentation = ObjectOperations.getInstanceName(bean);
         if (bean instanceof Mappable mappable) {
             putAll(mappable.toMap());
         } else {
@@ -188,12 +190,41 @@ public class BeanMap extends HashMap<String, Object> implements Serializable {
     }
 
     /**
-     * Sets the string representation returned by {@link #toString()}, usually the bean's own {@code toString()}.
+     * Sets the string representation returned by {@link #toString()}, usually the bean's {@link InstanceName} or its {@code toString()}.
      *
      * @param stringRepresentation the string representation
      */
     public void setStringRepresentation(String stringRepresentation) {
         this.stringRepresentation = stringRepresentation;
+    }
+
+    /**
+     * Converts the entries of this map to a JSON object. Only the property entries are written; metadata such as
+     * id, name or beanClass is not included.
+     *
+     * @return the JSON string
+     */
+    @Override
+    public String toJson() {
+        return StringPojoParser.convertPojoToJson(new LinkedHashMap<>(this));
+    }
+
+    /**
+     * Converts the entries of this map to XML. The root element is named after {@link #getName()} (or
+     * {@code BeanMap} if it is blank) and each entry becomes a child element. Only the property entries are
+     * written; metadata such as id or beanClass is not included.
+     *
+     * @return the XML string
+     */
+    @Override
+    public String toXml() {
+        var rootName = name != null && !name.isBlank() ? name : "BeanMap";
+        try {
+            return StringPojoParser.createXmlMapper().writer().withRootName(rootName)
+                    .writeValueAsString(new LinkedHashMap<>(this));
+        } catch (tools.jackson.core.JacksonException e) {
+            throw new XmlParsingException(e);
+        }
     }
 
     /**

@@ -53,7 +53,7 @@ public class BeanMapEntityMapper implements EntityMapper<BeanMap> {
     }
 
     /**
-     * Maps the entity to a {@link BeanMap} with its id, class, string representation and requested properties.
+     * Maps the entity to a {@link BeanMap} with its id, class, string representation (the {@link tools.dynamia.commons.InstanceName} member or {@code toString()}) and requested properties.
      *
      * @param entity the entity, never null
      * @return the read-only map
@@ -64,7 +64,7 @@ public class BeanMapEntityMapper implements EntityMapper<BeanMap> {
         BeanMap map = new BeanMap();
         map.setBeanClass(DomainUtils.getEntityClass(target));
         map.setName(map.getBeanClass().getSimpleName());
-        map.setStringRepresentation(target.toString());
+        map.setStringRepresentation(ObjectOperations.getInstanceName(target));
         map.setFields(properties);
         try {
             map.setId(DomainUtils.findEntityId(target));
