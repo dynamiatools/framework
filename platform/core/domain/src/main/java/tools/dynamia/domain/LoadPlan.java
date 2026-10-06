@@ -16,6 +16,8 @@
  */
 package tools.dynamia.domain;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -75,8 +77,8 @@ public final class LoadPlan {
     }
 
     /**
-     * Returns the plan declared with {@link InitializeOnLoad} on the entity class (or a superclass), or
-     * {@link #EMPTY} when the class is not annotated.
+     * Returns the plan declared with {@link InitializeOnLoad} on the entity class (or a superclass) and on its fields
+     * and getters, or {@link #EMPTY} when nothing is annotated.
      */
     public static LoadPlan annotatedOf(Class<?> type) {
         if (type == null) {
@@ -86,12 +88,59 @@ public final class LoadPlan {
     }
 
     private static LoadPlan readAnnotation(Class<?> type) {
+        LoadPlan plan = EMPTY;
+
         InitializeOnLoad ann = type.getAnnotation(InitializeOnLoad.class);
+        if (ann != null) {
+            plan = of(ann.value());
+            if (ann.allCollections()) {
+                plan = plan.and(allCollections(ann.depth()));
+            }
+        }
+
+        for (Class<?> c = type; c != null && c != Object.class; c = c.getSuperclass()) {
+            for (Field field : c.getDeclaredFields()) {
+                plan = plan.and(fromMember(field.getAnnotation(InitializeOnLoad.class), field.getName()));
+            }
+            for (Method method : c.getDeclaredMethods()) {
+                String property = propertyName(method);
+                if (property != null) {
+                    plan = plan.and(fromMember(method.getAnnotation(InitializeOnLoad.class), property));
+                }
+            }
+        }
+        return plan;
+    }
+
+    /**
+     * The plan of a field or getter annotation: the property itself plus its relative paths.
+     */
+    private static LoadPlan fromMember(InitializeOnLoad ann, String property) {
         if (ann == null) {
             return EMPTY;
         }
-        LoadPlan plan = of(ann.value());
-        return ann.allCollections() ? plan.and(allCollections(ann.depth())) : plan;
+        Set<String> paths = new LinkedHashSet<>();
+        paths.add(property);
+        for (String sub : ann.value()) {
+            if (sub != null && !sub.isBlank()) {
+                paths.add(property + "." + sub.trim());
+            }
+        }
+        return new LoadPlan(Collections.unmodifiableSet(paths), false, 0);
+    }
+
+    private static String propertyName(Method method) {
+        if (method.getParameterCount() != 0 || !method.isAnnotationPresent(InitializeOnLoad.class)) {
+            return null;
+        }
+        String name = method.getName();
+        String property = null;
+        if (name.startsWith("get") && name.length() > 3) {
+            property = name.substring(3);
+        } else if (name.startsWith("is") && name.length() > 2) {
+            property = name.substring(2);
+        }
+        return property == null ? null : Character.toLowerCase(property.charAt(0)) + property.substring(1);
     }
 
     /**

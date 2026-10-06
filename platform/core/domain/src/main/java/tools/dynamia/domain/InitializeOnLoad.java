@@ -24,7 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Declares which associations of an entity (normally an aggregate root) must travel with it when a
+ * Declares which associations of an entity must travel with it when a
  * {@link tools.dynamia.domain.services.CrudService} hands it out of the persistence context.
  * <p>
  * Without Open Persistence In View, an entity returned by {@code find}, {@code load}, {@code reload} or
@@ -37,18 +37,34 @@ import java.lang.annotation.Target;
  * @InitializeOnLoad({"detalles", "impuestos", "detalles.subdetalles"})
  * public class Venta { ... }
  * }</pre>
+ * <p>
+ * It can also be placed directly on a <strong>field</strong> (or on its getter), which is usually clearer for
+ * collections: the association is initialized and {@link #value()} lists paths <em>relative to it</em>.
+ * <pre>{@code
+ * @Entity
+ * public class Venta {
+ *     @InitializeOnLoad("subdetalles")      // initializes detalles and detalles.subdetalles
+ *     @OneToMany(mappedBy = "venta") private List<DetalleVenta> detalles;
+ *
+ *     @InitializeOnLoad                      // initializes impuestos
+ *     @OneToMany(mappedBy = "venta") private List<ImpuestoVenta> impuestos;
+ * }
+ * }</pre>
+ * Declarations on the class and on its fields (including those of superclasses) add up. On a field,
+ * {@link #allCollections()} and {@link #depth()} are ignored.
  *
  * @see LoadPlan
  */
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
 public @interface InitializeOnLoad {
 
     /**
-     * Property paths to initialize, relative to the entity. A path walks through collections, so
-     * {@code "detalles.subdetalles"} initializes {@code detalles} and the {@code subdetalles} of each element.
+     * Property paths to initialize, relative to the entity (or, on a field, relative to the annotated property). A
+     * path walks through collections, so {@code "detalles.subdetalles"} initializes {@code detalles} and the
+     * {@code subdetalles} of each element.
      */
     String[] value() default {};
 

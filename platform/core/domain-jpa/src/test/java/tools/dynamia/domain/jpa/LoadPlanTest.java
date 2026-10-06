@@ -29,6 +29,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.test.util.AopTestUtils;
+import tools.dynamia.domain.InitializeOnLoad;
 import tools.dynamia.domain.LoadPlan;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
@@ -80,7 +81,10 @@ public class LoadPlanTest {
     @AfterEach
     public void tearDown() {
         target.setLoadCollectionsMode("annotated");
-        tx.executeWithoutResult(s -> crudService.executeQuery("select o from LoadPlanOrder o").forEach(o -> crudService.delete(o)));
+        tx.executeWithoutResult(s -> {
+            crudService.executeQuery("select o from LoadPlanOrder o").forEach(o -> crudService.delete(o));
+            crudService.executeQuery("select b from LoadPlanBox b").forEach(b -> crudService.delete(b));
+        });
     }
 
     // ---------------------------------------------------------------- the declared plan (@InitializeOnLoad)
@@ -225,6 +229,65 @@ public class LoadPlanTest {
 
         assertThrows(LazyInitializationException.class, () -> line.getOrder().getLines().size());
         assertEquals(1, line.getSubs().size());
+    }
+
+    // ---------------------------------------------------------------- @InitializeOnLoad on fields
+
+    private Long newBox() {
+        return tx.execute(s -> {
+            var box = new LoadPlanBox();
+            box.setName("b1");
+            var item = new LoadPlanItem();
+            item.setName("i1");
+            item.setBox(box);
+            item.getTags().add("t1");
+            box.getItems().add(item);
+            box.getSpare().add("s1");
+            return crudService.save(box).getId();
+        });
+    }
+
+    @Test
+    public void annotatedFieldIsInitializedWithItsRelativePaths() {
+        var box = crudService.load(LoadPlanBox.class, newBox());
+
+        assertEquals(1, box.getItems().size());
+        assertEquals(1, box.getItems().getFirst().getTags().size(), "relative path items.tags");
+    }
+
+    @Test
+    public void unannotatedFieldsStayLazy() {
+        var box = crudService.load(LoadPlanBox.class, newBox());
+
+        assertThrows(LazyInitializationException.class, () -> box.getSpare().size());
+    }
+
+    public static class Parent {
+        @InitializeOnLoad
+        private java.util.List<String> fromParent;
+        @InitializeOnLoad({"a", "b"})
+        private java.util.List<String> nested;
+        private java.util.List<String> ignored;
+        private boolean flag;
+
+        @InitializeOnLoad
+        public boolean isFlag() {
+            return flag;
+        }
+    }
+
+    @InitializeOnLoad("onClass")
+    public static class Child extends Parent {
+        @InitializeOnLoad
+        private java.util.List<String> own;
+    }
+
+    @Test
+    public void fieldGetterAndClassDeclarationsAddUpAcrossTheHierarchy() {
+        var plan = LoadPlan.annotatedOf(Child.class);
+
+        assertEquals(java.util.Set.of("onClass", "own", "fromParent", "nested", "nested.a", "nested.b", "flag"), plan.getPaths());
+        assertFalse(plan.getPaths().contains("ignored"));
     }
 
     // ---------------------------------------------------------------- LoadPlan

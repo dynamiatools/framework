@@ -721,6 +721,17 @@ transaction nothing extra is loaded, so there is no cost there.
 
    `@InitializeOnLoad(allCollections = true, depth = 2)` initializes every to-many association instead.
 
+   It can also go **directly on a field** (or getter), which reads better for collections; `value` is then relative to
+   that property, and declarations on the class and on fields (also of superclasses) add up:
+
+   ```java
+   @InitializeOnLoad("subdetalles")            // detalles and detalles.subdetalles
+   @OneToMany(mappedBy = "venta") private List<DetalleVenta> detalles;
+
+   @InitializeOnLoad                            // impuestos
+   @OneToMany(mappedBy = "venta") private List<ImpuestoVenta> impuestos;
+   ```
+
 2. **Ask for what you need at the call site** (adds to the declared plan, and is honored in every mode):
 
    ```java
