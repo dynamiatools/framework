@@ -22,6 +22,7 @@ import org.hibernate.proxy.HibernateProxy;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.Identifiable;
 import tools.dynamia.commons.reflect.PropertyInfo;
+import tools.dynamia.domain.LoadPlan;
 import tools.dynamia.domain.query.DataPaginator;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.util.QueryBuilder;
@@ -423,7 +424,8 @@ public abstract class JpaUtils {
     }
 
     private static boolean isToMany(PropertyInfo p) {
-        return p.isCollection() && (p.isAnnotationPresent(OneToMany.class) || p.isAnnotationPresent(ManyToMany.class));
+        return p.isCollection() && (p.isAnnotationPresent(OneToMany.class) || p.isAnnotationPresent(ManyToMany.class)
+                || p.isAnnotationPresent(ElementCollection.class));
     }
 
     private static boolean isToOne(PropertyInfo p) {
@@ -485,5 +487,91 @@ public abstract class JpaUtils {
             }
         }
         return entity;
+    }
+    /**
+     * Initializes the entity (unproxied, with its to-one associations) and the associations described by
+     * {@code plan}, so it can be used after the persistence context is closed. Must be called inside an active
+     * transaction or session.
+     * <p>
+     * Explicit paths walk through collections ({@code "lines.subs"} initializes {@code lines} and the {@code subs} of
+     * every line). With {@link LoadPlan#isAllCollections()} every to-many association is initialized, nested up to
+     * {@link LoadPlan#getDepth()} levels. Paths that do not exist, or that are not associations, are ignored.
+     *
+     * @param entity the entity to initialize, does nothing if {@code null}
+     * @param plan   the associations to initialize
+     * @return the unproxied entity
+     */
+    public static <T> T initializeEntity(T entity, LoadPlan plan) {
+        if (entity == null) {
+            return null;
+        }
+        entity = initializeEntity(entity, false);
+        if (plan == null || plan.isEmpty()) {
+            return entity;
+        }
+
+        for (String path : plan.getPaths()) {
+            initializePath(entity, path.split("\\."), 0);
+        }
+
+        if (plan.isAllCollections()) {
+            initializeCollections(entity, plan.getDepth(), java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>()));
+        }
+        return entity;
+    }
+
+    private static void initializePath(Object target, String[] segments, int index) {
+        if (target == null || index >= segments.length) {
+            return;
+        }
+
+        Object value;
+        try {
+            value = ObjectOperations.invokeGetMethod(target, segments[index]);
+        } catch (Exception e) {
+            return; // not a property of this object
+        }
+        if (value == null) {
+            return;
+        }
+
+        Hibernate.initialize(value);
+        if (index == segments.length - 1) {
+            return;
+        }
+
+        if (value instanceof java.util.Collection<?> collection) {
+            for (Object element : collection) {
+                initializePath(element, segments, index + 1);
+            }
+        } else if (value instanceof java.util.Map<?, ?> map) {
+            for (Object element : map.values()) {
+                initializePath(element, segments, index + 1);
+            }
+        } else {
+            initializePath(Hibernate.unproxy(value), segments, index + 1);
+        }
+    }
+
+    private static void initializeCollections(Object target, int depth, java.util.Set<Object> visited) {
+        if (target == null || depth <= 0 || !visited.add(target)) {
+            return;
+        }
+
+        for (PropertyInfo p : ObjectOperations.getPropertiesInfo(Hibernate.getClass(target))) {
+            if (!isToMany(p)) {
+                continue;
+            }
+            Object value = ObjectOperations.invokeGetMethod(target, p);
+            if (value == null) {
+                continue;
+            }
+            Hibernate.initialize(value);
+            if (depth > 1 && value instanceof java.util.Collection<?> collection) {
+                for (Object element : collection) {
+                    initializeCollections(Hibernate.unproxy(element), depth - 1, visited);
+                }
+            }
+        }
     }
 }

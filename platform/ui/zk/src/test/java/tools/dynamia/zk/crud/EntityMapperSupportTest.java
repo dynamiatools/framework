@@ -260,4 +260,43 @@ public class EntityMapperSupportTest {
         assertNull(EntityMapperSupport.toEntity(service, null));
         assertTrue(loads.isEmpty());
     }
+
+    // ---------------------------------------------------------------- load plan of a view
+
+    public static class OrderBean {
+        private String name;
+        private List<String> lines = new ArrayList<>();
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public List<String> getLines() {
+            return lines;
+        }
+
+        public void setLines(List<String> lines) {
+            this.lines = lines;
+        }
+    }
+
+    @Test
+    public void loadPlanOfADescriptorListsItsCollectionFields() {
+        var descriptor = tools.dynamia.viewers.ViewDescriptorBuilder.viewDescriptor("form", OrderBean.class, false)
+                .fields(tools.dynamia.viewers.ViewDescriptorBuilder.field("name"), tools.dynamia.viewers.ViewDescriptorBuilder.field("lines"))
+                .build();
+
+        var plan = EntityMapperSupport.loadPlanOf(descriptor);
+
+        assertEquals(java.util.Set.of("lines"), plan.getPaths());
+    }
+
+    @Test
+    public void loadPlanOfAnAbsentDescriptorIsEmpty() {
+        assertTrue(EntityMapperSupport.loadPlanOf((tools.dynamia.viewers.ViewDescriptor) null).isEmpty());
+    }
 }

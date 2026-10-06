@@ -31,6 +31,7 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.crud.CrudControllerAPI;
 import tools.dynamia.crud.QueryProjectionBuilder;
 import tools.dynamia.domain.CrudServiceException;
+import tools.dynamia.domain.LoadPlan;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.jdbc.QueryInterruptedException;
 import tools.dynamia.domain.query.DataPaginator;
@@ -217,6 +218,12 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
      * Flag indicating whether to automatically reload the entity from database after operations.
      */
     private boolean autoReloadEntity = true;
+
+    /**
+     * Associations (the collection fields of the form) loaded together with the entity being edited, so the form can
+     * show them after the persistence context closes. {@code null} means "resolve it from the default form descriptor".
+     */
+    private LoadPlan formLoadPlan;
 
     /**
      * List of subcrud controllers for managing child entities in master-detail relationships.
@@ -572,9 +579,24 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     @Override
     public void reloadEntity() {
         if (entity != null && DomainUtils.findEntityId(entity) != null && autoReloadEntity) {
-            entity = crudService.findSingle(entityClass, "id", DomainUtils.findEntityId(entity));
+            entity = crudService.load(entityClass, DomainUtils.findEntityId(entity), getFormLoadPlan());
             autoReloadEntity = true;
         }
+    }
+
+    /**
+     * The associations loaded with the entity being edited: the collection fields of the form. When the CRUD view did
+     * not set one, it is resolved from the default {@code form} descriptor of the entity class.
+     */
+    public LoadPlan getFormLoadPlan() {
+        if (formLoadPlan == null) {
+            formLoadPlan = EntityMapperSupport.loadPlanOf(entityClass, "form");
+        }
+        return formLoadPlan;
+    }
+
+    public void setFormLoadPlan(LoadPlan formLoadPlan) {
+        this.formLoadPlan = formLoadPlan;
     }
 
     /**
@@ -1200,7 +1222,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
             beforeEdit();
             var entityId = DomainUtils.findEntityId(ent);
             if (entityId != null) {
-                setEntity(crudService.load(entityClass, entityId));
+                setEntity(crudService.load(entityClass, entityId, getFormLoadPlan()));
             } else {
                 setEntity((E) ent);
             }
