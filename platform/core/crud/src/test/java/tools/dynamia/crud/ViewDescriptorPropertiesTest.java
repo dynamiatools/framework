@@ -102,4 +102,19 @@ public class ViewDescriptorPropertiesTest {
         assertEquals(true, props.contains("notes"));
         assertEquals(false, props.stream().anyMatch(p -> p.contains(" ") || p.contains("#") || p.contains("(")));
     }
+
+    @Test
+    public void collectionsOfListsOnlyTheCollectionFields() {
+        var descriptor = viewDescriptor("form", TestEntity.class, false)
+                .fields(field("name"), field("subentity"), field("children"))
+                .build();
+
+        assertEquals(Arrays.asList("children"), Arrays.asList(ViewDescriptorProperties.collectionsOf(descriptor)));
+    }
+
+    @Test
+    public void collectionsOfIsEmptyWithoutCollectionFieldsOrDescriptor() {
+        assertEquals(0, ViewDescriptorProperties.collectionsOf(descriptor()).length);
+        assertEquals(0, ViewDescriptorProperties.collectionsOf(null).length);
+    }
 }

@@ -146,6 +146,30 @@ public interface CrudService {
     <T> T load(Class<T> type, Serializable id);
 
     /**
+     * Loads an entity and, in addition to what the service already initializes for the type (see
+     * {@link tools.dynamia.domain.InitializeOnLoad}), the associations of {@code plan}. The associations are
+     * initialized while the persistence context is still open, so they can be used after the call returns even when
+     * Open Persistence In View is disabled.
+     * <p>
+     * Implementations that have no persistence context may ignore the plan.
+     *
+     * @param type the entity class
+     * @param id   the id
+     * @param plan the extra associations to initialize
+     */
+    default <T> T load(Class<T> type, Serializable id, tools.dynamia.domain.LoadPlan plan) {
+        return load(type, id);
+    }
+
+    /**
+     * Same as {@link #load(Class, Serializable, tools.dynamia.domain.LoadPlan)} with explicit property paths, for
+     * example {@code load(Venta.class, id, "detalles", "detalles.subdetalles")}.
+     */
+    default <T> T load(Class<T> type, Serializable id, String... paths) {
+        return load(type, id, tools.dynamia.domain.LoadPlan.of(paths));
+    }
+
+    /**
      * A shortcut method to find an entity by a field called remoteId. If this field dont exist an exception
      * will throw
      *
@@ -540,6 +564,23 @@ public interface CrudService {
      * @return the t
      */
     <T> T reload(T entity);
+
+    /**
+     * Reloads the entity initializing, in addition to what the service already initializes for the type, the
+     * associations of {@code plan} (see {@link #load(Class, Serializable, tools.dynamia.domain.LoadPlan)}). This is
+     * the safe way to use a lazy collection of an entity that reached the caller detached.
+     */
+    default <T> T reload(T entity, tools.dynamia.domain.LoadPlan plan) {
+        return reload(entity);
+    }
+
+    /**
+     * Same as {@link #reload(Object, tools.dynamia.domain.LoadPlan)} with explicit property paths, for example
+     * {@code reload(venta, "detalles", "impuestos")}.
+     */
+    default <T> T reload(T entity, String... paths) {
+        return reload(entity, tools.dynamia.domain.LoadPlan.of(paths));
+    }
 
     /**
      * Execute a query projection like count, sum, max, avg, etc. It returns a

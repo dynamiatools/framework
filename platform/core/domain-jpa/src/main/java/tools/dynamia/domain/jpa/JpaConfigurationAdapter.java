@@ -278,6 +278,7 @@ public class JpaConfigurationAdapter implements ApplicationContextAware {
         factory.setDataSource(dataSource());
         factory.setJpaVendorAdapter(jpaVendorAdapter());
         registerTenantIdentifierResolver(factory);
+        registerLazyLoadNoTrans(factory);
         configureEntityManagerFactory(factory);
         logger.info("Setting EntityManagerFactory. Datasource: " + factory.getDataSource().toString() + ".  Packages to Scan: " + Arrays.toString(packages));
 
@@ -317,6 +318,33 @@ public class JpaConfigurationAdapter implements ApplicationContextAware {
         }
         factory.getJpaPropertyMap().put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, resolver);
         logger.info("Hibernate tenant identifier resolver: " + resolver.getClass().getName());
+    }
+
+    /**
+     * Property that enables {@code hibernate.enable_lazy_load_no_trans}.
+     */
+    public static final String LAZY_LOAD_NO_TRANS_PROPERTY = "dynamia.app.lazy-load-no-trans";
+
+    /**
+     * Safety net for applications that run without Open Persistence In View: when
+     * {@code dynamia.app.lazy-load-no-trans=true}, a lazy association touched on a detached entity is loaded in a
+     * temporary session instead of throwing {@code LazyInitializationException} (Hibernate's
+     * {@code enable_lazy_load_no_trans}). It is <strong>off by default</strong> because every association touched
+     * this way opens its own session and connection (N+1 when walking collections), and it hides code that should
+     * load what it needs with {@code @InitializeOnLoad} or {@code crudService.reload(entity, "paths")}. Use it as a
+     * temporary bridge. Spring Boot applications can set
+     * {@code spring.jpa.properties.hibernate.enable_lazy_load_no_trans} directly.
+     *
+     * @param factory the entity manager factory being configured
+     */
+    protected void registerLazyLoadNoTrans(LocalContainerEntityManagerFactoryBean factory) {
+        boolean enabled = applicationContext != null
+                && applicationContext.getEnvironment().getProperty(LAZY_LOAD_NO_TRANS_PROPERTY, Boolean.class, false);
+        if (enabled) {
+            factory.getJpaPropertyMap().put(AvailableSettings.ENABLE_LAZY_LOAD_NO_TRANS, true);
+            logger.warn("Hibernate enable_lazy_load_no_trans is ON (" + LAZY_LOAD_NO_TRANS_PROPERTY + "): lazy associations of detached "
+                    + "entities load in temporary sessions. Prefer @InitializeOnLoad / crudService.reload(entity, paths).");
+        }
     }
 
     /**

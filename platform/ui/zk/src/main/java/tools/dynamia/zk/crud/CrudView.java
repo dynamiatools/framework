@@ -33,6 +33,7 @@ import org.zkoss.zul.impl.XulElement;
 import tools.dynamia.actions.*;
 import tools.dynamia.commons.ApplicableClass;
 import tools.dynamia.commons.BeanMap;
+import tools.dynamia.domain.LoadPlan;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.Callback;
 import tools.dynamia.commons.LocalizedMessagesProvider;
@@ -269,6 +270,10 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
 
         formView.setActionEventBuilder(this);
         formView.setAutoheight(true);
+
+        if (controller != null) {
+            controller.setFormLoadPlan(EntityMapperSupport.loadPlanOf(formView.getViewDescriptor()));
+        }
     }
 
     /**
@@ -985,9 +990,27 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
     private Object loadDataFromBeanMap(BeanMap beanMap, Object data) {
         CrudService crudService = crudServiceName != null ? Containers.get().findObject(crudServiceName, CrudService.class) : Containers.get().findObject(CrudService.class);
         if (crudService != null && beanMap.getId()!=null && beanMap.getBeanClass()!=null) {
-            data = crudService.load(beanMap.getBeanClass(), (Serializable) beanMap.getId());
+            data = crudService.load(beanMap.getBeanClass(), (Serializable) beanMap.getId(), formLoadPlan(beanMap.getBeanClass()));
         }
         return data;
+    }
+
+    /**
+     * The associations the form of this CRUD shows (its collection fields), so an entity loaded for a form or for
+     * an action started from it can be used after the persistence context closes.
+     */
+    private LoadPlan formLoadPlan(Class<?> beanClass) {
+        if (formView != null) {
+            return EntityMapperSupport.loadPlanOf(formView.getViewDescriptor());
+        }
+        if (formViewDescriptorId != null && !formViewDescriptorId.isBlank()) {
+            try {
+                return EntityMapperSupport.loadPlanOf(Viewers.findViewDescriptor(formViewDescriptorId));
+            } catch (RuntimeException e) {
+                return LoadPlan.EMPTY;
+            }
+        }
+        return EntityMapperSupport.loadPlanOf(beanClass, "form");
     }
 
     private void fireChangedStateListeners(CrudState newState, CrudState oldState) {

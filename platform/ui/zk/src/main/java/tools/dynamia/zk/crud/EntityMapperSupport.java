@@ -18,6 +18,7 @@ package tools.dynamia.zk.crud;
 
 import tools.dynamia.commons.BeanMap;
 import tools.dynamia.crud.ViewDescriptorProperties;
+import tools.dynamia.domain.LoadPlan;
 import tools.dynamia.domain.OpenPersistenceInViewProvider;
 import tools.dynamia.domain.query.BeanMapEntityMapper;
 import tools.dynamia.domain.query.QueryParameters;
@@ -25,6 +26,7 @@ import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.util.Viewers;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -117,6 +119,30 @@ public final class EntityMapperSupport {
             return true;
         }
         return false;
+    }
+
+    /**
+     * The associations an entity must carry to be shown with the descriptor: its collection fields (for example the
+     * child table of a form). The entity is loaded with them while the persistence context is open, so rendering the
+     * view does not throw {@code LazyInitializationException} when Open Persistence In View is disabled.
+     *
+     * @param descriptor the view descriptor, may be null
+     * @return the plan, empty when the descriptor has no collection fields
+     */
+    public static LoadPlan loadPlanOf(ViewDescriptor descriptor) {
+        return descriptor == null ? LoadPlan.EMPTY : LoadPlan.of(ViewDescriptorProperties.collectionsOf(descriptor));
+    }
+
+    /**
+     * Same as {@link #loadPlanOf(ViewDescriptor)} for the descriptor registered for the class under that name
+     * ({@code "form"} for the default form). Answers an empty plan when there is no such descriptor.
+     */
+    public static LoadPlan loadPlanOf(Class<?> entityClass, String descriptorName) {
+        try {
+            return loadPlanOf(Viewers.findViewDescriptor(entityClass, descriptorName));
+        } catch (RuntimeException e) {
+            return LoadPlan.EMPTY;
+        }
     }
 
     /**

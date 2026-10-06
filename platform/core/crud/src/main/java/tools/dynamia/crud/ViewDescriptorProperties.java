@@ -63,6 +63,26 @@ public final class ViewDescriptorProperties {
         return properties.toArray(new String[0]);
     }
 
+    /**
+     * Lists the fields of the descriptor that are collections (for example the child table of a form). They are the
+     * associations the view will iterate, so an entity loaded for that view must have them initialized before the
+     * persistence context closes (no Open Persistence In View). See {@code tools.dynamia.domain.LoadPlan}.
+     *
+     * @param descriptor the view descriptor, may be null
+     * @return the names of the collection fields, in field order
+     */
+    public static String[] collectionsOf(ViewDescriptor descriptor) {
+        Set<String> collections = new LinkedHashSet<>();
+        if (descriptor != null) {
+            for (Field field : Viewers.getFields(descriptor)) {
+                if (field.isProperty() && field.getPropertyInfo() != null && field.getPropertyInfo().isCollection()) {
+                    collections.add(field.getName());
+                }
+            }
+        }
+        return collections.toArray(new String[0]);
+    }
+
     private static void addBindings(Set<String> properties, Object bindings) {
         if (bindings instanceof Map<?, ?> map) {
             for (Object binding : map.values()) {

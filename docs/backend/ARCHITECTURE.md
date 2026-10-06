@@ -703,6 +703,66 @@ When disabled, `CrudController.query()` attaches a `BeanMapEntityMapper` (built 
 - Anything the view reads that is not a descriptor field (e.g. `row.getX().getY()` in a customizer) is not available
   on a `BeanMap`.
 
+### Using entities without a persistence context
+
+Without OSIV an entity returned by `find`, `load`, `reload` or `findSingle` is **detached** as soon as the call
+returns: touching one of its lazy collections throws `LazyInitializationException`. `CrudService` therefore
+initializes the associations an entity needs **before** it leaves the persistence context. This only happens when the
+call is the outermost one (no transaction active, or the call started it); inside a service that already runs in a
+transaction nothing extra is loaded, so there is no cost there.
+
+1. **Declare the plan on the aggregate root** with `@InitializeOnLoad`. Paths walk through collections:
+
+   ```java
+   @Entity
+   @InitializeOnLoad({"detalles", "impuestos", "detalles.subdetalles"})
+   public class Venta { ... }
+   ```
+
+   `@InitializeOnLoad(allCollections = true, depth = 2)` initializes every to-many association instead.
+
+   It can also go **directly on a field** (or getter), which reads better for collections; `value` is then relative to
+   that property, and declarations on the class and on fields (also of superclasses) add up:
+
+   ```java
+   @InitializeOnLoad("subdetalles")            // detalles and detalles.subdetalles
+   @OneToMany(mappedBy = "venta") private List<DetalleVenta> detalles;
+
+   @InitializeOnLoad                            // impuestos
+   @OneToMany(mappedBy = "venta") private List<ImpuestoVenta> impuestos;
+   ```
+
+2. **Ask for what you need at the call site** (adds to the declared plan, and is honored in every mode):
+
+   ```java
+   var venta = crudService.load(Venta.class, id, "detalles", "pago.detalles");
+   venta = crudService.reload(venta, "retenciones");          // entity that reached you detached
+   var plan = crudService.load(Venta.class, id, LoadPlan.of("detalles"));
+   ```
+
+   An entity that is already detached **cannot** be repaired (Hibernate 7 has no re-attach): reload it with the paths.
+
+3. **The CRUD view does it for you**: `CrudController.doEdit`, `reloadEntity` and `CrudView.buildActionEvent` load the
+   entity with the *collection fields of the form descriptor* (`ViewDescriptorProperties.collectionsOf`), so a form
+   with a child table, `afterEdit()` and the actions launched from the view receive those collections initialized.
+
+Global mode, `dynamia.crud.load-collections`:
+
+| Value | Effect |
+|---|---|
+| `annotated` (default) | Applies `@InitializeOnLoad`. Entities without the annotation behave as before. |
+| `all` | Also initializes every to-many association, up to `dynamia.crud.load-depth` (default 1). Handy to find what an app depends on; can be expensive. |
+| `none` | Ignores `@InitializeOnLoad`. Explicit paths are still honored. |
+
+**Safety net (off by default).** `dynamia.app.lazy-load-no-trans=true` (or, in Spring Boot,
+`spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true`) makes Hibernate load a lazy association touched on a
+detached entity in a temporary session. It works, but each touched collection opens its own session and connection
+(N+1 when walking collections) and it hides the problem; use it as a temporary bridge, not as the design.
+
+Do **not** keep an `EntityManager` open outside a transaction to get the old behavior back: `REQUIRES_NEW`
+(`executeWithinTransaction`, `AccountTenants.runAs`) reuses it, and the `EntityManager` keeps the tenant it was opened
+with.
+
 ## Summary
 
 DynamiaTools architecture is built on:

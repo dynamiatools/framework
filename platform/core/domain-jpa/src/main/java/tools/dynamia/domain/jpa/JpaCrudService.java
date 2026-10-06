@@ -21,6 +21,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
+import org.hibernate.Hibernate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.NoTransactionException;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -34,6 +39,7 @@ import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.PropertyInfo;
 import tools.dynamia.domain.AbstractEntity;
+import tools.dynamia.domain.LoadPlan;
 import tools.dynamia.domain.OrderBy;
 import tools.dynamia.domain.jdbc.QueryInterruptedException;
 import tools.dynamia.domain.query.*;
@@ -78,6 +84,21 @@ public class JpaCrudService extends AbstractCrudService {
     private final ValidatorService validatorService;
 
     private boolean fullyLoadEntities = false;
+
+    /**
+     * Which associations are initialized when an entity leaves the persistence context. Bound to
+     * {@code dynamia.crud.load-collections}: {@code none} (nothing, unless a plan is requested explicitly),
+     * {@code annotated} (the default: the plan declared with {@link tools.dynamia.domain.InitializeOnLoad}) or
+     * {@code all} (also every to-many association of the entity, see {@link #loadDepth}).
+     */
+    @Value("${dynamia.crud.load-collections:annotated}")
+    private String loadCollectionsMode = "annotated";
+
+    /**
+     * Nesting level used by the {@code all} mode. Bound to {@code dynamia.crud.load-depth}.
+     */
+    @Value("${dynamia.crud.load-depth:1}")
+    private int loadDepth = 1;
 
     public JpaCrudService(ValidatorService validatorService) {
         this.validatorService = validatorService;
@@ -174,30 +195,109 @@ public class JpaCrudService extends AbstractCrudService {
     @Override
     @Transactional
     public <T> T find(Class<T> type, final Serializable id) {
+        var entity = findById(type, id);
+        if (entity != null && isFullyLoadEntities()) {
+            entity = JpaUtils.initializeEntity(entity);
+        }
+
+        return applyLoadPlan(entity, LoadPlan.EMPTY);
+    }
+
+    private <T> T findById(Class<T> type, Serializable id) {
         if (id == null) {
             return null;
         }
 
         Object targetId = JpaUtils.checkIdType(type, id);
         if (targetId == null) return null;
-        var entity = em.find(type, targetId);
-        if (entity != null && isFullyLoadEntities()) {
-            entity = JpaUtils.initializeEntity(entity);
-        }
-
-        return entity;
+        return em.find(type, targetId);
     }
 
     @Override
     @Transactional
     public <T> T load(Class<T> type, Serializable id) {
+        return load(type, id, LoadPlan.EMPTY);
+    }
+
+    @Override
+    @Transactional
+    public <T> T load(Class<T> type, Serializable id, LoadPlan plan) {
         if (id == null || type == null) {
             return null;
         }
 
-        var entity = find(type, id);
-        return JpaUtils.initializeEntity(entity);
+        var entity = JpaUtils.initializeEntity(findById(type, id));
+        return applyLoadPlan(entity, plan);
+    }
 
+    // Declared here (not only as interface defaults) so the call goes through the transactional proxy.
+    @Override
+    @Transactional
+    public <T> T load(Class<T> type, Serializable id, String... paths) {
+        return load(type, id, LoadPlan.of(paths));
+    }
+
+    /**
+     * Initializes the associations of the load plan when the entity is about to leave the persistence context, that
+     * is, when the call that produced it is the outermost transactional one. Inside a service that already runs in a
+     * transaction nothing is loaded: the entity stays attached and its collections load on demand.
+     */
+    private <T> T applyLoadPlan(T entity, LoadPlan extra) {
+        if (entity == null || !leavesPersistenceContext()) {
+            return entity;
+        }
+
+        LoadPlan plan = loadPlanFor(entity.getClass()).and(extra);
+        if (plan.isEmpty()) {
+            return entity;
+        }
+        return JpaUtils.initializeEntity(entity, plan);
+    }
+
+    /**
+     * The plan the service applies by default to an entity class: the {@code @InitializeOnLoad} declaration and, in
+     * {@code all} mode, every to-many association up to the configured depth.
+     */
+    public LoadPlan loadPlanFor(Class<?> type) {
+        if (type == null || "none".equalsIgnoreCase(loadCollectionsMode)) {
+            return LoadPlan.EMPTY;
+        }
+
+        Class<?> entityClass = org.hibernate.proxy.HibernateProxy.class.isAssignableFrom(type) ? type.getSuperclass() : type;
+        LoadPlan plan = LoadPlan.annotatedOf(entityClass);
+        if ("all".equalsIgnoreCase(loadCollectionsMode)) {
+            plan = plan.and(LoadPlan.allCollections(loadDepth));
+        }
+        return plan;
+    }
+
+    /**
+     * Tells whether the entity returned by the current call will be detached when it ends. It is true when no
+     * transaction is active (every query runs in its own persistence context) or when the current call started the
+     * transaction. It is false when the call joined a transaction opened by the caller, or when a persistence context
+     * is bound to the thread (Open Persistence In View), because the entity stays managed.
+     */
+    private boolean leavesPersistenceContext() {
+        if (noPersistenceContextOpen()) {
+            return true;
+        }
+
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+            return false; // a persistence context bound to the thread (Open Persistence In View)
+        }
+
+        try {
+            return TransactionAspectSupport.currentTransactionStatus().isNewTransaction();
+        } catch (NoTransactionException e) {
+            // a transaction opened programmatically (TransactionTemplate), not by a @Transactional method of this service
+            return false;
+        }
+    }
+
+    private boolean noPersistenceContextOpen() {
+        return !TransactionSynchronizationManager.isActualTransactionActive()
+                && TransactionSynchronizationManager.getResourceMap().values().stream()
+                .noneMatch(r -> r instanceof org.springframework.orm.jpa.EntityManagerHolder);
     }
 
     /*
@@ -244,7 +344,43 @@ public class JpaCrudService extends AbstractCrudService {
         }
 
         fireListeners(resultList, EventType.AFTER_QUERY);
-        return result;
+        return initializeDetachedResult(result);
+    }
+
+    /**
+     * {@code findSingle} is not transactional, so its result is detached when no transaction is active. If the
+     * entity declares a load plan, it is loaded again inside a short transaction to initialize it.
+     */
+    private <T> T initializeDetachedResult(T result) {
+        if (result == null || !noPersistenceContextOpen()) {
+            return result;
+        }
+
+        LoadPlan plan = loadPlanFor(result.getClass());
+        if (plan.isEmpty()) {
+            return result;
+        }
+
+        PlatformTransactionManager txManager = Containers.get().findObject(PlatformTransactionManager.class);
+        if (txManager == null) {
+            return result;
+        }
+
+        try {
+            Serializable id = JpaUtils.getJPAIdValue(result);
+            if (id == null) {
+                return result;
+            }
+            Class<T> type = (Class<T>) result.getClass();
+            T loaded = new TransactionTemplate(txManager).execute(status -> {
+                T entity = em.find(type, id);
+                return entity != null ? JpaUtils.initializeEntity(entity, plan) : null;
+            });
+            return loaded != null ? loaded : result;
+        } catch (Exception e) {
+            logger.warn("Cannot initialize the load plan of " + result.getClass().getSimpleName() + ": " + e.getMessage());
+            return result;
+        }
     }
 
     /*
@@ -981,19 +1117,32 @@ public class JpaCrudService extends AbstractCrudService {
     @Override
     @Transactional
     public <T> T reload(T entity) {
+        return reload(entity, LoadPlan.EMPTY);
+    }
+
+    @Override
+    @Transactional
+    public <T> T reload(T entity, LoadPlan plan) {
         if (entity instanceof AbstractEntity) {
-            entity = (T) load(entity.getClass(), ((AbstractEntity) entity).getId());
+            entity = (T) load(entity.getClass(), ((AbstractEntity) entity).getId(), plan);
         } else {
             try {
                 Serializable id = JpaUtils.getJPAIdValue(entity);
                 if (id != null) {
-                    entity = (T) load(entity.getClass(), id);
+                    entity = (T) load(entity.getClass(), id, plan);
                 }
             } catch (Exception ignored) {
             }
         }
 
         return entity;
+    }
+
+    // Declared here (not only as interface defaults) so the call goes through the transactional proxy.
+    @Override
+    @Transactional
+    public <T> T reload(T entity, String... paths) {
+        return reload(entity, LoadPlan.of(paths));
     }
 
     /*
@@ -1039,6 +1188,26 @@ public class JpaCrudService extends AbstractCrudService {
                 .setParameter("entity", entity)
                 .getSingleResult();
 
+    }
+
+    public String getLoadCollectionsMode() {
+        return loadCollectionsMode;
+    }
+
+    /**
+     * Sets which associations are initialized when an entity leaves the persistence context:
+     * {@code none}, {@code annotated} or {@code all} (see {@code dynamia.crud.load-collections}).
+     */
+    public void setLoadCollectionsMode(String loadCollectionsMode) {
+        this.loadCollectionsMode = loadCollectionsMode;
+    }
+
+    public int getLoadDepth() {
+        return loadDepth;
+    }
+
+    public void setLoadDepth(int loadDepth) {
+        this.loadDepth = loadDepth;
     }
 
     public boolean isFullyLoadEntities() {
