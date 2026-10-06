@@ -59,6 +59,11 @@ public class JpaEntityUtilsProvider implements EntityUtilsProvider {
     }
 
     @Override
+    public Object initializeEntity(Object entity) {
+        return JpaUtils.initializeEntity(entity);
+    }
+
+    @Override
     public Class<?> getEntityClass(Object entity) {
         return Hibernate.getClass(entity);
     }

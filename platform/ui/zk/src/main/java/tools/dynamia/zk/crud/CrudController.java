@@ -40,9 +40,6 @@ import tools.dynamia.domain.query.QueryExecuter;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.commons.BeanMap;
-import tools.dynamia.crud.ViewDescriptorProperties;
-import tools.dynamia.domain.OpenPersistenceInViewProvider;
-import tools.dynamia.domain.query.BeanMapEntityMapper;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.integration.Containers;
@@ -494,11 +491,8 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
      * @param params the query parameters to configure
      */
     protected void configureEntityMapper(QueryParameters params) {
-        if (dataSetView == null || !isOpenPersistenceInViewDisabled()) {
-            return;
-        }
-        if (params.getMapper() == null || params.getMapper() instanceof BeanMapEntityMapper) {
-            params.mapWith(new BeanMapEntityMapper(ViewDescriptorProperties.propertiesOf(dataSetView.getViewDescriptor())));
+        if (dataSetView != null) {
+            EntityMapperSupport.configure(params, dataSetView.getViewDescriptor());
         }
     }
 
@@ -510,15 +504,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
      * @return the entity
      */
     protected Object toEntity(Object row) {
-        if (row instanceof BeanMap beanMap && beanMap.getId() != null) {
-            return crudService.load(beanMap.getBeanClass(), (java.io.Serializable) beanMap.getId());
-        }
-        return row;
-    }
-
-    private boolean isOpenPersistenceInViewDisabled() {
-        OpenPersistenceInViewProvider provider = Containers.get().findObject(OpenPersistenceInViewProvider.class);
-        return provider == null || provider.isDisabled();
+        return EntityMapperSupport.toEntity(crudService, row);
     }
 
     /**

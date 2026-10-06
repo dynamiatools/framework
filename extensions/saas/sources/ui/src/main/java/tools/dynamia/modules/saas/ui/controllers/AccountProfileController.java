@@ -76,7 +76,7 @@ public class AccountProfileController extends CrudController<AccountProfile> {
 
     @Override
     protected void afterEdit() {
-        Window window = ZKUtil.showDialog(getPagePath("new"), "Edit Profile", getSelected(), "90%", "90%");
+        Window window = ZKUtil.showDialog(getPagePath("new"), "Edit Profile", getEntity(), "90%", "90%");
         window.addEventListener(Events.ON_CLOSE, evt -> doQuery());
 
 

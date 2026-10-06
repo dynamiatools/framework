@@ -61,8 +61,8 @@ public class EntityFileController extends TreeCrudController<EntityFile> {
 
     @Override
     protected void afterCreate() {
-        if (getSelected() != null && getSelected().getType() == EntityFileType.DIRECTORY) {
-            getEntity().setParent(getSelected());
+        if (toEntity(getSelected()) instanceof EntityFile selected && selected.getType() == EntityFileType.DIRECTORY) {
+            getEntity().setParent(selected);
         }
     }
 

@@ -19,12 +19,13 @@ package tools.dynamia.zk.ui;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
+import tools.dynamia.commons.BeanMap;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.AbstractEntity;
 
 /**
  *
- * Render dynamic cells for each field
+ * Render dynamic cells for each field. Rows can be entities or read-only {@link BeanMap}s.
  *
  * @author Mario A. Serrano Leones
  */
@@ -36,8 +37,14 @@ public class DynamicListItemRenderer implements ListitemRenderer<Object> {
     public void render(Listitem item, Object data, int index) {
         item.setValue(data);
 
+        Object id = null;
         if (data instanceof AbstractEntity ent) {
-            Listcell idCell = new Listcell(ent.getId().toString());
+            id = ent.getId();
+        } else if (data instanceof BeanMap beanMap) {
+            id = beanMap.getId();
+        }
+        if (id != null) {
+            Listcell idCell = new Listcell(id.toString());
             idCell.setParent(item);
         }
 
@@ -48,7 +55,8 @@ public class DynamicListItemRenderer implements ListitemRenderer<Object> {
             for (String field : fields) {
                 Object value = "";
                 try {
-                    value = ObjectOperations.invokeGetMethod(data, field.trim());
+                    String name = field.trim();
+                    value = data instanceof BeanMap beanMap ? beanMap.get(name) : ObjectOperations.invokeGetMethod(data, name);
                 } catch (Exception ignored) {
                 }
                 String cellValue = null;

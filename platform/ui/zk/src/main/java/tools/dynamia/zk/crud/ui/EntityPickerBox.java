@@ -45,6 +45,7 @@ import tools.dynamia.web.util.HttpUtils;
 import tools.dynamia.zk.BindingComponentIndex;
 import tools.dynamia.zk.ComponentAliasIndex;
 import tools.dynamia.zk.crud.CrudView;
+import tools.dynamia.zk.crud.EntityMapperSupport;
 import tools.dynamia.crud.actions.FastCrudAction;
 import tools.dynamia.zk.ui.CanBeReadonly;
 import tools.dynamia.zk.util.ZKUtil;
@@ -91,6 +92,8 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
     private String entityName;
 
     private Object selected;
+    private Object selectedRow;
+    private ViewDescriptor pickerDescriptor;
     private boolean autoboxed;
     private Bandbox inputField;
     private TableView resultTable;
@@ -180,6 +183,7 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
         String noneText = Messages.get(EntityPickerBox.class, "none");
         ViewDescriptor descriptor = Viewers.findViewDescriptor(entityClass, HttpUtils.detectDevice(), ENTITYPICKER);
         if (descriptor == null || HttpUtils.isSmartphone()) {
+            pickerDescriptor = null;
             resultTable = new TableView();
             resultTable.setItemRenderer((ListitemRenderer<Object>) (item, data, index) -> {
                 String noneLabel = defaultItemLabel != null ? defaultItemLabel : noneText;
@@ -187,6 +191,7 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
                 item.setLabel(data != null ? ObjectOperations.getInstanceName(data) : noneLabel);
             });
         } else {
+            pickerDescriptor = descriptor;
             DefaultViewDescriptor resultDescriptor = new DefaultViewDescriptor(entityClass, "table", false);
             resultDescriptor.addParam("sizedByContent", true);
 
@@ -273,8 +278,17 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
 
 
             defaultParameters.setMaxResults(maxResults);
-            //noinspection unchecked
-            this.result = crudService.findByFields(entityClass, param, defaultParameters, getFields());
+            // With Open Persistence In View disabled the rows are read-only BeanMaps, resolved to the entity on selection
+            boolean mapperAttached = EntityMapperSupport.configure(defaultParameters, pickerDescriptor);
+            try {
+                //noinspection unchecked
+                this.result = crudService.findByFields(entityClass, param, defaultParameters, getFields());
+            } finally {
+                if (mapperAttached) {
+                    // keep the mapper out of the parameters shared with the CrudView opened by the picker button
+                    defaultParameters.mapWith(null);
+                }
+            }
             if (result != null && !result.isEmpty()) {
                 autoboxed = false;
                 inputField.open();
@@ -296,7 +310,11 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
 
     public Object getSelected() {
         if (resultTable.getSelectedItem() != null) {
-            selected = resultTable.getSelectedItem().getValue();
+            Object row = resultTable.getSelectedItem().getValue();
+            if (row != selectedRow) {
+                selectedRow = row;
+                selected = EntityMapperSupport.toEntity(crudService, row);
+            }
         } else if (entityClass == null && entityProperty != null) {
             selected = inputField.getValue();
         }
@@ -306,8 +324,9 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
     }
 
     public void setSelected(Object object) {
-
+        object = EntityMapperSupport.toEntity(crudService, object);
         this.selected = object;
+        this.selectedRow = null;
 
         if (object != null) {
             inputField.setValue(object.toString());

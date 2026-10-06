@@ -524,6 +524,19 @@ public abstract class DomainUtils {
     }
 
     /**
+     * Returns the real entity with its to-one relations unproxied and initialized using the registered
+     * {@link EntityUtilsProvider}. Call it while the persistence context is open. Returns the object unchanged if no
+     * provider is registered.
+     *
+     * @param entity the entity or proxy, may be null
+     * @return the real, initialized entity
+     */
+    public static Object initializeEntity(Object entity) {
+        EntityUtilsProvider provider = entity != null ? Containers.get().findObject(EntityUtilsProvider.class) : null;
+        return provider != null ? provider.initializeEntity(entity) : entity;
+    }
+
+    /**
      * Returns the real entity class (never a proxy subclass) using the registered {@link EntityUtilsProvider}.
      *
      * @param entity the entity or proxy, never null

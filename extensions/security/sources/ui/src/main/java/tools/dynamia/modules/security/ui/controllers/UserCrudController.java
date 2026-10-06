@@ -32,9 +32,9 @@ public class UserCrudController extends CrudController<User> {
 
 
     public void showSetProfiles() {
-        if (getSelected() != null) {
+        if (toEntity(getSelected()) instanceof User user) {
 
-            Window window = ZKUtil.showDialog(getPagePath("setProfiles"), "Set Profiles: " + getSelected().getUsername(), getSelected(), "800px", "500px");
+            Window window = ZKUtil.showDialog(getPagePath("setProfiles"), "Set Profiles: " + user.getUsername(), user, "800px", "500px");
             window.addEventListener(Events.ON_CLOSE, evt -> doQuery());
 
         } else {

@@ -851,7 +851,8 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
     private void loadMenuActions() {
         if (contextMenu != null && dataSetView != null && dataSetView.getSelected() != null) {
             Object value = dataSetView.getSelected();
-            Class valueClass = value.getClass();
+            // BeanMap rows (Open Persistence In View disabled) stand for their entity class
+            Class valueClass = value instanceof BeanMap beanMap && beanMap.getBeanClass() != null ? beanMap.getBeanClass() : value.getClass();
             Class lastClass = (Class) contextMenu.getAttribute("LastClass");
             if (valueClass != lastClass) {
                 lastClass = valueClass;

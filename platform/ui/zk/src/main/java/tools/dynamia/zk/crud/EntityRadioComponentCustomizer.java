@@ -20,6 +20,7 @@ import org.zkoss.zul.ListModelList;
 import org.zkoss.zul.Radiogroup;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.AbstractEntity;
+import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Provider;
@@ -41,7 +42,10 @@ public class EntityRadioComponentCustomizer implements ComponentCustomizer<Radio
             if (ObjectOperations.isAssignable(field.getFieldClass(), AbstractEntity.class)) {
                 if (field.getParams().get("automodel") == Boolean.TRUE) {
                     CrudService crudService = Containers.get().findObject(CrudService.class);
-                    List entities = crudService.findAll(field.getFieldClass());
+                    QueryParameters params = new QueryParameters();
+                    // the model items are assigned to the entity property, so they must stay entities (not BeanMaps)
+                    EntityMapperSupport.configureEntities(params);
+                    List entities = crudService.find(field.getFieldClass(), params);
                     //noinspection unchecked
                     component.setModel(new ListModelList(entities, true));
                 }

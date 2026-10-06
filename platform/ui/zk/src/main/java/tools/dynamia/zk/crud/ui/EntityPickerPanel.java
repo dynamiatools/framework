@@ -24,6 +24,7 @@ import tools.dynamia.commons.StringUtils;
 import tools.dynamia.domain.query.DataPaginator;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
+import tools.dynamia.zk.crud.EntityMapperSupport;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.viewers.ViewCustomizer;
 import tools.dynamia.viewers.ViewDescriptor;
@@ -126,7 +127,16 @@ public class EntityPickerPanel<E> extends Div {
         dataPaginator.setPageSize(tableView.getPageSize());
         defaultParameters.paginate(dataPaginator);
 
-        List<E> result = crudService.findByFields(entityClass, param, defaultParameters, fields);
+        // With Open Persistence In View disabled the rows are read-only BeanMaps, resolved to the entity on selection
+        boolean mapperAttached = EntityMapperSupport.configure(defaultParameters, fields);
+        List<E> result;
+        try {
+            result = crudService.findByFields(entityClass, param, defaultParameters, fields);
+        } finally {
+            if (mapperAttached) {
+                defaultParameters.mapWith(null);
+            }
+        }
 
         tableView.setValue(result);
         return result.size();
@@ -134,7 +144,8 @@ public class EntityPickerPanel<E> extends Div {
 
     public void select() {
         if (tableView.isListitemSelected()) {
-            selected = tableView.getSelectedItem().getValue();
+            //noinspection unchecked
+            selected = (E) EntityMapperSupport.toEntity(crudService, tableView.getSelectedItem().getValue());
         } else {
             selected = null;
         }
