@@ -313,6 +313,7 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
 
     /**
      * Adds the main form view to the multiview container with the specified title.
+     *
      * @param formViewTitle title for the form view tab
      */
     protected void addFormViewToContainer(String formViewTitle) {
@@ -674,8 +675,8 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
      * Adds a nested CRUD subview for collection fields configured as CRUD components.
      *
      * @param formView parent form view
-     * @param field descriptor field representing the subcrud relation
-     * @param label tab/section label
+     * @param field    descriptor field representing the subcrud relation
+     * @param label    tab/section label
      */
     protected void addSubCrudView(FormView<T> formView, final Field field, final String label) {
         if (field.getParams().get(Viewers.PARAM_INPLACE) == Boolean.TRUE) {
@@ -929,7 +930,7 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
      * Finds all actions applicable to target class and state.
      *
      * @param targetClass target entity class
-     * @param state active CRUD state
+     * @param state       active CRUD state
      * @return sorted applicable actions
      */
     protected List<CrudAction> findApplicableActions(final Class targetClass, final CrudState state) {
@@ -973,14 +974,19 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
             case READ, DELETE -> getDataSetView().getSelected();
         };
 
-        if (data instanceof BeanMap beanMap && ((BeanMap) data).getId() != null) {
-            CrudService crudService = crudServiceName != null ? Containers.get().findObject(crudServiceName, CrudService.class) : Containers.get().findObject(CrudService.class);
-            if (crudService != null) {
-                data = crudService.find(beanMap.getBeanClass(), (Serializable) beanMap.getId());
-            }
+        if (data instanceof BeanMap beanMap) {
+            data = loadDataFromBeanMap(beanMap, data);
         }
 
         return new CrudActionEvent(data, source, params, this, this.getController());
+    }
+
+    private Object loadDataFromBeanMap(BeanMap beanMap, Object data) {
+        CrudService crudService = crudServiceName != null ? Containers.get().findObject(crudServiceName, CrudService.class) : Containers.get().findObject(CrudService.class);
+        if (crudService != null && beanMap.getId()!=null && beanMap.getBeanClass()!=null) {
+            data = crudService.load(beanMap.getBeanClass(), (Serializable) beanMap.getId());
+        }
+        return data;
     }
 
     private void fireChangedStateListeners(CrudState newState, CrudState oldState) {
@@ -1032,9 +1038,9 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
     /**
      * Opens an update CRUD dialog and invokes callback when update flow ends.
      *
-     * @param title dialog title
-     * @param clazz entity class
-     * @param value entity value to edit
+     * @param title    dialog title
+     * @param clazz    entity class
+     * @param value    entity value to edit
      * @param callback optional completion callback
      * @return dialog window
      */
@@ -1125,8 +1131,8 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
     /**
      * Opens a create CRUD dialog and invokes callback when flow returns to read state.
      *
-     * @param title dialog title
-     * @param clazz entity class
+     * @param title    dialog title
+     * @param clazz    entity class
      * @param callback optional completion callback
      * @return dialog window
      */

@@ -3,6 +3,7 @@ package tools.dynamia.domain.jpa;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -16,6 +17,7 @@ import tools.dynamia.integration.SpringObjectContainer;
 import javax.sql.DataSource;
 
 @Configuration
+@EnableTransactionManagement
 public class JpaTestConfig {
 
     @Bean

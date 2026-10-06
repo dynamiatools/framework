@@ -1021,8 +1021,18 @@ public final class ObjectOperations {
     }
 
     /**
-     * Return the value of the field or method annoted with {@link InstanceName} or invoke toString() method if
-     * not InstanceName is found
+     * Returns the text that represents the given object to users, as a replacement for {@code toString()}.
+     * <p>
+     * The first non-null, non-blank value of a field annotated with {@link InstanceName} (any visibility, whole class
+     * hierarchy) or of a public no-arg method annotated with {@link InstanceName} is returned, converted with
+     * {@link String#valueOf(Object)}. If the object has no such member, the member returns {@code null} or blank, or
+     * reading it fails, {@code toString()} is used instead.
+     * <p>
+     * Note that Hibernate proxies must be unproxied first, because reading a field of an uninitialized proxy
+     * returns {@code null}.
+     *
+     * @param object the object, may be {@code null}
+     * @return the instance name, an empty string if the object is {@code null}
      */
     public static String getInstanceName(Object object) {
         if (object == null) {
@@ -1030,29 +1040,35 @@ public final class ObjectOperations {
         }
 
         try {
-            var fields = getFieldsWithAnnotation(object.getClass(), InstanceName.class);
-            if (fields.length > 0) {
-                var field = Stream.of(fields).filter(f -> f.getType() == String.class).findFirst().orElse(null);
-                if (field != null) {
-                    field.setAccessible(true);
-                    return (String) field.get(object);
+            for (Field field : getFieldsWithAnnotation(object.getClass(), InstanceName.class)) {
+                field.setAccessible(true);
+                var name = toInstanceName(field.get(object));
+                if (name != null) {
+                    return name;
                 }
             }
 
-            var methods = getMethodsWithAnnotation(object.getClass(), InstanceName.class);
-            if (methods.length > 0) {
-                var method = Stream.of(methods).filter(m -> m.getReturnType() == String.class)
-                        .findFirst().orElse(null);
-                if (method != null) {
-                    return (String) method.invoke(object);
+            for (Method method : getMethodsWithAnnotation(object.getClass(), InstanceName.class)) {
+                if (method.getParameterCount() == 0 && method.getReturnType() != void.class) {
+                    method.setAccessible(true);
+                    var name = toInstanceName(method.invoke(object));
+                    if (name != null) {
+                        return name;
+                    }
                 }
-
             }
-
         } catch (Exception e) {
             //fail, just ignore
         }
         return object.toString();
+    }
+
+    private static String toInstanceName(Object value) {
+        if (value == null) {
+            return null;
+        }
+        var name = String.valueOf(value);
+        return name.isBlank() ? null : name;
     }
 
     /**

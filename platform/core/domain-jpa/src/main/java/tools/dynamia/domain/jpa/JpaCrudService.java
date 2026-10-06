@@ -431,7 +431,7 @@ public class JpaCrudService extends AbstractCrudService {
 
 
             List result = mapResultsToBeanMaps(queryBuilder, query.getResultList());
-
+            result = applyMapper(queryBuilder, parameters, result);
 
             if (parameters.getPaginator() != null) {
                 PagedListDataSource<T> dataSource = new JpaPagedListDataSource<>(
@@ -450,6 +450,25 @@ public class JpaCrudService extends AbstractCrudService {
             throw ex;
 
         }
+    }
+
+    /**
+     * Applies the {@link EntityMapper} carried by the parameters (if any) to every result while the persistence
+     * context is still open. Results already projected to {@link BeanMap} are left untouched.
+     */
+    static List applyMapper(QueryBuilder queryBuilder, QueryParameters parameters, List result) {
+        EntityMapper mapper = parameters != null ? parameters.getMapper() : null;
+        // A PagedList loads (and maps, through find(QueryMetadata)) its pages on demand: never iterate it here, that
+        // would load every page and flatten the auto pagination.
+        if (mapper == null || result == null || result instanceof PagedList || result.isEmpty()
+                || (queryBuilder != null && queryBuilder.getResultType() == BeanMap.class)) {
+            return result;
+        }
+        List mapped = new ArrayList<>(result.size());
+        for (Object entity : result) {
+            mapped.add(entity != null ? mapper.map(entity) : null);
+        }
+        return mapped;
     }
 
     private List mapResultsToBeanMaps(QueryBuilder queryBuilder, List result) {
@@ -570,7 +589,8 @@ public class JpaCrudService extends AbstractCrudService {
         queryMetada.getParameters().applyTo(wrap(query));
         JpaUtils.configurePaginator(em, query, null, queryMetada.getParameters());
 
-        return mapResultsToBeanMaps(queryMetada.getQueryBuilder(), query.getResultList());
+        List result = mapResultsToBeanMaps(queryMetada.getQueryBuilder(), query.getResultList());
+        return applyMapper(queryMetada.getQueryBuilder(), queryMetada.getParameters(), result);
     }
 
     @Transactional(readOnly = true)

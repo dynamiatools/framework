@@ -206,7 +206,9 @@ public class EntityTreeNode<E> extends TreeViewNode<E> implements Serializable {
     }
 
     public Class getEntityType() {
-        if (getData() != null) {
+        if (getData() instanceof tools.dynamia.commons.BeanMap beanMap && beanMap.getBeanClass() != null) {
+            return beanMap.getBeanClass();
+        } else if (getData() != null) {
             return getData().getClass();
         } else {
             return null;

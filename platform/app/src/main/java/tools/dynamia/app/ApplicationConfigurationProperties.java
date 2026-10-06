@@ -125,6 +125,12 @@ public class ApplicationConfigurationProperties {
     private boolean webCacheEnabled;
 
     /**
+     * Open Persistence In View. When false the persistence context is closed before views render, so lists and
+     * tables are mapped to read-only BeanMaps by the CrudService. Default true.
+     */
+    private boolean openPersistenceInView = true;
+
+    /**
      * Application description text.
      */
     private String description;
@@ -465,5 +471,23 @@ public class ApplicationConfigurationProperties {
      */
     public void setApiBasePath(String apiBasePath) {
         this.apiBasePath = apiBasePath;
+    }
+
+    /**
+     * Checks if Open Persistence In View is enabled.
+     *
+     * @return true if enabled (default)
+     */
+    public boolean isOpenPersistenceInView() {
+        return openPersistenceInView;
+    }
+
+    /**
+     * Enables or disables Open Persistence In View ({@code dynamia.app.open-persistence-in-view}).
+     *
+     * @param openPersistenceInView false to disable it
+     */
+    public void setOpenPersistenceInView(boolean openPersistenceInView) {
+        this.openPersistenceInView = openPersistenceInView;
     }
 }
