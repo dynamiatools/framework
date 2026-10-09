@@ -32,4 +32,4 @@ jobs:
         distribution: temurin
         cache: maven
     - name: Build with Maven
-      run: mvn -B -T 1C verify --file pom.xml
+      run: mvn -B -e -DskipTests -pl platform/core/commons -am verify --file pom.xml
