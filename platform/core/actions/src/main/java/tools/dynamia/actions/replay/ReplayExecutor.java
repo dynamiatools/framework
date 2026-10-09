@@ -75,9 +75,10 @@ public final class ReplayExecutor {
             original = request;
         }
 
-        var interactions = new ReplayInteractions(answers);
+        var session = new ReplaySession(answers);
+        var interactions = new ReplayInteractions(session);
         Object result = transactions().run(
-                () -> UIMessages.withDisplayer(interactions, () -> body.apply(original)),
+                () -> ReplaySession.run(session, () -> UIMessages.withDisplayer(interactions, () -> body.apply(original))),
                 () -> !interactions.isPending());
 
         if (interactions.isPending()) {
