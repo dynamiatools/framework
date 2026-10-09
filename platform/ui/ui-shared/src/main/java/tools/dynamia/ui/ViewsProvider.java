@@ -29,4 +29,10 @@ public interface ViewsProvider {
      * It is never called if the user cancels.
      */
     <T> void showForm(FormOptions<T> options, BiConsumer<T, ViewDialog> onSubmit);
+
+    /**
+     * Shows {@code options.value()} read only. The user closes it; nothing is reported back. In a headless run the action
+     * continues once the client acknowledged the view.
+     */
+    <T> void showView(ViewOptions<T> options);
 }

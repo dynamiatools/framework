@@ -265,3 +265,20 @@ describe('runActionFlow CHOICE and new window redirects', () => {
     expect(navigate).toHaveBeenCalledWith('/files/1/download', { newWindow: true });
   });
 });
+
+describe('runActionFlow VIEW', () => {
+  it('shows the view read only and acknowledges it', async () => {
+    const view = flowResponse(step({ type: 'VIEW', viewDescriptor: 'form', viewClass: 'x.Sale', data: { total: 5 }, title: 'Sale 1' }));
+    const { client: base, calls } = fakeClient({ main: [view, flowResponse(step({ type: 'DONE' }))] });
+    const client = {
+      ...(base as object),
+      metadata: { getEntityView: vi.fn(async () => ({ id: 'form', fields: [], view: 'form' })), getEntity: vi.fn(async () => null) },
+    } as never;
+    const showFormDialog = vi.fn(async () => ({}));
+
+    await runActionFlow(client, action, { dataType: 'x.Sale' }, handlers({ showFormDialog }), 'x.Sale');
+
+    expect(showFormDialog).toHaveBeenCalledWith(expect.objectContaining({ title: 'Sale 1', readonly: true }));
+    expect(calls.main[1]!.data).toBe(true);
+  });
+});

@@ -241,6 +241,10 @@ async function renderFlowStep(
     case 'DIALOG':
       return renderDialogStep(step, handlers, client, className);
 
+    case 'VIEW':
+      await renderDialogStep(step, handlers, client, className, true);
+      return true; // the user only had to see it
+
     case 'CHOICE': {
       if (!handlers.choose) {
         throw new Error('runActionFlow: no "choose" handler provided for flow step type "CHOICE"');
@@ -287,6 +291,7 @@ async function renderDialogStep(
   handlers: FlowStepHandlers,
   client: DynamiaClient,
   className: string | null,
+  readonly = false,
 ): Promise<Record<string, unknown> | null> {
   if (!handlers.showFormDialog) {
     throw new Error('runActionFlow: no "showFormDialog" handler provided for flow step type "DIALOG"');
@@ -313,6 +318,7 @@ async function renderDialogStep(
   return handlers.showFormDialog({
     view,
     ...(step.title !== undefined ? { title: step.title } : {}),
+    ...(readonly ? { readonly: true } : {}),
   });
 }
 

@@ -59,4 +59,15 @@ public final class UIViews {
             dialog.close();
         });
     }
+
+    /**
+     * Shows a bean read only.
+     *
+     * <pre>{@code
+     * UIViews.showView(ViewOptions.of(ObjectOperations.getInstanceName(sale), Sale.class, sale));
+     * }</pre>
+     */
+    public static <T> void showView(ViewOptions<T> options) {
+        UIFacades.resolve(ViewsProvider.class).showView(options);
+    }
 }

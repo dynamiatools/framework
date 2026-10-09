@@ -83,4 +83,31 @@ class HeadlessViewsTest {
         assertNull(session.pending());
         assertTrue(log.isEmpty());
     }
+
+    @Test
+    void aViewBecomesAVIEWStepAndTheActionContinuesWhenItIsAcknowledged() {
+        var payment = new Payment();
+        payment.amount = "7";
+
+        var first = new ReplaySession(new ArrayList<>());
+        showView(first, payment);
+        var step = first.pending();
+        assertEquals(ActionFlowStepType.VIEW, step.getType());
+        assertEquals(Payment.class.getName(), step.getViewClass());
+        assertEquals(Map.of("amount", "7"), step.getData());
+
+        var second = new ReplaySession(new ArrayList<>(List.of(true)));
+        showView(second, payment);
+        assertNull(second.pending());
+    }
+
+    private void showView(ReplaySession session, Payment payment) {
+        var provider = new HeadlessViews(session, (bean, type) -> Map.of("amount", ((Payment) bean).amount), (bean, type, values) -> {
+        });
+        UIFacades.with(ViewsProvider.class, provider, () -> {
+            UIViews.showView(tools.dynamia.ui.ViewOptions.of("Payment", Payment.class, payment));
+            log.add("after view");
+            return null;
+        });
+    }
 }

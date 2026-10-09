@@ -98,6 +98,16 @@ public class ActionFlowStep implements Serializable {
         return step;
     }
 
+    /**
+     * The client shows {@code viewDescriptor} of {@code viewClass} read only, filled with {@code data}, and answers when
+     * the user closes it.
+     */
+    public static ActionFlowStep view(String viewDescriptor, String viewClass, Object data, String title) {
+        var step = dialog(viewDescriptor, viewClass, data, title);
+        step.type = ActionFlowStepType.VIEW;
+        return step;
+    }
+
     /** Fire-and-forget notification — the client shows it and immediately continues the flow. */
     public static ActionFlowStep notify(String message, MessageType messageType) {
         var step = new ActionFlowStep();

@@ -12,6 +12,8 @@ export interface DialogFormOptions {
   view: VueFormView;
   /** Optional heading shown in the dialog header. */
   title?: string;
+  /** Show the form read only with a Close button (the `VIEW` flow step). */
+  readonly?: boolean;
 }
 
 /** A queued/current form-dialog request, as tracked internally by {@link DialogFormManager}. */
@@ -50,6 +52,7 @@ export class DialogFormManager {
         id: crypto.randomUUID(),
         view: options.view,
         ...(options.title !== undefined ? { title: options.title } : {}),
+        ...(options.readonly ? { readonly: true } : {}),
       };
       const wasEmpty = this._queue.length === 0;
       this._queue.push({ request, resolve });

@@ -8,7 +8,17 @@
       panel-class="dynamia-form-dialog"
       @close="respond(null)"
   >
-    <Form :view="current.view" @submit="respond" @cancel="respond(null)"/>
+    <template v-if="current.readonly">
+      <fieldset disabled class="dynamia-form-readonly">
+        <Form :view="current.view">
+          <template #actions><span/></template>
+        </Form>
+      </fieldset>
+      <div class="dynamia-form-actions">
+        <button type="button" @click="respond({})">Close</button>
+      </div>
+    </template>
+    <Form v-else :view="current.view" @submit="respond" @cancel="respond(null)"/>
   </Dialog>
 </template>
 

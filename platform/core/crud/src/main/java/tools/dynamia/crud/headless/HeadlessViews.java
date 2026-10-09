@@ -20,6 +20,7 @@ import tools.dynamia.actions.ActionFlowStep;
 import tools.dynamia.actions.replay.ReplaySession;
 import tools.dynamia.ui.FormOptions;
 import tools.dynamia.ui.ViewDialog;
+import tools.dynamia.ui.ViewOptions;
 import tools.dynamia.ui.ViewsProvider;
 
 import java.util.Map;
@@ -70,6 +71,15 @@ public final class HeadlessViews implements ViewsProvider {
                 applier.apply(options.value(), options.beanClass(), (Map<String, Object>) values);
                 onSubmit.accept(options.value(), CLIENT_CLOSES);
             }
+        });
+    }
+
+    @Override
+    public <T> void showView(ViewOptions<T> options) {
+        var step = ActionFlowStep.view(options.viewName(), options.beanClass().getName(),
+                toValues.apply(options.value(), options.beanClass()), options.title());
+        session.interact(step, answer -> {
+            // the user only had to see it
         });
     }
 

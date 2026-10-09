@@ -19,7 +19,6 @@ platform/ui/zk/src/main/java/tools/dynamia/zk/actions/CallZKGlobalCommandViewAct
 platform/ui/zk/src/main/java/tools/dynamia/zk/actions/SendHttpRequestViewAction.java
 platform/ui/zk/src/main/java/tools/dynamia/zk/crud/actions/FiltersAction.java
 platform/ui/zk/src/main/java/tools/dynamia/zk/crud/actions/FindAction.java
-platform/ui/zk/src/main/java/tools/dynamia/zk/crud/actions/ViewDataAction.java
 platform/ui/zk/src/main/java/tools/dynamia/zk/crud/cfg/SaveConfigAction.java
 platform/ui/zk/src/main/java/tools/dynamia/zk/reports/actions/ExportAction.java
 platform/ui/zk/src/main/java/tools/dynamia/zk/reports/actions/ExportCSVAction.java
