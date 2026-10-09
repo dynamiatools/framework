@@ -37,8 +37,19 @@ public final class ReplaySession {
 
     private final List<Object> answers;
     private final List<ReplayInteractions.Notification> notifications = new ArrayList<>();
+    private final List<Download> downloads = new ArrayList<>();
     private int cursor;
     private ActionFlowStep pending;
+
+    /**
+     * A file the action gave to the user.
+     *
+     * @param name        file name
+     * @param contentType MIME type, may be null
+     * @param content     the bytes
+     */
+    public record Download(String name, String contentType, byte[] content) {
+    }
 
     /**
      * @param answers the answers of the user so far, in the order of the interactions
@@ -88,6 +99,21 @@ public final class ReplaySession {
         if (pending == null) {
             notifications.add(new ReplayInteractions.Notification(message, title, type));
         }
+    }
+
+    /**
+     * Records a file for the user. Ignored once the pass has stopped at a question; like messages, only the downloads
+     * of the pass that ran to the end reach the client.
+     */
+    public void download(String name, String contentType, byte[] content) {
+        if (pending == null) {
+            downloads.add(new Download(name, contentType, content));
+        }
+    }
+
+    /** @return the files of this pass, in order; they are only meaningful when the pass completed */
+    public List<Download> downloads() {
+        return downloads;
     }
 
     /** @return the question waiting for an answer, or {@code null} when the action ran to the end */

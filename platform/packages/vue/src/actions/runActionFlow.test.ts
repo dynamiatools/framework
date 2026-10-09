@@ -173,3 +173,40 @@ describe('runActionFlow CALL (experimental)', () => {
     await expect(runActionFlow(client, action, {}, handlers())).rejects.toThrow(/data\.action/);
   });
 });
+
+describe('runActionFlow UPLOAD and downloads', () => {
+  it('asks for files on an UPLOAD step and answers with them', async () => {
+    const upload = flowResponse(step({ type: 'UPLOAD', data: { accept: '.json', multiple: false } }));
+    const done = flowResponse(step({ type: 'DONE' }));
+    const { client, calls } = fakeClient({ main: [upload, done] });
+    const file = { name: 'report.json', contentType: 'application/json', content: 'e30=' };
+    const pickFiles = vi.fn(async () => [file]);
+
+    await runActionFlow(client, action, {}, handlers({ pickFiles }));
+
+    expect(pickFiles).toHaveBeenCalledWith({ accept: '.json', multiple: false });
+    expect(calls.main[1]!.data).toEqual([file]);
+    expect(calls.main[1]!.resumeToken).toBe('tok');
+  });
+
+  it('answers with an empty list when the user cancels the picker', async () => {
+    const { client, calls } = fakeClient({
+      main: [flowResponse(step({ type: 'UPLOAD', data: { multiple: true } })), flowResponse(step({ type: 'DONE' }))],
+    });
+
+    await runActionFlow(client, action, {}, handlers({ pickFiles: async () => null }));
+
+    expect(calls.main[1]!.data).toEqual([]);
+  });
+
+  it('gives params.downloads of the final response to saveFile', async () => {
+    const file = { name: 'out.txt', contentType: 'text/plain', content: 'aGVsbG8=' };
+    const final = { ...flowResponse(step({ type: 'DONE' })), params: { downloads: [file] } };
+    const { client } = fakeClient({ main: [final] });
+    const saveFile = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ saveFile }));
+
+    expect(saveFile).toHaveBeenCalledWith(file);
+  });
+});

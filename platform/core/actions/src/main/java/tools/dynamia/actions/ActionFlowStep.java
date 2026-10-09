@@ -129,6 +129,24 @@ public class ActionFlowStep implements Serializable {
         return step;
     }
 
+    /**
+     * The client asks the user for files and answers with a list of {@code {name, contentType, content(Base64)}}.
+     *
+     * @param title    title of the picker, may be null
+     * @param accept   accepted types as in an HTML {@code accept} attribute, may be null
+     * @param multiple whether several files can be chosen
+     */
+    public static ActionFlowStep upload(String title, String accept, boolean multiple) {
+        var step = new ActionFlowStep();
+        step.type = ActionFlowStepType.UPLOAD;
+        step.title = title;
+        var payload = new HashMap<String, Object>();
+        payload.put("accept", accept);
+        payload.put("multiple", multiple);
+        step.data = payload;
+        return step;
+    }
+
     /** Terminal step carrying the action's result. */
     public static ActionFlowStep done(Object data) {
         var step = new ActionFlowStep();

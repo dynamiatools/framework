@@ -5,6 +5,7 @@ import type {
   ActionExecutionResponse,
   ActionFlowStep,
   ActionMetadata,
+  FlowUploadedFile,
   DynamiaClient,
 } from '@dynamia-tools/sdk';
 import type { FeedbackVariant } from '@dynamia-tools/ui-core';
@@ -31,6 +32,16 @@ export interface FlowStepHandlers {
    * `window.location.assign(url)`. Apps with a client-side router can supply a router-aware version.
    */
   navigate?: (url: string) => void | Promise<void>;
+  /**
+   * Renders an `UPLOAD` step: asks the user for files and returns them (Base64), or `null`/`[]` if they cancel.
+   * Optional: defaults to the browser's file picker ({@link browserPickFiles}).
+   */
+  pickFiles?: (options: { title?: string; accept?: string; multiple?: boolean }) => Promise<FlowUploadedFile[] | null>;
+  /**
+   * Gives a file the action produced (`params.downloads` of the final response) to the user. Optional: defaults to a
+   * browser download ({@link browserSaveFile}).
+   */
+  saveFile?: (file: FlowUploadedFile) => void | Promise<void>;
 }
 
 /** Max nesting of `CALL` steps (a flow calling an action that itself calls...) before failing fast. */
@@ -112,6 +123,8 @@ async function driveFlow(
   if (response.flow?.message) {
     handlers.showToast({ message: response.flow.message, variant: mapMessageTypeToVariant(response.flow.messageType) });
   }
+
+  await saveDownloads(response, handlers);
 
   return response;
 }
@@ -218,6 +231,16 @@ async function renderFlowStep(
     case 'DIALOG':
       return renderDialogStep(step, handlers, client, className);
 
+    case 'UPLOAD': {
+      const { accept, multiple } = (step.data ?? {}) as { accept?: string | null; multiple?: boolean };
+      const pick = handlers.pickFiles ?? browserPickFiles;
+      return (await pick({
+        ...(step.title ? { title: step.title } : {}),
+        ...(accept ? { accept } : {}),
+        multiple: multiple === true,
+      })) ?? [];
+    }
+
     case 'CUSTOM': {
       const renderer = FlowStepRendererRegistry.resolve(step);
       if (!renderer) {
@@ -280,4 +303,60 @@ function mapMessageTypeToVariant(messageType?: string): FeedbackVariant {
     default:
       return 'info';
   }
+}
+
+/** Hands the files the action produced (`params.downloads`) to the user. */
+async function saveDownloads(response: ActionExecutionResponse, handlers: FlowStepHandlers): Promise<void> {
+  const downloads = response.params?.downloads;
+  if (!Array.isArray(downloads)) return;
+  const save = handlers.saveFile ?? browserSaveFile;
+  for (const file of downloads as FlowUploadedFile[]) {
+    await save(file);
+  }
+}
+
+/** Default `UPLOAD` renderer: the browser's file picker. Resolves with `null` when the user cancels. */
+export function browserPickFiles(options: { accept?: string; multiple?: boolean }): Promise<FlowUploadedFile[] | null> {
+  return new Promise(resolve => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    if (options.accept) input.accept = options.accept;
+    input.multiple = options.multiple === true;
+    input.addEventListener('cancel', () => resolve(null));
+    input.addEventListener('change', async () => {
+      const files = await Promise.all(Array.from(input.files ?? []).map(async file => ({
+        name: file.name,
+        contentType: file.type || null,
+        content: bytesToBase64(new Uint8Array(await file.arrayBuffer())),
+      })));
+      resolve(files.length ? files : null);
+    });
+    input.click();
+  });
+}
+
+/** Default `params.downloads` handler: saves the file through a temporary link. */
+export function browserSaveFile(file: FlowUploadedFile): void {
+  const blob = new Blob([base64ToBytes(file.content) as BlobPart], { type: file.contentType ?? 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = file.name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function bytesToBase64(bytes: Uint8Array): string {
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(binary);
+}
+
+function base64ToBytes(base64: string): Uint8Array {
+  const binary = atob(base64);
+  return Uint8Array.from(binary, c => c.charCodeAt(0));
 }

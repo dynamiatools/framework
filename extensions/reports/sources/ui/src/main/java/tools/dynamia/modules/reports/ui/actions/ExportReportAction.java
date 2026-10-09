@@ -16,7 +16,7 @@
 package tools.dynamia.modules.reports.ui.actions;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zkoss.zul.Filedownload;
+import tools.dynamia.actions.HeadlessCapable;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.AbstractCrudAction;
@@ -24,12 +24,13 @@ import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.modules.reports.core.domain.Report;
 import tools.dynamia.modules.reports.core.services.ReportsService;
 import tools.dynamia.ui.MessageType;
+import tools.dynamia.ui.UIFiles;
 import tools.dynamia.ui.UIMessages;
 
 import java.io.File;
 
 @InstallAction
-public class ExportReportAction extends AbstractCrudAction {
+public class ExportReportAction extends AbstractCrudAction implements HeadlessCapable {
 
 
     private final ReportsService service;
@@ -51,7 +52,7 @@ public class ExportReportAction extends AbstractCrudAction {
             try {
                 File file = service.exportReport(crudService().load(Report.class, report.getId()));
                 try {
-                    Filedownload.save(java.nio.file.Files.readAllBytes(file.toPath()), "text/json", file.getName());
+                    UIFiles.download(file, "text/json");
                 } finally {
                     file.delete();
                 }

@@ -15,6 +15,7 @@ export type {
     ActionExecutionRequest,
     ActionExecutionResponse,
     ActionFlowStepType,
+    FlowUploadedFile,
     ActionFlowStep,
     ViewDescriptorMetadata,
     ActionReference,

@@ -10,8 +10,6 @@ extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfil
 extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/ReloadEntityFileStoragesAction.java
 extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/ViewFileURLAction.java
 extensions/http-functions/sources/ui/src/main/java/tools/dynamia/modules/functions/ui/actions/TestHttpFunctionAction.java
-extensions/reports/sources/ui/src/main/java/tools/dynamia/modules/reports/ui/actions/ExportReportAction.java
-extensions/reports/sources/ui/src/main/java/tools/dynamia/modules/reports/ui/actions/ImportReportAction.java
 extensions/reports/sources/ui/src/main/java/tools/dynamia/modules/reports/ui/actions/TestReportDatasourceAction.java
 extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/FilterAccountByRegionAction.java
 extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/NewAccountPaymentAction.java

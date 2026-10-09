@@ -50,6 +50,13 @@ public enum ActionFlowStepType {
     /** The client invokes another action first and feeds its response back as the answer. */
     CALL,
 
+    /**
+     * Asks the user for files. {@link ActionFlowStep#getData()} carries {@code accept} (as in an HTML {@code accept}
+     * attribute) and {@code multiple}. The client answers with a list of files, each
+     * {@code {name, contentType, content}} with {@code content} in Base64; an empty list means the user cancelled.
+     */
+    UPLOAD,
+
     /** Terminal step — identical semantics to a plain, non-flow {@link ActionExecutionResponse}. */
     DONE,
 

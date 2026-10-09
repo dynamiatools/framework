@@ -216,6 +216,7 @@ export type ActionFlowStepType =
     | 'CONFIRM'
     | 'INPUT'
     | 'DIALOG'
+    | 'UPLOAD'
     | 'NOTIFY'
     | 'REDIRECT'
     | 'CALL'
@@ -223,10 +224,21 @@ export type ActionFlowStepType =
     | 'CUSTOM';
 
 /**
+ * A file exchanged with an action through the flow protocol: the answer of an `UPLOAD` step, and the entries of
+ * `ActionExecutionResponse.params.downloads`. `content` is Base64.
+ */
+export interface FlowUploadedFile {
+    name: string;
+    contentType?: string | null;
+    content: string;
+}
+
+/**
  * A single step of a `FlowRemoteAction` flow — mirrors `tools.dynamia.actions.ActionFlowStep`.
  *
  * `data`'s shape depends on `type`: the result for `DONE`, `{ url, awaitReturn }` for `REDIRECT`,
- * `{ action, ...}` for `CALL`, `{ component, ... }` for `CUSTOM`, prefill data for `DIALOG`, or absent
+ * `{ action, ...}` for `CALL`, `{ component, ... }` for `CUSTOM`, prefill data for `DIALOG`, `{ accept, multiple }` for
+ * `UPLOAD` (answered with a list of {@link FlowUploadedFile}), or absent
  * for `CONFIRM`/`INPUT`/`NOTIFY`.
  *
  * `REDIRECT` (terminal; `awaitReturn: true` unsupported) and `CALL` (`data.action`, optional `data.className`)

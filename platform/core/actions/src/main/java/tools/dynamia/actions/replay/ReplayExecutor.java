@@ -6,9 +6,12 @@ import tools.dynamia.actions.ActionFlowStep;
 import tools.dynamia.actions.ActionFlows;
 import tools.dynamia.actions.flow.FlowTokenException;
 import tools.dynamia.integration.Containers;
+import tools.dynamia.ui.FileTransfer;
+import tools.dynamia.ui.UIFacades;
 import tools.dynamia.ui.UIMessages;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -38,6 +41,8 @@ public final class ReplayExecutor {
     private static final String ANSWERS_KEY = "answers";
     /** Messages the action showed in the final pass, in {@link ActionExecutionResponse#getParams()}. */
     public static final String NOTIFICATIONS_PARAM = "notifications";
+    /** Response param with the files the action gave to the user: a list of {@code {name, contentType, content}}, Base64. */
+    public static final String DOWNLOADS_PARAM = "downloads";
 
     private ReplayExecutor() {
     }
@@ -78,7 +83,8 @@ public final class ReplayExecutor {
         var session = new ReplaySession(answers);
         var interactions = new ReplayInteractions(session);
         Object result = transactions().run(
-                () -> ReplaySession.run(session, () -> UIMessages.withDisplayer(interactions, () -> body.apply(original))),
+                () -> ReplaySession.run(session, () -> UIMessages.withDisplayer(interactions,
+                        () -> UIFacades.with(FileTransfer.class, new ReplayFileTransfer(session), () -> body.apply(original)))),
                 () -> !interactions.isPending());
 
         if (interactions.isPending()) {
@@ -92,11 +98,23 @@ public final class ReplayExecutor {
         var last = notifications.isEmpty() ? null : notifications.get(notifications.size() - 1);
         var done = last == null ? ActionFlowStep.done(result) : ActionFlowStep.done(result, last.message(), last.type());
         var response = ActionFlows.toResponse(flowId, actionId, Map.of(), done);
-        if (!notifications.isEmpty()) {
+        var downloads = session.downloads();
+        if (!notifications.isEmpty() || !downloads.isEmpty()) {
             var params = new HashMap<String, Object>();
-            params.put(NOTIFICATIONS_PARAM, notifications.stream()
-                    .map(n -> Map.of("message", String.valueOf(n.message()), "type", String.valueOf(n.type())))
-                    .toList());
+            if (!notifications.isEmpty()) {
+                params.put(NOTIFICATIONS_PARAM, notifications.stream()
+                        .map(n -> Map.of("message", String.valueOf(n.message()), "type", String.valueOf(n.type())))
+                        .toList());
+            }
+            if (!downloads.isEmpty()) {
+                params.put(DOWNLOADS_PARAM, downloads.stream().map(d -> {
+                    var file = new LinkedHashMap<String, Object>();
+                    file.put("name", d.name());
+                    file.put("contentType", d.contentType());
+                    file.put("content", Base64.getEncoder().encodeToString(d.content()));
+                    return file;
+                }).toList());
+            }
             response.setParams(params);
         }
         return response;
