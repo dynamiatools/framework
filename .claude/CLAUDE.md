@@ -73,6 +73,13 @@ Monorepo: Maven reactor (Java, `tools.dynamia.*`) + pnpm workspace (TS, `@dynami
 
 ---
 
+## Language
+
+Everything in this repository is written in **English**: code, Javadoc, comments, `docs/`, commit messages, branch
+names, issues and pull requests (title and body). Only the user-facing conversation may be in Spanish.
+
+---
+
 ## Coding Guidelines
 
 - Code must be **clean, modular, and reusable**.
