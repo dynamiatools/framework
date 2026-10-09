@@ -97,7 +97,11 @@
   @apply flex items-center gap-2;
 }
 .dynamia-cool-label-image {
-  @apply h-8 w-8 rounded object-cover;
+  @apply h-8 w-8 shrink-0 rounded object-cover;
+}
+.dynamia-cool-label-avatar {
+  @apply flex items-center justify-center rounded-full text-sm font-medium text-white;
+  background-color: var(--skin-primary);
 }
 .dynamia-cool-label-content {
   @apply flex flex-col;
@@ -470,4 +474,23 @@
 }
 .dynamia-star-rating-confirm:disabled {
   @apply cursor-not-allowed opacity-50;
+}
+
+/* ── Entity reference multi picker (collections) ───────────────────────────── */
+
+.dynamia-entity-ref-multi {
+  @apply relative flex flex-col gap-1;
+}
+.dynamia-entity-ref-multi-chips {
+  @apply flex flex-wrap gap-1;
+}
+.dynamia-entity-ref-multi-chip {
+  @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs text-gray-800 dark:text-white/90;
+  background-color: var(--skin-primary-soft);
+}
+.dynamia-entity-ref-multi-remove {
+  @apply text-gray-500 hover:text-red-500;
+}
+.dynamia-entity-ref-multi .dynamia-entity-ref-picker-dropdown {
+  @apply top-full left-0;
 }

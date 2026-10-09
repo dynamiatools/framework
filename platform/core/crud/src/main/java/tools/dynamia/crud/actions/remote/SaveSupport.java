@@ -133,8 +133,13 @@ final class SaveSupport {
             node.properties().forEach(entry -> {
                 Field field = descriptor.getField(entry.getKey());
                 if (field != null) {
-                    Object fieldValue = JsonViewDescriptorDeserializer.getNodeValue(field.getPropertyInfo(), entry.getValue());
-                    ObjectOperations.invokeSetMethod(entity, field.getPropertyInfo(), fieldValue);
+                    var info = field.getPropertyInfo();
+                    if (info != null && info.isCollection()) {
+                        JsonViewDescriptorDeserializer.applyCollectionPatch(entity, info, entry.getValue());
+                        return;
+                    }
+                    Object fieldValue = JsonViewDescriptorDeserializer.getNodeValue(info, entry.getValue());
+                    ObjectOperations.invokeSetMethod(entity, info, fieldValue);
                 }
             });
         } catch (JacksonException e) {

@@ -190,6 +190,10 @@ public class JsonViewDescriptorDeserializer extends StdDeserializer<Object> {
     private void processCollectionField(Object object, Field field, PropertyInfo fieldInfo,
                                         JsonNode fieldNode, Class<?> parentType) {
         Collection<Object> collection = getOrCreateCollection(object, fieldInfo);
+        if (isReferenceCollection(field, fieldInfo, parentType)) {
+            replaceWithReferences(collection, fieldInfo.getGenericType(), fieldNode);
+            return;
+        }
         ViewDescriptor collectionDescriptor = resolveCollectionDescriptor(fieldInfo.getGenericType());
         String parentName = resolveParentName(field, fieldInfo, parentType);
 
@@ -198,6 +202,37 @@ public class JsonViewDescriptorDeserializer extends StdDeserializer<Object> {
             ObjectOperations.invokeSetMethod(item, parentName, object);
             collection.add(item);
         }
+    }
+
+    /**
+     * A collection of references (e.g. a many-to-many {@code Set<Genre>}) holds entities that already exist and have no
+     * property pointing back to the owner, unlike the items of a one-to-many detail that are created with their parent.
+     */
+    private boolean isReferenceCollection(Field field, PropertyInfo fieldInfo, Class<?> parentType) {
+        Class<?> itemType = fieldInfo.getGenericType();
+        if (field.getParams().get("parentName") != null || itemType == null || !DomainUtils.isEntity(itemType)) {
+            return false;
+        }
+        return ObjectOperations.getPropertiesInfo(itemType).stream()
+                .noneMatch(info -> ObjectOperations.isAssignable(info.getType(), parentType));
+    }
+
+    /**
+     * Makes the collection hold exactly the existing entities referenced by the {@code id} of each JSON item.
+     */
+    private void replaceWithReferences(Collection<Object> collection, Class<?> itemType, JsonNode fieldNode) {
+        List<Object> references = new ArrayList<>();
+        for (JsonNode child : fieldNode) {
+            JsonNode id = child.get("id");
+            if (id != null && !id.isNull()) {
+                Object reference = DomainUtils.lookupCrudService().find(itemType, id.asLong());
+                if (reference != null) {
+                    references.add(reference);
+                }
+            }
+        }
+        collection.clear();
+        collection.addAll(references);
     }
 
     @SuppressWarnings("unchecked")
@@ -238,6 +273,45 @@ public class JsonViewDescriptorDeserializer extends StdDeserializer<Object> {
             ViewDescriptor descriptor = Viewers.findViewDescriptor(type, "json-form");
             return descriptor != null ? descriptor : Viewers.getViewDescriptor(type, "form");
         });
+    }
+
+    /**
+     * Applies a collection field of a patch onto an existing entity. Only a many-to-many association of entities is
+     * replaced, with the entities whose {@code id} the JSON array lists. Any other collection (owned children, element
+     * collections) is left untouched: {@link #getNodeValue} cannot build it, and setting {@code null} would wipe the
+     * current children.
+     *
+     * @param entity the entity being patched
+     * @param info   the collection property
+     * @param node   the JSON value of the property
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void applyCollectionPatch(Object entity, PropertyInfo info, JsonNode node) {
+        if (!node.isArray() || !isManyToMany(info) || !DomainUtils.isEntity(info.getGenericType())) {
+            return;
+        }
+        Collection<Object> items = Set.class.isAssignableFrom(info.getType()) ? new LinkedHashSet<>() : new ArrayList<>();
+        for (JsonNode item : node) {
+            var id = item.get("id");
+            if (id != null && !id.isNull()) {
+                Object related = DomainUtils.lookupCrudService().find((Class) info.getGenericType(), id.asLong());
+                if (related != null) {
+                    items.add(related);
+                }
+            }
+        }
+        ObjectOperations.invokeSetMethod(entity, info, items);
+    }
+
+    private static boolean isManyToMany(PropertyInfo info) {
+        var annotations = new ArrayList<java.lang.annotation.Annotation>();
+        if (info.getField() != null) {
+            annotations.addAll(Arrays.asList(info.getField().getAnnotations()));
+        }
+        if (info.getReadMethod() != null) {
+            annotations.addAll(Arrays.asList(info.getReadMethod().getAnnotations()));
+        }
+        return annotations.stream().anyMatch(a -> "ManyToMany".equals(a.annotationType().getSimpleName()));
     }
 
     public static Object getNodeValue(PropertyInfo fieldInfo, JsonNode fieldNode) {

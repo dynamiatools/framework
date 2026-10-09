@@ -90,6 +90,12 @@ export function useCrudPage(options: UseCrudPageOptions) {
       // 3. CRUD resource API bound to the node's virtual path
       const api = client.crud(context.virtualPath);
 
+      // The list rows carry only the table columns: load the complete entity when editing starts.
+      crudView.setEntityLoader(async (row) => {
+        const id = (row as Record<string, unknown>)['id'] as string | number | undefined;
+        return id == null ? row : api.findById(id);
+      });
+
       // 4. Wire loader according to the resolved dataset view type.
       if (crudView.tableView) {
         crudView.tableView.setLoader(async (params) => {

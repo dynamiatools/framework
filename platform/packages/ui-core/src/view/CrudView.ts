@@ -150,11 +150,42 @@ export class CrudView extends View {
     this.emit('mode-change', 'create');
   }
 
-  /** Start editing an existing entity */
+  /**
+   * Sets a loader that fetches the complete entity when editing starts. The rows of a list usually carry only
+   * the columns of the table view (no relations such as a many-to-one or a many-to-many), so the form would
+   * open without them.
+   */
+  setEntityLoader(loader: ((entity: unknown) => Promise<unknown>) | null): void {
+    this.entityLoader = loader;
+  }
+
+  private entityLoader: ((entity: unknown) => Promise<unknown>) | null = null;
+
+  /**
+   * Start editing an existing entity. The form opens at once with the given row; when an entity loader is set
+   * the complete entity replaces it as soon as it arrives (unless the user already left that edition).
+   */
   startEdit(entity: unknown): void {
     this.formView.setValue(entity);
     this.state.mode = 'edit';
     this.emit('mode-change', 'edit');
+
+    const loader = this.entityLoader;
+    if (loader) {
+      loader(entity)
+        .then(full => {
+          if (full && this.state.mode === 'edit' && this.isSameEntity(entity, full)) {
+            this.formView.setValue(full);
+          }
+        })
+        .catch(() => { /* keep the row already shown in the form */ });
+    }
+  }
+
+  private isSameEntity(a: unknown, b: unknown): boolean {
+    const idA = (a as Record<string, unknown> | null)?.['id'];
+    const idB = (b as Record<string, unknown> | null)?.['id'];
+    return idA == null || idB == null || idA === idB;
   }
 
   /** Cancel edit / create and return to list */
