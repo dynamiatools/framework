@@ -16,6 +16,8 @@
 package tools.dynamia.modules.reports.ui;
 
 import tools.dynamia.crud.CrudPage;
+import tools.dynamia.modules.reports.core.ReportsUi;
+import tools.dynamia.modules.reports.core.navigation.ReportViewerPage;
 import tools.dynamia.navigation.Module;
 import tools.dynamia.navigation.Page;
 import tools.dynamia.modules.reports.core.domain.Report;
@@ -23,7 +25,8 @@ import tools.dynamia.modules.reports.core.domain.ReportDataSourceConfig;
 import tools.dynamia.modules.reports.core.domain.ReportGroup;
 
 /**
- * Helper module to configure DynamiaReports very easy
+ * Helper module to configure DynamiaReports very easy. The viewer page depends on {@link ReportsUi}: a
+ * {@link ReportViewerPage} for the Vue front (default) or a plain ZK page.
  */
 public class DynamiaReportsModule extends Module {
     private Page reportDesignPage;
@@ -31,17 +34,32 @@ public class DynamiaReportsModule extends Module {
     private Page reportGroupsPage;
     private Page reportDatasourcesPage;
 
+    /**
+     * Creates the module at the last position.
+     * 
+     * @param id          module id
+     * @param name        module name
+     * @param description module description
+     */
     public DynamiaReportsModule(String id, String name, String description) {
         this(id, name, description, Double.MAX_VALUE);
     }
 
+    /**
+     * Creates the module with groups, design, datasources and viewer pages.
+     * 
+     * @param id          module id
+     * @param name        module name
+     * @param description module description
+     * @param position    position in the navigation
+     */
     public DynamiaReportsModule(String id, String name, String description, double position) {
         super(id, name, description);
 
         this.reportGroupsPage = new CrudPage("groups", "Reports Groups", ReportGroup.class);
         this.reportDesignPage = new CrudPage("design", "Reports Design", Report.class);
         this.reportDatasourcesPage = new CrudPage("datasources", "Reports Datasource", ReportDataSourceConfig.class);
-        this.reportViewerPage = new Page("viewer", "Reports Viewer", "classpath:/zk/dynamia/reports/pages/viewer.zul");
+        this.reportViewerPage = createViewerPage();
 
 
         addPage(reportGroupsPage);
@@ -52,18 +70,38 @@ public class DynamiaReportsModule extends Module {
         setPosition(position);
     }
 
+    private static Page createViewerPage() {
+        String legacyPath = "classpath:/zk/dynamia/reports/pages/viewer.zul";
+        if (ReportsUi.current() == ReportsUi.VUE) {
+            return new ReportViewerPage("viewer", "Reports Viewer", legacyPath);
+        }
+        return new Page("viewer", "Reports Viewer", legacyPath);
+    }
+
+    /**
+     * @return the page that manages report groups
+     */
     public Page getReportGroupsPage() {
         return reportGroupsPage;
     }
 
+    /**
+     * @return the page that designs reports
+     */
     public Page getReportDesignPage() {
         return reportDesignPage;
     }
 
+    /**
+     * @return the page that manages external datasources
+     */
     public Page getReportDatasourcesPage() {
         return reportDatasourcesPage;
     }
 
+    /**
+     * @return the page that lists and runs reports
+     */
     public Page getReportViewerPage() {
         return reportViewerPage;
     }

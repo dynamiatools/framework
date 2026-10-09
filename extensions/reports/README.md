@@ -38,6 +38,41 @@ Additional module for  create and connect to external datasources. Mainly SQL da
 ### Boot module
 A spring boot application to run DynamiaReports as a standalone app.
 
+## Front end
+
+The navigation pages of the module follow `dynamia.reports.ui`:
+
+| value | behaviour |
+|---|---|
+| `vue` (default) | The viewer page is a `ReportViewerPage` (type `ReportViewerPage` in the navigation API). A Vue shell renders it natively; the ZK shell still opens its legacy view. |
+| `zk` | Legacy behaviour: a plain page that renders the ZK viewer. A Vue shell embeds it with its ZK bridge. |
+
+The `core` module has no ZK dependency and contains the whole backend (domain, services, REST API, exports,
+`DynamiaReportsModule`). The `ui` module is the legacy ZK front end (`ReportViewer`, `ReportPage`, actions); existing
+applications keep depending on it unchanged. The design pages (groups, reports, datasources) are CRUD pages and work
+in both shells.
+
+## REST API for UIs
+
+`/api/reports/v2` serves any front end. The caller must be authenticated; only active reports of the current account
+(and the system account) that pass the access policies are visible, anything else answers `404`/`403`. Errors use the
+platform `ErrorResult`.
+
+| endpoint | purpose |
+|---|---|
+| `GET /api/reports/v2/catalog` | Groups with their reports |
+| `GET /api/reports/v2/{id}` | Definition: summary, filters (type, required, options source), declared columns, charts, export formats |
+| `GET /api/reports/v2/{id}/filters/{filter}/options?q=&limit=` | Options of enum, entity (only entities published by an `EntityFilterProvider`), query and static filters |
+| `POST /api/reports/v2/{id}/run` | Body `{filters, page, size, sort, direction}`. Returns `{columns, rows, total, page, size, truncated, durationMs, charts}` |
+| `POST /api/reports/v2/{id}/export?format=xlsx\|csv\|pdf` | Same body; downloads the file. `X-Report-Truncated: true` when the row limit was reached |
+
+Filter values are sent by filter name: text, number, boolean, date `yyyy-MM-dd`, date time `yyyy-MM-dd HH:mm:ss`,
+time `HH:mm:ss`, enum name or entity id. Values in rows are plain JSON (dates as ISO text, enums by name, other objects
+as text). Chart data follows the Chart.js structure (`labels` and `datasets`). CSV cells that start with `=`, `+`, `-`
+or `@` are prefixed with `'` so spreadsheets do not run them.
+
+The older `/api/reports/{group}/{endpoint}` endpoints keep working for existing integrations.
+
 ## Security and limits
 
 Reports run user-defined queries, so execution is restricted:
@@ -59,6 +94,7 @@ Reports run user-defined queries, so execution is restricted:
   report in the catalog, the REST API and the viewer. The default policy checks `HttpServletRequest.isUserInRole`;
   register a `ReportAccessPolicy` bean to apply your own rules (all policies must allow). A report with roles is denied
   when no request is available to evaluate them.
+- **Front end.** `dynamia.reports.ui` selects `vue` (default) or `zk`, see above.
 - **Caches.** Report lists are cached per account.
 - **REST errors.** Errors use the platform `ErrorResult`; unexpected failures return a generic message plus a
   `details.reference` id that is also written to the server log.

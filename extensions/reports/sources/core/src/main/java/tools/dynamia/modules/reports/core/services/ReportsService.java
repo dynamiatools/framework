@@ -32,7 +32,16 @@ public interface ReportsService {
      * @return Result of the report execution
      */
     default ReportData execute(Report report, ReportFilters filters) {
-        return execute(report, filters, tools.dynamia.modules.reports.core.ReportsUtils.findDatasource(report));
+        return execute(report, filters, datasource(report));
+    }
+
+    /**
+     * Resolves the datasource a report runs on: its configured external datasource, or the application database.
+     * @param report the report
+     * @return the datasource
+     */
+    default ReportDataSource datasource(Report report) {
+        return tools.dynamia.modules.reports.core.ReportsUtils.findDatasource(report);
     }
 
     /**

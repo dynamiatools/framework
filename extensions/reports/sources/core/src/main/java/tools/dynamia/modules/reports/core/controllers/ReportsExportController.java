@@ -4,33 +4,36 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.modules.reports.api.ReportDTO;
 import tools.dynamia.modules.reports.core.NestedMapReportDataExporter;
 import tools.dynamia.modules.reports.core.ReportFilterOption;
+import tools.dynamia.modules.reports.core.ReportFilterValues;
 import tools.dynamia.modules.reports.core.ReportFilters;
 import tools.dynamia.modules.reports.core.domain.Report;
-import tools.dynamia.modules.reports.core.domain.ReportFilter;
 import tools.dynamia.modules.reports.core.security.ReportAccess;
 import tools.dynamia.modules.reports.core.security.ReportAccessDeniedException;
 import tools.dynamia.modules.reports.core.services.ReportsService;
 import tools.dynamia.web.navigation.ErrorResult;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Original export endpoints: one URL per report ({@code /api/reports/{group}/{endpoint}}) for reports published with
+ * {@code exportEndpoint}. Kept for existing integrations; UIs should use {@link ReportsApiController}.
+ */
 @RestController
 @RequestMapping(value = "/api/reports", produces = "application/json")
 public class ReportsExportController {
 
-    public static final String DATE_FORMAT = "yyyy-MM-dd";
-    public static final String DATA_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    public static final String TIME_FORMAT = "HH:mm:ss";
+    public static final String DATE_FORMAT = ReportFilterValues.DATE_FORMAT;
+    public static final String DATA_TIME_FORMAT = ReportFilterValues.DATE_TIME_FORMAT;
+    public static final String TIME_FORMAT = ReportFilterValues.TIME_FORMAT;
     private static final LoggingService LOGGER = LoggingService.get(ReportsExportController.class);
     private final ReportsService reportsService;
 
@@ -82,8 +85,8 @@ public class ReportsExportController {
 
             ReportAccess.check(report);
 
-            var loadedFilters = loadFilters(report, filters);
-            validateFilters(report, loadedFilters);
+            var loadedFilters = ReportFilterValues.load(report, rawValues(filters));
+            ReportFilterValues.validateRequired(report, loadedFilters);
 
             var reportData = reportsService.execute(report, loadedFilters);
             var map = new NestedMapReportDataExporter().export(reportData);
@@ -107,97 +110,15 @@ public class ReportsExportController {
         return ResponseEntity.status(status).body(new ErrorResult(status.value(), code, message, request.getRequestURI()));
     }
 
-    private void validateFilters(Report report, ReportFilters loadedFilters) {
-        List<ReportFilter> requiredFilters = report.getRequiredFilters();
-        if (requiredFilters != null && !requiredFilters.isEmpty()) {
-
-            if (loadedFilters.isEmpty()) {
-                throw new ValidationError("Filters Required:" + requiredFilters);
-            }
-
-            requiredFilters.forEach(f -> {
-                if (!loadedFilters.exists(f.getName())) {
-                    throw new ValidationError("Filter Required [" + f.getName() + "] of type [" + f.getDataType() + "] " + expectedFormat(f));
-                }
-            });
-        }
-    }
-
-    private ReportFilters loadFilters(Report report, ReportFilters requestFilters) {
-        ReportFilters loaded = new ReportFilters();
+    private static Map<String, Object> rawValues(ReportFilters requestFilters) {
+        Map<String, Object> raw = new LinkedHashMap<>();
         if (requestFilters != null) {
-            requestFilters.getOptions().forEach(reqOpt -> {
-                if (reqOpt.getValue() != null) {
-                    report.getFilters().stream().filter(f -> f.getName().equals(reqOpt.getName()))
-                            .findFirst().ifPresent(f -> loaded.add(f, convertFilterValue(f, reqOpt.getValue())));
+            requestFilters.getOptions().forEach(option -> {
+                if (option.getName() != null && option.getValue() != null) {
+                    raw.put(option.getName(), option.getValue());
                 }
             });
         }
-        return loaded;
-    }
-
-    private Object convertFilterValue(ReportFilter filter, Object value) {
-        try {
-            Object converted = switch (filter.getDataType()) {
-                case BOOLEAN -> parseBoolean(value.toString());
-                case ENUM -> convertToEnum(filter.getEnumClassName(), value);
-                case NUMBER, CURRENCY -> new BigDecimal(value.toString());
-                case ENTITY -> convertToEntity(filter.getEntityClassName(), value);
-                case DATE -> DateTimeUtils.parse(value.toString(), DATE_FORMAT);
-                case DATE_TIME -> DateTimeUtils.parse(value.toString(), DATA_TIME_FORMAT);
-                case TIME -> DateTimeUtils.parse(value.toString(), TIME_FORMAT);
-                case TEXT -> value.toString();
-            };
-            if (converted == null) {
-                throw new IllegalArgumentException("Cannot convert value");
-            }
-            return converted;
-        } catch (Exception e) {
-            throw new ValidationError("Invalid value for filter [" + filter.getName() + "] of type [" + filter.getDataType() + "] "
-                    + expectedFormat(filter));
-        }
-    }
-
-    private static Boolean parseBoolean(String value) {
-        if ("true".equalsIgnoreCase(value)) {
-            return Boolean.TRUE;
-        } else if ("false".equalsIgnoreCase(value)) {
-            return Boolean.FALSE;
-        }
-        throw new IllegalArgumentException("Not a boolean");
-    }
-
-    private String expectedFormat(ReportFilter f) {
-        return switch (f.getDataType()) {
-            case BOOLEAN -> "(true or false)";
-            case CURRENCY, NUMBER -> "(a number)";
-            case ENUM -> "(one of " + Arrays.toString(listEnumValues(f.getEnumClassName())) + ")";
-            case ENTITY -> "(id)";
-            case DATE -> "(with format " + DATE_FORMAT + ")";
-            case DATE_TIME -> "(with format " + DATA_TIME_FORMAT + ")";
-            case TIME -> "(with format " + TIME_FORMAT + ")";
-            case TEXT -> "";
-        };
-    }
-
-    private Object convertToEntity(String entityClassName, Object value) throws ClassNotFoundException {
-        try {
-            return Long.parseLong(value.toString());
-        } catch (Exception e) {
-            return value;
-        }
-    }
-
-    private Object convertToEnum(String enumClassName, Object value) throws ClassNotFoundException {
-        return Enum.valueOf((Class<Enum>) Class.forName(enumClassName), value.toString());
-    }
-
-    private Enum[] listEnumValues(String enumClassName) {
-        try {
-            return (Enum[]) Class.forName(enumClassName).getEnumConstants();
-        } catch (Exception e) {
-            return new Enum[]{};
-        }
-
+        return raw;
     }
 }
