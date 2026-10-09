@@ -73,6 +73,11 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
 
     @Override
     public ReportData execute(Report report, ReportFilters filters, ReportDataSource datasource) {
+        return execute(report, filters, datasource, settings.getMaxRows());
+    }
+
+    @Override
+    public ReportData execute(Report report, ReportFilters filters, ReportDataSource datasource, int maxRows) {
         ReportAccess.check(report);
         String lang = report.getQueryLang() == null ? "" : report.getQueryLang().toLowerCase();
         if (!"sql".equals(lang) && !"jpql".equals(lang)) {
@@ -84,7 +89,7 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
         log("Executing query for report: " + report.getName() + " - " + lang);
         long start = System.currentTimeMillis();
         loadDefaultFilters(report, filters);
-        ReportData data = "sql".equals(lang) ? executeSQL(report, filters, datasource) : executeJPQL(report, filters, datasource);
+        ReportData data = "sql".equals(lang) ? executeSQL(report, filters, datasource, maxRows) : executeJPQL(report, filters, datasource, maxRows);
         long end = System.currentTimeMillis();
         log("Report " + report.getName() + " executed in " + (end - start) + "ms" + (data.isTruncated() ? " (truncated)" : ""));
         return data;
@@ -122,9 +127,8 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
         return report;
     }
 
-    private ReportData executeSQL(Report report, ReportFilters filters, ReportDataSource dataSource) {
+    private ReportData executeSQL(Report report, ReportFilters filters, ReportDataSource dataSource, int maxRows) {
         String sql = ReportQueryValidator.validateQuery(ReportQueryBuilder.build(report.getQueryScript(), filters), "sql");
-        int maxRows = settings.getMaxRows();
 
         try (Connection connection = ReportsUtils.getJdbcConnection(dataSource)) {
             setReadOnly(connection, true);
@@ -161,9 +165,8 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
         }
     }
 
-    private ReportData executeJPQL(Report report, ReportFilters filters, ReportDataSource dataSource) {
+    private ReportData executeJPQL(Report report, ReportFilters filters, ReportDataSource dataSource, int maxRows) {
         String jpql = ReportQueryValidator.validateQuery(ReportQueryBuilder.build(report.getQueryScript(), filters), "jpql");
-        int maxRows = settings.getMaxRows();
         boolean ownsEntityManager = dataSource.getDelegate() instanceof EntityManagerFactory;
         EntityManager em = ReportsUtils.getJpaEntityManager(dataSource);
         try {

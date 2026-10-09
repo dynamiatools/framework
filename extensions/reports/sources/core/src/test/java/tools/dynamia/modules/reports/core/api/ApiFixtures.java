@@ -67,6 +67,11 @@ public final class ApiFixtures {
         }
 
         @Override
+        public ReportData execute(Report report, ReportFilters filters, ReportDataSource datasource, int maxRows) {
+            return delegate.execute(report, filters, datasource, maxRows);
+        }
+
+        @Override
         public ReportDataSource datasource(Report report) {
             return new ReportDataSource("test", db);
         }
@@ -96,14 +101,23 @@ public final class ApiFixtures {
             throw new UnsupportedOperationException();
         }
 
+        public String lastImported;
+
         @Override
         public File exportReport(Report report) {
-            throw new UnsupportedOperationException();
+            return delegate.exportReport(report);
         }
 
         @Override
         public Report importReport(File file) {
-            throw new UnsupportedOperationException();
+            try {
+                lastImported = java.nio.file.Files.readString(file.toPath());
+            } catch (java.io.IOException e) {
+                throw new IllegalStateException(e);
+            }
+            var imported = new Report();
+            imported.setId(99L);
+            return imported;
         }
 
         @Override

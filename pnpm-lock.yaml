@@ -175,6 +175,52 @@ importers:
         specifier: ^4.1.11
         version: 4.1.11(@types/node@26.4.1)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.2.2(@types/node@26.4.1)(jiti@2.7.0))
 
+  extensions/reports/packages/reports-vue:
+    dependencies:
+      '@dynamia-tools/reports-sdk':
+        specifier: workspace:*
+        version: link:../reports-sdk
+    devDependencies:
+      '@dynamia-tools/sdk':
+        specifier: workspace:*
+        version: link:../../../../platform/packages/sdk
+      '@dynamia-tools/vue':
+        specifier: workspace:*
+        version: link:../../../../platform/packages/vue
+      '@types/node':
+        specifier: ^26.4.1
+        version: 26.4.1
+      '@vitejs/plugin-vue':
+        specifier: ^6.0.8
+        version: 6.0.9(vite@8.3.0(@types/node@26.4.1)(jiti@2.7.0))(vue@3.5.43(typescript@6.0.3))
+      '@vue/test-utils':
+        specifier: ^2.4.6
+        version: 2.5.1(@vue/compiler-dom@3.5.43)(@vue/server-renderer@3.5.43)(vue@3.5.43(typescript@6.0.3))
+      chart.js:
+        specifier: ^4.4.0
+        version: 4.5.1
+      happy-dom:
+        specifier: ^20.14.5
+        version: 20.14.5
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vite:
+        specifier: ^8.2.2
+        version: 8.3.0(@types/node@26.4.1)(jiti@2.7.0)
+      vite-plugin-dts:
+        specifier: ^5.1.0
+        version: 5.1.0(@vue/language-core@3.3.11)(rolldown@1.2.7)(typescript@6.0.3)(vite@8.3.0(@types/node@26.4.1)(jiti@2.7.0))
+      vitest:
+        specifier: ^4.1.11
+        version: 4.1.11(@types/node@26.4.1)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@26.4.1)(jiti@2.7.0))
+      vue:
+        specifier: ^3.5.43
+        version: 3.5.43(typescript@6.0.3)
+      vue-tsc:
+        specifier: ^2.2.12
+        version: 2.2.12(typescript@6.0.3)
+
   extensions/saas/packages/saas-sdk:
     devDependencies:
       '@dynamia-tools/sdk':

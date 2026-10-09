@@ -77,7 +77,7 @@ State of the separation:
 | entity-files | config page provider, cache action, 4 descriptors | field customizers, file actions, explorer controller, icons, components |
 | email-sms | provider, listener, action, all descriptors | OTP dialog, test/preview actions |
 | http-functions | provider, descriptors | test action |
-| reports | 12 descriptors | module classes with a zul viewer page, user module, viewer, crud controller |
+| reports | `reports-core`: domain, services, REST API, exports, module classes, dashboard widget, 12 descriptors | `reports-ui`: ZK viewer, user module, report page, actions, crud controller |
 | dashboard | `dashboard-core`: widget contract, context, REST endpoint | `dashboard-zk`: `Dashboard`, renderer, ZK widgets |
 | file-importer | - | everything (the whole module is ZK UI) |
 
@@ -678,115 +678,85 @@ public class DashboardModuleProvider implements ModuleProvider {
 
 ## Reports Extension
 
-**Artifact ID**: `tools.dynamia.reports.core`
+**Artifacts**: `tools.dynamia.modules.reports.api` (DTOs, filter providers), `tools.dynamia.modules.reports.core`
+(domain, services, REST API, exports; no ZK) and `tools.dynamia.modules.reports.ui` (the legacy ZK front end).
 
-**Purpose**: Advanced reporting framework with multiple export formats and visualization.
+**Purpose**: Reports defined as data: a SQL or JPQL query stored in the database, with filters, columns and charts,
+run by any front end. Multi-tenant (reports belong to an account, the system account shares its reports).
 
 ### Key Features
 
-- **Query Builders**: JPQL and native SQL
-- **Export Formats**: CSV, Excel, PDF
-- **Charts**: Built-in chart support
-- **Templates**: Reusable report templates
-- **Scheduling**: Scheduled report generation
-- **Email Delivery**: Send reports via email
-- **Caching**: Performance optimization
+- **Queries**: SQL (application database or an external datasource) and JPQL, with named parameters bound from filters.
+- **Filters**: text, number, boolean, date, date time, time, enum, entity, query and static options.
+- **Outputs**: table with paging and sorting, Chart.js charts, export to xlsx, csv and pdf.
+- **Safe execution**: read-only single `SELECT`, read-only connection, timeout and row limit, validated on save and on run.
+- **Authorization**: `Report.accessRoles` plus pluggable `ReportAccessPolicy` beans.
+- **Dashboards**: the `report` widget shows a report, a chart or a KPI in any dashboard.
 
-### Adding the Dependency
+### Modules and fronts
 
-```xml
-<dependency>
-    <groupId>tools.dynamia.reports</groupId>
-    <artifactId>tools.dynamia.reports.core</artifactId>
-    <version>26.3.2</version>
-</dependency>
+| Module | Contents |
+|---|---|
+| `reports.api` | `EntityFilterProvider`, `EnumFilterProvider`, the DTOs of the UI API (`api.v2` records) |
+| `reports.core` | Entities, `ReportsService`, `ReportsApiService`, REST controllers, exporters, `DynamiaReportsModule`, `ReportDashboardWidget`. No ZK on the classpath. |
+| `reports.ui` | Legacy ZK front end: `ReportViewer`, `ReportPage`, actions, designer customizers |
+| `@dynamia-tools/reports-sdk` | Typed TypeScript client |
+| `@dynamia-tools/reports-vue` | Vue 3 list, viewer, designer and dashboard renderer |
+
+`dynamia.reports.ui` chooses what the navigation pages are: `vue` (default) makes the viewer page a `ReportViewerPage`
+that a Vue shell renders natively (the ZK shell still opens its legacy view); `zk` keeps a plain ZK page, which a Vue
+shell embeds with its ZK bridge. The design pages are CRUD pages and work in both shells.
+
+### REST API
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/reports/v2/catalog` | Reports the user can run, grouped |
+| `GET /api/reports/v2/{id}` | Filters, declared columns, charts, export formats |
+| `GET /api/reports/v2/{id}/filters/{filter}/options` | Options of enum, entity, query and static filters |
+| `POST /api/reports/v2/{id}/run` | Run with filters, paging and sorting; returns columns, rows, total, truncation flag and chart data |
+| `POST /api/reports/v2/{id}/export?format=xlsx\|csv\|pdf` | Download the whole result as a file |
+| `/api/reports/v2/design/**` | Designer tools (query preview, definition import/export, datasource test) for designer roles only |
+| `/api/reports/{group}/{endpoint}` | Original endpoints for reports published with `exportEndpoint`, kept for existing integrations |
+
+All endpoints require an authenticated user and use `ErrorResult` for errors. Details and examples are in the
+extension README.
+
+### Settings
+
+| Property | Default | Meaning |
+|---|---|---|
+| `dynamia.reports.ui` | `vue` | Front end of the navigation pages, `vue` or `zk` |
+| `dynamia.reports.max-rows` | `100000` | Rows after which a result is truncated |
+| `dynamia.reports.query-timeout` | `60` | Query timeout, seconds |
+| `dynamia.reports.allowed-drivers` | MySQL, MariaDB, PostgreSQL, Oracle, SQL Server | JDBC drivers allowed in external datasources |
+| `dynamia.reports.encryption-key` | empty | Encrypts datasource passwords at rest |
+| `dynamia.reports.designer-roles` | empty | Roles allowed to use the designer API; nobody by default |
+| `dynamia.reports.preview-limit` | `50` | Rows of a query preview |
+
+### Dashboard widget
+
+`ReportDashboardWidget` (widget id `report`) is registered with `@InstallDashboardWidget`. In a dashboard descriptor:
+
+```yaml
+fields:
+  salesByRegion:
+    params:
+      widget: report
+      report: Sales by region     # name or id
+      display: chart              # table (default), chart or kpi
+      filters.year: 2026
 ```
 
-### Creating Reports
+`chart` and `kpi` reuse the standard `chart` and `kpi` renderers; `table` serves the `report` widget type, drawn by
+`registerReportWidget()` from `@dynamia-tools/reports-vue`. The widget runs the report through `ReportsApiService`, so
+account scoping, access policies and row limits apply.
 
-#### 1. Simple Report
+### Extending
 
-```java
-@Service
-public class ContactListReportService {
-    
-    private final ReportService reportService;
-    
-    public Report generateContactReport() {
-        Report report = new Report();
-        report.setName("contact-list");
-        report.setTitle("All Contacts");
-        report.setQuery("SELECT c FROM Contact c ORDER BY c.name");
-        
-        report.addColumn("id", "ID");
-        report.addColumn("name", "Name");
-        report.addColumn("email", "Email");
-        report.addColumn("company.name", "Company");
-        
-        return report;
-    }
-}
-```
-
-#### 2. Report with Filtering
-
-```java
-@Service
-public class FilteredReportService {
-    
-    private final ReportService reportService;
-    
-    public Report generateActiveContactsReport(String city) {
-        Report report = new Report();
-        report.setName("active-contacts-by-city");
-        report.setTitle("Active Contacts in " + city);
-        
-        String query = "SELECT c FROM Contact c WHERE c.active = true AND c.city = :city";
-        report.setQuery(query);
-        report.addParameter("city", city);
-        
-        report.addColumn("name", "Name");
-        report.addColumn("email", "Email");
-        report.addColumn("phone", "Phone");
-        
-        return report;
-    }
-}
-```
-
-#### 3. Report Export
-
-```java
-@RestController
-@RequestMapping("/api/reports")
-public class ReportExportController {
-    
-    private final ReportService reportService;
-    
-    @GetMapping("/{reportId}/export")
-    public ResponseEntity<InputStreamResource> exportReport(
-            @PathVariable String reportId,
-            @RequestParam(defaultValue = "EXCEL") String format) {
-        
-        Report report = reportService.getReport(reportId);
-        byte[] data = reportService.export(report, ExportFormat.valueOf(format));
-        
-        return ResponseEntity.ok()
-            .header("Content-Disposition", "attachment; filename=\"" + report.getName() + "." + format.toLowerCase() + "\"")
-            .body(new InputStreamResource(new ByteArrayInputStream(data)));
-    }
-}
-```
-
-### When to Use Reports Extension
-
-- Business intelligence
-- Data export
-- Compliance reporting
-- Analytics dashboards
-- Scheduled report generation
-
----
+- `ReportAccessPolicy`: decide who can see and run a report (all policies must allow).
+- `ReportDesignerPolicy`: decide who can use the designer API (any policy that allows is enough).
+- `EnumFilterProvider` / `EntityFilterProvider`: publish the enums and entities that filters can use.
 
 ## Finance Framework
 

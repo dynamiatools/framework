@@ -14,6 +14,8 @@ import tools.dynamia.integration.sterotypes.Provider;
  *     datasources (a default list of common databases is used when empty).</li>
  *     <li>{@code dynamia.reports.ui}: front end of the navigation pages, {@code vue} (default) or {@code zk}
  *     (legacy), see {@link ReportsUi}.</li>
+ *     <li>{@code dynamia.reports.designer-roles}: roles allowed to use the designer API; nobody by default.</li>
+ *     <li>{@code dynamia.reports.preview-limit}: rows returned by a query preview (default 50).</li>
  *     <li>{@code dynamia.reports.encryption-key}: key used to encrypt datasource passwords at rest.</li>
  * </ul>
  */
@@ -29,6 +31,12 @@ public class ReportsSettings {
     @Value("${dynamia.reports.ui:vue}")
     private String ui = "vue";
 
+    @Value("${dynamia.reports.designer-roles:}")
+    private String designerRoles = "";
+
+    @Value("${dynamia.reports.preview-limit:50}")
+    private int previewLimit = 50;
+
     @Value("${dynamia.reports.allowed-drivers:}")
     private String allowedDrivers = "";
 
@@ -42,6 +50,35 @@ public class ReportsSettings {
     public void apply() {
         ReportSecrets.configure(encryptionKey);
         ReportDataSourceValidator.configureAllowedDrivers(allowedDrivers);
+    }
+
+    /**
+     * @return comma separated roles that can use the designer API (preview, import, export, datasource test); empty
+     * means nobody
+     */
+    public String getDesignerRoles() {
+        return designerRoles;
+    }
+
+    /**
+     * @param designerRoles comma separated roles allowed to design reports
+     */
+    public void setDesignerRoles(String designerRoles) {
+        this.designerRoles = designerRoles;
+    }
+
+    /**
+     * @return maximum rows a query preview returns
+     */
+    public int getPreviewLimit() {
+        return previewLimit;
+    }
+
+    /**
+     * @param previewLimit maximum rows a query preview returns
+     */
+    public void setPreviewLimit(int previewLimit) {
+        this.previewLimit = previewLimit;
     }
 
     /**
