@@ -11,7 +11,6 @@ extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfil
 extensions/http-functions/sources/ui/src/main/java/tools/dynamia/modules/functions/ui/actions/TestHttpFunctionAction.java
 extensions/reports/sources/ui/src/main/java/tools/dynamia/modules/reports/ui/actions/TestReportDatasourceAction.java
 extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/FilterAccountByRegionAction.java
-extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/NewAccountPaymentAction.java
 extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/ShowAccountAdminActions.java
 extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/ViewAccountLogAction.java
 extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/ViewAccountLogoAction.java

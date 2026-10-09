@@ -210,3 +210,20 @@ describe('runActionFlow UPLOAD and downloads', () => {
     expect(saveFile).toHaveBeenCalledWith(file);
   });
 });
+
+describe('runActionFlow DIALOG view class', () => {
+  it('fetches the view of step.viewClass instead of the entity of the request', async () => {
+    const dialog = flowResponse(step({ type: 'DIALOG', viewDescriptor: 'form', viewClass: 'x.AccountPayment', data: { amount: 5 } }));
+    const done = flowResponse(step({ type: 'DONE' }));
+    const { client: base, calls } = fakeClient({ main: [dialog, done] });
+    const getEntityView = vi.fn(async () => ({ id: 'form', fields: [], view: 'form' }));
+    const getEntity = vi.fn(async () => null);
+    const client = { ...(base as object), metadata: { getEntityView, getEntity } } as never;
+    const showFormDialog = vi.fn(async () => ({ amount: 10 }));
+
+    await runActionFlow(client, action, { dataType: 'x.Account' }, handlers({ showFormDialog }), 'x.Account');
+
+    expect(getEntityView).toHaveBeenCalledWith('x.AccountPayment', 'form');
+    expect(calls.main[1]!.data).toEqual({ amount: 10 });
+  });
+});

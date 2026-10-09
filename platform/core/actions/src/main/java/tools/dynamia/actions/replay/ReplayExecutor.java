@@ -86,7 +86,8 @@ public final class ReplayExecutor {
         Object result = transactions().run(
                 () -> ReplaySession.run(session, () -> UIMessages.withDisplayer(interactions,
                         () -> UIFacades.with(FileTransfer.class, new ReplayFileTransfer(session),
-                                () -> UIFacades.with(ProgressRunner.class, new ReplayProgressRunner(session), () -> body.apply(original))))),
+                                () -> UIFacades.with(ProgressRunner.class, new ReplayProgressRunner(session),
+                                        () -> bindAll(session, binders(), 0, () -> body.apply(original)))))),
                 () -> !interactions.isPending());
 
         if (interactions.isPending()) {
@@ -120,6 +121,18 @@ public final class ReplayExecutor {
             response.setParams(params);
         }
         return response;
+    }
+
+    private static List<ReplayBinder> binders() {
+        var found = Containers.get().findObjects(ReplayBinder.class);
+        return found == null ? List.of() : new ArrayList<>(found);
+    }
+
+    static <T> T bindAll(ReplaySession session, List<ReplayBinder> binders, int index, java.util.function.Supplier<T> work) {
+        if (index >= binders.size()) {
+            return work.get();
+        }
+        return binders.get(index).bind(session, () -> bindAll(session, binders, index + 1, work));
     }
 
     private static ReplayTransactions transactions() {

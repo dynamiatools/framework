@@ -255,6 +255,8 @@ export interface ActionFlowStep {
     messageType?: string;
     /** For `DIALOG`: name of the `ViewDescriptor` to render as a form. */
     viewDescriptor?: string;
+    /** For `DIALOG`: class name `viewDescriptor` belongs to, when it is not the entity the action runs on. */
+    viewClass?: string;
     data?: unknown;
     /** Opaque, signed — echo back verbatim as `ActionExecutionRequest.resumeToken` to continue the flow. */
     resumeToken?: string;

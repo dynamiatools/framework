@@ -272,13 +272,14 @@ async function renderDialogStep(
   if (!step.viewDescriptor) {
     throw new Error('runActionFlow: DIALOG flow step is missing "viewDescriptor"');
   }
-  if (!className) {
-    throw new Error('runActionFlow: DIALOG flow step requires a known entity class (dataType/className)');
+  const viewClass = step.viewClass ?? className;
+  if (!viewClass) {
+    throw new Error('runActionFlow: DIALOG flow step requires a known entity class (viewClass or dataType/className)');
   }
 
   const [descriptor, entityMetadata] = await Promise.all([
-    client.metadata.getEntityView(className, step.viewDescriptor),
-    client.metadata.getEntity(className).catch(() => null),
+    client.metadata.getEntityView(viewClass, step.viewDescriptor),
+    client.metadata.getEntity(viewClass).catch(() => null),
   ]);
 
   const view = new VueFormView(descriptor, entityMetadata);

@@ -48,6 +48,7 @@ public class ActionFlowStep implements Serializable {
     private String message;
     private MessageType messageType;
     private String viewDescriptor;
+    private String viewClass;
     private Object data;
     private String resumeToken;
 
@@ -84,6 +85,16 @@ public class ActionFlowStep implements Serializable {
         step.viewDescriptor = viewDescriptor;
         step.data = data;
         step.title = title;
+        return step;
+    }
+
+    /**
+     * Same as {@link #dialog(String, Object, String)} for a form of {@code viewClass}, which may differ from the entity
+     * the action runs on.
+     */
+    public static ActionFlowStep dialog(String viewDescriptor, String viewClass, Object data, String title) {
+        var step = dialog(viewDescriptor, data, title);
+        step.viewClass = viewClass;
         return step;
     }
 
@@ -219,6 +230,18 @@ public class ActionFlowStep implements Serializable {
 
     public String getViewDescriptor() {
         return viewDescriptor;
+    }
+
+    /**
+     * For {@code DIALOG}: class name of the bean {@link #getViewDescriptor()} belongs to, when it is not the entity the
+     * action runs on. {@code null} means the entity of the request.
+     */
+    public String getViewClass() {
+        return viewClass;
+    }
+
+    public void setViewClass(String viewClass) {
+        this.viewClass = viewClass;
     }
 
     public void setViewDescriptor(String viewDescriptor) {
