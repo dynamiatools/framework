@@ -17,8 +17,6 @@ extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/Vi
 extensions/security/sources/ui/src/main/java/tools/dynamia/modules/security/ui/action/ResetPasswordAction.java
 platform/ui/zk/src/main/java/tools/dynamia/zk/actions/CallZKGlobalCommandViewAction.java
 platform/ui/zk/src/main/java/tools/dynamia/zk/actions/SendHttpRequestViewAction.java
-platform/ui/zk/src/main/java/tools/dynamia/zk/crud/actions/FiltersAction.java
-platform/ui/zk/src/main/java/tools/dynamia/zk/crud/actions/FindAction.java
 platform/ui/zk/src/main/java/tools/dynamia/zk/crud/cfg/SaveConfigAction.java
 platform/ui/zk/src/main/java/tools/dynamia/zk/reports/actions/ExportAction.java
 platform/ui/zk/src/main/java/tools/dynamia/zk/reports/actions/ExportCSVAction.java

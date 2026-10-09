@@ -898,6 +898,9 @@ public class CrudView<T> extends Div implements CrudViewComponent<T>, ActionEven
                 if (action instanceof CrudControllerAware) {
                     ((CrudControllerAware) action).setCrudController(getController());
                 }
+                if (action instanceof tools.dynamia.crud.CrudControllerAware aware) {
+                    aware.setCrudController(getController());
+                }
             }
         }
         for (ActionGroup group : groups.values()) {

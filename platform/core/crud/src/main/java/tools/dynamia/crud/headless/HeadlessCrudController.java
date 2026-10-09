@@ -30,6 +30,7 @@ import java.util.Map;
  */
 public class HeadlessCrudController<E> implements CrudControllerAPI<E> {
 
+    private final java.util.Map<String, Object> attributes = new java.util.HashMap<>();
     private static final ClassMessages MESSAGES = ClassMessages.get(HeadlessCrudController.class);
 
     private CrudService crudService;
@@ -327,5 +328,10 @@ public class HeadlessCrudController<E> implements CrudControllerAPI<E> {
     @Override
     public Map<String, Object> getDefaultEntityValues() {
         return Map.of();
+    }
+
+    @Override
+    public java.util.Map<String, Object> getAttributes() {
+        return attributes;
     }
 }

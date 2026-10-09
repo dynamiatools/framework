@@ -14,9 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tools.dynamia.zk.crud.actions;
+package tools.dynamia.crud.actions;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import tools.dynamia.actions.ActionGroup;
 import tools.dynamia.actions.HeadlessCapable;
 import tools.dynamia.actions.InstallAction;
@@ -27,7 +26,6 @@ import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.crud.CrudState;
 import tools.dynamia.domain.LazyLoadable;
-import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.ui.MessageType;
 import tools.dynamia.ui.UIMessages;
@@ -42,9 +40,6 @@ import java.io.Serializable;
 @InstallAction
 public class ViewDataAction extends AbstractCrudAction implements ReadableOnly, HeadlessCapable {
 
-
-    @Autowired
-    private CrudService crudService;
 
     public ViewDataAction() {
         setName(Messages.get(ViewDataAction.class, "viewData"));
@@ -67,11 +62,11 @@ public class ViewDataAction extends AbstractCrudAction implements ReadableOnly, 
      * @param data
      */
     public void reloadAndView(final Object data) {
-        crudService.executeWithinTransaction(() -> {
+        crudService().executeWithinTransaction(() -> {
             Object entity = data;
             Serializable id = DomainUtils.findEntityId(entity);
             if (id != null) {
-                entity = crudService.load(entity.getClass(), id);
+                entity = crudService().load(entity.getClass(), id);
             }
 
             view(entity);

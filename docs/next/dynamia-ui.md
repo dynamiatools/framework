@@ -437,7 +437,10 @@ Actions converted: `ExportReportAction` (also headless), `ImportReportAction`, `
   scanner of the inventory does not follow casts. It stays in `ui`.
 - **`UIViews`** supports forms of entity classes known to the REST metadata; `showView` and forms with a descriptor built in
   code (`TestHttpFunctionAction`) or a form model (`ResetPasswordAction`) are not done.
-- **`CLIENT` actions** (`FindAction`, `FiltersAction`, exports) are declared but not published: a ZK-free deployment does not
-  have these classes, so their declaration has to move to a ZK-free place first.
+- **`CLIENT` actions**: `FindAction` and `FiltersAction` now live in `crud` (ZK-free; their ZK widgets are
+  `ZKFindRenderProvider` and `ZKCrudFilters`), so a ZK-free deployment has them, but they are not published to REST clients yet.
+  The exports (`ExportCSV/Excel/JsonAction`) still live in `zk`.
+- **ERP impact of #210**: `ViewDataAction`, `FindAction` and `FiltersAction` changed package (`tools.dynamia.zk.crud.actions` ->
+  `tools.dynamia.crud.actions`); 18 ERP files import the old one.
 - **Files travel inline** (Base64): 1 MB up, 10 MB down. A stream endpoint is needed for more.
 - **`UIProgress` headless** runs inside the request (request timeout applies); an asynchronous job with polling is future work.

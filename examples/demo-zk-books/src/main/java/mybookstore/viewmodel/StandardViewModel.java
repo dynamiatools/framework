@@ -10,7 +10,7 @@ import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.ui.MessageType;
 import tools.dynamia.ui.UIMessages;
-import tools.dynamia.zk.crud.actions.ViewDataAction;
+import tools.dynamia.crud.actions.ViewDataAction;
 import tools.dynamia.zk.util.ZKBindingUtil;
 import tools.dynamia.zk.util.ZKUtil;
 import tools.dynamia.zk.viewers.ui.Viewer;
