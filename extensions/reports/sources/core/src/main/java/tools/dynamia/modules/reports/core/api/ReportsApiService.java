@@ -90,6 +90,21 @@ public class ReportsApiService {
                 ReportCharts.definitions(report), EXPORT_FORMATS);
     }
 
+    /**
+     * Finds a report the current user can see, by id or by name.
+     *
+     * @param reference the report id (digits) or its name, case-insensitive
+     * @param group     optional group name to tell apart reports with the same name
+     * @return the report summary, or empty when there is no visible report like that
+     */
+    public java.util.Optional<ReportSummary> findReport(String reference, String group) {
+        boolean numeric = reference.chars().allMatch(Character::isDigit);
+        return ReportAccess.filter(reportsService.findActives()).stream()
+                .filter(r -> numeric ? String.valueOf(r.getId()).equals(reference) : reference.equalsIgnoreCase(r.getName()))
+                .filter(r -> group == null || (r.getGroup() != null && group.equalsIgnoreCase(r.getGroup().getName())))
+                .findFirst().map(this::summary);
+    }
+
     // ---- filter options
 
     /**

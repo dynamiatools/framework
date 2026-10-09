@@ -70,3 +70,180 @@ export interface ReportDTO {
   /** List of filter descriptors accepted by this report */
   filters?: ReportFilterDTO[];
 }
+
+// ─── UI API (/api/reports/v2) ────────────────────────────────────────────────
+
+/** Data types of columns and filters. Mirrors the Java `DataType` enum. */
+export type ReportDataType =
+  | 'TEXT'
+  | 'NUMBER'
+  | 'CURRENCY'
+  | 'DATE'
+  | 'DATE_TIME'
+  | 'TIME'
+  | 'BOOLEAN'
+  | 'ENUM'
+  | 'ENTITY';
+
+/** Where the options of a filter come from. Anything other than `NONE` can be loaded with `filterOptions()`. */
+export type ReportFilterOptionsSource = 'NONE' | 'STATIC' | 'ENUM' | 'ENTITY' | 'QUERY';
+
+/** Export formats of `ReportsApi.export()`. */
+export type ReportExportFormat = 'xlsx' | 'csv' | 'pdf';
+
+/** A report in the catalog. Mirrors `tools.dynamia.modules.reports.api.v2.ReportSummary`. */
+export interface ReportSummary {
+  id: number;
+  name: string;
+  title?: string | null;
+  subtitle?: string | null;
+  description?: string | null;
+  group?: string | null;
+  chartable: boolean;
+  hasFilters: boolean;
+  /** Legacy export endpoint, empty when the report is not exported */
+  endpoint?: string | null;
+}
+
+/** A group of reports in the catalog. */
+export interface ReportCatalogGroup {
+  name: string;
+  endpointName?: string | null;
+  reports: ReportSummary[];
+}
+
+/** A column of a report result. */
+export interface ReportColumn {
+  /** Key of the value in every row */
+  name: string;
+  label: string;
+  dataType: ReportDataType;
+  align: 'LEFT' | 'CENTER' | 'RIGHT';
+  format?: string | null;
+  width?: string | null;
+  upperCase: boolean;
+}
+
+/** A filter a report accepts. */
+export interface ReportFilterDefinition {
+  name: string;
+  label: string;
+  dataType: ReportDataType;
+  required: boolean;
+  hideLabel: boolean;
+  defaultValue?: string | null;
+  order: number;
+  optionsSource: ReportFilterOptionsSource;
+  /** Date/time pattern for DATE, DATE_TIME and TIME filters */
+  format?: string | null;
+}
+
+/** A chart of a report. Its data comes with the run result. */
+export interface ReportChartDefinition {
+  index: number;
+  title: string;
+  /** Chart.js type: bar, line, pie, doughnut... */
+  type: string;
+  labelField: string;
+  valueField: string;
+  grouped: boolean;
+}
+
+/** Everything a UI needs to show a report. */
+export interface ReportDefinition {
+  report: ReportSummary;
+  /** True when the columns come from the query, so `columns` is empty until the report runs */
+  autofields: boolean;
+  columns: ReportColumn[];
+  filters: ReportFilterDefinition[];
+  charts: ReportChartDefinition[];
+  exportFormats: ReportExportFormat[];
+}
+
+/** An option of a filter with predefined values. */
+export interface ReportFilterOptionItem {
+  value: unknown;
+  label: string;
+}
+
+/** A single filter value: text, number, boolean, `yyyy-MM-dd` date, `yyyy-MM-dd HH:mm:ss`, `HH:mm:ss`, enum name or entity id. */
+export type ReportFilterValue = string | number | boolean | null | undefined;
+
+/** Request to run or export a report. */
+export interface ReportRunRequest {
+  /** Filter values by filter name */
+  filters?: Record<string, ReportFilterValue> | undefined;
+  /** Zero based page */
+  page?: number | undefined;
+  /** Rows per page; empty or 0 returns every row */
+  size?: number | undefined;
+  /** Column to sort by */
+  sort?: string | undefined;
+  direction?: 'asc' | 'desc' | undefined;
+}
+
+/** Data of a chart, shaped like a Chart.js configuration. */
+export interface ReportChartResult {
+  index: number;
+  title: string;
+  type: string;
+  labels: string[];
+  datasets: Array<{ label: string; data: number[]; backgroundColor: string[] }>;
+}
+
+/** A row: one value per column name. Dates are ISO text, enums their name, other objects text. */
+export type ReportRow = Record<string, string | number | boolean | null>;
+
+/** Result of running a report. */
+export interface ReportRunResult {
+  columns: ReportColumn[];
+  rows: ReportRow[];
+  /** Rows of the whole result, before paging */
+  total: number;
+  page: number;
+  size: number;
+  /** True when the report reached the maximum rows (`dynamia.reports.max-rows`) and has more data */
+  truncated: boolean;
+  durationMs: number;
+  charts: ReportChartResult[];
+}
+
+/** Result of the legacy endpoints `/api/reports/{group}/{endpoint}`. */
+export interface ReportEndpointResult {
+  data: Array<Record<string, unknown>>;
+  truncated?: boolean;
+}
+
+// ─── Designer API (/api/reports/v2/design) ───────────────────────────────────
+
+/** Preview of a query being designed: the first rows, never more than the preview limit. */
+export interface ReportPreviewRequest {
+  queryLang: 'sql' | 'jpql';
+  queryScript: string;
+  /** Id of an external datasource; empty uses the application database (or the entity manager for JPQL) */
+  dataSourceId?: number | null | undefined;
+  /** Values for the `:name` parameters of the query */
+  parameters?: Record<string, ReportFilterValue> | undefined;
+}
+
+/** Result of a preview. */
+export interface ReportPreviewResult {
+  columns: string[];
+  rows: ReportRow[];
+  /** True when there are more rows than the preview shows */
+  truncated: boolean;
+  durationMs: number;
+}
+
+/** Result of testing the connection of a datasource. */
+export interface DataSourceTestResult {
+  ok: boolean;
+  message: string;
+}
+
+/** What the current user can do in the designer. */
+export interface ReportDesignerInfo {
+  allowed: boolean;
+  /** Maximum rows a preview returns */
+  previewLimit: number;
+}

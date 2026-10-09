@@ -84,114 +84,93 @@ In Node.js you will typically use `node-fetch` (or a global `fetch` polyfill) an
 
 ## Reports API
 
-The `ReportsApi` class mirrors the implementation in `src/api.ts` and exposes the following methods (base path: `/api/reports`):
+`ReportsApi` has three groups of methods.
 
-- `list(): Promise<ReportDTO[]>`
-  - GET `/api/reports` — Returns a list of available reports with metadata and filters.
-- `get(group: string, endpoint: string, params?: Record<string, string|number|boolean>): Promise<unknown>`
-  - GET `/api/reports/{group}/{endpoint}` — Fetch report data by passing query-string parameters.
-- `post(group: string, endpoint: string, filters?: ReportFilters): Promise<unknown>`
-  - POST `/api/reports/{group}/{endpoint}` — Execute a report using a structured body. Note: the package's types declare `ReportFilters.options: ReportFilterOption[]` (the Java model names this field `options`).
+### UI API (`/api/reports/v2`)
 
-Examples:
-
-- List reports and inspect available filters
-
-```ts
-const reportsList = await reports.list();
-for (const r of reportsList) {
-  console.log(r.group, r.endpoint, r.title ?? r.name);
-  if (r.filters?.length) {
-	console.log('  filters:', r.filters.map(f => `${f.name}${f.required ? ' (required)' : ''}`));
-  }
-}
-```
-
-- Execute a report using structured options (recommended when the report expects typed inputs)
+| method | purpose |
+|---|---|
+| `catalog()` | Reports the current user can run, grouped |
+| `definition(id)` | Filters, declared columns, charts and export formats |
+| `filterOptions(id, filter, { q, limit })` | Options of enum, entity, query and static filters |
+| `run(id, { filters, page, size, sort, direction })` | Runs a report: `columns`, `rows`, `total`, `truncated`, `durationMs`, `charts` |
+| `export(id, format, request)` | Downloads the whole result as a `Blob` (`xlsx`, `csv` or `pdf`) |
 
 ```ts
-// ReportFilters uses `options: { name, value }[]`
-const filters = { options: [{ name: 'startDate', value: '2026-01-01' }, { name: 'endDate', value: '2026-01-31' }] };
-const result = await reports.post('sales', 'monthly', filters);
-// `result` shape depends on the server-side report implementation (JSON table, aggregated object, etc.)
-console.log(result);
+import { DynamiaClient } from '@dynamia-tools/sdk';
+import { ReportsApi } from '@dynamia-tools/reports-sdk';
+
+const reports = new ReportsApi(new DynamiaClient({ baseUrl: 'https://app.example.com', token: '...' }).http);
+
+const [group] = await reports.catalog();
+const definition = await reports.definition(group.reports[0].id);
+const result = await reports.run(definition.report.id, {
+  filters: { year: 2026 },
+  page: 0,
+  size: 25,
+  sort: 'TOTAL',
+  direction: 'desc',
+});
+console.log(result.columns.map((c) => c.label), result.rows, result.truncated);
 ```
 
-- Fetch a report via GET with simple query params
+Filter values are sent by filter name: text, number, boolean, date `yyyy-MM-dd`, date time `yyyy-MM-dd HH:mm:ss`, time
+`HH:mm:ss`, enum name or entity id. A missing required filter, an invalid value or an unknown sort column answers `400`
+with the problem in `DynamiaApiError.message`; a report the user cannot access answers `404` or `403`.
 
-```ts
-const table = await reports.get('sales', 'monthly', { year: 2026, region: 'EMEA' });
-console.log(table);
-```
+### Designer API (`/api/reports/v2/design`)
 
-Because the SDK's `HttpClient` inspects `Content-Type`, these methods will return JSON when the server replies with `application/json` and will return a `Blob` when the server returns binary content (see next section).
+Only for users with a designer role (`dynamia.reports.designer-roles`), `403` for everyone else.
+
+| method | purpose |
+|---|---|
+| `designer()` | `{ allowed, previewLimit }` for the current user |
+| `preview({ queryLang, queryScript, dataSourceId, parameters })` | First rows of a query being designed |
+| `exportDefinition(id)` / `importDefinition(definition)` | Move report definitions between systems as JSON |
+| `testDataSource(id)` | Tests the connection of a saved datasource |
+
+### Legacy endpoints (`/api/reports/{group}/{endpoint}`)
+
+`list()`, `get(group, endpoint, params)` and `post(group, endpoint, filters)` for reports published with
+`exportEndpoint`. They return `{ data, truncated? }` (`ReportEndpointResult`).
 
 ---
 
 ## TypeScript types
 
-This package exports a small set of types that mirror the server models. The most important are:
+All types are exported from the package index and mirror the Java records of `tools.dynamia.modules.reports.api.v2`:
 
-- `ReportDTO` — report descriptor returned by `list()`; contains `name`, `endpoint`, `group`, optional `filters` (array of `ReportFilterDTO`) and human-readable metadata.
-- `ReportFilterDTO` — metadata describing a single filter (name, datatype, required, values, format).
-- `ReportFilterOption` — a resolved filter option `{ name: string; value: string }` used when submitting a report.
-- `ReportFilters` — POST body shape `{ options: ReportFilterOption[] }`.
+- Catalog and definition: `ReportCatalogGroup`, `ReportSummary`, `ReportDefinition`, `ReportColumn`,
+  `ReportFilterDefinition` (with `optionsSource`: `NONE`, `STATIC`, `ENUM`, `ENTITY` or `QUERY`), `ReportChartDefinition`.
+- Running: `ReportRunRequest`, `ReportRunResult`, `ReportRow`, `ReportChartResult`, `ReportFilterOptionItem`,
+  `ReportFilterValue`, `ReportExportFormat`.
+- Designer: `ReportDesignerInfo`, `ReportPreviewRequest`, `ReportPreviewResult`, `DataSourceTestResult`.
+- Legacy endpoints: `ReportDTO`, `ReportFilterDTO`, `ReportFilterOption`, `ReportFilters`, `ReportEndpointResult`.
 
-Refer to the package exports (or your editor's intellisense) for exact types and nullable fields. Example (from `src/types.ts`):
-
-```ts
-// POST body
-interface ReportFilters { options: { name: string; value: string }[] }
-
-// Report descriptor
-interface ReportDTO { name: string; endpoint: string; group?: string; filters?: ReportFilterDTO[] }
-```
+Rows contain plain JSON values: dates are ISO text, enums their name and any other object its text.
 
 ---
 
-## Handling exports / binary responses
+## Exporting files
 
-The underlying `HttpClient` normalises responses as follows (see `@dynamia-tools/sdk` implementation):
-
-- If the response `Content-Type` includes `application/json` the client returns the parsed JSON.
-- Otherwise the client returns a `Blob` (binary response). In browsers you can turn that into a downloadable file; in Node.js you may need to use `arrayBuffer()` and write the buffer to disk.
-
-Browser example (download PDF):
+`export()` returns the file as a `Blob` (the `HttpClient` returns a `Blob` for any response that is not JSON). The
+server suggests the name `report-name-yyyy-MM-dd.format`.
 
 ```ts
-const blob = await reports.post('sales', 'monthly-export', { options: [] });
-// If the server returned binary data this will be a Blob
-if (blob instanceof Blob) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'report.pdf';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-} else {
-  // JSON result (e.g. preview data)
-  console.log(blob);
-}
+const blob = await reports.export(12, 'xlsx', { filters: { year: 2026 }, sort: 'TOTAL', direction: 'desc' });
+
+// browser
+const url = URL.createObjectURL(blob);
+const link = Object.assign(document.createElement('a'), { href: url, download: 'sales.xlsx' });
+link.click();
+URL.revokeObjectURL(url);
+
+// Node.js
+await fs.promises.writeFile('./sales.xlsx', Buffer.from(await blob.arrayBuffer()));
 ```
 
-Node.js note: when running under Node you will typically use a `fetch` implementation that returns a Response whose `blob()` or `arrayBuffer()` is available. If you receive an `ArrayBuffer` or a Node `Buffer` you can write it to disk with `fs.writeFile`.
-
-Example using `arrayBuffer()` (generic):
-
-```ts
-const maybeBlob = await reports.post('sales', 'monthly-export', { options: [] });
-if ((maybeBlob as any).arrayBuffer) {
-  const ab = await (maybeBlob as any).arrayBuffer();
-  const buffer = Buffer.from(ab);
-  await fs.promises.writeFile('./monthly.pdf', buffer);
-} else if (maybeBlob instanceof Buffer) {
-  await fs.promises.writeFile('./monthly.pdf', maybeBlob as Buffer);
-} else {
-  console.log('non-binary response:', maybeBlob);
-}
-```
+The export has every row of the result, whatever page you were viewing, up to the server row limit
+(`dynamia.reports.max-rows`). `@dynamia-tools/reports-vue` does the download for you.
 
 ---
 
