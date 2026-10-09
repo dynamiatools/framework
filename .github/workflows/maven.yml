@@ -36,5 +36,5 @@ jobs:
         env | grep -iE "maven|timestamp|source_date|^CI|JAVA" | grep -viE "token|secret|password" || true
         cat ~/.m2/settings.xml | sed -E 's/>[^<]*(token|secret)[^<]*</>***</I' || true
         mvn -B -q help:effective-pom -pl platform/core/commons -Doutput=/tmp/eff.xml || true
-        grep -n "outputTimestamp" /tmp/eff.xml || echo "NO outputTimestamp in effective pom"
+        sed -n 20,75p /tmp/eff.xml; ls -a . .mvn 2>/dev/null | head -40; git log -3 --format=%H%n%s
         mvn -B -DskipTests -pl platform/core/commons -am -Dmaven.compiler.verbose=true compile --file pom.xml || true
