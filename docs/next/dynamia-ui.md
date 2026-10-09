@@ -1,6 +1,7 @@
 # Dynamia UI: one UI contract, any front end
 
-**Status:** design, first iteration in progress on `feature/next-ui`. Branch `next`.
+**Status:** design; first iteration (tools only) implemented on `feature/next-ui`: issues #200 to #208. See
+[Implementation status](#implementation-status).
 
 > **Scope of the first iteration: `dynamia-tools` only, `dynamia-erp` untouched.** The goal is that ZK lives in its own
 > corner of the repository (`platform/ui/zk`, `zk-starter`, `theme-dynamical`, the `ZK_ONLY` extension `ui` modules and
@@ -400,3 +401,43 @@ capability is reachable without ZK, or is explicitly and knowingly `ZK_ONLY`"**.
 2. Phase 0: walking test + baseline, contract fixtures.
 3. Phase 1 on `ui-shared` / `ui-core`, with the existing headless tests as the regression net.
 4. GitHub issues per phase under the ZK-separation epic (#130); issues are the backlog, this document is the design.
+
+
+---
+
+## Implementation status
+
+First iteration, `dynamia-tools` only (branch `feature/next-ui`):
+
+| Issue | Done |
+|---|---|
+| #200 | `ActionInventoryTest`: every `@InstallAction` classified, baseline of ZK-bound actions |
+| #201 | `ZkCornerRuleTest`: ZK only in its modules (no violation today) |
+| #202 | `UIFacades`, `ReplaySession`, `ReplayBinder`: one lookup and one numbering of interactions for all facades |
+| #203 | `UIFiles` (+ `UPLOAD` step, `params.downloads`, Vue renderers) |
+| #204 | `UIProgress` |
+| #205 | `UIViews.showForm` (+ `viewClass` in `DIALOG`) |
+| #206 | `UIChoices` (+ `CHOICE` step), `UINavigation` (+ `newWindow` in `REDIRECT`) |
+| #207 | `ActionRuntime`, `@RunsOn`, `runtime` in `ActionMetadata` and the SDK |
+| #208 | Actions that no longer import ZK moved to `core` where their resources allow it |
+
+Actions converted: `ExportReportAction` (also headless), `ImportReportAction`, `NewAccountPaymentAction`,
+`ReloadEntityFileStoragesAction`, `MoveEntityFileLocalToRemoteStorageAction`, `DownloadFileAction`. ZK-bound actions went from
+34 to 28 of 61 (baseline file).
+
+### Known limits and what comes next
+
+- **Not verified in a running ZK or Vue application.** The facades, the replay side and the Vue runner are covered by unit
+  tests; the ZK implementations (`ZKFileTransfer`, `ZKProgressRunner`, `ZKViewsProvider`, `ZKChoicesProvider`,
+  `ZKNavigationProvider`) compile but were not exercised in a browser. Do that before merging.
+- **Per-package `Messages.properties`.** `ExportReportAction`, `ImportReportAction` and `NewAccountPaymentAction` are ZK-free
+  but stay in their `ui` modules: their message bundle is shared with ZK-bound actions in the same package, and a bundle with
+  the same name in two jars would hide one of them. Moving them needs bundles per action or merging bundles of the same name.
+- **`DownloadFileAction`** has no ZK import but its base class casts the controller to the ZK `EntityFileController`; the
+  scanner of the inventory does not follow casts. It stays in `ui`.
+- **`UIViews`** supports forms of entity classes known to the REST metadata; `showView` and forms with a descriptor built in
+  code (`TestHttpFunctionAction`) or a form model (`ResetPasswordAction`) are not done.
+- **`CLIENT` actions** (`FindAction`, `FiltersAction`, exports) are declared but not published: a ZK-free deployment does not
+  have these classes, so their declaration has to move to a ZK-free place first.
+- **Files travel inline** (Base64): 1 MB up, 10 MB down. A stream endpoint is needed for more.
+- **`UIProgress` headless** runs inside the request (request timeout applies); an asynchronous job with polling is future work.

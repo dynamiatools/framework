@@ -559,6 +559,24 @@ question; and it may only use the ports (`UIMessages`, `CrudControllerAPI`, `Cru
 id REST clients see is the class name without `Action`, lower case (`archive`); override `headlessId()` to change it, or
 `headlessSupported()` to leave a subclass out. Design and limits: [`docs/design/HEADLESS_ACTIONS.md`](../design/HEADLESS_ACTIONS.md).
 
+The ports an action may use, besides `UIMessages`, are facades in `ui-shared` that pick their implementation from the
+environment (ZK registers its own beans; a headless run binds another for the execution, see `UIFacades`). Use them
+instead of ZK classes:
+
+| Instead of | Use | Headless step |
+|---|---|---|
+| `Messagebox`, `ZKUtil.showMessage` | `UIMessages` | `CONFIRM`, `INPUT`, messages in the response |
+| `Filedownload`, `Fileupload` | `UIFiles.download`, `UIFiles.upload` | `UPLOAD`; downloads in `params.downloads` (limits: 1 MB up, 10 MB down) |
+| `LongOperation` + monitor window | `UIProgress.run` | runs inside the request; must be the last interaction |
+| `Window` + `Viewer` with a form | `UIViews.showForm` (entity classes only) | `DIALOG` with `viewClass` |
+| `ZKUtil.showListboxSelector` | `UIChoices.chooseOne` / `chooseMany` | `CHOICE` |
+| `Executions.sendRedirect` | `UINavigation.open` / `openInNewWindow` | final `REDIRECT` |
+
+A new facade is an SPI interface, a static facade resolving it with `UIFacades.resolve`, a bean in `zk` and a headless
+implementation bound by `ReplayExecutor` (or a `ReplayBinder` bean when it needs a module such as `crud`). Declare what
+cannot be derived with `@RunsOn(ActionRuntime.CLIENT | ZK_ONLY)`. ZK may only be used in the modules listed in
+`ZkCornerRuleTest`. Design: [`docs/next/dynamia-ui.md`](../next/dynamia-ui.md).
+
 Implement `FlowRemoteAction` directly (the low level API, see
 [`SERVER_DRIVEN_ACTION_FLOWS.md`](../design/SERVER_DRIVEN_ACTION_FLOWS.md)) only for an action that exists for REST clients
 alone, needs a step the replay runtime does not produce yet (`DIALOG`, `REDIRECT`, `CALL`, `CUSTOM`), or cannot ask the same
