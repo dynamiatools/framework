@@ -74,6 +74,11 @@ public class UserInterfaceController extends HashMap<String, Boolean> implements
             return false;
         }
 
+        if (accessPermissions == null) {
+            // nobody is logged in (init() found no user): nothing to check against
+            return false;
+        }
+
         key = key.toLowerCase();
         for (Permission p : accessPermissions) {
             if (p.getValue() != null) {

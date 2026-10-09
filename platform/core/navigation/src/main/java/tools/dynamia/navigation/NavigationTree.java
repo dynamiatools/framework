@@ -64,7 +64,9 @@ public class NavigationTree implements Serializable {
                     List<Module> modules = new ArrayList<>(ModuleContainer.getInstance().getModules());
                     modules.sort(new ModuleComparator());
                     for (Module module : modules) {
-                        if (NavigationRestrictions.allowAccess(module) && hasPagesWithAccess(module)) {
+                        // an invisible module is hidden whatever the restrictions answer (a restriction that grants access
+                        // would otherwise win over NoVisibleRestriction, which runs last)
+                        if (module.isVisible() && NavigationRestrictions.allowAccess(module) && hasPagesWithAccess(module)) {
                             var moduleNode = new NavigationNode(module, labelProviders);
                             getNavigationTree().addNode(moduleNode);
                             buildPages(module.getDefaultPageGroup(), moduleNode);

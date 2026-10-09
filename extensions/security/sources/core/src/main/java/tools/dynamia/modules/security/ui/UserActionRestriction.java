@@ -16,6 +16,7 @@ package tools.dynamia.modules.security.ui;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Scope;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.stereotype.Component;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ReadableOnly;
@@ -32,10 +33,13 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
+ * Action permissions of the current user. Request scoped: it works with and without ZK (the ZK desktop scope only
+ * exists when ZK is on the classpath) and the permissions of the user are read again on every request.
+ *
  * @author Mario Serrano Leones
  */
 @Component
-@Scope("zk-desktop")
+@Scope(WebApplicationContext.SCOPE_REQUEST)
 public class UserActionRestriction implements tools.dynamia.actions.ActionRestriction, Serializable {
 
     private final LoggingService logger = new SLF4JLoggingService(UserActionRestriction.class);

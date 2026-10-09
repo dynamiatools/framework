@@ -42,10 +42,13 @@ public class UserNavigationRestriction implements tools.dynamia.navigation.Navig
 
     @Override
     public Boolean allowAccess(NavigationElement element) {
-        String username = usuarioActual.getUsername();
+        // anonymous visitors: let the other restrictions (or the page's own flags) decide
+        if (!usuarioActual.isLogged()) {
+            return null;
+        }
         AccountDTO accountDTO = accountServiceAPI.getCurrentAccount();
 
-        if (username == null || accountDTO == null) {
+        if (accountDTO == null) {
             return null;
         }
 

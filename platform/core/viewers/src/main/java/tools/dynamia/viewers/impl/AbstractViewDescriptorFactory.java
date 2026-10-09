@@ -73,6 +73,9 @@ public abstract class AbstractViewDescriptorFactory implements ViewDescriptorFac
      */
     private final Set<ViewDescriptor> allDescriptors = new HashSet<>();
 
+    /** Guards the lazy load against descriptor interceptors that look descriptors up while loading. */
+    private boolean loadingDescriptors;
+
     /**
      * The descriptors location.
      */
@@ -441,6 +444,17 @@ public abstract class AbstractViewDescriptorFactory implements ViewDescriptorFac
     public ViewDescriptor findDescriptor(Class beanClass, String device, String viewType) {
         if (device == null) {
             device = DEFAULT_DEVICE;
+        }
+
+        // Descriptors load lazily; a lookup that never goes through getDescriptor (the REST read path, for example)
+        // must not answer "not found" only because nobody asked for a descriptor yet.
+        if (allDescriptors.isEmpty() && !loadingDescriptors) {
+            loadingDescriptors = true;
+            try {
+                loadViewDescriptors();
+            } finally {
+                loadingDescriptors = false;
+            }
         }
 
         SimpleCache<String, SimpleCache<Class, ViewDescriptor>> classDescriptors = descriptors.get(device);
