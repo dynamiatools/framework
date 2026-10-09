@@ -1,0 +1,36 @@
+view: form
+beanClass: tools.dynamia.demos.movies.domain.Movie
+autofields: false
+
+fields:
+  title:
+    params:
+      span: 2
+  year:
+  runtime:
+  certification:
+  language:
+  country:
+  studio:
+  genres:
+    params:
+      span: 2
+  rating:
+  votes:
+  budget:
+  boxOffice:
+  featured:
+  posterUrl:
+    params:
+      span: 2
+  trailerUrl:
+    params:
+      span: 2
+  synopsis:
+    params:
+      span: 4
+      multiline: true
+      height: 90px
+
+layout:
+  columns: 4

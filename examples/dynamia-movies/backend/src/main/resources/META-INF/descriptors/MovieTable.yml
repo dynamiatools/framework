@@ -1,0 +1,15 @@
+view: table
+beanClass: tools.dynamia.demos.movies.domain.Movie
+autofields: false
+
+fields:
+  title:
+  year:
+  directorName:
+    label: Director
+  genresText:
+    label: Genres
+  rating:
+  votes:
+  certification:
+  featured:

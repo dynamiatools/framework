@@ -1,0 +1,24 @@
+view: json-form
+beanClass: tools.dynamia.demos.movies.domain.Movie
+autofields: false
+
+fields:
+  title:
+  year:
+  runtime:
+  certification:
+  language:
+  country:
+  synopsis:
+  posterUrl:
+  trailerUrl:
+  rating:
+  votes:
+  budget:
+  boxOffice:
+  featured:
+  genresText:
+  directorName:
+  topCast:
+  studio:
+  genres:

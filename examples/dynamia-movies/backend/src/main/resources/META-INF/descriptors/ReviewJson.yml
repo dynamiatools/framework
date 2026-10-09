@@ -1,0 +1,10 @@
+view: json
+beanClass: tools.dynamia.demos.movies.domain.Review
+autofields: false
+
+fields:
+  movie.id:
+  author:
+  score:
+  comment:
+  reviewDate:

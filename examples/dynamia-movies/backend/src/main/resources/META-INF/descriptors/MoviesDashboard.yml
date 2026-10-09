@@ -1,0 +1,78 @@
+view: dashboard
+id: moviesDashboard
+
+layout:
+  params:
+    columns: 4
+
+fields:
+  totalMovies:
+    params:
+      widget: report
+      report: Total movies
+      display: kpi
+      value: total
+      title: Movies in catalog
+  avgRating:
+    params:
+      widget: report
+      report: Average rating
+      display: kpi
+      value: avg_rating
+      unit: / 10
+  totalReviews:
+    params:
+      widget: report
+      report: Total reviews
+      display: kpi
+      value: total
+  boxOffice:
+    params:
+      widget: report
+      report: Total box office
+      display: kpi
+      value: total
+      unit: M USD
+
+  moviesPerDecade:
+    params:
+      span: 2
+      widget: report
+      report: Movies per decade
+      display: chart
+      chart: 0
+  moviesByGenre:
+    params:
+      span: 2
+      widget: report
+      report: Movies by genre
+      display: chart
+      chart: 0
+
+  topRated:
+    params:
+      span: 2
+      widget: report
+      report: Top rated movies
+      display: table
+      limit: 8
+  latestReviews:
+    params:
+      span: 2
+      widget: latest-reviews
+      limit: 6
+
+  topDirectors:
+    params:
+      span: 2
+      widget: report
+      report: Top directors
+      display: table
+      limit: 8
+  reviewScores:
+    params:
+      span: 2
+      widget: report
+      report: Reviews by score
+      display: chart
+      chart: 0
