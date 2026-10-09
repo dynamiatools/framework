@@ -2,15 +2,20 @@ package tools.dynamia.modules.reports.core.services.impl;
 
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Parameter;
+import jakarta.persistence.PersistenceException;
 import jakarta.persistence.Query;
 import org.hibernate.Hibernate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import tools.dynamia.commons.StringPojoParser;
 import tools.dynamia.commons.StringUtils;
-import tools.dynamia.domain.jdbc.JdbcHelper;
+import tools.dynamia.domain.ValidationError;
+import tools.dynamia.domain.jdbc.JdbcDataSet;
 import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.AbstractService;
@@ -21,6 +26,11 @@ import tools.dynamia.modules.reports.core.domain.Report;
 import tools.dynamia.modules.reports.core.domain.ReportFilter;
 import tools.dynamia.modules.reports.core.domain.ReportGroup;
 import tools.dynamia.modules.reports.core.services.ReportsService;
+import tools.dynamia.modules.reports.core.security.ReportAccess;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import tools.jackson.databind.ser.std.SimpleBeanPropertyFilter;
 import tools.jackson.databind.ser.std.SimpleFilterProvider;
 
@@ -30,32 +40,53 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @CacheConfig(cacheNames = "reports")
 public class ReportsServiceImpl extends AbstractService implements ReportsService {
 
 
+    private static final String ACCOUNT_KEY = "#root.target.currentAccountKey()";
+
     private final AccountServiceAPI accountServiceAPI;
+    private ReportsSettings settings = new ReportsSettings();
 
     public ReportsServiceImpl(AccountServiceAPI accountServiceAPI) {
         this.accountServiceAPI = accountServiceAPI;
     }
 
+    @Autowired(required = false)
+    public void setSettings(ReportsSettings settings) {
+        this.settings = settings;
+    }
+
+    /**
+     * Account used in the cache keys, so cached lists are never shared between accounts.
+     */
+    public Long currentAccountKey() {
+        return accountServiceAPI.getCurrentAccountId();
+    }
+
     @Override
     public ReportData execute(Report report, ReportFilters filters, ReportDataSource datasource) {
-        log("Executing query for report: " + report.getName() + " - " + report.getQueryLang());
+        ReportAccess.check(report);
+        String lang = report.getQueryLang() == null ? "" : report.getQueryLang().toLowerCase();
+        if (!"sql".equals(lang) && !"jpql".equals(lang)) {
+            throw new ReportsException("Unsupported query language [" + report.getQueryLang() + "] in report " + report.getName());
+        }
+        if (filters == null) {
+            filters = new ReportFilters();
+        }
+        log("Executing query for report: " + report.getName() + " - " + lang);
         long start = System.currentTimeMillis();
-        ReportData data = null;
         loadDefaultFilters(report, filters);
-        data = switch (report.getQueryLang()) {
-            case "sql" -> executeSQL(report, filters, datasource);
-            case "jpql" -> executeJPQL(report, filters, datasource);
-            default -> data;
-        };
+        ReportData data = "sql".equals(lang) ? executeSQL(report, filters, datasource) : executeJPQL(report, filters, datasource);
         long end = System.currentTimeMillis();
-        log("Report " + report.getName() + " executed in " + (end - start) + "ms");
+        log("Report " + report.getName() + " executed in " + (end - start) + "ms" + (data.isTruncated() ? " (truncated)" : ""));
         return data;
     }
 
@@ -82,7 +113,7 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Cacheable(key = "'Report-' + #id")
+    @Cacheable(key = "'Report-' + #id + '-' + " + ACCOUNT_KEY)
     public Report loadReportModel(Long id) {
         Report report = crudService().findSingle(Report.class, QueryParameters.with("id", id).add("accountId", QueryConditions.isNotNull()));
         report.getFields().size();
@@ -91,53 +122,92 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
         return report;
     }
 
-    private static ReportData executeSQL(Report report, ReportFilters filters, ReportDataSource dataSource) {
-        ReportData data = null;
+    private ReportData executeSQL(Report report, ReportFilters filters, ReportDataSource dataSource) {
+        String sql = ReportQueryValidator.validateQuery(ReportQueryBuilder.build(report.getQueryScript(), filters), "sql");
+        int maxRows = settings.getMaxRows();
 
         try (Connection connection = ReportsUtils.getJdbcConnection(dataSource)) {
-            var jdbc = new JdbcHelper(new ReportDataSource("delegate", connection));
-            jdbc.setShowSQL(false);
-            String sql = buildSqlScript(report.getQueryScript(), filters);
-
-            var result = filters.isEmpty() ? jdbc.query(sql) : jdbc.query(sql, filters.getValues());
-            data = ReportData.build(report, result);
-        } catch (SQLException e) {
-            throw new ReportsException(e);
+            setReadOnly(connection, true);
+            try {
+                var template = new JdbcTemplate(new SingleConnectionDataSource(connection, true));
+                template.setQueryTimeout(settings.getQueryTimeoutSeconds());
+                if (maxRows > 0) {
+                    template.setMaxRows(maxRows == Integer.MAX_VALUE ? maxRows : maxRows + 1);
+                }
+                List<Map<String, Object>> rows = new NamedParameterJdbcTemplate(template).queryForList(sql, filters.getValues());
+                boolean truncated = maxRows > 0 && rows.size() > maxRows;
+                if (truncated) {
+                    rows = new ArrayList<>(rows.subList(0, maxRows));
+                }
+                ReportData data = ReportData.build(report, new JdbcDataSet(rows));
+                data.setTruncated(truncated);
+                return data;
+            } finally {
+                setReadOnly(connection, false);
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new ReportsException("Error executing report [" + report.getName() + "]: " + e.getMessage(), e);
         }
-
-        return data;
     }
 
-    private static ReportData executeJPQL(Report report, ReportFilters filters, ReportDataSource dataSource) {
-        EntityManager em = ReportsUtils.getJpaEntityManager(dataSource);
-        String jpql = buildSqlScript(report.getQueryScript(), filters);
-        Query query = em.createQuery(jpql);
-        filters.getValues().forEach(query::setParameter);
-        List result = query.getResultList();
-        return ReportData.build(report, result);
-    }
-
-    private static String buildSqlScript(String query, ReportFilters filters) {
-        query = query.replace("\n", " ").replace("\t", " ");
-        StringBuilder filtersSql = new StringBuilder("");
-        if (!filters.isEmpty() && !query.contains("where")) {
-            filtersSql.append("where 1=1 ");
-        }
-        for (String filterName : filters.getFiltersNames()) {
-            ReportFilter filter = filters.getFilter(filterName);
-            if (filter.getCondition() != null) {
-                filtersSql.append(" and ").append(filter.getCondition());
+    private void setReadOnly(Connection connection, boolean readOnly) {
+        try {
+            connection.setReadOnly(readOnly);
+        } catch (SQLException | RuntimeException e) {
+            // Some drivers do not support it. Queries are still validated and limited.
+            if (readOnly) {
+                logWarn("Cannot set report connection as read-only: " + e.getMessage());
             }
         }
-        if (query.contains("<FILTERS>")) {
-            query = query.replace("<FILTERS>", filtersSql.toString());
-        } else {
-            query = query + " " + filtersSql;
-        }
-        return query;
     }
 
-    @Cacheable(key = "'ActiveReport'")
+    private ReportData executeJPQL(Report report, ReportFilters filters, ReportDataSource dataSource) {
+        String jpql = ReportQueryValidator.validateQuery(ReportQueryBuilder.build(report.getQueryScript(), filters), "jpql");
+        int maxRows = settings.getMaxRows();
+        boolean ownsEntityManager = dataSource.getDelegate() instanceof EntityManagerFactory;
+        EntityManager em = ReportsUtils.getJpaEntityManager(dataSource);
+        try {
+            Query query = em.createQuery(jpql);
+            Set<String> declared = query.getParameters().stream().map(Parameter::getName)
+                    .filter(Objects::nonNull).collect(Collectors.toSet());
+            filters.getValues().forEach((name, value) -> {
+                if (declared.contains(name)) {
+                    query.setParameter(name, value);
+                }
+            });
+            if (maxRows > 0 && maxRows < Integer.MAX_VALUE) {
+                query.setMaxResults(maxRows + 1);
+            }
+            hint(query, "jakarta.persistence.query.timeout", settings.getQueryTimeoutSeconds() * 1000);
+            hint(query, "org.hibernate.readOnly", true);
+
+            List<?> result = query.getResultList();
+            boolean truncated = maxRows > 0 && result.size() > maxRows;
+            if (truncated) {
+                result = new ArrayList<>(result.subList(0, maxRows));
+            }
+            ReportData data = ReportData.build(report, result);
+            data.setTruncated(truncated);
+            return data;
+        } catch (PersistenceException | IllegalArgumentException e) {
+            throw new ReportsException("Error executing report [" + report.getName() + "]: " + e.getMessage(), e);
+        } finally {
+            if (ownsEntityManager) {
+                em.close();
+            }
+        }
+    }
+
+    private static void hint(Query query, String name, Object value) {
+        try {
+            query.setHint(name, value);
+        } catch (IllegalArgumentException ignored) {
+            // hint not supported by the provider
+        }
+    }
+
+    @Override
+    @Cacheable(key = "'ActiveReport-' + " + ACCOUNT_KEY)
     public List<Report> findActives() {
         List<Long> accounts = new ArrayList<>();
         accounts.add(accountServiceAPI.getSystemAccountId());
@@ -149,11 +219,15 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
         return crudService().find(Report.class, params);
     }
 
-    @Cacheable(key = "'ActiveReportByGroup-' + #reportGroup.id")
+    @Override
+    @Cacheable(key = "'ActiveReportByGroup-' + #reportGroup.id + '-' + " + ACCOUNT_KEY)
     public List<Report> findActivesByGroup(ReportGroup reportGroup) {
+        List<Long> accounts = new ArrayList<>();
+        accounts.add(accountServiceAPI.getSystemAccountId());
+        accounts.add(accountServiceAPI.getCurrentAccountId());
         return crudService().find(Report.class, QueryParameters.with("group.name", QueryConditions.eq(reportGroup.getName()))
                 .add("active", true)
-                .add("accountId", accountServiceAPI.getSystemAccountId()).orderBy("name"));
+                .add("accountId", QueryConditions.in(accounts)).orderBy("name"));
     }
 
     @Override
@@ -201,6 +275,7 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
     public File exportReport(Report report) {
         try {
             File file = File.createTempFile("report-" + StringUtils.simplifiedString(report.getName()) + "-", ".json");
+            file.deleteOnExit();
             var ignoreIds = new SimpleFilterProvider();
             ignoreIds.addFilter("ignoreIds", SimpleBeanPropertyFilter.serializeAllExcept("id", "accountId"));
 
@@ -220,45 +295,51 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
             Report report = StringPojoParser.createJsonMapper().readerFor(Report.class)
                     .readValue(file);
 
-            if (report != null) {
-                report.setId(null);
-                report.setName(report.getName() + " (imported)");
-                report.setActive(false);
-                report.setExportWithoutFormat(false);
-                report.setExportEndpoint(false);
-                report.setDataSourceConfig(null);
-                if (report.getGroup() != null) {
-                    report.setGroup(findGroup(report.getGroup().getName()));
-                    report.setAccountId(report.getGroup().getAccountId());
-                }
-
-                if (report.getFilters() != null) {
-                    report.getFilters().forEach(f -> {
-                        f.setId(null);
-                        f.setAccountId(report.getAccountId());
-                        f.setReport(report);
-                    });
-                }
-
-                if (report.getFields() != null) {
-                    report.getFields().forEach(f -> {
-                        f.setId(null);
-                        f.setAccountId(report.getAccountId());
-                        f.setReport(report);
-                    });
-                }
-
-                if (report.getCharts() != null) {
-                    report.getCharts().forEach(c -> {
-                        c.setId(null);
-                        c.setAccountId(report.getAccountId());
-                        c.setReport(report);
-                    });
-                }
+            if (report == null) {
+                throw new ReportsException("The file does not contain a report");
             }
+            if (report.getGroup() == null || report.getGroup().getName() == null || report.getGroup().getName().isBlank()) {
+                throw new ReportsException("The report file has no group");
+            }
+
+            report.setId(null);
+            report.setName(report.getName() + " (imported)");
+            report.setActive(false);
+            report.setExportWithoutFormat(false);
+            report.setExportEndpoint(false);
+            report.setDataSourceConfig(null);
+            report.setGroup(findGroup(report.getGroup().getName()));
+            report.setAccountId(report.getGroup().getAccountId());
+
+            if (report.getFilters() != null) {
+                report.getFilters().forEach(f -> {
+                    f.setId(null);
+                    f.setAccountId(report.getAccountId());
+                    f.setReport(report);
+                });
+            }
+
+            if (report.getFields() != null) {
+                report.getFields().forEach(f -> {
+                    f.setId(null);
+                    f.setAccountId(report.getAccountId());
+                    f.setReport(report);
+                });
+            }
+
+            if (report.getCharts() != null) {
+                report.getCharts().forEach(c -> {
+                    c.setId(null);
+                    c.setAccountId(report.getAccountId());
+                    c.setReport(report);
+                });
+            }
+
             validate(report);
             report.save();
             return report;
+        } catch (ReportsException | ValidationError e) {
+            throw e;
         } catch (Exception e) {
             log("Error importing", e);
             throw new ReportsException("Error importing report", e);
@@ -277,7 +358,7 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
     }
 
     @Override
-    @Cacheable(key = "'ExportableReports-'+#includeSystem")
+    @Cacheable(key = "'ExportableReports-' + #includeSystem + '-' + " + ACCOUNT_KEY)
     @Transactional
     public List<Report> findExportableReports(boolean includeSystem) {
         List<Long> accounts = new ArrayList<>();
