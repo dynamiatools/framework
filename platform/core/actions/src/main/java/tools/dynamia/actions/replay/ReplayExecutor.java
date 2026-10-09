@@ -7,6 +7,7 @@ import tools.dynamia.actions.ActionFlows;
 import tools.dynamia.actions.flow.FlowTokenException;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.ui.FileTransfer;
+import tools.dynamia.ui.ProgressRunner;
 import tools.dynamia.ui.UIFacades;
 import tools.dynamia.ui.UIMessages;
 
@@ -84,7 +85,8 @@ public final class ReplayExecutor {
         var interactions = new ReplayInteractions(session);
         Object result = transactions().run(
                 () -> ReplaySession.run(session, () -> UIMessages.withDisplayer(interactions,
-                        () -> UIFacades.with(FileTransfer.class, new ReplayFileTransfer(session), () -> body.apply(original)))),
+                        () -> UIFacades.with(FileTransfer.class, new ReplayFileTransfer(session),
+                                () -> UIFacades.with(ProgressRunner.class, new ReplayProgressRunner(session), () -> body.apply(original))))),
                 () -> !interactions.isPending());
 
         if (interactions.isPending()) {

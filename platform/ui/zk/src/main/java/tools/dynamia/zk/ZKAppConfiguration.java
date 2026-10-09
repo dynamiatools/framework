@@ -29,9 +29,11 @@ import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.ui.FileTransfer;
 import tools.dynamia.ui.MessageDisplayer;
+import tools.dynamia.ui.ProgressRunner;
 import tools.dynamia.ui.icons.IconsProvider;
 import tools.dynamia.zk.ui.MessageNotification;
 import tools.dynamia.zk.ui.ZKFileTransfer;
+import tools.dynamia.zk.ui.ZKProgressRunner;
 import tools.dynamia.zk.ui.ZIconsProvider;
 import tools.dynamia.zk.util.ZKUtil;
 
@@ -64,6 +66,12 @@ public class ZKAppConfiguration {
     @ConditionalOnMissingBean(FileTransfer.class)
     public FileTransfer fileTransfer() {
         return new ZKFileTransfer();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ProgressRunner.class)
+    public ProgressRunner progressRunner() {
+        return new ZKProgressRunner();
     }
 
 

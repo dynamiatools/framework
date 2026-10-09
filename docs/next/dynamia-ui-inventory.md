@@ -66,6 +66,13 @@ Two facts stand out:
 2. **The biggest remaining need is one new facade, `UIViews`**: about 100 actions show a form or table in a dialog
    (`ZKUtil.showDialog` is called 143 times, `Viewer` is imported by 59 actions). It is the facade to build first.
 
+## Corrections found while implementing
+
+- `ExportCSVAction`, `ExportExcelAction`, `ExportJsonAction` (`platform/ui/zk`) were counted EASY (files + progress). They
+  are not: they read the data from ZK's `CrudController` (query result, `TreeModel`). They are `runtime=CLIENT` candidates
+  (a front end exports what it already shows), not conversion targets.
+- `ReloadEntityFileStoragesAction` was ZK-bound only by unused imports (FREE after cleaning them).
+
 ## Where the work is: leverage points
 
 Abstract bases that carry ZK for many subclasses. Fixing the base converts all of its subclasses at once:

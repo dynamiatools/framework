@@ -18,8 +18,7 @@ import tools.dynamia.modules.entityfile.domain.EntityFile;
 import tools.dynamia.modules.entityfile.domain.enums.EntityFileState;
 import tools.dynamia.modules.entityfile.local.LocalEntityFileStorage;
 import tools.dynamia.ui.UIMessages;
-import tools.dynamia.zk.ui.LongOperationMonitorWindow;
-import tools.dynamia.zk.util.LongOperation;
+import tools.dynamia.ui.UIProgress;
 import tools.dynamia.zk.util.ZKUtil;
 
 import java.util.ArrayList;
@@ -59,18 +58,11 @@ class MoveEntityFileLocalToRemoteStorageAction extends AbstractConfigPageAction 
     }
 
     public void move(EntityFileStorage otherStorage, List<Long> accounts, String title) {
-        var monitor = new ProgressMonitor();
-
-        var longOp = LongOperation.create()
-                .execute(() -> moveFiles(accounts, monitor, otherStorage))
-                .onFinish(() -> UIMessages.showMessage("Moving files completed"))
-                .onException(e -> UIMessages.showMessage("Error: " + e.getMessage()))
-                .start();
-
-        LongOperationMonitorWindow.show(title, longOp, monitor)
-                .setMessageTemplate("Moving files to " + otherStorage.getName() + ": {0} / {1}");
+        UIProgress.run(title, "Moving files to " + otherStorage.getName() + ": {0} / {1}",
+                monitor -> moveFiles(accounts, monitor, otherStorage),
+                () -> UIMessages.showMessage("Moving files completed"),
+                e -> UIMessages.showMessage("Error: " + e.getMessage()));
     }
-
 
     private void moveFiles(List<Long> accounts, ProgressMonitor monitor, EntityFileStorage otherStorage) {
         otherStorage.reloadParams();

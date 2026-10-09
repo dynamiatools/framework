@@ -38,6 +38,7 @@ public final class ReplaySession {
     private final List<Object> answers;
     private final List<ReplayInteractions.Notification> notifications = new ArrayList<>();
     private final List<Download> downloads = new ArrayList<>();
+    private String nonRepeatable;
     private int cursor;
     private ActionFlowStep pending;
 
@@ -88,7 +89,23 @@ public final class ReplaySession {
         if (cursor < answers.size()) {
             onAnswer.accept(answers.get(cursor++));
         } else {
+            if (nonRepeatable != null) {
+                throw new IllegalStateException(nonRepeatable + " already did its work in this pass, so it must be the last "
+                        + "interaction of the action: the action runs again for every answer of the user");
+            }
             pending = question;
+        }
+    }
+
+    /**
+     * Declares that the action did something that must not happen twice (long work done inside the request). Questions
+     * asked later in the same pass fail, because answering them would run the action, and the work, again.
+     *
+     * @param what who did it, for the error message
+     */
+    public void markNonRepeatable(String what) {
+        if (nonRepeatable == null) {
+            nonRepeatable = what;
         }
     }
 
