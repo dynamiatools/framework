@@ -33,8 +33,7 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: |
-        env | grep -iE "maven|timestamp|source_date|^CI|JAVA" | grep -viE "token|secret|password" || true
-        cat ~/.m2/settings.xml | sed -E 's/>[^<]*(token|secret)[^<]*</>***</I' || true
-        mvn -B -q help:effective-pom -pl platform/core/commons -Doutput=/tmp/eff.xml || true
-        sed -n 20,75p /tmp/eff.xml; ls -a . .mvn 2>/dev/null | head -40; git log -3 --format=%H%n%s
-        mvn -B -DskipTests -pl platform/core/commons -am -Dmaven.compiler.verbose=true compile --file pom.xml || true
+        mvn -v
+        which -a mvn
+        mvn -B -X -pl platform/core/commons validate 2>&1 | grep -n -iE "outputTimestamp|1980-02-01" | head -10 || true
+        mvn -B -X -pl platform/core/commons validate 2>&1 | grep -iE "Using settings|user settings|global settings|Reading (user|global)" | head -5 || true
