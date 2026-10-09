@@ -61,6 +61,15 @@ This folder is organized to help frontend developers understand:
 - **For:** Frontend developers integrating ZK pages into a Vue shell
 - **Contains:** `<DynamiaZkEmbed>` / `<dynamia-embed mode="inline">` usage, how the mount works, constraints
 
+#### 6. **[Field Components](./FIELD_COMPONENTS.md)**
+- **Purpose:** How view descriptor fields become Vue components (forms and table cells)
+- **For:** Anyone building a Vue backoffice with `@dynamia-tools/vue`
+- **Contains:** component resolution order, what `ApiFieldCustomizer` sends, many-to-many pickers, `bindings`
+
+#### 7. **[UI Ports for Actions](../design/UI_PORTS_FOR_ACTIONS.md)** (open problem, proposal)
+- **Purpose:** Why the Vue CRUD offers fewer actions than ZK, and the plan to close the gap
+- **Contains:** inventory of the 20 ZK-bound `CrudAction`s, intent-based UI ports, suggested order
+
 ---
 
 ## 🎯 How to Use This Documentation

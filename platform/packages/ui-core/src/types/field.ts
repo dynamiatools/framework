@@ -23,6 +23,7 @@ export const FieldComponent = {
     EntityPicker: 'entitypicker',
     EntityRefPicker: 'entityrefpicker',
     EntityRefLabel: 'entityreflabel',
+    EntityRefMultiPicker: 'entityrefmultipicker',
     Label: 'label',
     EnumLabel: 'enumlabel',
     CrudView: 'crudview',

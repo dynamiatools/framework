@@ -29,8 +29,8 @@ import { FieldComponents } from '@dynamia-tools/ui-core';
 const props = defineProps<{
   /** The resolved field descriptor */
   field: ResolvedField;
-  /** The parent FormView */
-  view: FormView;
+  /** The parent FormView (absent when the field renders a table cell) */
+  view?: FormView;
   /** Current field value */
   modelValue?: unknown;
   /** Whether the field is in read-only mode */
@@ -54,6 +54,7 @@ const componentMap: Record<string, () => Promise<Component>> = {
   [FieldComponents.Checkbox]: () => import('./fields/Checkbox.vue'),
   [FieldComponents.EntityPicker]: () => import('./fields/EntityPicker.vue'),
   [FieldComponents.EntityRefPicker]: () => import('./fields/EntityRefPicker.vue'),
+  [FieldComponents.EntityRefMultiPicker]: () => import('./fields/EntityRefMultiPicker.vue'),
   [FieldComponents.EntityRefLabel]: () => import('./fields/EntityRefLabel.vue'),
   [FieldComponents.Label]: () => import('./fields/Label.vue'),
   [FieldComponents.EnumLabel]: () => import('./fields/EnumLabel.vue'),

@@ -54,10 +54,30 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter implements Log
         }
 
 
-        // Validar el token
-        doJwtLogin(token, request, response);
+        // Token requests are stateless: a session only created while handling this request (session-scoped
+        // beans such as CurrentUser) must not outlive it, or every cookie-less client leaks one session per call.
+        boolean hadSession = request.getSession(false) != null;
+        try {
+            // Validar el token
+            doJwtLogin(token, request, response);
 
-        filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response);
+        } finally {
+            if (!hadSession) {
+                invalidateSession(request);
+            }
+        }
+    }
+
+    private static void invalidateSession(HttpServletRequest request) {
+        var session = request.getSession(false);
+        if (session != null) {
+            try {
+                session.invalidate();
+            } catch (IllegalStateException ignored) {
+                // already invalidated
+            }
+        }
     }
 
     public SecurityContext doJwtLogin(String token, HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {

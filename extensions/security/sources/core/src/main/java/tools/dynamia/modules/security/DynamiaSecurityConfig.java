@@ -21,6 +21,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -166,7 +167,10 @@ public class DynamiaSecurityConfig {
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http, AccountServiceAPI accountServiceAPI, JWTService jwtService) throws Exception {
 
         http.securityMatcher("/api/**")
-                .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        // JWT requests must never rotate the JSESSIONID: the browser shares that cookie with the
+                        // stateful web chain (the shell at "/"), and parallel API calls would leave it with a stale id.
+                        .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::none))
                 .csrf(AbstractHttpConfigurer::disable)
                 .securityContext(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth

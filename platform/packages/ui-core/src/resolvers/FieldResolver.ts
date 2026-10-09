@@ -88,6 +88,11 @@ export class FieldResolver {
     // EntityRefPicker needs params.entityAlias to search `/api/entities/{alias}/search` — only
     // use it when the descriptor actually configured that; otherwise EntityRefLabel is the safe
     // default (read-only display of the already-loaded reference, works with zero extra config).
+    // Collections of entities (many-to-many) are picked as a list of references.
+    if (field.entity && field.collection) {
+      return params['entityAlias'] ? FieldComponent.EntityRefMultiPicker : FieldComponent.Label;
+    }
+
     if (field.entity) {
       return params['entityAlias'] ? FieldComponent.EntityRefPicker : FieldComponent.EntityRefLabel;
     }

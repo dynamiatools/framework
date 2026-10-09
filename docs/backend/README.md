@@ -18,6 +18,7 @@ This documentation is organized into the following sections:
 ### Development & Best Practices
 - **[Development Patterns](./DEVELOPMENT_PATTERNS.md)** - Common patterns, anti-patterns, and best practices
 - **[Navigation Session](./NAVIGATION_SESSION.md)** - Multi-tab/iframe navigation scope and cross-request hand-off
+- **[Web Security & Sessions](./WEB_SECURITY_SESSIONS.md)** - JWT API chain vs session web chain, `JSESSIONID` rules, `CurrentUser` reuse
 - **[Advanced Topics](./ADVANCED_TOPICS.md)** - Spring integration, modularity, custom extensions, microfrontend integration, and security
 - **[Examples & Integration](./EXAMPLES.md)** - Code examples for common tasks and real-world scenarios
 

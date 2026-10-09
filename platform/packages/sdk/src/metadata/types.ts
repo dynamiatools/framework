@@ -358,6 +358,9 @@ export interface ViewField {
     action?: ActionReference;
     entity?: boolean;
     enum?: boolean;
+    /** The field holds a collection (e.g. a many-to-many `Set`); `genericType` is its element class */
+    collection?: boolean;
+    genericType?: string;
     localizedLabel?: string;
     localizedDescription?: string;
     /** Arbitrary field parameters — absent when empty (`@JsonInclude(NON_DEFAULT)`) */
