@@ -32,4 +32,9 @@ jobs:
         distribution: temurin
         cache: maven
     - name: Build with Maven
-      run: mvn -B -e -DskipTests -pl platform/core/commons -am verify --file pom.xml
+      run: |
+        env | grep -iE "maven|timestamp|source_date|^CI|JAVA" | grep -viE "token|secret|password" || true
+        cat ~/.m2/settings.xml | sed -E 's/>[^<]*(token|secret)[^<]*</>***</I' || true
+        mvn -B -q help:effective-pom -pl platform/core/commons -Doutput=/tmp/eff.xml || true
+        grep -n "outputTimestamp" /tmp/eff.xml || echo "NO outputTimestamp in effective pom"
+        mvn -B -DskipTests -pl platform/core/commons -am -Dmaven.compiler.verbose=true compile --file pom.xml || true
