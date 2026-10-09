@@ -217,6 +217,7 @@ export type ActionFlowStepType =
     | 'INPUT'
     | 'DIALOG'
     | 'UPLOAD'
+    | 'CHOICE'
     | 'NOTIFY'
     | 'REDIRECT'
     | 'CALL'
@@ -238,7 +239,8 @@ export interface FlowUploadedFile {
  *
  * `data`'s shape depends on `type`: the result for `DONE`, `{ url, awaitReturn }` for `REDIRECT`,
  * `{ action, ...}` for `CALL`, `{ component, ... }` for `CUSTOM`, prefill data for `DIALOG`, `{ accept, multiple }` for
- * `UPLOAD` (answered with a list of {@link FlowUploadedFile}), or absent
+ * `UPLOAD` (answered with a list of {@link FlowUploadedFile}), `{ options: string[], multiple }` for `CHOICE`
+ * (answered with the list of positions chosen), or absent
  * for `CONFIRM`/`INPUT`/`NOTIFY`.
  *
  * `REDIRECT` (terminal; `awaitReturn: true` unsupported) and `CALL` (`data.action`, optional `data.className`)

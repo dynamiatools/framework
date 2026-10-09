@@ -6,7 +6,9 @@ import tools.dynamia.actions.ActionFlowStep;
 import tools.dynamia.actions.ActionFlows;
 import tools.dynamia.actions.flow.FlowTokenException;
 import tools.dynamia.integration.Containers;
+import tools.dynamia.ui.ChoicesProvider;
 import tools.dynamia.ui.FileTransfer;
+import tools.dynamia.ui.NavigationProvider;
 import tools.dynamia.ui.ProgressRunner;
 import tools.dynamia.ui.UIFacades;
 import tools.dynamia.ui.UIMessages;
@@ -87,7 +89,9 @@ public final class ReplayExecutor {
                 () -> ReplaySession.run(session, () -> UIMessages.withDisplayer(interactions,
                         () -> UIFacades.with(FileTransfer.class, new ReplayFileTransfer(session),
                                 () -> UIFacades.with(ProgressRunner.class, new ReplayProgressRunner(session),
-                                        () -> bindAll(session, binders(), 0, () -> body.apply(original)))))),
+                                        () -> UIFacades.with(ChoicesProvider.class, new ReplayChoicesProvider(session),
+                                                () -> UIFacades.with(NavigationProvider.class, new ReplayNavigationProvider(session),
+                                                        () -> bindAll(session, binders(), 0, () -> body.apply(original)))))))),
                 () -> !interactions.isPending());
 
         if (interactions.isPending()) {
@@ -100,7 +104,9 @@ public final class ReplayExecutor {
         var notifications = interactions.notifications();
         var last = notifications.isEmpty() ? null : notifications.get(notifications.size() - 1);
         var done = last == null ? ActionFlowStep.done(result) : ActionFlowStep.done(result, last.message(), last.type());
-        var response = ActionFlows.toResponse(flowId, actionId, Map.of(), done);
+        var finalStep = session.redirectUrl() == null ? done
+                : ActionFlowStep.redirect(session.redirectUrl(), false, session.redirectInNewWindow());
+        var response = ActionFlows.toResponse(flowId, actionId, Map.of(), finalStep);
         var downloads = session.downloads();
         if (!notifications.isEmpty() || !downloads.isEmpty()) {
             var params = new HashMap<String, Object>();

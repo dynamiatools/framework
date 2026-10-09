@@ -27,13 +27,17 @@ import org.zkoss.zk.ui.http.DHtmlLayoutServlet;
 import org.zkoss.zk.ui.http.HttpSessionListener;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
+import tools.dynamia.ui.ChoicesProvider;
 import tools.dynamia.ui.FileTransfer;
 import tools.dynamia.ui.MessageDisplayer;
+import tools.dynamia.ui.NavigationProvider;
 import tools.dynamia.ui.ProgressRunner;
 import tools.dynamia.ui.ViewsProvider;
 import tools.dynamia.ui.icons.IconsProvider;
 import tools.dynamia.zk.ui.MessageNotification;
+import tools.dynamia.zk.ui.ZKChoicesProvider;
 import tools.dynamia.zk.ui.ZKFileTransfer;
+import tools.dynamia.zk.ui.ZKNavigationProvider;
 import tools.dynamia.zk.ui.ZKProgressRunner;
 import tools.dynamia.zk.ui.ZKViewsProvider;
 import tools.dynamia.zk.ui.ZIconsProvider;
@@ -80,6 +84,18 @@ public class ZKAppConfiguration {
     @ConditionalOnMissingBean(ViewsProvider.class)
     public ViewsProvider viewsProvider() {
         return new ZKViewsProvider();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ChoicesProvider.class)
+    public ChoicesProvider choicesProvider() {
+        return new ZKChoicesProvider();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(NavigationProvider.class)
+    public NavigationProvider navigationProvider() {
+        return new ZKNavigationProvider();
     }
 
 

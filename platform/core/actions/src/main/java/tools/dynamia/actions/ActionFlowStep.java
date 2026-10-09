@@ -118,6 +118,15 @@ public class ActionFlowStep implements Serializable {
         return step;
     }
 
+    /**
+     * Same as {@link #redirect(String, boolean)}, asking the client to open the URL in a new window or tab.
+     */
+    public static ActionFlowStep redirect(String url, boolean awaitReturn, boolean newWindow) {
+        var step = redirect(url, awaitReturn);
+        step.data = Map.of("url", url, "awaitReturn", awaitReturn, "newWindow", newWindow);
+        return step;
+    }
+
     /** Shorthand for {@link #redirect(String, boolean)} that does not wait for the client to come back. */
     public static ActionFlowStep redirect(String url) {
         return redirect(url, false);
@@ -136,6 +145,24 @@ public class ActionFlowStep implements Serializable {
         if (data != null) {
             payload.putAll(data);
         }
+        step.data = payload;
+        return step;
+    }
+
+    /**
+     * The client asks the user to choose among {@code labels} and answers with the positions chosen.
+     *
+     * @param title    title of the picker, may be null
+     * @param labels   what to show for each option; the answer refers to them by position
+     * @param multiple whether several can be chosen
+     */
+    public static ActionFlowStep choice(String title, java.util.List<String> labels, boolean multiple) {
+        var step = new ActionFlowStep();
+        step.type = ActionFlowStepType.CHOICE;
+        step.title = title;
+        var payload = new HashMap<String, Object>();
+        payload.put("options", labels);
+        payload.put("multiple", multiple);
         step.data = payload;
         return step;
     }

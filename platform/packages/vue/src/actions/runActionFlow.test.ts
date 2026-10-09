@@ -227,3 +227,41 @@ describe('runActionFlow DIALOG view class', () => {
     expect(calls.main[1]!.data).toEqual({ amount: 10 });
   });
 });
+
+describe('runActionFlow CHOICE and new window redirects', () => {
+  it('answers a CHOICE step with the positions chosen', async () => {
+    const choice = flowResponse(step({ type: 'CHOICE', title: 'Storage', data: { options: ['LOCAL', 'S3'], multiple: false } }));
+    const { client, calls } = fakeClient({ main: [choice, flowResponse(step({ type: 'DONE' }))] });
+    const choose = vi.fn(async () => [1]);
+
+    await runActionFlow(client, action, {}, handlers({ choose }));
+
+    expect(choose).toHaveBeenCalledWith({ title: 'Storage', options: ['LOCAL', 'S3'], multiple: false });
+    expect(calls.main[1]!.data).toEqual([1]);
+  });
+
+  it('answers an empty list when the user cancels the choice', async () => {
+    const { client, calls } = fakeClient({
+      main: [flowResponse(step({ type: 'CHOICE', data: { options: ['A'], multiple: true } })), flowResponse(step({ type: 'DONE' }))],
+    });
+
+    await runActionFlow(client, action, {}, handlers({ choose: async () => null }));
+
+    expect(calls.main[1]!.data).toEqual([]);
+  });
+
+  it('fails clearly when there is no choose handler', async () => {
+    const { client } = fakeClient({ main: [flowResponse(step({ type: 'CHOICE', data: { options: [] } }))] });
+    await expect(runActionFlow(client, action, {}, handlers())).rejects.toThrow(/choose/);
+  });
+
+  it('tells the navigate handler to open a new window', async () => {
+    const redirect = flowResponse(step({ type: 'REDIRECT', data: { url: '/files/1/download', awaitReturn: false, newWindow: true } }));
+    const { client } = fakeClient({ main: [redirect] });
+    const navigate = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ navigate }));
+
+    expect(navigate).toHaveBeenCalledWith('/files/1/download', { newWindow: true });
+  });
+});

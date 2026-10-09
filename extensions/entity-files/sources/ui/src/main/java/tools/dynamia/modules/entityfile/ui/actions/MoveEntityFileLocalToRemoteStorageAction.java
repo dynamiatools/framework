@@ -17,9 +17,9 @@ import tools.dynamia.modules.entityfile.EntityFileStorage;
 import tools.dynamia.modules.entityfile.domain.EntityFile;
 import tools.dynamia.modules.entityfile.domain.enums.EntityFileState;
 import tools.dynamia.modules.entityfile.local.LocalEntityFileStorage;
+import tools.dynamia.ui.UIChoices;
 import tools.dynamia.ui.UIMessages;
 import tools.dynamia.ui.UIProgress;
-import tools.dynamia.zk.util.ZKUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,12 +45,7 @@ class MoveEntityFileLocalToRemoteStorageAction extends AbstractConfigPageAction 
     public void actionPerformed(ActionEvent evt) {
         var otherStorages = Containers.get().findObjects(EntityFileStorage.class, s -> !LocalEntityFileStorage.ID.equals(s.getId()));
 
-        ZKUtil.showListboxSelector("Select new Storage", new ArrayList(otherStorages), event -> {
-            var otherStorage = (EntityFileStorage) event.getSelectedObjects().stream().findFirst().orElse(null);
-            if (otherStorage == null) {
-                return;
-            }
-
+        UIChoices.chooseOne("Select new Storage", new ArrayList<>(otherStorages), EntityFileStorage::getName, otherStorage -> {
             List<Long> accounts = findFilesAccounts();
             UIMessages.showQuestion("Are you sure want to move files from " + accounts.size() + " accounts to " + otherStorage,
                     () -> move(otherStorage, accounts, "Moving files to " + otherStorage));

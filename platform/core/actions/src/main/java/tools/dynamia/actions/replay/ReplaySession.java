@@ -38,6 +38,8 @@ public final class ReplaySession {
     private final List<Object> answers;
     private final List<ReplayInteractions.Notification> notifications = new ArrayList<>();
     private final List<Download> downloads = new ArrayList<>();
+    private String redirectUrl;
+    private boolean redirectInNewWindow;
     private String nonRepeatable;
     private int cursor;
     private ActionFlowStep pending;
@@ -126,6 +128,26 @@ public final class ReplaySession {
         if (pending == null) {
             downloads.add(new Download(name, contentType, content));
         }
+    }
+
+    /**
+     * Records where the user must go when the action ends. Ignored once the pass has stopped at a question; the first
+     * redirect wins.
+     */
+    public void redirect(String url, boolean newWindow) {
+        if (pending == null && redirectUrl == null) {
+            redirectUrl = url;
+            redirectInNewWindow = newWindow;
+        }
+    }
+
+    /** @return the URL the user must go to when the action ended, or {@code null} */
+    public String redirectUrl() {
+        return redirectUrl;
+    }
+
+    public boolean redirectInNewWindow() {
+        return redirectInNewWindow;
     }
 
     /** @return the files of this pass, in order; they are only meaningful when the pass completed */

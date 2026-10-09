@@ -3,8 +3,6 @@ examples/demo-zk-books/src/main/java/mybookstore/actions/LongOperationActionDemo
 extensions/email-sms/sources/ui/src/main/java/tools/dynamia/modules/email/ui/actions/PreviewEmailTemplateAction.java
 extensions/email-sms/sources/ui/src/main/java/tools/dynamia/modules/email/ui/actions/TestEmailAccountAction.java
 extensions/email-sms/sources/ui/src/main/java/tools/dynamia/modules/email/ui/actions/TestSMSAction.java
-extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/DownloadFileAction.java
-extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/MoveEntityFileLocalToRemoteStorageAction.java
 extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/NewDirectoryAction.java
 extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/NewFileAction.java
 extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/ViewFileURLAction.java

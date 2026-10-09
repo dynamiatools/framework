@@ -31,7 +31,12 @@ export interface FlowStepHandlers {
    * **Experimental.** Performs the navigation for a `REDIRECT` step. Optional: defaults to
    * `window.location.assign(url)`. Apps with a client-side router can supply a router-aware version.
    */
-  navigate?: (url: string) => void | Promise<void>;
+  navigate?: (url: string, options?: { newWindow?: boolean }) => void | Promise<void>;
+  /**
+   * Renders a `CHOICE` step: shows the labels and returns the positions chosen (empty or `null` if the user cancels).
+   * Required for `CHOICE` steps; there is no sensible default look.
+   */
+  choose?: (options: { title?: string; options: string[]; multiple: boolean }) => Promise<number[] | null>;
   /**
    * Renders an `UPLOAD` step: asks the user for files and returns them (Base64), or `null`/`[]` if they cancel.
    * Optional: defaults to the browser's file picker ({@link browserPickFiles}).
@@ -97,6 +102,7 @@ async function driveFlow(
     let answer: unknown;
 
     if (step.type === 'REDIRECT') {
+      await saveDownloads(response, handlers);
       await redirect(step, handlers);
       return response; // terminal — see runActionFlow
     }
@@ -140,7 +146,7 @@ function isSafeRedirectUrl(url: string): boolean {
 }
 
 async function redirect(step: ActionFlowStep, handlers: FlowStepHandlers): Promise<void> {
-  const { url, awaitReturn } = (step.data ?? {}) as { url?: unknown; awaitReturn?: unknown };
+  const { url, awaitReturn, newWindow } = (step.data ?? {}) as { url?: unknown; awaitReturn?: unknown; newWindow?: unknown };
   if (typeof url !== 'string' || !url) {
     throw new Error('runActionFlow: REDIRECT flow step is missing "data.url"');
   }
@@ -151,9 +157,13 @@ async function redirect(step: ActionFlowStep, handlers: FlowStepHandlers): Promi
     throw new Error(`runActionFlow: REDIRECT to "${url}" refused — only relative and http(s) URLs are allowed`);
   }
   if (handlers.navigate) {
-    await handlers.navigate(url);
+    await (newWindow === true ? handlers.navigate(url, { newWindow: true }) : handlers.navigate(url));
   } else if (typeof window !== 'undefined') {
-    window.location.assign(url);
+    if (newWindow === true) {
+      window.open(url, '_blank', 'noopener');
+    } else {
+      window.location.assign(url);
+    }
   } else {
     throw new Error('runActionFlow: no "navigate" handler provided for flow step type "REDIRECT"');
   }
@@ -230,6 +240,18 @@ async function renderFlowStep(
 
     case 'DIALOG':
       return renderDialogStep(step, handlers, client, className);
+
+    case 'CHOICE': {
+      if (!handlers.choose) {
+        throw new Error('runActionFlow: no "choose" handler provided for flow step type "CHOICE"');
+      }
+      const { options, multiple } = (step.data ?? {}) as { options?: string[]; multiple?: boolean };
+      return (await handlers.choose({
+        ...(step.title ? { title: step.title } : {}),
+        options: options ?? [],
+        multiple: multiple === true,
+      })) ?? [];
+    }
 
     case 'UPLOAD': {
       const { accept, multiple } = (step.data ?? {}) as { accept?: string | null; multiple?: boolean };
