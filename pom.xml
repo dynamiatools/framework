@@ -137,6 +137,17 @@
                     <encoding>${source.encoding}</encoding>
                     <parameters>true</parameters>
                 </configuration>
+                <dependencies>
+                    <!-- Maven 3.10 sets project.build.outputTimestamp by default, which makes the compiler plugin
+                         rewrite module-info.class with its own ASM (9.7.1). That version cannot read Java 25 class
+                         files ("Unsupported class file major version 69"). Plugin dependencies are inherited by
+                         every module, including those that redeclare the plugin. -->
+                    <dependency>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm</artifactId>
+                        <version>9.9.1</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
