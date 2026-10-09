@@ -1,0 +1,9 @@
+view: entityfilters
+beanClass: tools.dynamia.demos.movies.domain.Movie
+autofields: false
+
+fields:
+  title:
+  year:
+  certification:
+  featured:

@@ -1,0 +1,10 @@
+view: table
+beanClass: tools.dynamia.demos.movies.domain.Credit
+autofields: false
+
+fields:
+  movie:
+  person:
+  role:
+  characterName:
+  billing:

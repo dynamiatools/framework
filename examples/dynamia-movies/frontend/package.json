@@ -1,0 +1,34 @@
+{
+  "name": "dynamia-movies",
+  "private": true,
+  "version": "26.10.1-SNAPSHOT",
+  "description": "Public movie site (Vue 3) for the Dynamia Movies demo. It reads the automatic REST API of DynamiaTools.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "type-check": "vue-tsc --noEmit",
+    "build:insights": "vite build --config vite.insights.config.ts"
+  },
+  "dependencies": {
+    "@dynamia-tools/dashboard-sdk": "file:../../../extensions/dashboard/packages/dashboard-sdk",
+    "@dynamia-tools/dashboard-vue": "file:../../../extensions/dashboard/packages/dashboard-vue",
+    "@dynamia-tools/reports-sdk": "file:../../../extensions/reports/packages/reports-sdk",
+    "@dynamia-tools/reports-vue": "file:../../../extensions/reports/packages/reports-vue",
+    "@dynamia-tools/sdk": "file:../../../platform/packages/sdk",
+    "@dynamia-tools/vue": "file:../../../platform/packages/vue",
+    "chart.js": "^4.4.0",
+    "vue": "^3.5.26",
+    "vue-router": "^5.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@vitejs/plugin-vue": "^6.0.9",
+    "@vue/tsconfig": "^0.7.0",
+    "tailwindcss": "^4.1.18",
+    "typescript": "~5.7.3",
+    "vite": "^8.3.0",
+    "vue-tsc": "^2.2.12"
+  }
+}

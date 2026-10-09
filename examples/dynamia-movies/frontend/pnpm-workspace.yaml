@@ -1,0 +1,11 @@
+# This example runs against the SNAPSHOT sources of the monorepo, not against published npm versions.
+# The extension packages declare `workspace:*` between them; outside the monorepo workspace those
+# references are redirected to the local folders so they resolve.
+overrides:
+  '@dynamia-tools/dashboard-sdk': file:../../../extensions/dashboard/packages/dashboard-sdk
+  '@dynamia-tools/reports-sdk': file:../../../extensions/reports/packages/reports-sdk
+  '@dynamia-tools/sdk': file:../../../platform/packages/sdk
+  '@dynamia-tools/ui-core': file:../../../platform/packages/ui-core
+  '@dynamia-tools/vue': file:../../../platform/packages/vue
+allowBuilds:
+  esbuild: true

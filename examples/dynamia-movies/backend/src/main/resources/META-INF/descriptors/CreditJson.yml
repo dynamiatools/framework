@@ -1,0 +1,16 @@
+view: json
+beanClass: tools.dynamia.demos.movies.domain.Credit
+autofields: false
+
+fields:
+  movie.id:
+  movie.title:
+  movie.year:
+  movie.rating:
+  movie.directorName:
+  movie.genresText:
+  person.id:
+  person.name:
+  role:
+  characterName:
+  billing:
