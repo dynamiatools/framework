@@ -68,6 +68,10 @@ public class ReportGroup extends SimpleEntitySaaS {
         this.module = module;
     }
 
+    /**
+     * Kept for compatibility with callers and descriptors; same value as the {@code is} accessor.
+     * Do not annotate it with {@code @JsonIgnore}: Jackson would drop the whole property.
+     */
     public boolean getActive() {
         return active;
     }

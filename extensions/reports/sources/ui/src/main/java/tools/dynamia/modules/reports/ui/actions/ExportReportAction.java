@@ -50,7 +50,11 @@ public class ExportReportAction extends AbstractCrudAction {
         if (report != null) {
             try {
                 File file = service.exportReport(crudService().load(Report.class, report.getId()));
-                Filedownload.save(file, "text/json");
+                try {
+                    Filedownload.save(java.nio.file.Files.readAllBytes(file.toPath()), "text/json", file.getName());
+                } finally {
+                    file.delete();
+                }
             } catch (Exception e) {
                 UIMessages.showMessage("Error exporting report: " + e.getMessage(), MessageType.ERROR);
             }

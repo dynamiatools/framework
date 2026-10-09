@@ -36,6 +36,9 @@ fields:
       height: '400px !important'
   exportEndpoint:
   endpointName:
+  accessRoles:
+    params:
+      span: 2
 
   filters:
     component: crudview

@@ -3,6 +3,7 @@ package tools.dynamia.modules.reports.core;
 import tools.dynamia.integration.CacheManagerUtils;
 import tools.dynamia.modules.reports.core.domain.Report;
 import tools.dynamia.modules.reports.core.domain.ReportGroup;
+import tools.dynamia.modules.reports.core.security.ReportAccess;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -15,7 +16,7 @@ public class Reports {
     public static List<Reports> loadAll() {
         List<Reports> reports = new ArrayList<>();
 
-        Report.findActives().forEach(rp -> {
+        ReportAccess.filter(Report.findActives()).forEach(rp -> {
             Reports currentReports = reports.stream()
                     .filter(report -> report.getGroup().getName().equals(rp.getGroup().getName()))
                     .findFirst()

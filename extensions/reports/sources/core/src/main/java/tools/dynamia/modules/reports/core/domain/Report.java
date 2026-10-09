@@ -17,6 +17,7 @@ import tools.dynamia.modules.reports.core.domain.enums.DataType;
 import tools.dynamia.modules.reports.core.services.ReportsService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -56,6 +57,12 @@ public class Report extends SimpleEntitySaaS implements Transferable<ReportDTO> 
 
     private String endpointName;
 
+    /**
+     * Comma separated roles allowed to see and run this report. Empty means any user.
+     */
+    @Column(length = 500)
+    private String accessRoles;
+
     @ManyToOne
     @JsonIgnore
     private ReportDataSourceConfig dataSourceConfig;
@@ -81,6 +88,25 @@ public class Report extends SimpleEntitySaaS implements Transferable<ReportDTO> 
     @Override
     public String toString() {
         return name;
+    }
+
+    public String getAccessRoles() {
+        return accessRoles;
+    }
+
+    public void setAccessRoles(String accessRoles) {
+        this.accessRoles = accessRoles;
+    }
+
+    /**
+     * @return the parsed {@link #getAccessRoles()}, empty when the report is open to any user
+     */
+    @JsonIgnore
+    public List<String> getAccessRoleNames() {
+        if (accessRoles == null || accessRoles.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(accessRoles.split(",")).map(String::trim).filter(r -> !r.isEmpty()).toList();
     }
 
     public ReportGroup getGroup() {
@@ -147,6 +173,10 @@ public class Report extends SimpleEntitySaaS implements Transferable<ReportDTO> 
         this.charts = charts;
     }
 
+    /**
+     * Kept for compatibility with callers and descriptors; same value as the {@code is} accessor.
+     * Do not annotate it with {@code @JsonIgnore}: Jackson would drop the whole property.
+     */
     public boolean getAutofields() {
         return autofields;
     }
@@ -159,6 +189,10 @@ public class Report extends SimpleEntitySaaS implements Transferable<ReportDTO> 
         this.autofields = autofields;
     }
 
+    /**
+     * Kept for compatibility with callers and descriptors; same value as the {@code is} accessor.
+     * Do not annotate it with {@code @JsonIgnore}: Jackson would drop the whole property.
+     */
     public boolean getActive() {
         return active;
     }
@@ -171,6 +205,10 @@ public class Report extends SimpleEntitySaaS implements Transferable<ReportDTO> 
         this.active = active;
     }
 
+    /**
+     * Kept for compatibility with callers and descriptors; same value as the {@code is} accessor.
+     * Do not annotate it with {@code @JsonIgnore}: Jackson would drop the whole property.
+     */
     public boolean getChartable() {
         return chartable;
     }
@@ -250,7 +288,7 @@ public class Report extends SimpleEntitySaaS implements Transferable<ReportDTO> 
     @JsonIgnore
     @Transient
     public String getFullEndpoint() {
-        if (exportEndpoint && endpointName != null && !endpointName.isBlank()) {
+        if (getExportEndpoint() && endpointName != null && !endpointName.isBlank() && group != null) {
             if (group.getEndpointName() != null && !group.getEndpointName().isBlank()) {
                 return "/api/reports/" + group.getEndpointName() + "/" + getEndpointName();
             } else {

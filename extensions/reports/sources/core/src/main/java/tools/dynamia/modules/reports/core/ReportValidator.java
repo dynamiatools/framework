@@ -5,6 +5,7 @@ import tools.dynamia.domain.Validator;
 import tools.dynamia.domain.ValidatorUtil;
 import tools.dynamia.integration.sterotypes.Provider;
 import tools.dynamia.modules.reports.core.domain.Report;
+import tools.dynamia.modules.reports.core.domain.ReportFilter;
 
 @Provider
 public class ReportValidator implements Validator<Report> {
@@ -13,8 +14,21 @@ public class ReportValidator implements Validator<Report> {
     public void validate(Report report) throws ValidationError {
 
         if (report.getExportEndpoint()) {
+            if (report.getGroup() == null) {
+                throw new ValidationError("Report group is required when export endpoint is enabled");
+            }
             ValidatorUtil.validateEmpty(report.getGroup().getEndpointName(), "Group endpoint name is required when export endpoint is enabled");
             ValidatorUtil.validateEmpty(report.getEndpointName(), "Endpoint name is required when export endpoint is enabled");
+        }
+
+        ReportQueryValidator.validateQuery(report.getQueryScript(), report.getQueryLang());
+        if (report.getFilters() != null) {
+            for (ReportFilter filter : report.getFilters()) {
+                ReportQueryValidator.validateFragment(filter.getCondition());
+                if (filter.getQueryValues() != null && !filter.getQueryValues().isBlank()) {
+                    ReportQueryValidator.validateQuery(filter.getQueryValues(), report.getQueryLang());
+                }
+            }
         }
     }
 }
