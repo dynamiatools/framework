@@ -25,7 +25,9 @@ import org.zkoss.zul.West;
 import org.zkoss.zul.Window;
 import tools.dynamia.actions.ActionGroup;
 import tools.dynamia.actions.ActionRenderer;
+import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.actions.ReadableOnly;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.AbstractCrudAction;
@@ -42,6 +44,7 @@ import tools.dynamia.zk.crud.ui.EntityFiltersPanel;
 import tools.dynamia.zk.util.ZKUtil;
 
 @InstallAction
+@RunsOn(ActionRuntime.CLIENT)
 public class FiltersAction extends AbstractCrudAction implements ReadableOnly {
 
     private EntityFiltersPanel filtersPanel;

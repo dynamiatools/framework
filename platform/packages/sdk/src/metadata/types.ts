@@ -118,6 +118,9 @@ export interface ApplicationMetadataActions {
     actions: ActionMetadata[];
 }
 
+/** Mirrors `tools.dynamia.actions.ActionRuntime`: where and how a published action runs. */
+export type ActionRuntime = 'HEADLESS' | 'FLOW' | 'REMOTE' | 'CLIENT' | 'ZK_ONLY' | 'UNDECLARED';
+
 export type ActionType = 'Action' | 'ClassAction' | 'CrudAction' | string;
 
 /**
@@ -129,6 +132,8 @@ export type ActionType = 'Action' | 'ClassAction' | 'CrudAction' | string;
 export interface ActionMetadata extends BasicMetadata {
     /** Logical server-side action type: Action, ClassAction or CrudAction */
     type?: ActionType;
+    /** Where the action runs: on the server (`HEADLESS`, `FLOW`, `REMOTE`) or in the front end (`CLIENT`). */
+    runtime?: ActionRuntime;
     /** Simple Java class name of the action implementation */
     className?: string;
     /** Fully-qualified class name of the Java action implementation */

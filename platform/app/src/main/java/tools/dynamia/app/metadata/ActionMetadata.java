@@ -2,6 +2,8 @@ package tools.dynamia.app.metadata;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import tools.dynamia.actions.ActionRuntime;
+import tools.dynamia.actions.ActionRuntimes;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ClassAction;
 import tools.dynamia.actions.RemoteAction;
@@ -61,6 +63,7 @@ public class ActionMetadata extends BasicMetadata {
 
     private String type;
     private String className;
+    private String runtime;
 
     /**
      * Default constructor for serialization and manual instantiation.
@@ -83,6 +86,8 @@ public class ActionMetadata extends BasicMetadata {
         setIcon(action.getImage());
         setEndpoint(ApplicationMetadataController.PATH + "/actions/execute/" + getId());
         setClassName(action.getClass().getSimpleName());
+        this.runtime = (action instanceof tools.dynamia.crud.headless.HeadlessCrudRemoteAction
+                ? ActionRuntime.HEADLESS : ActionRuntimes.of(action)).name();
         setType(switch (action) {
             case CrudRemoteAction crudAction -> "CrudAction";
             case ClassAction classAction -> "ClassAction";
@@ -112,6 +117,17 @@ public class ActionMetadata extends BasicMetadata {
      *
      * @return the group name
      */
+    /**
+     * @return where the action runs, one of {@code tools.dynamia.actions.ActionRuntime}
+     */
+    public String getRuntime() {
+        return runtime;
+    }
+
+    public void setRuntime(String runtime) {
+        this.runtime = runtime;
+    }
+
     public String getGroup() {
         return group;
     }

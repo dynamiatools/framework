@@ -18,7 +18,9 @@ package tools.dynamia.zk.crud.actions;
 
 import tools.dynamia.actions.ActionGroup;
 import tools.dynamia.actions.ActionRenderer;
+import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.actions.ReadableOnly;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.commons.ObjectOperations;
@@ -43,6 +45,7 @@ import java.util.List;
  * @author Mario A. Serrano Leones
  */
 @InstallAction
+@RunsOn(ActionRuntime.CLIENT)
 public class FindAction extends AbstractCrudAction implements CrudControllerAware, ReadableOnly {
 
     private static final String LAST_QUERY_TEXT = "lastQueryText";

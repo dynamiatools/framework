@@ -2,7 +2,9 @@ package tools.dynamia.zk.reports.actions;
 
 import tools.dynamia.actions.ActionLifecycleAware;
 import tools.dynamia.actions.ActionRenderer;
+import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.actions.ReadableOnly;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.AbstractCrudAction;
@@ -13,6 +15,7 @@ import tools.dynamia.zk.crud.CrudController;
 import tools.dynamia.zk.crud.CrudControllerAware;
 
 @InstallAction
+@RunsOn(ActionRuntime.CLIENT)
 public class ExportAction extends AbstractCrudAction implements ActionLifecycleAware, CrudControllerAware, ReadableOnly {
 
     private CrudController crudController;
