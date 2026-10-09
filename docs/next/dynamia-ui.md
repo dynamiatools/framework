@@ -287,8 +287,7 @@ is unsafe). Replace the implicit rule by an explicit `runtime`, published in `Ac
 |---|---|---|
 | `HEADLESS` | Local action written against intents; replay works | Server (replay), or ZK directly |
 | `FLOW` | `FlowRemoteAction` state machine | Server |
-| `CLIENT` | Pure UI behaviour (`FindAction`, `FiltersAction`, `NewAction`...); the metadata carries a hint, each front end implements it once | Front end |
-| `ZK_ONLY` | Needs ZK components on purpose (legacy screens, `ZkEmbed` targets) | ZK only; Vue shows it embedded (`ZkEmbed`) or hides it |
+| `ZK_ONLY` | Behaviour or screen of the ZK UI (toolbar widgets, search box, filters panel, legacy screens, `ZkEmbed` targets). Not published | ZK only. Other front ends write their own **client action in TypeScript** (`registerClientAction`); Java never declares client actions |
 
 Rules:
 
@@ -335,7 +334,7 @@ Global actions loader, navigation metadata completeness, dashboard widgets (`ext
 ### Phase 5: Dynamia ERP (deferred, out of the first iteration)
 Same method on `dynamia-erp`, in this order, because each step is independently shippable:
 
-1. Run the walking test over the ERP's `@InstallAction`s, classify each (`HEADLESS` / `CLIENT` / `ZK_ONLY`), publish the
+1. Run the walking test over the ERP's `@InstallAction`s, classify each (`HEADLESS` / `ZK_ONLY`), publish the
    numbers. Do not start rewriting before this list exists.
 2. Replace direct ZK calls inside actions (`Messagebox`, `Window`, `Filedownload`) by the facades. The actions keep their
    logic, class names, ids and restrictions; this alone converts most of the 93 files, since the common cases are
@@ -437,10 +436,9 @@ Actions converted: `ExportReportAction` (also headless), `ImportReportAction`, `
   scanner of the inventory does not follow casts. It stays in `ui`.
 - **`UIViews`** supports forms of entity classes known to the REST metadata; `showView` and forms with a descriptor built in
   code (`TestHttpFunctionAction`) or a form model (`ResetPasswordAction`) are not done.
-- **`CLIENT` actions**: `FindAction` and `FiltersAction` now live in `crud` (ZK-free; their ZK widgets are
-  `ZKFindRenderProvider` and `ZKCrudFilters`), so a ZK-free deployment has them, but they are not published to REST clients yet.
-  The exports (`ExportCSV/Excel/JsonAction`) still live in `zk`.
-- **ERP impact of #210**: `ViewDataAction`, `FindAction` and `FiltersAction` changed package (`tools.dynamia.zk.crud.actions` ->
-  `tools.dynamia.crud.actions`); 18 ERP files import the old one.
+- **Client actions are TypeScript.** There is no `CLIENT` runtime in Java: a search box, a filters panel or an export of what the grid
+  shows is a `registerClientAction` in the front end. `FindAction` and `FiltersAction` live in `crud` (ZK-free, with their ZK widgets
+  in `ZKFindRenderProvider` and `ZKCrudFilters`) and are `ZK_ONLY`: the server does not publish them. The exports
+  (`ExportCSV/Excel/Json`) stay in `zk`.
 - **Files travel inline** (Base64): 1 MB up, 10 MB down. A stream endpoint is needed for more.
 - **`UIProgress` headless** runs inside the request (request timeout applies); an asynchronous job with polling is future work.

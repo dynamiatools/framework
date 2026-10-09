@@ -574,7 +574,7 @@ instead of ZK classes:
 
 A new facade is an SPI interface, a static facade resolving it with `UIFacades.resolve`, a bean in `zk` and a headless
 implementation bound by `ReplayExecutor` (or a `ReplayBinder` bean when it needs a module such as `crud`). Declare what
-cannot be derived with `@RunsOn(ActionRuntime.CLIENT | ZK_ONLY)`. ZK may only be used in the modules listed in
+cannot be derived with `@RunsOn(ActionRuntime.ZK_ONLY)` (client actions are written in TypeScript with `registerClientAction`, never in Java). ZK may only be used in the modules listed in
 `ZkCornerRuleTest`. Design: [`docs/next/dynamia-ui.md`](../next/dynamia-ui.md).
 
 Implement `FlowRemoteAction` directly (the low level API, see

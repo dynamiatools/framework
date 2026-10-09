@@ -16,7 +16,7 @@ then classified by what it uses (grep on its source and its ZK ancestors):
 | **FREE** | No ZK in the class or its ancestors | Review, then mark `HeadlessCapable` / `runtime=HEADLESS`. No code change |
 | **EASY** | Only messages, prompts, files, progress or navigation | Swap the ZK lines for existing or small facades (`UIMessages`, `UIFiles`, `UIProgress`, `UINavigation`) |
 | **MEDIUM** | Also shows a form / table / selector in a dialog | Needs `UIViews.showForm/showView` (or `UIChoices`); logic stays |
-| **HARD** | Builds ZK widgets by hand or uses a custom ZK action renderer | Not a line swap: client hint (`runtime=CLIENT`), a descriptor-based rewrite of the dialog, or `ZK_ONLY` |
+| **HARD** | Builds ZK widgets by hand or uses a custom ZK action renderer | Not a line swap: `ZK_ONLY` (the front end writes its own TypeScript client action) or a descriptor-based rewrite of the dialog |
 
 Limits: it is a heuristic. It does not follow calls into ZK-dependent helper services; "FREE" does not mean "safe to
 publish" (restrictions, non-determinism and side effects before a question still have to be reviewed); `Window` and
@@ -69,7 +69,7 @@ Two facts stand out:
 ## Corrections found while implementing
 
 - `ExportCSVAction`, `ExportExcelAction`, `ExportJsonAction` (`platform/ui/zk`) were counted EASY (files + progress). They
-  are not: they read the data from ZK's `CrudController` (query result, `TreeModel`). They are `runtime=CLIENT` candidates
+  are not: they read the data from ZK's `CrudController` (query result, `TreeModel`). They are `ZK_ONLY`
   (a front end exports what it already shows), not conversion targets.
 - `ReloadEntityFileStoragesAction` was ZK-bound only by unused imports (FREE after cleaning them).
 
@@ -152,7 +152,7 @@ Consequence for the plan: the module split is part of the work, not a detail.
 FREE in tools (30): `ActionPlaceholder`, `ApplyDiscountAction`, `CancelAction`, `ClearAccountCacheAction`, `ClearEntityFileCacheAction`, `DeleteAction`, `DeleteFileAction`, `EditAction`, `EditProfileAction`, `FastAction`, `FastCrudAction`, `FileAction`, `FilterBookByBuyDateAction`, `HeadlessCrudRemoteAction`, `MarkOutOfStockAction`, `NewAction`, `NewProfileAction`, `QuickEditPricingAction`, `RateBookAction`, `ReinitAccountAction`, `ReloadDashboardAction`, `ResetAccountBalanceAction`, `SaveAccountFeaturesAction`, `SaveAction`, `SaveAndEditAction`, `SaveAndNewAction`, `SetPreferredAccountAction`, `SetUserProfilesAction`, `SomeGlobalAction`, `ViewReportAction`.
 
 Notes: `ViewDataAction`, `FindAction`, `FiltersAction`, `SaveConfigAction`, `ExportAction` (module `platform/ui/zk`) are
-the ZK implementations of toolbar behaviours; they are `runtime=CLIENT` candidates (each front end implements find /
+the ZK implementations of toolbar behaviours; they are `ZK_ONLY` (each front end implements find /
 filters / export once), not conversion targets. The 20 ZK-importing `CrudAction`s of UI_PORTS_FOR_ACTIONS.md are a
 subset of the table above.
 

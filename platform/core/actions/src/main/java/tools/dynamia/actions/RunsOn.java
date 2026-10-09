@@ -24,10 +24,10 @@ import java.lang.annotation.Target;
 
 /**
  * Declares the {@link ActionRuntime} of an action when it cannot be derived from its type, typically
- * {@link ActionRuntime#CLIENT} or {@link ActionRuntime#ZK_ONLY}.
+ * {@link ActionRuntime#ZK_ONLY}.
  * <pre>{@code
  * @InstallAction
- * @RunsOn(ActionRuntime.CLIENT)
+ * @RunsOn(ActionRuntime.ZK_ONLY)
  * public class FindAction extends AbstractCrudAction { ... }
  * }</pre>
  */

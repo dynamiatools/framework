@@ -49,7 +49,7 @@ import java.util.List;
  * @author Mario A. Serrano Leones
  */
 @InstallAction
-@RunsOn(ActionRuntime.CLIENT)
+@RunsOn(ActionRuntime.ZK_ONLY)
 public class FindAction extends AbstractCrudAction implements CrudControllerAware, ReadableOnly {
 
     /** Name of the {@code ActionRenderProvider} that draws the search box. */

@@ -42,7 +42,7 @@ import java.util.Collection;
 
 @SuppressWarnings("unchecked")
 @InstallAction
-@RunsOn(ActionRuntime.CLIENT)
+@RunsOn(ActionRuntime.ZK_ONLY)
 public class ExportExcelAction extends AbstractExportAction implements ReadableOnly {
 
     private static final int LARGE = 5000;

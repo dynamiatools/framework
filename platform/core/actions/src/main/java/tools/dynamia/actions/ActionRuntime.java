@@ -33,10 +33,11 @@ public enum ActionRuntime {
     /** A plain {@link RemoteAction}: one request, one answer. */
     REMOTE,
 
-    /** Pure UI behaviour (find, filters, export of what the grid shows): each front end implements it once. */
-    CLIENT,
-
-    /** Needs ZK on purpose (ZK components, ZK-only screens). Other front ends hide it or embed the ZK page. */
+    /**
+     * Not published to REST clients: a behaviour or screen of the ZK UI (toolbar widgets, search box, filters panel, ZK
+     * screens). Other front ends do not receive it; they implement their own equivalent in TypeScript as a client action
+     * ({@code registerClientAction}), which the server knows nothing about.
+     */
     ZK_ONLY,
 
     /** Nobody declared it and it cannot be derived: a local action that is not headless-capable. */

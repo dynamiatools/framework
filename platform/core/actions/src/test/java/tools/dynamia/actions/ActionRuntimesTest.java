@@ -19,7 +19,7 @@ class ActionRuntimesTest {
         }
     }
 
-    @RunsOn(ActionRuntime.CLIENT)
+    @RunsOn(ActionRuntime.ZK_ONLY)
     static class Find extends AbstractAction {
     }
 
@@ -32,7 +32,7 @@ class ActionRuntimesTest {
         assertEquals(ActionRuntime.UNDECLARED, ActionRuntimes.of(new Plain()));
         assertEquals(ActionRuntime.HEADLESS, ActionRuntimes.of(new Headless()));
         assertEquals(ActionRuntime.UNDECLARED, ActionRuntimes.of(new OptedOut()));
-        assertEquals(ActionRuntime.CLIENT, ActionRuntimes.of(new Find()));
+        assertEquals(ActionRuntime.ZK_ONLY, ActionRuntimes.of(new Find()));
         assertEquals(ActionRuntime.ZK_ONLY, ActionRuntimes.of(new Legacy()), "a declaration beats the derivation");
     }
 }
