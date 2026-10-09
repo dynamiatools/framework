@@ -768,6 +768,13 @@ public void useAction() {
 | **CRUD Action** | Entity operations | Approve, Activate, Deactivate |
 | **Custom Action** | Domain-specific | Calculate, SendEmail, GenerateReport |
 
+### Actions for ZK and for JS front ends
+
+An action marked `HeadlessCapable` runs unchanged in ZK and for REST clients: the `actions` module replays it, answering
+its `UIMessages` questions with the answers the client already gave, over the action flow protocol (`ActionFlows`,
+`ActionFlowStep`, `resumeToken`). `FlowRemoteAction` is the low level API of that protocol. See
+[DEVELOPMENT_PATTERNS.md](./DEVELOPMENT_PATTERNS.md#pattern-one-action-for-zk-and-for-restjs-front-ends-headless).
+
 ### When to Use Actions Module
 
 - Implement reusable operations

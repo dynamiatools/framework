@@ -7,4 +7,5 @@ open module tools.dynamia.actions {
     requires com.fasterxml.jackson.annotation;
     exports tools.dynamia.actions;
     exports tools.dynamia.actions.flow;
+    exports tools.dynamia.actions.replay;
 }

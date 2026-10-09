@@ -10,7 +10,7 @@ framework and of the extensions. The cause is the contract of `ApplicationMetada
 REST clients only when it is
 
 1. a `CrudRemoteAction` (written for REST), or
-2. a `CrudAction` that is `HeadlessCapable` (the *replay* runtime, branch `next-actions-flow`).
+2. a `CrudAction` that is `HeadlessCapable` (the *replay* runtime, see [HEADLESS_ACTIONS.md](HEADLESS_ACTIONS.md)).
 
 Today only `SaveAction` and `DeleteAction` are headless. `NewAction`, `EditAction` and `CancelAction` are pure UI state
 that the Vue CRUD handles itself. Every other action of the catalog is invisible to a REST client, and so is every

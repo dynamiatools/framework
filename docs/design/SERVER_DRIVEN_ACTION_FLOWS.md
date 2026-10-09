@@ -7,6 +7,13 @@ follow-up hardening: generic `CrudState` enforcement (#83, closed — see §7.6 
 step renderers (#81, **experimental** — see §6 and §9). Tracked in #79. See inline notes throughout (§4, §6,
 §7.6, §8, §9) for the delta between this design and what actually shipped.
 
+> **How this document relates to the headless action runtime.** This document defines the *protocol* of server-driven
+> actions (steps, `resumeToken`, `ActionFlowContext`, the client loop) and the low level `FlowRemoteAction` API. It is
+> no longer the recommended way to write the actions of a CRUD: [`HEADLESS_ACTIONS.md`](HEADLESS_ACTIONS.md) runs the very
+> same `LocalAction`s ZK uses over this same protocol (replay), so an action is written once. The hand written
+> `SaveRemoteAction`, `SaveFlowRemoteAction`, `DeleteRemoteAction` and `DeleteFlowRemoteAction` of §7 were removed in favor
+> of it; read §7 as the history of why, and the rest as the reference of the wire protocol.
+
 > **Experimental.** The whole flow protocol (`FlowRemoteAction`, `ActionFlowStep`, `resumeToken`, the
 > `runActionFlow` client loop) is experimental: it's implemented and tested, but has had limited real-world
 > use and its API/wire format may still change without a deprecation cycle. `REDIRECT`/`CALL` are the least
