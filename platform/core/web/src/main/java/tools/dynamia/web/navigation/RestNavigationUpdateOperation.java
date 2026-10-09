@@ -20,6 +20,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringPojoParser;
+import tools.dynamia.commons.reflect.PropertyInfo;
+import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.commons.logger.AbstractLoggable;
 import tools.dynamia.crud.CrudPage;
 import tools.dynamia.navigation.PageNotFoundException;
@@ -28,6 +30,13 @@ import tools.dynamia.viewers.JsonViewDescriptorDeserializer;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Handles the <em>update</em> operation for the REST navigation API.
@@ -87,8 +96,13 @@ public class RestNavigationUpdateOperation extends AbstractLoggable {
             node.properties().forEach(entry -> {
                 Field field = descriptor.getField(entry.getKey());
                 if (field != null) {
-                    Object fieldValue = JsonViewDescriptorDeserializer.getNodeValue(field.getPropertyInfo(), entry.getValue());
-                    ObjectOperations.invokeSetMethod(entity, field.getPropertyInfo(), fieldValue);
+                    var info = field.getPropertyInfo();
+                    if (info != null && info.isCollection()) {
+                        applyCollection(entity, info, entry.getValue());
+                        return;
+                    }
+                    Object fieldValue = JsonViewDescriptorDeserializer.getNodeValue(info, entry.getValue());
+                    ObjectOperations.invokeSetMethod(entity, info, fieldValue);
                 }
             });
         } catch (JacksonException e) {
@@ -97,5 +111,38 @@ public class RestNavigationUpdateOperation extends AbstractLoggable {
 
         return RestNavigationContext.buildJsonResponse(descriptor, ctx.getCrudService().update(entity), "Updated Successfully");
     }
-}
 
+    /**
+     * A collection field of the patch. Only a many-to-many association of entities is replaced, with the entities whose
+     * {@code id} the JSON array lists. Any other collection (owned children, element collections) is left untouched:
+     * {@link JsonViewDescriptorDeserializer#getNodeValue} cannot build it, and setting {@code null} would wipe the
+     * current children.
+     */
+    private void applyCollection(Object entity, PropertyInfo info, JsonNode node) {
+        if (!node.isArray() || !isManyToMany(info) || !DomainUtils.isEntity(info.getGenericType())) {
+            return;
+        }
+        Collection<Object> items = Set.class.isAssignableFrom(info.getType()) ? new LinkedHashSet<>() : new ArrayList<>();
+        for (JsonNode item : node) {
+            var id = item.get("id");
+            if (id != null) {
+                @SuppressWarnings("unchecked") Object related = ctx.getCrudService().find((Class) info.getGenericType(), id.asLong());
+                if (related != null) {
+                    items.add(related);
+                }
+            }
+        }
+        ObjectOperations.invokeSetMethod(entity, info, items);
+    }
+
+    private static boolean isManyToMany(PropertyInfo info) {
+        var annotations = new ArrayList<Annotation>();
+        if (info.getField() != null) {
+            annotations.addAll(Arrays.asList(info.getField().getAnnotations()));
+        }
+        if (info.getReadMethod() != null) {
+            annotations.addAll(Arrays.asList(info.getReadMethod().getAnnotations()));
+        }
+        return annotations.stream().anyMatch(a -> "ManyToMany".equals(a.annotationType().getSimpleName()));
+    }
+}

@@ -61,6 +61,11 @@ export interface NavigationNode {
     position?: number;
     /** Whether this node should appear in featured/shortcut areas — Java `Boolean`, nullable */
     featured?: boolean;
+    /**
+     * Address a browser can load for this page. Only present when the page's path is an absolute `http(s)://` URL or
+     * a root relative one (e.g. an `ExternalPage`); internal paths are never sent. Use it to embed the page.
+     */
+    url?: string;
     children?: NavigationNode[];
     attributes?: Record<string, unknown>;
 }

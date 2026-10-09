@@ -30,7 +30,7 @@ public abstract class NavigationBuilder {
         NavigationManager.getCurrent().getAvailablesPages().clear();
         modules.sort(new ModuleComparator());
         for (Module module : modules) {
-            if (NavigationRestrictions.allowAccess(module) && hasPagesWithAccess(module)) {
+            if (module.isVisible() && NavigationRestrictions.allowAccess(module) && hasPagesWithAccess(module)) {
                 viewBuilder.createModuleView(module);
 
                 var moduleNode = new NavigationNode(module, labelProviders());
