@@ -32,7 +32,6 @@ import tools.dynamia.crud.FilterCondition;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.query.QueryCondition;
 import tools.dynamia.domain.query.QueryParameters;
-import tools.dynamia.modules.dashboard.ChartjsDashboardWidget;
 import tools.dynamia.modules.reports.api.EnumFilterProvider;
 import tools.dynamia.modules.reports.core.*;
 import tools.dynamia.modules.reports.core.domain.Report;
@@ -50,6 +49,7 @@ import tools.dynamia.zk.actions.ButtonActionRenderer;
 import tools.dynamia.zk.crud.ui.EntityFiltersPanel;
 import tools.dynamia.zk.ui.chartjs.CategoryChartjsData;
 import tools.dynamia.zk.ui.chartjs.Chartjs;
+import tools.dynamia.zk.ui.chartjs.ChartjsColorPalette;
 import tools.dynamia.zk.ui.chartjs.ChartjsOptions;
 
 import java.io.File;
@@ -62,6 +62,7 @@ public class ReportViewer extends Div implements ActionEventBuilder {
 
 
     public static final int MAX_RESULT_TO_DISPLAY = 2000;
+    private static final ChartjsColorPalette MATERIAL_COLORS = new ChartjsColorPalette("Material", ReportChartPalette.COLORS);
     private static final tools.dynamia.commons.logger.LoggingService LOGGER = tools.dynamia.commons.logger.LoggingService.get(ReportViewer.class);
     private final ClassMessages messages = ClassMessages.get(ReportViewer.class);
     private final ReportsService service;
@@ -507,7 +508,7 @@ public class ReportViewer extends Div implements ActionEventBuilder {
 
             for (var c : report.getCharts()) {
                 CategoryChartjsData data = new CategoryChartjsData();
-                data.getDataset().setColorPalette(ChartjsDashboardWidget.MATERIAL_COLORS);
+                data.getDataset().setColorPalette(MATERIAL_COLORS);
 
                 if (c.isGrouped()) {
                     Map<String, Number> groups = new HashMap<>();
