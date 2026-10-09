@@ -13,6 +13,7 @@ import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.crud.CrudRemoteAction;
 import tools.dynamia.crud.CrudState;
+import tools.dynamia.crud.headless.HeadlessCrudRemoteAction;
 import tools.dynamia.domain.EntityReference;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.util.DomainUtils;
@@ -176,7 +177,11 @@ public class ApplicationMetadataController {
         if (actionMetadata != null) {
             try {
                 RemoteAction actionInstance = null;
-                if (actionMetadata.getAction() != null) {
+                if (actionMetadata.getAction() instanceof HeadlessCrudRemoteAction headless) {
+                    // a local action served headless: every request works on a fresh instance of it
+                    var fresh = Containers.get().findObject(headless.getDelegate().getClass());
+                    actionInstance = fresh != null ? new HeadlessCrudRemoteAction(fresh) : null;
+                } else if (actionMetadata.getAction() != null) {
                     actionInstance = Containers.get().findObject(actionMetadata.getAction().getClass());
                 }
                 if (!ActionRestrictions.allowAccess(actionInstance)) {
@@ -242,6 +247,10 @@ public class ApplicationMetadataController {
      */
     static boolean isApplicableState(RemoteAction actionInstance, ActionExecutionRequest request) {
         if (!(actionInstance instanceof CrudRemoteAction crudRemoteAction)) {
+            return true;
+        }
+        if (request.getResumeToken() != null && !request.getResumeToken().isBlank()) {
+            // continues a flow already started: its state was checked then and the signed token carries the request
             return true;
         }
         CrudState[] applicableStates = crudRemoteAction.getApplicableStates();
@@ -445,6 +454,11 @@ public class ApplicationMetadataController {
         var entityMetadata = getEntityMetadata(id);
         if (entityMetadata != null) {
             var actionMetadata = entityMetadata.getActions().stream().filter(a -> a.getId().equals(action)).findFirst().orElse(null);
+            // The entity comes from the URL, resolved here: clients no longer receive the class name (see
+            // EntityMetadata#getClassName), and one that sent it could point the action at any class.
+            if (entityMetadata.getClassName() != null) {
+                request.setDataType(entityMetadata.getClassName());
+            }
             return executeAction(action, request, actionMetadata, httpRequest);
         }
         return okBody(new ActionExecutionResponse("Entity " + id + " not found", HttpStatus.NOT_FOUND.getReasonPhrase(), 404));

@@ -521,6 +521,49 @@ public class ActivateAction extends AbstractCrudAction {
 }
 ```
 
+### Pattern: One action for ZK and for REST/JS front ends (headless)
+
+Write the action once, against the UI-neutral ports, and mark it `HeadlessCapable`. A ZK desktop runs it as always; a
+REST client (Vue, React, mobile) runs the same class through `/api/app/metadata/entities/{id}/action/{action}`, and the
+questions the action asks (`UIMessages.showQuestion`, `showInput`) reach the client as steps of the action flow protocol.
+
+```java
+@InstallAction
+public class ArchiveAction extends AbstractCrudAction implements HeadlessCapable {
+
+    public ArchiveAction() {
+        setName("Archive");
+        setApplicableStates(CrudState.get(CrudState.READ));
+    }
+
+    @Override
+    public void actionPerformed(CrudActionEvent evt) {
+        Invoice invoice = (Invoice) evt.getData();
+        UIMessages.showQuestion("Archive invoice " + invoice.getNumber() + "?", () -> {   // 1
+            invoice.setArchived(true);
+            evt.getController().getCrudService().save(invoice);                           // 2
+            UIMessages.showMessage("Archived");
+        });
+    }
+}
+```
+
+1. A question is an interaction. When the client has not answered it yet, the callback does not run: the question goes to
+   the client and the action runs again, from the start, with the answer. A headless run therefore executes the action
+   once per question (plus one).
+2. Every run is a transaction and only the last one is committed, so database writes are safe anywhere in the action.
+
+Rules for a headless action: it must ask the same questions in the same order on every run for the same request; anything
+that is not a database write (mail, files, calls to other systems) belongs inside the last callback, never before a
+question; and it may only use the ports (`UIMessages`, `CrudControllerAPI`, `CrudViewComponent`), never ZK classes. The
+id REST clients see is the class name without `Action`, lower case (`archive`); override `headlessId()` to change it, or
+`headlessSupported()` to leave a subclass out. Design and limits: [`docs/design/HEADLESS_ACTIONS.md`](../design/HEADLESS_ACTIONS.md).
+
+Implement `FlowRemoteAction` directly (the low level API, see
+[`SERVER_DRIVEN_ACTION_FLOWS.md`](../design/SERVER_DRIVEN_ACTION_FLOWS.md)) only for an action that exists for REST clients
+alone, needs a step the replay runtime does not produce yet (`DIALOG`, `REDIRECT`, `CALL`, `CUSTOM`), or cannot ask the same
+questions on every run.
+
 ### Pattern 3: Conditional Actions
 
 **✅ CORRECT**: Actions that check conditions

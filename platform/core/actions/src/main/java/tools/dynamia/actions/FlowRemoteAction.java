@@ -22,6 +22,14 @@ package tools.dynamia.actions;
  * called again with the answer — as many times as needed until it returns a
  * {@link ActionFlowStepType#DONE} step.
  * <p>
+ * <strong>Low level API.</strong> To write an action for CRUD or any other screen, write a {@link LocalAction} against
+ * the UI ports ({@code UIMessages}, {@code CrudControllerAPI}) and mark it {@link HeadlessCapable}: the same class then
+ * runs in ZK and for REST clients, which ask its questions with the replay runtime
+ * ({@link tools.dynamia.actions.replay.ReplayExecutor}), and nothing has to be written twice. Implement
+ * {@code FlowRemoteAction} directly only for an action that exists <em>only</em> for REST clients, that needs a step the
+ * replay runtime does not produce yet ({@code DIALOG}, {@code REDIRECT}, {@code CALL}, {@code CUSTOM}), or whose
+ * questions are not the same on every run. Both ways speak the same protocol, so clients cannot tell them apart.
+ * <p>
  * This is purely additive to {@link RemoteAction}: {@link #execute(ActionExecutionRequest)} has a default
  * implementation that bridges into {@link ActionFlows}, so existing dispatch code
  * ({@code Actions.execute}, {@code ApplicationMetadataController}) needs no changes at all.

@@ -32,12 +32,9 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
- * Shared persistence logic for {@link SaveRemoteAction} and {@link SaveFlowRemoteAction}.
- * <p>
- * Deliberately a small {@code static} helper rather than a common superclass — see
- * {@code docs/design/SERVER_DRIVEN_ACTION_FLOWS.md} §7.4 for why {@code SaveFlowRemoteAction extends
- * SaveRemoteAction} is a footgun here (a class method always wins over {@code FlowRemoteAction}'s default
- * {@code execute()}, silently skipping the flow dispatch).
+ * Builds an entity from the JSON of an action request: the entity class by name, and a patch of the fields the entity's
+ * view descriptor maps. Used by {@link tools.dynamia.crud.headless.HeadlessCrudRemoteAction} to hand the saving actions
+ * the entity the client edited.
  * <p>
  * Same field-resolution approach as {@code RestNavigationUpdateOperation} (plain REST CRUD writes): entities
  * are resolved through the entity's {@code json-form}/{@code json}/{@code form} {@link ViewDescriptor} so
@@ -45,7 +42,7 @@ import java.util.Map;
  *
  * @author Mario A. Serrano Leones
  */
-final class SaveSupport {
+public final class SaveSupport {
 
     private SaveSupport() {
     }
@@ -55,7 +52,7 @@ final class SaveSupport {
      *
      * @throws IllegalArgumentException if {@code className} is missing or not a known class
      */
-    static Class<?> resolveEntityClass(String className) {
+    public static Class<?> resolveEntityClass(String className) {
         if (className == null || className.isBlank()) {
             throw new IllegalArgumentException("Missing dataType/className for save action");
         }
@@ -111,7 +108,7 @@ final class SaveSupport {
     }
 
     /** Same lookup order as {@code RestNavigationContext.getJsonFormDescriptor(entityClass, true)}. */
-    private static ViewDescriptor jsonFormDescriptor(Class<?> entityClass) {
+    public static ViewDescriptor jsonFormDescriptor(Class<?> entityClass) {
         ViewDescriptor descriptor = Viewers.findViewDescriptor(entityClass, "json-form");
         if (descriptor == null) {
             descriptor = Viewers.findViewDescriptor(entityClass, "json");
@@ -126,7 +123,7 @@ final class SaveSupport {
     }
 
     /** Applies every field present in {@code data} and mapped in {@code descriptor} onto {@code entity}. */
-    private static void applyPatch(Object entity, ViewDescriptor descriptor, Map<String, Object> data) {
+    public static void applyPatch(Object entity, ViewDescriptor descriptor, Map<String, Object> data) {
         try {
             String json = StringPojoParser.convertMapToJson(data);
             JsonNode node = StringPojoParser.createJsonMapper().readTree(json);

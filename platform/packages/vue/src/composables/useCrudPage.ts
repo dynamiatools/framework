@@ -153,8 +153,8 @@ export function useCrudPage(options: UseCrudPageOptions) {
         void persist();
       });
 
-      // 6. Wire delete handler — same action-aware pattern as save (typically resolves to
-      // DeleteFlowRemoteAction, which confirms before deleting).
+      // 6. Wire delete handler — same action-aware pattern as save (resolves to the server's `delete`
+      // action, the same DeleteAction ZK runs, which asks for confirmation through the flow protocol).
       crudView.on('delete', (entity) => {
         const rec = entity as Record<string, unknown>;
         const id = rec['id'] as string | number | undefined;

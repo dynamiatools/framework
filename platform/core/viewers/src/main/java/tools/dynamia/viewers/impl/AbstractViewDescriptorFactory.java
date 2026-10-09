@@ -446,16 +446,7 @@ public abstract class AbstractViewDescriptorFactory implements ViewDescriptorFac
             device = DEFAULT_DEVICE;
         }
 
-        // Descriptors load lazily; a lookup that never goes through getDescriptor (the REST read path, for example)
-        // must not answer "not found" only because nobody asked for a descriptor yet.
-        if (allDescriptors.isEmpty() && !loadingDescriptors) {
-            loadingDescriptors = true;
-            try {
-                loadViewDescriptors();
-            } finally {
-                loadingDescriptors = false;
-            }
-        }
+        ensureLoaded();
 
         SimpleCache<String, SimpleCache<Class, ViewDescriptor>> classDescriptors = descriptors.get(device);
         SimpleCache<Class, ViewDescriptor> viewsDescriptors = null;
@@ -601,13 +592,32 @@ public abstract class AbstractViewDescriptorFactory implements ViewDescriptorFac
         }
     }
 
+    /**
+     * Descriptors load lazily. A lookup that never goes through {@code getDescriptor} (the REST read path, the
+     * application metadata) must not answer "not found" only because nobody asked for a descriptor yet.
+     */
+    private void ensureLoaded() {
+        if (allDescriptors.isEmpty() && !loadingDescriptors) {
+            loadingDescriptors = true;
+            try {
+                loadViewDescriptors();
+            } finally {
+                loadingDescriptors = false;
+            }
+        }
+    }
+
     @Override
     public Set<Map.Entry<Class, ViewDescriptor>> findDescriptorsByType(String viewType) {
-        return descriptors.get(DEFAULT_DEVICE).get(viewType).entrySet();
+        ensureLoaded();
+        var byDevice = descriptors.get(DEFAULT_DEVICE);
+        var byType = byDevice != null ? byDevice.get(viewType) : null;
+        return byType != null ? byType.entrySet() : Set.of();
     }
 
     @Override
     public Set<ViewDescriptor> findDescriptorByClass(Class entityClass) {
+        ensureLoaded();
         return allDescriptors.stream()
                 .filter(vd -> vd.getBeanClass() != null)
                 .filter(vd -> vd.getBeanClass().equals(entityClass))

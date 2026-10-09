@@ -1,7 +1,11 @@
 package tools.dynamia.app.metadata;
 
 import org.springframework.context.annotation.DependsOn;
+import tools.dynamia.actions.Action;
+import tools.dynamia.actions.ActionComparator;
 import tools.dynamia.actions.ActionLoader;
+import tools.dynamia.actions.HeadlessCapable;
+import tools.dynamia.actions.RemoteAction;
 import tools.dynamia.actions.ApplicationGlobalAction;
 import tools.dynamia.actions.ApplicationGlobalRemoteAction;
 import tools.dynamia.app.ApplicationInfo;
@@ -9,6 +13,7 @@ import tools.dynamia.app.controllers.ApplicationMetadataController;
 import tools.dynamia.commons.ApplicableClass;
 import tools.dynamia.crud.CrudAction;
 import tools.dynamia.crud.CrudRemoteAction;
+import tools.dynamia.crud.headless.HeadlessCrudRemoteAction;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.ViewDescriptorFactory;
@@ -137,8 +142,18 @@ public class ApplicationMetadataLoader {
         entity.setDescriptors(descriptors.stream().map(ViewDescriptorMetadata::new).toList());
 
         ActionLoader<CrudRemoteAction> loader = new ActionLoader<>(CrudRemoteAction.class);
-        entity.setActions(loader
-                .load(action -> isApplicable(entityClass, action))
+        List<RemoteAction> actions = new ArrayList<>(loader.load(action -> isApplicable(entityClass, action)));
+
+        // The same actions ZK runs, served headless: they replace a hand written remote action with the same id
+        var headless = new ActionLoader<>(CrudAction.class)
+                .load(action -> action instanceof HeadlessCapable capable && capable.headlessSupported() && ApplicableClass.isApplicable(entityClass, action.getApplicableClasses(), true))
+                .stream().<RemoteAction>map(HeadlessCrudRemoteAction::new).toList();
+        var headlessIds = headless.stream().map(Action::getId).collect(Collectors.toSet());
+        actions.removeIf(a -> headlessIds.contains(a.getId()));
+        actions.addAll(headless);
+        actions.sort(new ActionComparator());
+
+        entity.setActions(actions
                 .stream().map(a -> {
                     var md = new ActionMetadata(a);
                     md.setEndpoint(ApplicationMetadataController.PATH + "/entities/" + entity.getId() + "/actions/" + a.getId());

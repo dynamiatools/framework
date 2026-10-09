@@ -32,6 +32,9 @@ import java.util.UUID;
  * calls the action, and stamps the returned {@link ActionFlowStep} with a fresh signed token before
  * wrapping it into an {@link ActionExecutionResponse}.
  * <p>
+ * This is the protocol layer of every server-driven action: {@link FlowRemoteAction}s and the replay runtime
+ * ({@link tools.dynamia.actions.replay.ReplayExecutor}) both build their responses and tokens here.
+ * <p>
  * This is the only place a {@code resumeToken} is created or verified — action authors never touch
  * signing directly. See {@code docs/design/SERVER_DRIVEN_ACTION_FLOWS.md} for the full protocol.
  *
@@ -102,6 +105,23 @@ public final class ActionFlows {
             request.getParams().forEach(seed::putIfAbsent);
         }
         return seed;
+    }
+
+    /**
+     * Builds the response for a step produced outside of {@link FlowRemoteAction} (the replay runtime): a signed
+     * resume token carrying {@code data} is attached to every step that waits for the user.
+     */
+    public static ActionExecutionResponse toResponse(String flowId, String actionId, Map<String, Object> data, ActionFlowStep step) {
+        return toResponse(flowId, new ActionFlowContext(flowId, actionId, null, data), step);
+    }
+
+    /**
+     * Verifies a resume token of {@code actionId} and returns what it carries.
+     *
+     * @throws tools.dynamia.actions.flow.FlowTokenException when the token is malformed, tampered with, expired or of another action
+     */
+    public static FlowTokenPayload verifyToken(String token, String actionId) {
+        return signer().verify(token, actionId);
     }
 
     private static ActionExecutionResponse toResponse(String flowId, ActionFlowContext ctx, ActionFlowStep step) {
