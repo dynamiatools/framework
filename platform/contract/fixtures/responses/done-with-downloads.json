@@ -1,0 +1,1 @@
+{"status":"SUCCESS","statusCode":200,"flow":{"flowId":"f1","type":"DONE","message":"Done","messageType":"NORMAL"},"params":{"notifications":[{"message":"Done","type":"NORMAL"}],"downloads":[{"name":"out.txt","contentType":"text/plain","size":5,"url":"/api/app/transfers/6f1b7c0e-0a52-4f9c-9a5e-0c4d9d7c1a11"}]}}

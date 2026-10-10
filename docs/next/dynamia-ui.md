@@ -831,7 +831,8 @@ Known limits of that iteration (addressed by the work packages above):
 | WP4 | Done, see below |
 | WP5 | Done, see below |
 | WP6 | Done except the ZK driver, see below |
-| WP7 to WP10 | Not started |
+| WP7 | Done except the items listed below |
+| WP8 to WP10 | Not started |
 
 #### WP1 · `UIEnvironment` and clear errors
 
@@ -975,3 +976,26 @@ The branch already had the mechanism §8 asks for: `ContextCapturer` beans, aske
   without UI. Rows of §4 that only the ZK adapter can prove (a question in a window, `Filedownload`, the redirect) are
   unverified until someone runs ZK in a browser or adds ZATS.
 - `ZKViewsProvider.showView` keeps its field-count sizing heuristics in ZK; the hints are the explicit size.
+
+#### WP7 · Reusable architecture rules and contract
+
+- **`platform/testing/arch-rules`** (`tools.dynamia.arch-rules`, test scope): `ArchRulesConfig`, `RepoSources`, `ArchBaseline` and the
+  rules `FrontendCornerRule` (R1), `ActionInventoryRule` (R2, R3, R4) and `VocabularyRule` (R5), with a README that explains how
+  the ERP adopts them. `RepoSources` ignores comments and string literals, detects the front end by `import`, by fully
+  qualified name in the body and by Maven `groupId`/`artifactId`, and resolves inheritance by fully qualified name (package,
+  explicit and wildcard imports). The old `RepoSources`, `ZkCornerRuleTest` and `ActionInventoryTest` of `actions` are gone.
+- **Baselines** (`arch-rules/src/test/resources/arch`): `frontend-corner.baseline` (59), `frontend-bound-actions.baseline` (25)
+  and `undeclared-actions.baseline` (42), all of which only shrink. The corner no longer includes `extensions/*/sources/ui` in
+  block, so the ZK use of those modules is now a counted baseline; R3 and R5 pass with no baseline.
+- **`platform/contract/fixtures`**: 12 steps (one per `ActionFlowStepType`), 4 answers and 2 responses. Java
+  (`FixturesTest`, Jackson) parses each into its class and writes it back; the SDK test (`fixtures.test.ts`) checks the same
+  files against the generated types, so a step type without a fixture fails both.
+- **`platform/contract/ui-contract-generator`**: generates `sdk/src/generated/ui-contract.ts` (`ActionFlowStepType`,
+  `ActionFlowStep`, `ActionRuntime` and the catalog of ports declared with `@UIPort` with the steps each produces). The
+  handwritten versions of those types in `sdk/src/metadata/types.ts` are replaced by re-exports. `GeneratedContractTest` fails
+  when the committed file is stale, which is the CI check (it runs with `mvn test`); regenerate with
+  `mvn -pl platform/contract/ui-contract-generator test -Dcontract.update=true`.
+- Not done: generating the TS interfaces of `ui-core/ports` (the TS ports do not exist yet; they come with WP9), generating the
+  other protocol types (`ActionExecutionRequest/Response`, `FlowFileRef`, `FlowDownload` are still handwritten), and the
+  per-property JSDoc of `ActionFlowStep` (the generated file carries no field docs; the Javadoc of `ActionFlowStepType` has them).
+- The source-level R4 approximates `ActionRuntimes`: a class whose type is `RemoteAction` is detected by name (`*RemoteAction`).

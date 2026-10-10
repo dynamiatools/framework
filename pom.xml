@@ -113,6 +113,8 @@
         <module>platform/ui/zk</module>
 
         <!-- Testing platform (scope test for consumers) -->
+        <module>platform/testing/arch-rules</module>
+        <module>platform/contract/ui-contract-generator</module>
         <module>platform/testing/ui-contract</module>
         <module>platform/testing/ui-testing</module>
 
