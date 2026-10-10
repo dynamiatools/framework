@@ -42,9 +42,9 @@ public final class ReplaySession {
     private final List<ReplayInteractions.Notification> notifications = new ArrayList<>();
     private final List<DownloadSource> downloads = new ArrayList<>();
     private final List<String> consumedRefs = new ArrayList<>();
+    private final List<String> consumedJobs = new ArrayList<>();
     private String redirectUrl;
     private boolean redirectInNewWindow;
-    private String nonRepeatable;
     private int cursor;
     private String pendingFingerprint;
     private Throwable failure;
@@ -94,10 +94,12 @@ public final class ReplaySession {
      *
      * @param question what the client must show to get the answer
      * @param onAnswer what the action does with the answer
+     * @return {@code true} when this call made {@code question} the pending one for the first time (a new question), so the
+     * caller may start what the question depends on; {@code false} when it was answered, repeated after a retry, or ignored
      */
-    public void interact(ActionFlowStep question, Consumer<Object> onAnswer) {
+    public boolean interact(ActionFlowStep question, Consumer<Object> onAnswer) {
         if (pending != null) {
-            return; // the action already stopped at an earlier question
+            return false; // the action already stopped at an earlier question
         }
         String fp = fingerprint(question);
         if (cursor < answers.size()) {
@@ -108,7 +110,7 @@ public final class ReplaySession {
                 if (!answer.fp().equals(fp)) {
                     dropFrom(start);
                     ask(question, fp, null, ClassMessages.get(ReplaySession.class).get("flow.stepChanged"), MessageType.WARNING, null);
-                    return;
+                    return true;
                 }
                 value = answer.value();
             }
@@ -117,10 +119,12 @@ public final class ReplaySession {
             } catch (ReplayRetry retry) {
                 dropFrom(start);
                 ask(question, fp, value, retry.getMessage(), retry.getMessage() == null ? null : MessageType.ERROR, retry.getField());
+                return false; // the same question again, not a new one
             }
-        } else {
-            ask(question, fp, null, null, null, null);
+            return false;
         }
+        ask(question, fp, null, null, null, null);
+        return true;
     }
 
     private void dropFrom(int index) {
@@ -132,10 +136,6 @@ public final class ReplaySession {
     }
 
     private void ask(ActionFlowStep question, String fp, Object submitted, String notice, MessageType noticeType, String field) {
-        if (pending == null && nonRepeatable != null && notice == null) {
-            throw new IllegalStateException(nonRepeatable + " already did its work in this pass, so it must be the last "
-                    + "interaction of the action: the action runs again for every answer of the user");
-        }
         if (submitted != null && (question.getType() == ActionFlowStepType.DIALOG)) {
             question.setData(submitted);
         }
@@ -206,15 +206,19 @@ public final class ReplaySession {
     }
 
     /**
-     * Declares that the action did something that must not happen twice (long work done inside the request). Questions
-     * asked later in the same pass fail, because answering them would run the action, and the work, again.
+     * Records that the action consumed the result of a background job. When the flow ends the runtime forgets the job.
      *
-     * @param what who did it, for the error message
+     * @param jobId the job id
      */
-    public void markNonRepeatable(String what) {
-        if (nonRepeatable == null) {
-            nonRepeatable = what;
+    public void consumeJob(String jobId) {
+        if (!consumedJobs.contains(jobId)) {
+            consumedJobs.add(jobId);
         }
+    }
+
+    /** @return the jobs whose result was consumed in this pass */
+    public List<String> consumedJobs() {
+        return List.copyOf(consumedJobs);
     }
 
     /**

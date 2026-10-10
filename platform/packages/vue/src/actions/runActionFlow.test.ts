@@ -19,7 +19,11 @@ function fakeClient(opts: {
 }) {
   const calls = { main: [] as ActionExecutionRequest[], global: [] as [string, ActionExecutionRequest][], entity: [] as [string, string, ActionExecutionRequest][] };
   const uploads: File[] = [];
+  const jobStatuses: { state: string; current: number; max: number }[] = [];
   const client = {
+    jobs: {
+      status: vi.fn(async (id: string) => ({ id, title: 'Moving', message: '', ...(jobStatuses.length > 1 ? jobStatuses.shift()! : jobStatuses[0]!) })),
+    },
     transfers: {
       upload: vi.fn(async (file: File) => {
         uploads.push(file);
@@ -41,7 +45,7 @@ function fakeClient(opts: {
       }),
     },
   };
-  return { client: client as never, calls, uploads };
+  return { client: client as never, calls, uploads, jobStatuses };
 }
 
 function handlers(overrides: Partial<FlowStepHandlers> = {}): FlowStepHandlers {
@@ -341,5 +345,39 @@ describe('runActionFlow DIALOG shown again after a validation error', () => {
 
     expect(showFormDialog).toHaveBeenCalledWith(expect.objectContaining({ message: 'Name is required', messageType: 'ERROR' }));
     expect(calls.main[1]!.data).toEqual({ name: 'Ana' });
+  });
+});
+
+describe('runActionFlow PROGRESS', () => {
+  it('follows the job until it stops and answers with its id and state', async () => {
+    const progress = flowResponse(step({ type: 'PROGRESS', title: 'Moving', data: { title: 'Moving', jobId: 'job-1' } }));
+    const { client, calls, jobStatuses } = fakeClient({ main: [progress, flowResponse(step({ type: 'DONE' }))] });
+    jobStatuses.push({ state: 'RUNNING', current: 1, max: 4 }, { state: 'RUNNING', current: 3, max: 4 }, { state: 'DONE', current: 4, max: 4 });
+    const shown: string[] = [];
+
+    await runActionFlow(client, action, {}, handlers({
+      progressIntervalMs: 0,
+      showProgress: status => shown.push(`${status.state} ${status.current}/${status.max}`),
+    }));
+
+    expect(shown).toEqual(['RUNNING 1/4', 'RUNNING 3/4', 'DONE 4/4']);
+    expect(calls.main[1]!.data).toEqual({ jobId: 'job-1', state: 'DONE' });
+    expect(calls.main[1]!.resumeToken).toBe('tok');
+  });
+
+  it('answers FAILED when the job failed so the action can handle the error', async () => {
+    const progress = flowResponse(step({ type: 'PROGRESS', data: { jobId: 'job-2' } }));
+    const { client, calls, jobStatuses } = fakeClient({ main: [progress, flowResponse(step({ type: 'DONE' }))] });
+    jobStatuses.push({ state: 'FAILED', current: 0, max: 0 });
+
+    await runActionFlow(client, action, {}, handlers({ progressIntervalMs: 0 }));
+
+    expect(calls.main[1]!.data).toEqual({ jobId: 'job-2', state: 'FAILED' });
+  });
+
+  it('fails when the step carries no job', async () => {
+    const { client } = fakeClient({ main: [flowResponse(step({ type: 'PROGRESS', data: {} }))] });
+
+    await expect(runActionFlow(client, action, {}, handlers())).rejects.toThrow(/jobId/);
   });
 });

@@ -12,6 +12,7 @@ import tools.dynamia.ui.files.FlowPrincipal;
 import tools.dynamia.ui.files.TransferMeta;
 import tools.dynamia.ui.files.TransferRef;
 import tools.dynamia.ui.files.TransferStore;
+import tools.dynamia.ui.jobs.JobRegistry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -161,13 +162,19 @@ public final class ReplayExecutor {
     }
 
     private static void deleteConsumed(ReplaySession session) {
-        var consumed = session.consumedRefs();
-        if (consumed.isEmpty()) {
-            return;
+        var refs = session.consumedRefs();
+        if (!refs.isEmpty()) {
+            TransferStore store = Containers.get().findObject(TransferStore.class);
+            if (store != null) {
+                refs.forEach(store::delete);
+            }
         }
-        TransferStore store = Containers.get().findObject(TransferStore.class);
-        if (store != null) {
-            consumed.forEach(store::delete);
+        var jobs = session.consumedJobs();
+        if (!jobs.isEmpty()) {
+            JobRegistry registry = Containers.get().findObject(JobRegistry.class);
+            if (registry != null) {
+                jobs.forEach(registry::remove);
+            }
         }
     }
 

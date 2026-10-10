@@ -57,9 +57,9 @@ public enum ActionFlowStepType {
     VIEW,
 
     /**
-     * Asks the user to choose among options. {@link ActionFlowStep#getData()} carries {@code options} (a list of labels,
-     * the answer identifies them by position) and {@code multiple}. The client answers with the list of positions
-     * chosen, or an empty list when the user cancels.
+     * Asks the user to choose among options. {@link ActionFlowStep#getData()} carries {@code options} (a list of
+     * {@code {key, label}}) and {@code multiple}. The client answers with the list of keys chosen, or an empty list when the
+     * user cancels.
      */
     CHOICE,
 
@@ -70,6 +70,15 @@ public enum ActionFlowStepType {
      * checks owner, expiry, type and sizes, and hands the action streaming handles. An empty list means the user cancelled.
      */
     UPLOAD,
+
+    /**
+     * A long task is running in the background. {@link ActionFlowStep#getData()} carries {@code jobId} and {@code title}. The
+     * client polls {@code GET /api/app/jobs/{jobId}} ({@code state}, {@code current}, {@code max}, {@code message}) and, when
+     * the job is no longer {@code RUNNING}, answers with {@code {jobId, state}}. The server reads the real state of the job
+     * itself (the answer only says the client stopped waiting): if it still runs the step is asked again; otherwise the
+     * action goes on with {@code onFinish} or {@code onError}, and the task is never run twice.
+     */
+    PROGRESS,
 
     /** Terminal step — identical semantics to a plain, non-flow {@link ActionExecutionResponse}. */
     DONE,

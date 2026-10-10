@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  * SPI behind {@link UIProgress}. ZK runs the task in a background thread and shows a progress window; a headless run
  * runs it right away, inside the request.
  */
-@UIPort(name = "progress")
+@UIPort(name = "progress", steps = {"PROGRESS"})
 public interface ProgressRunner {
 
     /**

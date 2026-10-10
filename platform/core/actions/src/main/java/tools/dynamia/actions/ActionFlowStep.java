@@ -224,6 +224,32 @@ public class ActionFlowStep implements Serializable {
         return step;
     }
 
+    /**
+     * A long task runs in the background; the client follows it and answers when it stops waiting.
+     *
+     * @param title what the user is told the task does
+     * @param jobId identifier of the job; {@code null} until the job is started
+     */
+    public static ActionFlowStep progress(String title, String jobId) {
+        var step = new ActionFlowStep();
+        step.type = ActionFlowStepType.PROGRESS;
+        step.title = title;
+        step.data = progressData(title, jobId);
+        return step;
+    }
+
+    /**
+     * @param title the title of the task
+     * @param jobId the job
+     * @return the {@code data} of a {@code PROGRESS} step
+     */
+    public static Map<String, Object> progressData(String title, String jobId) {
+        var payload = new HashMap<String, Object>();
+        payload.put("title", title);
+        payload.put("jobId", jobId);
+        return payload;
+    }
+
     /** Terminal step carrying the action's result. */
     public static ActionFlowStep done(Object data) {
         var step = new ActionFlowStep();

@@ -2,7 +2,7 @@
 // Regenerate with: mvn -pl platform/contract/ui-contract-generator test -Dcontract.update=true
 
 /** Mirrors `tools.dynamia.actions.ActionFlowStepType`. */
-export const ACTION_FLOW_STEP_TYPES = ['CONFIRM', 'INPUT', 'DIALOG', 'NOTIFY', 'REDIRECT', 'CALL', 'VIEW', 'CHOICE', 'UPLOAD', 'DONE', 'CUSTOM'] as const;
+export const ACTION_FLOW_STEP_TYPES = ['CONFIRM', 'INPUT', 'DIALOG', 'NOTIFY', 'REDIRECT', 'CALL', 'VIEW', 'CHOICE', 'UPLOAD', 'PROGRESS', 'DONE', 'CUSTOM'] as const;
 export type ActionFlowStepType = (typeof ACTION_FLOW_STEP_TYPES)[number];
 
 /** Mirrors `tools.dynamia.actions.ActionRuntime`: where and how a published action runs. */
@@ -39,7 +39,7 @@ export const UI_PORTS = {
     files: { spi: 'FileTransfer', steps: ['UPLOAD'] },
     messages: { spi: 'MessageDisplayer', steps: ['CONFIRM', 'INPUT', 'NOTIFY'] },
     navigation: { spi: 'NavigationProvider', steps: ['REDIRECT'] },
-    progress: { spi: 'ProgressRunner', steps: [] },
+    progress: { spi: 'ProgressRunner', steps: ['PROGRESS'] },
     views: { spi: 'ViewsProvider', steps: ['DIALOG', 'VIEW'] },
 } as const;
 export type UIPortName = keyof typeof UI_PORTS;
