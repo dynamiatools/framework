@@ -17,6 +17,7 @@
 package tools.dynamia.actions.replay;
 
 import tools.dynamia.actions.ActionFlowStep;
+import tools.dynamia.commons.ClassMessages;
 import tools.dynamia.ui.ChoiceOptions;
 import tools.dynamia.ui.ChoicesProvider;
 
@@ -25,8 +26,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * {@link ChoicesProvider} of a headless run: a {@code CHOICE} step with the labels; the client answers with the positions
- * chosen, which are mapped back to the options (the list is the same on every pass of a deterministic action).
+ * {@link ChoicesProvider} of a headless run: a {@code CHOICE} step whose options are identified by key. The client answers
+ * with the keys it chose; a key that no longer exists means the options changed since the question was asked, so the
+ * question is asked again instead of applying the answer to another option. Choosing nothing is cancelling.
  */
 public final class ReplayChoicesProvider implements ChoicesProvider {
 
@@ -38,11 +40,13 @@ public final class ReplayChoicesProvider implements ChoicesProvider {
 
     @Override
     public <T> void choose(ChoiceOptions<T> options, Consumer<List<T>> onChoice) {
-        session.interact(ActionFlowStep.choice(options.title(), options.labels(), options.multiple()), answer -> {
+        var keys = options.keys();
+        session.interact(ActionFlowStep.choice(options.title(), keys, options.labels(), options.multiple()), answer -> {
             var chosen = new ArrayList<T>();
-            for (int position : positions(answer)) {
-                if (position < 0 || position >= options.options().size()) {
-                    throw new IllegalArgumentException("Choice " + position + " is not one of the " + options.options().size() + " options");
+            for (String key : keysOf(answer)) {
+                int position = keys.indexOf(key);
+                if (position < 0) {
+                    throw new ReplayRetry(ClassMessages.get(ReplayChoicesProvider.class).get("flow.invalidChoice"));
                 }
                 chosen.add(options.options().get(position));
             }
@@ -52,15 +56,15 @@ public final class ReplayChoicesProvider implements ChoicesProvider {
         });
     }
 
-    private static List<Integer> positions(Object answer) {
-        var positions = new ArrayList<Integer>();
-        if (answer instanceof Number number) {
-            positions.add(number.intValue());
-        } else if (answer instanceof List<?> list) {
+    private static List<String> keysOf(Object answer) {
+        var keys = new ArrayList<String>();
+        if (answer instanceof List<?> list) {
             for (Object item : list) {
-                positions.add(Integer.parseInt(String.valueOf(item)));
+                keys.add(String.valueOf(item));
             }
+        } else if (answer != null) {
+            keys.add(String.valueOf(answer));
         }
-        return positions;
+        return keys;
     }
 }

@@ -260,8 +260,8 @@ export interface FlowDownload {
  *
  * `data`'s shape depends on `type`: the result for `DONE`, `{ url, awaitReturn }` for `REDIRECT`,
  * `{ action, ...}` for `CALL`, `{ component, ... }` for `CUSTOM`, prefill data for `DIALOG`, for
- * `VIEW` (a read only `DIALOG`, answered with anything when closed), `UPLOAD` (`{ accept, multiple, maxFiles, maxFileSize, maxTotalSize }`, answered with a list of {@link FlowFileRef}), `{ options: string[], multiple }` for `CHOICE`
- * (answered with the list of positions chosen), or absent
+ * `VIEW` (a read only `DIALOG`, answered with anything when closed), `UPLOAD` (`{ accept, multiple, maxFiles, maxFileSize, maxTotalSize }`, answered with a list of {@link FlowFileRef}), `{ options: {key, label}[], multiple }` for `CHOICE`
+ * (answered with the list of keys chosen), or absent
  * for `CONFIRM`/`INPUT`/`NOTIFY`.
  *
  * `REDIRECT` (terminal; `awaitReturn: true` unsupported) and `CALL` (`data.action`, optional `data.className`)
@@ -281,6 +281,10 @@ export interface ActionFlowStep {
     /** For `DIALOG`: class name `viewDescriptor` belongs to, when it is not the entity the action runs on. */
     viewClass?: string;
     data?: unknown;
+    /** For a `DIALOG` shown again after a validation error: the message of each failed field, by field name. */
+    fieldErrors?: Record<string, string>;
+    /** Presentation hints the front end may follow, such as `width` and `height` of a dialog ("60%", "500px"). */
+    hints?: Record<string, string>;
     /** Opaque, signed — echo back verbatim as `ActionExecutionRequest.resumeToken` to continue the flow. */
     resumeToken?: string;
 }

@@ -232,14 +232,17 @@ public final class TestUIEnvironment implements UIEnvironment {
                 if (form.edit() != null) {
                     form.edit().accept(options.value());
                 }
+                var closed = new boolean[1];
                 try {
-                    // Like the replay adapter today, returning from onSubmit means the user is done with the form.
-                    onSubmit.accept(options.value(), () -> {
-                    });
-                    return;
+                    onSubmit.accept(options.value(), () -> closed[0] = true);
                 } catch (ValidationError e) {
-                    error = e.getMessage();
+                    error = e.getMessage(); // the form stays open with the error
+                    continue;
                 }
+                if (closed[0]) {
+                    return;
+                }
+                error = null; // the action did not close it: it is still open, as in ZK
             }
         }
 
@@ -272,8 +275,12 @@ public final class TestUIEnvironment implements UIEnvironment {
             }
             var chosen = new ArrayList<T>();
             var labels = options.labels();
+            var keys = options.keys();
             for (Object selected : choose.selection()) {
-                int position = selected instanceof Integer i ? i : labels.indexOf(String.valueOf(selected));
+                int position = selected instanceof Integer i ? i : keys.indexOf(String.valueOf(selected));
+                if (position < 0) {
+                    position = labels.indexOf(String.valueOf(selected));
+                }
                 if (position < 0 || position >= options.options().size()) {
                     throw new AssertionError("Choice " + selected + " is not one of the options " + labels);
                 }

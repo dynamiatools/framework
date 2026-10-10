@@ -17,7 +17,10 @@
 package tools.dynamia.crud.headless;
 
 import tools.dynamia.actions.ActionFlowStep;
+import tools.dynamia.commons.Callback;
+import tools.dynamia.actions.replay.ReplayRetry;
 import tools.dynamia.actions.replay.ReplaySession;
+import tools.dynamia.domain.ValidationError;
 import tools.dynamia.ui.FormOptions;
 import tools.dynamia.ui.ViewDialog;
 import tools.dynamia.ui.ViewOptions;
@@ -30,16 +33,14 @@ import java.util.function.BiFunction;
 /**
  * {@link ViewsProvider} of a headless run. A form becomes a {@code DIALOG} step: the client builds it from the view
  * descriptor of the bean class and answers with the submitted values (or {@code null} if the user cancels); the values
- * are applied to the bean and the submit handler runs with it.
+ * are applied to the bean and the submit handler runs with it. The form stays open (the same step is asked again, with the
+ * values the user sent) when the handler throws {@link ValidationError}, which also carries the message and the field, or
+ * returns without calling {@link ViewDialog#close()}; only {@code close()} lets the action go on.
  * <p>
  * How a bean is turned into values and values are applied to it is the same as the headless save of a CRUD (see
  * {@link tools.dynamia.crud.actions.remote.SaveSupport}), so the form shows and accepts the same fields.
  */
 public final class HeadlessViews implements ViewsProvider {
-
-    /** Closing is the client's job: it closes the dialog when it answers. */
-    private static final ViewDialog CLIENT_CLOSES = () -> {
-    };
 
     private final ReplaySession session;
     private final BiFunction<Object, Class<?>, Object> toValues;
@@ -66,21 +67,51 @@ public final class HeadlessViews implements ViewsProvider {
     public <T> void showForm(FormOptions<T> options, BiConsumer<T, ViewDialog> onSubmit) {
         var step = ActionFlowStep.dialog(options.viewName(), options.beanClass().getName(),
                 toValues.apply(options.value(), options.beanClass()), options.title());
+        step.setHints(hints(options.width(), null));
         session.interact(step, answer -> {
             if (answer instanceof Map<?, ?> values) {
                 applier.apply(options.value(), options.beanClass(), (Map<String, Object>) values);
-                onSubmit.accept(options.value(), CLIENT_CLOSES);
+                var closed = new boolean[1];
+                try {
+                    onSubmit.accept(options.value(), () -> closed[0] = true);
+                } catch (ValidationError e) {
+                    // the form stays open with what was sent, the message and the field that failed
+                    throw new ReplayRetry(e.getMessage(), e.getInvalidProperty());
+                }
+                if (!closed[0] && !session.isPending()) {
+                    throw new ReplayRetry(null); // the action did not close it: it is still open, as in ZK
+                }
             }
         });
     }
 
     @Override
     public <T> void showView(ViewOptions<T> options) {
+        showView(options, null);
+    }
+
+    @Override
+    public <T> void showView(ViewOptions<T> options, Callback onClose) {
         var step = ActionFlowStep.view(options.viewName(), options.beanClass().getName(),
                 toValues.apply(options.value(), options.beanClass()), options.title());
+        step.setHints(hints(options.width(), options.height()));
         session.interact(step, answer -> {
-            // the user only had to see it
+            // the user only had to see it; the client answers when they close it
+            if (onClose != null) {
+                onClose.doSomething();
+            }
         });
+    }
+
+    private static Map<String, String> hints(String width, String height) {
+        var hints = new java.util.LinkedHashMap<String, String>();
+        if (width != null) {
+            hints.put("width", width);
+        }
+        if (height != null) {
+            hints.put("height", height);
+        }
+        return hints.isEmpty() ? null : hints;
     }
 
     private static Object entityToValues(Object bean, Class<?> beanClass) {

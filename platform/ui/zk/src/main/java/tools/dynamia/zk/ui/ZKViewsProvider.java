@@ -84,6 +84,11 @@ public class ZKViewsProvider implements ViewsProvider {
      */
     @Override
     public <T> void showView(ViewOptions<T> options) {
+        showView(options, null);
+    }
+
+    @Override
+    public <T> void showView(ViewOptions<T> options, tools.dynamia.commons.Callback onClose) {
         Object entity = options.value();
 
         Div content = new Div();
@@ -157,6 +162,9 @@ public class ZKViewsProvider implements ViewsProvider {
             height = options.height();
         }
 
-        ZKUtil.showDialog(options.title(), content, width, height);
+        Window window = ZKUtil.showDialog(options.title(), content, width, height);
+        if (onClose != null) {
+            window.addEventListener(org.zkoss.zk.ui.event.Events.ON_CLOSE, event -> onClose.doSomething());
+        }
     }
 }

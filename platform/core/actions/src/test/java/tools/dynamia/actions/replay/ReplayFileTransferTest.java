@@ -158,17 +158,19 @@ class ReplayFileTransferTest {
 
     @Test
     void aReferenceOfAnotherUserOrTenantIsNotFound() {
+        principal.set(user("luis", "1"));
+        var luisRef = sent("report.json", "{}");
         principal.set(user("ana", "1"));
-        var ref = sent("report.json", "{}");
         var pending = ReplayExecutor.execute("import", new ActionExecutionRequest(), this::importLike);
 
-        principal.set(user("luis", "1"));
         assertThrows(UploadRejectedException.class, () ->
-                ReplayExecutor.execute("import", answer(pending, List.of(Map.of("ref", ref.ref()))), this::importLike));
+                ReplayExecutor.execute("import", answer(pending, List.of(Map.of("ref", luisRef.ref()))), this::importLike));
 
         principal.set(user("ana", "2"));
+        var anaOtherTenant = sent("report.json", "{}");
+        principal.set(user("ana", "1"));
         assertThrows(UploadRejectedException.class, () ->
-                ReplayExecutor.execute("import", answer(pending, List.of(Map.of("ref", ref.ref()))), this::importLike));
+                ReplayExecutor.execute("import", answer(pending, List.of(Map.of("ref", anaOtherTenant.ref()))), this::importLike));
         assertTrue(imported.isEmpty());
     }
 

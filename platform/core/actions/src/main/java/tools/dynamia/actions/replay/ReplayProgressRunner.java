@@ -18,7 +18,9 @@ package tools.dynamia.actions.replay;
 
 import tools.dynamia.commons.Callback;
 import tools.dynamia.integration.ProgressMonitor;
+import tools.dynamia.ui.NoUIEnvironment;
 import tools.dynamia.ui.ProgressRunner;
+import tools.dynamia.ui.UIFacades;
 import tools.dynamia.ui.ProgressTask;
 
 import java.util.function.Consumer;
@@ -29,6 +31,13 @@ import java.util.function.Consumer;
  * {@link ReplaySession#markNonRepeatable(String)}).
  */
 public final class ReplayProgressRunner implements ProgressRunner {
+
+    /** Carries a checked exception of the task out of the transaction callback. */
+    private static final class TaskFailure extends RuntimeException {
+        TaskFailure(Throwable cause) {
+            super(cause);
+        }
+    }
 
     private final ReplaySession session;
 
@@ -43,8 +52,25 @@ public final class ReplayProgressRunner implements ProgressRunner {
         }
         session.markNonRepeatable("UIProgress");
         try {
-            task.run(new ProgressMonitor());
+            // like in ZK, the task does not run inside the transaction of the pass: it manages its own
+            ReplayTransactions.current().runOutside(() ->
+                    // the contract of UIProgress: no UI facade can be used inside the task
+                    UIFacades.with(NoUIEnvironment.INSTANCE, () -> {
+                        try {
+                            task.run(new ProgressMonitor());
+                        } catch (RuntimeException e) {
+                            throw e;
+                        } catch (Exception e) {
+                            throw new TaskFailure(e);
+                        }
+                        return null;
+                    }));
+        } catch (TaskFailure failure) {
+            session.fail(failure.getCause());
+            onError.accept(failure.getCause());
+            return;
         } catch (Throwable e) {
+            session.fail(e); // the action handles the error, but what the pass did is not committed
             onError.accept(e);
             return;
         }

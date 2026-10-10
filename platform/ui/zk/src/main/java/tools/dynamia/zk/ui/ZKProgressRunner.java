@@ -18,7 +18,9 @@ package tools.dynamia.zk.ui;
 
 import tools.dynamia.commons.Callback;
 import tools.dynamia.integration.ProgressMonitor;
+import tools.dynamia.ui.NoUIEnvironment;
 import tools.dynamia.ui.ProgressRunner;
+import tools.dynamia.ui.UIFacades;
 import tools.dynamia.ui.ProgressTask;
 import tools.dynamia.zk.util.LongOperation;
 
@@ -34,15 +36,7 @@ public class ZKProgressRunner implements ProgressRunner {
     public void run(String title, String messageTemplate, ProgressTask task, Callback onFinish, Consumer<Throwable> onError) {
         var monitor = new ProgressMonitor();
         var operation = LongOperation.create()
-                .execute(() -> {
-                    try {
-                        task.run(monitor);
-                    } catch (RuntimeException e) {
-                        throw e;
-                    } catch (Exception e) {
-                        throw new IllegalStateException(e.getMessage(), e);
-                    }
-                })
+                .execute(() -> runWithoutUi(task, monitor))
                 .onException(onError::accept);
         if (onFinish != null) {
             operation.onFinish(onFinish);
@@ -53,5 +47,22 @@ public class ZKProgressRunner implements ProgressRunner {
         if (messageTemplate != null) {
             window.setMessageTemplate(messageTemplate);
         }
+    }
+
+    /**
+     * Runs the task of a progress operation. The contract of {@code UIProgress}: no UI facade can be used inside the task,
+     * so it runs in {@link NoUIEnvironment} whatever thread executes it; it reports through the monitor.
+     */
+    static void runWithoutUi(ProgressTask task, ProgressMonitor monitor) {
+        UIFacades.with(NoUIEnvironment.INSTANCE, () -> {
+            try {
+                task.run(monitor);
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new IllegalStateException(e.getMessage(), e);
+            }
+            return null;
+        });
     }
 }

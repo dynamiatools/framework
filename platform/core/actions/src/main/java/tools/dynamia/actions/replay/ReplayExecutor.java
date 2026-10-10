@@ -41,6 +41,7 @@ public final class ReplayExecutor {
 
     private static final String REQUEST_KEY = "request";
     private static final String ANSWERS_KEY = "answers";
+    private static final String PENDING_FP_KEY = "pendingFp";
     /** Messages the action showed in the final pass, in {@link ActionExecutionResponse#getParams()}. */
     public static final String NOTIFICATIONS_PARAM = "notifications";
     /** Path of the transfers endpoint; downloads are fetched from {@code TRANSFERS_PATH/{ref}}. */
@@ -73,9 +74,11 @@ public final class ReplayExecutor {
                 flowId = payload.flowId();
                 original = requestFromMap(asMap(payload.data().get(REQUEST_KEY)));
                 if (payload.data().get(ANSWERS_KEY) instanceof List<?> previous) {
-                    answers.addAll(previous);
+                    previous.forEach(item -> answers.add(toAnswer(item)));
                 }
-                answers.add(request.getData());
+                Object fingerprint = payload.data().get(PENDING_FP_KEY);
+                answers.add(fingerprint != null ? new ReplaySession.Answer(String.valueOf(fingerprint), request.getData())
+                        : request.getData());
             } catch (FlowTokenException e) {
                 return new ActionExecutionResponse(e.getMessage(), "ERROR", 401);
             }
@@ -87,14 +90,15 @@ public final class ReplayExecutor {
         var session = new ReplaySession(answers);
         var environment = new ReplayUIEnvironment(session, contributors());
         var interactions = environment.interactions();
-        Object result = transactions().run(
+        Object result = ReplayTransactions.current().run(
                 () -> UIFacades.with(environment, () -> body.apply(original)),
-                () -> !interactions.isPending());
+                () -> !interactions.isPending() && !session.failed());
 
         if (interactions.isPending()) {
             Map<String, Object> carried = new HashMap<>();
             carried.put(REQUEST_KEY, requestToMap(original));
-            carried.put(ANSWERS_KEY, answers);
+            carried.put(ANSWERS_KEY, answers.stream().map(ReplayExecutor::fromAnswer).toList());
+            carried.put(PENDING_FP_KEY, session.pendingFingerprint());
             return ActionFlows.toResponse(flowId, actionId, carried, interactions.pending());
         }
 
@@ -105,8 +109,10 @@ public final class ReplayExecutor {
                 : ActionFlowStep.redirect(session.redirectUrl(), false, session.redirectInNewWindow());
         var response = ActionFlows.toResponse(flowId, actionId, Map.of(), finalStep);
         var downloads = session.downloads();
-        var published = publishDownloads(downloads);
-        deleteConsumed(session);
+        var published = session.failed() ? List.<Map<String, Object>>of() : publishDownloads(downloads);
+        if (!session.failed()) {
+            deleteConsumed(session);
+        }
         if (!notifications.isEmpty() || !published.isEmpty()) {
             var params = new HashMap<String, Object>();
             if (!notifications.isEmpty()) {
@@ -165,14 +171,27 @@ public final class ReplayExecutor {
         }
     }
 
+    /** An answer as it travels in the token: {@code {fp, value}}; an answer without fingerprint travels as is. */
+    private static Object fromAnswer(Object answer) {
+        if (answer instanceof ReplaySession.Answer a) {
+            var map = new LinkedHashMap<String, Object>();
+            map.put("fp", a.fp());
+            map.put("value", a.value());
+            return map;
+        }
+        return answer;
+    }
+
+    private static Object toAnswer(Object stored) {
+        if (stored instanceof Map<?, ?> map && map.size() == 2 && map.containsKey("fp") && map.containsKey("value")) {
+            return new ReplaySession.Answer(String.valueOf(map.get("fp")), map.get("value"));
+        }
+        return stored;
+    }
+
     private static List<ReplayPortContributor> contributors() {
         var found = Containers.get().findObjects(ReplayPortContributor.class);
         return found == null ? List.of() : new ArrayList<>(found);
-    }
-
-    private static ReplayTransactions transactions() {
-        var found = Containers.get().findObject(ReplayTransactions.class);
-        return found != null ? found : ReplayTransactions.NONE;
     }
 
     // -- the original request travels in the token: only plain data ---------------------------------------

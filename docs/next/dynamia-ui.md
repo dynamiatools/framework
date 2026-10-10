@@ -829,7 +829,9 @@ Known limits of that iteration (addressed by the work packages above):
 | WP2 | Done, see below |
 | WP3 | Done, see below |
 | WP4 | Done, see below |
-| WP5 to WP10 | Not started |
+| WP5 | Done, see below |
+| WP6 | Done except the ZK driver, see below |
+| WP7 to WP10 | Not started |
 
 #### WP1 · `UIEnvironment` and clear errors
 
@@ -927,3 +929,49 @@ The branch already had the mechanism §8 asks for: `ContextCapturer` beans, aske
   of the upload (`onProgress`) needs `XMLHttpRequest`.
 - Not done: a shared `TransferStore` for several nodes (waits for D2); an HTTP-level test of the 413 mapping (the handler is
   tested directly); the `UploadedFile` of `ZKFileTransfer` was not exercised in a browser.
+
+#### WP5 · Robust replay
+
+- **Fingerprints (§5.1):** `ReplaySession.Answer(fp, value)`; the token carries `{fp, value}` and the fingerprint of the pending
+  step. If the action asks something else now, the answer and the ones after it are dropped and the new question is asked
+  with a `WARNING` and `flow.stepChanged`. The fingerprint covers type, view, title, option keys and, for `CONFIRM`/`INPUT`,
+  the text of the question (the spec lists title only, but the text is what changes when the data changes). For those two
+  the notice is prefixed to the question because their `message` is the question.
+- **Retry (§5.2):** `ReplayRetry` thrown while handling an answer rolls the pass back, drops the answer and asks the same step
+  again with the error (`messageType=ERROR`), the submitted values in `data` and `fieldErrors` (new in `ActionFlowStep`).
+  `HeadlessViews` turns a `ValidationError` (message and invalid property) into it and also reopens a form that returned
+  without `ViewDialog.close()`, unless the action went on to another interaction; `CLIENT_CLOSES` is gone. The test platform
+  follows the same rule (direct mode), and `fillForm` works through it remotely. Forms of non-entity beans (DTOs) work as
+  long as the class has a descriptor (tested with a plain bean and an auto-fields descriptor).
+- **Choices (§5.3):** `ChoiceOptions` has a `key` (default `getId()` of the option if it has one, else the label); the step
+  carries `options: [{key, label}]`, the answer is a list of keys, an unknown key asks again, an empty selection cancels
+  (also for `chooseMany` in ZK, done in the facade).
+- **Token (§5.4):** bound to `FlowPrincipal` (user and tenant, else 401); `dynamia.actions.flow.require-secret=true` or the
+  `prod` profile makes startup fail without a secret; `dynamia.actions.flow.max-token-bytes` (16 KB) gives a clear error.
+- **Transactions (§5.5):** a pass whose `UIProgress` task failed is rolled back even if the action handled the error and
+  publishes nothing; the task runs with the transaction suspended (`ReplayTransactions.runOutside`, implemented in `app`).
+- **TS:** the Vue runner passes `message`/`messageType` to `FormDialogHost` and the field errors to the form view; `choose`
+  receives `{key, label}` options and returns keys.
+- Not done: asynchronous progress (WP8); a fingerprint cannot tell two questions with identical text apart.
+
+#### WP6 · Contract per port
+
+- **Suites** (`platform/testing/ui-contract`, `tools.dynamia.ui.contract`): `MessagesPortContract`, `ViewsPortContract`,
+  `ChoicesPortContract`, `FilesPortContract`, `ProgressPortContract` and `NavigationPortContract`, 36 cases that follow the
+  rows of §4. A `PortDriver` runs the action on one platform and plays the user with `Reply`s; it reports an `Outcome`
+  (what was asked, the effects of the last run, notices, downloads, redirect, failure).
+- **Adapters that run them** (in `ui-testing`): the replay adapter (`ReplayPortDriver`: the real `ReplayExecutor`, tokens and
+  a transfer store) and the test platform (`TestPlatformDriver`), 12 classes, all green.
+- **Fixes the suites forced:** the task of a headless `UIProgress` now runs without UI (it used to be able to register
+  questions); `UIViews.showView(options, onClose)` / `ViewsProvider.showView(options, onClose)` with the user's close
+  reported (ZK: `ON_CLOSE`; replay: the acknowledgement of the `VIEW` step; default: immediately); `ZKProgressRunner` runs
+  its task in `NoUIEnvironment` itself; `showView`/`showForm` width and height travel as `hints` in the step and the Vue
+  dialog applies them.
+- **Deviations from §9.3:** the suites live in their own module and not in a `ui-shared` test-jar, and the replay driver in
+  `ui-testing` and not in `actions`/`crud`. A test-jar of a modular artifact is not visible to the modules that use it, and
+  `ui-testing` already depends on `actions` and `crud`, so a driver there avoids a cycle.
+- **Not done: the ZK contract run.** ZATS is not available and the ZK providers need a desktop (`Executions`, windows,
+  `Fileupload`). `ZKAdaptersContractTest` covers what needs none: upload handles, the shared `UploadPolicy`, and the task
+  without UI. Rows of §4 that only the ZK adapter can prove (a question in a window, `Filedownload`, the redirect) are
+  unverified until someone runs ZK in a browser or adds ZATS.
+- `ZKViewsProvider.showView` keeps its field-count sizing heuristics in ZK; the hints are the explicit size.

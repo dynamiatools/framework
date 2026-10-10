@@ -36,4 +36,18 @@ public interface ViewsProvider {
      * continues once the client acknowledged the view.
      */
     <T> void showView(ViewOptions<T> options);
+
+    /**
+     * Shows {@code options.value()} read only and calls {@code onClose} when the user closes it. The default calls it right
+     * away, which is what an environment with nobody in front does; interactive adapters override it.
+     *
+     * @param options what to show
+     * @param onClose runs after the user closed the view, may be null
+     */
+    default <T> void showView(ViewOptions<T> options, tools.dynamia.commons.Callback onClose) {
+        showView(options);
+        if (onClose != null) {
+            onClose.doSomething();
+        }
+    }
 }

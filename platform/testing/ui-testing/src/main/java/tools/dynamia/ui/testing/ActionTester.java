@@ -193,7 +193,7 @@ public final class ActionTester {
             container.addObject(transfers);
         }
         if (beans.stream().noneMatch(ViewDescriptorFactory.class::isInstance)) {
-            container.addObject(autoFieldsFactory());
+            container.addObject(TestDescriptors.autoFields());
         }
         Containers.get().installObjectContainer(container);
         try {
@@ -201,29 +201,6 @@ public final class ActionTester {
         } finally {
             Containers.get().removeContainer(CONTAINER_NAME);
         }
-    }
-
-    /**
-     * Stands for the application's descriptor factory (forms filled with values need one): every class gets a form with one field per
-     * property, which is what forms of entities without a descriptor file look like. Register your own with
-     * {@link #bean(Object)} to test against real descriptors.
-     */
-    private static ViewDescriptorFactory autoFieldsFactory() {
-        return (ViewDescriptorFactory) Proxy.newProxyInstance(ViewDescriptorFactory.class.getClassLoader(),
-                new Class<?>[]{ViewDescriptorFactory.class}, (proxy, method, args) -> {
-                    if (ViewDescriptor.class.isAssignableFrom(method.getReturnType())) {
-                        for (Object arg : args) {
-                            if (arg instanceof Class<?> type) {
-                                return ViewDescriptorBuilder.viewDescriptor("form", type).autofields(true).build();
-                            }
-                        }
-                        return null;
-                    }
-                    if (Set.class.isAssignableFrom(method.getReturnType())) {
-                        return Set.of();
-                    }
-                    return null;
-                });
     }
 
     // -- direct --------------------------------------------------------------------------------------------
@@ -385,13 +362,30 @@ public final class ActionTester {
                     return ABANDONED;
                 }
                 if (answer instanceof UIScript.Choose choose) {
-                    var labels = (List<String>) ((Map<String, Object>) step.getData()).get("options");
-                    var positions = new ArrayList<Integer>();
+                    var options = (List<Map<String, String>>) ((Map<String, Object>) step.getData()).get("options");
+                    var keys = new ArrayList<String>();
                     for (Object selected : choose.selection()) {
-                        positions.add(selected instanceof Integer i ? i : labels.indexOf(String.valueOf(selected)));
+                        Map<String, String> option = null;
+                        if (selected instanceof Integer position && position >= 0 && position < options.size()) {
+                            option = options.get(position);
+                        } else {
+                            for (var candidate : options) {
+                                if (candidate.get("key").equals(String.valueOf(selected))) {
+                                    option = candidate;
+                                }
+                            }
+                            for (var candidate : options) {
+                                if (option == null && candidate.get("label").equals(String.valueOf(selected))) {
+                                    option = candidate;
+                                }
+                            }
+                        }
+                        if (option == null) {
+                            throw new AssertionError("Choice " + selected + " is not one of the options " + options);
+                        }
+                        keys.add(option.get("key"));
                     }
-                    boolean multiple = Boolean.TRUE.equals(((Map<String, Object>) step.getData()).get("multiple"));
-                    return multiple ? positions : positions.get(0);
+                    return keys;
                 }
             }
             case UPLOAD -> {

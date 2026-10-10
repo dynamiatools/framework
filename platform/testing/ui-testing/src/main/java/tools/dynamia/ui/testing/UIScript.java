@@ -135,9 +135,9 @@ public final class UIScript {
     }
 
     /**
-     * Chooses options of the next choice by label.
+     * Chooses options of the next choice by key, or by label when no key matches.
      *
-     * @param labels the labels, as the user sees them
+     * @param labels the keys of the options, or their labels as the user sees them
      * @return this script
      */
     public UIScript choose(String... labels) {

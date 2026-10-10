@@ -46,7 +46,18 @@ public final class UIChoices {
      * @param label text shown for each option
      */
     public static <T> void chooseOne(String title, List<T> options, Function<T, String> label, Consumer<T> onChoice) {
-        UIFacades.port(ChoicesProvider.class).choose(new ChoiceOptions<>(title, options, label, false), chosen -> {
+        chooseOne(title, options, label, ChoiceOptions.defaultKey(label), onChoice);
+    }
+
+    /**
+     * Asks for one option identified by a stable key.
+     *
+     * @param label text shown for each option
+     * @param key   stable identifier of each option; a headless client answers with it
+     */
+    public static <T> void chooseOne(String title, List<T> options, Function<T, String> label, Function<T, String> key,
+                                     Consumer<T> onChoice) {
+        UIFacades.port(ChoicesProvider.class).choose(new ChoiceOptions<>(title, options, label, key, false), chosen -> {
             if (!chosen.isEmpty()) {
                 onChoice.accept(chosen.get(0));
             }
@@ -54,9 +65,21 @@ public final class UIChoices {
     }
 
     /**
-     * Asks for any number of options (at least one).
+     * Asks for any number of options. Choosing none is the same as cancelling: the callback is not called.
      */
     public static <T> void chooseMany(String title, List<T> options, Function<T, String> label, Consumer<List<T>> onChoice) {
-        UIFacades.port(ChoicesProvider.class).choose(new ChoiceOptions<>(title, options, label, true), onChoice);
+        chooseMany(title, options, label, ChoiceOptions.defaultKey(label), onChoice);
+    }
+
+    /**
+     * Asks for any number of options identified by a stable key. Choosing none is the same as cancelling.
+     */
+    public static <T> void chooseMany(String title, List<T> options, Function<T, String> label, Function<T, String> key,
+                                      Consumer<List<T>> onChoice) {
+        UIFacades.port(ChoicesProvider.class).choose(new ChoiceOptions<>(title, options, label, key, true), chosen -> {
+            if (!chosen.isEmpty()) {
+                onChoice.accept(chosen);
+            }
+        });
     }
 }

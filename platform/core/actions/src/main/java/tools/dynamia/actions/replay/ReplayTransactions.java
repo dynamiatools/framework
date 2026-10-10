@@ -21,6 +21,24 @@ public interface ReplayTransactions {
      */
     <T> T run(Supplier<T> work, BooleanSupplier commit);
 
+    /**
+     * Runs {@code work} with the transaction of the pass suspended, so the work manages its own transactions. This is the
+     * rule of a {@code UIProgress} task in ZK too: it does not run inside the transaction of whoever started it.
+     *
+     * @param work the work
+     * @param <T>  its result
+     * @return what {@code work} returns
+     */
+    default <T> T runOutside(Supplier<T> work) {
+        return work.get();
+    }
+
+    /** @return the transactions of the application, or {@link #NONE} when there are none */
+    static ReplayTransactions current() {
+        var found = tools.dynamia.integration.Containers.get().findObject(ReplayTransactions.class);
+        return found != null ? found : NONE;
+    }
+
     /** No transaction at all. */
     ReplayTransactions NONE = new ReplayTransactions() {
         @Override
