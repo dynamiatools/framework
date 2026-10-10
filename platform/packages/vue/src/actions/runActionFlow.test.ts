@@ -173,3 +173,112 @@ describe('runActionFlow CALL (experimental)', () => {
     await expect(runActionFlow(client, action, {}, handlers())).rejects.toThrow(/data\.action/);
   });
 });
+
+describe('runActionFlow UPLOAD and downloads', () => {
+  it('asks for files on an UPLOAD step and answers with them', async () => {
+    const upload = flowResponse(step({ type: 'UPLOAD', data: { accept: '.json', multiple: false } }));
+    const done = flowResponse(step({ type: 'DONE' }));
+    const { client, calls } = fakeClient({ main: [upload, done] });
+    const file = { name: 'report.json', contentType: 'application/json', content: 'e30=' };
+    const pickFiles = vi.fn(async () => [file]);
+
+    await runActionFlow(client, action, {}, handlers({ pickFiles }));
+
+    expect(pickFiles).toHaveBeenCalledWith({ accept: '.json', multiple: false });
+    expect(calls.main[1]!.data).toEqual([file]);
+    expect(calls.main[1]!.resumeToken).toBe('tok');
+  });
+
+  it('answers with an empty list when the user cancels the picker', async () => {
+    const { client, calls } = fakeClient({
+      main: [flowResponse(step({ type: 'UPLOAD', data: { multiple: true } })), flowResponse(step({ type: 'DONE' }))],
+    });
+
+    await runActionFlow(client, action, {}, handlers({ pickFiles: async () => null }));
+
+    expect(calls.main[1]!.data).toEqual([]);
+  });
+
+  it('gives params.downloads of the final response to saveFile', async () => {
+    const file = { name: 'out.txt', contentType: 'text/plain', content: 'aGVsbG8=' };
+    const final = { ...flowResponse(step({ type: 'DONE' })), params: { downloads: [file] } };
+    const { client } = fakeClient({ main: [final] });
+    const saveFile = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ saveFile }));
+
+    expect(saveFile).toHaveBeenCalledWith(file);
+  });
+});
+
+describe('runActionFlow DIALOG view class', () => {
+  it('fetches the view of step.viewClass instead of the entity of the request', async () => {
+    const dialog = flowResponse(step({ type: 'DIALOG', viewDescriptor: 'form', viewClass: 'x.AccountPayment', data: { amount: 5 } }));
+    const done = flowResponse(step({ type: 'DONE' }));
+    const { client: base, calls } = fakeClient({ main: [dialog, done] });
+    const getEntityView = vi.fn(async () => ({ id: 'form', fields: [], view: 'form' }));
+    const getEntity = vi.fn(async () => null);
+    const client = { ...(base as object), metadata: { getEntityView, getEntity } } as never;
+    const showFormDialog = vi.fn(async () => ({ amount: 10 }));
+
+    await runActionFlow(client, action, { dataType: 'x.Account' }, handlers({ showFormDialog }), 'x.Account');
+
+    expect(getEntityView).toHaveBeenCalledWith('x.AccountPayment', 'form');
+    expect(calls.main[1]!.data).toEqual({ amount: 10 });
+  });
+});
+
+describe('runActionFlow CHOICE and new window redirects', () => {
+  it('answers a CHOICE step with the positions chosen', async () => {
+    const choice = flowResponse(step({ type: 'CHOICE', title: 'Storage', data: { options: ['LOCAL', 'S3'], multiple: false } }));
+    const { client, calls } = fakeClient({ main: [choice, flowResponse(step({ type: 'DONE' }))] });
+    const choose = vi.fn(async () => [1]);
+
+    await runActionFlow(client, action, {}, handlers({ choose }));
+
+    expect(choose).toHaveBeenCalledWith({ title: 'Storage', options: ['LOCAL', 'S3'], multiple: false });
+    expect(calls.main[1]!.data).toEqual([1]);
+  });
+
+  it('answers an empty list when the user cancels the choice', async () => {
+    const { client, calls } = fakeClient({
+      main: [flowResponse(step({ type: 'CHOICE', data: { options: ['A'], multiple: true } })), flowResponse(step({ type: 'DONE' }))],
+    });
+
+    await runActionFlow(client, action, {}, handlers({ choose: async () => null }));
+
+    expect(calls.main[1]!.data).toEqual([]);
+  });
+
+  it('fails clearly when there is no choose handler', async () => {
+    const { client } = fakeClient({ main: [flowResponse(step({ type: 'CHOICE', data: { options: [] } }))] });
+    await expect(runActionFlow(client, action, {}, handlers())).rejects.toThrow(/choose/);
+  });
+
+  it('tells the navigate handler to open a new window', async () => {
+    const redirect = flowResponse(step({ type: 'REDIRECT', data: { url: '/files/1/download', awaitReturn: false, newWindow: true } }));
+    const { client } = fakeClient({ main: [redirect] });
+    const navigate = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ navigate }));
+
+    expect(navigate).toHaveBeenCalledWith('/files/1/download', { newWindow: true });
+  });
+});
+
+describe('runActionFlow VIEW', () => {
+  it('shows the view read only and acknowledges it', async () => {
+    const view = flowResponse(step({ type: 'VIEW', viewDescriptor: 'form', viewClass: 'x.Sale', data: { total: 5 }, title: 'Sale 1' }));
+    const { client: base, calls } = fakeClient({ main: [view, flowResponse(step({ type: 'DONE' }))] });
+    const client = {
+      ...(base as object),
+      metadata: { getEntityView: vi.fn(async () => ({ id: 'form', fields: [], view: 'form' })), getEntity: vi.fn(async () => null) },
+    } as never;
+    const showFormDialog = vi.fn(async () => ({}));
+
+    await runActionFlow(client, action, { dataType: 'x.Sale' }, handlers({ showFormDialog }), 'x.Sale');
+
+    expect(showFormDialog).toHaveBeenCalledWith(expect.objectContaining({ title: 'Sale 1', readonly: true }));
+    expect(calls.main[1]!.data).toBe(true);
+  });
+});

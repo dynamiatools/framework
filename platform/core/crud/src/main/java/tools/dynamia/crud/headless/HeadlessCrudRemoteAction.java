@@ -85,7 +85,7 @@ public final class HeadlessCrudRemoteAction extends AbstractCrudRemoteAction {
         result.put("deleted", controller.isDeleted());
         result.put("state", view.getState());
         if (controller.getSavedEntity() != null) {
-            result.put("entity", asJson(controller.getSavedEntity(), entityClass));
+            result.put("entity", toJson(controller.getSavedEntity(), entityClass));
         }
         return result;
     }
@@ -95,7 +95,7 @@ public final class HeadlessCrudRemoteAction extends AbstractCrudRemoteAction {
      * touch lazy associations once the transaction is over.
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private Object asJson(Object entity, Class entityClass) {
+    static Object toJson(Object entity, Class entityClass) {
         var descriptor = SaveSupport.jsonFormDescriptor(entityClass);
         return StringPojoParser.parseJsonToMap(new JsonView<>(entity, descriptor).renderJson());
     }

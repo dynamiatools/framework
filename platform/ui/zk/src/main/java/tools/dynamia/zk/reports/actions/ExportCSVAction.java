@@ -16,7 +16,9 @@
  */
 package tools.dynamia.zk.reports.actions;
 
+import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.integration.ProgressMonitor;
 import tools.dynamia.reports.ExporterColumn;
@@ -34,6 +36,7 @@ import java.io.File;
 import java.util.Collection;
 
 @InstallAction
+@RunsOn(ActionRuntime.ZK_ONLY)
 public class ExportCSVAction extends AbstractExportAction {
 
 

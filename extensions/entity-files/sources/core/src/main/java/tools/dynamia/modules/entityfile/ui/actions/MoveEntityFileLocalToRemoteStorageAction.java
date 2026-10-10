@@ -17,10 +17,9 @@ import tools.dynamia.modules.entityfile.EntityFileStorage;
 import tools.dynamia.modules.entityfile.domain.EntityFile;
 import tools.dynamia.modules.entityfile.domain.enums.EntityFileState;
 import tools.dynamia.modules.entityfile.local.LocalEntityFileStorage;
+import tools.dynamia.ui.UIChoices;
 import tools.dynamia.ui.UIMessages;
-import tools.dynamia.zk.ui.LongOperationMonitorWindow;
-import tools.dynamia.zk.util.LongOperation;
-import tools.dynamia.zk.util.ZKUtil;
+import tools.dynamia.ui.UIProgress;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,12 +45,7 @@ class MoveEntityFileLocalToRemoteStorageAction extends AbstractConfigPageAction 
     public void actionPerformed(ActionEvent evt) {
         var otherStorages = Containers.get().findObjects(EntityFileStorage.class, s -> !LocalEntityFileStorage.ID.equals(s.getId()));
 
-        ZKUtil.showListboxSelector("Select new Storage", new ArrayList(otherStorages), event -> {
-            var otherStorage = (EntityFileStorage) event.getSelectedObjects().stream().findFirst().orElse(null);
-            if (otherStorage == null) {
-                return;
-            }
-
+        UIChoices.chooseOne("Select new Storage", new ArrayList<>(otherStorages), EntityFileStorage::getName, otherStorage -> {
             List<Long> accounts = findFilesAccounts();
             UIMessages.showQuestion("Are you sure want to move files from " + accounts.size() + " accounts to " + otherStorage,
                     () -> move(otherStorage, accounts, "Moving files to " + otherStorage));
@@ -59,18 +53,11 @@ class MoveEntityFileLocalToRemoteStorageAction extends AbstractConfigPageAction 
     }
 
     public void move(EntityFileStorage otherStorage, List<Long> accounts, String title) {
-        var monitor = new ProgressMonitor();
-
-        var longOp = LongOperation.create()
-                .execute(() -> moveFiles(accounts, monitor, otherStorage))
-                .onFinish(() -> UIMessages.showMessage("Moving files completed"))
-                .onException(e -> UIMessages.showMessage("Error: " + e.getMessage()))
-                .start();
-
-        LongOperationMonitorWindow.show(title, longOp, monitor)
-                .setMessageTemplate("Moving files to " + otherStorage.getName() + ": {0} / {1}");
+        UIProgress.run(title, "Moving files to " + otherStorage.getName() + ": {0} / {1}",
+                monitor -> moveFiles(accounts, monitor, otherStorage),
+                () -> UIMessages.showMessage("Moving files completed"),
+                e -> UIMessages.showMessage("Error: " + e.getMessage()));
     }
-
 
     private void moveFiles(List<Long> accounts, ProgressMonitor monitor, EntityFileStorage otherStorage) {
         otherStorage.reloadParams();

@@ -33,7 +33,7 @@ import tools.dynamia.viewers.ViewFactory;
 import tools.dynamia.viewers.ViewRendererException;
 import tools.dynamia.viewers.util.Viewers;
 import tools.dynamia.web.util.HttpUtils;
-import tools.dynamia.zk.crud.actions.ViewDataAction;
+import tools.dynamia.crud.actions.ViewDataAction;
 import tools.dynamia.zk.viewers.table.TableView;
 import tools.dynamia.zk.viewers.table.TableViewHeader;
 import tools.dynamia.zk.viewers.table.TableViewType;

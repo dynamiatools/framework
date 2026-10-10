@@ -60,8 +60,11 @@ Restrictions (`ActionRestrictions`), state checks and `ActionFilter`s apply as f
 ## What is not done
 
 - `HeadlessCrudController` copies the save/delete flow of `zk.crud.CrudController`. Next step: extract it into one class both use.
-- Ports still missing for the other actions: downloads, navigation / refresh, dialogs with a form (`UIToolsProvider`), long operations.
+- Ports still missing for the other actions: navigation / refresh, dialogs with a form (`UIToolsProvider`), long operations.
+  Files are done: `UIFiles` (`download`, `upload`) over the `FileTransfer` SPI; headless, an upload is an `UPLOAD` step answered with
+  Base64 files (limit 1 MB) and downloads travel in `params.downloads` of the final response (limit 10 MB). Bigger files need a
+  stream endpoint. See [dynamia-ui.md](../next/dynamia-ui.md) for the facade pattern.
   Until then `DIALOG`, `REDIRECT`, `CALL` and `CUSTOM` steps come from `FlowRemoteAction`.
 - Deferring non-database side effects (`afterCommit`) is a rule, not an API yet.
-- Actions that are pure UI (`FindAction`, `FiltersAction`, renderers): declare a client hint in the metadata; each front end implements it once.
-- A test that walks every `@InstallAction` and fails when an action is neither `HeadlessCapable` nor declared client side.
+- Actions that are pure UI (`FindAction`, `FiltersAction`, renderers): the server publishes nothing. They are `ZK_ONLY`; a front end writes its own client action in TypeScript (`registerClientAction`).
+- A test that walks every `@InstallAction` and fails when an action is neither `HeadlessCapable` nor declared `ZK_ONLY`.

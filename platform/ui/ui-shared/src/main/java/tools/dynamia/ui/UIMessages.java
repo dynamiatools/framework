@@ -84,12 +84,6 @@ public class UIMessages {
      * Return the current MessageDisplayer, if not set try to find one in the container
      */
     /**
-     * Displayer bound to the code running inside {@link #withDisplayer}: a headless runtime (a REST request that
-     * runs an action written against {@link UIMessages}) gives each execution its own displayer.
-     */
-    private static final ScopedValue<MessageDisplayer> SCOPED_DISPLAYER = ScopedValue.newInstance();
-
-    /**
      * Runs {@code work} with {@code displayer} as the {@link MessageDisplayer} of every {@code UIMessages} call made
      * by it (and by the threads it forks with structured concurrency). Outside of it the application's displayer
      * (ZK's, for example) is used as always.
@@ -100,12 +94,13 @@ public class UIMessages {
      * @return what {@code work} returns
      */
     public static <T> T withDisplayer(MessageDisplayer displayer, java.util.function.Supplier<T> work) {
-        return ScopedValue.where(SCOPED_DISPLAYER, displayer).call(work::get);
+        return UIFacades.with(MessageDisplayer.class, displayer, work);
     }
 
     public static MessageDisplayer getDisplayer() {
-        if (SCOPED_DISPLAYER.isBound()) {
-            return SCOPED_DISPLAYER.get();
+        MessageDisplayer scoped = UIFacades.bound(MessageDisplayer.class);
+        if (scoped != null) {
+            return scoped;
         }
         if (currentMessageDisplayer == null) {
             currentMessageDisplayer = Containers.get().findObject(MessageDisplayer.class);

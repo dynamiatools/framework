@@ -29,7 +29,7 @@ import tools.dynamia.web.util.HttpUtils;
 import tools.dynamia.zk.actions.*;
 import tools.dynamia.zk.crud.CrudView;
 import tools.dynamia.zk.crud.CrudViewRenderer;
-import tools.dynamia.zk.crud.actions.FindAction;
+import tools.dynamia.crud.actions.FindAction;
 import tools.dynamia.zk.util.ZKUtil;
 
 import java.util.HashMap;

@@ -16,18 +16,16 @@
 package tools.dynamia.modules.reports.ui.actions;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zkoss.zul.Fileupload;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
-import tools.dynamia.io.IOUtils;
 import tools.dynamia.modules.reports.core.domain.Report;
 import tools.dynamia.modules.reports.core.services.ReportsService;
+import tools.dynamia.ui.UIFiles;
 import tools.dynamia.ui.UIMessages;
 
 import java.io.File;
-import java.util.stream.Stream;
 
 @InstallAction
 public class ImportReportAction extends AbstractCrudAction {
@@ -46,21 +44,23 @@ public class ImportReportAction extends AbstractCrudAction {
     public void actionPerformed(final CrudActionEvent evt) {
 
 
-        Fileupload.get(uevt -> {
-            Stream.of(uevt.getMedias()).forEach(m -> {
-                try {
-                    if (m.getName().endsWith(".json")) {
-                        var file = File.createTempFile("report", ".json");
-                        IOUtils.copy(m.getStreamData(), file);
+        UIFiles.upload(".json", files -> files.forEach(f -> {
+            try {
+                if (f.name().endsWith(".json")) {
+                    var file = File.createTempFile("report", ".json");
+                    try {
+                        java.nio.file.Files.write(file.toPath(), f.content());
                         service.importReport(file);
+                    } finally {
+                        file.delete();
                     }
-                    UIMessages.showMessage("Imported OK");
-                    evt.getController().doQuery();
-                } catch (Exception e) {
-                    UIMessages.showMessage("Error importing: " + e.getMessage());
                 }
-            });
-        });
+                UIMessages.showMessage("Imported OK");
+                evt.getController().doQuery();
+            } catch (Exception e) {
+                UIMessages.showMessage("Error importing: " + e.getMessage());
+            }
+        }));
     }
 
 

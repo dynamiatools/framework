@@ -118,6 +118,9 @@ export interface ApplicationMetadataActions {
     actions: ActionMetadata[];
 }
 
+/** Mirrors `tools.dynamia.actions.ActionRuntime`: where and how a published action runs. */
+export type ActionRuntime = 'HEADLESS' | 'FLOW' | 'REMOTE' | 'ZK_ONLY' | 'UNDECLARED';
+
 export type ActionType = 'Action' | 'ClassAction' | 'CrudAction' | string;
 
 /**
@@ -129,6 +132,8 @@ export type ActionType = 'Action' | 'ClassAction' | 'CrudAction' | string;
 export interface ActionMetadata extends BasicMetadata {
     /** Logical server-side action type: Action, ClassAction or CrudAction */
     type?: ActionType;
+    /** How the server runs the action (`HEADLESS`, `FLOW`, `REMOTE`). Client actions are registered in TS and are not published. */
+    runtime?: ActionRuntime;
     /** Simple Java class name of the action implementation */
     className?: string;
     /** Fully-qualified class name of the Java action implementation */
@@ -216,6 +221,9 @@ export type ActionFlowStepType =
     | 'CONFIRM'
     | 'INPUT'
     | 'DIALOG'
+    | 'VIEW'
+    | 'UPLOAD'
+    | 'CHOICE'
     | 'NOTIFY'
     | 'REDIRECT'
     | 'CALL'
@@ -223,10 +231,22 @@ export type ActionFlowStepType =
     | 'CUSTOM';
 
 /**
+ * A file exchanged with an action through the flow protocol: the answer of an `UPLOAD` step, and the entries of
+ * `ActionExecutionResponse.params.downloads`. `content` is Base64.
+ */
+export interface FlowUploadedFile {
+    name: string;
+    contentType?: string | null;
+    content: string;
+}
+
+/**
  * A single step of a `FlowRemoteAction` flow — mirrors `tools.dynamia.actions.ActionFlowStep`.
  *
  * `data`'s shape depends on `type`: the result for `DONE`, `{ url, awaitReturn }` for `REDIRECT`,
- * `{ action, ...}` for `CALL`, `{ component, ... }` for `CUSTOM`, prefill data for `DIALOG`, or absent
+ * `{ action, ...}` for `CALL`, `{ component, ... }` for `CUSTOM`, prefill data for `DIALOG`, `{ accept, multiple }` for
+ * `VIEW` (a read only `DIALOG`, answered with anything when closed), `UPLOAD` (answered with a list of {@link FlowUploadedFile}), `{ options: string[], multiple }` for `CHOICE`
+ * (answered with the list of positions chosen), or absent
  * for `CONFIRM`/`INPUT`/`NOTIFY`.
  *
  * `REDIRECT` (terminal; `awaitReturn: true` unsupported) and `CALL` (`data.action`, optional `data.className`)
@@ -243,6 +263,8 @@ export interface ActionFlowStep {
     messageType?: string;
     /** For `DIALOG`: name of the `ViewDescriptor` to render as a form. */
     viewDescriptor?: string;
+    /** For `DIALOG`: class name `viewDescriptor` belongs to, when it is not the entity the action runs on. */
+    viewClass?: string;
     data?: unknown;
     /** Opaque, signed — echo back verbatim as `ActionExecutionRequest.resumeToken` to continue the flow. */
     resumeToken?: string;

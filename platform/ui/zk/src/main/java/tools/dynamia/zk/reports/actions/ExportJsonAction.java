@@ -17,7 +17,9 @@
 package tools.dynamia.zk.reports.actions;
 
 import org.zkoss.zul.Filedownload;
+import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.commons.ClassMessages;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.CrudActionEvent;
@@ -43,6 +45,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 @InstallAction
+@RunsOn(ActionRuntime.ZK_ONLY)
 public class ExportJsonAction extends AbstractExportAction {
 
     private static final int LARGE = 5000;

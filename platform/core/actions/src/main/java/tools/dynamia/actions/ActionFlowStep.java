@@ -48,6 +48,7 @@ public class ActionFlowStep implements Serializable {
     private String message;
     private MessageType messageType;
     private String viewDescriptor;
+    private String viewClass;
     private Object data;
     private String resumeToken;
 
@@ -87,6 +88,26 @@ public class ActionFlowStep implements Serializable {
         return step;
     }
 
+    /**
+     * Same as {@link #dialog(String, Object, String)} for a form of {@code viewClass}, which may differ from the entity
+     * the action runs on.
+     */
+    public static ActionFlowStep dialog(String viewDescriptor, String viewClass, Object data, String title) {
+        var step = dialog(viewDescriptor, data, title);
+        step.viewClass = viewClass;
+        return step;
+    }
+
+    /**
+     * The client shows {@code viewDescriptor} of {@code viewClass} read only, filled with {@code data}, and answers when
+     * the user closes it.
+     */
+    public static ActionFlowStep view(String viewDescriptor, String viewClass, Object data, String title) {
+        var step = dialog(viewDescriptor, viewClass, data, title);
+        step.type = ActionFlowStepType.VIEW;
+        return step;
+    }
+
     /** Fire-and-forget notification — the client shows it and immediately continues the flow. */
     public static ActionFlowStep notify(String message, MessageType messageType) {
         var step = new ActionFlowStep();
@@ -104,6 +125,15 @@ public class ActionFlowStep implements Serializable {
         var step = new ActionFlowStep();
         step.type = ActionFlowStepType.REDIRECT;
         step.data = Map.of("url", url, "awaitReturn", awaitReturn);
+        return step;
+    }
+
+    /**
+     * Same as {@link #redirect(String, boolean)}, asking the client to open the URL in a new window or tab.
+     */
+    public static ActionFlowStep redirect(String url, boolean awaitReturn, boolean newWindow) {
+        var step = redirect(url, awaitReturn);
+        step.data = Map.of("url", url, "awaitReturn", awaitReturn, "newWindow", newWindow);
         return step;
     }
 
@@ -125,6 +155,42 @@ public class ActionFlowStep implements Serializable {
         if (data != null) {
             payload.putAll(data);
         }
+        step.data = payload;
+        return step;
+    }
+
+    /**
+     * The client asks the user to choose among {@code labels} and answers with the positions chosen.
+     *
+     * @param title    title of the picker, may be null
+     * @param labels   what to show for each option; the answer refers to them by position
+     * @param multiple whether several can be chosen
+     */
+    public static ActionFlowStep choice(String title, java.util.List<String> labels, boolean multiple) {
+        var step = new ActionFlowStep();
+        step.type = ActionFlowStepType.CHOICE;
+        step.title = title;
+        var payload = new HashMap<String, Object>();
+        payload.put("options", labels);
+        payload.put("multiple", multiple);
+        step.data = payload;
+        return step;
+    }
+
+    /**
+     * The client asks the user for files and answers with a list of {@code {name, contentType, content(Base64)}}.
+     *
+     * @param title    title of the picker, may be null
+     * @param accept   accepted types as in an HTML {@code accept} attribute, may be null
+     * @param multiple whether several files can be chosen
+     */
+    public static ActionFlowStep upload(String title, String accept, boolean multiple) {
+        var step = new ActionFlowStep();
+        step.type = ActionFlowStepType.UPLOAD;
+        step.title = title;
+        var payload = new HashMap<String, Object>();
+        payload.put("accept", accept);
+        payload.put("multiple", multiple);
         step.data = payload;
         return step;
     }
@@ -201,6 +267,18 @@ public class ActionFlowStep implements Serializable {
 
     public String getViewDescriptor() {
         return viewDescriptor;
+    }
+
+    /**
+     * For {@code DIALOG}: class name of the bean {@link #getViewDescriptor()} belongs to, when it is not the entity the
+     * action runs on. {@code null} means the entity of the request.
+     */
+    public String getViewClass() {
+        return viewClass;
+    }
+
+    public void setViewClass(String viewClass) {
+        this.viewClass = viewClass;
     }
 
     public void setViewDescriptor(String viewDescriptor) {

@@ -18,7 +18,9 @@ package tools.dynamia.zk.crud.cfg;
 
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionRenderer;
+import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.cfg.AbstractConfigPageAction;
 import tools.dynamia.domain.query.ApplicationParameters;
@@ -37,6 +39,7 @@ import java.util.List;
  * @author Mario A. Serrano Leones
  */
 @InstallAction
+@RunsOn(ActionRuntime.ZK_ONLY)
 public class SaveConfigAction extends AbstractConfigPageAction {
 
     public SaveConfigAction() {

@@ -50,6 +50,26 @@ public enum ActionFlowStepType {
     /** The client invokes another action first and feeds its response back as the answer. */
     CALL,
 
+    /**
+     * Shows {@link ActionFlowStep#getViewDescriptor()} of {@link ActionFlowStep#getViewClass()} read only, filled with
+     * {@link ActionFlowStep#getData()}. The client answers with anything (a plain acknowledgement) when the user closes it.
+     */
+    VIEW,
+
+    /**
+     * Asks the user to choose among options. {@link ActionFlowStep#getData()} carries {@code options} (a list of labels,
+     * the answer identifies them by position) and {@code multiple}. The client answers with the list of positions
+     * chosen, or an empty list when the user cancels.
+     */
+    CHOICE,
+
+    /**
+     * Asks the user for files. {@link ActionFlowStep#getData()} carries {@code accept} (as in an HTML {@code accept}
+     * attribute) and {@code multiple}. The client answers with a list of files, each
+     * {@code {name, contentType, content}} with {@code content} in Base64; an empty list means the user cancelled.
+     */
+    UPLOAD,
+
     /** Terminal step — identical semantics to a plain, non-flow {@link ActionExecutionResponse}. */
     DONE,
 

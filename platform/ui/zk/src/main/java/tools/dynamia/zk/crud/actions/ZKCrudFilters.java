@@ -16,21 +16,20 @@
  */
 package tools.dynamia.zk.crud.actions;
 
-import org.zkoss.zk.ui.Component;
+import tools.dynamia.integration.sterotypes.Provider;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Caption;
 import org.zkoss.zul.Toolbarbutton;
 import org.zkoss.zul.West;
 import org.zkoss.zul.Window;
-import tools.dynamia.actions.ActionGroup;
+import tools.dynamia.actions.Action;
+import tools.dynamia.actions.ActionRenderProvider;
 import tools.dynamia.actions.ActionRenderer;
-import tools.dynamia.actions.InstallAction;
-import tools.dynamia.actions.ReadableOnly;
 import tools.dynamia.commons.Messages;
-import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
-import tools.dynamia.crud.CrudState;
+import tools.dynamia.crud.CrudFiltersProvider;
+import tools.dynamia.crud.actions.FiltersAction;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.ui.icons.IconSize;
 import tools.dynamia.viewers.ViewDescriptor;
@@ -41,50 +40,69 @@ import tools.dynamia.zk.crud.CrudView;
 import tools.dynamia.zk.crud.ui.EntityFiltersPanel;
 import tools.dynamia.zk.util.ZKUtil;
 
-@InstallAction
-public class FiltersAction extends AbstractCrudAction implements ReadableOnly {
+/**
+ * The filters panel of {@link FiltersAction} in ZK: an {@link EntityFiltersPanel} in the west area of the CRUD layout (or
+ * in a window on small screens), plus the toggle button that opens it. The state of the panel between clicks lives in an
+ * attribute of the action, which is created per CRUD view.
+ *
+ * @author Mario A. Serrano Leones
+ */
+@Provider
+public class ZKCrudFilters implements CrudFiltersProvider, ActionRenderProvider {
 
-    private EntityFiltersPanel filtersPanel;
-    private boolean open;
+    private static final String STATE = "zk.filters.state";
 
-    public FiltersAction() {
-        setName(Messages.get(getClass(), "filters"));
-        setImage("filter");
-        setGroup(ActionGroup.get("CRUD_FIND"));
-        setPosition(2);
+    /** What the panel needs to remember between clicks. */
+    private static class State {
+        private EntityFiltersPanel filtersPanel;
+        private boolean open;
     }
 
     @Override
-    public CrudState[] getApplicableStates() {
-        return new CrudState[]{CrudState.READ};
+    public String getName() {
+        return FiltersAction.RENDERER;
     }
 
+    @Override
+    public ActionRenderer<?> getActionRenderer() {
+        ToolbarbuttonActionRenderer renderer = new ToolbarbuttonActionRenderer();
+        renderer.setToggleMode(true);
+        return renderer;
+    }
+
+    @Override
     @SuppressWarnings("rawtypes")
-    @Override
-    public void actionPerformed(final CrudActionEvent evt) {
-
+    public void toggle(Action action, CrudActionEvent evt) {
+        State state = state(action);
         final CrudView crudView = (CrudView) evt.getCrudView();
+        initFilterPanel(state, action, crudView, evt);
 
-        initFilterPanel(crudView, evt);
-        Component filterContainerPanel = getFilterContainerPanel(crudView);
-        open(filterContainerPanel);
+        org.zkoss.zk.ui.Component filterContainerPanel = getFilterContainerPanel(state, crudView);
+        open(state, filterContainerPanel);
 
         if (evt.getSource() instanceof Toolbarbutton button) {
             if (button.isChecked()) {
-                close(filterContainerPanel, evt);
-            } else if (open) {
+                close(state, filterContainerPanel, evt);
+            } else if (state.open) {
                 button.setChecked(true);
             }
         }
 
         if (filterContainerPanel instanceof Window) {
-            filterContainerPanel.addEventListener(Events.ON_CLOSE, e -> close(filterContainerPanel, evt));
-
+            filterContainerPanel.addEventListener(Events.ON_CLOSE, e -> close(state, filterContainerPanel, evt));
         }
     }
 
-    private Component getFilterContainerPanel(final CrudView crudView) {
-        Component container = null;
+    private State state(Action action) {
+        if (!(action.getAttribute(STATE) instanceof State)) {
+            action.setAttribute(STATE, new State());
+        }
+        return (State) action.getAttribute(STATE);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private org.zkoss.zk.ui.Component getFilterContainerPanel(State state, final CrudView crudView) {
+        org.zkoss.zk.ui.Component container;
         if (crudView.getLayout() instanceof Borderlayout && !HttpUtils.isSmartphone()) {
             West west = ((Borderlayout) crudView.getLayout()).getWest();
             if (west == null) {
@@ -95,54 +113,46 @@ public class FiltersAction extends AbstractCrudAction implements ReadableOnly {
         } else {
             container = createWindow();
         }
+
         if (container != null) {
             container.getChildren().clear();
-
-            filtersPanel.setParent(container);
+            state.filtersPanel.setParent(container);
         }
         return container;
     }
 
-    private void initFilterPanel(final CrudView crudView, final CrudActionEvent evt) {
-        if (filtersPanel == null) {
+    @SuppressWarnings("rawtypes")
+    private void initFilterPanel(State state, Action action, final CrudView crudView, final CrudActionEvent evt) {
+        if (state.filtersPanel == null) {
             try {
-                filtersPanel = (EntityFiltersPanel) Viewers.getView(crudView.getBeanClass(), "entityfilters", null);
+                state.filtersPanel = (EntityFiltersPanel) Viewers.getView(crudView.getBeanClass(), "entityfilters", null);
             } catch (Exception e) {
-                filtersPanel = new EntityFiltersPanel(crudView.getBeanClass());
+                state.filtersPanel = new EntityFiltersPanel(crudView.getBeanClass());
             }
 
-            if (getAttribute("viewDescriptor") != null) {
-                ViewDescriptor viewDescriptor = Viewers.findViewDescriptor(getAttribute("viewDescriptor").toString());
-                filtersPanel.setViewDescriptor(viewDescriptor);
+            if (action.getAttribute("viewDescriptor") != null) {
+                ViewDescriptor viewDescriptor = Viewers.findViewDescriptor(action.getAttribute("viewDescriptor").toString());
+                state.filtersPanel.setViewDescriptor(viewDescriptor);
             }
-            filtersPanel.addEventListener(EntityFiltersPanel.ON_SEARCH, event -> {
+
+            state.filtersPanel.addEventListener(EntityFiltersPanel.ON_SEARCH, event -> {
                 QueryParameters params = (QueryParameters) event.getData();
                 evt.getController().clear();
                 evt.getController().setParams(params);
                 evt.getController().doQuery();
-
-                if (filtersPanel.getParent() instanceof Window window) {
+                if (state.filtersPanel.getParent() instanceof Window window) {
                     window.detach();
                 }
             });
-
         }
     }
 
-    @Override
-    public ActionRenderer getRenderer() {
-        ToolbarbuttonActionRenderer renderer = new ToolbarbuttonActionRenderer();
-        renderer.setToggleMode(true);
-        return renderer;
-    }
-
     private Window createWindow() {
-        Window window = new Window(Messages.get(getClass(), "filters"), "normal", true);
+        Window window = new Window(Messages.get(FiltersAction.class, "filters"), "normal", true);
         window.setPage(ZKUtil.getFirstPage());
-        Caption caption = new Caption(getName());
-        ZKUtil.configureComponentIcon(getImage(), caption, IconSize.NORMAL);
+        Caption caption = new Caption(Messages.get(FiltersAction.class, "filters"));
+        ZKUtil.configureComponentIcon("filter", caption, IconSize.NORMAL);
         caption.setParent(window);
-
         if ("smartphone".equals(HttpUtils.detectDevice())) {
             window.setHeight("95%");
             window.setWidth("95%");
@@ -150,37 +160,30 @@ public class FiltersAction extends AbstractCrudAction implements ReadableOnly {
             window.setHeight("400px");
             window.setWidth("400px");
         }
-
         window.doModal();
         return window;
     }
 
     private West createWest() {
         West west = new West();
-        west.setTitle(Messages.get(getClass(), "filters"));
-
+        west.setTitle(Messages.get(FiltersAction.class, "filters"));
         west.setCollapsible(true);
         west.setSize("18%");
         west.setSplittable(true);
-
         return west;
     }
 
-    private void close(Component panel, CrudActionEvent evt) {
+    private void close(State state, org.zkoss.zk.ui.Component panel, CrudActionEvent evt) {
         if (panel != null) {
             panel.detach();
-            panel = null;
-
         }
-        open = false;
-
+        state.open = false;
         evt.getController().getParams().clear();
         evt.getController().doQuery();
-        filtersPanel = null;
-
+        state.filtersPanel = null;
     }
 
-    private void open(Component panel) {
+    private void open(State state, org.zkoss.zk.ui.Component panel) {
         if (panel != null) {
             if (panel instanceof West) {
                 ((West) panel).setOpen(true);
@@ -188,7 +191,6 @@ public class FiltersAction extends AbstractCrudAction implements ReadableOnly {
                 panel.setVisible(true);
             }
         }
-
-        open = true;
+        state.open = true;
     }
 }

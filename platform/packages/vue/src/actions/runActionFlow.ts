@@ -5,6 +5,7 @@ import type {
   ActionExecutionResponse,
   ActionFlowStep,
   ActionMetadata,
+  FlowUploadedFile,
   DynamiaClient,
 } from '@dynamia-tools/sdk';
 import type { FeedbackVariant } from '@dynamia-tools/ui-core';
@@ -30,7 +31,22 @@ export interface FlowStepHandlers {
    * **Experimental.** Performs the navigation for a `REDIRECT` step. Optional: defaults to
    * `window.location.assign(url)`. Apps with a client-side router can supply a router-aware version.
    */
-  navigate?: (url: string) => void | Promise<void>;
+  navigate?: (url: string, options?: { newWindow?: boolean }) => void | Promise<void>;
+  /**
+   * Renders a `CHOICE` step: shows the labels and returns the positions chosen (empty or `null` if the user cancels).
+   * Required for `CHOICE` steps; there is no sensible default look.
+   */
+  choose?: (options: { title?: string; options: string[]; multiple: boolean }) => Promise<number[] | null>;
+  /**
+   * Renders an `UPLOAD` step: asks the user for files and returns them (Base64), or `null`/`[]` if they cancel.
+   * Optional: defaults to the browser's file picker ({@link browserPickFiles}).
+   */
+  pickFiles?: (options: { title?: string; accept?: string; multiple?: boolean }) => Promise<FlowUploadedFile[] | null>;
+  /**
+   * Gives a file the action produced (`params.downloads` of the final response) to the user. Optional: defaults to a
+   * browser download ({@link browserSaveFile}).
+   */
+  saveFile?: (file: FlowUploadedFile) => void | Promise<void>;
 }
 
 /** Max nesting of `CALL` steps (a flow calling an action that itself calls...) before failing fast. */
@@ -86,6 +102,7 @@ async function driveFlow(
     let answer: unknown;
 
     if (step.type === 'REDIRECT') {
+      await saveDownloads(response, handlers);
       await redirect(step, handlers);
       return response; // terminal — see runActionFlow
     }
@@ -113,6 +130,8 @@ async function driveFlow(
     handlers.showToast({ message: response.flow.message, variant: mapMessageTypeToVariant(response.flow.messageType) });
   }
 
+  await saveDownloads(response, handlers);
+
   return response;
 }
 
@@ -127,7 +146,7 @@ function isSafeRedirectUrl(url: string): boolean {
 }
 
 async function redirect(step: ActionFlowStep, handlers: FlowStepHandlers): Promise<void> {
-  const { url, awaitReturn } = (step.data ?? {}) as { url?: unknown; awaitReturn?: unknown };
+  const { url, awaitReturn, newWindow } = (step.data ?? {}) as { url?: unknown; awaitReturn?: unknown; newWindow?: unknown };
   if (typeof url !== 'string' || !url) {
     throw new Error('runActionFlow: REDIRECT flow step is missing "data.url"');
   }
@@ -138,9 +157,13 @@ async function redirect(step: ActionFlowStep, handlers: FlowStepHandlers): Promi
     throw new Error(`runActionFlow: REDIRECT to "${url}" refused — only relative and http(s) URLs are allowed`);
   }
   if (handlers.navigate) {
-    await handlers.navigate(url);
+    await (newWindow === true ? handlers.navigate(url, { newWindow: true }) : handlers.navigate(url));
   } else if (typeof window !== 'undefined') {
-    window.location.assign(url);
+    if (newWindow === true) {
+      window.open(url, '_blank', 'noopener');
+    } else {
+      window.location.assign(url);
+    }
   } else {
     throw new Error('runActionFlow: no "navigate" handler provided for flow step type "REDIRECT"');
   }
@@ -218,6 +241,32 @@ async function renderFlowStep(
     case 'DIALOG':
       return renderDialogStep(step, handlers, client, className);
 
+    case 'VIEW':
+      await renderDialogStep(step, handlers, client, className, true);
+      return true; // the user only had to see it
+
+    case 'CHOICE': {
+      if (!handlers.choose) {
+        throw new Error('runActionFlow: no "choose" handler provided for flow step type "CHOICE"');
+      }
+      const { options, multiple } = (step.data ?? {}) as { options?: string[]; multiple?: boolean };
+      return (await handlers.choose({
+        ...(step.title ? { title: step.title } : {}),
+        options: options ?? [],
+        multiple: multiple === true,
+      })) ?? [];
+    }
+
+    case 'UPLOAD': {
+      const { accept, multiple } = (step.data ?? {}) as { accept?: string | null; multiple?: boolean };
+      const pick = handlers.pickFiles ?? browserPickFiles;
+      return (await pick({
+        ...(step.title ? { title: step.title } : {}),
+        ...(accept ? { accept } : {}),
+        multiple: multiple === true,
+      })) ?? [];
+    }
+
     case 'CUSTOM': {
       const renderer = FlowStepRendererRegistry.resolve(step);
       if (!renderer) {
@@ -242,6 +291,7 @@ async function renderDialogStep(
   handlers: FlowStepHandlers,
   client: DynamiaClient,
   className: string | null,
+  readonly = false,
 ): Promise<Record<string, unknown> | null> {
   if (!handlers.showFormDialog) {
     throw new Error('runActionFlow: no "showFormDialog" handler provided for flow step type "DIALOG"');
@@ -249,13 +299,14 @@ async function renderDialogStep(
   if (!step.viewDescriptor) {
     throw new Error('runActionFlow: DIALOG flow step is missing "viewDescriptor"');
   }
-  if (!className) {
-    throw new Error('runActionFlow: DIALOG flow step requires a known entity class (dataType/className)');
+  const viewClass = step.viewClass ?? className;
+  if (!viewClass) {
+    throw new Error('runActionFlow: DIALOG flow step requires a known entity class (viewClass or dataType/className)');
   }
 
   const [descriptor, entityMetadata] = await Promise.all([
-    client.metadata.getEntityView(className, step.viewDescriptor),
-    client.metadata.getEntity(className).catch(() => null),
+    client.metadata.getEntityView(viewClass, step.viewDescriptor),
+    client.metadata.getEntity(viewClass).catch(() => null),
   ]);
 
   const view = new VueFormView(descriptor, entityMetadata);
@@ -267,6 +318,7 @@ async function renderDialogStep(
   return handlers.showFormDialog({
     view,
     ...(step.title !== undefined ? { title: step.title } : {}),
+    ...(readonly ? { readonly: true } : {}),
   });
 }
 
@@ -280,4 +332,60 @@ function mapMessageTypeToVariant(messageType?: string): FeedbackVariant {
     default:
       return 'info';
   }
+}
+
+/** Hands the files the action produced (`params.downloads`) to the user. */
+async function saveDownloads(response: ActionExecutionResponse, handlers: FlowStepHandlers): Promise<void> {
+  const downloads = response.params?.downloads;
+  if (!Array.isArray(downloads)) return;
+  const save = handlers.saveFile ?? browserSaveFile;
+  for (const file of downloads as FlowUploadedFile[]) {
+    await save(file);
+  }
+}
+
+/** Default `UPLOAD` renderer: the browser's file picker. Resolves with `null` when the user cancels. */
+export function browserPickFiles(options: { accept?: string; multiple?: boolean }): Promise<FlowUploadedFile[] | null> {
+  return new Promise(resolve => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    if (options.accept) input.accept = options.accept;
+    input.multiple = options.multiple === true;
+    input.addEventListener('cancel', () => resolve(null));
+    input.addEventListener('change', async () => {
+      const files = await Promise.all(Array.from(input.files ?? []).map(async file => ({
+        name: file.name,
+        contentType: file.type || null,
+        content: bytesToBase64(new Uint8Array(await file.arrayBuffer())),
+      })));
+      resolve(files.length ? files : null);
+    });
+    input.click();
+  });
+}
+
+/** Default `params.downloads` handler: saves the file through a temporary link. */
+export function browserSaveFile(file: FlowUploadedFile): void {
+  const blob = new Blob([base64ToBytes(file.content) as BlobPart], { type: file.contentType ?? 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = file.name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function bytesToBase64(bytes: Uint8Array): string {
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(binary);
+}
+
+function base64ToBytes(base64: string): Uint8Array {
+  const binary = atob(base64);
+  return Uint8Array.from(binary, c => c.charCodeAt(0));
 }

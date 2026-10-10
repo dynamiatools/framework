@@ -33,6 +33,8 @@ export type {
     ActionExecutionRequest,
     ActionExecutionResponse,
     ActionFlowStepType,
+    ActionRuntime,
+    FlowUploadedFile,
     ActionFlowStep,
     // Views
     ViewDescriptorMetadata,

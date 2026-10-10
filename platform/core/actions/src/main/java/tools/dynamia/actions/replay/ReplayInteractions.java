@@ -34,47 +34,47 @@ public final class ReplayInteractions implements MessageDisplayer {
     public record Notification(String message, String title, MessageType type) {
     }
 
-    private final List<Object> answers;
-    private final List<Notification> notifications = new ArrayList<>();
-    private int cursor;
-    private ActionFlowStep pending;
+    private final ReplaySession session;
 
     /**
      * @param answers the answers of the user so far, in the order of the interactions
      */
     public ReplayInteractions(List<Object> answers) {
-        this.answers = answers;
+        this(new ReplaySession(answers));
+    }
+
+    /**
+     * @param session the session of the pass; shared with the other headless implementations of UI facades
+     */
+    public ReplayInteractions(ReplaySession session) {
+        this.session = session;
+    }
+
+    /** @return the session of the pass */
+    public ReplaySession session() {
+        return session;
     }
 
     /** @return the question waiting for an answer, or {@code null} when the action ran to the end */
     public ActionFlowStep pending() {
-        return pending;
+        return session.pending();
     }
 
     public boolean isPending() {
-        return pending != null;
+        return session.isPending();
     }
 
     /** @return the messages of this pass, in order; they are only meaningful when the pass completed */
     public List<Notification> notifications() {
-        return notifications;
+        return session.notifications();
     }
 
     private void interact(ActionFlowStep question, Consumer<Object> onAnswer) {
-        if (pending != null) {
-            return; // the action already stopped at an earlier question
-        }
-        if (cursor < answers.size()) {
-            onAnswer.accept(answers.get(cursor++));
-        } else {
-            pending = question;
-        }
+        session.interact(question, onAnswer);
     }
 
     private void notify(String message, String title, MessageType type) {
-        if (pending == null) {
-            notifications.add(new Notification(message, title, type));
-        }
+        session.notify(message, title, type);
     }
 
     @Override

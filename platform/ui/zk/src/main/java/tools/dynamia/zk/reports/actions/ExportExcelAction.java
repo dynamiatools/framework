@@ -18,7 +18,9 @@ package tools.dynamia.zk.reports.actions;
 
 import org.zkoss.zul.Filedownload;
 import tools.dynamia.actions.ActionGroup;
+import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.actions.ReadableOnly;
 import tools.dynamia.commons.ClassMessages;
 import tools.dynamia.integration.ProgressMonitor;
@@ -40,6 +42,7 @@ import java.util.Collection;
 
 @SuppressWarnings("unchecked")
 @InstallAction
+@RunsOn(ActionRuntime.ZK_ONLY)
 public class ExportExcelAction extends AbstractExportAction implements ReadableOnly {
 
     private static final int LARGE = 5000;
