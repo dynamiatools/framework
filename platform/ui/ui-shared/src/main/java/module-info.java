@@ -5,4 +5,5 @@ open module tools.dynamia.ui {
     requires spring.context;
     exports tools.dynamia.ui;
     exports tools.dynamia.ui.icons;
+    exports tools.dynamia.ui.files;
 }

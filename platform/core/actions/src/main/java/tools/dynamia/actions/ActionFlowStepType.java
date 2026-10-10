@@ -65,8 +65,9 @@ public enum ActionFlowStepType {
 
     /**
      * Asks the user for files. {@link ActionFlowStep#getData()} carries {@code accept} (as in an HTML {@code accept}
-     * attribute) and {@code multiple}. The client answers with a list of files, each
-     * {@code {name, contentType, content}} with {@code content} in Base64; an empty list means the user cancelled.
+     * attribute), {@code multiple}, {@code maxFiles}, {@code maxFileSize} and {@code maxTotalSize}. The client sends each
+     * file to {@code /api/app/transfers} and answers with a list of references {@code {ref}}; the server resolves them,
+     * checks owner, expiry, type and sizes, and hands the action streaming handles. An empty list means the user cancelled.
      */
     UPLOAD,
 

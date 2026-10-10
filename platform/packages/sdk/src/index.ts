@@ -34,7 +34,8 @@ export type {
     ActionExecutionResponse,
     ActionFlowStepType,
     ActionRuntime,
-    FlowUploadedFile,
+    FlowFileRef,
+    FlowDownload,
     ActionFlowStep,
     // Views
     ViewDescriptorMetadata,
@@ -56,3 +57,5 @@ export type {
 
 // ── Schedule API (platform-core feature) ─────────────────────────────────────
 export {ScheduleApi} from './schedule/index.js';
+export {TransfersApi} from './transfers/index.js';
+export type {UploadOptions} from './transfers/index.js';

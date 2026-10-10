@@ -66,6 +66,14 @@ class ActionTesterTest {
         public String name;
     }
 
+    private static String text(tools.dynamia.ui.files.UploadedFile file) {
+        try (var in = file.openStream()) {
+            return new String(in.readAllBytes());
+        } catch (java.io.IOException e) {
+            throw new java.io.UncheckedIOException(e);
+        }
+    }
+
     private static LocalAction action(String id, java.util.function.Consumer<ActionEvent> body) {
         return new tools.dynamia.actions.AbstractLocalAction() {
             {
@@ -188,7 +196,7 @@ class ActionTesterTest {
     void filesChoicesDownloadsAndRedirectsAreScripted() {
         var read = new ArrayList<String>();
         var result = ActionTester.of(action("everything", e -> {
-            UIFiles.uploadOne(".txt", file -> read.add(new String(file.content())));
+            UIFiles.uploadOne(".txt", file -> read.add(text(file)));
             UIChoices.chooseOne("Format", List.of("PDF", "CSV"), s -> s, format -> {
                 UIFiles.download("out." + format, "text/plain", format.getBytes());
                 UINavigation.open("/done");

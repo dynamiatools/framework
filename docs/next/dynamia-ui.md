@@ -817,7 +817,7 @@ Known limits of that iteration (addressed by the work packages above):
 - Per-package `Messages.properties` keep ZK-free actions in their `ui` modules (WP10.2).
 - `DownloadFileAction` casts to a ZK controller; the inventory scanner does not follow casts (R1 cast detection, §9.2).
 - `UIViews` supports forms of entity classes only (WP5, last minor detail).
-- Files travel inline as Base64: 1 MB up, 10 MB down (WP4).
+- Files travel inline as Base64: 1 MB up, 10 MB down (fixed by WP4).
 - `UIProgress` headless runs inside the request (WP5.5, WP8).
 
 ### Work packages
@@ -828,7 +828,8 @@ Known limits of that iteration (addressed by the work packages above):
 | WP1b | Done except the items listed below |
 | WP2 | Done, see below |
 | WP3 | Done, see below |
-| WP4 to WP10 | Not started |
+| WP4 | Done, see below |
+| WP5 to WP10 | Not started |
 
 #### WP1 · `UIEnvironment` and clear errors
 
@@ -899,3 +900,30 @@ The branch already had the mechanism §8 asks for: `ContextCapturer` beans, aske
 | `AccountTenantContextCapturer` | `saas/core` | Existing (tenant bound, of the request or of the session); tests already cover `AccountTenants.with(7L, ...)` and the root tenant |
 | `UIEnvironmentContextCapturer` | `ui-shared` | New: the task runs in `NoUIEnvironment`, so a UI facade there throws `UIUnavailableException` |
 | `SecurityContextCapturer` | `security/core` | New: the task acts as the authenticated user of the caller; the pooled thread's context is restored afterwards |
+
+#### WP4 · Streaming files
+
+- `ui-shared` (`tools.dynamia.ui.files`): `UploadedFile` is an interface (`openStream`, `size`, `toTempFile`); `UploadOptions`
+  carries `maxFiles`, `maxFileSize` (default 100 MB, D3) and `maxTotalSize`; `DownloadSource` (`BytesSource`, `PathSource`,
+  `StreamSource`); `UploadPolicy` (the same server-side check in every adapter); `TransferStore`, `TransferRef`,
+  `TransferMeta`, `FlowPrincipal` and an `InMemoryTransferStore`. `FileTransfer.download` takes a `DownloadSource`;
+  `UIFiles` has overloads for bytes, `Path`/`File` and a `Supplier<InputStream>`.
+- `app`: `LocalTransferStore` (data + metadata file per reference, hard size limit, quota, TTL, purge every five minutes),
+  `TransfersConfiguration` (`dynamia.ui.files.*`) and `TransfersController` (`POST`/`GET`/`DELETE /api/app/transfers`,
+  raw body, no multipart, 413 on a file over the limit, a foreign reference is 404). The `app` surefire runs with
+  `-Xmx256m` and a test moves 50 MB through the controller.
+- `actions`: `ReplayFileTransfer` answers an `UPLOAD` step from references (resolved with owner, expiry, `UploadPolicy`) and
+  `ReplayExecutor` writes downloads to the store only in the pass that ends, returning `params.downloads[] = {name,
+  contentType, size, url}`; consumed upload references are deleted after the flow ends. Tokens carry references only.
+- `zk`: `ZKFileTransfer` streams downloads and wraps each uploaded `Media` as a temp-file handle (text media decoded by ZK,
+  stored as UTF-8), then applies `UploadPolicy`.
+- `security`: `SecurityFlowPrincipal` (authenticated user + current account) so references belong to a user and tenant.
+- TS: `client.transfers.upload/cancel/download`, `FlowFileRef`/`FlowDownload` replace `FlowUploadedFile`; the Vue runner
+  checks the limits, uploads each file and answers with `{ref}`; the default saver uses a link with cookie authentication and
+  a fetched blob with a token. `ImportReportAction` uses `toTempFile()`; `ExportReportAction` hands over bytes because it
+  deletes its file right after.
+- Deviations from §6: `InMemoryTransferStore` lives in `ui-shared` (the `actions` tests need it, and `ui-testing` depends
+  on `actions`); a reference is an unguessable UUID checked against the owner rather than a signed id; the progress callback
+  of the upload (`onProgress`) needs `XMLHttpRequest`.
+- Not done: a shared `TransferStore` for several nodes (waits for D2); an HTTP-level test of the 413 mapping (the handler is
+  tested directly); the `UploadedFile` of `ZKFileTransfer` was not exercised in a browser.

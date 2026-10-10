@@ -16,7 +16,7 @@
  */
 package tools.dynamia.ui.testing;
 
-import tools.dynamia.ui.UploadedFile;
+import tools.dynamia.ui.files.UploadedFile;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

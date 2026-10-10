@@ -32,8 +32,10 @@ import tools.dynamia.ui.ProgressRunner;
 import tools.dynamia.ui.ProgressTask;
 import tools.dynamia.ui.UIEnvironment;
 import tools.dynamia.ui.UIFacades;
-import tools.dynamia.ui.UploadOptions;
-import tools.dynamia.ui.UploadedFile;
+import tools.dynamia.ui.files.DownloadSource;
+import tools.dynamia.ui.files.UploadOptions;
+import tools.dynamia.ui.files.UploadPolicy;
+import tools.dynamia.ui.files.UploadedFile;
 import tools.dynamia.ui.ViewDialog;
 import tools.dynamia.ui.ViewOptions;
 import tools.dynamia.ui.ViewsProvider;
@@ -288,8 +290,12 @@ public final class TestUIEnvironment implements UIEnvironment {
     private final class Files implements FileTransfer {
 
         @Override
-        public void download(String fileName, String contentType, byte[] content) {
-            downloads.add(new CapturedDownload(fileName, contentType, content));
+        public void download(DownloadSource source) {
+            try (var in = source.openStream()) {
+                downloads.add(new CapturedDownload(source.name(), source.contentType(), in.readAllBytes()));
+            } catch (java.io.IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
         }
 
         @Override
@@ -305,6 +311,7 @@ public final class TestUIEnvironment implements UIEnvironment {
             if (!(answer instanceof UIScript.Upload upload)) {
                 throw UIScript.mismatch(interaction, interactions.size(), answer);
             }
+            UploadPolicy.check(options, upload.files());
             if (!upload.files().isEmpty()) {
                 onFiles.accept(upload.files());
             }

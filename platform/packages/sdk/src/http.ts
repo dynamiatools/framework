@@ -45,6 +45,36 @@ export class HttpClient {
     return this.request<T>('DELETE', url);
   }
 
+  /**
+   * Sends a raw (non JSON) body, for file transfers. `body` is handed to `fetch` as is, so a `Blob` or `File` is streamed
+   * by the browser and never read into memory by the SDK. Errors are mapped like in the JSON helpers.
+   */
+  async sendRaw<T>(method: HttpMethod, path: string, body: BodyInit, headers: Record<string, string>, signal?: AbortSignal): Promise<T> {
+    const url = this.buildUrl(path);
+    const init: RequestInit = { method, headers: { ...this.authHeaders(), Accept: 'application/json', ...headers }, body };
+    if (signal) init.signal = signal;
+    if (this.config.corsMode) init.mode = this.config.corsMode;
+    if (this.config.withCredentials) init.credentials = 'include';
+    return this.handle<T>(await this._fetch(url, init), url);
+  }
+
+  /** GET that answers the body as a `Blob` whatever its type: for file downloads. */
+  async getBlob(pathOrUrl: string, signal?: AbortSignal): Promise<Blob> {
+    const url = /^https?:\/\//.test(pathOrUrl) ? pathOrUrl : this.buildUrl(pathOrUrl);
+    const init: RequestInit = { method: 'GET', headers: this.authHeaders() };
+    if (signal) init.signal = signal;
+    if (this.config.corsMode) init.mode = this.config.corsMode;
+    if (this.config.withCredentials) init.credentials = 'include';
+    const response = await this._fetch(url, init);
+    await this.ensureOk(response, url);
+    return response.blob();
+  }
+
+  /** Whether requests are authenticated with a header (token or basic) rather than cookies. */
+  usesHeaderAuth(): boolean {
+    return Boolean(this.config.token || (this.config.username && this.config.password));
+  }
+
   /** Returns a fully-qualified URL for a given path (no request is made). */
   url(path: string, params?: Record<string, string | number | boolean | undefined | null>): string {
     return this.buildUrl(path, params);
@@ -80,10 +110,20 @@ export class HttpClient {
   }
 
   private buildHeaders(): HeadersInit {
-    const headers: Record<string, string> = {
+    return {
       'Content-Type': 'application/json',
       Accept: 'application/json',
+      ...this.authHeaders(),
     };
+  }
+
+  /** Authorization headers for requests the SDK does not send itself (an `XMLHttpRequest` upload with progress). */
+  authorizationHeaders(): Record<string, string> {
+    return this.authHeaders();
+  }
+
+  private authHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {};
 
     if (this.config.token) {
       headers['Authorization'] = `Bearer ${this.config.token}`;
@@ -113,8 +153,10 @@ export class HttpClient {
       init.body = JSON.stringify(body);
     }
 
-    const response = await this._fetch(url, init);
+    return this.handle<T>(await this._fetch(url, init), url);
+  }
 
+  private async ensureOk(response: Response, url: string): Promise<void> {
     if (!response.ok) {
       let errorBody: unknown;
       try {
@@ -130,6 +172,10 @@ export class HttpClient {
 
       throw new DynamiaApiError(message, response.status, url, errorBody);
     }
+  }
+
+  private async handle<T>(response: Response, url: string): Promise<T> {
+    await this.ensureOk(response, url);
 
     // 204 No Content
     if (response.status === 204) {

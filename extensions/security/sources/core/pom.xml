@@ -27,6 +27,11 @@
 
 
     <dependencies>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.ui</artifactId>
+            <version>26.10.1-SNAPSHOT</version>
+        </dependency>
 
 
         <dependency>

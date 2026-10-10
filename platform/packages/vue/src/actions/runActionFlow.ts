@@ -5,7 +5,8 @@ import type {
   ActionExecutionResponse,
   ActionFlowStep,
   ActionMetadata,
-  FlowUploadedFile,
+  FlowDownload,
+  FlowFileRef,
   DynamiaClient,
 } from '@dynamia-tools/sdk';
 import type { FeedbackVariant } from '@dynamia-tools/ui-core';
@@ -38,15 +39,17 @@ export interface FlowStepHandlers {
    */
   choose?: (options: { title?: string; options: string[]; multiple: boolean }) => Promise<number[] | null>;
   /**
-   * Renders an `UPLOAD` step: asks the user for files and returns them (Base64), or `null`/`[]` if they cancel.
-   * Optional: defaults to the browser's file picker ({@link browserPickFiles}).
+   * Renders an `UPLOAD` step: asks the user for files and returns them, or `null`/`[]` if they cancel. The runner checks
+   * them against the limits of the step, sends each one to `/api/app/transfers` and answers with the references; the
+   * content never travels inside the flow. Optional: defaults to the browser's file picker ({@link browserPickFiles}).
    */
-  pickFiles?: (options: { title?: string; accept?: string; multiple?: boolean }) => Promise<FlowUploadedFile[] | null>;
+  pickFiles?: (options: { title?: string; accept?: string; multiple?: boolean }) => Promise<File[] | null>;
   /**
    * Gives a file the action produced (`params.downloads` of the final response) to the user. Optional: defaults to a
-   * browser download ({@link browserSaveFile}).
+   * browser download ({@link browserSaveFile}): a plain link when requests are authenticated with cookies, otherwise the
+   * file is fetched with the client's credentials.
    */
-  saveFile?: (file: FlowUploadedFile) => void | Promise<void>;
+  saveFile?: (file: FlowDownload, client: DynamiaClient) => void | Promise<void>;
 }
 
 /** Max nesting of `CALL` steps (a flow calling an action that itself calls...) before failing fast. */
@@ -102,7 +105,7 @@ async function driveFlow(
     let answer: unknown;
 
     if (step.type === 'REDIRECT') {
-      await saveDownloads(response, handlers);
+      await saveDownloads(response, handlers, client);
       await redirect(step, handlers);
       return response; // terminal — see runActionFlow
     }
@@ -130,7 +133,7 @@ async function driveFlow(
     handlers.showToast({ message: response.flow.message, variant: mapMessageTypeToVariant(response.flow.messageType) });
   }
 
-  await saveDownloads(response, handlers);
+  await saveDownloads(response, handlers, client);
 
   return response;
 }
@@ -258,13 +261,19 @@ async function renderFlowStep(
     }
 
     case 'UPLOAD': {
-      const { accept, multiple } = (step.data ?? {}) as { accept?: string | null; multiple?: boolean };
+      const limits = (step.data ?? {}) as UploadStepData;
       const pick = handlers.pickFiles ?? browserPickFiles;
-      return (await pick({
+      const files = (await pick({
         ...(step.title ? { title: step.title } : {}),
-        ...(accept ? { accept } : {}),
-        multiple: multiple === true,
+        ...(limits.accept ? { accept: limits.accept } : {}),
+        multiple: limits.multiple === true,
       })) ?? [];
+      checkUploadLimits(files, limits);
+      const refs: FlowFileRef[] = [];
+      for (const file of files) {
+        refs.push(await client.transfers.upload(file));
+      }
+      return refs.map(({ ref }) => ({ ref }));
     }
 
     case 'CUSTOM': {
@@ -334,58 +343,87 @@ function mapMessageTypeToVariant(messageType?: string): FeedbackVariant {
   }
 }
 
+/** The data of an `UPLOAD` step: what to ask and the limits the server will enforce. */
+interface UploadStepData {
+  accept?: string | null;
+  multiple?: boolean;
+  maxFiles?: number;
+  maxFileSize?: number;
+  maxTotalSize?: number;
+}
+
+/** Gives quick feedback before sending anything; the server enforces the same limits again. */
+function checkUploadLimits(files: File[], limits: UploadStepData): void {
+  if (limits.maxFiles && files.length > limits.maxFiles) {
+    throw new Error(`At most ${limits.maxFiles} file(s) are allowed, got ${files.length}`);
+  }
+  let total = 0;
+  for (const file of files) {
+    if (limits.maxFileSize && file.size > limits.maxFileSize) {
+      throw new Error(`${file.name} is ${file.size} bytes, the limit is ${limits.maxFileSize}`);
+    }
+    if (!acceptsFile(limits.accept, file)) {
+      throw new Error(`${file.name} is not of an accepted type: ${limits.accept}`);
+    }
+    total += file.size;
+  }
+  if (limits.maxTotalSize && total > limits.maxTotalSize) {
+    throw new Error(`The files add up to ${total} bytes, the limit is ${limits.maxTotalSize}`);
+  }
+}
+
+function acceptsFile(accept: string | null | undefined, file: File): boolean {
+  if (!accept || !accept.trim()) return true;
+  const name = file.name.toLowerCase();
+  const type = (file.type || '').toLowerCase();
+  return accept.split(',').map(rule => rule.trim().toLowerCase()).filter(Boolean).some(rule =>
+    (rule.startsWith('.') && name.endsWith(rule))
+    || (rule.endsWith('/*') && type.startsWith(rule.slice(0, -1)))
+    || rule === type);
+}
+
 /** Hands the files the action produced (`params.downloads`) to the user. */
-async function saveDownloads(response: ActionExecutionResponse, handlers: FlowStepHandlers): Promise<void> {
+async function saveDownloads(response: ActionExecutionResponse, handlers: FlowStepHandlers, client: DynamiaClient): Promise<void> {
   const downloads = response.params?.downloads;
   if (!Array.isArray(downloads)) return;
   const save = handlers.saveFile ?? browserSaveFile;
-  for (const file of downloads as FlowUploadedFile[]) {
-    await save(file);
+  for (const file of downloads as FlowDownload[]) {
+    await save(file, client);
   }
 }
 
 /** Default `UPLOAD` renderer: the browser's file picker. Resolves with `null` when the user cancels. */
-export function browserPickFiles(options: { accept?: string; multiple?: boolean }): Promise<FlowUploadedFile[] | null> {
+export function browserPickFiles(options: { accept?: string; multiple?: boolean }): Promise<File[] | null> {
   return new Promise(resolve => {
     const input = document.createElement('input');
     input.type = 'file';
     if (options.accept) input.accept = options.accept;
     input.multiple = options.multiple === true;
     input.addEventListener('cancel', () => resolve(null));
-    input.addEventListener('change', async () => {
-      const files = await Promise.all(Array.from(input.files ?? []).map(async file => ({
-        name: file.name,
-        contentType: file.type || null,
-        content: bytesToBase64(new Uint8Array(await file.arrayBuffer())),
-      })));
+    input.addEventListener('change', () => {
+      const files = Array.from(input.files ?? []);
       resolve(files.length ? files : null);
     });
     input.click();
   });
 }
 
-/** Default `params.downloads` handler: saves the file through a temporary link. */
-export function browserSaveFile(file: FlowUploadedFile): void {
-  const blob = new Blob([base64ToBytes(file.content) as BlobPart], { type: file.contentType ?? 'application/octet-stream' });
-  const url = URL.createObjectURL(blob);
+/**
+ * Default `params.downloads` handler. With cookie authentication the browser streams the file from a plain link; with a
+ * token or basic authentication the file is fetched with the client's credentials and saved from a temporary object URL.
+ */
+export async function browserSaveFile(file: FlowDownload, client: DynamiaClient): Promise<void> {
   const link = document.createElement('a');
-  link.href = url;
   link.download = file.name;
+  let objectUrl: string | null = null;
+  if (client.transfers.needsAuthorizedFetch()) {
+    objectUrl = URL.createObjectURL(await client.transfers.download(file.url));
+    link.href = objectUrl;
+  } else {
+    link.href = client.transfers.absoluteUrl(file.url);
+  }
   document.body.appendChild(link);
   link.click();
   link.remove();
-  URL.revokeObjectURL(url);
-}
-
-function bytesToBase64(bytes: Uint8Array): string {
-  let binary = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  }
-  return btoa(binary);
-}
-
-function base64ToBytes(base64: string): Uint8Array {
-  const binary = atob(base64);
-  return Uint8Array.from(binary, c => c.charCodeAt(0));
+  if (objectUrl) URL.revokeObjectURL(objectUrl);
 }

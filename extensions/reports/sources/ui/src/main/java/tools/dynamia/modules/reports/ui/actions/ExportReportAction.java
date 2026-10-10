@@ -55,7 +55,8 @@ public class ExportReportAction extends AbstractCrudAction implements HeadlessCa
             try {
                 File file = service.exportReport(crudService().load(Report.class, report.getId()));
                 try {
-                    UIFiles.download(file, "text/json");
+                    // a report definition is small, and the file is deleted below, so it is handed over as bytes
+                    UIFiles.download(file.getName(), "text/json", java.nio.file.Files.readAllBytes(file.toPath()));
                 } finally {
                     file.delete();
                 }

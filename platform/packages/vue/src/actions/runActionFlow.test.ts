@@ -18,7 +18,14 @@ function fakeClient(opts: {
   entity?: Record<string, ActionExecutionResponse[]>;
 }) {
   const calls = { main: [] as ActionExecutionRequest[], global: [] as [string, ActionExecutionRequest][], entity: [] as [string, string, ActionExecutionRequest][] };
+  const uploads: File[] = [];
   const client = {
+    transfers: {
+      upload: vi.fn(async (file: File) => {
+        uploads.push(file);
+        return { ref: `ref-${uploads.length}`, name: file.name, contentType: file.type, size: file.size };
+      }),
+    },
     actions: {
       execute: vi.fn(async (_a: ActionMetadata, req: ActionExecutionRequest) => {
         calls.main.push(req);
@@ -34,7 +41,7 @@ function fakeClient(opts: {
       }),
     },
   };
-  return { client: client as never, calls };
+  return { client: client as never, calls, uploads };
 }
 
 function handlers(overrides: Partial<FlowStepHandlers> = {}): FlowStepHandlers {
@@ -175,39 +182,58 @@ describe('runActionFlow CALL (experimental)', () => {
 });
 
 describe('runActionFlow UPLOAD and downloads', () => {
-  it('asks for files on an UPLOAD step and answers with them', async () => {
-    const upload = flowResponse(step({ type: 'UPLOAD', data: { accept: '.json', multiple: false } }));
+  it('sends the picked files to the transfers endpoint and answers with their references only', async () => {
+    const upload = flowResponse(step({ type: 'UPLOAD', data: { accept: '.json', multiple: false, maxFileSize: 1000 } }));
     const done = flowResponse(step({ type: 'DONE' }));
-    const { client, calls } = fakeClient({ main: [upload, done] });
-    const file = { name: 'report.json', contentType: 'application/json', content: 'e30=' };
+    const { client, calls, uploads } = fakeClient({ main: [upload, done] });
+    const file = new File(['{}'], 'report.json', { type: 'application/json' });
     const pickFiles = vi.fn(async () => [file]);
 
     await runActionFlow(client, action, {}, handlers({ pickFiles }));
 
     expect(pickFiles).toHaveBeenCalledWith({ accept: '.json', multiple: false });
-    expect(calls.main[1]!.data).toEqual([file]);
+    expect(uploads).toEqual([file]);
+    expect(calls.main[1]!.data).toEqual([{ ref: 'ref-1' }]);
     expect(calls.main[1]!.resumeToken).toBe('tok');
   });
 
   it('answers with an empty list when the user cancels the picker', async () => {
-    const { client, calls } = fakeClient({
+    const { client, calls, uploads } = fakeClient({
       main: [flowResponse(step({ type: 'UPLOAD', data: { multiple: true } })), flowResponse(step({ type: 'DONE' }))],
     });
 
     await runActionFlow(client, action, {}, handlers({ pickFiles: async () => null }));
 
     expect(calls.main[1]!.data).toEqual([]);
+    expect(uploads).toHaveLength(0);
   });
 
-  it('gives params.downloads of the final response to saveFile', async () => {
-    const file = { name: 'out.txt', contentType: 'text/plain', content: 'aGVsbG8=' };
+  it('refuses, before sending anything, files that break the limits of the step', async () => {
+    const data = { accept: '.json', multiple: true, maxFiles: 1, maxFileSize: 5 };
+    const pick = (files: File[]) => handlers({ pickFiles: async () => files });
+    const exec = (files: File[]) => {
+      const { client, uploads } = fakeClient({ main: [flowResponse(step({ type: 'UPLOAD', data })), flowResponse(step({ type: 'DONE' }))] });
+      return { run: runActionFlow(client, action, {}, pick(files)), uploads };
+    };
+
+    const tooBig = exec([new File(['0123456789'], 'a.json')]);
+    await expect(tooBig.run).rejects.toThrow(/limit/);
+    const wrongType = exec([new File(['x'], 'a.exe')]);
+    await expect(wrongType.run).rejects.toThrow(/accepted type/);
+    const tooMany = exec([new File(['x'], 'a.json'), new File(['x'], 'b.json')]);
+    await expect(tooMany.run).rejects.toThrow(/At most 1/);
+    expect(tooBig.uploads.length + wrongType.uploads.length + tooMany.uploads.length).toBe(0);
+  });
+
+  it('gives params.downloads of the final response to saveFile with the client', async () => {
+    const file = { name: 'out.txt', contentType: 'text/plain', size: 5, url: '/api/app/transfers/abc' };
     const final = { ...flowResponse(step({ type: 'DONE' })), params: { downloads: [file] } };
     const { client } = fakeClient({ main: [final] });
     const saveFile = vi.fn();
 
     await runActionFlow(client, action, {}, handlers({ saveFile }));
 
-    expect(saveFile).toHaveBeenCalledWith(file);
+    expect(saveFile).toHaveBeenCalledWith(file, client);
   });
 });
 

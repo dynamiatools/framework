@@ -19,6 +19,7 @@ package tools.dynamia.actions.replay;
 import tools.dynamia.actions.ActionFlowStep;
 import tools.dynamia.ui.MessageType;
 import tools.dynamia.ui.UIFacades;
+import tools.dynamia.ui.files.DownloadSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,22 +38,13 @@ public final class ReplaySession {
 
     private final List<Object> answers;
     private final List<ReplayInteractions.Notification> notifications = new ArrayList<>();
-    private final List<Download> downloads = new ArrayList<>();
+    private final List<DownloadSource> downloads = new ArrayList<>();
+    private final List<String> consumedRefs = new ArrayList<>();
     private String redirectUrl;
     private boolean redirectInNewWindow;
     private String nonRepeatable;
     private int cursor;
     private ActionFlowStep pending;
-
-    /**
-     * A file the action gave to the user.
-     *
-     * @param name        file name
-     * @param contentType MIME type, may be null
-     * @param content     the bytes
-     */
-    public record Download(String name, String contentType, byte[] content) {
-    }
 
     /**
      * @param answers the answers of the user so far, in the order of the interactions
@@ -121,13 +113,30 @@ public final class ReplaySession {
     }
 
     /**
-     * Records a file for the user. Ignored once the pass has stopped at a question; like messages, only the downloads
+     * Records a file for the user; the content is read only when the flow ends. Ignored once the pass has stopped at a question; like messages, only the downloads
      * of the pass that ran to the end reach the client.
      */
-    public void download(String name, String contentType, byte[] content) {
+    public void download(DownloadSource source) {
         if (pending == null) {
-            downloads.add(new Download(name, contentType, content));
+            downloads.add(source);
         }
+    }
+
+    /**
+     * Records that the action read an uploaded file from the {@code TransferStore}. When the flow ends successfully the
+     * runtime deletes the references; if it is abandoned, the store expires them.
+     *
+     * @param ref the reference id
+     */
+    public void consume(String ref) {
+        if (!consumedRefs.contains(ref)) {
+            consumedRefs.add(ref);
+        }
+    }
+
+    /** @return the references of the uploads read in this pass */
+    public List<String> consumedRefs() {
+        return List.copyOf(consumedRefs);
     }
 
     /**
@@ -151,7 +160,7 @@ public final class ReplaySession {
     }
 
     /** @return the files of this pass, in order; they are only meaningful when the pass completed */
-    public List<Download> downloads() {
+    public List<DownloadSource> downloads() {
         return downloads;
     }
 

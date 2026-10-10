@@ -1,95 +1,80 @@
-/*
- * Copyright (C) 2023 Dynamia Soluciones IT S.A.S - NIT 900302344-1
- * Colombia / South America
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package tools.dynamia.actions.replay;
 
 import tools.dynamia.actions.ActionFlowStep;
+import tools.dynamia.integration.Containers;
 import tools.dynamia.ui.FileTransfer;
-import tools.dynamia.ui.UploadOptions;
-import tools.dynamia.ui.UploadedFile;
+import tools.dynamia.ui.files.DownloadSource;
+import tools.dynamia.ui.files.FlowPrincipal;
+import tools.dynamia.ui.files.StoredTransfer;
+import tools.dynamia.ui.files.TransferStore;
+import tools.dynamia.ui.files.UploadOptions;
+import tools.dynamia.ui.files.UploadPolicy;
+import tools.dynamia.ui.files.UploadRejectedException;
+import tools.dynamia.ui.files.UploadedFile;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * {@link FileTransfer} of a headless run. A download is recorded in the {@link ReplaySession} and travels with the
- * response (Base64 in {@link ReplayExecutor#DOWNLOADS_PARAM}); an upload is an {@code UPLOAD} step the client answers
- * with the files (Base64).
- * <p>
- * Files travel inline, so both directions are capped: this is for documents (an exported report, a JSON or Excel file to
- * import), not for large media. A stream endpoint for big files is a separate piece of work.
+ * {@link FileTransfer} of a headless run. Nothing travels inside the flow: an upload is an {@code UPLOAD} step the client
+ * answers with references to files it already sent to {@code /api/app/transfers}, which are resolved in the
+ * {@link TransferStore} (owner, expiry, accepted types and sizes) and handed to the action as streaming handles. A
+ * download is recorded in the {@link ReplaySession} as a {@link DownloadSource} and only written to the store by the pass
+ * that ends, so passes that are later discarded never read it.
  */
 public final class ReplayFileTransfer implements FileTransfer {
 
-    /** Biggest file the action can give to the user in one response. */
-    public static final int MAX_DOWNLOAD_BYTES = 10 * 1024 * 1024;
-
-    /** Biggest file the user can give to the action. It also travels inside the resume token of later questions. */
-    public static final int MAX_UPLOAD_BYTES = 1024 * 1024;
-
     private final ReplaySession session;
 
+    /**
+     * @param session the session of the pass
+     */
     public ReplayFileTransfer(ReplaySession session) {
         this.session = session;
     }
 
     @Override
-    public void download(String fileName, String contentType, byte[] content) {
-        if (content.length > MAX_DOWNLOAD_BYTES) {
-            throw new IllegalArgumentException("File " + fileName + " is too big to download from an action ("
-                    + content.length + " bytes, limit " + MAX_DOWNLOAD_BYTES + ")");
-        }
-        session.download(fileName, contentType, content);
+    public void download(DownloadSource source) {
+        session.download(source);
     }
 
     @Override
     public void upload(UploadOptions options, Consumer<List<UploadedFile>> onFiles) {
-        session.interact(ActionFlowStep.upload(options.title(), options.accept(), options.multiple()), answer -> {
-            var files = toFiles(answer);
+        session.interact(ActionFlowStep.upload(options.title(), options.accept(), options.maxFiles(),
+                options.maxFileSize(), options.maxTotalSize()), answer -> {
+            var files = resolve(options, answer);
             if (!files.isEmpty()) {
                 onFiles.accept(files);
             }
         });
     }
 
-    private static List<UploadedFile> toFiles(Object answer) {
-        var files = new ArrayList<UploadedFile>();
-        if (answer instanceof Map<?, ?> single) {
-            files.add(toFile(single));
-        } else if (answer instanceof List<?> list) {
-            for (Object item : list) {
-                if (item instanceof Map<?, ?> map) {
-                    files.add(toFile(map));
-                }
-            }
+    private List<UploadedFile> resolve(UploadOptions options, Object answer) {
+        var items = new ArrayList<Object>();
+        if (answer instanceof List<?> list) {
+            items.addAll(list);
+        } else if (answer != null) {
+            items.add(answer);
         }
+        if (items.isEmpty()) {
+            return List.of();
+        }
+        TransferStore store = Containers.get().findObject(TransferStore.class);
+        if (store == null) {
+            throw new IllegalStateException("No TransferStore is registered: uploads from remote clients need one");
+        }
+        FlowPrincipal owner = FlowPrincipal.current();
+        var stored = new ArrayList<StoredTransfer>();
+        for (Object item : items) {
+            String ref = item instanceof Map<?, ?> map ? String.valueOf(map.get("ref")) : String.valueOf(item);
+            stored.add(store.get(ref, owner).orElseThrow(() ->
+                    new UploadRejectedException("The uploaded file " + ref + " does not exist or has expired")));
+        }
+        var files = stored.stream().map(StoredTransfer::asUploadedFile).toList();
+        UploadPolicy.check(options, files);
+        stored.forEach(s -> session.consume(s.ref().ref()));
         return files;
-    }
-
-    private static UploadedFile toFile(Map<?, ?> map) {
-        var name = String.valueOf(map.get("name"));
-        var content = map.get("content") == null ? new byte[0] : Base64.getDecoder().decode(String.valueOf(map.get("content")));
-        if (content.length > MAX_UPLOAD_BYTES) {
-            throw new IllegalArgumentException("File " + name + " is too big to upload to an action (" + content.length
-                    + " bytes, limit " + MAX_UPLOAD_BYTES + ")");
-        }
-        var type = map.get("contentType");
-        return new UploadedFile(name, type == null ? null : String.valueOf(type), content);
     }
 }
