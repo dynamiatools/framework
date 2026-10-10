@@ -16,7 +16,7 @@
  */
 package tools.dynamia.ui.testing;
 
-import tools.dynamia.ui.UploadedFile;
+import tools.dynamia.ui.files.UploadedFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +44,7 @@ public final class TestFiles {
      * @return the file
      */
     public static UploadedFile of(String name, String contentType, byte[] content) {
-        return new UploadedFile(name, contentType, content);
+        return UploadedFile.of(name, contentType, content);
     }
 
     /**
@@ -58,11 +58,11 @@ public final class TestFiles {
 
     /**
      * @param file a file on disk
-     * @return the file, named as on disk
+     * @return the file, named as on disk and read by streaming
      */
     public static UploadedFile of(Path file) {
         try {
-            return of(file.getFileName().toString(), Files.probeContentType(file), Files.readAllBytes(file));
+            return UploadedFile.of(file.getFileName().toString(), Files.probeContentType(file), file);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

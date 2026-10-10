@@ -4,6 +4,7 @@ import { ActionsApi } from './metadata/actions.js';
 import { CrudResourceApi } from './cruds/crud-resource.js';
 import { CrudServiceApi } from './cruds/crud-service.js';
 import { ScheduleApi } from './schedule/api.js';
+import { TransfersApi } from './transfers/api.js';
 import type { DynamiaClientConfig } from './types.js';
 
 /**
@@ -31,12 +32,15 @@ export class DynamiaClient {
   readonly actions: ActionsApi;
   /** Scheduled-tasks API */
   readonly schedule: ScheduleApi;
+  /** File transfers: uploads that answer an `UPLOAD` flow step and downloads of `params.downloads` */
+  readonly transfers: TransfersApi;
 
   constructor(config: DynamiaClientConfig) {
     this.http = new HttpClient(config);
     this.metadata = new MetadataApi(this.http);
     this.actions = new ActionsApi(this.http);
     this.schedule = new ScheduleApi(this.http);
+    this.transfers = new TransfersApi(this.http);
   }
 
   /**

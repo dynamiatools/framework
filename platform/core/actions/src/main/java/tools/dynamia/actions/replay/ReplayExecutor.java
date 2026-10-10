@@ -7,9 +7,13 @@ import tools.dynamia.actions.ActionFlows;
 import tools.dynamia.actions.flow.FlowTokenException;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.ui.UIFacades;
+import tools.dynamia.ui.files.DownloadSource;
+import tools.dynamia.ui.files.FlowPrincipal;
+import tools.dynamia.ui.files.TransferMeta;
+import tools.dynamia.ui.files.TransferRef;
+import tools.dynamia.ui.files.TransferStore;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,7 +43,9 @@ public final class ReplayExecutor {
     private static final String ANSWERS_KEY = "answers";
     /** Messages the action showed in the final pass, in {@link ActionExecutionResponse#getParams()}. */
     public static final String NOTIFICATIONS_PARAM = "notifications";
-    /** Response param with the files the action gave to the user: a list of {@code {name, contentType, content}}, Base64. */
+    /** Path of the transfers endpoint; downloads are fetched from {@code TRANSFERS_PATH/{ref}}. */
+    public static final String TRANSFERS_PATH = "/api/app/transfers";
+    /** Response param with the files the action gave to the user: a list of {@code {name, contentType, size, url}}. */
     public static final String DOWNLOADS_PARAM = "downloads";
 
     private ReplayExecutor() {
@@ -99,25 +105,64 @@ public final class ReplayExecutor {
                 : ActionFlowStep.redirect(session.redirectUrl(), false, session.redirectInNewWindow());
         var response = ActionFlows.toResponse(flowId, actionId, Map.of(), finalStep);
         var downloads = session.downloads();
-        if (!notifications.isEmpty() || !downloads.isEmpty()) {
+        var published = publishDownloads(downloads);
+        deleteConsumed(session);
+        if (!notifications.isEmpty() || !published.isEmpty()) {
             var params = new HashMap<String, Object>();
             if (!notifications.isEmpty()) {
                 params.put(NOTIFICATIONS_PARAM, notifications.stream()
                         .map(n -> Map.of("message", String.valueOf(n.message()), "type", String.valueOf(n.type())))
                         .toList());
             }
-            if (!downloads.isEmpty()) {
-                params.put(DOWNLOADS_PARAM, downloads.stream().map(d -> {
-                    var file = new LinkedHashMap<String, Object>();
-                    file.put("name", d.name());
-                    file.put("contentType", d.contentType());
-                    file.put("content", Base64.getEncoder().encodeToString(d.content()));
-                    return file;
-                }).toList());
+            if (!published.isEmpty()) {
+                params.put(DOWNLOADS_PARAM, published);
             }
             response.setParams(params);
         }
         return response;
+    }
+
+    /**
+     * Writes the files the action gave to the user into the {@link TransferStore}, by streaming, and describes them for the
+     * client: {@code {name, contentType, size, url}}. Called only for the pass that ran to the end.
+     */
+    private static List<Map<String, Object>> publishDownloads(List<DownloadSource> downloads) {
+        if (downloads.isEmpty()) {
+            return List.of();
+        }
+        TransferStore store = Containers.get().findObject(TransferStore.class);
+        if (store == null) {
+            throw new IllegalStateException("No TransferStore is registered: downloads to remote clients need one");
+        }
+        FlowPrincipal owner = FlowPrincipal.current();
+        var published = new ArrayList<Map<String, Object>>();
+        for (DownloadSource source : downloads) {
+            TransferRef ref;
+            try (var in = source.openStream()) {
+                ref = store.put(in, TransferMeta.of(source.name(), source.contentType(), TransferMeta.Direction.DOWNLOAD, owner),
+                        Long.MAX_VALUE);
+            } catch (java.io.IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
+            var file = new LinkedHashMap<String, Object>();
+            file.put("name", ref.name());
+            file.put("contentType", ref.contentType());
+            file.put("size", ref.size());
+            file.put("url", TRANSFERS_PATH + "/" + ref.ref());
+            published.add(file);
+        }
+        return published;
+    }
+
+    private static void deleteConsumed(ReplaySession session) {
+        var consumed = session.consumedRefs();
+        if (consumed.isEmpty()) {
+            return;
+        }
+        TransferStore store = Containers.get().findObject(TransferStore.class);
+        if (store != null) {
+            consumed.forEach(store::delete);
+        }
     }
 
     private static List<ReplayPortContributor> contributors() {

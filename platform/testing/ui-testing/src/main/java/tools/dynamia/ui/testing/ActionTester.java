@@ -29,6 +29,10 @@ import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
 import tools.dynamia.ui.MessageType;
 import tools.dynamia.ui.UIFacades;
+import tools.dynamia.ui.files.FlowPrincipal;
+import tools.dynamia.ui.files.InMemoryTransferStore;
+import tools.dynamia.ui.files.TransferMeta;
+import tools.dynamia.ui.files.TransferStore;
 import tools.dynamia.ui.testing.UIInteraction.Type;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.ViewDescriptorBuilder;
@@ -36,7 +40,6 @@ import tools.dynamia.viewers.ViewDescriptorFactory;
 
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -77,6 +80,7 @@ public final class ActionTester {
     private Consumer<UIScript> user = script -> {
     };
     private boolean lenient;
+    private TransferStore transfers = new InMemoryTransferStore();
 
     private ActionTester(LocalAction action) {
         this.action = action;
@@ -186,6 +190,7 @@ public final class ActionTester {
         beans.forEach(container::addObject);
         if (remote) {
             container.addObject(new HeadlessViewsContributor());
+            container.addObject(transfers);
         }
         if (beans.stream().noneMatch(ViewDescriptorFactory.class::isInstance)) {
             container.addObject(autoFieldsFactory());
@@ -394,15 +399,17 @@ public final class ActionTester {
                     return ABANDONED;
                 }
                 if (answer instanceof UIScript.Upload upload) {
-                    var files = upload.files().stream().map(f -> {
-                        var map = new LinkedHashMap<String, Object>();
-                        map.put("name", f.name());
-                        map.put("contentType", f.contentType());
-                        map.put("content", Base64.getEncoder().encodeToString(f.content()));
-                        return map;
+                    var refs = upload.files().stream().map(f -> {
+                        try (var in = f.openStream()) {
+                            var ref = transfers.put(in, TransferMeta.of(f.name(), f.contentType(),
+                                    TransferMeta.Direction.UPLOAD, FlowPrincipal.current()), Long.MAX_VALUE);
+                            return Map.<String, Object>of("ref", ref.ref());
+                        } catch (java.io.IOException e) {
+                            throw new java.io.UncheckedIOException(e);
+                        }
                     }).toList();
                     boolean multiple = Boolean.TRUE.equals(((Map<String, Object>) step.getData()).get("multiple"));
-                    return multiple ? files : files.get(0);
+                    return multiple ? refs : refs.get(0);
                 }
             }
             default -> {
@@ -412,7 +419,7 @@ public final class ActionTester {
     }
 
     @SuppressWarnings("unchecked")
-    private static void addFinal(ActionExecutionResponse response, List<UIInteraction> interactions,
+    private void addFinal(ActionExecutionResponse response, List<UIInteraction> interactions,
                                  List<CapturedDownload> downloads) {
         Map<String, Object> params = response.getParams();
         if (params == null) {
@@ -428,9 +435,15 @@ public final class ActionTester {
         if (params.get("downloads") instanceof List<?> files) {
             for (Object item : files) {
                 var map = (Map<String, Object>) item;
-                downloads.add(new CapturedDownload(String.valueOf(map.get("name")),
-                        map.get("contentType") == null ? null : String.valueOf(map.get("contentType")),
-                        Base64.getDecoder().decode(String.valueOf(map.get("content")))));
+                String url = String.valueOf(map.get("url"));
+                var stored = transfers.get(url.substring(url.lastIndexOf('/') + 1), FlowPrincipal.current())
+                        .orElseThrow(() -> new AssertionError("The download " + url + " is not in the transfer store"));
+                try (var in = stored.openStream()) {
+                    downloads.add(new CapturedDownload(String.valueOf(map.get("name")),
+                            map.get("contentType") == null ? null : String.valueOf(map.get("contentType")), in.readAllBytes()));
+                } catch (java.io.IOException e) {
+                    throw new java.io.UncheckedIOException(e);
+                }
             }
         }
     }

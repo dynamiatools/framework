@@ -47,9 +47,8 @@ public class ImportReportAction extends AbstractCrudAction {
         UIFiles.upload(".json", files -> files.forEach(f -> {
             try {
                 if (f.name().endsWith(".json")) {
-                    var file = File.createTempFile("report", ".json");
+                    var file = f.toTempFile().toFile();
                     try {
-                        java.nio.file.Files.write(file.toPath(), f.content());
                         service.importReport(file);
                     } finally {
                         file.delete();

@@ -234,21 +234,33 @@ export type ActionFlowStepType =
     | 'CUSTOM';
 
 /**
- * A file exchanged with an action through the flow protocol: the answer of an `UPLOAD` step, and the entries of
- * `ActionExecutionResponse.params.downloads`. `content` is Base64.
+ * Reference to a file already sent to `/api/app/transfers` (see `client.transfers.upload`): what an `UPLOAD` step is
+ * answered with. The content never travels inside the flow.
  */
-export interface FlowUploadedFile {
+export interface FlowFileRef {
+    ref: string;
     name: string;
     contentType?: string | null;
-    content: string;
+    size: number;
+}
+
+/**
+ * A file the action gave to the user: an entry of `ActionExecutionResponse.params.downloads`. Fetch `url` (relative to
+ * the server) with `client.transfers.download`, or use it as a link.
+ */
+export interface FlowDownload {
+    name: string;
+    contentType?: string | null;
+    size: number;
+    url: string;
 }
 
 /**
  * A single step of a `FlowRemoteAction` flow — mirrors `tools.dynamia.actions.ActionFlowStep`.
  *
  * `data`'s shape depends on `type`: the result for `DONE`, `{ url, awaitReturn }` for `REDIRECT`,
- * `{ action, ...}` for `CALL`, `{ component, ... }` for `CUSTOM`, prefill data for `DIALOG`, `{ accept, multiple }` for
- * `VIEW` (a read only `DIALOG`, answered with anything when closed), `UPLOAD` (answered with a list of {@link FlowUploadedFile}), `{ options: string[], multiple }` for `CHOICE`
+ * `{ action, ...}` for `CALL`, `{ component, ... }` for `CUSTOM`, prefill data for `DIALOG`, for
+ * `VIEW` (a read only `DIALOG`, answered with anything when closed), `UPLOAD` (`{ accept, multiple, maxFiles, maxFileSize, maxTotalSize }`, answered with a list of {@link FlowFileRef}), `{ options: string[], multiple }` for `CHOICE`
  * (answered with the list of positions chosen), or absent
  * for `CONFIRM`/`INPUT`/`NOTIFY`.
  *

@@ -14,26 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tools.dynamia.ui;
+package tools.dynamia.ui.files;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-/**
- * A file the user gave to the application. It is held in memory, so it is meant for documents, not for large media.
- *
- * @param name        original file name
- * @param contentType MIME type, may be {@code null}
- * @param content     the bytes
- */
-public record UploadedFile(String name, String contentType, byte[] content) {
+/** An {@link UploadedFile} over bytes in memory. */
+record BytesUploadedFile(String name, String contentType, byte[] content) implements UploadedFile {
 
-    public InputStream stream() {
-        return new ByteArrayInputStream(content);
+    @Override
+    public long size() {
+        return content.length;
     }
 
-    public String extension() {
-        int dot = name == null ? -1 : name.lastIndexOf('.');
-        return dot < 0 ? "" : name.substring(dot + 1).toLowerCase();
+    @Override
+    public InputStream openStream() {
+        return new ByteArrayInputStream(content);
     }
 }

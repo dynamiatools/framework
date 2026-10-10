@@ -16,6 +16,10 @@
  */
 package tools.dynamia.ui;
 
+import tools.dynamia.ui.files.DownloadSource;
+import tools.dynamia.ui.files.UploadOptions;
+import tools.dynamia.ui.files.UploadedFile;
+
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -28,16 +32,15 @@ import java.util.function.Consumer;
 public interface FileTransfer {
 
     /**
-     * Gives a file to the user.
+     * Gives a file to the user. The content is read when the user downloads it, never fully into memory unless the source
+     * is a {@link DownloadSource.BytesSource}.
      *
-     * @param fileName    name the user sees
-     * @param contentType MIME type, may be {@code null}
-     * @param content     the bytes
+     * @param source where the content comes from
      */
-    void download(String fileName, String contentType, byte[] content);
+    void download(DownloadSource source);
 
     /**
-     * Asks the user for files. {@code onFiles} runs when the user has chosen them (never when they cancel).
+     * Asks the user for files. {@code onFiles} runs when the user has chosen them (never when they cancel). The limits of {@code options} are enforced on the server.
      *
      * @param options what to ask
      * @param onFiles receives the chosen files

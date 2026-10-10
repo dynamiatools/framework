@@ -178,7 +178,8 @@ public class ActionFlowStep implements Serializable {
     }
 
     /**
-     * The client asks the user for files and answers with a list of {@code {name, contentType, content(Base64)}}.
+     * The client asks the user for files, sends each one to {@code /api/app/transfers} and answers with a list of
+     * {@code {ref}}: references, not content.
      *
      * @param title    title of the picker, may be null
      * @param accept   accepted types as in an HTML {@code accept} attribute, may be null
@@ -192,6 +193,27 @@ public class ActionFlowStep implements Serializable {
         payload.put("accept", accept);
         payload.put("multiple", multiple);
         step.data = payload;
+        return step;
+    }
+
+    /**
+     * An {@code UPLOAD} step with the limits the server enforces. The client answers with a list of references to files it
+     * already sent to {@code /api/app/transfers}: {@code [{ref}]}.
+     *
+     * @param title        title of the file chooser
+     * @param accept       accepted extensions and MIME types, may be null
+     * @param maxFiles     maximum number of files
+     * @param maxFileSize  maximum size of each file in bytes
+     * @param maxTotalSize maximum size of all files together in bytes, 0 for no extra limit
+     * @return the step
+     */
+    public static ActionFlowStep upload(String title, String accept, int maxFiles, long maxFileSize, long maxTotalSize) {
+        var step = upload(title, accept, maxFiles > 1);
+        @SuppressWarnings("unchecked")
+        var payload = (Map<String, Object>) step.data;
+        payload.put("maxFiles", maxFiles);
+        payload.put("maxFileSize", maxFileSize);
+        payload.put("maxTotalSize", maxTotalSize);
         return step;
     }
 
