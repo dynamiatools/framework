@@ -29,7 +29,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * Source level view of a repository. It reads Java sources, not classes, so it needs no module built. Comments and string
@@ -80,11 +79,7 @@ public final class RepoSources {
      */
     public RepoSources(ArchRulesConfig config) {
         this.config = config;
-        try (Stream<Path> walk = Files.walk(config.root())) {
-            walk.filter(p -> p.toString().endsWith(".java")).filter(this::isMainSource).forEach(this::read);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        RepoFiles.list(config.root(), p -> p.toString().endsWith(".java") && isMainSource(p)).forEach(this::read);
         for (Pending p : pending) {
             String superFqn = p.superName() == null ? null : resolve(p.superName(), p.packageName(), p.explicit(), p.wildcards());
             var interfaces = p.interfaceNames().stream().map(n -> resolve(n, p.packageName(), p.explicit(), p.wildcards())).toList();

@@ -23,7 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * <b>R1, front end corner.</b> The front end (ZK) lives in its own corner: only the paths of
@@ -54,15 +53,13 @@ public abstract class FrontendCornerRule {
                 .filter(path -> !config.inCorner(path))
                 .forEach(violations::add);
 
-        try (Stream<Path> walk = Files.walk(config.root())) {
-            for (Path pom : walk.filter(p -> p.getFileName().toString().equals("pom.xml")).toList()) {
-                String rel = config.root().relativize(pom).toString().replace('\\', '/');
-                if (rel.contains("node_modules/") || rel.contains("/target/") || config.ignored(rel) || config.inCorner(rel)) {
-                    continue;
-                }
-                if (dependsOnFrontend(Files.readString(pom), config)) {
-                    violations.add(rel);
-                }
+        for (Path pom : RepoFiles.list(config.root(), p -> p.getFileName().toString().equals("pom.xml"))) {
+            String rel = config.root().relativize(pom).toString().replace('\\', '/');
+            if (config.ignored(rel) || config.inCorner(rel)) {
+                continue;
+            }
+            if (dependsOnFrontend(Files.readString(pom), config)) {
+                violations.add(rel);
             }
         }
 
