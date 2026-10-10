@@ -65,7 +65,7 @@ public final class HeadlessViews implements ViewsProvider {
     @Override
     @SuppressWarnings("unchecked")
     public <T> void showForm(FormOptions<T> options, BiConsumer<T, ViewDialog> onSubmit) {
-        var step = ActionFlowStep.dialog(options.viewName(), options.beanClass().getName(),
+        var step = ActionFlowStep.dialog(options.viewName(), viewClass(options.beanClass()),
                 toValues.apply(options.value(), options.beanClass()), options.title());
         step.setHints(hints(options.width(), null));
         session.interact(step, answer -> {
@@ -92,7 +92,7 @@ public final class HeadlessViews implements ViewsProvider {
 
     @Override
     public <T> void showView(ViewOptions<T> options, Callback onClose) {
-        var step = ActionFlowStep.view(options.viewName(), options.beanClass().getName(),
+        var step = ActionFlowStep.view(options.viewName(), viewClass(options.beanClass()),
                 toValues.apply(options.value(), options.beanClass()), options.title());
         step.setHints(hints(options.width(), options.height()));
         session.interact(step, answer -> {
@@ -101,6 +101,14 @@ public final class HeadlessViews implements ViewsProvider {
                 onClose.doSomething();
             }
         });
+    }
+
+    /**
+     * The class a client asks the metadata API about: the id of the entity, which is its simple name. The metadata of this
+     * server never exposes qualified class names (they leak the classpath), so a client cannot resolve one.
+     */
+    static String viewClass(Class<?> beanClass) {
+        return beanClass.getSimpleName();
     }
 
     private static Map<String, String> hints(String width, String height) {

@@ -56,7 +56,7 @@ class HeadlessViewsTest {
         assertNotNull(step);
         assertEquals(ActionFlowStepType.DIALOG, step.getType());
         assertEquals("form", step.getViewDescriptor());
-        assertEquals(Payment.class.getName(), step.getViewClass());
+        assertEquals("Payment", step.getViewClass(), "the entity id, not a qualified class name");
         assertEquals("New payment", step.getTitle());
         assertEquals(Map.of("amount", "5"), step.getData());
         assertTrue(log.isEmpty());
@@ -93,7 +93,7 @@ class HeadlessViewsTest {
         showView(first, payment);
         var step = first.pending();
         assertEquals(ActionFlowStepType.VIEW, step.getType());
-        assertEquals(Payment.class.getName(), step.getViewClass());
+        assertEquals("Payment", step.getViewClass(), "the entity id, not a qualified class name");
         assertEquals(Map.of("amount", "7"), step.getData());
 
         var second = new ReplaySession(new ArrayList<>(List.of(true)));
