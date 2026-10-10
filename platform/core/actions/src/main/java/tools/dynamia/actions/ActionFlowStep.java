@@ -50,6 +50,7 @@ public class ActionFlowStep implements Serializable {
     private String viewDescriptor;
     private String viewClass;
     private Object data;
+    private java.util.Map<String, String> fieldErrors;
     private String resumeToken;
 
     /** A yes/no question. The client answers with a {@code boolean}. */
@@ -160,18 +161,23 @@ public class ActionFlowStep implements Serializable {
     }
 
     /**
-     * The client asks the user to choose among {@code labels} and answers with the positions chosen.
+     * The client asks the user to choose among options and answers with the <b>keys</b> chosen, never with positions.
      *
      * @param title    title of the picker, may be null
-     * @param labels   what to show for each option; the answer refers to them by position
+     * @param keys     stable key of each option
+     * @param labels   what to show for each option, in the same order as {@code keys}
      * @param multiple whether several can be chosen
      */
-    public static ActionFlowStep choice(String title, java.util.List<String> labels, boolean multiple) {
+    public static ActionFlowStep choice(String title, java.util.List<String> keys, java.util.List<String> labels, boolean multiple) {
         var step = new ActionFlowStep();
         step.type = ActionFlowStepType.CHOICE;
         step.title = title;
         var payload = new HashMap<String, Object>();
-        payload.put("options", labels);
+        var options = new java.util.ArrayList<Map<String, String>>();
+        for (int i = 0; i < keys.size(); i++) {
+            options.add(Map.of("key", keys.get(i), "label", labels.get(i)));
+        }
+        payload.put("options", options);
         payload.put("multiple", multiple);
         step.data = payload;
         return step;
@@ -305,6 +311,18 @@ public class ActionFlowStep implements Serializable {
 
     public void setViewDescriptor(String viewDescriptor) {
         this.viewDescriptor = viewDescriptor;
+    }
+
+    /**
+     * @return when a form is shown again after a validation error, the message of each field that failed, by field name;
+     * otherwise {@code null}
+     */
+    public java.util.Map<String, String> getFieldErrors() {
+        return fieldErrors;
+    }
+
+    public void setFieldErrors(java.util.Map<String, String> fieldErrors) {
+        this.fieldErrors = fieldErrors;
     }
 
     public Object getData() {

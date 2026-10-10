@@ -14,6 +14,10 @@ export interface DialogFormOptions {
   title?: string;
   /** Show the form read only with a Close button (the `VIEW` flow step). */
   readonly?: boolean;
+  /** Message to show above the form: why it is shown again (validation error, changed question). */
+  message?: string;
+  /** Kind of {@link message}: `ERROR`, `WARNING`... */
+  messageType?: string;
 }
 
 /** A queued/current form-dialog request, as tracked internally by {@link DialogFormManager}. */
@@ -53,6 +57,8 @@ export class DialogFormManager {
         view: options.view,
         ...(options.title !== undefined ? { title: options.title } : {}),
         ...(options.readonly ? { readonly: true } : {}),
+        ...(options.message ? { message: options.message } : {}),
+        ...(options.messageType ? { messageType: options.messageType } : {}),
       };
       const wasEmpty = this._queue.length === 0;
       this._queue.push({ request, resolve });

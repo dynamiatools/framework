@@ -232,14 +232,17 @@ public final class TestUIEnvironment implements UIEnvironment {
                 if (form.edit() != null) {
                     form.edit().accept(options.value());
                 }
+                var closed = new boolean[1];
                 try {
-                    // Like the replay adapter today, returning from onSubmit means the user is done with the form.
-                    onSubmit.accept(options.value(), () -> {
-                    });
-                    return;
+                    onSubmit.accept(options.value(), () -> closed[0] = true);
                 } catch (ValidationError e) {
-                    error = e.getMessage();
+                    error = e.getMessage(); // the form stays open with the error
+                    continue;
                 }
+                if (closed[0]) {
+                    return;
+                }
+                error = null; // the action did not close it: it is still open, as in ZK
             }
         }
 

@@ -66,6 +66,18 @@ class ActionTesterTest {
         public String name;
     }
 
+    public static class Person {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
     private static String text(tools.dynamia.ui.files.UploadedFile file) {
         try (var in = file.openStream()) {
             return new String(in.readAllBytes());
@@ -166,6 +178,42 @@ class ActionTesterTest {
         var second = result.interactions().get(1);
         assertEquals("Name is required", second.message());
         assertEquals(MessageType.ERROR, second.messageType());
+    }
+
+    @Test
+    void aFormTheActionDoesNotCloseStaysOpenAndAsksAgain() {
+        var submitted = new ArrayList<String>();
+        var result = ActionTester.of(action("open-form", e -> UIViews.showForm(
+                FormOptions.of("Edit", Customer.class, new Customer()), (customer, dialog) -> {
+                    submitted.add(customer.name);
+                    if ("done".equals(customer.name)) {
+                        dialog.close();
+                    }
+                }))).user(u -> u.<Customer>submitForm(c -> c.name = "draft").<Customer>submitForm(c -> c.name = "done")).run();
+
+        assertEquals(List.of("draft", "done"), submitted);
+        assertEquals(List.of(DIALOG, DIALOG), result.types());
+    }
+
+    @Test
+    void aValidationErrorOpensTheFormAgainInDirectAndRemoteExecution() {
+        var saved = new ArrayList<String>();
+        var result = ActionTester.of(action("validated-form", e -> UIViews.showForm(
+                FormOptions.of("New person", Person.class, new Person()), (person, dialog) -> {
+                    if (person.getName() == null || person.getName().isBlank()) {
+                        throw new ValidationError("Name is required", null, "name", Person.class);
+                    }
+                    saved.add(person.getName());
+                    dialog.close();
+                }))).user(u -> u.fillForm(java.util.Map.of("name", "")).fillForm(java.util.Map.of("name", "Ana"))).runEverywhere();
+
+        assertEquals(List.of(DIALOG, DIALOG), result.types());
+        assertEquals(List.of("Ana", "Ana"), saved, "once in each execution");
+        assertEquals("Name is required", result.interactions().get(1).message());
+        var secondStep = result.remote().steps().get(1);
+        assertEquals("Name is required", secondStep.getMessage());
+        assertEquals(java.util.Map.of("name", "Name is required"), secondStep.getFieldErrors());
+        assertEquals(java.util.Map.of("name", ""), secondStep.getData(), "the submitted values come back");
     }
 
     @Test

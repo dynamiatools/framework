@@ -255,20 +255,20 @@ describe('runActionFlow DIALOG view class', () => {
 });
 
 describe('runActionFlow CHOICE and new window redirects', () => {
-  it('answers a CHOICE step with the positions chosen', async () => {
-    const choice = flowResponse(step({ type: 'CHOICE', title: 'Storage', data: { options: ['LOCAL', 'S3'], multiple: false } }));
+  it('answers a CHOICE step with the keys chosen', async () => {
+    const choice = flowResponse(step({ type: 'CHOICE', title: 'Storage', data: { options: [{ key: 'l', label: 'LOCAL' }, { key: 's', label: 'S3' }], multiple: false } }));
     const { client, calls } = fakeClient({ main: [choice, flowResponse(step({ type: 'DONE' }))] });
-    const choose = vi.fn(async () => [1]);
+    const choose = vi.fn(async () => ['s']);
 
     await runActionFlow(client, action, {}, handlers({ choose }));
 
-    expect(choose).toHaveBeenCalledWith({ title: 'Storage', options: ['LOCAL', 'S3'], multiple: false });
-    expect(calls.main[1]!.data).toEqual([1]);
+    expect(choose).toHaveBeenCalledWith({ title: 'Storage', options: [{ key: 'l', label: 'LOCAL' }, { key: 's', label: 'S3' }], multiple: false });
+    expect(calls.main[1]!.data).toEqual(['s']);
   });
 
   it('answers an empty list when the user cancels the choice', async () => {
     const { client, calls } = fakeClient({
-      main: [flowResponse(step({ type: 'CHOICE', data: { options: ['A'], multiple: true } })), flowResponse(step({ type: 'DONE' }))],
+      main: [flowResponse(step({ type: 'CHOICE', data: { options: [{ key: 'a', label: 'A' }], multiple: true } })), flowResponse(step({ type: 'DONE' }))],
     });
 
     await runActionFlow(client, action, {}, handlers({ choose: async () => null }));
@@ -306,5 +306,27 @@ describe('runActionFlow VIEW', () => {
 
     expect(showFormDialog).toHaveBeenCalledWith(expect.objectContaining({ title: 'Sale 1', readonly: true }));
     expect(calls.main[1]!.data).toBe(true);
+  });
+});
+
+describe('runActionFlow DIALOG shown again after a validation error', () => {
+  it('hands the message and the field errors to the form so the user sees what failed', async () => {
+    const reopened = flowResponse(step({
+      type: 'DIALOG', viewDescriptor: 'form', viewClass: 'x.Person', data: { name: '' },
+      message: 'Name is required', messageType: 'ERROR', fieldErrors: { name: 'Name is required' },
+    }));
+    const { client: base, calls } = fakeClient({ main: [reopened, flowResponse(step({ type: 'DONE' }))] });
+    const getEntityView = vi.fn(async () => ({ id: 'form', fields: [], view: 'form' }));
+    const client = { ...(base as object), metadata: { getEntityView, getEntity: vi.fn(async () => null) } } as never;
+    const showFormDialog = vi.fn(async (options: { view: { errors: { value: Record<string, string> }; values: { value: Record<string, unknown> } } }) => {
+      expect(options.view.errors.value).toEqual({ name: 'Name is required' });
+      expect(options.view.values.value).toEqual({ name: '' });
+      return { name: 'Ana' };
+    });
+
+    await runActionFlow(client, action, {}, handlers({ showFormDialog: showFormDialog as never }), 'x.Person');
+
+    expect(showFormDialog).toHaveBeenCalledWith(expect.objectContaining({ message: 'Name is required', messageType: 'ERROR' }));
+    expect(calls.main[1]!.data).toEqual({ name: 'Ana' });
   });
 });

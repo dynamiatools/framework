@@ -18,7 +18,11 @@
         <button type="button" @click="respond({})">Close</button>
       </div>
     </template>
-    <Form v-else :view="current.view" @submit="respond" @cancel="respond(null)"/>
+    <template v-else>
+      <div v-if="current.message" class="dynamia-form-message" :class="`dynamia-form-message--${(current.messageType ?? 'info').toLowerCase()}`"
+           role="alert">{{ current.message }}</div>
+      <Form :view="current.view" @submit="respond" @cancel="respond(null)"/>
+    </template>
   </Dialog>
 </template>
 
@@ -38,5 +42,6 @@ function respond(values: Record<string, unknown> | null): void {
   FormDialogHost.vue is intentionally headless (see Dialog.vue/Form.vue) — style via:
 
   .dynamia-form-dialog — panel class applied to the underlying <DynamiaDialog>
+  .dynamia-form-message(--error|--warning|--info) — why the form is shown again; field errors use .dynamia-field-error
   (the form itself uses Form.vue's own .dynamia-form-* class names)
 -->

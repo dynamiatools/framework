@@ -28,6 +28,17 @@ public class SpringReplayTransactions implements ReplayTransactions {
     }
 
     @Override
+    public <T> T runOutside(Supplier<T> work) {
+        var manager = transactionManager.getIfAvailable();
+        if (manager == null) {
+            return work.get();
+        }
+        var template = new TransactionTemplate(manager);
+        template.setPropagationBehavior(org.springframework.transaction.TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
+        return template.execute(status -> work.get());
+    }
+
+    @Override
     public <T> T run(Supplier<T> work, BooleanSupplier commit) {
         var manager = transactionManager.getIfAvailable();
         if (manager == null) {

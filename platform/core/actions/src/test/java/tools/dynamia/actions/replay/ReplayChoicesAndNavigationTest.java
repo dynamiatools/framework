@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ReplayChoicesAndNavigationTest {
@@ -36,15 +35,16 @@ class ReplayChoicesAndNavigationTest {
     };
 
     @Test
-    void aChoiceIsAStepWithLabelsAndTheAnswerIsThePosition() {
+    void aChoiceIsAStepWithKeyedOptionsAndTheAnswerIsTheKey() {
         var pending = ReplayExecutor.execute("move", new ActionExecutionRequest(), moveLike);
 
         assertEquals(ActionFlowStepType.CHOICE, pending.getFlow().getType());
         var data = (Map<?, ?>) pending.getFlow().getData();
-        assertEquals(List.of("LOCAL", "S3", "FTP"), data.get("options"));
+        assertEquals(List.of(Map.of("key", "LOCAL", "label", "LOCAL"), Map.of("key", "S3", "label", "S3"),
+                Map.of("key", "FTP", "label", "FTP")), data.get("options"));
         assertEquals(false, data.get("multiple"));
 
-        var confirm = ReplayExecutor.execute("move", answer(pending, 1), moveLike);
+        var confirm = ReplayExecutor.execute("move", answer(pending, List.of("S3")), moveLike);
         assertEquals(ActionFlowStepType.CONFIRM, confirm.getFlow().getType());
         assertEquals("Move to s3?", confirm.getFlow().getMessage());
 
@@ -62,21 +62,50 @@ class ReplayChoicesAndNavigationTest {
     }
 
     @Test
-    void manyChoicesGetTheListOfOptions() {
+    void manyChoicesAreAnsweredWithKeysAndNoneIsCancelling() {
         Function<ActionExecutionRequest, Object> body = request -> {
             UIChoices.chooseMany("Pick", storages, String::valueOf, chosen -> log.add(String.join(",", chosen)));
             return null;
         };
         var pending = ReplayExecutor.execute("pick", new ActionExecutionRequest(), body);
-        ReplayExecutor.execute("pick", answer(pending, List.of(0, 2)), body);
-
+        ReplayExecutor.execute("pick", answer(pending, List.of("local", "ftp")), body);
         assertEquals(List.of("local,ftp"), log);
+
+        var again = ReplayExecutor.execute("pick", new ActionExecutionRequest(), body);
+        ReplayExecutor.execute("pick", answer(again, List.of()), body);
+        assertEquals(List.of("local,ftp"), log, "an empty selection does not call the callback");
     }
 
     @Test
-    void aPositionOutsideTheOptionsIsRejected() {
+    void anUnknownKeyAsksTheQuestionAgainWithAWarning() {
         var pending = ReplayExecutor.execute("move", new ActionExecutionRequest(), moveLike);
-        assertThrows(IllegalArgumentException.class, () -> ReplayExecutor.execute("move", answer(pending, 7), moveLike));
+
+        var again = ReplayExecutor.execute("move", answer(pending, List.of("NOPE")), moveLike);
+
+        assertEquals(ActionFlowStepType.CHOICE, again.getFlow().getType());
+        assertEquals(tools.dynamia.ui.MessageType.ERROR, again.getFlow().getMessageType());
+        assertTrue(log.isEmpty());
+    }
+
+    @Test
+    void whenTheOptionsChangeBetweenPassesTheAnswerIsNotAppliedToAnotherOption() {
+        var options = new ArrayList<>(List.of("a", "b"));
+        Function<ActionExecutionRequest, Object> body = request -> {
+            UIChoices.chooseOne("Pick", options, String::valueOf, picked ->
+                    UIMessages.showQuestion("Use " + picked + "?", () -> log.add("used " + picked)));
+            return null;
+        };
+        var pending = ReplayExecutor.execute("pick", new ActionExecutionRequest(), body);
+        var confirm = ReplayExecutor.execute("pick", answer(pending, List.of("b")), body);
+        assertEquals("Use b?", confirm.getFlow().getMessage());
+
+        options.remove("a"); // between the passes the list changed: the same key now points elsewhere in the list
+        options.add("c");
+        var reasked = ReplayExecutor.execute("pick", answer(confirm, true), body);
+
+        assertEquals(ActionFlowStepType.CHOICE, reasked.getFlow().getType(), "the choice is asked again, not confirmed");
+        assertEquals(tools.dynamia.ui.MessageType.WARNING, reasked.getFlow().getMessageType());
+        assertTrue(log.isEmpty(), "nothing was done with the old answers");
     }
 
     @Test

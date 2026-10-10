@@ -34,10 +34,10 @@ export interface FlowStepHandlers {
    */
   navigate?: (url: string, options?: { newWindow?: boolean }) => void | Promise<void>;
   /**
-   * Renders a `CHOICE` step: shows the labels and returns the positions chosen (empty or `null` if the user cancels).
+   * Renders a `CHOICE` step: shows the labels and returns the **keys** chosen (empty or `null` if the user cancels).
    * Required for `CHOICE` steps; there is no sensible default look.
    */
-  choose?: (options: { title?: string; options: string[]; multiple: boolean }) => Promise<number[] | null>;
+  choose?: (options: { title?: string; options: FlowChoiceOption[]; multiple: boolean; message?: string }) => Promise<string[] | null>;
   /**
    * Renders an `UPLOAD` step: asks the user for files and returns them, or `null`/`[]` if they cancel. The runner checks
    * them against the limits of the step, sends each one to `/api/app/transfers` and answers with the references; the
@@ -50,6 +50,12 @@ export interface FlowStepHandlers {
    * file is fetched with the client's credentials.
    */
   saveFile?: (file: FlowDownload, client: DynamiaClient) => void | Promise<void>;
+}
+
+/** An option of a `CHOICE` step: the client answers with the `key`. */
+export interface FlowChoiceOption {
+  key: string;
+  label: string;
 }
 
 /** Max nesting of `CALL` steps (a flow calling an action that itself calls...) before failing fast. */
@@ -252,9 +258,10 @@ async function renderFlowStep(
       if (!handlers.choose) {
         throw new Error('runActionFlow: no "choose" handler provided for flow step type "CHOICE"');
       }
-      const { options, multiple } = (step.data ?? {}) as { options?: string[]; multiple?: boolean };
+      const { options, multiple } = (step.data ?? {}) as { options?: FlowChoiceOption[]; multiple?: boolean };
       return (await handlers.choose({
         ...(step.title ? { title: step.title } : {}),
+        ...(step.message ? { message: step.message } : {}),
         options: options ?? [],
         multiple: multiple === true,
       })) ?? [];
@@ -323,11 +330,16 @@ async function renderDialogStep(
   if (step.data && typeof step.data === 'object') {
     view.setValue(step.data as Record<string, unknown>);
   }
+  if (step.fieldErrors) {
+    view.errors.value = { ...step.fieldErrors };
+  }
 
   return handlers.showFormDialog({
     view,
     ...(step.title !== undefined ? { title: step.title } : {}),
     ...(readonly ? { readonly: true } : {}),
+    ...(step.message ? { message: step.message } : {}),
+    ...(step.messageType ? { messageType: step.messageType } : {}),
   });
 }
 

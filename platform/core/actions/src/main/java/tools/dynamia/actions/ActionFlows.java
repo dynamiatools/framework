@@ -20,6 +20,7 @@ import tools.dynamia.actions.flow.FlowTokenException;
 import tools.dynamia.actions.flow.FlowTokenPayload;
 import tools.dynamia.actions.flow.FlowTokenSigner;
 import tools.dynamia.integration.Containers;
+import tools.dynamia.ui.files.FlowPrincipal;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -129,7 +130,9 @@ public final class ActionFlows {
 
         if (step.getType() != ActionFlowStepType.DONE) {
             long expiresAt = Instant.now().plus(signer().ttl()).toEpochMilli();
-            var payload = new FlowTokenPayload(flowId, ctx.actionId(), step.getType().name(), ctx.data(), expiresAt);
+            var caller = FlowPrincipal.current();
+            var payload = new FlowTokenPayload(flowId, ctx.actionId(), step.getType().name(), ctx.data(), expiresAt,
+                    caller.subject(), caller.tenant());
             step.setResumeToken(signer().sign(payload));
         }
 

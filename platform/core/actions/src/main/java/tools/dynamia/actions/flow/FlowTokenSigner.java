@@ -31,6 +31,7 @@ import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
+import tools.dynamia.ui.files.FlowPrincipal;
 import java.util.Map;
 import java.util.Objects;
 
@@ -58,13 +59,23 @@ public class FlowTokenSigner {
     public static final String SECRET_PROPERTY = "dynamia.actions.flow.secret";
     public static final String TTL_PROPERTY = "dynamia.actions.flow.token-ttl";
     public static final Duration DEFAULT_TTL = Duration.ofMinutes(10);
+    /** When {@code true}, startup fails without a secret. It is also required with the {@code prod} profile. */
+    public static final String REQUIRE_SECRET_PROPERTY = "dynamia.actions.flow.require-secret";
+    /** Largest resume token accepted, in characters. */
+    public static final String MAX_TOKEN_BYTES_PROPERTY = "dynamia.actions.flow.max-token-bytes";
+    public static final int DEFAULT_MAX_TOKEN_BYTES = 16 * 1024;
 
     private final SecretKey secretKey;
     private final Duration ttl;
+    private final int maxTokenBytes;
 
     public FlowTokenSigner(Environment environment) {
         String secret = environment != null ? environment.getProperty(SECRET_PROPERTY) : null;
         if (secret == null || secret.length() < 32) {
+            if (secretRequired(environment)) {
+                throw new IllegalStateException(SECRET_PROPERTY + " must be set (at least 32 characters) in production: "
+                        + "with a per-JVM random secret, tokens break on restart and between nodes");
+            }
             LOGGER.warn(SECRET_PROPERTY + " is not set or too short (min 32 chars). Using a temporal, " +
                     "per-JVM secret for action flow tokens — flows won't resume across a restart/rolling deploy.");
             secret = StringUtils.randomString() + StringUtils.randomString();
@@ -73,6 +84,14 @@ public class FlowTokenSigner {
 
         String ttlProperty = environment != null ? environment.getProperty(TTL_PROPERTY) : null;
         this.ttl = ttlProperty != null ? Duration.parse(ttlProperty) : DEFAULT_TTL;
+
+        String maxProperty = environment != null ? environment.getProperty(MAX_TOKEN_BYTES_PROPERTY) : null;
+        this.maxTokenBytes = maxProperty != null ? Integer.parseInt(maxProperty.trim()) : DEFAULT_MAX_TOKEN_BYTES;
+    }
+
+    private static boolean secretRequired(Environment environment) {
+        return environment != null && (Boolean.parseBoolean(environment.getProperty(REQUIRE_SECRET_PROPERTY, "false"))
+                || environment.acceptsProfiles(org.springframework.core.env.Profiles.of("prod")));
     }
 
     /** Signs {@code payload}, producing an opaque token to hand to the client as {@code resumeToken}. */
@@ -80,7 +99,13 @@ public class FlowTokenSigner {
         String json = StringPojoParser.convertMapToJson(payload.toMap());
         String encodedPayload = base64Encode(json.getBytes(StandardCharsets.UTF_8));
         String signature = hmac(encodedPayload);
-        return encodedPayload + "." + signature;
+        String token = encodedPayload + "." + signature;
+        if (token.length() > maxTokenBytes) {
+            throw new IllegalStateException("The state of this flow does not fit in a resume token (" + token.length()
+                    + " bytes, limit " + maxTokenBytes + " set by " + MAX_TOKEN_BYTES_PROPERTY + "). Big values such as files "
+                    + "must travel as references, not inside the flow.");
+        }
+        return token;
     }
 
     /**
@@ -111,6 +136,10 @@ public class FlowTokenSigner {
         }
         if (!Objects.equals(payload.actionId(), expectedActionId)) {
             throw new FlowTokenException("Flow token does not match action");
+        }
+        FlowPrincipal caller = FlowPrincipal.current();
+        if (!Objects.equals(payload.subject(), caller.subject()) || !Objects.equals(payload.tenant(), caller.tenant())) {
+            throw new FlowTokenException("Flow token belongs to another user");
         }
         return payload;
     }

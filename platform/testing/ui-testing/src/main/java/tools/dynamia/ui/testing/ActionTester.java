@@ -385,13 +385,25 @@ public final class ActionTester {
                     return ABANDONED;
                 }
                 if (answer instanceof UIScript.Choose choose) {
-                    var labels = (List<String>) ((Map<String, Object>) step.getData()).get("options");
-                    var positions = new ArrayList<Integer>();
+                    var options = (List<Map<String, String>>) ((Map<String, Object>) step.getData()).get("options");
+                    var keys = new ArrayList<String>();
                     for (Object selected : choose.selection()) {
-                        positions.add(selected instanceof Integer i ? i : labels.indexOf(String.valueOf(selected)));
+                        Map<String, String> option = null;
+                        if (selected instanceof Integer position && position >= 0 && position < options.size()) {
+                            option = options.get(position);
+                        } else {
+                            for (var candidate : options) {
+                                if (candidate.get("label").equals(String.valueOf(selected))) {
+                                    option = candidate;
+                                }
+                            }
+                        }
+                        if (option == null) {
+                            throw new AssertionError("Choice " + selected + " is not one of the options " + options);
+                        }
+                        keys.add(option.get("key"));
                     }
-                    boolean multiple = Boolean.TRUE.equals(((Map<String, Object>) step.getData()).get("multiple"));
-                    return multiple ? positions : positions.get(0);
+                    return keys;
                 }
             }
             case UPLOAD -> {

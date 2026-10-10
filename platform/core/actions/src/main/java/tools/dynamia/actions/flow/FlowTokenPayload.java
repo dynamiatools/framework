@@ -33,8 +33,21 @@ public final class FlowTokenPayload {
     private final String step;
     private final Map<String, Object> data;
     private final long expiresAt;
+    private final String subject;
+    private final String tenant;
 
     public FlowTokenPayload(String flowId, String actionId, String step, Map<String, Object> data, long expiresAt) {
+        this(flowId, actionId, step, data, expiresAt, tools.dynamia.ui.files.FlowPrincipal.ANONYMOUS.subject(), null);
+    }
+
+    /**
+     * @param subject the user the flow belongs to; the token is only valid for this user
+     * @param tenant  the tenant the flow belongs to, may be null; the token is only valid in this tenant
+     */
+    public FlowTokenPayload(String flowId, String actionId, String step, Map<String, Object> data, long expiresAt,
+                            String subject, String tenant) {
+        this.subject = subject;
+        this.tenant = tenant;
         this.flowId = flowId;
         this.actionId = actionId;
         this.step = step;
@@ -58,6 +71,16 @@ public final class FlowTokenPayload {
         return data;
     }
 
+    /** @return the user the flow belongs to */
+    public String subject() {
+        return subject;
+    }
+
+    /** @return the tenant the flow belongs to, may be null */
+    public String tenant() {
+        return tenant;
+    }
+
     public long expiresAt() {
         return expiresAt;
     }
@@ -70,6 +93,10 @@ public final class FlowTokenPayload {
         map.put("step", step);
         map.put("data", data);
         map.put("exp", expiresAt);
+        map.put("sub", subject);
+        if (tenant != null) {
+            map.put("ten", tenant);
+        }
         return map;
     }
 
@@ -84,7 +111,9 @@ public final class FlowTokenPayload {
                 (String) map.get("actionId"),
                 (String) map.get("step"),
                 data instanceof Map ? (Map<String, Object>) data : new HashMap<>(),
-                expiresAt
+                expiresAt,
+                (String) map.get("sub"),
+                (String) map.get("ten")
         );
     }
 }

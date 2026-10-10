@@ -81,13 +81,13 @@ class NewAccountPaymentActionTest {
     }
 
     @Test
-    void nothingIsSavedWhenTheUserDoesNotConfirm() {
+    void nothingIsSavedAndTheFormStaysOpenWhenTheUserDoesNotConfirm() {
         var result = tester()
-                .user(u -> u.fillForm(Map.of("value", 1)).confirm(false))
+                .user(u -> u.fillForm(Map.of("value", 1)).confirm(false).cancel())
                 .runEverywhere();
 
         assertNull(result.exception());
-        assertEquals(List.of(DIALOG, CONFIRM), result.types());
+        assertEquals(List.of(DIALOG, CONFIRM, DIALOG), result.types(), "saying no leaves the form open, as in ZK");
         verify(crudService, never()).save(any(AccountPayment.class));
     }
 
