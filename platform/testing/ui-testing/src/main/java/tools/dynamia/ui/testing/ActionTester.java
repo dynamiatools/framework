@@ -33,6 +33,7 @@ import tools.dynamia.ui.files.FlowPrincipal;
 import tools.dynamia.ui.files.InMemoryTransferStore;
 import tools.dynamia.ui.files.TransferMeta;
 import tools.dynamia.ui.files.TransferStore;
+import tools.dynamia.ui.jobs.InMemoryJobRegistry;
 import tools.dynamia.ui.testing.UIInteraction.Type;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.ViewDescriptorBuilder;
@@ -81,6 +82,7 @@ public final class ActionTester {
     };
     private boolean lenient;
     private TransferStore transfers = new InMemoryTransferStore();
+    private final InMemoryJobRegistry jobs = new InMemoryJobRegistry();
 
     private ActionTester(LocalAction action) {
         this.action = action;
@@ -191,6 +193,7 @@ public final class ActionTester {
         if (remote) {
             container.addObject(new HeadlessViewsContributor());
             container.addObject(transfers);
+            container.addObject(jobs);
         }
         if (beans.stream().noneMatch(ViewDescriptorFactory.class::isInstance)) {
             container.addObject(TestDescriptors.autoFields());
@@ -288,6 +291,10 @@ public final class ActionTester {
             maxToken = Math.max(maxToken, step.getResumeToken() == null ? 0 : step.getResumeToken().length());
             var interaction = toInteraction(step);
             interactions.add(interaction);
+            if (step.getType() == ActionFlowStepType.PROGRESS) {
+                request = resume(step, waitForJob(step)); // the client follows the job until it stops, then answers
+                continue;
+            }
             var answer = answerFor(script, interaction, step, interactions.size());
             if (answer == ABANDONED) {
                 abandoned = true;
@@ -304,6 +311,33 @@ public final class ActionTester {
     }
 
     private static final Object ABANDONED = new Object();
+
+    /** Plays the client of a {@code PROGRESS} step: waits for the background job and answers {@code {jobId, state}}. */
+    @SuppressWarnings("unchecked")
+    private Object waitForJob(ActionFlowStep step) {
+        String jobId = String.valueOf(((Map<String, Object>) step.getData()).get("jobId"));
+        for (int i = 0; i < 600; i++) {
+            var status = jobs.status(jobId, FlowPrincipal.current())
+                    .orElseThrow(() -> new AssertionError("The job " + jobId + " of the PROGRESS step does not exist"));
+            if (status.state().isFinished()) {
+                return Map.of("jobId", jobId, "state", status.state().name());
+            }
+            try {
+                Thread.sleep(25);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new AssertionError("Interrupted while waiting for job " + jobId, e);
+            }
+        }
+        throw new AssertionError("The job " + jobId + " did not finish in 15 seconds");
+    }
+
+    private static ActionExecutionRequest resume(ActionFlowStep step, Object answer) {
+        var request = new ActionExecutionRequest();
+        request.setResumeToken(step.getResumeToken());
+        request.setData(answer);
+        return request;
+    }
 
     private static UIInteraction toInteraction(ActionFlowStep step) {
         var type = Type.valueOf(step.getType().name());

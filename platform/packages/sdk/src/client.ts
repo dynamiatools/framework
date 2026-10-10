@@ -5,6 +5,7 @@ import { CrudResourceApi } from './cruds/crud-resource.js';
 import { CrudServiceApi } from './cruds/crud-service.js';
 import { ScheduleApi } from './schedule/api.js';
 import { TransfersApi } from './transfers/api.js';
+import { JobsApi } from './jobs/api.js';
 import type { DynamiaClientConfig } from './types.js';
 
 /**
@@ -34,6 +35,8 @@ export class DynamiaClient {
   readonly schedule: ScheduleApi;
   /** File transfers: uploads that answer an `UPLOAD` flow step and downloads of `params.downloads` */
   readonly transfers: TransfersApi;
+  /** Background jobs: follow the task of a `PROGRESS` flow step */
+  readonly jobs: JobsApi;
 
   constructor(config: DynamiaClientConfig) {
     this.http = new HttpClient(config);
@@ -41,6 +44,7 @@ export class DynamiaClient {
     this.actions = new ActionsApi(this.http);
     this.schedule = new ScheduleApi(this.http);
     this.transfers = new TransfersApi(this.http);
+    this.jobs = new JobsApi(this.http);
   }
 
   /**

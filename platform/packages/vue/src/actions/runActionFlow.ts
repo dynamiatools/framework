@@ -7,6 +7,7 @@ import type {
   ActionMetadata,
   FlowDownload,
   FlowFileRef,
+  JobStatus,
   DynamiaClient,
 } from '@dynamia-tools/sdk';
 import type { FeedbackVariant } from '@dynamia-tools/ui-core';
@@ -44,6 +45,13 @@ export interface FlowStepHandlers {
    * content never travels inside the flow. Optional: defaults to the browser's file picker ({@link browserPickFiles}).
    */
   pickFiles?: (options: { title?: string; accept?: string; multiple?: boolean }) => Promise<File[] | null>;
+  /**
+   * Shows the progress of the background task of a `PROGRESS` step, called every time the job is polled. Optional: without it
+   * the task is followed silently.
+   */
+  showProgress?: (status: JobStatus) => void;
+  /** Milliseconds between two polls of a job. Defaults to 500. */
+  progressIntervalMs?: number;
   /**
    * Gives a file the action produced (`params.downloads` of the final response) to the user. Optional: defaults to a
    * browser download ({@link browserSaveFile}): a plain link when requests are authenticated with cookies, otherwise the
@@ -281,6 +289,23 @@ async function renderFlowStep(
         refs.push(await client.transfers.upload(file));
       }
       return refs.map(({ ref }) => ({ ref }));
+    }
+
+    case 'PROGRESS': {
+      // the action runs a long task in the background: follow it until it stops, then say so; the server reads the real state
+      const { jobId } = (step.data ?? {}) as { jobId?: string };
+      if (!jobId) {
+        throw new Error('runActionFlow: PROGRESS flow step is missing "jobId"');
+      }
+      const interval = handlers.progressIntervalMs ?? 500;
+      for (;;) {
+        const status = await client.jobs.status(jobId);
+        handlers.showProgress?.(status);
+        if (status.state !== 'RUNNING') {
+          return { jobId, state: status.state };
+        }
+        await new Promise(resolve => setTimeout(resolve, interval));
+      }
     }
 
     case 'CUSTOM': {

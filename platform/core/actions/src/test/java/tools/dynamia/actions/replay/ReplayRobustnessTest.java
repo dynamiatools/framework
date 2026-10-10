@@ -123,15 +123,15 @@ class ReplayRobustnessTest {
         assertEquals(List.of("used 3"), log);
     }
 
-    /** Transactions that remember how every pass ended and where tasks ran. */
+    /** Transactions that remember how every pass ended and whether a thread is inside one. */
     private static final class RecordingTransactions implements ReplayTransactions {
-        final List<String> outcomes = new ArrayList<>();
-        boolean inside;
-        boolean taskInsideTransaction;
+        final List<String> outcomes = java.util.Collections.synchronizedList(new ArrayList<>());
+        final ThreadLocal<Boolean> inside = ThreadLocal.withInitial(() -> false);
+        volatile Boolean taskInsideTransaction;
 
         @Override
         public <T> T run(Supplier<T> work, BooleanSupplier commit) {
-            inside = true;
+            inside.set(true);
             try {
                 T result = work.get();
                 outcomes.add(commit.getAsBoolean() ? "commit" : "rollback");
@@ -140,18 +140,7 @@ class ReplayRobustnessTest {
                 outcomes.add("rollback");
                 throw e;
             } finally {
-                inside = false;
-            }
-        }
-
-        @Override
-        public <T> T runOutside(Supplier<T> work) {
-            boolean was = inside;
-            inside = false;
-            try {
-                return work.get();
-            } finally {
-                inside = was;
+                inside.set(false);
             }
         }
     }
@@ -160,33 +149,54 @@ class ReplayRobustnessTest {
         var transactions = new RecordingTransactions();
         var beans = new SimpleObjectContainer("transactions");
         beans.addObject((ReplayTransactions) transactions);
+        beans.addObject(new tools.dynamia.ui.jobs.InMemoryJobRegistry());
         Containers.get().installObjectContainer(beans);
         return transactions;
     }
 
-    @Test
-    void aProgressTaskRunsOutsideTheTransactionOfThePass() {
-        var transactions = installTransactions();
-        ReplayExecutor.execute("task", new ActionExecutionRequest(), request -> {
-            UIProgress.run("Working", monitor -> transactions.taskInsideTransaction = transactions.inside, null);
-            return null;
-        });
+    private static String jobId(ActionExecutionResponse pending) {
+        return String.valueOf(((java.util.Map<?, ?>) pending.getFlow().getData()).get("jobId"));
+    }
 
-        assertFalse(transactions.taskInsideTransaction);
-        assertEquals(List.of("commit"), transactions.outcomes);
+    private void waitForJob(String jobId) throws InterruptedException {
+        var registry = Containers.get().findObject(tools.dynamia.ui.jobs.JobRegistry.class);
+        for (int i = 0; i < 200; i++) {
+            if (registry.status(jobId, FlowPrincipal.ANONYMOUS).orElseThrow().state().isFinished()) {
+                return;
+            }
+            Thread.sleep(25);
+        }
+        throw new AssertionError("The job did not finish");
     }
 
     @Test
-    void aPassWhoseProgressTaskFailedIsRolledBackEvenIfTheActionHandledTheError() {
+    void aProgressTaskRunsOutsideTheTransactionOfThePass() throws Exception {
         var transactions = installTransactions();
-        var done = ReplayExecutor.execute("task", new ActionExecutionRequest(), request -> {
+        var pending = ReplayExecutor.execute("task", new ActionExecutionRequest(), request -> {
+            UIProgress.run("Working", monitor -> transactions.taskInsideTransaction = transactions.inside.get(), null);
+            return null;
+        });
+        waitForJob(jobId(pending));
+
+        assertEquals(false, transactions.taskInsideTransaction, "the task manages its own transactions");
+        assertEquals(List.of("rollback"), transactions.outcomes, "the pass that only started the job commits nothing");
+    }
+
+    @Test
+    void thePassThatReadsAFailedTaskIsRolledBackEvenIfTheActionHandledTheError() throws Exception {
+        var transactions = installTransactions();
+        Function<ActionExecutionRequest, Object> body = request -> {
             UIProgress.run("Working", null, monitor -> {
                 throw new IllegalStateException("boom");
             }, null, e -> UIMessages.showMessage("Error: " + e.getMessage()));
             return null;
-        });
+        };
+        var pending = ReplayExecutor.execute("task", new ActionExecutionRequest(), body);
+        waitForJob(jobId(pending));
 
-        assertEquals(List.of("rollback"), transactions.outcomes);
+        var done = ReplayExecutor.execute("task", answer(pending, java.util.Map.of("jobId", jobId(pending))), body);
+
+        assertEquals(List.of("rollback", "rollback"), transactions.outcomes);
         assertEquals("Error: boom", done.getFlow().getMessage());
     }
 

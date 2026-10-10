@@ -818,7 +818,7 @@ Known limits of that iteration (addressed by the work packages above):
 - `DownloadFileAction` casts to a ZK controller; the inventory scanner does not follow casts (R1 cast detection, §9.2).
 - `UIViews` supports forms of entity classes only (WP5, last minor detail).
 - Files travel inline as Base64: 1 MB up, 10 MB down (fixed by WP4).
-- `UIProgress` headless runs inside the request (WP5.5, WP8).
+- `UIProgress` headless runs inside the request (fixed by WP8).
 
 ### Work packages
 
@@ -832,7 +832,8 @@ Known limits of that iteration (addressed by the work packages above):
 | WP5 | Done, see below |
 | WP6 | Done except the ZK driver, see below |
 | WP7 | Done except the items listed below |
-| WP8 to WP10 | Not started |
+| WP8 | Done, see below |
+| WP9 to WP10 | Not started |
 
 #### WP1 · `UIEnvironment` and clear errors
 
@@ -999,3 +1000,21 @@ The branch already had the mechanism §8 asks for: `ContextCapturer` beans, aske
   other protocol types (`ActionExecutionRequest/Response`, `FlowFileRef`, `FlowDownload` are still handwritten), and the
   per-property JSDoc of `ActionFlowStep` (the generated file carries no field docs; the Javadoc of `ActionFlowStepType` has them).
 - The source-level R4 approximates `ActionRuntimes`: a class whose type is `RemoteAction` is detected by name (`*RemoteAction`).
+
+#### WP8 · Asynchronous progress
+
+- **Protocol:** new `PROGRESS` step (`data: {title, jobId}`), generated into the SDK types and covered by two fixtures. The client
+  polls `GET /api/app/jobs/{id}` (`{id, title, state, current, max, message, error}`) and answers with `{jobId, state}`.
+- **Server:** `JobRegistry` / `InMemoryJobRegistry` (`ui-shared`) runs the task with `SchedulerUtil`, so it gets the context of the
+  caller (tenant, security) and no UI; `JobsController` and `JobsConfiguration` (`app`, purged every five minutes). The pass
+  that reaches `UIProgress` starts the job once (`ReplaySession.interact` now tells whether the question is new) and stops at the
+  step. On resume the **server reads the real state of the job** (the client's `state` is only a hint that it stopped
+  waiting): still running → the same step with the same job; done → `onFinish`; failed → `onError`; the task never runs twice.
+  A pass that consumed a failed job is rolled back; consumed jobs are forgotten when the flow ends. `markNonRepeatable` is gone.
+- **Ownership:** a job belongs to the user and tenant that started it (snapshotted, not the live principal). Another user gets 404.
+- **Client:** `client.jobs.status(id)`; the Vue runner follows the job (`showProgress`, `progressIntervalMs`) and answers.
+- **Tests:** the replay tests now prove the request returns while the task still waits, `onFinish` runs once with the task run
+  once across several passes, and the client cannot claim a running job is done; the contract suite records what the task does
+  apart from the callbacks, because they now run in different places.
+- Not done: cancelling a job from the client (the monitor has `stop`, there is no endpoint); a shared `JobRegistry` for several
+  nodes (D2); the ZK adapter was already asynchronous; no browser test of the polling.

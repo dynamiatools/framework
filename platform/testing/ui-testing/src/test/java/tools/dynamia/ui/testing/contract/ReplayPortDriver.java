@@ -14,6 +14,7 @@ import tools.dynamia.ui.contract.Reply;
 import tools.dynamia.ui.files.FlowPrincipal;
 import tools.dynamia.ui.files.InMemoryTransferStore;
 import tools.dynamia.ui.files.TransferMeta;
+import tools.dynamia.ui.jobs.InMemoryJobRegistry;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -45,6 +46,8 @@ public class ReplayPortDriver implements PortDriver {
         var store = new InMemoryTransferStore();
         var container = new SimpleObjectContainer("replay-contract");
         container.addObject(store);
+        var jobs = new InMemoryJobRegistry();
+        container.addObject(jobs);
         beans.forEach(container::addObject);
         Containers.get().installObjectContainer(container);
         try {
@@ -82,6 +85,10 @@ public class ReplayPortDriver implements PortDriver {
                     }
                     break;
                 }
+                if (step.getType() == ActionFlowStepType.PROGRESS) {
+                    request = resume(step, waitForJob(jobs, step));
+                    continue;
+                }
                 boolean isError = step.getMessageType() == tools.dynamia.ui.MessageType.ERROR;
                 boolean questionIsMessage = step.getType() == ActionFlowStepType.CONFIRM || step.getType() == ActionFlowStepType.INPUT;
                 asked.add(new Outcome.Asked(step.getType().name(), questionIsMessage ? step.getMessage() : step.getTitle(),
@@ -110,6 +117,24 @@ public class ReplayPortDriver implements PortDriver {
     }
 
     private static final Object ABANDONED = new Object();
+
+    @SuppressWarnings("unchecked")
+    private static Object waitForJob(InMemoryJobRegistry jobs, ActionFlowStep step) {
+        String jobId = String.valueOf(((Map<String, Object>) step.getData()).get("jobId"));
+        for (int i = 0; i < 600; i++) {
+            var status = jobs.status(jobId, FlowPrincipal.current()).orElseThrow();
+            if (status.state().isFinished()) {
+                return Map.of("jobId", jobId, "state", status.state().name());
+            }
+            try {
+                Thread.sleep(25);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new AssertionError(e);
+            }
+        }
+        throw new AssertionError("The job did not finish");
+    }
 
     private static ActionExecutionRequest resume(ActionFlowStep step, Object answer) {
         var request = new ActionExecutionRequest();
