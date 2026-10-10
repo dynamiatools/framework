@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 /**
  * SPI behind {@link UIChoices}. ZK opens a list selector window; a headless run sends a {@code CHOICE} step.
  */
+@UIPort(name = "choices", steps = {"CHOICE"})
 public interface ChoicesProvider {
 
     /**

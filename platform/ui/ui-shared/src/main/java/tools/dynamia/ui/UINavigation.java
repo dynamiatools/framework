@@ -31,13 +31,13 @@ public final class UINavigation {
      * Sends the user to {@code url} in the current window.
      */
     public static void open(String url) {
-        UIFacades.resolve(NavigationProvider.class).open(url, false);
+        UIFacades.port(NavigationProvider.class).open(url, false);
     }
 
     /**
      * Sends the user to {@code url} in a new window or tab.
      */
     public static void openInNewWindow(String url) {
-        UIFacades.resolve(NavigationProvider.class).open(url, true);
+        UIFacades.port(NavigationProvider.class).open(url, true);
     }
 }

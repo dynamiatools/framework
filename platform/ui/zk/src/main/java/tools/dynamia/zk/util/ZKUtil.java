@@ -33,10 +33,10 @@ import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.domain.query.DataPaginator;
 import tools.dynamia.domain.util.DomainUtils;
-import tools.dynamia.integration.Containers;
 import tools.dynamia.io.IOUtils;
 import tools.dynamia.io.Resource;
 import tools.dynamia.ui.MessageDisplayer;
+import tools.dynamia.ui.UIFacades;
 import tools.dynamia.ui.MessageType;
 import tools.dynamia.ui.icons.*;
 import tools.dynamia.web.util.HttpUtils;
@@ -151,7 +151,7 @@ public abstract class ZKUtil {
 
     /**
      * Displays a message to the user with custom title and type.
-     * Uses the configured {@link MessageDisplayer} from the container, or falls back
+     * Uses the {@link MessageDisplayer} of the active UI environment, or falls back
      * to {@link MessageDialog} if none is configured.
      *
      * @param message the message text to display
@@ -160,10 +160,7 @@ public abstract class ZKUtil {
      */
     public static void showMessage(String message, String title, MessageType type) {
 
-        MessageDisplayer displayer = Containers.get().findObject(MessageDisplayer.class);
-        if (displayer == null) {
-            displayer = new MessageDialog();
-        }
+        MessageDisplayer displayer = UIFacades.current().port(MessageDisplayer.class).orElseGet(MessageDialog::new);
 
         displayer.showMessage(message, title, type);
 

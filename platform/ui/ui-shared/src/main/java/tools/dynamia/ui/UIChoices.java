@@ -46,7 +46,7 @@ public final class UIChoices {
      * @param label text shown for each option
      */
     public static <T> void chooseOne(String title, List<T> options, Function<T, String> label, Consumer<T> onChoice) {
-        UIFacades.resolve(ChoicesProvider.class).choose(new ChoiceOptions<>(title, options, label, false), chosen -> {
+        UIFacades.port(ChoicesProvider.class).choose(new ChoiceOptions<>(title, options, label, false), chosen -> {
             if (!chosen.isEmpty()) {
                 onChoice.accept(chosen.get(0));
             }
@@ -57,6 +57,6 @@ public final class UIChoices {
      * Asks for any number of options (at least one).
      */
     public static <T> void chooseMany(String title, List<T> options, Function<T, String> label, Consumer<List<T>> onChoice) {
-        UIFacades.resolve(ChoicesProvider.class).choose(new ChoiceOptions<>(title, options, label, true), onChoice);
+        UIFacades.port(ChoicesProvider.class).choose(new ChoiceOptions<>(title, options, label, true), onChoice);
     }
 }

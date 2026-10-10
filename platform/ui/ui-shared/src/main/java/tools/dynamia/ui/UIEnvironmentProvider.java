@@ -17,16 +17,19 @@
 package tools.dynamia.ui;
 
 /**
- * SPI behind {@link UINavigation}. ZK redirects the browser; a headless run ends the action with a {@code REDIRECT} step.
+ * Contributes a {@link UIEnvironment} that is active only while some condition holds. It is registered as a bean (ZK
+ * registers one that is active while a ZK {@code Execution} exists) and consulted by {@link UIFacades#current()} when
+ * no environment is bound explicitly.
  */
-@UIPort(name = "navigation", steps = {"REDIRECT"})
-public interface NavigationProvider {
+public interface UIEnvironmentProvider {
 
     /**
-     * Sends the user to {@code url}.
-     *
-     * @param url       relative or http(s) URL
-     * @param newWindow whether to open it in a new window or tab
+     * @return whether the code running on this thread is inside the environment of this provider
      */
-    void open(String url, boolean newWindow);
+    boolean isActive();
+
+    /**
+     * @return the environment to use while {@link #isActive()} is true
+     */
+    UIEnvironment environment();
 }

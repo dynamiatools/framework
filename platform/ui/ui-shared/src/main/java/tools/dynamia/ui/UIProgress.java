@@ -58,6 +58,6 @@ public final class UIProgress {
      * @param onError         runs when it failed
      */
     public static void run(String title, String messageTemplate, ProgressTask task, Callback onFinish, Consumer<Throwable> onError) {
-        UIFacades.resolve(ProgressRunner.class).run(title, messageTemplate, task, onFinish, onError);
+        UIFacades.port(ProgressRunner.class).run(title, messageTemplate, task, onFinish, onError);
     }
 }

@@ -32,8 +32,6 @@ import java.util.function.Consumer;
  */
 public class UIMessages {
 
-    private static MessageDisplayer currentMessageDisplayer;
-
     private UIMessages() {
     }
 
@@ -81,12 +79,9 @@ public class UIMessages {
     }
 
     /**
-     * Return the current MessageDisplayer, if not set try to find one in the container
-     */
-    /**
      * Runs {@code work} with {@code displayer} as the {@link MessageDisplayer} of every {@code UIMessages} call made
-     * by it (and by the threads it forks with structured concurrency). Outside of it the application's displayer
-     * (ZK's, for example) is used as always.
+     * by it (and by the threads it forks with structured concurrency). Outside of it the displayer of the active
+     * {@link UIEnvironment} (ZK's, for example) is used as always.
      *
      * @param displayer the displayer for this execution
      * @param work      the code that talks to the user through {@code UIMessages}
@@ -97,22 +92,15 @@ public class UIMessages {
         return UIFacades.with(MessageDisplayer.class, displayer, work);
     }
 
+    /**
+     * Returns the {@link MessageDisplayer} of the active {@link UIEnvironment}. It is resolved on every call, so it
+     * follows the environment the code runs in.
+     *
+     * @return the displayer
+     * @throws UIUnavailableException when the active environment cannot show messages
+     */
     public static MessageDisplayer getDisplayer() {
-        MessageDisplayer scoped = UIFacades.bound(MessageDisplayer.class);
-        if (scoped != null) {
-            return scoped;
-        }
-        if (currentMessageDisplayer == null) {
-            currentMessageDisplayer = Containers.get().findObject(MessageDisplayer.class);
-            if (currentMessageDisplayer == null) {
-                throw new IllegalStateException("MessageDisplayer not found");
-            }
-        }
-        return currentMessageDisplayer;
-    }
-
-    public static void setCurrentMessageDisplayer(MessageDisplayer currentMessageDisplayer) {
-        UIMessages.currentMessageDisplayer = currentMessageDisplayer;
+        return UIFacades.port(MessageDisplayer.class);
     }
 
     /**
