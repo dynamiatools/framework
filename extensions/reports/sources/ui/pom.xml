@@ -62,6 +62,17 @@
             <version>${swagger.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.ui.testing</artifactId>
+            <version>26.10.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 

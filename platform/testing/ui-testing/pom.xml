@@ -16,17 +16,33 @@
   ~ limitations under the License.
   -->
 
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>tools.dynamia.modules.entityfiles.parent</artifactId>
-        <groupId>tools.dynamia.modules</groupId>
+        <groupId>tools.dynamia</groupId>
+        <artifactId>tools.dynamia.parent</artifactId>
         <version>26.10.1-SNAPSHOT</version>
+        <relativePath>../../../pom.xml</relativePath>
     </parent>
-    <name>DynamiaModules - EntityFiles - Core</name>
-    <artifactId>tools.dynamia.modules.entityfiles</artifactId>
-    <url>https://www.dynamia.tools/modules/entityfiles</url>
+
+    <artifactId>tools.dynamia.ui.testing</artifactId>
+    <name>DynamiaTools - UI Testing</name>
+    <url>https://dynamia.tools/docs/ui</url>
+    <description>Test platform for Dynamia UI: runs actions against a scripted user, without ZK, a browser or an HTTP server</description>
+
+    <licenses>
+       <license>
+            <name>APACHE LICENSE, VERSION 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/dynamia-projects/dynamiatools</url>
+    </scm>
 
     <build>
         <plugins>
@@ -36,7 +52,7 @@
                 <version>${maven.compiler}</version>
                 <configuration>
                     <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <target>${target.version}</target>
                      <encoding>${source.encoding}</encoding>
                     <parameters>true</parameters>
                 </configuration>
@@ -46,42 +62,24 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <scope>test</scope>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.ui</artifactId>
+            <version>26.10.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
-            <artifactId>tools.dynamia.ui.testing</artifactId>
+            <artifactId>tools.dynamia.actions</artifactId>
             <version>26.10.1-SNAPSHOT</version>
-            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.crud</artifactId>
+            <version>26.10.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>tools.dynamia</groupId>
-            <artifactId>tools.dynamia.domain.jpa</artifactId>
-            <version>26.10.1-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>tools.dynamia</groupId>
-            <artifactId>tools.dynamia.io</artifactId>
-            <version>26.10.1-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-
-        <dependency>
-            <groupId>tools.dynamia</groupId>
-            <artifactId>tools.dynamia.web</artifactId>
-            <version>26.10.1-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-
     </dependencies>
-
 </project>

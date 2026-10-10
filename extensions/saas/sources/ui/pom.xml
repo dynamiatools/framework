@@ -72,5 +72,16 @@
             <artifactId>tools.dynamia.modules.entityfiles.ui</artifactId>
             <version>26.10.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.ui.testing</artifactId>
+            <version>26.10.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

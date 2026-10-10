@@ -42,6 +42,7 @@ public class HeadlessCrudController<E> implements CrudControllerAPI<E> {
     private boolean saved;
     private boolean deleted;
     private boolean confirmBeforeSave;
+    private boolean queryRequested;
     private Callback onSaveCallback;
     private final Map<String, Object> parameters = new HashMap<>();
 
@@ -250,14 +251,28 @@ public class HeadlessCrudController<E> implements CrudControllerAPI<E> {
         return new UnsupportedOperationException(operation + " needs a user interface and is not available when the action runs headless");
     }
 
+    /**
+     * There is no list to refresh headless: the client re-queries when the action ends. The request is remembered so a
+     * caller (a test, the REST layer) can tell the action asked for it.
+     */
     @Override
     public void query() {
-        throw notHeadless("query");
+        queryRequested = true;
     }
 
+    /**
+     * Same as {@link #query()}: asking for the list to be reloaded is harmless headless, where the client reloads it.
+     */
     @Override
     public void doQuery() {
-        throw notHeadless("doQuery");
+        queryRequested = true;
+    }
+
+    /**
+     * @return whether an action asked for the list to be queried again
+     */
+    public boolean isQueryRequested() {
+        return queryRequested;
     }
 
     @Override
