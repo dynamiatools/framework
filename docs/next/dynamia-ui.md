@@ -833,7 +833,8 @@ Known limits of that iteration (addressed by the work packages above):
 | WP6 | Done except the ZK driver, see below |
 | WP7 | Done except the items listed below |
 | WP8 | Done, see below |
-| WP9 to WP10 | Not started |
+| WP9 | Done, see below |
+| WP10 | Not started |
 
 #### WP1 · `UIEnvironment` and clear errors
 
@@ -866,7 +867,8 @@ New module `platform/testing/ui-testing` (`tools.dynamia.ui.testing`, test scope
   `ValidationError` in a form's `onSubmit` opens the form again with the error (direct mode).
 - Every converted action has a green `runEverywhere()` test: `SaveAction`, `DeleteAction`, `ViewDataAction` (in
   `ui-testing`), `ExportReportAction`, `ImportReportAction` (`reports/ui`), `NewAccountPaymentAction` (`saas/ui`),
-  `MoveEntityFileLocalToRemoteStorageAction` (`entity-files/core`).
+  `MoveEntityFileLocalToRemoteStorageAction`, `ReloadEntityFileStoragesAction` (`entity-files/core`) and `DownloadFileAction`
+  (`entity-files/ui`, exercised through the event it would receive because its controller is a ZK class).
 - Behaviour change found by those tests: `HeadlessCrudController.query()`/`doQuery()` threw `UnsupportedOperationException`
   headless, so `ImportReportAction` and `NewAccountPaymentAction` failed after doing their work when reached remotely. They
   now record the request (`isQueryRequested()`), because the remote client re-queries when the action ends.
@@ -1018,3 +1020,19 @@ The branch already had the mechanism §8 asks for: `ContextCapturer` beans, aske
   apart from the callbacks, because they now run in different places.
 - Not done: cancelling a job from the client (the monitor has `stop`, there is no endpoint); a shared `JobRegistry` for several
   nodes (D2); the ZK adapter was already asynchronous; no browser test of the polling.
+
+#### WP9 · Framework-free flow runner
+
+- The loop of `vue/src/actions/runActionFlow.ts` now lives in `@dynamia-tools/ui-core` (`src/flow/runActionFlow.ts`), exported with
+  `FlowHandlers`, `FlowFormRequest`, `FlowChoiceOption`, `browserPickFiles` and `browserSaveFile`. It imports no Vue and no
+  `VueFormView`: a `DIALOG`/`VIEW` step reaches the front end as a `FlowFormRequest` (descriptor and entity metadata already
+  fetched, values, message, field errors, size hints) through the `showForm` handler. `dynamia-pos` and `tienda-shop` can use it
+  as is.
+- The Vue file keeps only what is Vue specific: `FlowStepHandlers` (the same handlers, with `showFormDialog` instead of
+  `showForm`) and the adaptation of a `FlowFormRequest` to a prefilled `VueFormView` shown through the `DialogFormManager`.
+  `runActionFlow` and `FlowStepHandlers` keep their names and signature, so `Actions.vue`, `useCrudPage` and
+  `crudActionDispatch` did not change.
+- The 28 tests of the runner now run against `ui-core` (`test/flow/runActionFlow.test.ts`, with `showForm`); the Vue tests (4) cover
+  the adapter. `vue-tsc` is clean (it found a type error of WP6 in `FormDialogHost.vue`, fixed).
+- Not verified: `dynamia-pos` and `tienda-shop` were not changed to use it; the standalone build of `ui-core` was built but not
+  loaded in a browser.

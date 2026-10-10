@@ -38,7 +38,7 @@ const { current, answer } = useFormDialog();
 const panelStyle = computed(() => {
   const request = current.value;
   const style = [request?.width ? `width: ${request.width}` : '', request?.height ? `height: ${request.height}` : ''];
-  return style.filter(Boolean).join('; ') || undefined;
+  return style.filter(Boolean).join('; ');
 });
 
 function respond(values: Record<string, unknown> | null): void {
