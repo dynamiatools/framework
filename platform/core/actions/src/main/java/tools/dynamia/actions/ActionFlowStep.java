@@ -92,7 +92,8 @@ public class ActionFlowStep implements Serializable {
 
     /**
      * Same as {@link #dialog(String, Object, String)} for a form of {@code viewClass}, which may differ from the entity
-     * the action runs on.
+     * the action runs on. {@code viewClass} is the id of the entity in the metadata API (its simple name), never a qualified
+     * class name: the metadata does not expose those and a client could not resolve one.
      */
     public static ActionFlowStep dialog(String viewDescriptor, String viewClass, Object data, String title) {
         var step = dialog(viewDescriptor, data, title);

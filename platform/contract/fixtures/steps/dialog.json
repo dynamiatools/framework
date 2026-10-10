@@ -1,1 +1,1 @@
-{"flowId":"f1","type":"DIALOG","title":"New payment","viewDescriptor":"form","viewClass":"x.AccountPayment","data":{"amount":"","note":"cash"},"hints":{"width":"60%"},"resumeToken":"tok.sig"}
+{"flowId":"f1","type":"DIALOG","title":"New payment","viewDescriptor":"form","viewClass":"AccountPayment","data":{"amount":"","note":"cash"},"hints":{"width":"60%"},"resumeToken":"tok.sig"}

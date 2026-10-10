@@ -1,1 +1,1 @@
-{"flowId":"f1","type":"DIALOG","title":"New payment","message":"Amount is required","messageType":"ERROR","viewDescriptor":"form","viewClass":"x.AccountPayment","data":{"amount":"","note":"cash"},"fieldErrors":{"amount":"Amount is required"},"resumeToken":"tok.sig"}
+{"flowId":"f1","type":"DIALOG","title":"New payment","message":"Amount is required","messageType":"ERROR","viewDescriptor":"form","viewClass":"AccountPayment","data":{"amount":"","note":"cash"},"fieldErrors":{"amount":"Amount is required"},"resumeToken":"tok.sig"}
