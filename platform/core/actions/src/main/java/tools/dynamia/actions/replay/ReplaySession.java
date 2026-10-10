@@ -66,7 +66,7 @@ public final class ReplaySession {
      * running under {@link ReplayExecutor} (for example in ZK)
      */
     public static ReplaySession current() {
-        return UIFacades.bound(ReplaySession.class);
+        return UIFacades.current().port(ReplaySession.class).orElse(null);
     }
 
     /**

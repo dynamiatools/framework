@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ActionMetadata, EntityMetadata, ViewDescriptor } from '@dynamia-tools/sdk';
-import { CrudView, ActionResolver } from '../../src/index.js';
+import { CrudView, ActionResolver, ClientActionRegistry } from '../../src/index.js';
 
 function createAction(action: Partial<ActionMetadata> & Pick<ActionMetadata, 'id' | 'name'>): ActionMetadata {
   return {
@@ -30,6 +30,22 @@ function createDescriptor(): ViewDescriptor {
 }
 
 describe('ActionResolver', () => {
+  it('hides FRONTEND actions this front end does not implement and shows the ones it does', () => {
+    const frontend = (id: string) => createAction({ id, name: id, type: 'CrudAction', runtime: 'FRONTEND' });
+    ClientActionRegistry.register('FindAction', { id: 'FindAction', name: 'Find', execute: () => undefined });
+
+    try {
+      const resolved = ActionResolver.resolveActions(
+        [frontend('FindAction'), frontend('FiltersAction'), createAction({ id: 'delete', name: 'Delete', runtime: 'HEADLESS' })],
+        { targetClass: 'Book' },
+      );
+
+      expect(resolved.map(action => action.id)).toEqual(['FindAction', 'delete']);
+    } finally {
+      ClientActionRegistry.clear();
+    }
+  });
+
   it('filters actions by applicable class and CRUD alias state', () => {
     const actions = [
       createAction({ id: 'NewAction', name: 'New', type: 'CrudAction', applicableStates: ['READ'] }),

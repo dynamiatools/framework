@@ -16,22 +16,21 @@
  */
 package tools.dynamia.crud.headless;
 
-import tools.dynamia.actions.replay.ReplayBinder;
+import tools.dynamia.actions.replay.ReplayPortContributor;
 import tools.dynamia.actions.replay.ReplaySession;
 import tools.dynamia.integration.sterotypes.Component;
-import tools.dynamia.ui.UIFacades;
 import tools.dynamia.ui.ViewsProvider;
 
-import java.util.function.Supplier;
+import java.util.Map;
 
 /**
- * Makes {@code UIViews} work in a headless run: binds {@link HeadlessViews} for the pass.
+ * Makes {@code UIViews} work in a headless run: contributes {@link HeadlessViews} to the environment of the pass.
  */
 @Component
-public class HeadlessViewsBinder implements ReplayBinder {
+public class HeadlessViewsContributor implements ReplayPortContributor {
 
     @Override
-    public <T> T bind(ReplaySession session, Supplier<T> work) {
-        return UIFacades.with(ViewsProvider.class, new HeadlessViews(session), work);
+    public Map<Class<?>, Object> ports(ReplaySession session) {
+        return Map.of(ViewsProvider.class, new HeadlessViews(session));
     }
 }

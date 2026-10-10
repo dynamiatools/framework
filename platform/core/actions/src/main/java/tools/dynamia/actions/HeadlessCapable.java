@@ -6,10 +6,16 @@ package tools.dynamia.actions;
  * in a headless runtime that serves a REST client, which answers the questions of the action with the replay
  * protocol of {@link tools.dynamia.actions.replay.ReplayExecutor}.
  * <p>
+ * <p>
+ * <b>Deprecated:</b> declare {@code @RunsOn(ActionRuntime.HEADLESS)} on the concrete class instead. While this marker exists it
+ * counts only when the concrete class lists it in its own {@code implements}; it is never inherited, and
+ * {@link #headlessSupported()} still works as a dynamic veto.
+ * <p>
  * An action that implements it must keep the code that runs <em>before</em> an interaction free of side effects that
  * are not database writes: in a headless run the action is executed again from the start every time the user
  * answers, and only the last run is committed.
  */
+@Deprecated
 public interface HeadlessCapable {
 
     /**
@@ -29,10 +35,6 @@ public interface HeadlessCapable {
      * @return the id
      */
     default String headlessId() {
-        var name = getClass().getSimpleName();
-        if (name.endsWith("Action") && name.length() > "Action".length()) {
-            name = name.substring(0, name.length() - "Action".length());
-        }
-        return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+        return ActionRuntimes.headlessId(getClass());
     }
 }

@@ -45,7 +45,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 @InstallAction
-@RunsOn(ActionRuntime.ZK_ONLY)
+@RunsOn(ActionRuntime.FRONTEND)
 public class ExportJsonAction extends AbstractExportAction {
 
     private static final int LARGE = 5000;

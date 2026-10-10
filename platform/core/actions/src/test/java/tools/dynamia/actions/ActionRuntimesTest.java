@@ -19,12 +19,40 @@ class ActionRuntimesTest {
         }
     }
 
-    @RunsOn(ActionRuntime.ZK_ONLY)
+    @RunsOn(ActionRuntime.FRONTEND)
     static class Find extends AbstractAction {
     }
 
-    @RunsOn(ActionRuntime.ZK_ONLY)
+    @RunsOn(ActionRuntime.FRONTEND)
     static class Legacy extends AbstractAction implements HeadlessCapable {
+    }
+
+    @RunsOn(ActionRuntime.HEADLESS)
+    static class Declared extends AbstractAction {
+    }
+
+    static class SubOfDeclared extends Declared {
+    }
+
+    static class SubOfMarked extends Headless {
+    }
+
+    @RunsOn(ActionRuntime.HEADLESS)
+    static class DeclaredAgainInSub extends SubOfDeclared {
+    }
+
+    @Test
+    void aSubclassDoesNotInheritWhatItsParentDeclaredNorTheMarker() {
+        assertEquals(ActionRuntime.HEADLESS, ActionRuntimes.of(new Declared()));
+        assertEquals(ActionRuntime.UNDECLARED, ActionRuntimes.of(new SubOfDeclared()));
+        assertEquals(ActionRuntime.UNDECLARED, ActionRuntimes.of(new SubOfMarked()));
+        assertEquals(ActionRuntime.HEADLESS, ActionRuntimes.of(new DeclaredAgainInSub()), "it can declare it itself");
+    }
+
+    @Test
+    void theDefaultRemoteIdDropsTheActionSuffix() {
+        assertEquals("headless", ActionRuntimes.headlessId(Headless.class));
+        assertEquals("find", ActionRuntimes.headlessId(Find.class));
     }
 
     @Test
@@ -32,7 +60,7 @@ class ActionRuntimesTest {
         assertEquals(ActionRuntime.UNDECLARED, ActionRuntimes.of(new Plain()));
         assertEquals(ActionRuntime.HEADLESS, ActionRuntimes.of(new Headless()));
         assertEquals(ActionRuntime.UNDECLARED, ActionRuntimes.of(new OptedOut()));
-        assertEquals(ActionRuntime.ZK_ONLY, ActionRuntimes.of(new Find()));
-        assertEquals(ActionRuntime.ZK_ONLY, ActionRuntimes.of(new Legacy()), "a declaration beats the derivation");
+        assertEquals(ActionRuntime.FRONTEND, ActionRuntimes.of(new Find()));
+        assertEquals(ActionRuntime.FRONTEND, ActionRuntimes.of(new Legacy()), "a declaration beats the derivation");
     }
 }

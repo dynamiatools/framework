@@ -15,7 +15,7 @@ import tools.dynamia.zk.crud.CrudController;
 import tools.dynamia.zk.crud.CrudControllerAware;
 
 @InstallAction
-@RunsOn(ActionRuntime.ZK_ONLY)
+@RunsOn(ActionRuntime.FRONTEND)
 public class ExportAction extends AbstractCrudAction implements ActionLifecycleAware, CrudControllerAware, ReadableOnly {
 
     private CrudController crudController;

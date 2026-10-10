@@ -3,6 +3,7 @@
 import type { EntityMetadata, ActionMetadata } from '@dynamia-tools/sdk';
 import type { CrudActionStateAlias } from '../actions/crudActionState.js';
 import { isCrudActionStateApplicable } from '../actions/crudActionState.js';
+import { ClientActionRegistry } from '../actions/ClientAction.js';
 
 export interface ActionResolutionContext {
   /** Optional view type or rendering context. Reserved for future filtering. */
@@ -41,9 +42,18 @@ export class ActionResolver {
   }
 
   private static _isApplicable(action: ActionMetadata, context: ActionResolutionContext): boolean {
-    return ActionResolver._matchesType(action, context)
+    return ActionResolver._isAvailable(action)
+      && ActionResolver._matchesType(action, context)
       && ActionResolver._matchesClass(action, context.targetClass)
       && ActionResolver._matchesCrudState(action, context.crudState);
+  }
+
+  /**
+   * A `FRONTEND` action has no server side: it is only shown when this front end registered a
+   * {@link ClientAction} for the same id.
+   */
+  private static _isAvailable(action: ActionMetadata): boolean {
+    return action.runtime !== 'FRONTEND' || ClientActionRegistry.resolve(action) !== null;
   }
 
   private static _matchesType(action: ActionMetadata, context: ActionResolutionContext): boolean {

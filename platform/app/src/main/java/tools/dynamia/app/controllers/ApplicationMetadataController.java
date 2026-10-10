@@ -148,7 +148,7 @@ public class ApplicationMetadataController {
      * {@link #executeAction} and {@code docs/design/SERVER_DRIVEN_ACTION_FLOWS.md} §7.6 point 3
      */
     @PostMapping(value = "/actions/{action}", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Object> executeGlobalAction(@PathVariable("action") String action, ActionExecutionRequest request,
+    public ResponseEntity<Object> executeGlobalAction(@PathVariable("action") String action, @RequestBody ActionExecutionRequest request,
                                                         HttpServletRequest httpRequest) {
         var actionMetadata = getGlobalActions().getAction(action);
         return executeAction(action, request, actionMetadata, httpRequest);
@@ -174,7 +174,7 @@ public class ApplicationMetadataController {
      */
     static ResponseEntity<Object> executeAction(String action, ActionExecutionRequest request,
                                                           ActionMetadata actionMetadata, HttpServletRequest httpRequest) {
-        if (actionMetadata != null) {
+        if (actionMetadata != null && actionMetadata.isExecutable()) {
             try {
                 RemoteAction actionInstance = null;
                 if (actionMetadata.getAction() instanceof HeadlessCrudRemoteAction headless) {

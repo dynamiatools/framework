@@ -39,7 +39,7 @@ import java.util.List;
  * @author Mario A. Serrano Leones
  */
 @InstallAction
-@RunsOn(ActionRuntime.ZK_ONLY)
+@RunsOn(ActionRuntime.FRONTEND)
 public class SaveConfigAction extends AbstractConfigPageAction {
 
     public SaveConfigAction() {

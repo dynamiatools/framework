@@ -4,7 +4,8 @@ import org.springframework.context.annotation.DependsOn;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ActionComparator;
 import tools.dynamia.actions.ActionLoader;
-import tools.dynamia.actions.HeadlessCapable;
+import tools.dynamia.actions.ActionRuntime;
+import tools.dynamia.actions.ActionRuntimes;
 import tools.dynamia.actions.RemoteAction;
 import tools.dynamia.actions.ApplicationGlobalAction;
 import tools.dynamia.actions.ApplicationGlobalRemoteAction;
@@ -142,21 +143,30 @@ public class ApplicationMetadataLoader {
         entity.setDescriptors(descriptors.stream().map(ViewDescriptorMetadata::new).toList());
 
         ActionLoader<CrudRemoteAction> loader = new ActionLoader<>(CrudRemoteAction.class);
-        List<RemoteAction> actions = new ArrayList<>(loader.load(action -> isApplicable(entityClass, action)));
+        List<Action> actions = new ArrayList<>(loader.load(action -> isApplicable(entityClass, action)));
 
-        // The same actions ZK runs, served headless: they replace a hand written remote action with the same id
-        var headless = new ActionLoader<>(CrudAction.class)
-                .load(action -> action instanceof HeadlessCapable capable && capable.headlessSupported() && ApplicableClass.isApplicable(entityClass, action.getApplicableClasses(), true))
-                .stream().<RemoteAction>map(HeadlessCrudRemoteAction::new).toList();
-        var headlessIds = headless.stream().map(Action::getId).collect(Collectors.toSet());
-        actions.removeIf(a -> headlessIds.contains(a.getId()));
+        // Local actions, by what each concrete class declares: HEADLESS ones are served by replay and replace a hand
+        // written remote action with the same id; FRONTEND ones are published without endpoint; the rest are not published
+        var locals = new ActionLoader<>(CrudAction.class)
+                .load(action -> ApplicableClass.isApplicable(entityClass, action.getApplicableClasses(), true));
+        var headless = locals.stream()
+                .filter(action -> ActionRuntimes.of(action) == ActionRuntime.HEADLESS)
+                .<Action>map(HeadlessCrudRemoteAction::new).toList();
+        var frontend = locals.stream()
+                .filter(action -> ActionRuntimes.of(action) == ActionRuntime.FRONTEND)
+                .<Action>map(action -> action).toList();
+        var publishedIds = headless.stream().map(Action::getId).collect(Collectors.toSet());
+        actions.removeIf(a -> publishedIds.contains(a.getId()));
         actions.addAll(headless);
+        actions.addAll(frontend);
         actions.sort(new ActionComparator());
 
         entity.setActions(actions
                 .stream().map(a -> {
                     var md = new ActionMetadata(a);
-                    md.setEndpoint(ApplicationMetadataController.PATH + "/entities/" + entity.getId() + "/actions/" + a.getId());
+                    if (a instanceof RemoteAction) {
+                        md.setEndpoint(ApplicationMetadataController.PATH + "/entities/" + entity.getId() + "/actions/" + a.getId());
+                    }
                     return md;
                 })
                 .toList());

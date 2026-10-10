@@ -38,7 +38,7 @@ import tools.dynamia.ui.UIFacades;
  * @author Mario A. Serrano Leones
  */
 @InstallAction
-@RunsOn(ActionRuntime.ZK_ONLY)
+@RunsOn(ActionRuntime.FRONTEND)
 public class FiltersAction extends AbstractCrudAction implements ReadableOnly {
 
     /** Name of the {@code ActionRenderProvider} that draws the toggle button. */

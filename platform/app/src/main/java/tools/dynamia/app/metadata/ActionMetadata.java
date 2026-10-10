@@ -72,22 +72,24 @@ public class ActionMetadata extends BasicMetadata {
     }
 
     /**
-     * Constructs an {@code ActionMetadata} from the given {@link Action} instance.
+     * Constructs an {@code ActionMetadata} from the given {@link Action} instance. Only a {@link RemoteAction} gets an
+     * endpoint and an executable instance; a {@code FRONTEND} action is published without them.
      * <p>
      * Copies relevant properties from the action, including id, name, description, icon, endpoint, renderer, group,
      * applicable states (for {@link CrudAction}), and applicable classes (for {@link ClassAction}).
      *
      * @param action the {@link Action} instance to extract metadata from
      */
-    public ActionMetadata(RemoteAction action) {
+    public ActionMetadata(Action action) {
         setId(action.getId());
         setName(action.getLocalizedName());
         setDescription(action.getLocalizedDescription());
         setIcon(action.getImage());
-        setEndpoint(ApplicationMetadataController.PATH + "/actions/execute/" + getId());
+        this.runtime = ActionRuntimes.of(action).name();
+        if (action instanceof RemoteAction) {
+            setEndpoint(ApplicationMetadataController.PATH + "/actions/execute/" + getId());
+        }
         setClassName(action.getClass().getSimpleName());
-        this.runtime = (action instanceof tools.dynamia.crud.headless.HeadlessCrudRemoteAction
-                ? ActionRuntime.HEADLESS : ActionRuntimes.of(action)).name();
         setType(switch (action) {
             case CrudRemoteAction crudAction -> "CrudAction";
             case ClassAction classAction -> "ClassAction";
@@ -109,7 +111,7 @@ public class ActionMetadata extends BasicMetadata {
             this.applicableClasses = Streams.mapAndCollect(classAction.getApplicableClasses(), a -> a.targetClass() == null ? "all" : a.targetClass().getSimpleName());
         }
 
-        this.action = action;
+        this.action = action instanceof RemoteAction remote ? remote : null;
     }
 
     /**
@@ -204,6 +206,16 @@ public class ActionMetadata extends BasicMetadata {
      */
     public RemoteAction getAction() {
         return action;
+    }
+
+    /**
+     * @return whether the server runs this action when asked: only {@code HEADLESS}, {@code FLOW} and {@code REMOTE}
+     * actions are executable. A {@code FRONTEND} action is in the catalog but each front end implements it.
+     */
+    @JsonIgnore
+    public boolean isExecutable() {
+        return action != null && (ActionRuntime.HEADLESS.name().equals(runtime) || ActionRuntime.FLOW.name().equals(runtime)
+                || ActionRuntime.REMOTE.name().equals(runtime));
     }
 
     public String getType() {

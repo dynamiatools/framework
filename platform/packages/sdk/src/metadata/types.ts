@@ -118,8 +118,11 @@ export interface ApplicationMetadataActions {
     actions: ActionMetadata[];
 }
 
-/** Mirrors `tools.dynamia.actions.ActionRuntime`: where and how a published action runs. */
-export type ActionRuntime = 'HEADLESS' | 'FLOW' | 'REMOTE' | 'ZK_ONLY' | 'UNDECLARED';
+/**
+ * Mirrors `tools.dynamia.actions.ActionRuntime`: where and how a published action runs. A `FRONTEND` action is in the
+ * catalog without `endpoint`: each front end implements it as a `ClientAction` with the same id, or does not show it.
+ */
+export type ActionRuntime = 'HEADLESS' | 'FLOW' | 'REMOTE' | 'FRONTEND' | 'UNDECLARED';
 
 export type ActionType = 'Action' | 'ClassAction' | 'CrudAction' | string;
 
@@ -132,7 +135,7 @@ export type ActionType = 'Action' | 'ClassAction' | 'CrudAction' | string;
 export interface ActionMetadata extends BasicMetadata {
     /** Logical server-side action type: Action, ClassAction or CrudAction */
     type?: ActionType;
-    /** How the server runs the action (`HEADLESS`, `FLOW`, `REMOTE`). Client actions are registered in TS and are not published. */
+    /** How the action runs (`HEADLESS`, `FLOW`, `REMOTE` on the server; `FRONTEND` in each front end, without `endpoint`). */
     runtime?: ActionRuntime;
     /** Simple Java class name of the action implementation */
     className?: string;

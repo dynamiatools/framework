@@ -301,4 +301,24 @@ class ApplicationMetadataControllerTest {
         assertFalse(json.contains("tools.dynamia"), json);
         assertTrue(json.contains("/entities/Book/views/form"), json);
     }
+
+    @tools.dynamia.actions.RunsOn(tools.dynamia.actions.ActionRuntime.FRONTEND)
+    private static class FrontendOnlyAction extends tools.dynamia.actions.AbstractLocalAction {
+        @Override
+        public void actionPerformed(tools.dynamia.actions.ActionEvent evt) {
+        }
+    }
+
+    @Test
+    void aFrontendActionIsNotFoundEvenIfSomeoneKnowsItsId() {
+        var action = new FrontendOnlyAction();
+        action.setId("find");
+        install(action);
+
+        var response = ApplicationMetadataController.executeAction(
+                "find", new ActionExecutionRequest(), new ActionMetadata(action), new MockHttpServletRequest());
+
+        var body = assertInstanceOf(ActionExecutionResponse.class, response.getBody());
+        assertEquals(404, body.getStatusCode());
+    }
 }

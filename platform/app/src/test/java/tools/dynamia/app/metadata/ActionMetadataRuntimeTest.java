@@ -36,4 +36,41 @@ class ActionMetadataRuntimeTest {
         assertEquals("REMOTE", new ActionMetadata(new Plain()).getRuntime());
         assertEquals("FLOW", new ActionMetadata(new Flow()).getRuntime());
     }
+
+    @tools.dynamia.actions.RunsOn(tools.dynamia.actions.ActionRuntime.FRONTEND)
+    static class SearchBox extends tools.dynamia.actions.AbstractLocalAction {
+        @Override
+        public void actionPerformed(tools.dynamia.actions.ActionEvent evt) {
+        }
+    }
+
+    @tools.dynamia.actions.RunsOn(tools.dynamia.actions.ActionRuntime.HEADLESS)
+    static class Declared extends tools.dynamia.actions.AbstractLocalAction {
+        @Override
+        public void actionPerformed(tools.dynamia.actions.ActionEvent evt) {
+        }
+    }
+
+    static class SubOfDeclared extends Declared {
+    }
+
+    @Test
+    void frontendActionsArePublishedWithoutEndpointAndAreNotExecutable() {
+        var metadata = new ActionMetadata(new SearchBox());
+
+        assertEquals("FRONTEND", metadata.getRuntime());
+        org.junit.jupiter.api.Assertions.assertNull(metadata.getEndpoint());
+        org.junit.jupiter.api.Assertions.assertFalse(metadata.isExecutable());
+    }
+
+    @Test
+    void aSubclassOfAHeadlessActionIsUndeclared() {
+        assertEquals("HEADLESS", new ActionMetadata(new Declared()).getRuntime());
+        assertEquals("UNDECLARED", new ActionMetadata(new SubOfDeclared()).getRuntime());
+    }
+
+    @Test
+    void remoteActionsAreExecutable() {
+        org.junit.jupiter.api.Assertions.assertTrue(new ActionMetadata(new Plain()).isExecutable());
+    }
 }
