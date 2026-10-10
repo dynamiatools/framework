@@ -14,6 +14,10 @@ export interface DialogFormOptions {
   title?: string;
   /** Show the form read only with a Close button (the `VIEW` flow step). */
   readonly?: boolean;
+  /** Width of the dialog ("60%", "500px"), a hint from the server. */
+  width?: string;
+  /** Height of the dialog, a hint from the server. */
+  height?: string;
   /** Message to show above the form: why it is shown again (validation error, changed question). */
   message?: string;
   /** Kind of {@link message}: `ERROR`, `WARNING`... */
@@ -57,6 +61,8 @@ export class DialogFormManager {
         view: options.view,
         ...(options.title !== undefined ? { title: options.title } : {}),
         ...(options.readonly ? { readonly: true } : {}),
+        ...(options.width ? { width: options.width } : {}),
+        ...(options.height ? { height: options.height } : {}),
         ...(options.message ? { message: options.message } : {}),
         ...(options.messageType ? { messageType: options.messageType } : {}),
       };

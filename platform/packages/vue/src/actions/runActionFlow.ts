@@ -340,6 +340,8 @@ async function renderDialogStep(
     ...(readonly ? { readonly: true } : {}),
     ...(step.message ? { message: step.message } : {}),
     ...(step.messageType ? { messageType: step.messageType } : {}),
+    ...(step.hints?.['width'] ? { width: step.hints['width'] } : {}),
+    ...(step.hints?.['height'] ? { height: step.hints['height'] } : {}),
   });
 }
 

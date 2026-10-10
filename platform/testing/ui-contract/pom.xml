@@ -27,10 +27,10 @@
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>tools.dynamia.ui.testing</artifactId>
-    <name>DynamiaTools - UI Testing</name>
+    <artifactId>tools.dynamia.ui.contract</artifactId>
+    <name>DynamiaTools - UI Contract</name>
     <url>https://dynamia.tools/docs/ui</url>
-    <description>Test platform for Dynamia UI: runs actions against a scripted user, without ZK, a browser or an HTTP server</description>
+    <description>Contract test suites of the Dynamia UI ports, run against every adapter (replay, ZK, test platform)</description>
 
     <licenses>
        <license>
@@ -68,24 +68,14 @@
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
-            <artifactId>tools.dynamia.actions</artifactId>
+            <artifactId>tools.dynamia.domain</artifactId>
             <version>26.10.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>tools.dynamia</groupId>
-            <artifactId>tools.dynamia.crud</artifactId>
-            <version>26.10.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>tools.dynamia</groupId>
-            <artifactId>tools.dynamia.ui.contract</artifactId>
-            <version>26.10.1-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
+            <!-- the suites are test classes: JUnit is part of this artifact, not of its tests -->
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

@@ -51,6 +51,7 @@ public class ActionFlowStep implements Serializable {
     private String viewClass;
     private Object data;
     private java.util.Map<String, String> fieldErrors;
+    private java.util.Map<String, String> hints;
     private String resumeToken;
 
     /** A yes/no question. The client answers with a {@code boolean}. */
@@ -323,6 +324,18 @@ public class ActionFlowStep implements Serializable {
 
     public void setFieldErrors(java.util.Map<String, String> fieldErrors) {
         this.fieldErrors = fieldErrors;
+    }
+
+    /**
+     * @return presentation hints the front end may follow, such as {@code width} and {@code height} of a dialog; {@code null}
+     * when there are none
+     */
+    public java.util.Map<String, String> getHints() {
+        return hints;
+    }
+
+    public void setHints(java.util.Map<String, String> hints) {
+        this.hints = hints;
     }
 
     public Object getData() {

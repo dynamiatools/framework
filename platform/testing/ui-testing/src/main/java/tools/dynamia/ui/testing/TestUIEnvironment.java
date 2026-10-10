@@ -275,8 +275,12 @@ public final class TestUIEnvironment implements UIEnvironment {
             }
             var chosen = new ArrayList<T>();
             var labels = options.labels();
+            var keys = options.keys();
             for (Object selected : choose.selection()) {
-                int position = selected instanceof Integer i ? i : labels.indexOf(String.valueOf(selected));
+                int position = selected instanceof Integer i ? i : keys.indexOf(String.valueOf(selected));
+                if (position < 0) {
+                    position = labels.indexOf(String.valueOf(selected));
+                }
                 if (position < 0 || position >= options.options().size()) {
                     throw new AssertionError("Choice " + selected + " is not one of the options " + labels);
                 }

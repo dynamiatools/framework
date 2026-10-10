@@ -67,6 +67,13 @@ public final class UIViews {
      * UIViews.showView(ViewOptions.of(ObjectOperations.getInstanceName(sale), Sale.class, sale));
      * }</pre>
      */
+    public static <T> void showView(ViewOptions<T> options, tools.dynamia.commons.Callback onClose) {
+        UIFacades.port(ViewsProvider.class).showView(options, onClose);
+    }
+
+    /**
+     * Shows a bean read only.
+     */
     public static <T> void showView(ViewOptions<T> options) {
         UIFacades.port(ViewsProvider.class).showView(options);
     }

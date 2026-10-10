@@ -193,7 +193,7 @@ public final class ActionTester {
             container.addObject(transfers);
         }
         if (beans.stream().noneMatch(ViewDescriptorFactory.class::isInstance)) {
-            container.addObject(autoFieldsFactory());
+            container.addObject(TestDescriptors.autoFields());
         }
         Containers.get().installObjectContainer(container);
         try {
@@ -201,29 +201,6 @@ public final class ActionTester {
         } finally {
             Containers.get().removeContainer(CONTAINER_NAME);
         }
-    }
-
-    /**
-     * Stands for the application's descriptor factory (forms filled with values need one): every class gets a form with one field per
-     * property, which is what forms of entities without a descriptor file look like. Register your own with
-     * {@link #bean(Object)} to test against real descriptors.
-     */
-    private static ViewDescriptorFactory autoFieldsFactory() {
-        return (ViewDescriptorFactory) Proxy.newProxyInstance(ViewDescriptorFactory.class.getClassLoader(),
-                new Class<?>[]{ViewDescriptorFactory.class}, (proxy, method, args) -> {
-                    if (ViewDescriptor.class.isAssignableFrom(method.getReturnType())) {
-                        for (Object arg : args) {
-                            if (arg instanceof Class<?> type) {
-                                return ViewDescriptorBuilder.viewDescriptor("form", type).autofields(true).build();
-                            }
-                        }
-                        return null;
-                    }
-                    if (Set.class.isAssignableFrom(method.getReturnType())) {
-                        return Set.of();
-                    }
-                    return null;
-                });
     }
 
     // -- direct --------------------------------------------------------------------------------------------
@@ -393,7 +370,12 @@ public final class ActionTester {
                             option = options.get(position);
                         } else {
                             for (var candidate : options) {
-                                if (candidate.get("label").equals(String.valueOf(selected))) {
+                                if (candidate.get("key").equals(String.valueOf(selected))) {
+                                    option = candidate;
+                                }
+                            }
+                            for (var candidate : options) {
+                                if (option == null && candidate.get("label").equals(String.valueOf(selected))) {
                                     option = candidate;
                                 }
                             }

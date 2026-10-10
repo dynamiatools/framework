@@ -283,6 +283,8 @@ export interface ActionFlowStep {
     data?: unknown;
     /** For a `DIALOG` shown again after a validation error: the message of each failed field, by field name. */
     fieldErrors?: Record<string, string>;
+    /** Presentation hints the front end may follow, such as `width` and `height` of a dialog ("60%", "500px"). */
+    hints?: Record<string, string>;
     /** Opaque, signed — echo back verbatim as `ActionExecutionRequest.resumeToken` to continue the flow. */
     resumeToken?: string;
 }

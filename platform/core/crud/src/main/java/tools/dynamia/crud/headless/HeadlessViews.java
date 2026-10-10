@@ -17,6 +17,7 @@
 package tools.dynamia.crud.headless;
 
 import tools.dynamia.actions.ActionFlowStep;
+import tools.dynamia.commons.Callback;
 import tools.dynamia.actions.replay.ReplayRetry;
 import tools.dynamia.actions.replay.ReplaySession;
 import tools.dynamia.domain.ValidationError;
@@ -66,6 +67,7 @@ public final class HeadlessViews implements ViewsProvider {
     public <T> void showForm(FormOptions<T> options, BiConsumer<T, ViewDialog> onSubmit) {
         var step = ActionFlowStep.dialog(options.viewName(), options.beanClass().getName(),
                 toValues.apply(options.value(), options.beanClass()), options.title());
+        step.setHints(hints(options.width(), null));
         session.interact(step, answer -> {
             if (answer instanceof Map<?, ?> values) {
                 applier.apply(options.value(), options.beanClass(), (Map<String, Object>) values);
@@ -85,11 +87,31 @@ public final class HeadlessViews implements ViewsProvider {
 
     @Override
     public <T> void showView(ViewOptions<T> options) {
+        showView(options, null);
+    }
+
+    @Override
+    public <T> void showView(ViewOptions<T> options, Callback onClose) {
         var step = ActionFlowStep.view(options.viewName(), options.beanClass().getName(),
                 toValues.apply(options.value(), options.beanClass()), options.title());
+        step.setHints(hints(options.width(), options.height()));
         session.interact(step, answer -> {
-            // the user only had to see it
+            // the user only had to see it; the client answers when they close it
+            if (onClose != null) {
+                onClose.doSomething();
+            }
         });
+    }
+
+    private static Map<String, String> hints(String width, String height) {
+        var hints = new java.util.LinkedHashMap<String, String>();
+        if (width != null) {
+            hints.put("width", width);
+        }
+        if (height != null) {
+            hints.put("height", height);
+        }
+        return hints.isEmpty() ? null : hints;
     }
 
     private static Object entityToValues(Object bean, Class<?> beanClass) {

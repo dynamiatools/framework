@@ -6,6 +6,7 @@
       v-if="current"
       :title="current.title ?? ''"
       panel-class="dynamia-form-dialog"
+      :panel-style="panelStyle"
       @close="respond(null)"
   >
     <template v-if="current.readonly">
@@ -27,11 +28,18 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useFormDialog } from '../composables/useFormDialog.js';
 import Dialog from './Dialog.vue';
 import Form from './Form.vue';
 
 const { current, answer } = useFormDialog();
+
+const panelStyle = computed(() => {
+  const request = current.value;
+  const style = [request?.width ? `width: ${request.width}` : '', request?.height ? `height: ${request.height}` : ''];
+  return style.filter(Boolean).join('; ') || undefined;
+});
 
 function respond(values: Record<string, unknown> | null): void {
   if (current.value) answer(current.value.id, values);

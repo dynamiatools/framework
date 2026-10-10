@@ -830,7 +830,8 @@ Known limits of that iteration (addressed by the work packages above):
 | WP3 | Done, see below |
 | WP4 | Done, see below |
 | WP5 | Done, see below |
-| WP6 to WP10 | Not started |
+| WP6 | Done except the ZK driver, see below |
+| WP7 to WP10 | Not started |
 
 #### WP1 · `UIEnvironment` and clear errors
 
@@ -952,3 +953,25 @@ The branch already had the mechanism §8 asks for: `ContextCapturer` beans, aske
 - **TS:** the Vue runner passes `message`/`messageType` to `FormDialogHost` and the field errors to the form view; `choose`
   receives `{key, label}` options and returns keys.
 - Not done: asynchronous progress (WP8); a fingerprint cannot tell two questions with identical text apart.
+
+#### WP6 · Contract per port
+
+- **Suites** (`platform/testing/ui-contract`, `tools.dynamia.ui.contract`): `MessagesPortContract`, `ViewsPortContract`,
+  `ChoicesPortContract`, `FilesPortContract`, `ProgressPortContract` and `NavigationPortContract`, 36 cases that follow the
+  rows of §4. A `PortDriver` runs the action on one platform and plays the user with `Reply`s; it reports an `Outcome`
+  (what was asked, the effects of the last run, notices, downloads, redirect, failure).
+- **Adapters that run them** (in `ui-testing`): the replay adapter (`ReplayPortDriver`: the real `ReplayExecutor`, tokens and
+  a transfer store) and the test platform (`TestPlatformDriver`), 12 classes, all green.
+- **Fixes the suites forced:** the task of a headless `UIProgress` now runs without UI (it used to be able to register
+  questions); `UIViews.showView(options, onClose)` / `ViewsProvider.showView(options, onClose)` with the user's close
+  reported (ZK: `ON_CLOSE`; replay: the acknowledgement of the `VIEW` step; default: immediately); `ZKProgressRunner` runs
+  its task in `NoUIEnvironment` itself; `showView`/`showForm` width and height travel as `hints` in the step and the Vue
+  dialog applies them.
+- **Deviations from §9.3:** the suites live in their own module and not in a `ui-shared` test-jar, and the replay driver in
+  `ui-testing` and not in `actions`/`crud`. A test-jar of a modular artifact is not visible to the modules that use it, and
+  `ui-testing` already depends on `actions` and `crud`, so a driver there avoids a cycle.
+- **Not done: the ZK contract run.** ZATS is not available and the ZK providers need a desktop (`Executions`, windows,
+  `Fileupload`). `ZKAdaptersContractTest` covers what needs none: upload handles, the shared `UploadPolicy`, and the task
+  without UI. Rows of §4 that only the ZK adapter can prove (a question in a window, `Filedownload`, the redirect) are
+  unverified until someone runs ZK in a browser or adds ZATS.
+- `ZKViewsProvider.showView` keeps its field-count sizing heuristics in ZK; the hints are the explicit size.

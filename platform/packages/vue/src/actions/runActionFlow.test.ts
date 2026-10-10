@@ -309,6 +309,19 @@ describe('runActionFlow VIEW', () => {
   });
 });
 
+describe('runActionFlow VIEW size hints', () => {
+  it('hands the width and height of the server to the dialog', async () => {
+    const view = flowResponse(step({ type: 'VIEW', viewDescriptor: 'form', viewClass: 'x.Sale', data: {}, hints: { width: '60%', height: '400px' } }));
+    const { client: base } = fakeClient({ main: [view, flowResponse(step({ type: 'DONE' }))] });
+    const client = { ...(base as object), metadata: { getEntityView: vi.fn(async () => ({ id: 'form', fields: [], view: 'form' })), getEntity: vi.fn(async () => null) } } as never;
+    const showFormDialog = vi.fn(async () => ({}));
+
+    await runActionFlow(client, action, {}, handlers({ showFormDialog }), 'x.Sale');
+
+    expect(showFormDialog).toHaveBeenCalledWith(expect.objectContaining({ width: '60%', height: '400px', readonly: true }));
+  });
+});
+
 describe('runActionFlow DIALOG shown again after a validation error', () => {
   it('hands the message and the field errors to the form so the user sees what failed', async () => {
     const reopened = flowResponse(step({

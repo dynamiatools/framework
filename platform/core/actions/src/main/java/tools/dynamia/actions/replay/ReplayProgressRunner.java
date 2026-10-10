@@ -18,7 +18,9 @@ package tools.dynamia.actions.replay;
 
 import tools.dynamia.commons.Callback;
 import tools.dynamia.integration.ProgressMonitor;
+import tools.dynamia.ui.NoUIEnvironment;
 import tools.dynamia.ui.ProgressRunner;
+import tools.dynamia.ui.UIFacades;
 import tools.dynamia.ui.ProgressTask;
 
 import java.util.function.Consumer;
@@ -51,16 +53,18 @@ public final class ReplayProgressRunner implements ProgressRunner {
         session.markNonRepeatable("UIProgress");
         try {
             // like in ZK, the task does not run inside the transaction of the pass: it manages its own
-            ReplayTransactions.current().runOutside(() -> {
-                try {
-                    task.run(new ProgressMonitor());
-                } catch (RuntimeException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw new TaskFailure(e);
-                }
-                return null;
-            });
+            ReplayTransactions.current().runOutside(() ->
+                    // the contract of UIProgress: no UI facade can be used inside the task
+                    UIFacades.with(NoUIEnvironment.INSTANCE, () -> {
+                        try {
+                            task.run(new ProgressMonitor());
+                        } catch (RuntimeException e) {
+                            throw e;
+                        } catch (Exception e) {
+                            throw new TaskFailure(e);
+                        }
+                        return null;
+                    }));
         } catch (TaskFailure failure) {
             session.fail(failure.getCause());
             onError.accept(failure.getCause());
