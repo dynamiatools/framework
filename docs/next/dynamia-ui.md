@@ -867,7 +867,8 @@ New module `platform/testing/ui-testing` (`tools.dynamia.ui.testing`, test scope
   `ValidationError` in a form's `onSubmit` opens the form again with the error (direct mode).
 - Every converted action has a green `runEverywhere()` test: `SaveAction`, `DeleteAction`, `ViewDataAction` (in
   `ui-testing`), `ExportReportAction`, `ImportReportAction` (`reports/ui`), `NewAccountPaymentAction` (`saas/ui`),
-  `MoveEntityFileLocalToRemoteStorageAction` (`entity-files/core`).
+  `MoveEntityFileLocalToRemoteStorageAction`, `ReloadEntityFileStoragesAction` (`entity-files/core`) and `DownloadFileAction`
+  (`entity-files/ui`, exercised through the event it would receive because its controller is a ZK class).
 - Behaviour change found by those tests: `HeadlessCrudController.query()`/`doQuery()` threw `UnsupportedOperationException`
   headless, so `ImportReportAction` and `NewAccountPaymentAction` failed after doing their work when reached remotely. They
   now record the request (`isQueryRequested()`), because the remote client re-queries when the action ends.
