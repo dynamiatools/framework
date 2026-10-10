@@ -19,6 +19,7 @@ package tools.dynamia.ui;
 /**
  * SPI behind {@link UINavigation}. ZK redirects the browser; a headless run ends the action with a {@code REDIRECT} step.
  */
+@UIPort(name = "navigation", steps = {"REDIRECT"})
 public interface NavigationProvider {
 
     /**

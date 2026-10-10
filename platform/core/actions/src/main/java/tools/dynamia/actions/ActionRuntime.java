@@ -34,12 +34,13 @@ public enum ActionRuntime {
     REMOTE,
 
     /**
-     * Not published to REST clients: a behaviour or screen of the ZK UI (toolbar widgets, search box, filters panel, ZK
-     * screens). Other front ends do not receive it; they implement their own equivalent in TypeScript as a client action
-     * ({@code registerClientAction}), which the server knows nothing about.
+     * Behaviour specific to each front end: the search box, the filters panel, the export of what the grid shows, ZK
+     * screens. It is in the action catalog (id, name, icon, restrictions) but has no endpoint and the server never runs
+     * it. Each front end provides its own implementation under the same id (ZK in Java, Vue or POS as a TypeScript
+     * {@code ClientAction}) or does not show the action.
      */
-    ZK_ONLY,
+    FRONTEND,
 
-    /** Nobody declared it and it cannot be derived: a local action that is not headless-capable. */
+    /** Nobody declared it and it cannot be derived: it is not published. */
     UNDECLARED
 }

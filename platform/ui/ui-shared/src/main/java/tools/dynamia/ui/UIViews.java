@@ -47,7 +47,7 @@ public final class UIViews {
      * Shows a form and calls {@code onSubmit} with the edited bean and the dialog.
      */
     public static <T> void showForm(FormOptions<T> options, BiConsumer<T, ViewDialog> onSubmit) {
-        UIFacades.resolve(ViewsProvider.class).showForm(options, onSubmit);
+        UIFacades.port(ViewsProvider.class).showForm(options, onSubmit);
     }
 
     /**
@@ -68,6 +68,6 @@ public final class UIViews {
      * }</pre>
      */
     public static <T> void showView(ViewOptions<T> options) {
-        UIFacades.resolve(ViewsProvider.class).showView(options);
+        UIFacades.port(ViewsProvider.class).showView(options);
     }
 }

@@ -16,7 +16,7 @@ then classified by what it uses (grep on its source and its ZK ancestors):
 | **FREE** | No ZK in the class or its ancestors | Review, then mark `HeadlessCapable` / `runtime=HEADLESS`. No code change |
 | **EASY** | Only messages, prompts, files, progress or navigation | Swap the ZK lines for existing or small facades (`UIMessages`, `UIFiles`, `UIProgress`, `UINavigation`) |
 | **MEDIUM** | Also shows a form / table / selector in a dialog | Needs `UIViews.showForm/showView` (or `UIChoices`); logic stays |
-| **HARD** | Builds ZK widgets by hand or uses a custom ZK action renderer | Not a line swap: `ZK_ONLY` (the front end writes its own TypeScript client action) or a descriptor-based rewrite of the dialog |
+| **HARD** | Builds ZK widgets by hand or uses a custom ZK action renderer | Not a line swap: `FRONTEND` (the front end writes its own TypeScript client action) or a descriptor-based rewrite of the dialog |
 
 Limits: it is a heuristic. It does not follow calls into ZK-dependent helper services; "FREE" does not mean "safe to
 publish" (restrictions, non-determinism and side effects before a question still have to be reviewed); `Window` and
@@ -33,7 +33,7 @@ widget patterns can match text that is not a real use; an action is classified b
 
 Reading: **about 60 % of all actions (FREE + EASY) can run without ZK with no more than replacing a handful of lines**;
 about a quarter more (MEDIUM) need one new facade, the form/view dialog; the HARD tail (~20 %) is where
-`ZK_ONLY` and client hints are the honest answer.
+`FRONTEND` and client hints are the honest answer.
 
 Only 10 concrete actions are marked `HeadlessCapable` today (`SaveAction`, `DeleteAction`, `SaveAndNewAction`,
 `SaveAndEditAction` in tools; six `Anular*Action` in the ERP: ventas, compras, cuentas, caja), so most of the FREE bucket
@@ -54,8 +54,8 @@ Frequency among the ZK-bound actions (an action can need several):
 | file download / upload | 8 | 26 | `UIFiles` (new) |
 | long operation / busy indicator | 7 | 18 | `UIProgress` (new) |
 | navigation / redirect | 2 | 28 | `UINavigation` (new) |
-| client-side JavaScript | 0 | 2 | client hint / `ZK_ONLY` |
-| ZK widgets built by hand (layouts, listbox, combobox...) | 8 | 30 | client hint / `ZK_ONLY` / rewrite as descriptor |
+| client-side JavaScript | 0 | 2 | client hint / `FRONTEND` |
+| ZK widgets built by hand (layouts, listbox, combobox...) | 8 | 30 | client hint / `FRONTEND` / rewrite as descriptor |
 | custom ZK action renderer (date range, find box, combobox in the toolbar) | 9 | 42 | client hint (action input widget) |
 | ZK event thread / event queue | 2 | 9 | goes away with the above |
 
@@ -69,7 +69,7 @@ Two facts stand out:
 ## Corrections found while implementing
 
 - `ExportCSVAction`, `ExportExcelAction`, `ExportJsonAction` (`platform/ui/zk`) were counted EASY (files + progress). They
-  are not: they read the data from ZK's `CrudController` (query result, `TreeModel`). They are `ZK_ONLY`
+  are not: they read the data from ZK's `CrudController` (query result, `TreeModel`). They are `FRONTEND`
   (a front end exports what it already shows), not conversion targets.
 - `ReloadEntityFileStoragesAction` was ZK-bound only by unused imports (FREE after cleaning them).
 
@@ -152,7 +152,7 @@ Consequence for the plan: the module split is part of the work, not a detail.
 FREE in tools (30): `ActionPlaceholder`, `ApplyDiscountAction`, `CancelAction`, `ClearAccountCacheAction`, `ClearEntityFileCacheAction`, `DeleteAction`, `DeleteFileAction`, `EditAction`, `EditProfileAction`, `FastAction`, `FastCrudAction`, `FileAction`, `FilterBookByBuyDateAction`, `HeadlessCrudRemoteAction`, `MarkOutOfStockAction`, `NewAction`, `NewProfileAction`, `QuickEditPricingAction`, `RateBookAction`, `ReinitAccountAction`, `ReloadDashboardAction`, `ResetAccountBalanceAction`, `SaveAccountFeaturesAction`, `SaveAction`, `SaveAndEditAction`, `SaveAndNewAction`, `SetPreferredAccountAction`, `SetUserProfilesAction`, `SomeGlobalAction`, `ViewReportAction`.
 
 Notes: `ViewDataAction`, `FindAction`, `FiltersAction`, `SaveConfigAction`, `ExportAction` (module `platform/ui/zk`) are
-the ZK implementations of toolbar behaviours; they are `ZK_ONLY` (each front end implements find /
+the ZK implementations of toolbar behaviours; they are `FRONTEND` (each front end implements find /
 filters / export once), not conversion targets. The 20 ZK-importing `CrudAction`s of UI_PORTS_FOR_ACTIONS.md are a
 subset of the table above.
 

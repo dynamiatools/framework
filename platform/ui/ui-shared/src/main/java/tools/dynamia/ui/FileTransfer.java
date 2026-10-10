@@ -24,6 +24,7 @@ import java.util.function.Consumer;
  * {@code Filedownload}/{@code Fileupload}; a headless run answers the upload from the client and hands the downloads
  * to it with the response.
  */
+@UIPort(name = "files", steps = {"UPLOAD"})
 public interface FileTransfer {
 
     /**

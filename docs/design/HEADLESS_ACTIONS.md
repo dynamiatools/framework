@@ -66,5 +66,5 @@ Restrictions (`ActionRestrictions`), state checks and `ActionFilter`s apply as f
   stream endpoint. See [dynamia-ui.md](../next/dynamia-ui.md) for the facade pattern.
   Until then `DIALOG`, `REDIRECT`, `CALL` and `CUSTOM` steps come from `FlowRemoteAction`.
 - Deferring non-database side effects (`afterCommit`) is a rule, not an API yet.
-- Actions that are pure UI (`FindAction`, `FiltersAction`, renderers): the server publishes nothing. They are `ZK_ONLY`; a front end writes its own client action in TypeScript (`registerClientAction`).
-- A test that walks every `@InstallAction` and fails when an action is neither `HeadlessCapable` nor declared `ZK_ONLY`.
+- Actions that are pure UI (`FindAction`, `FiltersAction`, renderers): the server publishes nothing. They are `FRONTEND`; a front end writes its own client action in TypeScript (`registerClientAction`).
+- A test that walks every `@InstallAction` and fails when an action is neither `HeadlessCapable` nor declared `FRONTEND`.

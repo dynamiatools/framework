@@ -112,6 +112,9 @@
         <module>platform/ui/ui-shared</module>
         <module>platform/ui/zk</module>
 
+        <!-- Testing platform (scope test for consumers) -->
+        <module>platform/testing/ui-testing</module>
+
         <!-- Starters -->
         <module>platform/starters/zk-starter</module>
 

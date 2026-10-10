@@ -26,6 +26,7 @@ import java.util.function.Consumer;
  *
  * @author Mario Serrano Leones
  */
+@UIPort(name = "messages", steps = {"CONFIRM", "INPUT", "NOTIFY"})
 public interface MessageDisplayer {
 
     /**

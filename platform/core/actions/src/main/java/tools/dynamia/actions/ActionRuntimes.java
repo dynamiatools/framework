@@ -16,8 +16,16 @@
  */
 package tools.dynamia.actions;
 
+import java.util.Arrays;
+
 /**
- * Finds the {@link ActionRuntime} of an action: what it declares with {@link RunsOn}, otherwise what its type says.
+ * Finds the {@link ActionRuntime} of an action: what its concrete class declares with {@link RunsOn} (never inherited),
+ * otherwise what its type implies.
+ * <p>
+ * Only types whose contract already says how they run are derived: {@link FlowRemoteAction} is {@code FLOW},
+ * {@link RemoteAction} is {@code REMOTE}. The deprecated {@link HeadlessCapable} counts as {@code HEADLESS} only when the
+ * concrete class lists it in its own {@code implements}; a subclass of a headless action is {@code UNDECLARED} until
+ * someone reviews it and declares it.
  */
 public final class ActionRuntimes {
 
@@ -26,8 +34,7 @@ public final class ActionRuntimes {
 
     /**
      * @param action the action
-     * @return its runtime; {@link ActionRuntime#UNDECLARED} for a local action that is not headless-capable and did not
-     * declare one
+     * @return its runtime
      */
     public static ActionRuntime of(Action action) {
         return of(action.getClass(), action);
@@ -38,8 +45,9 @@ public final class ActionRuntimes {
      * @param action      an instance, used to ask {@link HeadlessCapable#headlessSupported()}; may be {@code null}
      * @return its runtime
      */
+    @SuppressWarnings("deprecation")
     public static ActionRuntime of(Class<?> actionClass, Action action) {
-        RunsOn declared = actionClass.getAnnotation(RunsOn.class);
+        RunsOn declared = actionClass.getDeclaredAnnotation(RunsOn.class);
         if (declared != null) {
             return declared.value();
         }
@@ -49,10 +57,23 @@ public final class ActionRuntimes {
         if (RemoteAction.class.isAssignableFrom(actionClass)) {
             return ActionRuntime.REMOTE;
         }
-        if (HeadlessCapable.class.isAssignableFrom(actionClass)) {
+        if (Arrays.asList(actionClass.getInterfaces()).contains(HeadlessCapable.class)) {
             boolean supported = !(action instanceof HeadlessCapable capable) || capable.headlessSupported();
             return supported ? ActionRuntime.HEADLESS : ActionRuntime.UNDECLARED;
         }
         return ActionRuntime.UNDECLARED;
+    }
+
+    /**
+     * @param actionClass a class of an action
+     * @return the id a remote client uses for a local action served headless: the class name without the
+     * {@code Action} suffix, in lower case ({@code DeleteAction} becomes {@code delete})
+     */
+    public static String headlessId(Class<?> actionClass) {
+        var name = actionClass.getSimpleName();
+        if (name.endsWith("Action") && name.length() > "Action".length()) {
+            name = name.substring(0, name.length() - "Action".length());
+        }
+        return Character.toLowerCase(name.charAt(0)) + name.substring(1);
     }
 }

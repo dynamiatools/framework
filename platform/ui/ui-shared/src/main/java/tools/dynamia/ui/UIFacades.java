@@ -18,82 +18,126 @@ package tools.dynamia.ui;
 
 import tools.dynamia.integration.Containers;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- * Finds the implementation of a UI service for the environment the current code runs in.
+ * Finds the implementation of a UI port for the environment the current code runs in.
  * <p>
  * Actions talk to the user through static facades such as {@link UIMessages}. Each facade is backed by an SPI (for
- * {@code UIMessages}, {@link MessageDisplayer}) with one implementation per environment: ZK registers its own as a
- * bean, a headless run (REST client, tests) binds another one for the duration of an execution. This class is the
- * lookup they share:
+ * {@code UIMessages}, {@link MessageDisplayer}) and every {@link UIEnvironment} knows its implementation of each SPI it
+ * supports. The environment is chosen in this order:
  * <ol>
- *     <li>an implementation bound with {@link #with(Class, Object, Supplier)} for the current execution, if any;</li>
- *     <li>otherwise the one registered in the container.</li>
+ *     <li>the one bound to the current execution with {@link #with(UIEnvironment, Supplier)} (a replayed action, a
+ *     test);</li>
+ *     <li>otherwise the first {@link UIEnvironmentProvider} in the container that {@linkplain
+ *     UIEnvironmentProvider#isActive() is active} (ZK, while a ZK execution exists);</li>
+ *     <li>otherwise {@link NoUIEnvironment}.</li>
  * </ol>
  * The binding is a {@link ScopedValue}: it is visible to the code run inside {@code with(...)} (and the threads it
  * forks with structured concurrency), never leaks to other executions, and needs no cleanup.
  * <p>
- * To add a facade: define the SPI interface, write the facade with a static method that calls
- * {@code UIFacades.resolve(Spi.class)}, register the ZK implementation as a bean in the {@code zk} module and the
- * headless one wherever the runtime binds it. Actions only ever see the facade.
+ * To add a facade: define the SPI interface annotated with {@link UIPort}, write the facade with a static method that
+ * calls {@code UIFacades.port(Spi.class)}, and make each environment that supports it answer for the SPI in
+ * {@link UIEnvironment#port(Class)}. Actions only ever see the facade.
  */
 public final class UIFacades {
 
-    private static final ScopedValue<Map<Class<?>, Object>> BINDINGS = ScopedValue.newInstance();
+    private static final ScopedValue<UIEnvironment> BOUND = ScopedValue.newInstance();
 
     private UIFacades() {
     }
 
     /**
-     * Runs {@code work} with {@code implementation} as the implementation of {@code spi}. Bindings of other SPIs made by
-     * an enclosing call stay visible; a binding of the same SPI is replaced for the duration of {@code work}.
+     * Runs {@code work} with {@code environment} as the active one.
+     *
+     * @param environment the environment for this execution, not null
+     * @param work        the code to run
+     * @param <R>         result type
+     * @return what {@code work} returns
+     */
+    public static <R> R with(UIEnvironment environment, Supplier<R> work) {
+        return ScopedValue.where(BOUND, environment).call(work::get);
+    }
+
+    /**
+     * Runs {@code work} with {@code implementation} as the implementation of {@code spi}, on top of whatever environment
+     * is active now. Ports of other SPIs keep coming from that environment. It is the light way to replace one port,
+     * mostly in tests.
      *
      * @param spi            the SPI type
      * @param implementation the implementation to use, not null
      * @param work           the code to run
+     * @param <S>            SPI type
+     * @param <R>            result type
      * @return what {@code work} returns
      */
     public static <S, R> R with(Class<S> spi, S implementation, Supplier<R> work) {
-        Map<Class<?>, Object> merged = BINDINGS.isBound() ? new HashMap<>(BINDINGS.get()) : new HashMap<>();
-        merged.put(spi, implementation);
-        return ScopedValue.where(BINDINGS, Map.copyOf(merged)).call(work::get);
+        return with(new Overlay(current(), spi, implementation), work);
     }
 
     /**
-     * @param spi the SPI type
-     * @return the implementation bound for the current execution, or {@code null} when none is bound (the container is
-     * not consulted)
+     * @return the environment active for the code running on this thread, never null
      */
-    public static <S> S bound(Class<S> spi) {
-        if (BINDINGS.isBound()) {
-            return spi.cast(BINDINGS.get().get(spi));
+    public static UIEnvironment current() {
+        if (BOUND.isBound()) {
+            return BOUND.get();
         }
-        return null;
+        Collection<UIEnvironmentProvider> providers = Containers.get().findObjects(UIEnvironmentProvider.class);
+        if (providers != null) {
+            for (UIEnvironmentProvider provider : providers) {
+                if (provider.isActive()) {
+                    return provider.environment();
+                }
+            }
+        }
+        return NoUIEnvironment.INSTANCE;
     }
 
     /**
      * @param spi the SPI type
-     * @return the bound implementation, else the one in the container, else {@code null}
+     * @param <S> the SPI type
+     * @return the implementation of {@code spi} in the active environment
+     * @throws UIUnavailableException when the active environment does not support it
+     */
+    public static <S> S port(Class<S> spi) {
+        UIEnvironment environment = current();
+        return environment.port(spi).orElseThrow(() -> new UIUnavailableException(portName(spi), environment.name()));
+    }
+
+    /**
+     * Looks for an optional service the same way: the active environment first, then the container. Meant for helpers
+     * that are not {@link UIPort}s.
+     *
+     * @param spi the service type
+     * @param <S> the service type
+     * @return the implementation, or {@code null} when there is none
      */
     public static <S> S find(Class<S> spi) {
-        S bound = bound(spi);
-        return bound != null ? bound : Containers.get().findObject(spi);
+        Optional<S> fromEnvironment = current().port(spi);
+        return fromEnvironment.orElseGet(() -> Containers.get().findObject(spi));
     }
 
-    /**
-     * @param spi the SPI type
-     * @return the bound implementation, else the one in the container
-     * @throws IllegalStateException when there is none
-     */
-    public static <S> S resolve(Class<S> spi) {
-        S found = find(spi);
-        if (found == null) {
-            throw new IllegalStateException(spi.getSimpleName() + " not found: no implementation is bound for this execution "
-                    + "and none is registered in the container");
+    private static String portName(Class<?> spi) {
+        UIPort port = spi.getAnnotation(UIPort.class);
+        return port != null ? port.name() : spi.getSimpleName();
+    }
+
+    /** One port replaced on top of a base environment. */
+    private record Overlay(UIEnvironment base, Class<?> spi, Object implementation) implements UIEnvironment {
+
+        @Override
+        public String name() {
+            return base.name();
         }
-        return found;
+
+        @Override
+        public <S> Optional<S> port(Class<S> requested) {
+            if (requested == spi) {
+                return Optional.of(requested.cast(implementation));
+            }
+            return base.port(requested);
+        }
     }
 }

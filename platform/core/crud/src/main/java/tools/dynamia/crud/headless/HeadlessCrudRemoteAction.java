@@ -2,7 +2,10 @@ package tools.dynamia.crud.headless;
 
 import tools.dynamia.actions.ActionExecutionRequest;
 import tools.dynamia.actions.ActionExecutionResponse;
+import tools.dynamia.actions.ActionRuntime;
+import tools.dynamia.actions.ActionRuntimes;
 import tools.dynamia.actions.HeadlessCapable;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.actions.replay.ReplayExecutor;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringPojoParser;
@@ -25,24 +28,25 @@ import java.util.Map;
  * Serves a {@link CrudAction} (the same class ZK runs) to REST clients: this is the single piece of code that adapts
  * a local action to the {@code /api/app/metadata/entities/{id}/actions/{action}} endpoint.
  * <p>
- * The delegate must be {@link HeadlessCapable}. For every request the adapter builds what the action expects in its
+ * The delegate must be declared {@code @RunsOn(HEADLESS)}. For every request the adapter builds what the action expects in its
  * {@link CrudActionEvent}: the entity (loaded by {@code dataId}, or built from the JSON of {@code data}), a
  * {@link HeadlessCrudController} and a {@link HeadlessCrudView}; and runs {@code actionPerformed} through the
  * {@link ReplayExecutor}, which turns the questions of the action into steps of the flow protocol.
  */
+@RunsOn(ActionRuntime.HEADLESS)
 public final class HeadlessCrudRemoteAction extends AbstractCrudRemoteAction {
 
     private final CrudAction delegate;
 
     /**
-     * @param delegate the action to serve; it must implement {@link HeadlessCapable}
+     * @param delegate the action to serve; it must be declared {@code HEADLESS}
      */
     public HeadlessCrudRemoteAction(CrudAction delegate) {
-        if (!(delegate instanceof HeadlessCapable capable) || !capable.headlessSupported()) {
-            throw new IllegalArgumentException(delegate.getClass().getName() + " is not HeadlessCapable");
+        if (ActionRuntimes.of(delegate) != ActionRuntime.HEADLESS) {
+            throw new IllegalArgumentException(delegate.getClass().getName() + " is not declared HEADLESS");
         }
         this.delegate = delegate;
-        setId(capable.headlessId());
+        setId(delegate instanceof HeadlessCapable capable ? capable.headlessId() : ActionRuntimes.headlessId(delegate.getClass()));
         setName(delegate.getName());
         setDescription(delegate.getDescription());
         setImage(delegate.getImage());

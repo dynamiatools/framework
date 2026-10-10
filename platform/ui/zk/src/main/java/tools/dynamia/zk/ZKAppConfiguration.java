@@ -27,20 +27,10 @@ import org.zkoss.zk.ui.http.DHtmlLayoutServlet;
 import org.zkoss.zk.ui.http.HttpSessionListener;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
-import tools.dynamia.ui.ChoicesProvider;
-import tools.dynamia.ui.FileTransfer;
-import tools.dynamia.ui.MessageDisplayer;
-import tools.dynamia.ui.NavigationProvider;
-import tools.dynamia.ui.ProgressRunner;
-import tools.dynamia.ui.ViewsProvider;
+import tools.dynamia.ui.UIEnvironmentProvider;
 import tools.dynamia.ui.icons.IconsProvider;
-import tools.dynamia.zk.ui.MessageNotification;
-import tools.dynamia.zk.ui.ZKChoicesProvider;
-import tools.dynamia.zk.ui.ZKFileTransfer;
-import tools.dynamia.zk.ui.ZKNavigationProvider;
-import tools.dynamia.zk.ui.ZKProgressRunner;
-import tools.dynamia.zk.ui.ZKViewsProvider;
 import tools.dynamia.zk.ui.ZIconsProvider;
+import tools.dynamia.zk.ui.ZKUIEnvironmentProvider;
 import tools.dynamia.zk.util.ZKUtil;
 
 import java.util.HashMap;
@@ -63,41 +53,10 @@ public class ZKAppConfiguration {
 
 
     @Bean
-    @ConditionalOnMissingBean(MessageDisplayer.class)
-    public MessageDisplayer messageDialog() {
-        return new MessageNotification();
+    @ConditionalOnMissingBean(ZKUIEnvironmentProvider.class)
+    public UIEnvironmentProvider zkUIEnvironmentProvider() {
+        return new ZKUIEnvironmentProvider();
     }
-
-    @Bean
-    @ConditionalOnMissingBean(FileTransfer.class)
-    public FileTransfer fileTransfer() {
-        return new ZKFileTransfer();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(ProgressRunner.class)
-    public ProgressRunner progressRunner() {
-        return new ZKProgressRunner();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(ViewsProvider.class)
-    public ViewsProvider viewsProvider() {
-        return new ZKViewsProvider();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(ChoicesProvider.class)
-    public ChoicesProvider choicesProvider() {
-        return new ZKChoicesProvider();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(NavigationProvider.class)
-    public NavigationProvider navigationProvider() {
-        return new ZKNavigationProvider();
-    }
-
 
     @Bean
     @ConditionalOnMissingBean(IconsProvider.class)

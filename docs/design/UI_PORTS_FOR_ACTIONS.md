@@ -58,12 +58,12 @@ Constraints:
 - Keep `UIToolsProvider` as it is (many ZK actions use it); the new ports are a separate interface.
 - An intent must be replayable: same request and answers give the same intents in the same order. A form whose fields
   change while the user types stays on the client side. `progress` breaks determinism: prefer a `FlowRemoteAction`.
-- Pure UI actions are not ported and not published: they are `ZK_ONLY`, and each front end writes its own client action in TypeScript.
+- Pure UI actions are not ported and not published: they are `FRONTEND`, and each front end writes its own client action in TypeScript.
 
 ## Suggested order
 
 1. A test that walks every `@InstallAction` and fails when a `CrudAction` is neither `HeadlessCapable` nor declared
-   declared `ZK_ONLY`. It makes the inventory above executable.
+   declared `FRONTEND`. It makes the inventory above executable.
 2. `download`, `upload`, `choose`; migrate `ExportReportAction` and `ImportReportAction` to prove the whole path
    (port, ZK adapter, TS step).
 3. Review and mark the nine business actions without ZK, one by one: they are published to REST once marked, so check

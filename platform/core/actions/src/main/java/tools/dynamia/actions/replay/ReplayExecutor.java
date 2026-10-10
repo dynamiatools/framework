@@ -6,12 +6,7 @@ import tools.dynamia.actions.ActionFlowStep;
 import tools.dynamia.actions.ActionFlows;
 import tools.dynamia.actions.flow.FlowTokenException;
 import tools.dynamia.integration.Containers;
-import tools.dynamia.ui.ChoicesProvider;
-import tools.dynamia.ui.FileTransfer;
-import tools.dynamia.ui.NavigationProvider;
-import tools.dynamia.ui.ProgressRunner;
 import tools.dynamia.ui.UIFacades;
-import tools.dynamia.ui.UIMessages;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -84,14 +79,10 @@ public final class ReplayExecutor {
         }
 
         var session = new ReplaySession(answers);
-        var interactions = new ReplayInteractions(session);
+        var environment = new ReplayUIEnvironment(session, contributors());
+        var interactions = environment.interactions();
         Object result = transactions().run(
-                () -> ReplaySession.run(session, () -> UIMessages.withDisplayer(interactions,
-                        () -> UIFacades.with(FileTransfer.class, new ReplayFileTransfer(session),
-                                () -> UIFacades.with(ProgressRunner.class, new ReplayProgressRunner(session),
-                                        () -> UIFacades.with(ChoicesProvider.class, new ReplayChoicesProvider(session),
-                                                () -> UIFacades.with(NavigationProvider.class, new ReplayNavigationProvider(session),
-                                                        () -> bindAll(session, binders(), 0, () -> body.apply(original)))))))),
+                () -> UIFacades.with(environment, () -> body.apply(original)),
                 () -> !interactions.isPending());
 
         if (interactions.isPending()) {
@@ -129,16 +120,9 @@ public final class ReplayExecutor {
         return response;
     }
 
-    private static List<ReplayBinder> binders() {
-        var found = Containers.get().findObjects(ReplayBinder.class);
+    private static List<ReplayPortContributor> contributors() {
+        var found = Containers.get().findObjects(ReplayPortContributor.class);
         return found == null ? List.of() : new ArrayList<>(found);
-    }
-
-    static <T> T bindAll(ReplaySession session, List<ReplayBinder> binders, int index, java.util.function.Supplier<T> work) {
-        if (index >= binders.size()) {
-            return work.get();
-        }
-        return binders.get(index).bind(session, () -> bindAll(session, binders, index + 1, work));
     }
 
     private static ReplayTransactions transactions() {

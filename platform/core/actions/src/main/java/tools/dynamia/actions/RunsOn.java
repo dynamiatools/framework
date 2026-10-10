@@ -23,11 +23,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Declares the {@link ActionRuntime} of an action when it cannot be derived from its type, typically
- * {@link ActionRuntime#ZK_ONLY}.
+ * Declares the {@link ActionRuntime} of an action. The declaration is read from the concrete class only
+ * ({@link Class#getDeclaredAnnotation}): a subclass does not inherit it, so publishing an action to remote clients is a
+ * decision taken for each class.
  * <pre>{@code
  * @InstallAction
- * @RunsOn(ActionRuntime.ZK_ONLY)
+ * @RunsOn(ActionRuntime.FRONTEND)
  * public class FindAction extends AbstractCrudAction { ... }
  * }</pre>
  */

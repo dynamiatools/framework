@@ -14,21 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tools.dynamia.actions.replay;
-
-import java.util.function.Supplier;
+package tools.dynamia.ui;
 
 /**
- * Binds the headless implementation of a UI facade for the duration of a replay pass. Modules that own the knowledge a
- * facade needs (for example {@code crud}, which knows how to fill an entity from submitted values) register one as a
- * bean; {@link ReplayExecutor} applies all of them around the action.
- * <pre>{@code
- * public <T> T bind(ReplaySession session, Supplier<T> work) {
- *     return UIFacades.with(ViewsProvider.class, new HeadlessViews(session), work);
- * }
- * }</pre>
+ * Contributes a {@link UIEnvironment} that is active only while some condition holds. It is registered as a bean (ZK
+ * registers one that is active while a ZK {@code Execution} exists) and consulted by {@link UIFacades#current()} when
+ * no environment is bound explicitly.
  */
-public interface ReplayBinder {
+public interface UIEnvironmentProvider {
 
-    <T> T bind(ReplaySession session, Supplier<T> work);
+    /**
+     * @return whether the code running on this thread is inside the environment of this provider
+     */
+    boolean isActive();
+
+    /**
+     * @return the environment to use while {@link #isActive()} is true
+     */
+    UIEnvironment environment();
 }

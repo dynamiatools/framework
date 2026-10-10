@@ -572,9 +572,9 @@ instead of ZK classes:
 | `ZKUtil.showListboxSelector` | `UIChoices.chooseOne` / `chooseMany` | `CHOICE` |
 | `Executions.sendRedirect` | `UINavigation.open` / `openInNewWindow` | final `REDIRECT` |
 
-A new facade is an SPI interface, a static facade resolving it with `UIFacades.resolve`, a bean in `zk` and a headless
-implementation bound by `ReplayExecutor` (or a `ReplayBinder` bean when it needs a module such as `crud`). Declare what
-cannot be derived with `@RunsOn(ActionRuntime.ZK_ONLY)` (client actions are written in TypeScript with `registerClientAction`, never in Java). ZK may only be used in the modules listed in
+A new facade is an SPI interface annotated `@UIPort`, a static facade resolving it with `UIFacades.port`, its implementation in `ZKUIEnvironment` (`zk`) and a headless
+implementation in `ReplayUIEnvironment` (or a `ReplayPortContributor` bean when it needs a module such as `crud`). Declare the runtime on the concrete class with `@RunsOn` (`HEADLESS` for an action written against the facades,
+`FRONTEND` for behaviour each front end implements; it is never inherited, so a subclass is `UNDECLARED` until declared) (client actions are written in TypeScript with `registerClientAction`, never in Java). ZK may only be used in the modules listed in
 `ZkCornerRuleTest`. Design: [`docs/next/dynamia-ui.md`](../next/dynamia-ui.md).
 
 Implement `FlowRemoteAction` directly (the low level API, see

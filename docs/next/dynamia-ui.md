@@ -1,412 +1,799 @@
-# Dynamia UI: one UI contract, any front end
+# Dynamia UI: target architecture (ZK as a port)
 
-**Status:** design; first iteration (tools only) implemented on `feature/next-ui`: issues #200 to #208. See
-[Implementation status](#implementation-status).
+**Date:** 2026-10-10 · **Base:** `dynamia-tools@feature/next-ui` (13 commits over `next`) · **Main consumer:**
+`dynamia-erp@next`.
+**Sources:** previous revision of this document, [dynamia-ui-inventory.md](dynamia-ui-inventory.md) and a reading of the code.
+**Audience:** whoever implements it. Sections 1 to 10 describe **how the system must end up**; §11 turns that into ordered
+work packages (WP), each with files, steps and acceptance criteria.
 
-> **Scope of the first iteration: `dynamia-tools` only, `dynamia-erp` untouched.** The goal is that ZK lives in its own
-> corner of the repository (`platform/ui/zk`, `zk-starter`, `theme-dynamical`, the `ZK_ONLY` extension `ui` modules and
-> `dashboard/zk`) and everything else is ZK-free, enforced by a test. Everything is additive: no class is removed or
-> renamed, the ERP must keep compiling against it. In scope: facades + SPIs + replay (§2b, §3.2), the `runtime`
-> classification (§5), converting the actions of tools (inventory), the ZK-corner rule. **Deferred:** shared view models
-> (§3.3), the generated Java-to-TS contract (§3.1), a Vue-side rewrite, and Phase 5 (ERP).
-**Scope:** `platform/ui/ui-shared`, `platform/core/{actions,crud,viewers,navigation}`, `platform/packages/{sdk,ui-core,vue}`,
-and, as the first big consumer, `dynamia-erp`.
-**Inventory:** [dynamia-ui-inventory.md](dynamia-ui-inventory.md) (every action of tools and the ERP, classified).
 **Builds on:** [HEADLESS_ACTIONS.md](../design/HEADLESS_ACTIONS.md),
 [SERVER_DRIVEN_ACTION_FLOWS.md](../design/SERVER_DRIVEN_ACTION_FLOWS.md),
-[UI_PORTS_FOR_ACTIONS.md](../design/UI_PORTS_FOR_ACTIONS.md) (this document generalises it),
+[UI_PORTS_FOR_ACTIONS.md](../design/UI_PORTS_FOR_ACTIONS.md),
 [MIGRATION_ZK_SEPARATION.md](../backend/MIGRATION_ZK_SEPARATION.md) (epic #130).
 
----
+**Out of scope:** binary compatibility between `dynamia-tools` versions. In this workspace tools is published as a SNAPSHOT
+and everything is reinstalled together. Moving or renaming classes is allowed, so the architecture is not designed around it.
 
-## 1. Goal
+### Verified state of the branch (2026-10-10)
 
-Reach the point where **no feature of Dynamia Tools, Dynamia ERP or their extensions needs ZK to be used from a Vue front
-end**, while ZK keeps working as it does today. ZK becomes one front end among several, not the definition of the UI.
-
-The way to get there is not "port every ZK class to Vue". It is to give the framework a **UI-neutral vocabulary** that
-both languages share, so that an action, a view or a navigation entry is written once and each front end only
-implements the vocabulary:
-
-> **Dynamia UI** = descriptors + intents + view models + a wire protocol, defined once, implemented in Java and in
-> TypeScript, rendered by adapters (ZK, Vue, anything else).
-
-### Non-goals
-
-- Not a component library and not a design system. Dynamia UI never says "a `Window` with a `Listbox`"; it says "ask
-  the user to choose one of these options". Rendering stays in the adapter.
-- Not a replacement for ZK. ZK keeps its adapter and every ZK-only feature stays available there (§8).
-- Not server-side rendering of components. The server sends data and intents, never markup.
-- Not a new form-description language. `ViewDescriptor` (YAML/JSON) stays the way to describe forms, tables and trees.
-
----
-
-## 2. Where we are
-
-What already exists and is the base of this design:
-
-| Piece | Where | State |
-|---|---|---|
-| UI-neutral presentation contracts (`UIMessages`, `MessageDisplayer`, `UIToolsProvider`, icons) | `ui-shared` (`tools.dynamia.ui`) | Exists. `UIMessages` is a real port; `UIToolsProvider` is not (takes a ZK component as `content`) |
-| Descriptors (`ViewDescriptor`, fields, groups, JSON serializer) | `core/viewers` | Exists, already consumed by Vue (`DynamiaForm`, `Table`, `Tree`) |
-| Action metadata + REST execution (`RemoteAction`, `ActionExecutionRequest/Response`) | `core/actions`, `app` | Exists |
-| Headless actions (replay): a `LocalAction` written once against ports runs without ZK | `core/actions` (`ReplayExecutor`...), `core/crud` | Done for `SaveAction`, `DeleteAction` |
-| Flow protocol: `ActionFlowStep` (`CONFIRM`, `INPUT`, `DIALOG`, `NOTIFY`, `REDIRECT`, `CALL`, `DONE`, `CUSTOM`), signed `resumeToken` | `core/actions`, `sdk`, `vue` (`runActionFlow`) | Implemented, experimental |
-| Client side actions (`ClientAction`, registries, renderers, feedback managers) | `ui-core`, `vue` | Exists |
-| Core is ZK-free | `platform/core/*` | Verified: no `org.zkoss` import in `core` |
-
-What is missing:
-
-1. **Ports for most interactions.** Replay only works for what `UIMessages` can express (confirm, message, question).
-   Forms, downloads, uploads, choices, progress, navigation have no port. This is the 20 `CrudAction`s that import ZK in
-   the framework (see UI_PORTS_FOR_ACTIONS.md) and, in the ERP, roughly a quarter of the `@InstallAction` classes
-   (93 of 355 files with `@InstallAction` import ZK; measured with grep on `next`, 2026-10-09, the real number of
-   *actions* is lower because some files hold helpers).
-2. **A contract that is checked, not just agreed.** Java and TS types are written by hand on both sides
-   (`ActionFlowStep` in Java, `ActionFlowStep` in the SDK). Drift is a matter of time.
-3. **A client-side way to write actions and view models.** `ClientAction` exists, but there is no shared notion of a view
-   model (state + commands) between `CrudController` (Java) and `useCrud`/`CrudView` (TS), so each is a re-implementation.
-4. **A classification of every action** (runs headless / needs a flow / is client side / is ZK only) that is explicit and
-   tested, instead of "it is invisible to REST because it does not implement a marker".
-5. **In the ERP:** actions and views that call ZK directly (`Window`, `Messagebox`, `Filedownload`, `Executions`) instead
-   of ports, and ERP-specific UI pieces (dashboards, wizards) with no descriptor at all.
-
----
-
-## 2b. Core principle: actions stay as they are, the facades react to the environment
-
-**Existing actions of Dynamia Tools and Dynamia ERP are not rewritten.** What changes is *what they call*: the few
-ZK-specific calls (a message box, a window with a viewer, a download) are replaced, one by one, by a **Dynamia facade**
-with the same shape, and the facade finds its implementation from the environment. `SaveAction` already works this way
-and is the reference:
-
-```java
-// SaveAction (unchanged by this design): no ZK, no REST, only tools-level APIs
-crud.getController().onSave(afterSave);     // asks "save?" through UIMessages.showQuestion(...)
-```
-
-```
-UIMessages.showQuestion(...)            static facade, in ui-shared
-        │
-        ▼  MessageDisplayer chosen by the environment
-        ├── ZK running normally ........ ZK bean (MessageDialog)            -> real dialog, waits for the click
-        ├── REST request (headless) .... ReplayInteractions, bound by      -> answered from the token, or stops
-        │                                ReplayExecutor with
-        │                                UIMessages.withDisplayer(...)       and sends a CONFIRM step to Vue
-        └── tests ...................... any stub
-```
-
-Three pieces make it work, and they are the template for everything new:
-
-1. **A facade with a stable API** (`UIMessages`) that actions import. It lives in `ui-shared`, has no UI dependency.
-2. **An SPI** (`MessageDisplayer`) with one implementation per environment. The facade resolves it from a scoped
-   value first (set per execution by the headless runtime) and from the container otherwise (ZK registers its own).
-3. **A runtime that binds the right implementation for the execution** (`ReplayExecutor`). The action never knows.
-
-So the work is a list of facades, not a new action model:
-
-| ZK-specific thing used by actions today | Facade (tools level, in `ui-shared`) | ZK implementation | Headless / Vue implementation |
-|---|---|---|---|
-| `Messagebox`, `MessageDialog` | `UIMessages` (exists) | exists | `ReplayInteractions` (exists) |
-| `Window` + `Viewer`/form with fields | **`UIViews.showForm / showView`** (new) | window + `Viewer` | `DIALOG` step with the `ViewDescriptor` name; the answer is the submitted values |
-| `Filedownload` | **`UIFiles.download`** (new) | `Filedownload` | `DOWNLOAD` step (signed URL) |
-| `Fileupload` | **`UIFiles.upload`** (new) | `Fileupload` | `UPLOAD` step |
-| listbox / combo in a window | **`UIChoices.choose`** (new) | window | `CHOICE` step |
-| `LongOperation` | **`UIProgress.run`** (new) | `LongOperation` | progress step with polling |
-| `Executions.sendRedirect`, page switch | **`UINavigation.open`** (new) | ZK navigation | `REDIRECT` step |
-| `CrudViewComponent` (what `evt.getCrudView()` returns) | exists as an interface in `crud` | ZK view | `HeadlessCrudView` (exists) |
-
-They may live in one class or several; what matters is the pattern. Names are provisional.
-
-**"A viewer that does not depend on ZK".** `UIViews.showForm(descriptorName, values, onSubmit)` takes a view
-*descriptor name* and plain values, never a `Viewer` or a `Window`. The ZK implementation builds the usual `Viewer`
-inside a window; the headless one describes it as a step and Vue renders `DynamiaForm`. An action that today builds
-`new Viewer(...)` inside a `Window` changes those lines, not its logic.
-
-**Migration rule per action:** replace the ZK lines by the facade; if the action then has no `org.zkoss` import, mark it
-`HeadlessCapable` after reviewing its restrictions. Nothing else in the action changes. Actions that stay on ZK keep
-working exactly as now, because ZK's implementation of each facade is what they would have done anyway.
-
-The callback style (`showQuestion(text, () -> ...)`) is kept on purpose: it is what existing actions are written with,
-and replay already makes it work in REST by re-running the action. A facade method may also offer a "returning" form
-for new code, but is never required.
-
----
-
-## 3. The model: four layers
-
-```
-                    ┌────────────────────────────────────────────────┐
-  Business code ───►│ 4. Actions  (Java LocalAction / TS ClientAction) │  written once
-                    ├────────────────────────────────────────────────┤
-                    │ 3. View models  (state + commands, no widgets)   │  spec shared, impl in Java and TS
-                    ├────────────────────────────────────────────────┤
-                    │ 2. Intents  (ports: ask, show, choose, download) │  spec shared, impl in Java and TS
-                    ├────────────────────────────────────────────────┤
-                    │ 1. Descriptors + protocol (JSON, versioned)      │  single source of truth
-                    └───────────────┬────────────────────────────────┘
-                                    │ adapters
-                       ┌────────────┼─────────────┐
-                       ▼            ▼             ▼
-                      ZK          Vue         anything else
-```
-
-### 3.1 Layer 1: descriptors and protocol (the contract)
-
-Everything that crosses a boundary is plain data with a JSON Schema:
-
-- `ViewDescriptor`, `Field`, `FieldGroup` (exist).
-- `ActionMetadata` (exists) **plus** a `runtime` classification (§5).
-- `NavigationMetadata` (exists).
-- `Intent` and `IntentResult` (new, §3.2). `ActionFlowStep` becomes the serialised form of an `Intent`.
-- `ViewModelState` (new, §3.3).
-
-**Single source of truth.** The Java types are the origin; a build step generates the JSON Schema and the TS types in
-`@dynamia-tools/sdk` from them (or the reverse; see open question Q1). A conformance suite of JSON fixtures
-(`contract/fixtures/*.json`) is replayed by both the Java and the TS test suites: same fixture, same parsed object, same
-re-serialised JSON. This is what makes "implemented in two languages" safe.
-
-Versioning: the contract carries `uiProtocolVersion`; adapters declare which they support. Additive changes only inside
-a major version.
-
-### 3.2 Layer 2: intents (the ports)
-
-An **intent** is "what the program needs from the user or the environment", described as data, with a typed answer.
-This is the generalisation of `UIMessages` and of the flow steps.
-
-| Intent | Answer | ZK adapter | Vue adapter | Today's flow step |
-|---|---|---|---|---|
-| `confirm(message)` | `boolean` | `Messagebox` | confirm dialog | `CONFIRM` |
-| `input(prompt, type)` | value | prompt window | prompt dialog | `INPUT` |
-| `notify(message, level)` | none | `Clients.showNotification` | toast | `NOTIFY` |
-| `form(viewDescriptor, values)` | values (or cancel) | window + `Viewer` | `DynamiaForm` dialog | `DIALOG` |
-| `view(viewDescriptor, data)` | none | window + `Viewer` | `DynamiaViewer` dialog | `DIALOG` (read only) |
-| `choose(options, multi)` | selection | listbox window | select / list dialog | new |
-| `upload(accept)` | file reference | `Fileupload` | file picker | new |
-| `download(name, mime, ref)` | none | `Filedownload` | signed URL / browser download | new |
-| `progress(operation)` | none (completes) | `LongOperation` | progress + polling | new |
-| `navigate(target)` | none | `Executions` / page switch | router | `REDIRECT` |
-| `refresh(scope)` | none | reload view | reload view | new |
-| `callAction(id, request)` | response | run action | run action | `CALL` |
-| `custom(component, data)` | any | registered component | registered renderer | `CUSTOM` |
-
-Rules:
-
-1. **An intent describes, never contains, a component.** No `Object content`. This is why `UIToolsProvider.showDialog`
-   can not be the port: it can not cross a network or a language.
-2. **Intents are answerable by any runtime.** In Java they are the facades of §2b (`UIMessages`, `UIViews`, `UIFiles`...)
-   in `ui-shared`, backed by one SPI each; in TS they are the same-named functions in `ui-core`. A single `Intent` data
-   type underneath is what `ReplayInteractions` records and serialises as an `ActionFlowStep`.
-3. **Two execution modes, one action.**
-   - *Direct* (ZK, or a TS action in the browser): the adapter shows the UI and the call returns/continues with the
-     answer.
-   - *Replay* (a Java action reached from a REST client): the existing `ReplayInteractions` answers from the token or
-     stops at the first unanswered intent, which goes to the client as an `ActionFlowStep`. This is exactly what
-     headless actions do now; the change is that it works for every intent, not only confirm and message.
-4. **Replay constraints stay** (HEADLESS_ACTIONS.md): same request + same answers must yield the same intents in the same
-   order; every pass runs in a transaction that only the last pass commits. `progress` breaks determinism, so it is
-   only allowed in a `FlowRemoteAction` or as the last intent of an action.
-5. `UIMessages` and `UIToolsProvider` stay as they are (many ZK actions use them). `UIToolsProvider` is not touched; new
-   facades are separate, and its users are migrated action by action only when someone needs that action in Vue.
-
-### 3.3 Layer 3: view models (deferred)
-
-A view model is **state and commands of a screen, with no widgets**. Dynamia already has two incompatible
-implementations of the same idea: `CrudController` / `CrudState` (Java, drives ZK) and `useCrud` / `CrudView` /
-`crudActionState.ts` (TS, drives Vue). Both encode the same state machine (`READ`, `CREATE`, `UPDATE`, `DELETE`),
-selection, filters, paging and "which actions apply in this state".
-
-Proposal: specify the view models once (state shape, transitions, events), implement them in both languages, and make
-the adapters bind widgets to them.
-
-| View model | State | Commands | Replaces |
-|---|---|---|---|
-| `CrudViewModel` | state, selected, filters, paging, form values, errors | `create`, `edit(id)`, `save`, `delete`, `cancel`, `query`, `applyFilter` | `CrudController`, `useCrud` |
-| `FormViewModel` | values, errors, dirty, readonly fields | `setValue`, `validate`, `submit` | `FormViewModel` (exists, Java), `FormView` (TS) |
-| `TableViewModel` | columns, rows, sort, selection, page | `sort`, `select`, `page` | `TableView` |
-| `TreeViewModel` | nodes, expanded, selected | `expand`, `select` | `TreeView` |
-| `NavigationViewModel` | current module/page, breadcrumb | `open(page)` | `NavigationResolver` |
-
-Two consequences:
-
-- A **headless action's** `CrudControllerAPI` (what `SaveAction` calls today) is the Java face of `CrudViewModel`. The
-  extraction already planned in HEADLESS_ACTIONS.md ("`HeadlessCrudController` copies the save/delete flow of
-  `zk.crud.CrudController`") is the first concrete step: one implementation, two consumers.
-- A **TS action** receives the same `CrudViewModel` API, so a `ClientAction` can do what a Java action does.
-
-The view model *state* is serialisable (`ViewModelState` in layer 1) so a server-side model and a client-side one can
-exchange it when needed (e.g. an embedded ZK view inside Vue, see `ZkEmbed.vue`).
-
-### 3.4 Layer 4: actions
-
-Actions are **not** a new API. They are the current `LocalAction` / `CrudAction` classes. The only change is the facade
-they call for UI (§2b):
-
-```java
-// Before: ZK inside the action, only runs in ZK
-Filedownload.save(bytes, "application/pdf", "report.pdf");
-
-// After: same action, a tools facade; ZK downloads, Vue receives a DOWNLOAD step
-UIFiles.download("report.pdf", "application/pdf", bytes);
-```
-
-New front-end-only logic can still be a TS `ClientAction` (it already exists) that uses the TS twin of the same
-facades. `ActionMetadata.runtime` (§5) says which of the two a front end will get.
-
----
-
-## 4. Module placement
-
-No new top-level product; the vocabulary lands where the code already lives.
-
-| Concern | Java | TypeScript |
-|---|---|---|
-| `Intent` data type, facades (`UIViews`, `UIFiles`, `UIChoices`...) and their SPIs | `ui-shared`, new package `tools.dynamia.ui.intent` + facades in `tools.dynamia.ui` | `ui-core`, new folder `intents/` |
-| View model spec + base impl | `ui-shared` (state/transition types, no persistence); `crud` keeps `CrudControllerAPI` as the facade over it | `ui-core` (`viewmodel/`) |
-| Wire types (`ActionFlowStep`, `Intent`, `ViewModelState`) | generated schema from Java | `sdk` (generated types) |
-| Replay (intent -> `ActionFlowStep`) | `actions` (existing `ReplayInteractions`) | `vue` `runActionFlow` generalised to all intents, moved to `ui-core` once framework-free |
-| Adapters | `zk` (+ `zk-starter`) | `vue`; future `react`, `web-components` |
-| Conformance fixtures | `platform/contract/` (new, language-neutral JSON) | same files |
-
-Dependency consequence to check: `actions` would depend on `ui-shared` (for `Intent`). `ui-shared` depends only on
-`commons`, `integration` and `io`, so no cycle appears, but `ui-shared` must never import `viewers` or `actions`:
-intents refer to views and actions **by name** (`viewDescriptor: "ResetPasswordForm"`), not by type.
-
-`ui-core` already has no Vue dependency; the generalised flow runner moves there so a second front end (React, web
-components, Svelte) reuses it instead of copying `packages/vue/.../runActionFlow.ts`.
-
----
-
-## 5. Classifying every action
-
-Today an action reaches REST only if it is a `CrudRemoteAction` or `HeadlessCapable`. That is implicit and, for
-`HeadlessCapable`, defaults to "yes" (UI_PORTS_FOR_ACTIONS.md explains why making all `CrudAction`s headless by default
-is unsafe). Replace the implicit rule by an explicit `runtime`, published in `ActionMetadata`:
-
-| `runtime` | Meaning | Who executes it |
-|---|---|---|
-| `HEADLESS` | Local action written against intents; replay works | Server (replay), or ZK directly |
-| `FLOW` | `FlowRemoteAction` state machine | Server |
-| `ZK_ONLY` | Behaviour or screen of the ZK UI (toolbar widgets, search box, filters panel, legacy screens, `ZkEmbed` targets). Not published | ZK only. Other front ends write their own **client action in TypeScript** (`registerClientAction`); Java never declares client actions |
-
-Rules:
-
-- `runtime` is **declared** (annotation attribute on `@InstallAction` or a method on the action), never inferred, and is
-  **reviewed per action**: publishing an action to REST means exposing it, so each one that resets a password, clears a
-  cache or reinitialises an account gets its restrictions checked first.
-- **A test walks every `@InstallAction`** in the framework and in the ERP and fails when `runtime` is missing or when an
-  action declared `HEADLESS` imports `org.zkoss`. This turns the inventory into something executable and gives a
-  progress number ("n of N actions are not `ZK_ONLY`").
-- `ApplicationGlobalAction` gets the same treatment (the loader currently only reads `ApplicationGlobalRemoteAction`).
-
----
-
-## 6. Migrating the ZK-bound code
-
-The order below reduces risk: every step is useful alone and keeps ZK working.
-
-### Phase 0: make the problem measurable
-1. The `@InstallAction` walking test with a baseline file (`runtime` unset allowed, listed). Fails only on regressions.
-2. The conformance fixture suite for the existing `ActionFlowStep` / `ActionMetadata` / `ViewDescriptor` JSON (it
-   documents today's contract and catches drift before the design changes anything).
-
-### Phase 1: intents on top of what exists
-1. Generalise the `UIMessages` mechanism: a common way to register an SPI per facade, bind it per execution
-   (`withDisplayer` becomes a generic scoped binding) and record an interaction as an `Intent` that serialises to an
-   `ActionFlowStep`. `UIMessages` keeps its public API; existing headless tests must pass untouched.
-2. The first new facade, `UIViews.showForm/showView`, with its ZK implementation (window + `Viewer`) and its headless
-   one (`DIALOG` step). Vue already renders `DIALOG` in `runActionFlow`; move that loop to `ui-core`.
-
-### Phase 2: the other facades, driven by real actions
-`UIChoices`, `UIFiles` (upload, download), `UINavigation`, then `UIProgress`. Each one lands with **one real action
-migrated end to end by replacing only its ZK lines** (facade, ZK implementation, headless implementation, TS renderer,
-test), starting with `ExportReportAction` / `ImportReportAction`
-(UI_PORTS_FOR_ACTIONS.md step 2). Then the nine business actions without ZK are reviewed and marked `HEADLESS`.
-
-### Phase 3: view models (deferred)
-Extract `CrudViewModel` from `CrudController` (the `HeadlessCrudController` duplication is the trigger), then align
-`useCrud`/`CrudView` with the spec. `Form`, `Table`, `Tree` follow. ZK keeps its widgets, now bound to the shared model.
-
-### Phase 4: global actions, navigation and the rest of the framework
-Global actions loader, navigation metadata completeness, dashboard widgets (`extensions/dashboard`), the remaining
-`ui` modules of extensions that still hold logic next to ZK code (MIGRATION_ZK_SEPARATION.md continues).
-
-### Phase 5: Dynamia ERP (deferred, out of the first iteration)
-Same method on `dynamia-erp`, in this order, because each step is independently shippable:
-
-1. Run the walking test over the ERP's `@InstallAction`s, classify each (`HEADLESS` / `ZK_ONLY`), publish the
-   numbers. Do not start rewriting before this list exists.
-2. Replace direct ZK calls inside actions (`Messagebox`, `Window`, `Filedownload`) by the facades. The actions keep their
-   logic, class names, ids and restrictions; this alone converts most of the 93 files, since the common cases are
-   confirm, form, choose, download. Actions that stay on ZK are not touched.
-3. Screens that are real ZK layouts (`erp-ui`, `erp-widgets`) either get a `ViewDescriptor` or remain `ZK_ONLY` and are
-   embedded in Vue (`ZkEmbed`) during the transition.
-4. Align with `erp-next` (`/api/v2`, Kotlin facade): DynamiaNext and the Dynamia UI protocol are two ways of exposing the
-   same actions to Vue/POS/shop. They must not diverge: either `/api/v2` forwards flow steps unchanged, or the facade
-   translates them in one place. **Decision needed with the POS and shop owners** (Q4).
-5. Per-module PRs against `next`, each with its `ZK_ONLY` count going down.
-
-Cross-repo: a change in `ui-shared`, `actions` or the wire types can break `dynamia-erp` and, through `/api/v2`,
-`dynamia-pos` and `tienda-shop`; every phase lists its impact on them in the PR.
-
----
-
-## 7. Open questions
-
-- **Q1. Which side generates which?** Java as source (schema generated from classes) is simplest for the maintainers
-  and keeps the wire format close to what exists, but TS developers can not evolve the contract first. The alternative,
-  JSON Schema by hand as source and both languages generated, is cleaner but adds a toolchain. Recommendation: Java as
-  source, schema + TS types generated at build time, fixtures as the safety net.
-- **Q2. Is `Intent` a new type or just `ActionFlowStep`?** Recommendation: keep `ActionFlowStep` as the wire form (it is
-  already shipped and has a token), add the new step types, and treat `Intent` as the in-process Java/TS API that
-  serialises to it. Avoids a second protocol.
-- **Q3. Does a TS `ClientAction` get server-side effects?** It runs in the browser; anything that must persist goes
-  through `callAction` to a server action (same restrictions and auditing). No TS code runs on the server.
-- **Q4. `/api/v2` (DynamiaNext) vs the flow protocol.** One surface or two? See Phase 5.4.
-- **Q5. Versioning of the experimental flow protocol.** It is marked experimental; moving it to a stable
-  `uiProtocolVersion: 1` means committing to its wire format. Decide before Phase 1 ships.
-- **Q6. Offline.** `dynamia-pos` is offline-first. Replay needs the server; intents that a POS must run offline
-  (confirm, choose) need a client implementation of the action, i.e. a `ClientAction`. Out of scope here, but it is
-  a reason to keep the TS action API first class.
-
----
-
-## 8. What stays ZK on purpose
-
-Some things are not worth abstracting: ZK-specific components used by large legacy screens, the ZK template/theme
-(`theme-dynamical`), `MicroFrontend` hosting, and extensions that exist only for the ZK back office. They are marked
-`ZK_ONLY`, keep working unchanged, and are reachable from Vue through the embed (`ZkEmbed`, INLINE_ZK_EMBED.md) while
-a Dynamia-UI-native replacement does not exist. The success metric is not "zero ZK classes"; it is **"every user-facing
-capability is reachable without ZK, or is explicitly and knowingly `ZK_ONLY`"**.
-
----
-
-## 9. Risks
-
-| Risk | Mitigation |
+| Check | Result |
 |---|---|
-| Two implementations (Java + TS) of view models drift | Shared fixtures and spec tests run in both suites (§3.1); view model logic stays small |
-| Replay determinism broken by a new intent | Intents are listed with their determinism rule; `progress` restricted; replay tests per intent |
-| Publishing an action to REST exposes it | `runtime` is declared and reviewed per action; restrictions checked; the walking test forces a decision |
-| Big-bang rewrite temptation | Every phase ships alone and keeps ZK working; real action migrated with each new intent |
-| Breaking the flow protocol used by the current Vue backoffice | Phase 0 fixtures pin today's behaviour first; changes are additive within `uiProtocolVersion` |
-| `next` is explosive and the ERP depends on it | Per-phase impact check on `dynamia-erp`, `/api/v2` consumers; no cross-repo breaking change without the ERP PR ready |
+| `mvn -o -pl platform/ui/ui-shared,platform/core/actions,platform/core/crud,platform/app,platform/ui/zk -am test` | OK, exit 0. `ui-shared` 4, `actions` 47, `crud` 19, `app` 24, `zk` 34 tests, no failures |
+| `pnpm exec vitest run` in `platform/packages/vue` | OK, 22 tests |
+| Test in ZK or Vue in a browser | **Not done.** The ZK adapters (`ZK*Provider`) compile, but nobody has run them |
+| ERP compilation against the branch | Not done |
 
 ---
 
-## 10. Suggested first deliverables
+## 1. Goal and invariants
 
-1. This document agreed (answers to Q1, Q2, Q4, Q5).
-2. Phase 0: walking test + baseline, contract fixtures.
-3. Phase 1 on `ui-shared` / `ui-core`, with the existing headless tests as the regression net.
-4. GitHub issues per phase under the ZK-separation epic (#130); issues are the backlog, this document is the design.
+**Goal:** a Java action of Dynamia Tools or the ERP is written once against neutral UI ports and behaves the same in ZK and
+in a remote front end (Vue, POS, shop), without importing ZK. ZK becomes one more adapter.
 
+Invariants the architecture must guarantee and the tests must check:
+
+| # | Invariant |
+|---|---|
+| I1 | No action published to remote clients imports ZK, neither itself nor its ancestors. |
+| I2 | An action behaves the same in every adapter: same callbacks, in the same order, with the same context (tenant, user, transaction). Only how it looks changes. |
+| I3 | The core (`platform/core/*`, `ui-shared`) names no front end: no `ZK` in types, enums or annotations. |
+| I4 | Nothing of arbitrary size travels in memory or inside JSON or tokens. Files move by streaming. |
+| I5 | Publishing an action over REST is an **explicit decision, per concrete class**; it is never inherited. |
+| I6 | If a port is used where there is no UI, the error is clear and immediate, not a `NullPointerException` inside ZK. |
+| I7 | There is a single network protocol (`ActionFlowStep`); Java and TS implement it against the same fixtures. |
+| I8 | There is **one source of truth** for each port and for the action catalog: it is defined once (Java) and everything else (TS types, steps, metadata) is derived from it or checked against it. |
+| I9 | Every publishable action can be tested **without ZK, without a browser and without an HTTP server**, with the `test` platform (§10), and its test shows that it behaves the same in direct and remote execution. |
+
+### 1.1 Unified development model (Capacitor style)
+
+The DX must feel like **a single framework**, as in Capacitor. There you program against `@capacitor/camera`, each platform
+(Android, iOS, web) ships its default implementation, and anything platform-specific is opt-in and isolated. Dynamia UI
+adopts the same model:
+
+| Capacitor | Dynamia UI | Where it lives |
+|---|---|---|
+| Plugin (single API: `Camera.getPhoto()`) | **Port** = facade + SPI + protocol step(s) + contract suite (`UIFiles`, `UIViews`, ...) | `ui-shared` (Java, source of truth) |
+| Android / iOS implementation | **Platform adapter**: `zk` (stateful server) and `remote` (replay towards any client) | `platform/ui/zk`, `core/actions` + `crud` |
+| Plugin mocks / test implementation | **`test` platform**: implements every port with a "user" script written in the test (§10) | `platform/testing/ui-testing` |
+| Web implementation of the plugin | TS implementation of the same port (`ui-core/ports`), used by `ClientAction` and by the flow runner | `platform/packages/ui-core` |
+| Native ↔ JS bridge | `ActionFlowStep` protocol + `/api/app/transfers` + `/api/app/jobs` | `core/actions`, `app`, `sdk` |
+| `Capacitor.getPlatform()` | `UIPlatform.current().name()` → `"zk"`, `"remote"`, `"none"`, `"test"` | `ui-shared` (`UIEnvironment`, §3) |
+| `Capacitor.isPluginAvailable('X')` | `UIPlatform.supports(UIFiles.class)` | `ui-shared` |
+| App's own plugin | **Own port**: the developer declares `@UIPort interface DigitalSignature`, implements it in ZK and as a TS renderer of a `CUSTOM` step. This solves the HARD bucket without tying the action to ZK | app module |
+| `android/`, `ios/` folders | Platform-specific code only in `*-zk` (or `ui`) modules and TS packages | §9 R1 enforces it |
+| `capacitor.config` | `dynamia.ui.*` properties (files, tokens, jobs) | `application.yml` |
+
+How it looks for whoever writes an action. It is what exists today, minus ZK:
+
+```java
+@InstallAction
+@RunsOn(ActionRuntime.HEADLESS)                      // the only place where "multiplatform" is decided
+public class ImportCustomersAction extends AbstractCrudAction {
+    public void actionPerformed(CrudActionEvent evt) {
+        UIFiles.uploadOne(".xlsx", file ->           // ZK: Fileupload · remote: UPLOAD step + transfers
+            UIProgress.run(msg("importing"), monitor -> importer.importFrom(file.openStream(), monitor),
+                    () -> { UIMessages.showMessage(msg("done")); evt.getController().doQuery(); },
+                    e -> UIMessages.showMessage(e.getMessage(), MessageType.ERROR)));
+    }
+}
+```
+
+When something is **really** platform-specific there are two explicit exits, with no platform `if`s scattered around:
+
+1. **Own port** (preferred): the logic stays a single action and only the widget changes per platform.
+2. **Front end action** (`@RunsOn(FRONTEND)`): the action exists **once in the catalog** (id, name, icon, restrictions). ZK
+   implements it in Java and Vue/POS implement it as a TS `ClientAction` **with the same id**. A front end without an
+   implementation simply does not show it (`isPluginAvailable`). This is the case of the search box, the filters and the
+   export of what the grid shows.
+
+### 1.2 What is kept and what changes
+
+| Kept as is | Changes because it is necessary |
+|---|---|
+| Static facades with callbacks (`UIMessages`, `UIViews`, `UIChoices`, `UIFiles`, `UIProgress`, `UINavigation`) and their names | Resolution through `UIEnvironment` instead of one bean per SPI (§3) |
+| `LocalAction`/`CrudAction`, `@InstallAction`, ids, restrictions, `ActionGroup` | Publication by `@RunsOn` declared on the concrete class (§7) |
+| Stateless replay (`ReplayExecutor`, `ReplaySession`, per-pass transactions, signed token) | Per-step fingerprint, retry on validation, token bound to user and tenant (§5) |
+| `ActionFlowStep` as the only protocol; `runActionFlow` and its handlers | `UploadedFile`/downloads by streaming and refs (§6); runner moved to `ui-core` (WP9) |
+| `ViewDescriptor` as the way to describe forms and views | `HeadlessViews` for any class with a descriptor, not only entities |
+| `ClientAction`/`registerClientAction` in TS | Single catalog with a shared id for `FRONTEND` actions (§7.3) |
+| Current ZK adapters (`ZK*Provider`) | Grouped in `ZKUIEnvironment` and required to meet the contract (§4, §9.3) |
+| Architecture baselines that can only go down | Moved to an artifact reusable by the ERP (§9) |
+
+### 1.3 Single source of truth
+
+- **Ports:** each port is declared in Java with `@UIPort(name = "files", steps = {UPLOAD})` on its SPI. A build step
+  (`ui-contract-generator`, in `platform/contract`) generates from there the JSON Schema of the steps, the TS types of
+  `sdk` (`ActionFlowStep`, `FlowFileRef`...) and the port interfaces of `ui-core/ports`. The fixtures (§9.4) are the safety
+  net. This closes design question Q1: Java is the source.
+- **Actions:** the catalog is that of `@InstallAction`. Each entry carries `runtime`, and no TS action exists without a
+  catalog entry, except purely local actions of the client app, which do not go through the server.
+- **Forms and views:** `ViewDescriptor`, as today.
+
+---
+
+## 2. Overview
+
+```
+                         Java action (LocalAction / CrudAction)
+                                       │  only uses facades
+                                       ▼
+   ui-shared   UIMessages · UIViews · UIChoices · UIFiles · UIProgress · UINavigation
+                                       │  UIFacades.port(Spi.class)
+                                       ▼
+                               active UIEnvironment
+              ┌────────────────────────┼─────────────────────────┬──────────────────┐
+              ▼                        ▼                         ▼                  ▼
+     ZKUIEnvironment          ReplayUIEnvironment          NoUIEnvironment     TestUIEnvironment
+  (platform/ui/zk; active   (core/actions; created by    (ui-shared; jobs,   (ui-testing; user
+   only with a ZK Execution)  ReplayExecutor per pass)    threads, no UI)      script, §10)
+              │                        │
+        ZK widgets             ActionFlowStep (JSON) ──► ui-core/flow (TS, framework-free)
+                                       │                         │
+                               TransferStore ◄── /api/app/transfers ──► Vue / POS / shop adapter
+```
+
+Three cross-cutting axes:
+
+- **Classification and publication** (§7): `ActionRuntime` decides what is published and what is executed.
+- **Execution context** (§8): tenant, user, transaction and bindings travel to any thread the adapter uses.
+- **Executable architecture rules** (§9): the same for tools and for the ERP.
+
+---
+
+## 3. Facade core: `UIEnvironment`
+
+### 3.1 What changes and why
+
+Today each SPI is resolved separately (`UIFacades.resolve(Spi.class)`): first the per-execution binding and then a container
+bean. This leaves three problems:
+
+- `ReplayExecutor` hand-nests 5 bindings and `ReplayBinder` only covers `ViewsProvider`.
+- In the hybrid ERP, a call outside ZK and outside replay (a job, a `RemoteAction`, the Kotlin `/api/v2` facade) resolves the
+  ZK bean and fails inside ZK. Today only `ZKNavigationProvider` checks it.
+- In a deployment without ZK, that same call yields `IllegalStateException("... not found")` without saying what was done wrong.
+
+### 3.2 Design
+
+```java
+// ui-shared, tools.dynamia.ui
+public interface UIEnvironment {
+    String name();                                   // "zk", "replay", "none", "test"
+    <S> Optional<S> port(Class<S> spi);              // empty = this environment does not support that port
+}
+
+public final class UIFacades {
+    // 1. the environment bound to the execution (ScopedValue), if any
+    // 2. otherwise, the first UIEnvironmentProvider in the container whose isActive() is true
+    //    (ZK: Executions.getCurrent() != null)
+    // 3. otherwise, NoUIEnvironment
+    public static UIEnvironment current();
+    public static <S> S port(Class<S> spi);          // throws UIUnavailableException with environment + port + hint
+    public static <R> R with(UIEnvironment env, Supplier<R> work);
+}
+
+public interface UIEnvironmentProvider {             // bean; ZK registers one
+    boolean isActive();
+    UIEnvironment environment();
+}
+```
+
+- `UIUnavailableException` (unchecked) carries a message such as: `"UIFiles.download used with no UI (environment
+  'none'): run it from a ZK event or from a replayed action, or move it out of background code"`.
+- `NoUIEnvironment` only implements `MessageDisplayer`, which records messages in the log. Any other port throws
+  `UIUnavailableException`.
+- `ReplayUIEnvironment` groups all headless ports of a pass in a single object, so there is **one binding**. Ports contributed
+  by other modules (for example `HeadlessViews` from `crud`) are contributed through `ReplayPortContributor` (replaces
+  `ReplayBinder`): `Map<Class<?>, Object> ports(ReplaySession)`.
+- `UIMessages` stops caching the `MessageDisplayer` statically: it resolves it through `UIFacades.port`, like the others.
+- ZK providers stop being loose beans with `@ConditionalOnMissingBean`. `ZKAppConfiguration` registers a single
+  `ZKUIEnvironmentProvider`; whoever wants to replace a concrete ZK port does so with a bean that wraps that environment.
+
+---
+
+## 4. Semantic contract of each port
+
+This table is **normative**: both adapters (ZK and replay) must meet it, and each row becomes a case of a contract suite (§9.3).
+
+| Port | Common rule (ZK = replay) |
+|---|---|
+| All | The callback is **the only continuation point**. Code after the facade call in the action body cannot depend on the answer. |
+| All | Cancelling never calls the success callback. If the signature has `onCancel`, that one is called. |
+| All | The callback runs with the same tenant, user and bindings as the action (§8). |
+| `UIMessages.showQuestion` | Yes → `onYes`; No or close → `onNo` if present. |
+| `UIMessages.showInput` | Value converted to `valueClass`; if it cannot be converted, it is asked again with the error (in replay: the same step, with `message`). |
+| `UIViews.showForm` | `onSubmit(bean, dialog)`. If `onSubmit` throws `ValidationError`, **the form stays open with the submitted values and the message**, in both adapters (§5.2). `dialog.close()` is what closes it; if `onSubmit` returns without closing it, it stays open in ZK and is shown again in replay. |
+| `UIViews.showView` | Shown and closed; no callback (or optional `onClose`). Presentation hints (`width`, `height`, collections as tables) come from `ViewOptions`/descriptor and both adapters interpret them. |
+| `UIChoices` | Options are identified by a **stable key** (§5.3), not by position. Choosing nothing equals cancelling: the callback is not called, not even in multiple mode. |
+| `UIFiles.upload` | The callback receives streaming handles (§6). `accept`, `maxFileSize`, `maxFiles` and `maxTotalSize` are enforced on the server in both adapters. |
+| `UIFiles.download` | Streaming source; no fixed in-memory limit. Name and MIME type reach the user. |
+| `UIProgress.run` | `run` **returns control without waiting** in both adapters; the continuation goes in `onFinish`/`onError`. The task runs **without an ambient transaction** and with the propagated context (§8). **No UI facade can be used inside the task** (throws `UIUnavailableException`); progress is reported with `ProgressMonitor`. On error, `onError` receives the exception and whatever the task did is **not committed** if it ran in its own transaction. |
+| `UINavigation.open` | Terminal in practice: whatever the action does afterwards runs, but the user is already leaving. In replay, the final `REDIRECT` keeps the notifications and they are shown before navigating. |
+
+---
+
+## 5. Replay runtime (headless)
+
+`ReplayExecutor` and `ReplaySession` stay as the base. These are the changes.
+
+### 5.1 Fingerprint of each interaction
+
+Each stored answer carries the fingerprint of the step it answered: `answers: [{fp, value}]`, with
+`fp = hash(type, viewDescriptor|viewClass, title, option keys)`. On resume, if the fingerprint of step n does not match the
+one of the step the action raises now, **the answer is discarded and the step becomes pending again**. The client receives
+the same step with `messageType=WARNING` and the localized message `flow.stepChanged`. This way a non-deterministic action,
+or data that changed between passes, never applies an answer to a different question.
+
+### 5.2 Retry on validation
+
+`ReplaySession.interact` receives an `onAnswer` that may throw `ValidationError`. In that case the session:
+
+1. Rolls back the pass (`ReplayTransactions` already commits only when nothing is pending; the pending one becomes this step).
+2. Removes the answer from `answers`.
+3. Emits the same step again with the submitted values in `data` and the error in `message`/`messageType=ERROR`
+   (`fieldErrors` if the `ValidationError` carries a field).
+
+`HeadlessViews` drops `CLIENT_CLOSES`: `ViewDialog.close()` marks the step as finished, and if `onSubmit` returns without
+closing, the same re-emission rule applies. Vue (`FormDialogHost`) shows `message` and the `fieldErrors` in the form.
+
+### 5.3 `CHOICE` with keys
+
+```java
+public record ChoiceOptions<T>(String title, List<T> options, Function<T, String> label,
+                               Function<T, String> key, boolean multiple) { }
+```
+
+- Default `key`: the entity id (`DomainUtils.findEntityId`) if there is one; otherwise `label`.
+- Step: `data.options = [{key, label}]`. Answer: list of keys. A key that no longer exists → re-emission (§5.1).
+- `UIChoices` exposes overloads with `key`.
+
+### 5.4 Resume token
+
+- **Bound to user and tenant.** Adds the `FlowPrincipal` SPI (`String subject(); String tenant();`), implemented by
+  `security`/`saas`; without an implementation, `"anonymous"`/`null`. `verify` compares both.
+- **Mandatory secret in production.** If `dynamia.actions.flow.secret` is missing, the per-JVM random secret breaks tokens
+  on restart and across nodes. With the `prod` profile, or with `dynamia.actions.flow.require-secret=true`, startup fails.
+- **Payload size cap** (`dynamia.actions.flow.max-token-bytes`, default 16 KB). If exceeded, a clear error is thrown. With
+  §6 files no longer travel inside the token, so only a huge form could exceed it.
+- The token is signed only, not encrypted. Since it no longer carries files, it is enough to document that it must not be logged.
+
+### 5.5 Transactions
+
+- A pass that ends with an exception always rolls back, including exceptions the action captures through the default
+  `onError` of `UIProgress` (see §4).
+- `ReplayProgressRunner` runs the task with the pass transaction suspended (`ReplayTransactions.runOutside`). It is the same
+  rule as in ZK: the task manages its own transactions.
+
+### 5.6 Asynchronous progress (phase 2 of this axis)
+
+The first version may keep running the task inside the request, but the final shape is:
+
+- `PROGRESS {jobId, title}` step. The task runs in `SchedulerUtil` with the propagated context (§8).
+- The client polls `GET /api/app/jobs/{jobId}` (`{state, current, max, message}`).
+- When the task ends, the client answers the step with `{jobId, state}`. The next pass consumes that answer and calls
+  `onFinish`/`onError` **without running the task again**: the `jobId` is in `answers` and the fingerprint identifies it.
+- This removes `markNonRepeatable`: the task no longer runs inside a pass.
+
+---
+
+## 6. File transfer (full redesign)
+
+### 6.1 Why it has to be redone
+
+Today `UploadedFile` is `byte[]`, uploads travel as Base64 inside the response JSON **and inside the resume token**, and
+downloads travel as Base64 inside `params.downloads`. The limits are 1 MB up and 10 MB down. The ERP configures in ZK
+`max-upload-size` = 102400 KB (100 MB; `erp-boot/.../zk.xml:36`), so this design does not serve its real cases (Excel
+importers, PDFs, images).
+
+### 6.2 Model
+
+```java
+// ui-shared, tools.dynamia.ui.files
+public interface UploadedFile {
+    String name();
+    String contentType();          // may be null
+    long size();
+    InputStream openStream();      // can be opened several times while the handle is alive
+    default Path toTempFile() { ... }   // streaming copy if a File is needed
+}
+
+public sealed interface DownloadSource permits BytesSource, PathSource, StreamSource {
+    String name(); String contentType(); OptionalLong size();
+}
+// StreamSource(name, contentType, size, Supplier<InputStream> opener)
+
+public record UploadOptions(String title, String accept, int maxFiles, long maxFileSize, long maxTotalSize) {
+    // defaults: dynamia.ui.files.max-file-size (100MB), max-files (10)
+}
+```
+
+Facade:
+
+```java
+UIFiles.download(String name, String contentType, byte[] content);    // small ones; becomes a BytesSource
+UIFiles.download(Path file, String contentType);                       // streaming
+UIFiles.download(String name, String contentType, Supplier<InputStream> opener);
+UIFiles.upload(UploadOptions, Consumer<List<UploadedFile>>);
+UIFiles.uploadOne(String accept, Consumer<UploadedFile>);
+```
+
+### 6.3 Temporary store: `TransferStore`
+
+```java
+// ui-shared (interface) + local implementation in platform/app
+public interface TransferStore {
+    TransferRef put(InputStream data, TransferMeta meta, long maxBytes);    // cuts and deletes if maxBytes is exceeded
+    Optional<StoredTransfer> get(String id, FlowPrincipal owner);           // checks owner and expiration
+    void delete(String id);
+    void purgeExpired();                                                     // called by a @Scheduled
+}
+// TransferMeta(name, contentType, direction UPLOAD|DOWNLOAD, owner subject+tenant, expiresAt)
+```
+
+- Default implementation `LocalTransferStore`: directory `dynamia.ui.files.dir` (default
+  `${java.io.tmpdir}/dynamia-transfers`), one data file and one metadata file per id. TTL in `dynamia.ui.files.ttl`
+  (default `PT30M`) and total quota in `dynamia.ui.files.quota`.
+- With several nodes behind a load balancer a shared store is needed (S3 or a shared FS). The interface allows it; the
+  implementation is left for when it is needed (see §12).
+- All writes stream (`InputStream.transferTo` over a `BoundedInputStream` that cuts at `maxBytes`). Never `readAllBytes`.
+
+### 6.4 Endpoints (`platform/app`, `TransfersController`)
+
+| Method | Route | Body / response |
+|---|---|---|
+| `POST` | `/api/app/transfers` | Raw `application/octet-stream` body, with headers `X-File-Name` (URL-encoded), the file's `Content-Type` in `X-File-Type` and `Content-Length`. Streams straight to the store, **bypassing Spring multipart** (so `spring.servlet.multipart.max-file-size`, 10 MB in the ERP, does not affect it). Responds `{ref, name, contentType, size}`, where `ref` is a signed id bound to `FlowPrincipal`. Limit: `dynamia.ui.files.max-file-size`. |
+| `GET` | `/api/app/transfers/{ref}` | Streaming with `Content-Disposition: attachment; filename*=UTF-8''...`, `Content-Length` and `Cache-Control: no-store`. Owner only; downloads are deleted after the first complete read or on expiry. |
+| `DELETE` | `/api/app/transfers/{ref}` | The client cancels an upload. |
+
+Security: they require authentication (the same filter chain as `/api/app/metadata`), check the owner (`subject` + `tenant`),
+and the server rejects `accept` and sizes outside `UploadOptions` when the reference is consumed, not only on the client.
+
+### 6.5 Upload flow in replay
+
+```
+action: UIFiles.upload(opts, cb)
+  └─ ReplayFileTransfer: UPLOAD step {title, accept, maxFiles, maxFileSize, maxTotalSize}  (pending)
+client: picks files → POST /api/app/transfers for each one (with progress) → answers the step with [{ref}]
+server (next pass): answers = [{fp, value:[{ref}]}]   ← only references in the token
+  └─ ReplayFileTransfer resolves each ref in TransferStore (owner, expiry, accept, sizes)
+     └─ cb(List<UploadedFile>) with StoredUploadedFile handles that open the file in the store
+when the flow ends successfully (after commit): consumed refs are deleted; if abandoned, the TTL cleans them
+```
+
+### 6.6 Download flow in replay
+
+`ReplayFileTransfer.download(source)` writes the source to the store by streaming (direction `DOWNLOAD`) **only in the pass
+that ends** (the one that is not left pending), and the registration happens after the commit. The final response carries
+`params.downloads = [{name, contentType, size, url}]`, with `url` relative to `/api/app/transfers/{ref}`. The client downloads
+with a link or `fetch`; the browser does the streaming and there is no Base64 in the JSON.
+
+So that the source is not read in passes that are later discarded, `ReplaySession.download` stores the `DownloadSource`
+(not the bytes) and materializes it at the end.
+
+### 6.7 ZK adapter
+
+- **Upload:** ZK's `Fileupload` with `accept` and `maxFiles` (use the `Fileupload.get` API with parameters/`accept` offered by
+  the project's ZK version, or a `Button` with `upload="true,maxsize=...,multiple=...,accept=..."`). The `Media` is wrapped in
+  `ZKMediaUploadedFile`: if `isBinary()`, `getStreamData()`; otherwise `getReaderData()` encoded with the media charset (fixes
+  the text case that `Uploadlink` handles today and `ZKFileTransfer` does not). If the media is in memory, it is dumped to a
+  temp file by streaming. Sizes and `accept` are validated on the server with the same validation class as replay
+  (`UploadPolicy`, in `ui-shared`).
+- **Download:** `Filedownload.save(InputStream|File, contentType, name)`; never `byte[]` except for `BytesSource`.
+
+### 6.8 TS side
+
+- `sdk`: types `FlowFileRef {ref, name, contentType, size}`, `FlowDownload {name, contentType, size, url}` and the client
+  `client.transfers.upload(file, {onProgress, signal})` (XHR or `fetch` with `Blob` streaming; no Base64) and
+  `client.transfers.download(url)`.
+- `ui-core/flow`: the `UPLOAD` step calls `handlers.pickFiles` (which returns `File[]`), validates `accept`/sizes on the client
+  for quick feedback, uploads each file and answers with the refs. The downloads step uses `handlers.saveFile(download)`; by
+  default, an `<a href=url download>` over the authenticated URL (if authentication is by header and not cookie, it is fetched
+  as a `Blob` with `fetch` and `URL.createObjectURL` is used).
+- `FlowUploadedFile` with Base64 `content` is removed.
+
+---
+
+## 7. Action classification and publication
+
+### 7.1 Neutral vocabulary
+
+```java
+public enum ActionRuntime {
+    HEADLESS,      // written against the facades; the server runs it by replay
+    FLOW,          // FlowRemoteAction
+    REMOTE,        // single-request RemoteAction
+    FRONTEND,      // behaviour specific to each front end (search box, filters, export of what the grid shows,
+                   // ZK screens). It is in the catalog but has no endpoint; each front end provides its
+                   // implementation with the same id (ZK in Java, Vue/POS as a TS ClientAction), or does not show it
+    UNDECLARED     // nobody declared it: it is not published
+}
+```
+
+`ZK_ONLY` disappears from the core. ERP actions that really are ZK screens are declared `FRONTEND`; the difference between
+"ZK implements it" and "Vue implements it" is known by each front end, not by the core.
+
+### 7.2 One declaration rule, not inheritable
+
+- The declaration is `@RunsOn(ActionRuntime.X)` **on the concrete class**. `ActionRuntimes.of(Class)` reads
+  `getDeclaredAnnotation`, not `getAnnotation`, so a subclass does not inherit `HEADLESS`.
+- Permitted derivation, only for types whose contract already implies the runtime: `FlowRemoteAction` → `FLOW` and
+  `RemoteAction` → `REMOTE`.
+- `HeadlessCapable` becomes `@Deprecated`. While it exists, it counts as `HEADLESS` **only if the concrete class declares it
+  in its own `implements`** (`Arrays.asList(c.getInterfaces()).contains(HeadlessCapable.class)`). `headlessSupported()`
+  keeps working as a dynamic veto.
+- Result for the ERP: `VerVentaAction extends ViewDataAction` becomes `UNDECLARED` (not published) until someone reviews and
+  declares it.
+- `HeadlessCrudRemoteAction` reports the runtime of its delegate; the special case with a qualified name in `ActionMetadata`
+  goes away.
+
+### 7.3 Who uses the runtime
+
+| Place | Rule |
+|---|---|
+| `ApplicationMetadataLoader` | Includes in the catalog the `HEADLESS`, `FLOW` and `REMOTE` actions (with `endpoint`) and the `FRONTEND` ones (without `endpoint`), provided they are applicable and pass the user's restrictions. `UNDECLARED` never appears. It stops looking at `HeadlessCapable` directly. |
+| `ApplicationMetadataController.executeAction` | Executes only `HEADLESS`, `FLOW` and `REMOTE`. Any other action gets 404, even if someone knows its id (defence in depth). |
+| `ActionMetadata.runtime` | Always present. The SDK types it with the new enum. |
+| Front end | For a `FRONTEND` action, looks up a `ClientAction` registered with the same id; if not found, does not show it. For the rest, uses the flow runner. |
+
+### 7.4 Global actions endpoint
+
+`executeGlobalAction` (`ApplicationMetadataController.java:150`) receives `ActionExecutionRequest` **without `@RequestBody`**
+(already so on `next`). Spring binds it as a model attribute and the JSON body is ignored: a global flow cannot be resumed
+because `resumeToken` travels in the body. `@RequestBody` must be added, with a test that resumes a global action.
+
+---
+
+## 8. Execution context
+
+### 8.1 Problem
+
+`SchedulerUtil.getWithContext` propagates `ObjectsContext`, but not the tenant (`AccountTenants`, a `ScopedValue`), nor
+Spring Security, nor the `UIFacades` bindings. The Javadoc of `AccountTenants` already warns: *"code that hands work to an
+executor must bind the tenant again inside the task"*. `ZKProgressRunner` → `LongOperation` → `SchedulerUtil.run`, so in the
+ERP the task of a `UIProgress` in ZK runs without tenant and, being fail-closed, sees nothing.
+
+### 8.2 Design
+
+```java
+// platform/core/integration, tools.dynamia.integration.context
+public interface ContextPropagator {            // bean; each module contributes its own
+    Object capture();                           // on the launching thread
+    <T> T runWith(Object captured, Supplier<T> work);   // on the executing thread
+}
+public final class ExecutionContext {
+    public static Snapshot capture();           // ObjectsContext + all ContextPropagators
+}
+```
+
+| Propagator | Module | What it propagates |
+|---|---|---|
+| `ObjectsContextPropagator` | `integration` | What `ObjectsContext.capture()` does today |
+| `UIEnvironmentPropagator` | `ui-shared` | **Replaces it with `NoUIEnvironment` inside the task** (rule of §4: no UI inside the task) |
+| `TenantPropagator` | `saas` | The effective `AccountTenants` (forced, from the request or from the session), re-bound with `AccountTenants.with` |
+| `SecurityContextPropagator` | `security` (or `app` if Spring Security is there) | `SecurityContextHolder` |
+
+`SchedulerUtil.getWithContext` switches to `ExecutionContext.capture().wrap(task)`. `LongOperation`, and therefore
+`ZKProgressRunner`, inherit it with no changes of their own. ZK's `onFinish`/`onError` return to the desktop event thread (as
+today), where the UI is available.
+
+---
+
+## 9. Executable architecture rules
+
+### 9.1 Reusable artifact
+
+`RepoSources`, `ZkCornerRuleTest` and `ActionInventoryTest` move out of `core/actions/src/test` into a new module
+`platform/testing/arch-rules` (artifact `tools.dynamia.arch-rules`, `scope test`), parameterised by repo root, ZK corner
+patterns and baseline files. The ERP uses it from its own test module with its baselines.
+
+### 9.2 Rules
+
+| Rule | Detail |
+|---|---|
+| R1 Front end corner | `org.zkoss` / `tools.dynamia.zk` only in the corner modules. Detects `import`, **fully qualified names in the body**, and Maven dependencies with `groupId org.zkoss` or `artifactId` `tools.dynamia.zk`/`zk-starter`. The `extensions/*/sources/ui` modules stop being a corner as a block: the corner is the classes that need it (or `*-zk` modules when they are split). |
+| R2 Inventory | Baseline of ZK-bound actions that can only go down (as today). |
+| R3 Publication | No class with a publishable runtime (§7.2) may be ZK-bound, including its ancestors. |
+| R4 Declaration | Baseline of `UNDECLARED` actions that can only go down. |
+| R5 Vocabulary | No type in `platform/core/**` or in `ui-shared` contains `ZK`/`Zk` in its name, constants or annotations. |
+
+Inheritance is resolved by fully qualified name (package + parent `import`), not by simple name.
+
+### 9.3 Contract suites per port
+
+In the `ui-shared` test-jar: `MessagesPortContract`, `ViewsPortContract`, `ChoicesPortContract`, `FilesPortContract`,
+`ProgressPortContract` and `NavigationPortContract`. They are abstract classes with a `driver()` method that knows how to
+"answer as the user" in that adapter. Replay extends them in `core/actions` and `crud`, and ZK extends them in
+`platform/ui/zk` with ZATS or a simulated desktop. If ZATS is not available, the ZK driver may directly invoke the listeners
+the adapter registers. Each row of the §4 table is a case.
+
+### 9.4 Protocol fixtures
+
+`platform/contract/fixtures/*.json`: one example per `ActionFlowStep` type (including `UPLOAD` with refs, `CHOICE` with keys
+and `DIALOG` with errors) and per answer. The Java tests (Jackson) and the TS ones (vitest) parse and re-serialise them and
+must get the same result.
+
+---
+
+## 10. Testing platform (third port)
+
+### 10.1 Why a platform and not a mock
+
+Today the ERP's actions are not tested. There are 12 test files across all `*-ui` modules and none runs an action. The
+`erp-integration-tests` module (real MySQL with Testcontainers) **depends on no `*-ui`**, and `AccionesAdminIT` says so in its
+own Javadoc: actions use `UIMessages` (ZK) and do not run headless, so the test **reproduces the pattern and JPQL of
+`DesvincularTodosItemsInventarioAction` instead of running the action**. So the test can pass while the real action is broken.
+
+With the model of §1.1, testing needs no tricks: it is **one more platform**, at the same level as ZK and remote. It is like
+Capacitor, where plugins are tested with their web implementation or official mocks, without a phone. The `test` platform
+implements **all** ports, meets the same contract (§4, checked by the same suites of §9.3) and lets the test drive the "user".
+
+| Platform | Who answers the user | What for |
+|---|---|---|
+| `zk` | A person in the ZK browser | Production (back office) |
+| `remote` | The client (Vue, POS, shop) through the step protocol | Production (front ends) |
+| `test` | **A script written in the test** | Unit and integration tests of actions, without ZK or a browser |
+
+### 10.2 Artifact
+
+`platform/testing/ui-testing` → `tools.dynamia.ui.testing` (`scope test`). Depends on `ui-shared`, `actions` and `crud`
+(headless). **It does not depend on ZK or Spring**; Spring integration is optional (§10.5).
+
+Components:
+
+| Class | What it does |
+|---|---|
+| `TestUIEnvironment` | `UIEnvironment` named `"test"` that implements all ports. Records each interaction in order and gets the answer from the script. |
+| `UIScript` | The "user": answers in order (`confirm(true)`, `input("x")`, `fillForm(Map)`, `submitForm(b -> …)`, `cancel()`, `choose(key)`, `upload(TestFiles.of(...))`) or by rules (`whenQuestion(containing("Void")).confirm(true)`). |
+| `UIInteraction` | Record of an interaction: `type` (`CONFIRM`, `INPUT`, `DIALOG`, `VIEW`, `CHOICE`, `UPLOAD`, `NOTIFY`, `PROGRESS`, `REDIRECT`), `title`, `message`, `messageType`, `payload` (form values, option labels and keys, upload options). |
+| `TestFiles` | Creates `UploadedFile` by streaming from a classpath resource, a `Path` or bytes. Downloads are kept as `CapturedDownload` (`name`, `contentType`, `size`, `openStream()`, `asString()`, `saveTo(Path)`). |
+| `InMemoryTransferStore` | `TransferStore` for the tester's remote mode. |
+| `TestCrud` | Builds a `CrudActionEvent` with `HeadlessCrudController` and `HeadlessCrudView` for an entity class and a `CrudService` (real or mock). Exposes what happened: `queried()`, `saved()`, `state()`. |
+| `ActionTester` | Entry point (§10.3). |
+| `ActionResult` | Interactions, notifications, downloads, redirect, exception, CRUD state and, in remote mode, the steps and the token size. |
+
+Script rules:
+
+- **Strict by default.** If the action raises an interaction the script does not answer, the test fails with a message
+  showing the pending interaction (`"Unanswered CONFIRM 'Void sale 123?' at interaction #2"`). If answers are left over at
+  the end, it also fails. `lenient()` turns it off.
+- If `onSubmit` throws `ValidationError`, the form is raised again with the error, as in ZK and remote (§4), and the script
+  can answer again. This is how the validation path is tested.
+- `UIProgress` runs without an extra thread but **applies the contract**: no UI inside the task (`NoUIEnvironment`), no
+  ambient transaction and with the propagated context (§8). `asyncProgress()` runs it on another thread to test continuations.
+
+### 10.3 Two execution modes: this is how an action is shown to be multiplatform
+
+```java
+ActionResult r = ActionTester.of(voidSaleAction)
+        .crud(Sale.class, crudService)          // TestCrud: HeadlessCrudController + HeadlessCrudView
+        .on(sale)                               // data of the CrudActionEvent
+        .asAccount(accountId)                   // tenant (via saas ContextPropagator)
+        .user(u -> u.confirm(true).input("Customer returned it").confirm(true))
+        .run();                                 // DIRECT mode
+
+assertThat(r.types()).containsExactly(CONFIRM, INPUT, CONFIRM, NOTIFY);
+assertThat(r.crud().queried()).isTrue();
+```
+
+| Mode | How it runs | What it shows |
+|---|---|---|
+| `run()` / `DIRECT` | Immediate callbacks, as in ZK | The action's logic |
+| `runRemote()` | Through the real `ReplayExecutor`: one pass per answer, signed token, per-pass transactions, `InMemoryTransferStore` | That it works for Vue/POS: it is deterministic, the fingerprints match and the token is within the cap |
+| `runEverywhere()` | Both, and compares the interactions and the effects | **The action is multiplatform.** It is the acceptance condition of any action declared `HEADLESS` |
+
+The `zk` mode is not tested per action: the contract suites of the ZK adapter cover it (§9.3). If the adapter meets the
+contract and the action passes `runEverywhere()`, the action works in ZK.
+
+### 10.4 What must be designed into actions to make them testable
+
+- **Actions depend on `CrudControllerAPI`, not on ZK controllers.** Today many ERP controllers extend
+  `tools.dynamia.zk.crud.CrudController` (`VentaCrudController`, `ClienteCrudController`, `OrdenMesaCrudController`, among
+  others) and the actions convert them with casts. The business logic of those controllers moves to services or to a neutral
+  `CrudControllerExtension`, and the ZK controller only delegates. If an action casts to a ZK controller, it is bound to ZK
+  (rule R1 with cast detection, §9.2).
+- **Dependencies by constructor or Spring**, not `Containers.get()` inside `actionPerformed`. `ActionTester` supports both
+  (a `SimpleObjectContainer` in the test), but the constructor eases unit tests with mocks.
+- **Texts through `Messages`/`ClassMessages`.** The script can use rules by message key
+  (`whenQuestion(key("confirmVoid"))`) as well as by text, so tests do not break when a translation changes. For that,
+  `UIInteraction` keeps the key when the action uses `msg(...)`.
+
+### 10.5 JUnit 5 and Spring integration
+
+- `@DynamiaUITest` (JUnit 5 extension): binds a clean `TestUIEnvironment` per test and injects `ActionTester` and `UIScript`
+  as parameters. Without Spring it uses a `SimpleObjectContainer`; with `@SpringBootTest` it uses the context (the tester
+  gets the action with `tester.action(VoidSaleAction.class)`, which creates it as a prototype like the app does).
+- In `erp-integration-tests`: with the `*-ui` → `*-actions` split (WP10), the module depends on the `*-actions` and runs the
+  **real actions** against MySQL. `AccionesAdminIT` stops copying the JPQL and calls
+  `ActionTester.of(unlinkAllItems).asAccount(a).user(u -> u.confirm(true)).run()`.
+- Fast unit tests per module: `module-x/actions/src/test` with `ActionTester` and a mock `CrudService` (Mockito).
+
+### 10.6 TS side
+
+`ui-core/testing` offers the same idea for front ends: `createTestPorts(script)` implements the TS ports (those of §1.3) with
+a script, and `runFlowScripted(client, action, script)` drives the flow runner against a simulated `DynamiaClient` or against
+a test server that replays the fixtures of §9.4. It serves to test Vue, POS and shop `ClientAction`s without a browser.
+
+### 10.7 Metric
+
+`ActionInventoryTest` publishes, besides the ZK-bound actions, how many `HEADLESS` actions have at least one test with
+`runEverywhere()`. The baseline of "published without a multiplatform test" can only go down. This makes "testable" part of
+the definition of done of a migrated action.
+
+---
+
+## 11. Implementation plan
+
+Rules for all packages: branch `feature/next-ui` of `dynamia-tools` (check with `git branch --show-current`). Code, Javadoc
+and commits in English. No commit or push unless the user asks. Each package ends with `mvn -o -pl <modules> -am test` green
+(and `pnpm exec vitest run` if it touches TS) and with this document updated in its *Implementation status* section.
+
+### WP1 · `UIEnvironment` and clear errors (§3)
+
+- **Files:** `ui-shared/.../UIFacades.java`, `UIMessages.java` and new `UIEnvironment`, `UIEnvironmentProvider`,
+  `NoUIEnvironment`, `UIUnavailableException`; `core/actions/.../replay/ReplayExecutor.java`, `ReplayBinder` →
+  `ReplayPortContributor`, new `ReplayUIEnvironment`; `crud/.../headless/HeadlessViewsBinder` → contributor;
+  `zk/ZKAppConfiguration.java`, new `zk/ui/ZKUIEnvironmentProvider`.
+- **Also:** `UIPlatform` (`current()`, `supports(Class)`) as the public facade of `UIEnvironment`, and the `@UIPort` annotation
+  on each existing SPI (`MessageDisplayer`, `ViewsProvider`, `ChoicesProvider`, `FileTransfer`, `ProgressRunner`,
+  `NavigationProvider`). The §1.3 generator goes in WP7.
+- **Acceptance:** `ReplayExecutor` makes a single `UIFacades.with(env, ...)`; a facade called outside ZK and outside replay
+  throws `UIUnavailableException` with the port and environment names; `UIMessages` without static cache; current tests green,
+  plus new resolution tests (bound > active provider > none).
+
+### WP1b · Testing platform (§10) — right after WP1
+
+- **Files:** new module `platform/testing/ui-testing` (`TestUIEnvironment`, `UIScript`, `UIInteraction`, `TestFiles`,
+  `CapturedDownload`, `TestCrud`, `ActionTester`, `ActionResult`, `@DynamiaUITest` extension). Move `RecordingDisplayer` from
+  the `ui-shared` tests to this platform. Rewrite the existing headless tests of `crud` (`SaveAction`, `DeleteAction`) and of
+  the already converted actions (`ExportReportAction`, `ImportReportAction`, `NewAccountPaymentAction`,
+  `MoveEntityFileLocalToRemoteStorageAction`, `ViewDataAction`) with `ActionTester`.
+- **Order:** `run()` mode goes with WP1. `runRemote()`/`runEverywhere()` are enabled with what exists of replay and grow with
+  WP4 (files by ref, `InMemoryTransferStore`) and WP5 (fingerprints, re-emission). The `test` platform also extends the WP6
+  contract suites.
+- **Acceptance:** each converted tools action has a green `runEverywhere()` test; an incomplete script fails with the pending
+  interaction message; a `ValidationError` in `showForm` can be answered again from the script; the module has no ZK
+  dependencies (rule R1).
+
+### WP2 · Classification and publication (§7)
+
+- **Files:** `ActionRuntime` (with `FRONTEND`; remove `ZK_ONLY`), `ActionRuntimes` (declared and not inherited), `RunsOn`,
+  `HeadlessCapable` (`@Deprecated`), `ActionMetadata`, `ApplicationMetadataLoader:149`, `ApplicationMetadataController` (filter
+  in `executeAction`, `@RequestBody` in `executeGlobalAction`), `HeadlessCrudRemoteAction`, `sdk/src/metadata/types.ts`. Change
+  `@RunsOn(ZK_ONLY)` → `FRONTEND` in `FindAction`, `FiltersAction`, `SaveConfigAction` and `Export*Action`. Add
+  `@RunsOn(HEADLESS)` where `HeadlessCapable` is today.
+- **Single catalog:** `FRONTEND` actions appear in the metadata without `endpoint`. In `ui-core`, the `ClientAction` registry
+  resolves by catalog id, and the UI hides `FRONTEND` actions without a local implementation.
+- **Acceptance:** test where a subclass of a `HEADLESS` action without declaration yields `UNDECLARED` and does not appear in
+  the metadata; `FindAction` appears as `FRONTEND` without endpoint; the endpoint returns 404 for a `FRONTEND` action; test
+  resuming a global action with a JSON body.
+
+### WP3 · Execution context (§8)
+
+- **Files:** `integration/.../context/ContextPropagator`, `ExecutionContext`, `SchedulerUtil.getWithContext`;
+  `UIEnvironmentPropagator` in `ui-shared`; `TenantPropagator` in `extensions/saas/sources/core`; `SecurityContextPropagator`
+  where Spring Security lives.
+- **Acceptance:** test in `saas` where a `SchedulerUtil.run` launched inside `AccountTenants.with(5L, ...)` sees tenant 5; test
+  where a facade inside a `SchedulerUtil` task throws `UIUnavailableException`.
+
+### WP4 · Streaming files (§6)
+
+- **Files:** `ui-shared`: `UploadedFile` (interface), `DownloadSource`, `UploadOptions`, `UploadPolicy`, `TransferStore`,
+  `TransferRef`, `TransferMeta`, `FlowPrincipal` (or in `actions` if preferred next to the token); `app`: `LocalTransferStore`,
+  `TransfersController`, scheduled purge, `dynamia.ui.files.*` properties; `actions`: `ReplayFileTransfer`, `ReplaySession`
+  (downloads as sources, delete after commit), `ActionFlowStep.upload(...)` with limits and `ReplayExecutor`
+  (`params.downloads` with URL); `zk`: `ZKFileTransfer` (`ZKMediaUploadedFile`, text/binary, `accept`, limits); actions that use
+  `f.content()` today: `ImportReportAction`; `sdk`: `transfers` and types; `vue`/`ui-core`: `UPLOAD` step and downloads.
+- **Acceptance:** `TransfersController` test with a 50 MB file generated by streaming without `OutOfMemory` and with a limited
+  test heap (`-Xmx256m` in that test's surefire); an upload over the limit → 413 and nothing in the store; another
+  user's/tenant's ref → 404; complete replay flow upload → confirm → callback, with a token under 2 KB; final download with
+  `params.downloads[].url` and no Base64; purge by TTL; vitest test of the `UPLOAD` step with a simulated `fetch`.
+
+### WP5 · Robust replay (§5.1 to §5.5)
+
+- **Files:** `ReplaySession` (fingerprint, re-emission, `ValidationError`), `ReplayExecutor` (`{fp, value}` format, rollback on
+  error), `FlowTokenSigner` (`FlowPrincipal`, mandatory secret, size cap), `HeadlessViews` (explicit close, re-emission with
+  errors), `ChoiceOptions`/`UIChoices`/`ReplayChoicesProvider`/`ZKChoicesProvider` (keys; empty multiple = cancel),
+  `ReplayProgressRunner` (outside the transaction), `vue/FormDialogHost.vue` (message and per-field errors), `runActionFlow`
+  (`CHOICE` with `{key,label}`).
+- **Acceptance:** tests that options changing between passes → re-emission; `ValidationError` in `onSubmit` → same `DIALOG`
+  with the error and the submitted values; another user's token → 401; startup with `require-secret` and no secret → fails.
+
+### WP6 · Per-port contract and ZK adapter (§4, §9.3)
+
+- **Files:** abstract suites in the `ui-shared` test-jar; driver implementations in `actions`/`crud` (replay) and `zk`;
+  adjustments to the `ZK*Provider`s to meet the §4 table (`ZKProgressRunner` without UI inside the task, `ZKViewsProvider`
+  unchanged apart from `onClose`, `showView` hints moved to `ViewOptions`/descriptor).
+- **Acceptance:** all rows of §4 covered in both adapters.
+
+### WP7 · Reusable architecture rules (§9.1, §9.2, §9.4)
+
+- **Files:** new `platform/testing/arch-rules`; move `RepoSources` and the two tests; rules R3 to R5; FQN and `groupId`
+  detection; FQN-based inheritance resolution; `platform/contract/fixtures` plus Java and TS tests;
+  `platform/contract/ui-contract-generator` (§1.3), which generates the SDK step and port types from `@UIPort` and
+  `ActionFlowStep`. The handwritten types in `sdk/src/metadata/types.ts` must be replaced and a CI check added that fails if
+  the generated output is stale.
+- **Acceptance:** tools green with their baselines; a short README in the module explaining how the ERP adopts it.
+
+### WP8 · Asynchronous progress (§5.6) — after WP3 and WP5
+
+- **Files:** `PROGRESS` step, `JobsController` (`/api/app/jobs/{id}`), asynchronous `ReplayProgressRunner`, step in
+  `ui-core/flow`, delete `markNonRepeatable`.
+- **Acceptance:** a 5 s task does not block the request; the client polls the state; `onFinish` runs exactly once.
+
+### WP9 · Framework-free `ui-core/flow` (§2, I7)
+
+- Move the loop of `vue/src/actions/runActionFlow.ts` to `ui-core/src/flow/` with injectable handlers; Vue becomes a thin
+  layer. This way `dynamia-pos` and `tienda-shop` reuse it.
+- **Acceptance:** the current `runActionFlow` tests pass against `ui-core`, and Vue only re-exports and provides the handlers.
+
+### WP10 · ERP (Phase 5), once WP1 to WP7 are in
+
+1. Adopt `arch-rules` with ERP baselines (R1 to R4).
+2. Split each `module-x/ui` into `module-x/actions` (no ZK: FREE and converted actions, with its own package and its own
+   `Messages.properties`) and `module-x/ui` (ZK). Moving to a new package is what avoids the same-name bundle clash found in #208.
+3. Convert first the bases that drag many actions (`VentaAction` 15, `TableViewRowAction` 6, `AbstractCrearCuentaRapidaAction`
+   4, `CompraAction` 4), then the EASY and MEDIUM actions of the inventory. Each is declared `@RunsOn(...)` after reviewing its
+   restrictions.
+4. Each converted action enters with its `ActionTester` test (`runEverywhere()`), unit in `module-x/actions` or integration in
+   `erp-integration-tests`, which comes to depend on the `*-actions`. First `AccionesAdminIT` is rewritten to run the real
+   `DesvincularTodosItemsInventarioAction`. The logic of the ERP's ZK controllers (`VentaCrudController` and similar) used by
+   the actions moves to services (§10.4).
+5. Test in the real ERP (ZK and Vue) the tenant cases: `UIProgress` (18 actions), importers with large files (`ImportarExcel*`,
+   `VerImportador*`).
+
+---
+
+## 12. Decisions that need the user
+
+| # | Decision | Proposal | Status |
+|---|---|---|---|
+| D1 | `/api/v2` (DynamiaNext) versus the flow protocol for POS and shop (design Q4) | `/api/v2` forwards `ActionFlowStep` untranslated, to have a single protocol | **Open** (no value received) |
+| D2 | Does the ERP run on more than one node? | If so, `TransferStore` and the WP8 jobs need shared storage (S3 or a shared FS) before production | **Open** (no value received); does not block WP1 to WP3 |
+| D3 | Default maximum file size | 100 MB, same as the current ZK `max-upload-size` in the ERP | **Decided: 100 MB** |
+| D4 | Name of the unpublished runtime | `FRONTEND` (alternatives: `LOCAL_UI`, `NOT_PUBLISHED`) | **Decided: `FRONTEND`** |
+
+---
+
+## 13. Map: current state → target
+
+| Topic | Today (`feature/next-ui`) | Target | WP |
+|---|---|---|---|
+| Port resolution | One SPI per facade; static cache in `UIMessages`; ZK beans are used outside ZK | Single `UIEnvironment`, active provider according to `Execution`, `NoUIEnvironment` | 1 |
+| Replay bindings | 5 nested `with` + `ReplayBinder` for one | One `ReplayUIEnvironment` + contributors | 1 |
+| Publication | By inheritable `HeadlessCapable` (`VerVentaAction` and 3 more in the ERP end up published); `runtime` only informs | `@RunsOn` declared on the concrete class; loader and endpoint use it | 2 |
+| Vocabulary | `ZK_ONLY` in `core/actions` and `core/crud` | `FRONTEND` | 2 |
+| Global actions | JSON body ignored (no `@RequestBody`) | Fixed and tested | 2 |
+| `UIProgress` in ZK | Another thread without tenant or security; UI inside the task fails confusingly | Propagated context; no UI inside the task in both adapters | 3, 6 |
+| Files | `byte[]`, Base64 in JSON and in the token; 1 MB / 10 MB | Streaming, `TransferStore`, signed refs, configurable 100 MB | 4 |
+| `ZKFileTransfer` | Ignores `accept`/title; `getStreamData` on text media | `ZKMediaUploadedFile`, `UploadPolicy` | 4 |
+| Replay answers | By position, unchecked | Per-step fingerprint and re-emission; `CHOICE` by key | 5 |
+| Form validation | ZK reopens; replay fails the whole action | Re-emission with errors in both | 5 |
+| Token | Bound to action and expiry; random per-JVM secret if missing | Bound to user and tenant; mandatory secret in prod; size cap | 5 |
+| Headless `UIProgress` | Inside the request and the pass transaction; error = commit | Outside the transaction; later asynchronous with jobs | 5, 8 |
+| Contract between adapters | Javadoc only | Per-port contract suites | 6 |
+| Architecture rules | Tools only; `import` and simple name; `extensions/*/ui` is a whole corner | Reusable artifact, FQN, `groupId`, R3 to R5 | 7 |
+| Action testing | Loose `RecordingDisplayer` in `ui-shared` tests; the ERP does not test actions (`AccionesAdminIT` copies the action's JPQL) | `test` platform with script, direct/remote/everywhere modes, JUnit 5 and Spring, and its TS equivalent | 1b |
+| TS runner | In `vue` | In `ui-core/flow` | 9 |
+| ERP | 0 uses of facades; 128 of 131 FREE actions in `*-ui` modules with ZK | `*-actions` modules without ZK, conversion by bases | 10 |
+
+### Minor details (include them when passing through each file)
+
+- Texts without i18n: `"OK"` (`ZKViewsProvider`), `"Close"` (`FormDialogHost.vue`), `"Error: "` (`UIProgress`),
+  `"Imported OK"` (`ImportReportAction`).
+- JSDoc of `ActionFlowStep` in the SDK: the `{ accept, multiple }` shape appears assigned to `VIEW` when it is the `UPLOAD` one.
+- `CrudControllerAPI.getAttributes()` as a `default` method returning an empty map, or document that it must be implemented.
+- There are two `CrudControllerAware` (`tools.dynamia.zk.crud` and `tools.dynamia.crud`): delete the ZK one and keep only the
+  `crud` one.
+- Fully qualified names in code (`java.util.Map`, `tools.dynamia.crud.actions.remote.SaveSupport`, `java.nio.file.Files`):
+  turn them into `import`s.
+- `HeadlessViews` only serves entities (it uses `SaveSupport.jsonFormDescriptor`). The target is to serialise and apply values
+  through the `ViewDescriptor` of any class with a descriptor, so DTO forms work (`ResetPasswordAction`,
+  `TestHttpFunctionAction`). It goes with WP5.
 
 ---
 
 ## Implementation status
 
-First iteration, `dynamia-tools` only (branch `feature/next-ui`):
+First iteration, `dynamia-tools` only (branch `feature/next-ui`), done before this architecture:
 
 | Issue | Done |
 |---|---|
@@ -424,21 +811,77 @@ Actions converted: `ExportReportAction` (also headless), `ImportReportAction`, `
 `ReloadEntityFileStoragesAction`, `MoveEntityFileLocalToRemoteStorageAction`, `DownloadFileAction`. ZK-bound actions went from
 34 to 28 of 61 (baseline file).
 
-### Known limits and what comes next
+Known limits of that iteration (addressed by the work packages above):
 
-- **Not verified in a running ZK or Vue application.** The facades, the replay side and the Vue runner are covered by unit
-  tests; the ZK implementations (`ZKFileTransfer`, `ZKProgressRunner`, `ZKViewsProvider`, `ZKChoicesProvider`,
-  `ZKNavigationProvider`) compile but were not exercised in a browser. Do that before merging.
-- **Per-package `Messages.properties`.** `ExportReportAction`, `ImportReportAction` and `NewAccountPaymentAction` are ZK-free
-  but stay in their `ui` modules: their message bundle is shared with ZK-bound actions in the same package, and a bundle with
-  the same name in two jars would hide one of them. Moving them needs bundles per action or merging bundles of the same name.
-- **`DownloadFileAction`** has no ZK import but its base class casts the controller to the ZK `EntityFileController`; the
-  scanner of the inventory does not follow casts. It stays in `ui`.
-- **`UIViews`** supports forms of entity classes known to the REST metadata; `showView` and forms with a descriptor built in
-  code (`TestHttpFunctionAction`) or a form model (`ResetPasswordAction`) are not done.
-- **Client actions are TypeScript.** There is no `CLIENT` runtime in Java: a search box, a filters panel or an export of what the grid
-  shows is a `registerClientAction` in the front end. `FindAction` and `FiltersAction` live in `crud` (ZK-free, with their ZK widgets
-  in `ZKFindRenderProvider` and `ZKCrudFilters`) and are `ZK_ONLY`: the server does not publish them. The exports
-  (`ExportCSV/Excel/Json`) stay in `zk`.
-- **Files travel inline** (Base64): 1 MB up, 10 MB down. A stream endpoint is needed for more.
-- **`UIProgress` headless** runs inside the request (request timeout applies); an asynchronous job with polling is future work.
+- Not verified in a running ZK or Vue application (the `ZK*Provider` adapters compile but were not exercised in a browser).
+- Per-package `Messages.properties` keep ZK-free actions in their `ui` modules (WP10.2).
+- `DownloadFileAction` casts to a ZK controller; the inventory scanner does not follow casts (R1 cast detection, §9.2).
+- `UIViews` supports forms of entity classes only (WP5, last minor detail).
+- Files travel inline as Base64: 1 MB up, 10 MB down (WP4).
+- `UIProgress` headless runs inside the request (WP5.5, WP8).
+
+### Work packages
+
+| WP | Status |
+|---|---|
+| WP1 | Done, see below |
+| WP1b | Done except the items listed below |
+| WP2 | Done, see below |
+| WP3 to WP10 | Not started |
+
+#### WP1 · `UIEnvironment` and clear errors
+
+- `ui-shared`: `UIEnvironment`, `UIEnvironmentProvider`, `NoUIEnvironment`, `UIUnavailableException`, `UIPlatform`
+  (`current()`, `supports(Class)`), `@UIPort` on `MessageDisplayer`, `ViewsProvider`, `ChoicesProvider`, `FileTransfer`,
+  `ProgressRunner` and `NavigationProvider`. `UIFacades` resolves bound environment, then the active provider, then
+  `NoUIEnvironment`; `UIFacades.port(Spi)` replaces `resolve`/`bound`. `UIFacades.with(Class, impl, work)` stays as an
+  overlay of one port on the active environment (used by tests). `UIMessages` has no static cache and
+  `setCurrentMessageDisplayer` is gone.
+- `core/actions`: `ReplayUIEnvironment` (all headless ports of a pass plus `ReplaySession`) and `ReplayPortContributor`
+  replace the nested bindings and `ReplayBinder`; `ReplayExecutor` makes a single `UIFacades.with(env, ...)`. `crud`:
+  `HeadlessViewsBinder` is now `HeadlessViewsContributor`.
+- `zk`: `ZKUIEnvironment` and `ZKUIEnvironmentProvider` (active while `Executions.getCurrent() != null`);
+  `ZKAppConfiguration` registers the provider instead of six port beans. A container bean of a port SPI (the ERP's and the
+  themes' `MessageDisplayer`) still replaces the ZK default for that port.
+- Not in WP1: the `@UIPort` generator (WP7); `UIEnvironmentPropagator` (WP3, so a `LongOperation` thread still sees the
+  environment of the ZK execution that is active in it only if ZK activated one).
+- **Breaking for the ERP:** `UIMessages.setCurrentMessageDisplayer` (used by 8 ERP view-model tests in `erp-pagos-ui` and
+  `erp-soporte-ui`) no longer exists; those tests must bind the displayer with `UIMessages.withDisplayer` or
+  `UIFacades.with(...)`.
+
+#### WP1b · Testing platform
+
+New module `platform/testing/ui-testing` (`tools.dynamia.ui.testing`, test scope for consumers, no ZK dependency):
+`TestUIEnvironment`, `UIScript`, `UIInteraction`, `TestFiles`, `CapturedDownload`, `TestCrud`, `ActionTester`, `ActionResult`.
+
+- `run()`, `runRemote()` (through the real `ReplayExecutor`, signed tokens) and `runEverywhere()` (compares questions,
+  notifications, downloads, redirect and exception) are implemented with what replay supports today.
+- Strict scripts: an unanswered interaction fails with `Unanswered CONFIRM '...' at interaction #n`; leftover answers fail.
+  `ValidationError` in a form's `onSubmit` opens the form again with the error (direct mode).
+- Every converted action has a green `runEverywhere()` test: `SaveAction`, `DeleteAction`, `ViewDataAction` (in
+  `ui-testing`), `ExportReportAction`, `ImportReportAction` (`reports/ui`), `NewAccountPaymentAction` (`saas/ui`),
+  `MoveEntityFileLocalToRemoteStorageAction` (`entity-files/core`).
+- Behaviour change found by those tests: `HeadlessCrudController.query()`/`doQuery()` threw `UnsupportedOperationException`
+  headless, so `ImportReportAction` and `NewAccountPaymentAction` failed after doing their work when reached remotely. They
+  now record the request (`isQueryRequested()`), because the remote client re-queries when the action ends.
+- `ViewDataAction.actionPerformed` ignores a null selection silently; its "select a row" message is unreachable.
+
+Not done yet: the `@DynamiaUITest` JUnit extension, `InMemoryTransferStore` and streaming `TestFiles` (WP4),
+`asAccount(...)` and context propagation into `UIProgress` tasks (WP3), `asyncProgress()`, rules by message key, remote
+re-ask after `ValidationError` (WP5), `submitForm(...)` in remote mode (use `fillForm`), moving `RecordingDisplayer`
+(`ui-shared` tests cannot depend on a module that depends on `ui-shared`), the contract suites (WP6) and TS side (§10.6).
+
+#### WP2 · Classification and publication
+
+- `ActionRuntime.ZK_ONLY` is now `FRONTEND`. `ActionRuntimes.of` reads `@RunsOn` with `getDeclaredAnnotation`, so a subclass
+  does not inherit it; `HeadlessCapable` is `@Deprecated` and counts only when the concrete class lists it in its own
+  `implements`. `@RunsOn(HEADLESS)` was added to `SaveAction`, `DeleteAction`, `ViewDataAction`, `ExportReportAction`
+  and `HeadlessCrudRemoteAction`, which removes the special case in `ActionMetadata`.
+- `FindAction`, `FiltersAction`, `SaveConfigAction` and the ZK `Export*Action`s are `FRONTEND`.
+- `ApplicationMetadataLoader` publishes `HEADLESS` actions with endpoint and `FRONTEND` ones without; undeclared local actions
+  never appear. `ApplicationMetadataController.executeAction` answers 404 for anything that is not `HEADLESS`, `FLOW` or
+  `REMOTE`. `executeGlobalAction` now has `@RequestBody` (the test `GlobalActionFlowTest` fails without it).
+- SDK: `ActionRuntime` is typed with `FRONTEND`. `ActionResolver` (`ui-core`) hides a `FRONTEND` action unless a `ClientAction`
+  with the same id or class name is registered.
+- Not in WP2: `ApplicationGlobalAction` (local global actions) is still not published, and the baseline of `UNDECLARED`
+  actions (rule R4) comes with WP7.

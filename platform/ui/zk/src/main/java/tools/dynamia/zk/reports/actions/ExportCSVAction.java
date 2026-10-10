@@ -36,7 +36,7 @@ import java.io.File;
 import java.util.Collection;
 
 @InstallAction
-@RunsOn(ActionRuntime.ZK_ONLY)
+@RunsOn(ActionRuntime.FRONTEND)
 public class ExportCSVAction extends AbstractExportAction {
 
 

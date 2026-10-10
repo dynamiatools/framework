@@ -47,7 +47,7 @@ public final class UIFiles {
      * Gives a file to the user.
      */
     public static void download(String fileName, String contentType, byte[] content) {
-        UIFacades.resolve(FileTransfer.class).download(fileName, contentType, content);
+        UIFacades.port(FileTransfer.class).download(fileName, contentType, content);
     }
 
     /**
@@ -65,7 +65,7 @@ public final class UIFiles {
      * Asks the user for files.
      */
     public static void upload(UploadOptions options, Consumer<List<UploadedFile>> onFiles) {
-        UIFacades.resolve(FileTransfer.class).upload(options, onFiles);
+        UIFacades.port(FileTransfer.class).upload(options, onFiles);
     }
 
     /**
