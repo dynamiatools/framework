@@ -58,4 +58,6 @@ export type {
 // ── Schedule API (platform-core feature) ─────────────────────────────────────
 export {ScheduleApi} from './schedule/index.js';
 export {TransfersApi} from './transfers/index.js';
+export {ACTION_FLOW_STEP_TYPES, ACTION_FLOW_STEP_FIELDS, ACTION_RUNTIMES, UI_PORTS} from './generated/ui-contract.js';
+export type {UIPortName} from './generated/ui-contract.js';
 export type {UploadOptions} from './transfers/index.js';

@@ -118,11 +118,11 @@ export interface ApplicationMetadataActions {
     actions: ActionMetadata[];
 }
 
-/**
- * Mirrors `tools.dynamia.actions.ActionRuntime`: where and how a published action runs. A `FRONTEND` action is in the
- * catalog without `endpoint`: each front end implements it as a `ClientAction` with the same id, or does not show it.
- */
-export type ActionRuntime = 'HEADLESS' | 'FLOW' | 'REMOTE' | 'FRONTEND' | 'UNDECLARED';
+// ActionRuntime, ActionFlowStepType and ActionFlowStep are generated from the Java classes (src/generated/ui-contract.ts).
+// A `FRONTEND` action is in the catalog without `endpoint`: each front end implements it as a `ClientAction` with the same id,
+// or does not show it.
+export type {ActionRuntime, ActionFlowStepType, ActionFlowStep} from '../generated/ui-contract.js';
+import type {ActionRuntime, ActionFlowStep} from '../generated/ui-contract.js';
 
 export type ActionType = 'Action' | 'ClassAction' | 'CrudAction' | string;
 
@@ -219,20 +219,6 @@ export interface ActionExecutionResponse {
     flow?: ActionFlowStep;
 }
 
-/** Mirrors `tools.dynamia.actions.ActionFlowStepType`. */
-export type ActionFlowStepType =
-    | 'CONFIRM'
-    | 'INPUT'
-    | 'DIALOG'
-    | 'VIEW'
-    | 'UPLOAD'
-    | 'CHOICE'
-    | 'NOTIFY'
-    | 'REDIRECT'
-    | 'CALL'
-    | 'DONE'
-    | 'CUSTOM';
-
 /**
  * Reference to a file already sent to `/api/app/transfers` (see `client.transfers.upload`): what an `UPLOAD` step is
  * answered with. The content never travels inside the flow.
@@ -253,40 +239,6 @@ export interface FlowDownload {
     contentType?: string | null;
     size: number;
     url: string;
-}
-
-/**
- * A single step of a `FlowRemoteAction` flow — mirrors `tools.dynamia.actions.ActionFlowStep`.
- *
- * `data`'s shape depends on `type`: the result for `DONE`, `{ url, awaitReturn }` for `REDIRECT`,
- * `{ action, ...}` for `CALL`, `{ component, ... }` for `CUSTOM`, prefill data for `DIALOG`, for
- * `VIEW` (a read only `DIALOG`, answered with anything when closed), `UPLOAD` (`{ accept, multiple, maxFiles, maxFileSize, maxTotalSize }`, answered with a list of {@link FlowFileRef}), `{ options: {key, label}[], multiple }` for `CHOICE`
- * (answered with the list of keys chosen), or absent
- * for `CONFIRM`/`INPUT`/`NOTIFY`.
- *
- * `REDIRECT` (terminal; `awaitReturn: true` unsupported) and `CALL` (`data.action`, optional `data.className`)
- * are experimental — see `docs/design/SERVER_DRIVEN_ACTION_FLOWS.md` §6.
- *
- * @experimental The whole flow protocol may still change.
- */
-export interface ActionFlowStep {
-    flowId: string;
-    type: ActionFlowStepType;
-    title?: string;
-    message?: string;
-    /** Mirrors `tools.dynamia.ui.MessageType` (NORMAL/ERROR/WARNING/INFO/CRITICAL/SPECIAL). */
-    messageType?: string;
-    /** For `DIALOG`: name of the `ViewDescriptor` to render as a form. */
-    viewDescriptor?: string;
-    /** For `DIALOG`: class name `viewDescriptor` belongs to, when it is not the entity the action runs on. */
-    viewClass?: string;
-    data?: unknown;
-    /** For a `DIALOG` shown again after a validation error: the message of each failed field, by field name. */
-    fieldErrors?: Record<string, string>;
-    /** Presentation hints the front end may follow, such as `width` and `height` of a dialog ("60%", "500px"). */
-    hints?: Record<string, string>;
-    /** Opaque, signed — echo back verbatim as `ActionExecutionRequest.resumeToken` to continue the flow. */
-    resumeToken?: string;
 }
 
 // ── View descriptors ───────────────────────────────────────────────────────

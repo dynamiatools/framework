@@ -22,7 +22,7 @@ import java.util.function.BiConsumer;
  * SPI behind {@link UIViews}. ZK opens a window with a {@code Viewer}; a headless run turns the form into a
  * {@code DIALOG} flow step the client renders from the view descriptor.
  */
-@UIPort(name = "views", steps = {"DIALOG"})
+@UIPort(name = "views", steps = {"DIALOG", "VIEW"})
 public interface ViewsProvider {
 
     /**
