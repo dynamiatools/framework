@@ -50,6 +50,13 @@ public final class UIFacades {
     }
 
     /**
+     * @return the scoped value that holds the bound environment, for the capturer that carries context into tasks
+     */
+    static ScopedValue<UIEnvironment> environmentBinding() {
+        return BOUND;
+    }
+
+    /**
      * Runs {@code work} with {@code environment} as the active one.
      *
      * @param environment the environment for this execution, not null

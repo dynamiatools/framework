@@ -827,7 +827,8 @@ Known limits of that iteration (addressed by the work packages above):
 | WP1 | Done, see below |
 | WP1b | Done except the items listed below |
 | WP2 | Done, see below |
-| WP3 to WP10 | Not started |
+| WP3 | Done, see below |
+| WP4 to WP10 | Not started |
 
 #### WP1 · `UIEnvironment` and clear errors
 
@@ -885,3 +886,16 @@ re-ask after `ValidationError` (WP5), `submitForm(...)` in remote mode (use `fil
   with the same id or class name is registered.
 - Not in WP2: `ApplicationGlobalAction` (local global actions) is still not published, and the baseline of `UNDECLARED`
   actions (rule R4) comes with WP7.
+
+#### WP3 · Execution context
+
+The branch already had the mechanism §8 asks for: `ContextCapturer` beans, asked by `ObjectsContext.capture()`, which
+`SchedulerUtil` uses for every task (and `LongOperation`, hence `ZKProgressRunner`, goes through `SchedulerUtil.run`). So
+`ContextPropagator`/`ExecutionContext` were not added as a second API; the propagators of §8.2 are `ContextCapturer`s:
+
+| Capturer | Module | State |
+|---|---|---|
+| `ObjectsContext` snapshot | `integration` | Existing |
+| `AccountTenantContextCapturer` | `saas/core` | Existing (tenant bound, of the request or of the session); tests already cover `AccountTenants.with(7L, ...)` and the root tenant |
+| `UIEnvironmentContextCapturer` | `ui-shared` | New: the task runs in `NoUIEnvironment`, so a UI facade there throws `UIUnavailableException` |
+| `SecurityContextCapturer` | `security/core` | New: the task acts as the authenticated user of the caller; the pooled thread's context is restored afterwards |
