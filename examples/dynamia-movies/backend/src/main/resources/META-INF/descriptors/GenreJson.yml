@@ -5,3 +5,5 @@ autofields: false
 fields:
   name:
   description:
+  color:
+    component: colorpicker

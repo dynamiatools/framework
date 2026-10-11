@@ -10,6 +10,11 @@ fields:
   genresText:
     label: Genres
   rating:
+    component: rating
+    params:
+      max: 5
+      scale: 10
   votes:
   certification:
+    component: badge
   featured:

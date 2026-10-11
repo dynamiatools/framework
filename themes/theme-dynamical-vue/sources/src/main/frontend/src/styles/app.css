@@ -89,6 +89,13 @@
 .dynamia-checkbox {
   @apply h-4 w-4 rounded border-gray-300 dark:border-gray-700 accent-[var(--skin-primary)];
 }
+/* A boolean in a table is a disabled checkbox: keep it readable instead of browser-greyed. */
+.dynamia-checkbox:disabled {
+  @apply cursor-default opacity-100;
+}
+.dynamia-checkbox:disabled:not(:checked) {
+  @apply opacity-60;
+}
 .dynamia-checkbox-label {
   @apply text-sm text-gray-600 dark:text-gray-400;
 }
@@ -600,4 +607,18 @@
 }
 .dynamia-row-menu-item-danger .dynamia-action-btn {
   @apply text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/15;
+}
+
+/* Basic star rating of @dynamia-tools/vue; this theme replaces it with the TailAdmin one (components/fields/StarRating.vue). */
+.dynamia-rating {
+  @apply inline-flex items-center gap-0.5;
+}
+.dynamia-rating-star {
+  @apply text-lg leading-none text-gray-300 dark:text-gray-700 disabled:cursor-default;
+}
+.dynamia-rating-star-on {
+  @apply text-warning-500;
+}
+.dynamia-rating-value {
+  @apply ml-1.5 text-xs tabular-nums text-gray-500 dark:text-gray-400;
 }

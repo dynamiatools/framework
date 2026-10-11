@@ -102,6 +102,14 @@ export class FieldResolver {
     return FieldResolver._inferComponent(fieldClass);
   }
 
+  /**
+   * The component that matches a field class (`java.lang.Boolean` → checkbox, a number → a number box...). It is also
+   * the fallback of a front end for a descriptor component name nobody implements.
+   */
+  static inferComponent(fieldClass?: string | null): FieldComponent | string {
+    return FieldResolver._inferComponent(fieldClass ?? '');
+  }
+
   private static _inferComponent(fieldClass: string): FieldComponent | string {
     const lc = fieldClass.toLowerCase();
     if (lc === 'string' || lc === 'java.lang.string') return FieldComponent.Textbox;

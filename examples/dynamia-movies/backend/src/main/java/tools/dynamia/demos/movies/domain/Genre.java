@@ -14,6 +14,8 @@ public class Genre extends BaseEntity {
     @NotEmpty
     private String name;
     private String description;
+    /** Hex color (`#rrggbb`) the backoffice shows for this genre. */
+    private String color;
 
     public Genre() {
     }
@@ -36,6 +38,14 @@ public class Genre extends BaseEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 
     @Override

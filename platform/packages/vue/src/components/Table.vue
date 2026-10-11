@@ -36,7 +36,7 @@
           >
             <slot :name="`cell-${col.name}`" :row="row" :col="col">
               <Field
-                v-if="isComponentColumn(col)"
+                v-if="isCellComponent(col)"
                 :field="col"
                 :model-value="(row as Record<string, unknown>)[col.name]"
                 read-only
@@ -67,18 +67,8 @@
 <script setup lang="ts">
 import { entityDisplayLabel } from '@dynamia-tools/ui-core';
 import type { VueTableView } from '../views/VueTableView.js';
-import type { ResolvedField } from '@dynamia-tools/ui-core';
 import Field from './Field.vue';
-
-/**
- * Display components a column can ask for with an explicit `component` in its view descriptor
- * (e.g. `component: coollabel`). Every other column keeps rendering its value as text.
- */
-const CELL_COMPONENTS = new Set(['coollabel', 'enumlabel', 'entityreflabel', 'label', 'link']);
-
-function isComponentColumn(col: ResolvedField): boolean {
-  return !!col.component && CELL_COMPONENTS.has(col.component.toLowerCase());
-}
+import { isCellComponent } from './fields/fieldComponents.js';
 
 defineProps<{
   /** The VueTableView instance to render */
