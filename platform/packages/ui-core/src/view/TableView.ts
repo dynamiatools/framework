@@ -23,6 +23,7 @@ export class TableView extends DataSetView {
 
   private _resolvedColumns: ResolvedField[] = [];
   private _readOnly = false;
+  private _filters: Record<string, unknown> = {};
   private _crudPath?: string;
   private _tableLoader?: (params: Record<string, unknown>) => Promise<{ rows: unknown[]; pagination: CrudPageable | null }>;
 
@@ -139,6 +140,23 @@ export class TableView extends DataSetView {
     await this.load({ page: 1 });
   }
 
+  /**
+   * Replaces the field filters of the query (field name to value) and loads the first page. Blank values are dropped, so an
+   * empty object clears every filter. The REST read applies them as `?field=value`.
+   */
+  async setFilters(filters: Record<string, unknown>): Promise<void> {
+    this._filters = Object.fromEntries(
+      Object.entries(filters).filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== ''),
+    );
+    await this.load({ page: 1 });
+  }
+
+  /** The text of the last search */
+  getSearchQuery(): string { return this.state.searchQuery; }
+
+  /** The field filters in effect */
+  getFilters(): Record<string, unknown> { return { ...this._filters }; }
+
   /** Select a row (alias for setSelected with table semantics) */
   selectRow(row: unknown): void { this.setSelected(row); }
 
@@ -155,7 +173,7 @@ export class TableView extends DataSetView {
   getPagination(): CrudPageable | null { return this.state.pagination; }
 
   private _buildQueryParams(): Record<string, unknown> {
-    const params: Record<string, unknown> = {};
+    const params: Record<string, unknown> = { ...this._filters };
     if (this.state.pagination) params['page'] = this.state.pagination.page;
     if (this.state.sortField) {
       params['sortField'] = this.state.sortField;

@@ -51,6 +51,11 @@ export class VueTableView extends TableView {
     this.state.initialized = true;
   }
 
+  /** The columns resolved by {@link initialize}, which keeps them in its own ref instead of the base class field. */
+  override getResolvedColumns(): ResolvedField[] {
+    return this._columnsRef.value;
+  }
+
   override async load(params: Record<string, unknown> = {}): Promise<void> {
     this.isLoading.value = true;
     try {

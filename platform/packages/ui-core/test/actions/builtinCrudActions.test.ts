@@ -116,3 +116,69 @@ describe('registerBuiltinCrudActions — execute behavior', () => {
     ).not.toThrow();
   });
 });
+
+describe('registerBuiltinCrudActions — Find and Filters', () => {
+  beforeEach(() => {
+    ClientActionRegistry.clear();
+    registerBuiltinCrudActions();
+  });
+
+  /** A CrudView whose table records the params of every load. */
+  function viewWithLoader() {
+    const view = new CrudView(createDescriptor(), null);
+    const loads: Record<string, unknown>[] = [];
+    view.tableView!.setLoader(async (params) => {
+      loads.push(params);
+      return { rows: [], pagination: null };
+    });
+    return { view, loads };
+  }
+
+  it('resolve under their ids, aliases and ask for their own renderer', () => {
+    for (const id of ['FindAction', 'find']) {
+      expect(ClientActionRegistry.resolve(meta(id))?.renderer).toBe('find');
+    }
+    for (const id of ['FiltersAction', 'filters']) {
+      expect(ClientActionRegistry.resolve(meta(id))?.renderer).toBe('filters');
+    }
+  });
+
+  it('Find: searches the text of request.data and goes back to the first page', async () => {
+    const { view, loads } = viewWithLoader();
+    await ClientActionRegistry.resolve(meta('FindAction'))!.execute({ action: meta('FindAction'), request: { data: '  dune ' }, view });
+    expect(loads.at(-1)).toMatchObject({ q: 'dune', page: 1 });
+  });
+
+  it('Find: an empty text clears the search', async () => {
+    const { view, loads } = viewWithLoader();
+    await view.tableView!.search('dune');
+    await ClientActionRegistry.resolve(meta('FindAction'))!.execute({ action: meta('FindAction'), request: { data: '' }, view });
+    expect(loads.at(-1)).not.toHaveProperty('q');
+  });
+
+  it('Filters: sends the field values and drops the blank ones', async () => {
+    const { view, loads } = viewWithLoader();
+    await ClientActionRegistry.resolve(meta('FiltersAction'))!.execute({
+      action: meta('FiltersAction'),
+      request: { data: { year: '1999', title: '  ', available: 'true' } },
+      view,
+    });
+    const last = loads.at(-1)!;
+    expect(last).toMatchObject({ year: '1999', available: 'true', page: 1 });
+    expect(last).not.toHaveProperty('title');
+    expect(view.tableView!.getFilters()).toEqual({ year: '1999', available: 'true' });
+  });
+
+  it('Filters: an empty object clears every filter', async () => {
+    const { view, loads } = viewWithLoader();
+    await view.tableView!.setFilters({ year: '1999' });
+    await ClientActionRegistry.resolve(meta('FiltersAction'))!.execute({ action: meta('FiltersAction'), request: { data: {} }, view });
+    expect(loads.at(-1)).not.toHaveProperty('year');
+    expect(view.tableView!.getFilters()).toEqual({});
+  });
+
+  it('are no-ops when the context view is not a CrudView', async () => {
+    await expect(ClientActionRegistry.resolve(meta('FindAction'))!.execute({ action: meta('FindAction'), request: { data: 'x' } })).resolves.toBeUndefined();
+    await expect(ClientActionRegistry.resolve(meta('FiltersAction'))!.execute({ action: meta('FiltersAction'), request: { data: {} } })).resolves.toBeUndefined();
+  });
+});

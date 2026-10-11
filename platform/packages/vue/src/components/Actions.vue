@@ -75,7 +75,9 @@ const { prompt } = useInput();
 const { showForm: showFormDialog } = useFormDialog();
 
 function resolveRenderer(action: ActionMetadata): Component {
-  return ActionRendererRegistry.get<Component>(action.renderer) ?? VueButtonActionRenderer;
+  // A client action names its own renderer: the server one is a Java class name that tells nothing (DelegateActionRender).
+  const rendererName = ClientActionRegistry.resolve(action)?.renderer ?? action.renderer;
+  return ActionRendererRegistry.get<Component>(rendererName) ?? VueButtonActionRenderer;
 }
 
 async function handleTrigger(action: ActionMetadata, payload?: ActionTriggerPayload): Promise<void> {
