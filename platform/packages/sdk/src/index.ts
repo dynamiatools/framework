@@ -47,7 +47,8 @@ export type {
 } from './metadata/index.js';
 
 // ── CRUD module ───────────────────────────────────────────────────────────────
-export {CrudResourceApi, CrudServiceApi} from './cruds/index.js';
+export {CrudResourceApi, CrudServiceApi, ConfigResourceApi} from './cruds/index.js';
+export type {ConfigResult, ConfigValues} from './cruds/index.js';
 export type {
     CrudListResult,
     CrudQueryParams,
