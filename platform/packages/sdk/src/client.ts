@@ -3,6 +3,7 @@ import { MetadataApi } from './metadata/api.js';
 import { ActionsApi } from './metadata/actions.js';
 import { CrudResourceApi } from './cruds/crud-resource.js';
 import { CrudServiceApi } from './cruds/crud-service.js';
+import { ConfigResourceApi } from './cruds/config-resource.js';
 import { ScheduleApi } from './schedule/api.js';
 import { TransfersApi } from './transfers/api.js';
 import { JobsApi } from './jobs/api.js';
@@ -60,6 +61,22 @@ export class DynamiaClient {
    */
   crud<T = unknown>(virtualPath: string): CrudResourceApi<T> {
     return new CrudResourceApi<T>(this.http, virtualPath);
+  }
+
+  /**
+   * Returns the client of a ConfigPage: reads and saves the values of its config descriptor.
+   *
+   * @param virtualPath - The ConfigPage virtual path (`NavigationNode.internalPath`).
+   *
+   * @example
+   * ```typescript
+   * const config = client.config('system/config/entityFile');
+   * const { descriptor, data } = await config.read();
+   * await config.save({ useHttps: true });
+   * ```
+   */
+  config(virtualPath: string): ConfigResourceApi {
+    return new ConfigResourceApi(this.http, virtualPath);
   }
 
   /**

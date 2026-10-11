@@ -10,6 +10,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.crud.CrudPage;
+import tools.dynamia.crud.cfg.ConfigPage;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.navigation.ModuleContainer;
 import tools.dynamia.navigation.Page;
@@ -62,6 +63,10 @@ public class RestApiNavigationConfiguration {
 
         Method routeDelete = RestNavigationController.class.getMethod("routeDelete",
                 Long.class, HttpServletRequest.class);
+        Method routeConfigRead = RestNavigationController.class.getMethod("routeConfigRead",
+                HttpServletRequest.class);
+        Method routeConfigSave = RestNavigationController.class.getMethod("routeConfigSave",
+                String.class, HttpServletRequest.class);
 
 
         var mapping = mappings.stream().findFirst().get();
@@ -73,6 +78,9 @@ public class RestApiNavigationConfiguration {
                         addRoute(controller, "", RequestMethod.POST, routeCreate, mapping, page, customizers);
                         addRoute(controller, "/{id}", RequestMethod.PUT, routeUpdate, mapping, page, customizers);
                         addRoute(controller, "/{id}", RequestMethod.DELETE, routeDelete, mapping, page, customizers);
+                    } else if (page instanceof ConfigPage) {
+                        addRoute(controller, "", RequestMethod.GET, routeConfigRead, mapping, page, customizers);
+                        addRoute(controller, "", RequestMethod.PUT, routeConfigSave, mapping, page, customizers);
                     }
                 }));
     }

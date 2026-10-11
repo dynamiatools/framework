@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import tools.dynamia.commons.StringPojoParser;
 import tools.dynamia.crud.CrudPage;
+import tools.dynamia.crud.cfg.ConfigPage;
 import tools.dynamia.domain.query.DataPaginator;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.navigation.ModuleContainer;
@@ -141,6 +142,27 @@ public class RestNavigationContext {
         if (page instanceof CrudPage crudPage) {
             NavigationRestrictions.verifyAccess(page);
             return crudPage;
+        }
+        throw new PageNotFoundException("Invalid Path " + path);
+    }
+
+    /**
+     * Resolves a {@link ConfigPage} by navigation {@code path}, verifying access restrictions, like {@link #findCrudPage(String)}.
+     *
+     * @param path the navigation path to resolve
+     * @return the matching {@link ConfigPage}
+     * @throws PageNotFoundException if the path does not resolve to a {@link ConfigPage}
+     */
+    public ConfigPage findConfigPage(String path) {
+        Page page;
+        try {
+            page = moduleContainer.findPage(path);
+        } catch (PageNotFoundException e) {
+            page = moduleContainer.findPageByPrettyVirtualPath(path);
+        }
+        if (page instanceof ConfigPage configPage) {
+            NavigationRestrictions.verifyAccess(page);
+            return configPage;
         }
         throw new PageNotFoundException("Invalid Path " + path);
     }

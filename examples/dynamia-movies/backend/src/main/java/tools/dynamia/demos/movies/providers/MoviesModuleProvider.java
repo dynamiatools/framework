@@ -1,6 +1,7 @@
 package tools.dynamia.demos.movies.providers;
 
 import tools.dynamia.crud.CrudPage;
+import tools.dynamia.crud.cfg.ConfigPage;
 import tools.dynamia.demos.movies.domain.*;
 import tools.dynamia.integration.sterotypes.Provider;
 import tools.dynamia.navigation.Module;
@@ -23,7 +24,8 @@ public class MoviesModuleProvider implements ModuleProvider {
                         new CrudPage("genres", "Genres", Genre.class).icon("tags"),
                         new CrudPage("studios", "Studios", Studio.class).icon("building"),
                         new CrudPage("credits", "Credits", Credit.class).icon("users"),
-                        new CrudPage("reviews", "Reviews", Review.class).icon("star")
+                        new CrudPage("reviews", "Reviews", Review.class).icon("star"),
+                        new ConfigPage("settings", "Settings", "MoviesSettingsCFG").icon("settings")
                 );
     }
 }

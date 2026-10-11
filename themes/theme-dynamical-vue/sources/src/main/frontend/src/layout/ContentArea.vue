@@ -1,6 +1,8 @@
 <template>
   <DynamiaCrudPage v-if="node.type === 'CrudPage'" :node="node" :client="client" />
 
+  <DynamiaConfigPage v-else-if="node.type === 'ConfigPage'" :node="node" :client="client" />
+
   <!--
     AdminLayout scrolls the whole page (no fixed-height content area), so an embedded page gets an
     explicit viewport-relative height and scrolls internally — instead of dynamia-embed's default

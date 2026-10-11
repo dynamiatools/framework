@@ -64,6 +64,7 @@ public class RestNavigationController {
     private final RestNavigationCreateOperation createOp;
     private final RestNavigationUpdateOperation updateOp;
     private final RestNavigationDeleteOperation deleteOp;
+    private final RestNavigationConfigOperation configOp;
 
     /**
      * Constructs a new {@code RestNavigationController} and initialises all operation delegates.
@@ -77,6 +78,7 @@ public class RestNavigationController {
         this.createOp = new RestNavigationCreateOperation(ctx);
         this.updateOp = new RestNavigationUpdateOperation(ctx);
         this.deleteOp = new RestNavigationDeleteOperation(ctx);
+        this.configOp = new RestNavigationConfigOperation(ctx);
     }
 
     // -------------------------------------------------------------------------
@@ -136,6 +138,27 @@ public class RestNavigationController {
      */
     public ResponseEntity<String> routeDelete(@PathVariable Long id, HttpServletRequest request) {
         return deleteOp.delete(ctx.getPath(request).replace("/" + id, ""), id, request);
+    }
+
+    /**
+     * Entry point for reading the values of a {@link tools.dynamia.crud.cfg.ConfigPage}.
+     *
+     * @param request the current HTTP request
+     * @return a JSON response with the values by field name
+     */
+    public ResponseEntity<String> routeConfigRead(HttpServletRequest request) {
+        return configOp.read(ctx.getPath(request));
+    }
+
+    /**
+     * Entry point for saving the values of a {@link tools.dynamia.crud.cfg.ConfigPage}.
+     *
+     * @param jsonData a JSON object with field name to value
+     * @param request  the current HTTP request
+     * @return a JSON response with the values by field name after saving
+     */
+    public ResponseEntity<String> routeConfigSave(@RequestBody String jsonData, HttpServletRequest request) {
+        return configOp.save(ctx.getPath(request), jsonData);
     }
 
     // -------------------------------------------------------------------------
