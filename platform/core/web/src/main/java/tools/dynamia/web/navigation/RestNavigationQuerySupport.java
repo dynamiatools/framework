@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.reflect.AccessMode;
+import tools.dynamia.domain.query.CustomQueryCondition;
 import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.viewers.Field;
@@ -211,8 +212,12 @@ public final class RestNavigationQuerySupport {
             return;
         }
 
-        query.and("(" + String.join(" or ", conditions) + ")");
-        query.getQueryParameters().add(SEARCH_QUERY_PARAM, "%" + text.trim().toLowerCase() + "%");
+        // A plain query parameter named "searchText" would also become an "e.searchText like ..." condition, which fails (or
+        // silently filters) depending on whether the entity happens to have such an attribute. A custom condition renders the
+        // OR group as is and binds the value itself, so the entity model plays no part.
+        String pattern = "%" + text.trim().toLowerCase() + "%";
+        query.getQueryParameters().add(SEARCH_PARAM, new CustomQueryCondition("(" + String.join(" or ", conditions) + ")",
+                q -> q.setParameter(SEARCH_QUERY_PARAM, pattern)));
     }
 
     // -------------------------------------------------------------------------
