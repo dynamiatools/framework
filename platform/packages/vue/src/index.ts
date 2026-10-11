@@ -90,6 +90,7 @@ export { default as CrudComponent } from './components/Crud.vue';
 export { default as DynamiaCrudPage } from './components/CrudPage.vue';
 export { default as FieldComponent } from './components/Field.vue';
 export { default as ActionsComponent } from './components/Actions.vue';
+export { default as RowActionsComponent } from './components/RowActions.vue';
 export { default as NavMenuComponent } from './components/NavMenu.vue';
 export { default as NavBreadcrumbComponent } from './components/NavBreadcrumb.vue';
 export { default as DynamiaDialog } from './components/Dialog.vue';

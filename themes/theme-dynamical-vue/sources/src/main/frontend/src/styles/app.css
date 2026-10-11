@@ -214,13 +214,6 @@
 .dynamia-table-actions-cell {
   @apply px-3 py-2 text-right whitespace-nowrap;
 }
-/* Crud.vue's row Edit/Delete buttons carry no class — Edit always renders before Delete. */
-.dynamia-table-actions-cell button {
-  @apply ml-2 rounded-md px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 first:ml-0 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white;
-}
-.dynamia-table-actions-cell button:last-child {
-  @apply text-red-500 hover:bg-red-50 dark:hover:bg-red-500/15 hover:text-red-700;
-}
 .dynamia-table-empty {
   @apply px-3 py-8 text-center text-gray-400 dark:text-gray-500;
 }
@@ -493,4 +486,118 @@
 }
 .dynamia-entity-ref-multi .dynamia-entity-ref-picker-dropdown {
   @apply top-full left-0;
+}
+
+/* ── Modern CRUD UX: toolbar, search, filters, row actions ─────────────────── */
+
+.dynamia-sr-only {
+  @apply sr-only;
+}
+.dynamia-action-icon {
+  @apply text-[0.85em] opacity-80;
+}
+
+/* Toolbar: search + filters on the left, the primary "New" on the right. */
+.dynamia-crud-toolbar {
+  @apply flex-wrap;
+}
+.dynamia-crud-toolbar .dynamia-actions {
+  @apply flex-1 flex-wrap;
+}
+.dynamia-crud-new-btn {
+  order: 2;
+  @apply ml-auto inline-flex items-center gap-1.5 shadow-sm;
+}
+.dynamia-crud-new-btn::before {
+  content: '\2b';
+  font-family: 'Font Awesome 7 Free', 'Font Awesome 6 Free', 'FontAwesome';
+  font-weight: 900;
+  font-size: 0.8em;
+}
+
+/* Search: a single pill with the icon inside; Enter submits (the button is only for screen readers). */
+.dynamia-action-find {
+  @apply relative flex w-full max-w-sm items-center;
+}
+.dynamia-action-find-icon {
+  @apply pointer-events-none absolute left-3 text-xs text-gray-400 dark:text-gray-500;
+}
+.dynamia-action-find-input {
+  @apply w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 py-1.5 pr-3 pl-8 text-sm text-gray-800 dark:text-white/90 shadow-sm transition-colors;
+  @apply focus:border-transparent focus:ring-2 focus:ring-[color:var(--skin-primary)] focus:outline-none;
+}
+.dynamia-action-find-submit {
+  @apply sr-only;
+}
+
+/* Advanced filters: a popover under the button. */
+.dynamia-action-filters {
+  @apply relative;
+}
+.dynamia-action-filters-panel {
+  @apply absolute top-full left-0 z-30 mt-2 grid w-[28rem] max-w-[90vw] grid-cols-2 gap-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-lg;
+}
+.dynamia-action-filters-field {
+  @apply flex flex-col gap-1 text-xs font-medium text-gray-500 dark:text-gray-400;
+}
+.dynamia-action-filters-field input,
+.dynamia-action-filters-field select {
+  @apply w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-2.5 py-1.5 text-sm font-normal text-gray-800 dark:text-white/90;
+  @apply focus:border-transparent focus:ring-2 focus:ring-[color:var(--skin-primary)] focus:outline-none;
+}
+.dynamia-action-filters-buttons {
+  @apply col-span-2 flex justify-end gap-2 pt-1;
+}
+.dynamia-action-filters-buttons .dynamia-action-btn[type='submit'] {
+  border-color: transparent;
+  background-color: var(--skin-primary);
+  color: var(--skin-primary-fg);
+}
+
+/* Table: sort arrow, quiet header, row actions revealed on hover/focus. */
+.dynamia-table-sort {
+  @apply ml-1 text-[color:var(--skin-primary)];
+}
+.dynamia-table-actions-cell {
+  @apply w-px;
+}
+.dynamia-row-actions {
+  @apply flex items-center justify-end gap-1;
+}
+.dynamia-row-action {
+  @apply inline-flex size-8 items-center justify-center rounded-md text-gray-500 dark:text-gray-400 transition-colors;
+  @apply hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white;
+  @apply focus-visible:ring-2 focus-visible:ring-[color:var(--skin-primary)] focus-visible:outline-none;
+}
+.dynamia-row-action[aria-expanded='true'] {
+  background-color: var(--skin-primary-soft);
+  color: var(--skin-primary);
+}
+@media (hover: hover) {
+  .dynamia-row-actions {
+    @apply opacity-0 transition-opacity;
+  }
+  .dynamia-table-row:hover .dynamia-row-actions,
+  .dynamia-table-row-selected .dynamia-row-actions,
+  .dynamia-row-actions:focus-within {
+    @apply opacity-100;
+  }
+}
+
+/* Row menu (teleported to <body>, so it is not under .dynamia-crud). */
+.dynamia-row-menu {
+  @apply fixed z-50 flex flex-col gap-0.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-1 shadow-lg;
+}
+.dynamia-row-menu .dynamia-actions {
+  @apply block;
+}
+.dynamia-row-menu .dynamia-action-btn {
+  @apply flex w-full items-center gap-2.5 rounded-md border-0 bg-transparent px-2.5 py-2 text-left text-sm text-gray-700 dark:text-gray-300;
+  @apply hover:bg-gray-100 dark:hover:bg-white/10;
+}
+.dynamia-row-menu .dynamia-action-icon {
+  @apply w-4 text-center;
+}
+.dynamia-row-menu-item-danger .dynamia-action-btn {
+  @apply text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/15;
 }

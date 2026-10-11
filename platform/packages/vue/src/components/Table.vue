@@ -14,11 +14,11 @@
             @click="view.sort(col.name)"
           >
             {{ col.resolvedLabel }}
-            <span v-if="view.sortField.value === col.name">
+            <span v-if="view.sortField.value === col.name" class="dynamia-table-sort">
               {{ view.sortDir.value === 'asc' ? '↑' : '↓' }}
             </span>
           </th>
-          <th v-if="$slots['actions']" class="dynamia-table-actions-header">Actions</th>
+          <th v-if="$slots['actions']" class="dynamia-table-actions-header"><span class="dynamia-sr-only">Actions</span></th>
         </tr>
       </thead>
       <tbody>
@@ -57,9 +57,9 @@
     </table>
     <!-- Pagination -->
     <div v-if="view.pagination.value" class="dynamia-table-pagination">
-      <button :disabled="view.pagination.value.page <= 1" @click="view.prevPage()">←</button>
+      <button type="button" aria-label="Previous page" :disabled="view.pagination.value.page <= 1" @click="view.prevPage()">←</button>
       <span>{{ view.pagination.value.page }} / {{ view.pagination.value.pagesNumber }}</span>
-      <button :disabled="view.pagination.value.page >= view.pagination.value.pagesNumber" @click="view.nextPage()">→</button>
+      <button type="button" aria-label="Next page" :disabled="view.pagination.value.page >= view.pagination.value.pagesNumber" @click="view.nextPage()">→</button>
     </div>
   </div>
 </template>

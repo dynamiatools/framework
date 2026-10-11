@@ -21,5 +21,23 @@
  */
 export function resolveIconClass(icon: string | undefined | null, prefix = 'fa fa-'): string {
   if (!icon) return '';
-  return icon.includes(' ') ? icon : `${prefix}${icon}`;
+  if (icon.includes(' ')) return icon;
+  return `${prefix}${ACTION_ICON_ALIASES[icon] ?? icon}`;
 }
+
+/**
+ * Logical icon names the server sends for the standard actions (`delete`, `find`, `edit`…) that are not Font Awesome
+ * names. Same values as the ZK mapping `META-INF/dynamia/fa-icons.properties`, limited to the common action tokens so
+ * both front ends draw the same glyph for the same action.
+ */
+const ACTION_ICON_ALIASES: Readonly<Record<string, string>> = {
+  add: 'plus',
+  cancel: 'ban',
+  check: 'check-circle',
+  close: 'times',
+  delete: 'trash-alt',
+  edit: 'pencil-alt',
+  find: 'search',
+  more: 'ellipsis-h',
+  refresh: 'sync',
+};
