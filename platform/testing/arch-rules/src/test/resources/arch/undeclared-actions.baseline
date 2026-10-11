@@ -7,8 +7,6 @@ extensions/email-sms/sources/ui/src/main/java/tools/dynamia/modules/email/ui/act
 extensions/email-sms/sources/ui/src/main/java/tools/dynamia/modules/email/ui/actions/TestEmailAccountAction.java
 extensions/email-sms/sources/ui/src/main/java/tools/dynamia/modules/email/ui/actions/TestSMSAction.java
 extensions/entity-files/sources/core/src/main/java/tools/dynamia/modules/entityfile/ui/actions/ClearEntityFileCacheAction.java
-extensions/entity-files/sources/core/src/main/java/tools/dynamia/modules/entityfile/ui/actions/MoveEntityFileLocalToRemoteStorageAction.java
-extensions/entity-files/sources/core/src/main/java/tools/dynamia/modules/entityfile/ui/actions/ReloadEntityFileStoragesAction.java
 extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/DeleteFileAction.java
 extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/DownloadFileAction.java
 extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/FileAction.java
@@ -16,7 +14,6 @@ extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfil
 extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/NewFileAction.java
 extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/ViewFileURLAction.java
 extensions/http-functions/sources/ui/src/main/java/tools/dynamia/modules/functions/ui/actions/TestHttpFunctionAction.java
-extensions/reports/sources/ui/src/main/java/tools/dynamia/modules/reports/ui/actions/ImportReportAction.java
 extensions/reports/sources/ui/src/main/java/tools/dynamia/modules/reports/ui/actions/TestReportDatasourceAction.java
 extensions/reports/sources/ui/src/main/java/tools/dynamia/modules/reports/ui/actions/ViewReportAction.java
 extensions/saas/sources/core/src/main/java/tools/dynamia/modules/saas/ui/action/ClearAccountCacheAction.java
@@ -24,7 +21,6 @@ extensions/saas/sources/core/src/main/java/tools/dynamia/modules/saas/ui/action/
 extensions/saas/sources/core/src/main/java/tools/dynamia/modules/saas/ui/action/ResetAccountBalanceAction.java
 extensions/saas/sources/core/src/main/java/tools/dynamia/modules/saas/ui/action/SaveAccountFeaturesAction.java
 extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/FilterAccountByRegionAction.java
-extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/NewAccountPaymentAction.java
 extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/ShowAccountAdminActions.java
 extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/ViewAccountLogAction.java
 extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/ViewAccountLogoAction.java

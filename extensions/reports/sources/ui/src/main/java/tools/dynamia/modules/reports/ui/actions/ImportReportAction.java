@@ -17,6 +17,8 @@ package tools.dynamia.modules.reports.ui.actions;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.ActionRuntime;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
@@ -28,6 +30,7 @@ import tools.dynamia.ui.UIMessages;
 import java.io.File;
 
 @InstallAction
+@RunsOn(ActionRuntime.HEADLESS)
 public class ImportReportAction extends AbstractCrudAction {
 
     private final ReportsService service;

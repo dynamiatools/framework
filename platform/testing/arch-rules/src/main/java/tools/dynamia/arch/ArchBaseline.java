@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,7 +44,8 @@ public final class ArchBaseline {
         try {
             if (Boolean.getBoolean("ui.baseline.update")) {
                 Files.createDirectories(file.getParent());
-                Files.write(file, new TreeSet<>(actual));
+                // Always LF, whatever the platform: the baselines are committed and compared line by line
+                Files.writeString(file, new TreeSet<>(actual).stream().map(line -> line + "\n").collect(Collectors.joining()));
                 return;
             }
             var expected = new TreeSet<String>();
