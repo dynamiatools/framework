@@ -18,8 +18,12 @@ package tools.dynamia.web.navigation;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
+import tools.dynamia.domain.query.AbstractQuery;
 import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.viewers.impl.DefaultViewDescriptor;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -65,7 +69,21 @@ class RestNavigationSearchTest {
         assertTrue(jpql.contains("lower(e.title) like :searchText"), jpql);
         assertTrue(jpql.contains("lower(e.author) like :searchText"), jpql);
         assertTrue(jpql.contains(" or "), jpql);
-        assertEquals("%dune%", query.getQueryParameters().get("searchText"));
+        assertFalse(jpql.contains("e.searchText"), "the search value must not become an entity attribute condition: " + jpql);
+
+        var bound = new HashMap<String, Object>();
+        query.getQueryParameters().applyTo(new AbstractQuery<Object>(new Object()) {
+            @Override
+            public AbstractQuery setParameter(String name, Object value) {
+                bound.put(name, value);
+                return this;
+            }
+
+            @Override
+            public void setHint(String name, Object value) {
+            }
+        });
+        assertEquals(Map.of("searchText", "%dune%"), bound);
     }
 
     @Test
