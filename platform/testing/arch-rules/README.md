@@ -10,6 +10,7 @@ files, so they need no module built, and run as plain JUnit tests.
 | R3 publication | `ActionInventoryRule` | none | No action with runtime `HEADLESS`, `FLOW` or `REMOTE` may be bound to the front end, ancestors included |
 | R4 declaration | `ActionInventoryRule` | `undeclared-actions.baseline` | `@InstallAction` classes whose runtime is `UNDECLARED` (a runtime is declared on the concrete class and never inherited) |
 | R5 vocabulary | `VocabularyRule` | none | No identifier of the neutral core contains `ZK` / `Zk` |
+| R6 parity | `ParityRule` | `parity-gaps.baseline` | Every standard action (platform and extensions, not examples) is available to a remote client: published (`HEADLESS`/`FLOW`/`REMOTE`) without the front end, or with a TypeScript `ClientAction` whose id is the class name. Each gap is listed with its reason; the ideal is an empty file |
 
 A baseline lists violations that exist today and **only shrinks**: a new one fails the test, and so does a listed one that was
 fixed (remove it). Regenerate with `-Dui.baseline.update=true`. Comments and string literals are ignored, and inheritance is

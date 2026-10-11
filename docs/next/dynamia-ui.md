@@ -1,6 +1,6 @@
 # Dynamia UI: target architecture (ZK as a port)
 
-**Date:** 2026-10-10 · **Base:** `dynamia-tools@feature/next-ui` (13 commits over `next`) · **Main consumer:**
+**Date:** 2026-10-10 · **Base:** `dynamia-tools@next` (WP1 to WP9 merged, PRs #212 to #219) · **Main consumer:**
 `dynamia-erp@next`.
 **Sources:** previous revision of this document, [dynamia-ui-inventory.md](dynamia-ui-inventory.md) and a reading of the code.
 **Audience:** whoever implements it. Sections 1 to 10 describe **how the system must end up**; §11 turns that into ordered
@@ -793,7 +793,27 @@ and commits in English. No commit or push unless the user asks. Each package end
 
 ## Implementation status
 
-First iteration, `dynamia-tools` only (branch `feature/next-ui`), done before this architecture:
+### Work packages (2026-10-10)
+
+WP1 to WP9 are merged into `next` of `dynamia-tools`. Validation in running applications is tracked in #220.
+
+| WP | Status | PR |
+|---|---|---|
+| 1, 1b, 2 | Merged | #213 |
+| 3, 4 | Merged | #214 |
+| 5, 6 | Merged. Contract suites not run against the ZK adapter (no ZATS) | #215 |
+| 7 | Merged | #216 |
+| 8 | Merged. No job cancel endpoint; registry in memory (D2) | #217 |
+| 9 | Merged | #218 |
+| 10 (ERP) | **Not started** | n/a |
+
+Pending besides WP10: run ZK and Vue in a browser (#220), compile `dynamia-erp` against `next` (known breaks: removed
+`UIMessages.setCurrentMessageDisplayer`, actions published only through `HeadlessCapable` need `@RunsOn`, `CHOICE` answers
+are keys), decisions D1 and D2 (§12).
+
+### First iteration
+
+First iteration, `dynamia-tools` only, done before this architecture (issues #200 to #211, closed):
 
 | Issue | Done |
 |---|---|
