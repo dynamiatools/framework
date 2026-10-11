@@ -3,6 +3,8 @@ package tools.dynamia.modules.entityfile.ui.actions;
 
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.ActionRuntime;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.crud.cfg.AbstractConfigPageAction;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @InstallAction
+@RunsOn(ActionRuntime.HEADLESS)
 class MoveEntityFileLocalToRemoteStorageAction extends AbstractConfigPageAction {
 
     public static final String STORAGE_INFO = "storageInfo";

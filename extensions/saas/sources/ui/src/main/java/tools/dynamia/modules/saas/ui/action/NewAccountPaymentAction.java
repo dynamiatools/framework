@@ -19,6 +19,8 @@ package tools.dynamia.modules.saas.ui.action;
 
 import tools.dynamia.actions.ActionGroup;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.ActionRuntime;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.actions.PrimaryAction;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
@@ -30,6 +32,7 @@ import tools.dynamia.ui.UIMessages;
 import tools.dynamia.ui.UIViews;
 
 @InstallAction
+@RunsOn(ActionRuntime.HEADLESS)
 @PrimaryAction
 public class NewAccountPaymentAction extends AbstractCrudAction {
 
