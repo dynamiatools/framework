@@ -8,6 +8,10 @@ fields:
       span: 2
   year:
   runtime:
+    component: quantityinput
+    params:
+      min: 0
+      step: 5
   certification:
   language:
   country:
@@ -16,9 +20,21 @@ fields:
     params:
       span: 2
   rating:
+    component: rating
+    params:
+      max: 5
+      scale: 10
   votes:
   budget:
+    label: Budget (M USD)
+    component: moneyinput
+    params:
+      decimals: 1
   boxOffice:
+    label: Box Office (M USD)
+    component: moneyinput
+    params:
+      decimals: 1
   featured:
   posterUrl:
     params:

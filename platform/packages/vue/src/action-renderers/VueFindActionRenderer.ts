@@ -1,6 +1,6 @@
 import { defineComponent, h, ref, type PropType } from 'vue';
 import type { ActionMetadata } from '@dynamia-tools/sdk';
-import { CrudView, type View, type ActionTriggerPayload } from '@dynamia-tools/ui-core';
+import { CrudView, resolveIconClass, type View, type ActionTriggerPayload } from '@dynamia-tools/ui-core';
 
 /**
  * Search box of the CRUD: renderer `find` of `FindAction`. Submitting it (Enter or the button) triggers the action with the
@@ -27,6 +27,7 @@ export const VueFindActionRenderer = defineComponent({
       role: 'search',
       onSubmit: (event: Event) => { event.preventDefault(); submit(); },
     }, [
+      h('i', { class: ['dynamia-action-find-icon', resolveIconClass('find')], 'aria-hidden': 'true' }),
       h('input', {
         type: 'search',
         class: 'dynamia-action-find-input',
@@ -38,7 +39,7 @@ export const VueFindActionRenderer = defineComponent({
       }),
       h('button', {
         type: 'submit',
-        class: 'dynamia-action-btn',
+        class: 'dynamia-action-find-submit',
         disabled: props.disabled || props.executing,
       }, props.action.name),
     ]);

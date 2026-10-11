@@ -14,11 +14,11 @@
             @click="view.sort(col.name)"
           >
             {{ col.resolvedLabel }}
-            <span v-if="view.sortField.value === col.name">
+            <span v-if="view.sortField.value === col.name" class="dynamia-table-sort">
               {{ view.sortDir.value === 'asc' ? '↑' : '↓' }}
             </span>
           </th>
-          <th v-if="$slots['actions']" class="dynamia-table-actions-header">Actions</th>
+          <th v-if="$slots['actions']" class="dynamia-table-actions-header"><span class="dynamia-sr-only">Actions</span></th>
         </tr>
       </thead>
       <tbody>
@@ -36,7 +36,7 @@
           >
             <slot :name="`cell-${col.name}`" :row="row" :col="col">
               <Field
-                v-if="isComponentColumn(col)"
+                v-if="isCellComponent(col)"
                 :field="col"
                 :model-value="(row as Record<string, unknown>)[col.name]"
                 read-only
@@ -57,9 +57,9 @@
     </table>
     <!-- Pagination -->
     <div v-if="view.pagination.value" class="dynamia-table-pagination">
-      <button :disabled="view.pagination.value.page <= 1" @click="view.prevPage()">←</button>
+      <button type="button" aria-label="Previous page" :disabled="view.pagination.value.page <= 1" @click="view.prevPage()">←</button>
       <span>{{ view.pagination.value.page }} / {{ view.pagination.value.pagesNumber }}</span>
-      <button :disabled="view.pagination.value.page >= view.pagination.value.pagesNumber" @click="view.nextPage()">→</button>
+      <button type="button" aria-label="Next page" :disabled="view.pagination.value.page >= view.pagination.value.pagesNumber" @click="view.nextPage()">→</button>
     </div>
   </div>
 </template>
@@ -67,18 +67,8 @@
 <script setup lang="ts">
 import { entityDisplayLabel } from '@dynamia-tools/ui-core';
 import type { VueTableView } from '../views/VueTableView.js';
-import type { ResolvedField } from '@dynamia-tools/ui-core';
 import Field from './Field.vue';
-
-/**
- * Display components a column can ask for with an explicit `component` in its view descriptor
- * (e.g. `component: coollabel`). Every other column keeps rendering its value as text.
- */
-const CELL_COMPONENTS = new Set(['coollabel', 'enumlabel', 'entityreflabel', 'label', 'link']);
-
-function isComponentColumn(col: ResolvedField): boolean {
-  return !!col.component && CELL_COMPONENTS.has(col.component.toLowerCase());
-}
+import { isCellComponent } from './fields/fieldComponents.js';
 
 defineProps<{
   /** The VueTableView instance to render */

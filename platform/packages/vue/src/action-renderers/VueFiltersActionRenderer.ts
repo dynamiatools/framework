@@ -1,6 +1,6 @@
 import { defineComponent, h, reactive, ref, type PropType } from 'vue';
 import type { ActionMetadata } from '@dynamia-tools/sdk';
-import { CrudView, type ResolvedField, type View, type ActionTriggerPayload } from '@dynamia-tools/ui-core';
+import { CrudView, resolveIconClass, type ResolvedField, type View, type ActionTriggerPayload } from '@dynamia-tools/ui-core';
 
 type FilterKind = 'text' | 'number' | 'boolean';
 
@@ -85,7 +85,12 @@ export const VueFiltersActionRenderer = defineComponent({
         'aria-expanded': String(open.value),
         disabled: props.disabled || props.executing,
         onClick: () => { open.value = !open.value; },
-      }, props.action.name),
+      }, [
+        props.action.icon
+          ? h('i', { class: ['dynamia-action-icon', resolveIconClass(props.action.icon)], 'aria-hidden': 'true' })
+          : null,
+        h('span', { class: 'dynamia-action-label' }, props.action.name),
+      ]),
       open.value
         ? h('form', {
             class: 'dynamia-action-filters-panel',

@@ -14,10 +14,51 @@ and where it is rendered (forms and table cells).
    `entityreflabel` (read-only) otherwise.
 4. The field class: text, integer, decimal, checkbox, date, enum (`combobox`)... `textbox` when unknown.
 
-`Field.vue` maps the identifier to a component. Identifiers defined in `FieldComponent` that have no Vue component yet
-fall back to a plain text input: `doublespinner`, `timebox`, `listbox`, `colorpicker`, `htmleditor`, `sliderbox`,
-`numberrangebox`, `imagebox`, `entityfileimage`, `enumiconimage`, `crudview`, `printercombobox`,
-`providermultipickerbox`.
+`Field.vue` (through `resolveFieldComponent`, `components/fields/fieldComponents.ts`) turns the identifier into a
+component, in this order:
+
+1. **`FieldComponentRegistry`** (`@dynamia-tools/ui-core`), case-insensitive: what a theme or the application registered
+   for that name. It can override any built-in name.
+2. **The components of `@dynamia-tools/vue`**: the identifiers above, plus basic versions of `rating` (stars, params
+   `max` and `scale`), `switch`/`toggle` (a checkbox) and `badge`/`status` (the enum label), so they work without a theme.
+3. **The component of the field type** (`FieldResolver.inferComponent(fieldClass)`) when nobody implements the name:
+   an unknown `component: fancything` on a boolean is still a checkbox, on a number a number box. Only when not even the
+   type is known is a plain text input shown.
+
+Identifiers defined in `FieldComponent` that have no Vue component yet (`doublespinner`, `timebox`, `listbox`,
+`colorpicker`, `htmleditor`, `sliderbox`, `numberrangebox`, `imagebox`, `entityfileimage`, `enumiconimage`, `crudview`,
+`printercombobox`, `providermultipickerbox`) therefore draw the one of their field type.
+
+A theme registers its own implementations once, before mounting. `theme-dynamical-vue` does it in
+`src/lib/fieldComponents.ts` with the TailAdmin components (`ext/input/Rating`, `ui/Badge`, `ext/display/Status`):
+
+```ts
+FieldComponentRegistry.register('rating', StarRating, ['stars']);
+```
+
+What `theme-dynamical-vue` registers today (each one reads its `params:`, and shows a read-only form in a table cell):
+
+| Name (aliases) | TailAdmin component | params |
+|---|---|---|
+| `rating` (`stars`) | `ext/input/Rating` | `max`, `scale` |
+| `badge` | `ui/Badge` | `color`, `colors` |
+| `status` | `ext/display/Status` | `color`, `colors` |
+| `colorpicker` (`colorbox`) | `ext/input/ColorPicker` | `presets` (hex list), `showText` |
+| `moneyinput` (`moneybox`, `money`) | `ext/input/MoneyInput` | `currency`, `locale`, `decimals`, `min`, `max` |
+| `quantityinput` (`quantitybox`, `quantity`) | `ext/input/QuantityInput` | `min`, `max`, `step`, `allowDecimal` |
+
+`ext/display/QrCode` is not registered: it needs the `qrcode` package, which TailAdmin does not install.
+
+A component receives `field` (`ResolvedField`), `modelValue`, `readOnly` and `params` (the `params:` of the descriptor
+field), and emits `update:modelValue`.
+
+```yaml
+rating:
+  component: rating          # 0-10 value drawn with 5 stars
+  params: { max: 5, scale: 10 }
+certification:
+  component: badge          # enum value as a pill
+```
 
 ## What the server sends
 
@@ -47,8 +88,13 @@ The rows of a list carry the columns of the table view, not the relations. `Crud
 
 ## Table cells
 
-`Table.vue` renders a column with `Field.vue` (read-only) when the descriptor sets one of `coollabel`, `enumlabel`,
-`entityreflabel`, `label` or `link` as its `component`; any other column is plain text.
+`Table.vue` renders a column with `Field.vue` (read-only) in two cases (`isCellComponent`):
+
+- the field is a **boolean**: a disabled checkbox, with no `component` needed;
+- the descriptor names a **display component** that exists (built in or registered): `coollabel`, `enumlabel`,
+  `entityreflabel`, `label`, `link`, `rating`, `badge`, `status`, or anything a theme registered.
+
+Input-only names (`textbox`, `intbox`, `combobox`, `datebox`...) and names nobody implements stay plain text in a cell.
 
 A column with no property of its own (a virtual field) may declare `params.bindings`. The serializer then writes the
 field as an object with the value of every bound path:

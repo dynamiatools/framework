@@ -72,7 +72,7 @@ public class MovieDataLoader implements CommandLineRunner {
                 movie.setRuntime(Integer.parseInt(c[2]));
                 movie.setCertification(Certification.valueOf(c[3]));
                 for (var g : c[4].split(";")) {
-                    movie.getGenres().add(genres.computeIfAbsent(g, n -> crudService.save(new Genre(n))));
+                    movie.getGenres().add(genres.computeIfAbsent(g, this::newGenre));
                 }
                 movie.addCredit(new Credit(person(people, c[5]), CreditRole.DIRECTOR, 1));
                 int billing = 1;
@@ -105,6 +105,17 @@ public class MovieDataLoader implements CommandLineRunner {
         }
         log.info("Demo catalog loaded: {} movies, {} people, {} genres, {} studios",
                 count, people.size(), genres.size(), studios.size());
+    }
+
+    private static final String[] GENRE_COLORS = {
+            "#ef4444", "#f97316", "#eab308", "#22c55e", "#14b8a6", "#3b82f6", "#8b5cf6", "#ec4899"
+    };
+
+    /** Creates a genre with a color of the palette picked from its name, so every start paints it the same. */
+    private Genre newGenre(String name) {
+        var genre = new Genre(name);
+        genre.setColor(GENRE_COLORS[Math.floorMod(name.hashCode(), GENRE_COLORS.length)]);
+        return crudService.save(genre);
     }
 
     private Person person(Map<String, Person> cache, String name) {

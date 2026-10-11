@@ -3,6 +3,7 @@
 // ── Registry base ─────────────────────────────────────────────────────────────
 export { Registry } from './registry/Registry.js';
 export type { KeyNormalizer } from './registry/Registry.js';
+export { FieldComponentRegistry } from './registry/FieldComponentRegistry.js';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 export type { FieldComponent, ResolvedField } from './types/field.js';
