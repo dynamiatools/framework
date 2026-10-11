@@ -28,8 +28,6 @@ extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/Vi
 extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/ViewAccountStatsAction.java | uses the front end (UNDECLARED)
 extensions/security/sources/ui/src/main/java/tools/dynamia/modules/security/ui/action/ResetPasswordAction.java | uses the front end (UNDECLARED)
 extensions/security/sources/ui/src/main/java/tools/dynamia/modules/security/ui/action/SetUserProfilesAction.java | runtime UNDECLARED
-platform/core/crud/src/main/java/tools/dynamia/crud/actions/FiltersAction.java | FRONTEND without a TypeScript client action
-platform/core/crud/src/main/java/tools/dynamia/crud/actions/FindAction.java | FRONTEND without a TypeScript client action
 platform/core/crud/src/main/java/tools/dynamia/crud/actions/SaveAndEditAction.java | runtime UNDECLARED
 platform/core/crud/src/main/java/tools/dynamia/crud/actions/SaveAndNewAction.java | runtime UNDECLARED
 platform/ui/zk/src/main/java/tools/dynamia/zk/actions/CallZKGlobalCommandViewAction.java | uses the front end (UNDECLARED)

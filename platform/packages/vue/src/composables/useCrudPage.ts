@@ -11,6 +11,7 @@ import { useToast } from './useToast.js';
 import { useInput } from './useInput.js';
 import { useFormDialog } from './useFormDialog.js';
 import { dispatchCrudDelete, dispatchCrudSave } from '../actions/crudActionDispatch.js';
+import { toRestQuery } from '../actions/crudQuery.js';
 
 /** Options for the {@link useCrudPage} composable */
 export interface UseCrudPageOptions {
@@ -99,9 +100,7 @@ export function useCrudPage(options: UseCrudPageOptions) {
       // 4. Wire loader according to the resolved dataset view type.
       if (crudView.tableView) {
         crudView.tableView.setLoader(async (params) => {
-          const result = await api.findAll(
-            params as Record<string, string | number | boolean | undefined | null>,
-          );
+          const result = await api.findAll(toRestQuery(params));
           return {
             rows: result.content,
             pagination: {
@@ -115,9 +114,7 @@ export function useCrudPage(options: UseCrudPageOptions) {
         });
       } else if (crudView.treeView) {
         crudView.treeView.setLoader(async (params) => {
-          const result = await api.findAll(
-            params as Record<string, string | number | boolean | undefined | null>,
-          );
+          const result = await api.findAll(toRestQuery(params));
           return {
             nodes: mapCrudRowsToTreeNodes(result.content, context.descriptor),
           };

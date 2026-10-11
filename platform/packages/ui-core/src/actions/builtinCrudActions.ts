@@ -46,7 +46,38 @@ const cancelAction: ClientAction = {
 };
 
 /**
- * Registers the built-in New/Edit/Cancel {@link ClientAction}s in the global
+ * The search box of the CRUD, `FindAction` in Java (which is `FRONTEND`: only the front end draws it). The text arrives as
+ * the `data` of the request, from the `find` renderer, and is sent to the server as the `_q` parameter.
+ */
+const findAction: ClientAction = {
+  id: 'FindAction',
+  name: 'Find',
+  applicableState: 'READ',
+  renderer: 'find',
+  async execute({ request, view }) {
+    const table = asCrudView(view)?.tableView;
+    await table?.search(typeof request.data === 'string' ? request.data.trim() : '');
+  },
+};
+
+/**
+ * The advanced search of the CRUD, `FiltersAction` in Java: the `filters` renderer draws the panel and sends the values as
+ * the `data` of the request (field name to value). An empty object clears the filters.
+ */
+const filtersAction: ClientAction = {
+  id: 'FiltersAction',
+  name: 'Filters',
+  applicableState: 'READ',
+  renderer: 'filters',
+  async execute({ request, view }) {
+    const table = asCrudView(view)?.tableView;
+    const values = request.data && typeof request.data === 'object' ? (request.data as Record<string, unknown>) : {};
+    await table?.setFilters(values);
+  },
+};
+
+/**
+ * Registers the built-in New/Edit/Cancel/Find/Filters {@link ClientAction}s in the global
  * {@link ClientActionRegistry}. Idempotent — safe to call more than once.
  *
  * Aliases match the identity strings the backend may send for these actions (either the Java
@@ -71,4 +102,6 @@ export function registerBuiltinCrudActions(): void {
   ClientActionRegistry.register(newAction.id, newAction, ['new', 'create', 'createaction']);
   ClientActionRegistry.register(editAction.id, editAction, ['edit']);
   ClientActionRegistry.register(cancelAction.id, cancelAction, ['cancel']);
+  ClientActionRegistry.register(findAction.id, findAction, ['find']);
+  ClientActionRegistry.register(filtersAction.id, filtersAction, ['filters']);
 }
