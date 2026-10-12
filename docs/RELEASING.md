@@ -14,7 +14,7 @@ per month fits and two do not**. All modules share one version, so a partial rel
 | `YY.MM.N`, N > 0 (maintenance) | no | yes | yes | **pre-release** |
 | `YY.MM.N-SNAPSHOT` (`next`) | no | yes (`publish-snapshot.yml`) | no | none |
 
-- Consumers inside the organization (dynamia-erp and the other repos) resolve from GitHub Packages
+- Consumers inside the organization (applications that use the framework) resolve from GitHub Packages
   (`https://maven.pkg.github.com/dynamiatools/framework`). The Maven registry of GitHub Packages needs a token with
   `read:packages` even for public packages, so external users should be pointed at Maven Central.
 - Central versions are immutable: a bad `YY.MM.0` can only be fixed by another version, which costs another release.
