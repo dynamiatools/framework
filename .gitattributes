@@ -1,0 +1,2 @@
+# Generated files are compared byte-for-byte by tests; keep LF regardless of core.autocrlf
+platform/packages/sdk/src/generated/** text eol=lf
