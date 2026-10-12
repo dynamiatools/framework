@@ -46,8 +46,8 @@ jobs:
         distribution: temurin
         cache: maven
         server-id: github
-        server-username: MAVEN_USERNAME
-        server-password: MAVEN_PASSWORD
+        server-username-env-var: MAVEN_USERNAME
+        server-password-env-var: MAVEN_PASSWORD
 
     - name: Check the version
       # A wrong version would publish an immutable artifact (and spend Central quota), so fail before building.
@@ -95,8 +95,8 @@ jobs:
         distribution: temurin
         cache: maven
         server-id: central
-        server-username: MAVEN_USERNAME # env variable for username in deploy
-        server-password: MAVEN_PASSWORD # env variable for token in deploy
+        server-username-env-var: MAVEN_USERNAME # env variable for username in deploy
+        server-password-env-var: MAVEN_PASSWORD # env variable for token in deploy
         gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
 
     - name: Sign and deploy to Maven Central

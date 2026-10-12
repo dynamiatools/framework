@@ -37,8 +37,8 @@ jobs:
         distribution: temurin
         cache: maven
         server-id: github
-        server-username: MAVEN_USERNAME
-        server-password: MAVEN_PASSWORD
+        server-username-env-var: MAVEN_USERNAME
+        server-password-env-var: MAVEN_PASSWORD
 
     - name: Verify and deploy SNAPSHOT
       # Se invoca deploy:deploy directo porque central-publishing-maven-plugin (extensions=true)
