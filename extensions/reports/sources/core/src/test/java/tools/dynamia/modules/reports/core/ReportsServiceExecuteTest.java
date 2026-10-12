@@ -175,6 +175,20 @@ class ReportsServiceExecuteTest {
     @Test
     void queryTimeoutIsAppliedToTheStatement() throws Exception {
         settings.setQueryTimeoutSeconds(7);
+
+        assertEquals(7, statementTimeout(TestDb.sqlReport("timeout", "select id from sales")));
+    }
+
+    @Test
+    void reportQueryTimeoutOverridesTheDefault() throws Exception {
+        settings.setQueryTimeoutSeconds(7);
+        var report = TestDb.sqlReport("slow", "select id from sales");
+        report.setQueryTimeout(300L);
+
+        assertEquals(300, statementTimeout(report));
+    }
+
+    private int statementTimeout(Report report) throws Exception {
         Connection connection = spy(db.getConnection());
         var statements = new java.util.ArrayList<java.sql.PreparedStatement>();
         doAnswer(inv -> {
@@ -188,10 +202,12 @@ class ReportsServiceExecuteTest {
             return stm;
         }).when(connection).prepareStatement(anyString());
 
-        service.execute(TestDb.sqlReport("timeout", "select id from sales"), new ReportFilters(), new ReportDataSource("conn", connection));
+        service.execute(report, new ReportFilters(), new ReportDataSource("conn", connection));
 
         assertFalse(statements.isEmpty());
-        verify(statements.get(0)).setQueryTimeout(7);
+        var captor = org.mockito.ArgumentCaptor.forClass(Integer.class);
+        verify(statements.get(0)).setQueryTimeout(captor.capture());
+        return captor.getValue();
     }
 
     @Test

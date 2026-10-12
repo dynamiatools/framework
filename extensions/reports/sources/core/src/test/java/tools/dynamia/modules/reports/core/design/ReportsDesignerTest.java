@@ -73,6 +73,15 @@ class ReportsDesignerTest {
     // ---- service
 
     @Test
+    void previewAcceptsAQueryTimeoutAndRejectsNonPositiveOnes() {
+        var request = new ReportPreviewRequest("sql", "select id from sales", null, null, 30L);
+        assertFalse(service.preview(request).rows().isEmpty());
+
+        assertThrows(ValidationError.class, () -> service.preview(
+                new ReportPreviewRequest("sql", "select id from sales", null, null, 0L)));
+    }
+
+    @Test
     void previewReturnsTheFirstRowsAndFlagsTruncation() {
         var result = service.preview(preview("sql", "select id, region from sales order by id", null));
 

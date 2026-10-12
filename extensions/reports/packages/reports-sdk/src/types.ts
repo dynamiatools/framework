@@ -224,6 +224,8 @@ export interface ReportPreviewRequest {
   dataSourceId?: number | null | undefined;
   /** Values for the `:name` parameters of the query */
   parameters?: Record<string, ReportFilterValue> | undefined;
+  /** Query timeout in seconds; empty uses `dynamia.reports.query-timeout` */
+  queryTimeout?: number | null | undefined;
 }
 
 /** Result of a preview. */

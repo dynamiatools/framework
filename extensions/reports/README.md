@@ -134,7 +134,7 @@ Reports run user-defined queries, so execution is restricted:
 - **Read-only queries.** A report query must be a single `SELECT` / `WITH` statement (JPQL: `select` / `from`). Data
   modification, DDL, `;` separators and executable comments are rejected when the report is saved and again on
   execution. SQL runs on a read-only connection.
-- **Limits.** `dynamia.reports.max-rows` (default `100000`) and `dynamia.reports.query-timeout` (seconds, default `60`).
+- **Limits.** `dynamia.reports.max-rows` (default `100000`) and `dynamia.reports.query-timeout` (seconds, default `60`; a report overrides the timeout with its own `queryTimeout`).
   When the row limit is reached the result is flagged as truncated (`"truncated": true` in the REST response).
 - **Filters.** Filter values are always bound as named parameters. Filter conditions use `:name` placeholders and are
   inserted at the `<FILTERS>` marker, or before the first top level `GROUP BY` / `ORDER BY` / `LIMIT` clause.

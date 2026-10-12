@@ -88,11 +88,15 @@ public class ReportsDesignerService {
             throw new ValidationError("Query language must be sql or jpql");
         }
         ReportQueryValidator.validateQuery(request.queryScript(), lang);
+        if (request.queryTimeout() != null && request.queryTimeout() <= 0) {
+            throw new ValidationError("Query timeout must be greater than zero seconds, or empty to use the default");
+        }
 
         var report = new Report();
         report.setName("Preview");
         report.setQueryLang(lang);
         report.setQueryScript(request.queryScript());
+        report.setQueryTimeout(request.queryTimeout());
         report.setAccountId(currentAccountId());
 
         var filters = new ReportFilters();

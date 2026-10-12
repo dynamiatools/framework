@@ -728,7 +728,7 @@ extension README.
 |---|---|---|
 | `dynamia.reports.ui` | `vue` | Front end of the navigation pages, `vue` or `zk` |
 | `dynamia.reports.max-rows` | `100000` | Rows after which a result is truncated |
-| `dynamia.reports.query-timeout` | `60` | Query timeout, seconds |
+| `dynamia.reports.query-timeout` | `60` | Default query timeout, seconds; a report overrides it with its own `queryTimeout` |
 | `dynamia.reports.allowed-drivers` | MySQL, MariaDB, PostgreSQL, Oracle, SQL Server | JDBC drivers allowed in external datasources |
 | `dynamia.reports.encryption-key` | empty | Encrypts datasource passwords at rest |
 | `dynamia.reports.designer-roles` | empty | Roles allowed to use the designer API; nobody by default |

@@ -18,6 +18,10 @@
       <input v-model="dataSourceId" type="number" min="1" />
     </label>
     <label>
+      {{ text.queryTimeout }}
+      <input v-model="queryTimeout" type="number" min="1" />
+    </label>
+    <label>
       {{ text.parameters }}
       <textarea v-model="parameters" rows="2" spellcheck="false" placeholder='{"min": 100}'></textarea>
     </label>
@@ -55,6 +59,7 @@ const text = computed(() => resolveLabels(props.labels));
 const queryLang = ref<'sql' | 'jpql'>('sql');
 const queryScript = ref('');
 const dataSourceId = ref('');
+const queryTimeout = ref('');
 const parameters = ref('');
 const parameterError = ref<string | null>(null);
 
@@ -73,6 +78,7 @@ async function run(): Promise<void> {
     queryLang: queryLang.value,
     queryScript: queryScript.value,
     dataSourceId: dataSourceId.value ? Number(dataSourceId.value) : null,
+    queryTimeout: queryTimeout.value ? Number(queryTimeout.value) : undefined,
     parameters: parsed,
   });
 }

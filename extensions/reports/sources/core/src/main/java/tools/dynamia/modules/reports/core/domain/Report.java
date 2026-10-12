@@ -52,6 +52,10 @@ public class Report extends SimpleEntitySaaS implements Transferable<ReportDTO> 
     private String title;
     private String subtitle;
     private Boolean exportWithoutFormat = false;
+    /**
+     * Query timeout in seconds for this report. When null the global {@code dynamia.reports.query-timeout} is used.
+     */
+    private Long queryTimeout;
 
     private Boolean exportEndpoint;
 
@@ -235,6 +239,14 @@ public class Report extends SimpleEntitySaaS implements Transferable<ReportDTO> 
 
     public void setSubtitle(String subtitle) {
         this.subtitle = subtitle;
+    }
+
+    public Long getQueryTimeout() {
+        return queryTimeout;
+    }
+
+    public void setQueryTimeout(Long queryTimeout) {
+        this.queryTimeout = queryTimeout;
     }
 
     public Boolean getExportWithoutFormat() {

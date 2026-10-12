@@ -21,6 +21,10 @@ public class ReportValidator implements Validator<Report> {
             ValidatorUtil.validateEmpty(report.getEndpointName(), "Endpoint name is required when export endpoint is enabled");
         }
 
+        if (report.getQueryTimeout() != null && report.getQueryTimeout() <= 0) {
+            throw new ValidationError("Query timeout must be greater than zero seconds, or empty to use the default");
+        }
+
         ReportQueryValidator.validateQuery(report.getQueryScript(), report.getQueryLang());
         if (report.getFilters() != null) {
             for (ReportFilter filter : report.getFilters()) {

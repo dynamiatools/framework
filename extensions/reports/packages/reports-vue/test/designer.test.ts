@@ -124,6 +124,20 @@ describe('designer components', () => {
     expect(wrapper.text()).toContain('more rows than the preview shows');
   });
 
+  it('QueryPreview sends the query timeout only when it is set', async () => {
+    const { instance, fetchMock } = designer();
+    const wrapper = mount(QueryPreview, { props: { designer: instance } });
+
+    const [query] = wrapper.findAll('textarea');
+    await query!.setValue('select 1');
+    const [, timeout] = wrapper.findAll('input[type="number"]');
+    await timeout!.setValue('120');
+    await wrapper.get('button').trigger('click');
+    await flushPromises();
+
+    expect(bodyOf(fetchMock, '/preview')).toMatchObject({ queryScript: 'select 1', queryTimeout: 120 });
+  });
+
   it('QueryPreview does not call the server with invalid parameters or an empty query', async () => {
     const { instance, fetchMock } = designer();
     const wrapper = mount(QueryPreview, { props: { designer: instance } });

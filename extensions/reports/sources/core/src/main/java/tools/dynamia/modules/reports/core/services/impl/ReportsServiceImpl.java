@@ -133,7 +133,7 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
             setReadOnly(connection, true);
             try {
                 var template = new JdbcTemplate(new SingleConnectionDataSource(connection, true));
-                template.setQueryTimeout(settings.getQueryTimeoutSeconds());
+                template.setQueryTimeout(queryTimeoutSeconds(report));
                 if (maxRows > 0) {
                     template.setMaxRows(maxRows == Integer.MAX_VALUE ? maxRows : maxRows + 1);
                 }
@@ -151,6 +151,14 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
         } catch (SQLException | DataAccessException e) {
             throw new ReportsException("Error executing report [" + report.getName() + "]: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * The timeout of the report, or the global {@code dynamia.reports.query-timeout} when the report has none.
+     */
+    private int queryTimeoutSeconds(Report report) {
+        Long timeout = report.getQueryTimeout();
+        return timeout == null ? settings.getQueryTimeoutSeconds() : (int) Math.min(timeout, Integer.MAX_VALUE / 1000);
     }
 
     private void setReadOnly(Connection connection, boolean readOnly) {
@@ -180,7 +188,7 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
             if (maxRows > 0 && maxRows < Integer.MAX_VALUE) {
                 query.setMaxResults(maxRows + 1);
             }
-            hint(query, "jakarta.persistence.query.timeout", settings.getQueryTimeoutSeconds() * 1000);
+            hint(query, "jakarta.persistence.query.timeout", queryTimeoutSeconds(report) * 1000);
             hint(query, "org.hibernate.readOnly", true);
 
             List<?> result = query.getResultList();

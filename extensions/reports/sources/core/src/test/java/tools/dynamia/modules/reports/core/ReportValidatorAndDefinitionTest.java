@@ -135,4 +135,18 @@ class ReportValidatorAndDefinitionTest {
             file.delete();
         }
     }
+
+    @Test
+    void queryTimeoutMustBePositiveWhenSet() {
+        var report = TestDb.sqlReport("timeout", "select 1");
+        report.setQueryTimeout(0L);
+        assertThrows(ValidationError.class, () -> validator.validate(report));
+        report.setQueryTimeout(-5L);
+        assertThrows(ValidationError.class, () -> validator.validate(report));
+
+        report.setQueryTimeout(30L);
+        validator.validate(report);
+        report.setQueryTimeout(null);
+        validator.validate(report);
+    }
 }

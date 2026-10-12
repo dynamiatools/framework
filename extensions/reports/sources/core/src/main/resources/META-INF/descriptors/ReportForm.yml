@@ -28,6 +28,8 @@ fields:
   autofields:
   active:
   exportWithoutFormat:
+  queryTimeout:
+    label: Query timeout (seconds)
   queryScript:
     component: aceditor
     params:
