@@ -37,34 +37,34 @@ describe('ReportsApi legacy endpoints', () => {
 });
 
 describe('ReportsApi UI endpoints', () => {
-  it('catalog() calls GET /api/reports/v2/catalog', async () => {
+  it('catalog() calls GET /apps/api/reports/catalog', async () => {
     const catalog = [{ name: 'Sales', reports: [{ id: 1, name: 'By region', chartable: false, hasFilters: true }] }];
     const { api: reportsApi, fetch } = api(200, catalog);
     expect(await reportsApi.catalog()).toEqual(catalog);
-    expect(call(fetch).url).toBe('https://app.example.com/api/reports/v2/catalog');
+    expect(call(fetch).url).toBe('https://app.example.com/apps/api/reports/catalog');
   });
 
-  it('definition() calls GET /api/reports/v2/{id}', async () => {
+  it('definition() calls GET /apps/api/reports/{id}', async () => {
     const { api: reportsApi, fetch } = api(200, { report: { id: 7 }, filters: [], columns: [], charts: [] });
     await reportsApi.definition(7);
-    expect(call(fetch).url).toBe('https://app.example.com/api/reports/v2/7');
+    expect(call(fetch).url).toBe('https://app.example.com/apps/api/reports/7');
   });
 
   it('filterOptions() sends q and limit and skips undefined', async () => {
     const { api: reportsApi, fetch } = api(200, [{ value: 'a', label: 'A' }]);
     await reportsApi.filterOptions(7, 'region', { q: 'no', limit: 10 });
-    expect(call(fetch).url).toBe('https://app.example.com/api/reports/v2/7/filters/region/options?q=no&limit=10');
+    expect(call(fetch).url).toBe('https://app.example.com/apps/api/reports/7/filters/region/options?q=no&limit=10');
 
     const second = api(200, []);
     await second.api.filterOptions(7, 'a/b');
-    expect(call(second.fetch).url).toBe('https://app.example.com/api/reports/v2/7/filters/a%2Fb/options');
+    expect(call(second.fetch).url).toBe('https://app.example.com/apps/api/reports/7/filters/a%2Fb/options');
   });
 
   it('run() posts the request and returns the typed result', async () => {
     const result = { columns: [], rows: [{ a: 1 }], total: 1, page: 0, size: 1, truncated: false, durationMs: 3, charts: [] };
     const { api: reportsApi, fetch } = api(200, result);
     const run = await reportsApi.run(7, { filters: { year: 2025 }, page: 1, size: 20, sort: 'a', direction: 'desc' });
-    expect(call(fetch).url).toBe('https://app.example.com/api/reports/v2/7/run');
+    expect(call(fetch).url).toBe('https://app.example.com/apps/api/reports/7/run');
     expect(call(fetch).init.method).toBe('POST');
     expect(JSON.parse(call(fetch).init.body as string)).toEqual({
       filters: { year: 2025 }, page: 1, size: 20, sort: 'a', direction: 'desc',
@@ -81,7 +81,7 @@ describe('ReportsApi UI endpoints', () => {
   it('export() requests the format and returns a Blob', async () => {
     const { api: reportsApi, fetch } = api(200, 'x', 'text/csv');
     const blob = await reportsApi.export(7, 'csv', { filters: { year: 1 } });
-    expect(call(fetch).url).toBe('https://app.example.com/api/reports/v2/7/export?format=csv');
+    expect(call(fetch).url).toBe('https://app.example.com/apps/api/reports/7/export?format=csv');
     expect(blob).toBeInstanceOf(Blob);
   });
 
@@ -104,30 +104,30 @@ describe('ReportsApi designer endpoints', () => {
   it('designer() calls GET /design/info', async () => {
     const { api: reportsApi, fetch } = api(200, { allowed: true, previewLimit: 50 });
     expect((await reportsApi.designer()).allowed).toBe(true);
-    expect(call(fetch).url).toBe('https://app.example.com/api/reports/v2/design/info');
+    expect(call(fetch).url).toBe('https://app.example.com/apps/api/reports/design/info');
   });
 
   it('preview() posts the query being designed', async () => {
     const { api: reportsApi, fetch } = api(200, { columns: ['a'], rows: [], truncated: false, durationMs: 1 });
     await reportsApi.preview({ queryLang: 'sql', queryScript: 'select 1', dataSourceId: 3 });
-    expect(call(fetch).url).toBe('https://app.example.com/api/reports/v2/design/preview');
+    expect(call(fetch).url).toBe('https://app.example.com/apps/api/reports/design/preview');
     expect(JSON.parse(call(fetch).init.body as string)).toEqual({ queryLang: 'sql', queryScript: 'select 1', dataSourceId: 3 });
   });
 
   it('exports and imports definitions', async () => {
     const exported = api(200, { name: 'x' });
     expect(await exported.api.exportDefinition(5)).toEqual({ name: 'x' });
-    expect(call(exported.fetch).url).toBe('https://app.example.com/api/reports/v2/design/5/definition');
+    expect(call(exported.fetch).url).toBe('https://app.example.com/apps/api/reports/design/5/definition');
 
     const imported = api(200, { id: 9 });
     expect(await imported.api.importDefinition({ name: 'x' })).toEqual({ id: 9 });
-    expect(call(imported.fetch).url).toBe('https://app.example.com/api/reports/v2/design/import');
+    expect(call(imported.fetch).url).toBe('https://app.example.com/apps/api/reports/design/import');
   });
 
   it('testDataSource() posts without a body', async () => {
     const { api: reportsApi, fetch } = api(200, { ok: true, message: 'Connection ok' });
     expect((await reportsApi.testDataSource(2)).ok).toBe(true);
-    expect(call(fetch).url).toBe('https://app.example.com/api/reports/v2/design/datasources/2/test');
+    expect(call(fetch).url).toBe('https://app.example.com/apps/api/reports/design/datasources/2/test');
     expect(call(fetch).init.body).toBeUndefined();
   });
 });

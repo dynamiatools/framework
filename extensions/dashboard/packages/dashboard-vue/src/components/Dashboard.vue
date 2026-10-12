@@ -16,28 +16,33 @@
           :data-field="cell.field"
           :style="cellStyle(cell)"
         >
-          <div v-if="widgets[cell.field]?.response?.titleVisible" class="dynamia-dashboard-title">
-            {{ widgets[cell.field]?.response?.title }}
-          </div>
-          <div v-if="widgets[cell.field]?.loading" class="dynamia-dashboard-widget-loading">
-            <slot name="widget-loading" :field="cell.field"><span>Loading...</span></slot>
-          </div>
-          <div v-else-if="widgets[cell.field]?.error" class="dynamia-dashboard-widget-error">
-            <slot name="widget-error" :field="cell.field" :error="widgets[cell.field]?.error">
-              <span>{{ widgets[cell.field]?.error }}</span>
-            </slot>
-          </div>
-          <template v-else-if="widgets[cell.field]?.response">
-            <component
-              :is="rendererOf(cell.field)"
-              v-if="rendererOf(cell.field)"
-              :data="widgets[cell.field]!.response!.data"
-              :response="widgets[cell.field]!.response"
-            />
-            <slot v-else name="unsupported" :field="cell.field" :response="widgets[cell.field]!.response">
-              <span>No renderer registered for widget type "{{ widgets[cell.field]!.response!.type }}"</span>
-            </slot>
-          </template>
+          <component
+            :is="frame ?? WidgetFrame"
+            :field="cell.field"
+            :response="widgets[cell.field]?.response ?? null"
+            :loading="widgets[cell.field]?.loading ?? false"
+            :error="widgets[cell.field]?.error ?? null"
+          >
+            <div v-if="widgets[cell.field]?.loading" class="dynamia-dashboard-widget-loading">
+              <slot name="widget-loading" :field="cell.field"><span>Loading...</span></slot>
+            </div>
+            <div v-else-if="widgets[cell.field]?.error" class="dynamia-dashboard-widget-error">
+              <slot name="widget-error" :field="cell.field" :error="widgets[cell.field]?.error">
+                <span>{{ widgets[cell.field]?.error }}</span>
+              </slot>
+            </div>
+            <template v-else-if="widgets[cell.field]?.response">
+              <component
+                :is="rendererOf(cell.field)"
+                v-if="rendererOf(cell.field)"
+                :data="widgets[cell.field]!.response!.data"
+                :response="widgets[cell.field]!.response"
+              />
+              <slot v-else name="unsupported" :field="cell.field" :response="widgets[cell.field]!.response">
+                <span>No renderer registered for widget type "{{ widgets[cell.field]!.response!.type }}"</span>
+              </slot>
+            </template>
+          </component>
         </div>
       </div>
     </template>
@@ -45,12 +50,13 @@
 </template>
 
 <script setup lang="ts">
-import type { CSSProperties } from 'vue';
+import type { Component, CSSProperties } from 'vue';
 import type { DynamiaClient } from '@dynamia-tools/sdk';
 import { useDynamiaClient } from '@dynamia-tools/vue';
 import type { DashboardLayoutCell, DashboardWidgetParams } from '@dynamia-tools/dashboard-sdk';
 import { useDashboard } from '../composables/useDashboard.js';
 import { WidgetRendererRegistry } from '../registry.js';
+import WidgetFrame from './WidgetFrame.vue';
 
 const props = defineProps<{
   /** The dashboard view descriptor id */
@@ -59,6 +65,12 @@ const props = defineProps<{
   client?: DynamiaClient;
   /** Query parameters sent to every widget, e.g. a date range filter */
   params?: DashboardWidgetParams;
+  /**
+   * Component that frames each widget (card, title, spacing), so the host can give the dashboard the look of its own
+   * design system. It receives `field`, `response`, `loading` and `error` as props, and the widget content (or its
+   * loading and error state) in the default slot. Defaults to a plain frame with the widget title.
+   */
+  frame?: Component;
 }>();
 
 const client = props.client ?? useDynamiaClient();
@@ -91,8 +103,8 @@ defineExpose({ reload, reloadWidget });
 .dynamia-dashboard-row {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: var(--dynamia-dashboard-gap, 1rem);
+  margin-bottom: var(--dynamia-dashboard-gap, 1rem);
 }
 .dynamia-dashboard-cell { grid-column: span var(--dynamia-span-xs); min-width: 0; }
 @media (min-width: 576px) { .dynamia-dashboard-cell { grid-column: span var(--dynamia-span-sm); } }

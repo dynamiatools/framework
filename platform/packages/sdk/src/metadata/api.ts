@@ -11,7 +11,7 @@ import type {
 
 /**
  * Provides access to application metadata endpoints.
- * Base path: /api/app/metadata
+ * Base path: /apps/api/metadata
  *
  * View descriptors are cached in-memory because they rarely change at runtime.
  * Call {@link clearViewCache} to invalidate after a hot-reload or forced refresh.
@@ -30,58 +30,58 @@ export class MetadataApi {
         this.http = http;
     }
 
-    /** GET /api/app/metadata — Application-level metadata */
+    /** GET /apps/api/metadata — Application-level metadata */
     getApp(): Promise<ApplicationMetadata> {
-        return this.http.get('/api/app/metadata');
+        return this.http.get('/apps/api/metadata');
     }
 
-    /** GET /api/app/metadata/navigation — Full navigation tree */
+    /** GET /apps/api/metadata/navigation — Full navigation tree */
     getNavigation(): Promise<NavigationTree> {
-        return this.http.get('/api/app/metadata/navigation');
+        return this.http.get('/apps/api/metadata/navigation');
     }
 
-    /** GET /api/app/metadata/actions — All global actions */
+    /** GET /apps/api/metadata/actions — All global actions */
     getGlobalActions(): Promise<ApplicationMetadataActions> {
-        return this.http.get('/api/app/metadata/actions');
+        return this.http.get('/apps/api/metadata/actions');
     }
 
-    /** GET /api/app/metadata/entities — All entity metadata */
+    /** GET /apps/api/metadata/entities — All entity metadata */
     getEntities(): Promise<ApplicationMetadataEntities> {
-        return this.http.get('/api/app/metadata/entities');
+        return this.http.get('/apps/api/metadata/entities');
     }
 
     /**
-     * GET /api/app/metadata/entities/{id} — Single entity metadata.
+     * GET /apps/api/metadata/entities/{id} — Single entity metadata.
      *
      * @param id - the entity id (its simple class name, e.g. `"Invoice"` — see {@link EntityMetadata}).
      *   Not a fully-qualified Java class name.
      */
     getEntity(id: string): Promise<EntityMetadata> {
-        return this.http.get(`/api/app/metadata/entities/${encodeURIComponent(id)}`);
+        return this.http.get(`/apps/api/metadata/entities/${encodeURIComponent(id)}`);
     }
 
     /**
-     * GET /api/app/metadata/entities/by-path?path={virtualPath} — Resolves the entity metadata for
+     * GET /apps/api/metadata/entities/by-path?path={virtualPath} — Resolves the entity metadata for
      * the `CrudPage` registered at a navigation virtual path (`NavigationNode.internalPath`), without
      * needing to know the entity's id beforehand. This is how {@link https://www.npmjs.com/package/@dynamia-tools/ui-core | CrudPageResolver}
      * turns a `CrudPage` node into an entity, since `NavigationNode` carries no entity/class information.
      */
     getEntityByPath(virtualPath: string): Promise<EntityMetadata> {
-        return this.http.get(`/api/app/metadata/entities/by-path?path=${encodeURIComponent(virtualPath)}`);
+        return this.http.get(`/apps/api/metadata/entities/by-path?path=${encodeURIComponent(virtualPath)}`);
     }
 
-    /** GET /api/app/metadata/entities/ref/{alias}/{id} — Single entity reference */
+    /** GET /apps/api/metadata/entities/ref/{alias}/{id} — Single entity reference */
     getEntityReference(alias: string, id: string | number): Promise<EntityReference> {
-        return this.http.get(`/api/app/metadata/entities/ref/${encodeURIComponent(alias)}/${encodeURIComponent(id)}`);
+        return this.http.get(`/apps/api/metadata/entities/ref/${encodeURIComponent(alias)}/${encodeURIComponent(id)}`);
     }
 
-    /** GET /api/app/metadata/entities/ref/{alias}/search?q={query} — Search entity references */
+    /** GET /apps/api/metadata/entities/ref/{alias}/search?q={query} — Search entity references */
     findEntityReferences(alias: string, query: string): Promise<EntityReference[]> {
-        return this.http.get(`/api/app/metadata/entities/ref/${encodeURIComponent(alias)}/search?q=${encodeURIComponent(query)}`);
+        return this.http.get(`/apps/api/metadata/entities/ref/${encodeURIComponent(alias)}/search?q=${encodeURIComponent(query)}`);
     }
 
     /**
-     * GET /api/app/metadata/entities/{id}/views — All view descriptors for an entity.
+     * GET /apps/api/metadata/entities/{id}/views — All view descriptors for an entity.
      *
      * Results are cached after the first successful fetch.
      * Individual descriptors are also stored in the per-view cache.
@@ -93,7 +93,7 @@ export class MetadataApi {
         if (cached !== undefined) return cached;
 
         const descriptors = await this.http.get<ViewDescriptor[]>(
-            `/api/app/metadata/entities/${encodeURIComponent(id)}/views`,
+            `/apps/api/metadata/entities/${encodeURIComponent(id)}/views`,
         );
 
         this._viewsCache.set(id, descriptors);
@@ -107,7 +107,7 @@ export class MetadataApi {
     }
 
     /**
-     * GET /api/app/metadata/entities/{id}/views/{view} — Specific view descriptor.
+     * GET /apps/api/metadata/entities/{id}/views/{view} — Specific view descriptor.
      *
      * The result is cached after the first successful fetch.
      *
@@ -119,7 +119,7 @@ export class MetadataApi {
         if (cached !== undefined) return cached;
 
         const descriptor = await this.http.get<ViewDescriptor>(
-            `/api/app/metadata/entities/${encodeURIComponent(id)}/views/${encodeURIComponent(view)}`,
+            `/apps/api/metadata/entities/${encodeURIComponent(id)}/views/${encodeURIComponent(view)}`,
         );
 
         this._viewCache.set(key, descriptor);
@@ -127,7 +127,7 @@ export class MetadataApi {
     }
 
     /**
-     * GET /api/app/metadata/views/{id} — A view descriptor by its id, without going through an entity.
+     * GET /apps/api/metadata/views/{id} — A view descriptor by its id, without going through an entity.
      *
      * Use it for descriptors that are not bound to an entity, such as `view: dashboard`.
      * The result is cached after the first successful fetch.
@@ -139,7 +139,7 @@ export class MetadataApi {
         if (cached !== undefined) return cached;
 
         const descriptor = await this.http.get<ViewDescriptor>(
-            `/api/app/metadata/views/${encodeURIComponent(id)}`,
+            `/apps/api/metadata/views/${encodeURIComponent(id)}`,
         );
 
         this._viewByIdCache.set(id, descriptor);

@@ -99,6 +99,13 @@
             <artifactId>nimbus-jose-jwt</artifactId>
             <version>9.37.4</version>
         </dependency>
+
+        <!-- TEST DEPENDENCIES -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

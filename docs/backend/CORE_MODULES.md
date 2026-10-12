@@ -1174,7 +1174,7 @@ Exposes application metadata:
 
 ```java
 @RestController
-@RequestMapping("/api/metadata")
+@RequestMapping("/apps/api/metadata")
 public class ApplicationMetadataController {
     
     @GetMapping("/modules")

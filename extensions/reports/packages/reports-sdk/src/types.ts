@@ -71,7 +71,7 @@ export interface ReportDTO {
   filters?: ReportFilterDTO[];
 }
 
-// ─── UI API (/api/reports/v2) ────────────────────────────────────────────────
+// ─── UI API (/apps/api/reports) ────────────────────────────────────────────────
 
 /** Data types of columns and filters. Mirrors the Java `DataType` enum. */
 export type ReportDataType =
@@ -214,7 +214,7 @@ export interface ReportEndpointResult {
   truncated?: boolean;
 }
 
-// ─── Designer API (/api/reports/v2/design) ───────────────────────────────────
+// ─── Designer API (/apps/api/reports/design) ───────────────────────────────────
 
 /** Preview of a query being designed: the first rows, never more than the preview limit. */
 export interface ReportPreviewRequest {
@@ -224,6 +224,8 @@ export interface ReportPreviewRequest {
   dataSourceId?: number | null | undefined;
   /** Values for the `:name` parameters of the query */
   parameters?: Record<string, ReportFilterValue> | undefined;
+  /** Query timeout in seconds; empty uses `dynamia.reports.query-timeout` */
+  queryTimeout?: number | null | undefined;
 }
 
 /** Result of a preview. */

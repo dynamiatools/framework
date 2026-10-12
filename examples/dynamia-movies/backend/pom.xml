@@ -46,7 +46,7 @@
             <artifactId>tools.dynamia.modules.reports.core</artifactId>
             <version>${dynamia.version}</version>
         </dependency>
-        <!-- Dashboards: UI-agnostic widgets served by /api/dashboard -->
+        <!-- Dashboards: UI-agnostic widgets served by /apps/api/dashboard -->
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.dashboard.core</artifactId>

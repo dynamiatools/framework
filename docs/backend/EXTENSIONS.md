@@ -552,11 +552,11 @@ bridges to `init(DashboardContext)`.
 ### Dashboards from a JS Frontend
 
 A dashboard is a `view: dashboard` descriptor. A JS client gets the layout (columns, `span`, `span-sm`, `span-xs`) and
-the widget slots from the descriptor with `client.metadata.getView(id)` (`GET /api/app/metadata/views/{id}`), and each
+the widget slots from the descriptor with `client.metadata.getView(id)` (`GET /apps/api/metadata/views/{id}`), and each
 widget's data from:
 
 ```
-GET /api/dashboard/{descriptorId}/widgets/{field}?param=value
+GET /apps/api/dashboard/{descriptorId}/widgets/{field}?param=value
 ```
 
 - Only widgets declared as a **field of the descriptor** can be loaded; the widget id is read from the field's
@@ -568,7 +568,7 @@ GET /api/dashboard/{descriptorId}/widgets/{field}?param=value
   state.
 - The caller must be **authenticated** (`401` otherwise). A dashboard descriptor is not linked to the navigation pages
   that show it, so `NavigationRestrictions` cannot be applied: any authenticated user can read any dashboard's widgets.
-  Restrict `/api/dashboard/**` in the web security configuration for per-dashboard authorization.
+  Restrict `/apps/api/dashboard/**` in the web security configuration for per-dashboard authorization.
 - View descriptors served by the metadata API never include class names: `beanClass` is the entity simple name (the
   entity id), and `viewCustomizerClass` / `customViewRenderer` are not serialized.
 - A widget chooses how a JS frontend renders it with `getType()` (`chart`, `viewer`, `kpi`, `html`, `custom`, see
@@ -711,12 +711,12 @@ shell embeds with its ZK bridge. The design pages are CRUD pages and work in bot
 
 | Endpoint | Purpose |
 |---|---|
-| `GET /api/reports/v2/catalog` | Reports the user can run, grouped |
-| `GET /api/reports/v2/{id}` | Filters, declared columns, charts, export formats |
-| `GET /api/reports/v2/{id}/filters/{filter}/options` | Options of enum, entity, query and static filters |
-| `POST /api/reports/v2/{id}/run` | Run with filters, paging and sorting; returns columns, rows, total, truncation flag and chart data |
-| `POST /api/reports/v2/{id}/export?format=xlsx\|csv\|pdf` | Download the whole result as a file |
-| `/api/reports/v2/design/**` | Designer tools (query preview, definition import/export, datasource test) for designer roles only |
+| `GET /apps/api/reports/catalog` | Reports the user can run, grouped |
+| `GET /apps/api/reports/{id}` | Filters, declared columns, charts, export formats |
+| `GET /apps/api/reports/{id}/filters/{filter}/options` | Options of enum, entity, query and static filters |
+| `POST /apps/api/reports/{id}/run` | Run with filters, paging and sorting; returns columns, rows, total, truncation flag and chart data |
+| `POST /apps/api/reports/{id}/export?format=xlsx\|csv\|pdf` | Download the whole result as a file |
+| `/apps/api/reports/design/**` | Designer tools (query preview, definition import/export, datasource test) for designer roles only |
 | `/api/reports/{group}/{endpoint}` | Original endpoints for reports published with `exportEndpoint`, kept for existing integrations |
 
 All endpoints require an authenticated user and use `ErrorResult` for errors. Details and examples are in the
@@ -728,7 +728,7 @@ extension README.
 |---|---|---|
 | `dynamia.reports.ui` | `vue` | Front end of the navigation pages, `vue` or `zk` |
 | `dynamia.reports.max-rows` | `100000` | Rows after which a result is truncated |
-| `dynamia.reports.query-timeout` | `60` | Query timeout, seconds |
+| `dynamia.reports.query-timeout` | `60` | Default query timeout, seconds; a report overrides it with its own `queryTimeout` |
 | `dynamia.reports.allowed-drivers` | MySQL, MariaDB, PostgreSQL, Oracle, SQL Server | JDBC drivers allowed in external datasources |
 | `dynamia.reports.encryption-key` | empty | Encrypts datasource passwords at rest |
 | `dynamia.reports.designer-roles` | empty | Roles allowed to use the designer API; nobody by default |

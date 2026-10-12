@@ -186,7 +186,7 @@ public class ActionFlowStep implements Serializable {
     }
 
     /**
-     * The client asks the user for files, sends each one to {@code /api/app/transfers} and answers with a list of
+     * The client asks the user for files, sends each one to {@code /apps/api/transfers} and answers with a list of
      * {@code {ref}}: references, not content.
      *
      * @param title    title of the picker, may be null
@@ -206,7 +206,7 @@ public class ActionFlowStep implements Serializable {
 
     /**
      * An {@code UPLOAD} step with the limits the server enforces. The client answers with a list of references to files it
-     * already sent to {@code /api/app/transfers}: {@code [{ref}]}.
+     * already sent to {@code /apps/api/transfers}: {@code [{ref}]}.
      *
      * @param title        title of the file chooser
      * @param accept       accepted extensions and MIME types, may be null

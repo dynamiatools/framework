@@ -277,7 +277,7 @@ public class BulkDeleteAction extends AbstractCrudAction implements FlowRemoteAc
 > Phase 4 (a read-only snapshot of everything accumulated so far) — needed once `SaveFlowRemoteAction` had
 > to recover a whole entity payload across `start()`/`resume()`, not just one key at a time.
 
-No new endpoint, no new controller code — `POST /api/app/metadata/entities/{class}/action/bulkDelete` handles
+No new endpoint, no new controller code — `POST /apps/api/metadata/entities/{class}/action/bulkDelete` handles
 both the initial call and every continuation, distinguished only by the presence of `resumeToken` in the
 request body.
 

@@ -1,7 +1,7 @@
 # Migration: ZK separation (first release after 26.10.0)
 
-Part of the effort to remove ZK from Dynamia (epic #130, issues #118–#129 and #143). Two kinds of changes can affect
-an application that uses Dynamia Tools. Read both sections; the first one needs code changes, the second one usually
+Part of the effort to remove ZK from Dynamia (epic #130, issues #118–#129 and #143). Several kinds of changes can affect
+an application that uses Dynamia Tools. Read all sections; the first and the last need code changes, the second one usually
 does not but changes **what gets registered** in some deployments.
 
 | | Needs code changes | Who is affected |
@@ -9,6 +9,7 @@ does not but changes **what gets registered** in some deployments.
 | [1. Platform class renames](#1-platform-class-renames) | Yes, imports | Code that imports one of 12 classes that used to be in `tools.dynamia.zk` |
 | [2. Extensions: `ui` code moved to `core`](#2-extensions-zk-free-code-moved-from-ui-to-core) | No | Applications that depend on an extension's `core` artifact **without** its `ui` artifact |
 | [3. Dashboard](#3-dashboard) | No | Applications with dashboard widgets |
+| [4. REST paths](#4-rest-paths-api-for-integrations-appsapi-for-local-use-234) | Yes, clients and proxies | Anything that calls metadata, jobs, transfers, crud-service or functions directly |
 
 ---
 
@@ -68,7 +69,7 @@ grep -rnE "\b(CrudVDReaderCustomizer|AutoExecuteActionCrudStateChangedListener|F
   `TableVDReaderCustomizer` and `TreeVDReaderCustomizer` are beans; before, they were only registered when
   `tools.dynamia.zk` was on the classpath. Applications without ZK now get the YAML `actions`, `controller`,
   `dataSetView`, `parentName`, `formView` (crud) and `frozenColumns`/`actions` (table, tree) settings applied to the
-  descriptors they serve over `/api/app/metadata`.
+  descriptors they serve over `/apps/api/metadata`.
 - `TreeVDReaderCustomizer` still has no `@Provider`, as before, so tree `frozenColumns` is still not applied. This
   looks like an existing bug; it was not changed here.
 - `DefaultApplicationTemplate` is now in `tools.dynamia.app`, so applications without ZK also get the default template.
@@ -142,9 +143,41 @@ their names and packages. `DashboardContext` now extends the new `WidgetContext`
 `DashboardWidgetDefinition`; every method that existed is still there. `DashboardWidget.init(WidgetContext)` is a
 default method that calls `init(DashboardContext)`.
 
-New: `GET /api/dashboard/{descriptorId}/widgets/{field}` serves widget data to JS frontends. When a ZK widget is served
+New: `GET /apps/api/dashboard/{descriptorId}/widgets/{field}` serves widget data to JS frontends. When a ZK widget is served
 that way it receives a **headless** `DashboardContext` (no dashboard, no widget window), so code that calls
 `getDashboard()` or `getWindow()` inside `init` must not be exposed through this endpoint.
+
+---
+
+## 4. REST paths: `/api` for integrations, `/apps/api` for local use (#234)
+
+**Breaking for applications and clients that call these endpoints directly.** The SDKs (`@dynamia-tools/sdk`,
+`dashboard-sdk`, `reports-sdk`, `http-functions-sdk`), `ui-core`, `dashboard-vue` and `reports-vue` already use the new
+paths, so a frontend that only goes through them needs the upgrade and nothing else. There is no alias for the old paths.
+
+| Before | After |
+|---|---|
+| `/api/app/metadata/**` | `/apps/api/metadata/**` |
+| `/api/app/jobs` | `/apps/api/jobs` |
+| `/api/app/transfers` | `/apps/api/transfers` |
+| `/crud-service/{className}` | `/apps/api/crud-service/{className}` |
+| `/api/dashboard/**` (unreleased) | `/apps/api/dashboard/**` |
+| `/api/reports/v2/**` (unreleased) | `/apps/api/reports/**` |
+| `/api/dynamia/fx/{name}` | `/api/functions/{name}` |
+
+Unchanged: `/api/reports` and `/api/reports/{group}/{endpoint}` (reports published with `exportEndpoint`), `/api/saas`,
+`/api/storage` and the generated CRUD REST `/api/{crudPath}`.
+
+What to do:
+
+- Replace the old paths in any hand-written client, proxy rule, gateway route or firewall rule. In a Vite dev server,
+  proxy `/apps/api` as well as `/api`.
+- If your application defines its own `SecurityFilterChain`, add one for `/apps/api/**`. The security extension now
+  ships one (session by default, `Authorization: Bearer` also accepted, JWT cookie ignored, writes need a same-origin
+  request unless they carry a Bearer token). Without it these paths fall in the web chain, which redirects to `/login`.
+- `DynamiaSecurityConfig.isApiRequest` now also returns true for `/apps/api/**`.
+- The chain binds the account (tenant) of the session user to each request (`AppsApiAccountFilter`), as the JWT filter
+  already does for Bearer requests. Without it the first multi-tenant query of a session ran without an account.
 
 ---
 

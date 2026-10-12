@@ -44,7 +44,7 @@ import java.util.Map;
  * with the metadata API; this endpoint only returns each widget's data.
  *
  * <pre>
- * GET /api/dashboard/{descriptorId}/widgets/{field}?param=value
+ * GET /apps/api/dashboard/{descriptorId}/widgets/{field}?param=value
  * </pre>
  *
  * Only widgets declared as a field of the dashboard descriptor can be loaded, never an arbitrary widget id.
@@ -58,7 +58,7 @@ import java.util.Map;
  * <strong>Access:</strong> the caller must be authenticated ({@link HttpServletRequest#getUserPrincipal()}), otherwise
  * the endpoint answers {@code 401}. A dashboard descriptor has no link to the navigation pages that show it, so the
  * navigation restrictions of those pages cannot be applied here: any authenticated user can read the widgets of any
- * dashboard descriptor. Applications that need per-dashboard authorization must restrict {@code /api/dashboard/**} in
+ * dashboard descriptor. Applications that need per-dashboard authorization must restrict {@code /apps/api/dashboard/**} in
  * their web security configuration.
  *
  * @author Mario Serrano Leones
@@ -68,7 +68,7 @@ import java.util.Map;
 public class DashboardRestController {
 
     /** Base path of the dashboard endpoints. */
-    public static final String PATH = "/api/dashboard";
+    public static final String PATH = "/apps/api/dashboard";
 
     private static final String DASHBOARD_VIEW = "dashboard";
     private static final String WIDGET_PARAM = "widget";

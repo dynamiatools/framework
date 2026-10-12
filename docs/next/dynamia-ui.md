@@ -56,7 +56,7 @@ adopts the same model:
 | Android / iOS implementation | **Platform adapter**: `zk` (stateful server) and `remote` (replay towards any client) | `platform/ui/zk`, `core/actions` + `crud` |
 | Plugin mocks / test implementation | **`test` platform**: implements every port with a "user" script written in the test (§10) | `platform/testing/ui-testing` |
 | Web implementation of the plugin | TS implementation of the same port (`ui-core/ports`), used by `ClientAction` and by the flow runner | `platform/packages/ui-core` |
-| Native ↔ JS bridge | `ActionFlowStep` protocol + `/api/app/transfers` + `/api/app/jobs` | `core/actions`, `app`, `sdk` |
+| Native ↔ JS bridge | `ActionFlowStep` protocol + `/apps/api/transfers` + `/apps/api/jobs` | `core/actions`, `app`, `sdk` |
 | `Capacitor.getPlatform()` | `UIPlatform.current().name()` → `"zk"`, `"remote"`, `"none"`, `"test"` | `ui-shared` (`UIEnvironment`, §3) |
 | `Capacitor.isPluginAvailable('X')` | `UIPlatform.supports(UIFiles.class)` | `ui-shared` |
 | App's own plugin | **Own port**: the developer declares `@UIPort interface DigitalSignature`, implements it in ZK and as a TS renderer of a `CUSTOM` step. This solves the HARD bucket without tying the action to ZK | app module |
@@ -129,7 +129,7 @@ When something is **really** platform-specific there are two explicit exits, wit
               │                        │
         ZK widgets             ActionFlowStep (JSON) ──► ui-core/flow (TS, framework-free)
                                        │                         │
-                               TransferStore ◄── /api/app/transfers ──► Vue / POS / shop adapter
+                               TransferStore ◄── /apps/api/transfers ──► Vue / POS / shop adapter
 ```
 
 Three cross-cutting axes:
@@ -268,7 +268,7 @@ public record ChoiceOptions<T>(String title, List<T> options, Function<T, String
 The first version may keep running the task inside the request, but the final shape is:
 
 - `PROGRESS {jobId, title}` step. The task runs in `SchedulerUtil` with the propagated context (§8).
-- The client polls `GET /api/app/jobs/{jobId}` (`{state, current, max, message}`).
+- The client polls `GET /apps/api/jobs/{jobId}` (`{state, current, max, message}`).
 - When the task ends, the client answers the step with `{jobId, state}`. The next pass consumes that answer and calls
   `onFinish`/`onError` **without running the task again**: the `jobId` is in `answers` and the fingerprint identifies it.
 - This removes `markNonRepeatable`: the task no longer runs inside a pass.
@@ -340,11 +340,11 @@ public interface TransferStore {
 
 | Method | Route | Body / response |
 |---|---|---|
-| `POST` | `/api/app/transfers` | Raw `application/octet-stream` body, with headers `X-File-Name` (URL-encoded), the file's `Content-Type` in `X-File-Type` and `Content-Length`. Streams straight to the store, **bypassing Spring multipart** (so `spring.servlet.multipart.max-file-size`, 10 MB in the ERP, does not affect it). Responds `{ref, name, contentType, size}`, where `ref` is a signed id bound to `FlowPrincipal`. Limit: `dynamia.ui.files.max-file-size`. |
-| `GET` | `/api/app/transfers/{ref}` | Streaming with `Content-Disposition: attachment; filename*=UTF-8''...`, `Content-Length` and `Cache-Control: no-store`. Owner only; downloads are deleted after the first complete read or on expiry. |
-| `DELETE` | `/api/app/transfers/{ref}` | The client cancels an upload. |
+| `POST` | `/apps/api/transfers` | Raw `application/octet-stream` body, with headers `X-File-Name` (URL-encoded), the file's `Content-Type` in `X-File-Type` and `Content-Length`. Streams straight to the store, **bypassing Spring multipart** (so `spring.servlet.multipart.max-file-size`, 10 MB in the ERP, does not affect it). Responds `{ref, name, contentType, size}`, where `ref` is a signed id bound to `FlowPrincipal`. Limit: `dynamia.ui.files.max-file-size`. |
+| `GET` | `/apps/api/transfers/{ref}` | Streaming with `Content-Disposition: attachment; filename*=UTF-8''...`, `Content-Length` and `Cache-Control: no-store`. Owner only; downloads are deleted after the first complete read or on expiry. |
+| `DELETE` | `/apps/api/transfers/{ref}` | The client cancels an upload. |
 
-Security: they require authentication (the same filter chain as `/api/app/metadata`), check the owner (`subject` + `tenant`),
+Security: they require authentication (the same filter chain as `/apps/api/metadata`), check the owner (`subject` + `tenant`),
 and the server rejects `accept` and sizes outside `UploadOptions` when the reference is consumed, not only on the client.
 
 ### 6.5 Upload flow in replay
@@ -352,7 +352,7 @@ and the server rejects `accept` and sizes outside `UploadOptions` when the refer
 ```
 action: UIFiles.upload(opts, cb)
   └─ ReplayFileTransfer: UPLOAD step {title, accept, maxFiles, maxFileSize, maxTotalSize}  (pending)
-client: picks files → POST /api/app/transfers for each one (with progress) → answers the step with [{ref}]
+client: picks files → POST /apps/api/transfers for each one (with progress) → answers the step with [{ref}]
 server (next pass): answers = [{fp, value:[{ref}]}]   ← only references in the token
   └─ ReplayFileTransfer resolves each ref in TransferStore (owner, expiry, accept, sizes)
      └─ cb(List<UploadedFile>) with StoredUploadedFile handles that open the file in the store
@@ -363,7 +363,7 @@ when the flow ends successfully (after commit): consumed refs are deleted; if ab
 
 `ReplayFileTransfer.download(source)` writes the source to the store by streaming (direction `DOWNLOAD`) **only in the pass
 that ends** (the one that is not left pending), and the registration happens after the commit. The final response carries
-`params.downloads = [{name, contentType, size, url}]`, with `url` relative to `/api/app/transfers/{ref}`. The client downloads
+`params.downloads = [{name, contentType, size, url}]`, with `url` relative to `/apps/api/transfers/{ref}`. The client downloads
 with a link or `fetch`; the browser does the streaming and there is no Base64 in the JSON.
 
 So that the source is not read in passes that are later discarded, `ReplaySession.download` stores the `DownloadSource`
@@ -715,7 +715,7 @@ and commits in English. No commit or push unless the user asks. Each package end
 
 ### WP8 · Asynchronous progress (§5.6) — after WP3 and WP5
 
-- **Files:** `PROGRESS` step, `JobsController` (`/api/app/jobs/{id}`), asynchronous `ReplayProgressRunner`, step in
+- **Files:** `PROGRESS` step, `JobsController` (`/apps/api/jobs/{id}`), asynchronous `ReplayProgressRunner`, step in
   `ui-core/flow`, delete `markNonRepeatable`.
 - **Acceptance:** a 5 s task does not block the request; the client polls the state; `onFinish` runs exactly once.
 
@@ -935,7 +935,7 @@ The branch already had the mechanism §8 asks for: `ContextCapturer` beans, aske
   `TransferMeta`, `FlowPrincipal` and an `InMemoryTransferStore`. `FileTransfer.download` takes a `DownloadSource`;
   `UIFiles` has overloads for bytes, `Path`/`File` and a `Supplier<InputStream>`.
 - `app`: `LocalTransferStore` (data + metadata file per reference, hard size limit, quota, TTL, purge every five minutes),
-  `TransfersConfiguration` (`dynamia.ui.files.*`) and `TransfersController` (`POST`/`GET`/`DELETE /api/app/transfers`,
+  `TransfersConfiguration` (`dynamia.ui.files.*`) and `TransfersController` (`POST`/`GET`/`DELETE /apps/api/transfers`,
   raw body, no multipart, 413 on a file over the limit, a foreign reference is 404). The `app` surefire runs with
   `-Xmx256m` and a test moves 50 MB through the controller.
 - `actions`: `ReplayFileTransfer` answers an `UPLOAD` step from references (resolved with owner, expiry, `UploadPolicy`) and
@@ -1026,7 +1026,7 @@ The branch already had the mechanism §8 asks for: `ContextCapturer` beans, aske
 #### WP8 · Asynchronous progress
 
 - **Protocol:** new `PROGRESS` step (`data: {title, jobId}`), generated into the SDK types and covered by two fixtures. The client
-  polls `GET /api/app/jobs/{id}` (`{id, title, state, current, max, message, error}`) and answers with `{jobId, state}`.
+  polls `GET /apps/api/jobs/{id}` (`{id, title, state, current, max, message, error}`) and answers with `{jobId, state}`.
 - **Server:** `JobRegistry` / `InMemoryJobRegistry` (`ui-shared`) runs the task with `SchedulerUtil`, so it gets the context of the
   caller (tenant, security) and no UI; `JobsController` and `JobsConfiguration` (`app`, purged every five minutes). The pass
   that reaches `UIProgress` starts the job once (`ReplaySession.interact` now tells whether the question is new) and stops at the

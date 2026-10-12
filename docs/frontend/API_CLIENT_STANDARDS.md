@@ -444,6 +444,6 @@ expect(result).toEqual([{ id: 1, name: 'Item' }]);
 
 - `getEntityViews(entityId)` / `getEntityView(entityId, view)` — descriptors **of an entity**.
 - `getView(id)` — a descriptor **by its id**, with no entity. Use it for descriptors that are not bound to an entity,
-  such as `view: dashboard`. Backed by `GET /api/app/metadata/views/{id}` (`404` when unknown).
+  such as `view: dashboard`. Backed by `GET /apps/api/metadata/views/{id}` (`404` when unknown).
 
 Both are cached; `client.clearViewDescriptorCache(id?)` clears the entries of an entity id or of a descriptor id.

@@ -23,7 +23,7 @@ import java.util.Optional;
 
 /**
  * Runs the tasks of {@code UIProgress} for remote clients in the background and lets the client follow them. The request
- * that starts a task does not wait for it: the client polls {@code GET /api/app/jobs/{id}} and, when the job is finished,
+ * that starts a task does not wait for it: the client polls {@code GET /apps/api/jobs/{id}} and, when the job is finished,
  * answers the {@code PROGRESS} step so the action can go on, without running the task again.
  * <p>
  * The task runs with the context of the caller (tenant, security) and no UI. With several nodes behind a balancer the

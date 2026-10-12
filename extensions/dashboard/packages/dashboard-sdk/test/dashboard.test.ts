@@ -4,14 +4,14 @@ import { DashboardApi, resolveDashboardLayout } from '../src/index.js';
 import { makeHttpClient, mockFetch } from './helpers.js';
 
 describe('DashboardApi', () => {
-  it('widget() calls GET /api/dashboard/{id}/widgets/{field} with encoded segments and params', async () => {
+  it('widget() calls GET /apps/api/dashboard/{id}/widgets/{field} with encoded segments and params', async () => {
     const fetchMock = mockFetch(200, { field: 'total sales', widget: 'sales-kpi', type: 'kpi', data: { value: 1 } });
     const api = new DashboardApi(makeHttpClient(fetchMock));
 
     const result = await api.widget('main dash', 'total sales', { range: 'lastMonth', skip: undefined });
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe('https://app.example.com/api/dashboard/main%20dash/widgets/total%20sales?range=lastMonth');
+    expect(url).toBe('https://app.example.com/apps/api/dashboard/main%20dash/widgets/total%20sales?range=lastMonth');
     expect(init.method).toBe('GET');
     expect(result.type).toBe('kpi');
   });

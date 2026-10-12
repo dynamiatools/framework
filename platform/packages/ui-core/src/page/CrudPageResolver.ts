@@ -20,7 +20,7 @@ export const NavigationPageTypes = {
      * Leaf page that is automatically backed by a full CRUD interface for a single entity.
      * `NavigationNode` carries no entity/class information — {@link CrudPageResolver.resolve}
      * resolves the entity server-side from the node's `internalPath` via
-     * `GET /api/app/metadata/entities/by-path`.
+     * `GET /apps/api/metadata/entities/by-path`.
      */
     CrudPage: 'CrudPage',
     /** Leaf page that renders a configuration panel. Not yet resolved by this module. */

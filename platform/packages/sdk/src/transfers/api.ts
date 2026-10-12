@@ -11,11 +11,11 @@ export interface UploadOptions {
 
 /**
  * Moves files between a client and the server without Base64: a file is sent as the raw body of one request to
- * `/api/app/transfers` and travels afterwards as a {@link FlowFileRef}, which is what an `UPLOAD` flow step is answered with.
+ * `/apps/api/transfers` and travels afterwards as a {@link FlowFileRef}, which is what an `UPLOAD` flow step is answered with.
  * Downloads are fetched from the `url` of `params.downloads`.
  */
 export class TransfersApi {
-  private static readonly PATH = '/api/app/transfers';
+  private static readonly PATH = '/apps/api/transfers';
 
   constructor(private readonly http: HttpClient) {
   }

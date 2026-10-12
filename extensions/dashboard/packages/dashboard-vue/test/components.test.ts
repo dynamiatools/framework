@@ -35,7 +35,7 @@ describe('DynamiaDashboard', () => {
 
   it('renders cells with their spans, titles, renderers, errors and unsupported types', async () => {
     const { client } = makeClient({
-      '/api/app/metadata/views/main': descriptor,
+      '/apps/api/metadata/views/main': descriptor,
       '/widgets/totalSales': widgetResponse('totalSales', 'kpi', { value: 42 }, { title: 'Sales', titleVisible: true }),
       '/widgets/broken': () => ({ status: 500, body: { message: 'boom' } }),
       '/widgets/custom': widgetResponse('custom', 'sales-map', null),
@@ -52,8 +52,37 @@ describe('DynamiaDashboard', () => {
     expect(wrapper.get('[data-field="custom"]').text()).toContain('No renderer registered for widget type "sales-map"');
   });
 
+  it('lets the host frame every widget with the `frame` prop', async () => {
+    const Frame = defineComponent({
+      props: ['field', 'response', 'loading', 'error'],
+      template:
+        '<section class="host-card" :data-state="error ? \'error\' : loading ? \'loading\' : \'ready\'">' +
+        '<h3 v-if="response">{{ response.title }}</h3><slot /></section>',
+    });
+    const { client } = makeClient({
+      '/apps/api/metadata/views/main': descriptor,
+      '/widgets/totalSales': widgetResponse('totalSales', 'kpi', { value: 42 }, { title: 'Sales', titleVisible: false }),
+      '/widgets/broken': () => ({ status: 500, body: { message: 'boom' } }),
+      '/widgets/custom': widgetResponse('custom', 'sales-map', null),
+    });
+
+    const wrapper = mount(DynamiaDashboard, { props: { id: 'main', client, frame: Frame } });
+    await flushPromises();
+
+    const sales = wrapper.get('[data-field="totalSales"] .host-card');
+    expect(sales.attributes('data-state')).toBe('ready');
+    expect(sales.get('h3').text()).toBe('Sales');
+    expect(sales.get('.probe').text()).toBe('42');
+    expect(wrapper.find('[data-field="totalSales"] .dynamia-dashboard-title').exists()).toBe(false);
+
+    const broken = wrapper.get('[data-field="broken"] .host-card');
+    expect(broken.attributes('data-state')).toBe('error');
+    expect(broken.text()).toContain('boom');
+    expect(wrapper.get('[data-field="custom"] .host-card').text()).toContain('No renderer registered');
+  });
+
   it('shows the descriptor loading error', async () => {
-    const { client } = makeClient({ '/api/app/metadata/views/main': () => ({ status: 404, body: { message: 'nope' } }) });
+    const { client } = makeClient({ '/apps/api/metadata/views/main': () => ({ status: 404, body: { message: 'nope' } }) });
 
     const wrapper = mount(DynamiaDashboard, { props: { id: 'main', client } });
     await flushPromises();
@@ -88,6 +117,10 @@ describe('built-in widgets', () => {
 
     const none = mount(KpiWidget, { props: { data: { value: 3 } } });
     expect(none.find('.dynamia-kpi-trend').exists()).toBe(false);
+    expect(none.find('.dynamia-kpi-description').exists()).toBe(false);
+
+    const described = mount(KpiWidget, { props: { data: { value: 3, description: '12 sales made', icon: 'cart', color: 'success' } } });
+    expect(described.get('.dynamia-kpi-description').text()).toBe('12 sales made');
   });
 
   it('ChartWidget builds a Chart.js chart from the data and destroys it on unmount', async () => {

@@ -23,11 +23,11 @@ import java.util.Map;
  * {@link tools.dynamia.modules.reports.core.security.ReportDesignerPolicy} (by default the roles of
  * {@code dynamia.reports.designer-roles}) can use it, everyone else gets {@code 403}.
  * <pre>
- * GET  /api/reports/v2/design/info
- * POST /api/reports/v2/design/preview
- * GET  /api/reports/v2/design/{id}/definition
- * POST /api/reports/v2/design/import
- * POST /api/reports/v2/design/datasources/{id}/test
+ * GET  /apps/api/reports/design/info
+ * POST /apps/api/reports/design/preview
+ * GET  /apps/api/reports/design/{id}/definition
+ * POST /apps/api/reports/design/import
+ * POST /apps/api/reports/design/datasources/{id}/test
  * </pre>
  */
 @RestController

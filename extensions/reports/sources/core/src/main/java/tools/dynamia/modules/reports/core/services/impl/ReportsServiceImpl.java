@@ -39,10 +39,14 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Service
@@ -117,14 +121,9 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Cacheable(key = "'Report-' + #id + '-' + " + ACCOUNT_KEY)
     public Report loadReportModel(Long id) {
-        Report report = crudService().findSingle(Report.class, QueryParameters.with("id", id).add("accountId", QueryConditions.isNotNull()));
-        report.getFields().size();
-        report.getFilters().size();
-        report.getCharts().size();
-        return report;
+        return findSingleInAccounts(account -> QueryParameters.with("id", id).add("accountId", account), true);
     }
 
     private ReportData executeSQL(Report report, ReportFilters filters, ReportDataSource dataSource, int maxRows) {
@@ -134,7 +133,7 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
             setReadOnly(connection, true);
             try {
                 var template = new JdbcTemplate(new SingleConnectionDataSource(connection, true));
-                template.setQueryTimeout(settings.getQueryTimeoutSeconds());
+                template.setQueryTimeout(queryTimeoutSeconds(report));
                 if (maxRows > 0) {
                     template.setMaxRows(maxRows == Integer.MAX_VALUE ? maxRows : maxRows + 1);
                 }
@@ -152,6 +151,14 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
         } catch (SQLException | DataAccessException e) {
             throw new ReportsException("Error executing report [" + report.getName() + "]: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * The timeout of the report, or the global {@code dynamia.reports.query-timeout} when the report has none.
+     */
+    private int queryTimeoutSeconds(Report report) {
+        Long timeout = report.getQueryTimeout();
+        return timeout == null ? settings.getQueryTimeoutSeconds() : (int) Math.min(timeout, Integer.MAX_VALUE / 1000);
     }
 
     private void setReadOnly(Connection connection, boolean readOnly) {
@@ -181,7 +188,7 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
             if (maxRows > 0 && maxRows < Integer.MAX_VALUE) {
                 query.setMaxResults(maxRows + 1);
             }
-            hint(query, "jakarta.persistence.query.timeout", settings.getQueryTimeoutSeconds() * 1000);
+            hint(query, "jakarta.persistence.query.timeout", queryTimeoutSeconds(report) * 1000);
             hint(query, "org.hibernate.readOnly", true);
 
             List<?> result = query.getResultList();
@@ -212,66 +219,111 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
     @Override
     @Cacheable(key = "'ActiveReport-' + " + ACCOUNT_KEY)
     public List<Report> findActives() {
-        List<Long> accounts = new ArrayList<>();
-        accounts.add(accountServiceAPI.getSystemAccountId());
-        accounts.add(accountServiceAPI.getCurrentAccountId());
-        QueryParameters params = QueryParameters.with("active", true)
+        return findInAccounts(account -> QueryParameters.with("active", true)
                 .add("group.active", true)
-                .add("accountId", QueryConditions.in(accounts))
-                .orderBy("name");
-        return crudService().find(Report.class, params);
+                .add("accountId", account)
+                .orderBy("name"), false);
     }
 
     @Override
     @Cacheable(key = "'ActiveReportByGroup-' + #reportGroup.id + '-' + " + ACCOUNT_KEY)
     public List<Report> findActivesByGroup(ReportGroup reportGroup) {
-        List<Long> accounts = new ArrayList<>();
-        accounts.add(accountServiceAPI.getSystemAccountId());
-        accounts.add(accountServiceAPI.getCurrentAccountId());
-        return crudService().find(Report.class, QueryParameters.with("group.name", QueryConditions.eq(reportGroup.getName()))
+        return findInAccounts(account -> QueryParameters.with("group.name", QueryConditions.eq(reportGroup.getName()))
                 .add("active", true)
-                .add("accountId", QueryConditions.in(accounts)).orderBy("name"));
+                .add("accountId", account)
+                .orderBy("name"), false);
     }
 
     @Override
-    @Transactional
     public Report findByEndpoint(String endpoint) {
-        var report = crudService().findSingle(Report.class, QueryParameters.with("endpointName", QueryConditions.eq(endpoint)));
-        if (report == null) {
-            //if not fount try to find report in system account
-            report = crudService().findSingle(Report.class, QueryParameters.with("endpointName", QueryConditions.eq(endpoint))
-                    .add("accountId", accountServiceAPI.getSystemAccountId()));
-        }
-        if (report != null) {
-            Hibernate.initialize(report.getFields());
-            Hibernate.initialize(report.getFilters());
-            Hibernate.initialize(report.getCharts());
-            Hibernate.initialize(report.getGroup());
-        }
-        return report;
+        return findSingleInAccounts(account -> QueryParameters.with("endpointName", QueryConditions.eq(endpoint))
+                .add("accountId", account), true);
     }
 
-
-    @Transactional
     @Override
     public Report findByEndpoint(String group, String endpoint) {
-        var report = crudService().findSingle(Report.class, QueryParameters.with("endpointName", QueryConditions.eq(endpoint))
-                .add("group.endpointName", QueryConditions.eq(group)));
+        return findSingleInAccounts(account -> QueryParameters.with("endpointName", QueryConditions.eq(endpoint))
+                .add("group.endpointName", QueryConditions.eq(group))
+                .add("accountId", account), true);
+    }
 
-        if (report == null) {
-            //if not fount try to find report in system account
-            report = crudService().findSingle(Report.class, QueryParameters.with("endpointName", QueryConditions.eq(endpoint))
-                    .add("group.endpointName", QueryConditions.eq(group))
-                    .add("accountId", accountServiceAPI.getSystemAccountId()));
+    /**
+     * Reports are tenant entities: Hibernate only returns the rows of the tenant bound when the session opens, so the
+     * reports of the system account are not visible from another account. Each account is read as itself, in its own
+     * session, and the system reports are added to the ones of the current account.
+     *
+     * @param query      the query of the reports of one account
+     * @param initialize true to load the lazy parts of every report (fields, filters and charts)
+     * @return the reports of the system account and of the current account, sorted by name
+     */
+    private List<Report> findInAccounts(Function<Long, QueryParameters> query, boolean initialize) {
+        List<Report> reports = new ArrayList<>();
+        for (Long account : accountsToRead()) {
+            reports.addAll(inAccount(account, () -> crudService().find(Report.class, query.apply(account)), initialize));
         }
+        reports.sort(Comparator.comparing(Report::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
+        return reports;
+    }
 
-        if (report != null) {
+    /**
+     * Finds one report, looking first in the current account and then in the system account.
+     */
+    private Report findSingleInAccounts(Function<Long, QueryParameters> query, boolean initialize) {
+        var accounts = accountsToRead();
+        // the current account has priority over the system one
+        Collections.reverse(accounts);
+        for (Long account : accounts) {
+            Report report = inAccount(account, () -> crudService().findSingle(Report.class, query.apply(account)), initialize);
+            if (report != null) {
+                return report;
+            }
+        }
+        return null;
+    }
+
+    private List<Long> accountsToRead() {
+        var accounts = new ArrayList<Long>();
+        accounts.add(accountServiceAPI.getSystemAccountId());
+        Long current = accountServiceAPI.getCurrentAccountId();
+        if (current != null && !accounts.contains(current)) {
+            accounts.add(current);
+        }
+        return accounts;
+    }
+
+    /**
+     * Runs the work as the given account, in a new session and transaction, because the tenant of a session is fixed
+     * when it opens. The reports leave the session fully initialized.
+     */
+    @SuppressWarnings("unchecked")
+    private <T> T inAccount(Long account, Supplier<T> work, boolean initialize) {
+        Object[] result = new Object[1];
+        accountServiceAPI.withAccount(account, () -> {
+            crudService().executeWithinTransaction(() -> {
+                T value = work.get();
+                initialize(value, initialize);
+                result[0] = value;
+            });
+            return null;
+        });
+        return (T) result[0];
+    }
+
+    private static void initialize(Object value, boolean deep) {
+        if (value instanceof Report report) {
+            initialize(report, deep);
+        } else if (value instanceof List<?> list) {
+            list.forEach(r -> initialize((Report) r, deep));
+        }
+    }
+
+    private static void initialize(Report report, boolean deep) {
+        Hibernate.initialize(report.getGroup());
+        if (deep) {
             Hibernate.initialize(report.getFields());
             Hibernate.initialize(report.getFilters());
             Hibernate.initialize(report.getCharts());
-            Hibernate.initialize(report.getGroup());
         }
-        return report;
     }
 
     @Override
@@ -362,31 +414,17 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
 
     @Override
     @Cacheable(key = "'ExportableReports-' + #includeSystem + '-' + " + ACCOUNT_KEY)
-    @Transactional
     public List<Report> findExportableReports(boolean includeSystem) {
-        List<Long> accounts = new ArrayList<>();
-        accounts.add(accountServiceAPI.getSystemAccountId());
-        accounts.add(accountServiceAPI.getCurrentAccountId());
-        var params = QueryParameters.with("exportEndpoint", true)
-                .add("active", true)
-                .add("accountId", QueryConditions.in(accounts))
-                .add("group.active", true)
-                .orderBy("name");
-
-
-        if (!includeSystem) {
-            params.add("group.system", false);
-        }
-
-        var reports = crudService().find(Report.class, params);
-
-        reports.forEach(r -> {
-            Hibernate.initialize(r.getGroup());
-            Hibernate.initialize(r.getFields());
-            Hibernate.initialize(r.getFilters());
-            Hibernate.initialize(r.getCharts());
-        });
-
-        return reports;
+        return findInAccounts(account -> {
+            var params = QueryParameters.with("exportEndpoint", true)
+                    .add("active", true)
+                    .add("accountId", account)
+                    .add("group.active", true)
+                    .orderBy("name");
+            if (!includeSystem) {
+                params.add("group.system", false);
+            }
+            return params;
+        }, true);
     }
 }

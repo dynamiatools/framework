@@ -12,6 +12,7 @@
     >
       {{ trendText }}
     </div>
+    <div v-if="data?.description" class="dynamia-kpi-description">{{ data.description }}</div>
   </div>
 </template>
 
@@ -36,7 +37,8 @@ const trendText = computed(() => {
 <style scoped>
 .dynamia-kpi-label { opacity: 0.7; font-size: 0.9em; }
 .dynamia-kpi-value { font-size: 2em; font-weight: 600; }
+.dynamia-kpi-description { opacity: 0.7; font-size: 0.85em; }
 .dynamia-kpi-unit { font-size: 0.5em; font-weight: 400; }
-.dynamia-kpi-trend-up { color: #10b981; }
-.dynamia-kpi-trend-down { color: #ef4444; }
+.dynamia-kpi-trend-up { color: var(--dynamia-success, #10b981); }
+.dynamia-kpi-trend-down { color: var(--dynamia-danger, #ef4444); }
 </style>

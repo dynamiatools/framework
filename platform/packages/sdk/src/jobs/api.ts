@@ -3,7 +3,7 @@ import type { HttpClient } from '../http.js';
 /** State of a background job. */
 export type JobState = 'RUNNING' | 'DONE' | 'FAILED';
 
-/** Where a background job is: what `GET /api/app/jobs/{id}` answers. */
+/** Where a background job is: what `GET /apps/api/jobs/{id}` answers. */
 export interface JobStatus {
   id: string;
   title: string;
@@ -22,7 +22,7 @@ export interface JobStatus {
  * job is no longer `RUNNING` and then answers the step, which lets the action go on.
  */
 export class JobsApi {
-  private static readonly PATH = '/api/app/jobs';
+  private static readonly PATH = '/apps/api/jobs';
 
   constructor(private readonly http: HttpClient) {
   }

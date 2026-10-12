@@ -383,6 +383,28 @@ Here's how a typical request flows through the layers:
 
 ---
 
+### REST API surface: `/api` and `/apps/api`
+
+Endpoints are split by audience, not by technology. A host application protects each prefix with its own security chain.
+
+| Prefix | Audience | Auth | Examples |
+|---|---|---|---|
+| `/api/{module}/...` | External or public integrations | Stateless JWT (`Authorization: Bearer` or the `DYNAMIA_JWT` cookie) | `/api/reports/{group}/{endpoint}`, `/api/functions/{name}`, `/api/saas`, `/api/storage`, generated CRUD REST `/api/{crudPath}` |
+| `/apps/api/{module}/...` | Local: the application's own frontends and micro-frontends | Web session by default; `Authorization: Bearer` also accepted. The JWT **cookie** is ignored | `/apps/api/metadata`, `/apps/api/dashboard`, `/apps/api/reports`, `/apps/api/crud-service/{className}`, `/apps/api/jobs`, `/apps/api/transfers` |
+
+Rules:
+
+- The module name is the same under both prefixes. There is no version segment in the path.
+- Anything that exists only to feed a Dynamia frontend (metadata, dashboard data, report designer, class-name based
+  CRUD) goes under `/apps/api`. Anything a third party is meant to call goes under `/api`.
+- `/apps/api/**` has CSRF disabled (the session cookie is sent by the browser), so writes (`POST`, `PUT`, `PATCH`,
+  `DELETE`) require a same-origin request (`Origin` or `Sec-Fetch-Site`), checked by
+  `AppsApiSameOriginAuthorizationManager`. Requests with a Bearer token are exempt: that header is never added by the
+  browser on its own.
+- Unauthenticated requests get a JSON 401 (not a redirect to `/login`), so `fetch` callers can handle them.
+
+---
+
 ## Dependency Injection & Spring Integration
 
 DynamiaTools is built on Spring's dependency injection. All components are managed by the Spring container.
@@ -671,7 +693,7 @@ frontend. Practical consequences for contributors:
 
 - Code that does not need ZK must not live in a ZK-dependent module. For extensions this is the `core` / `ui` rule in
   [EXTENSIONS.md](./EXTENSIONS.md#module-layout-core-and-ui).
-- New UI features should be reachable through the REST/metadata API (`/api/app/metadata/*`, `/api/crud/*`, extension
+- New UI features should be reachable through the REST/metadata API (`/apps/api/metadata/*`, `/api/crud/*`, extension
   endpoints) and described by view descriptors, not only by ZK components.
 - ZK-specific hints in descriptors (`component:`, `controller:`, `customizer:`, `customView:`) are tolerated, but a
   descriptor that names a ZK class stays in a ZK module.

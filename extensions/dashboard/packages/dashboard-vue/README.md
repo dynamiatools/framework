@@ -63,3 +63,21 @@ const { layout, widgets, loading, error, reload, reloadWidget } = useDashboard(c
 
 `widgets` is keyed by descriptor field and holds `{ response, loading, error }` for each widget. `reloadWidget(field,
 params?)` refreshes one widget, for example from a widget-level filter.
+
+## Matching the host design
+
+The package does not need a design system. To make a dashboard look like the rest of your application:
+
+- **Frame each widget** with the `frame` prop: a component that receives `field`, `response`, `loading` and `error` as
+  props and renders the widget (or its loading and error state) in its default slot. Use it to wrap the widget in your
+  card component and to show the title your way. `WidgetFrame` is the default frame and documents the contract.
+- **Replace the renderers** you want to look native: `WidgetRendererRegistry.register('kpi', MyInfobox)` after
+  installing the plugin replaces the built-in `kpi` renderer (see [Custom widgets](#custom-widgets)).
+- **Loading, error and unsupported states** are slots (`loading`, `error`, `widget-loading`, `widget-error`,
+  `unsupported`).
+- The built-in components read CSS custom properties with fallbacks, so a host can theme them without extra CSS:
+  `--dynamia-dashboard-gap`, `--dynamia-success` and `--dynamia-danger` (trend colors).
+
+```vue
+<DynamiaDashboard id="mainDashboard" :frame="MyCard" />
+```

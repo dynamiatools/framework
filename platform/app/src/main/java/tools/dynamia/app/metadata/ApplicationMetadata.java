@@ -58,7 +58,7 @@ public class ApplicationMetadata extends BasicMetadata {
         setTemplate(info.getTemplate());
         setVersion(info.getVersion());
         setAuthor(info.getAuthor());
-        setEndpoint("/api/app/metadata");
+        setEndpoint("/apps/api/metadata");
     }
 
     /**

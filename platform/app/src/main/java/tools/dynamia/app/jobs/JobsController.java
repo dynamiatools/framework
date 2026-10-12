@@ -27,7 +27,7 @@ import tools.dynamia.ui.jobs.JobStatus;
 
 /**
  * Lets a remote client follow the background task of a {@code PROGRESS} flow step:
- * {@code GET /api/app/jobs/{id}} answers {@code {id, title, state, current, max, message, error}}. A job of another user or
+ * {@code GET /apps/api/jobs/{id}} answers {@code {id, title, state, current, max, message, error}}. A job of another user or
  * tenant, or one that expired, is {@code 404}.
  */
 @RestController
@@ -35,7 +35,7 @@ import tools.dynamia.ui.jobs.JobStatus;
 public class JobsController {
 
     /** Base path of the endpoint. */
-    public static final String PATH = "/api/app/jobs";
+    public static final String PATH = "/apps/api/jobs";
 
     private final JobRegistry jobs;
 

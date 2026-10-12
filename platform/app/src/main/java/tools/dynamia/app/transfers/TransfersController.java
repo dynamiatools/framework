@@ -47,12 +47,12 @@ import java.util.Map;
 /**
  * Moves the files of remote clients in and out of the {@link TransferStore} by streaming.
  * <ul>
- *     <li>{@code POST /api/app/transfers}: raw {@code application/octet-stream} body, with {@code X-File-Name}
+ *     <li>{@code POST /apps/api/transfers}: raw {@code application/octet-stream} body, with {@code X-File-Name}
  *     (URL-encoded) and {@code X-File-Type}. It does not go through Spring multipart, so the multipart limits do not
  *     apply; {@code dynamia.ui.files.max-file-size} does, and a bigger file gets {@code 413}.</li>
- *     <li>{@code GET /api/app/transfers/{ref}}: streams the file, only to its owner; downloads are deleted after the
+ *     <li>{@code GET /apps/api/transfers/{ref}}: streams the file, only to its owner; downloads are deleted after the
  *     first complete read.</li>
- *     <li>{@code DELETE /api/app/transfers/{ref}}: the client cancels an upload.</li>
+ *     <li>{@code DELETE /apps/api/transfers/{ref}}: the client cancels an upload.</li>
  * </ul>
  * A file of another user or tenant is reported as not found, never as forbidden. The accepted types and sizes of each
  * upload are enforced again when the action consumes the reference.
@@ -62,7 +62,7 @@ import java.util.Map;
 public class TransfersController {
 
     /** Base path of the endpoints. */
-    public static final String PATH = "/api/app/transfers";
+    public static final String PATH = "/apps/api/transfers";
 
     private final TransferStore store;
 

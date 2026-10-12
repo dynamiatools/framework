@@ -196,7 +196,7 @@ The layout of a dashboard (columns, `span`, `span-sm`, `span-xs`) and its widget
 descriptor, which a JS client reads with `client.metadata.getView(id)`. The data of each widget is served by:
 
 ```
-GET /api/dashboard/{descriptorId}/widgets/{field}?param=value
+GET /apps/api/dashboard/{descriptorId}/widgets/{field}?param=value
 ```
 
 The response is a `DashboardWidgetResponse`: `field`, `widget`, `type`, `title`, flags and `data`. Only widgets

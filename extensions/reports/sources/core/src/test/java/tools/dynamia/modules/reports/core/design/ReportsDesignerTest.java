@@ -73,6 +73,15 @@ class ReportsDesignerTest {
     // ---- service
 
     @Test
+    void previewAcceptsAQueryTimeoutAndRejectsNonPositiveOnes() {
+        var request = new ReportPreviewRequest("sql", "select id from sales", null, null, 30L);
+        assertFalse(service.preview(request).rows().isEmpty());
+
+        assertThrows(ValidationError.class, () -> service.preview(
+                new ReportPreviewRequest("sql", "select id from sales", null, null, 0L)));
+    }
+
+    @Test
     void previewReturnsTheFirstRowsAndFlagsTruncation() {
         var result = service.preview(preview("sql", "select id, region from sales order by id", null));
 
@@ -177,14 +186,14 @@ class ReportsDesignerTest {
 
     @Test
     void controllerRequiresAuthentication() throws Exception {
-        mvc.perform(get("/api/reports/v2/design/info")).andExpect(status().isUnauthorized());
-        mvc.perform(post("/api/reports/v2/design/preview").contentType(MediaType.APPLICATION_JSON).content("{}")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/apps/api/reports/design/info")).andExpect(status().isUnauthorized());
+        mvc.perform(post("/apps/api/reports/design/preview").contentType(MediaType.APPLICATION_JSON).content("{}")).andExpect(status().isUnauthorized());
     }
 
     @Test
     void infoTellsIfTheUserCanDesign() throws Exception {
         // ReportDesigners has no container in this test: nobody is a designer
-        mvc.perform(get("/api/reports/v2/design/info").principal(USER))
+        mvc.perform(get("/apps/api/reports/design/info").principal(USER))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.allowed", is(false)))
                 .andExpect(jsonPath("$.previewLimit", is(2)));
@@ -192,24 +201,24 @@ class ReportsDesignerTest {
 
     @Test
     void controllerPreviewDefinitionImportAndTest() throws Exception {
-        mvc.perform(post("/api/reports/v2/design/preview").principal(USER).contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/apps/api/reports/design/preview").principal(USER).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"queryLang\":\"sql\",\"queryScript\":\"select id from sales order by id\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rows", hasSize(2)))
                 .andExpect(jsonPath("$.truncated", is(true)));
 
-        mvc.perform(post("/api/reports/v2/design/preview").principal(USER).contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/apps/api/reports/design/preview").principal(USER).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"queryLang\":\"sql\",\"queryScript\":\"drop table sales\"}"))
                 .andExpect(status().isBadRequest());
 
-        mvc.perform(get("/api/reports/v2/design/1/definition").principal(USER))
+        mvc.perform(get("/apps/api/reports/design/1/definition").principal(USER))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", startsWith("application/json")))
                 .andExpect(jsonPath("$.name", is("Sales list")));
 
-        mvc.perform(get("/api/reports/v2/design/55/definition").principal(USER)).andExpect(status().isNotFound());
+        mvc.perform(get("/apps/api/reports/design/55/definition").principal(USER)).andExpect(status().isNotFound());
 
-        mvc.perform(post("/api/reports/v2/design/import").principal(USER).contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/apps/api/reports/design/import").principal(USER).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"x\",\"queryScript\":\"select 1\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(99)));
@@ -218,11 +227,11 @@ class ReportsDesignerTest {
     @Test
     void controllerDeniesNonDesigners() throws Exception {
         designer = false;
-        mvc.perform(post("/api/reports/v2/design/preview").principal(USER).contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/apps/api/reports/design/preview").principal(USER).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"queryLang\":\"sql\",\"queryScript\":\"select 1\"}"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error", is("ACCESS_DENIED")));
-        mvc.perform(get("/api/reports/v2/design/1/definition").principal(USER)).andExpect(status().isForbidden());
-        mvc.perform(post("/api/reports/v2/design/datasources/1/test").principal(USER)).andExpect(status().isForbidden());
+        mvc.perform(get("/apps/api/reports/design/1/definition").principal(USER)).andExpect(status().isForbidden());
+        mvc.perform(post("/apps/api/reports/design/datasources/1/test").principal(USER)).andExpect(status().isForbidden());
     }
 }

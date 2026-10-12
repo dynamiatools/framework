@@ -28,6 +28,7 @@ export interface ReportLabels {
   queryLanguage: string;
   query: string;
   datasourceId: string;
+  queryTimeout: string;
   parameters: string;
   preview: string;
   previewTruncated: string;
@@ -68,6 +69,7 @@ export const englishLabels: ReportLabels = {
   queryLanguage: 'Query language',
   query: 'Query',
   datasourceId: 'Datasource id (empty for the application database)',
+  queryTimeout: 'Query timeout in seconds (empty for the default)',
   parameters: 'Parameters (JSON)',
   preview: 'Preview',
   previewTruncated: 'There are more rows than the preview shows',
@@ -108,6 +110,7 @@ export const spanishLabels: ReportLabels = {
   queryLanguage: 'Lenguaje de consulta',
   query: 'Consulta',
   datasourceId: 'Id de la fuente de datos (vacio para la base de datos de la aplicacion)',
+  queryTimeout: 'Tiempo maximo de la consulta en segundos (vacio para el valor por defecto)',
   parameters: 'Parametros (JSON)',
   preview: 'Vista previa',
   previewTruncated: 'Hay mas filas de las que muestra la vista previa',

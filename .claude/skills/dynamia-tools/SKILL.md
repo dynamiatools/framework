@@ -1,13 +1,13 @@
 ---
 name: dynamia-tools
-description: DynamiaTools framework (backend) best practices — creating JPA entities, using CrudService/QueryParameters, ModuleProvider/CrudPage, Actions, Validators, ViewCustomizers, CrudServiceListener, and YAML view descriptors (form/table/tree/json/crud/entityfilters). Use when writing code inside this framework/ repo or in apps consuming tools.dynamia.*.
+description: DynamiaTools framework (backend) best practices — creating JPA entities, using CrudService/QueryParameters, ModuleProvider/CrudPage, Actions, Validators, ViewCustomizers, CrudServiceListener, and YAML view descriptors (form/table/tree/json/crud/entityfilters). Use when writing code inside this repo or in apps consuming tools.dynamia.*.
 ---
 
 # DynamiaTools — Backend Development Skill
 
-Full references: `framework/docs/backend/*.md` (ARCHITECTURE, CORE_MODULES, DEVELOPMENT_PATTERNS,
+Full references: `docs/backend/*.md` (ARCHITECTURE, CORE_MODULES, DEVELOPMENT_PATTERNS,
 EXTENSIONS, ADVANCED_TOPICS, EXAMPLES) and a real working example in
-`framework/examples/demo-zk-books/`. This skill summarizes what has been verified against the actual
+`examples/demo-zk-books/`. This skill summarizes what has been verified against the actual
 source code — prefer these patterns over generic Spring assumptions.
 
 ## 1. Framework-specific stereotypes — do NOT use Spring's `@Component`/`@Service` directly

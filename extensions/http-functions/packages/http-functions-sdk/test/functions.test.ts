@@ -3,14 +3,14 @@ import { FunctionsApi } from '../src/index.js';
 import { makeHttpClient, mockFetch } from './helpers.js';
 
 describe('FunctionsApi', () => {
-  it('call() POSTs { params } to /api/dynamia/fx/{name} and resolves with data', async () => {
+  it('call() POSTs { params } to /api/functions/{name} and resolves with data', async () => {
     const fetchMock = mockFetch(200, { success: true, data: { messageId: 'm1' } });
     const fx = new FunctionsApi(makeHttpClient(fetchMock));
 
     const result = await fx.call<{ messageId: string }>('WhatsApp.sendMessage', { to: '+57300' });
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe('https://app.example.com/api/dynamia/fx/WhatsApp.sendMessage');
+    expect(url).toBe('https://app.example.com/api/functions/WhatsApp.sendMessage');
     expect(init.method).toBe('POST');
     expect(JSON.parse(init.body as string)).toEqual({ params: { to: '+57300' } });
     expect(result).toEqual({ messageId: 'm1' });
@@ -23,7 +23,7 @@ describe('FunctionsApi', () => {
     await fx.call('my fn/x');
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe('https://app.example.com/api/dynamia/fx/my%20fn%2Fx');
+    expect(url).toBe('https://app.example.com/api/functions/my%20fn%2Fx');
     expect(JSON.parse(init.body as string)).toEqual({ params: {} });
   });
 
@@ -33,7 +33,7 @@ describe('FunctionsApi', () => {
 
     await fx.call('Math.double', { n: 1 }, { version: 2 });
 
-    expect((fetchMock.mock.calls[0] as [string])[0]).toBe('https://app.example.com/api/dynamia/fx/Math.double?v=2');
+    expect((fetchMock.mock.calls[0] as [string])[0]).toBe('https://app.example.com/api/functions/Math.double?v=2');
   });
 
   it('callBinary() resolves with the Blob of a binary response', async () => {

@@ -26,7 +26,7 @@ import java.util.Map;
 
 /**
  * Serves a {@link CrudAction} (the same class ZK runs) to REST clients: this is the single piece of code that adapts
- * a local action to the {@code /api/app/metadata/entities/{id}/actions/{action}} endpoint.
+ * a local action to the {@code /apps/api/metadata/entities/{id}/actions/{action}} endpoint.
  * <p>
  * The delegate must be declared {@code @RunsOn(HEADLESS)}. For every request the adapter builds what the action expects in its
  * {@link CrudActionEvent}: the entity (loaded by {@code dataId}, or built from the JSON of {@code data}), a

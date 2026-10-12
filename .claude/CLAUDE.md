@@ -10,11 +10,10 @@ The focus is on keeping the codebase consistent, maintainable, and well-document
 - **Finding references** — `mcp__idea__search_symbol` (symbol-aware) instead of grep/ripgrep.
 - **Reading symbol info** — `mcp__idea__get_symbol_info` for accurate type/member info instead of guessing from text.
 - **Renaming symbols** — `mcp__idea__rename_refactoring` for safe, project-wide renames instead of manual find/replace.
-- **Structural search** — `mcp__idea__search_structural` / `mcp__idea__get_structural_patterns` for pattern-based code search.
-- **Diagnostics/problems** — `mcp__idea__get_file_problems` / `mcp__idea__get_inspections` instead of manually re-reading files for errors.
+- **Diagnostics/problems** — `mcp__idea__get_file_problems` / `mcp__idea__lint_files` instead of manually re-reading files for errors.
 - **Navigating files** — `mcp__idea__search_file`, `mcp__idea__list_directory_tree`, `mcp__idea__search_text` / `mcp__idea__search_regex` before falling back to `find`/`ls`/`grep`.
 - **Reading files** — `mcp__idea__read_file` so content stays in sync with the IDE's live buffers (unsaved changes included).
-- **Editing** — `mcp__idea__apply_patch` (existing files) / `mcp__idea__create_new_file` (new files) so changes go through the IDE and stay in sync with its indices; `mcp__idea__apply_quick_fix` for IDE-suggested fixes.
+- **Editing** — `mcp__idea__apply_patch` (existing files) / `mcp__idea__create_new_file` (new files) so changes go through the IDE and stay in sync with its indices.
 - **Never excavate `.jar` files** (unzipping, extracting classes, browsing decompiled sources from `~/.m2` or `~/.gradle` caches, etc.) to inspect a dependency's API. IntelliJ already indexes all project dependencies — use `mcp__idea__search_symbol`, `mcp__idea__get_symbol_info`, or `mcp__idea__search_file` to resolve classes/methods from JARs directly through the IDE index.
 
 The IDE's semantic understanding is far more accurate than text-based search — treat grep/ripgrep/manual file scanning as a last resort for symbol-level work in this repo, and only when the MCP server isn't available.
@@ -60,7 +59,6 @@ Monorepo: Maven reactor (Java, `tools.dynamia.*`) + pnpm workspace (TS, `@dynami
 | vue | sdk, ui-core | Vue 3 adapter/plugin |
 | microfrontend-bridge | — | bridges JS bundles ↔ backend `tools.dynamia.zk.ui.MicroFrontend` |
 | cli | — | scaffolds new projects |
-| mcp | — | MCP server package |
 
 ### Other
 
@@ -102,10 +100,10 @@ When generating frontend code for Dynamia Platform, prefer the current APIs from
 ### `@dynamia-tools/sdk`
 
 - Use `new DynamiaClient({ baseUrl, token? })` as the entry point.
-- Prefer `baseUrl` as app origin (for example `https://app.example.com`), because SDK endpoints already include `/api/...` internally.
+- Prefer `baseUrl` as app origin (for example `https://app.example.com`), because SDK endpoints already include `/api/...` (integrations) or `/apps/api/...` (local: metadata, dashboard, reports UI, crud-service) internally.
 - Use `client.metadata.getNavigation()` for menus/routing (shape: `NavigationTree.navigation`, not `modules/groups/pages`).
 - Use `client.crud(path)` for `CrudPage` virtual paths (`findAll`, `findById`, `create`, `update`, `delete`).
-- Use `client.crudService(className)` only for class-name based `/crud-service` use cases.
+- Use `client.crudService(className)` only for class-name based `/apps/api/crud-service` use cases.
 - `findAll()` returns `CrudListResult` with `content`, `total`, `page`, `pageSize`, `totalPages`.
 - Handle API failures with `DynamiaApiError` (`status`, `url`, `body`).
 

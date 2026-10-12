@@ -28,6 +28,12 @@ export interface KpiWidgetData {
   unit?: string | null;
   /** Variation against the previous period, e.g. `0.12` for +12% */
   trend?: number | null;
+  /** A short complementary line, e.g. `12 sales made` */
+  description?: string | null;
+  /** Presentation hint: an icon name the frontend understands (its meaning belongs to the frontend) */
+  icon?: string | null;
+  /** Presentation hint: a semantic tone for the card, `primary`, `success`, `danger`, `warning` or `neutral` */
+  color?: string | null;
 }
 
 /**
@@ -42,7 +48,7 @@ export interface ViewerWidgetData {
 }
 
 /**
- * Response of `GET /api/dashboard/{descriptorId}/widgets/{field}`.
+ * Response of `GET /apps/api/dashboard/{descriptorId}/widgets/{field}`.
  * Mirrors `tools.dynamia.modules.dashboard.DashboardWidgetResponse`.
  *
  * @typeParam T - the shape of `data`, which depends on `type`

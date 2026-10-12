@@ -64,7 +64,7 @@ export interface FlowHandlers {
   choose?: (options: { title?: string; options: FlowChoiceOption[]; multiple: boolean; message?: string }) => Promise<string[] | null>;
   /**
    * Renders an `UPLOAD` step: asks the user for files and returns them, or `null`/`[]` if they cancel. The runner checks
-   * them against the limits of the step, sends each one to `/api/app/transfers` and answers with the references; the
+   * them against the limits of the step, sends each one to `/apps/api/transfers` and answers with the references; the
    * content never travels inside the flow. Optional: defaults to the browser's file picker ({@link browserPickFiles}).
    */
   pickFiles?: (options: { title?: string; accept?: string; multiple?: boolean }) => Promise<File[] | null>;

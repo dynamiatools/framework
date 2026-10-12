@@ -15,7 +15,7 @@ import java.util.Map;
 
 /**
  * HTTP entry point for {@link tools.dynamia.modules.functions.domain.DynamiaHttpFunction}s. Exposes
- * functions as callable HTTP endpoints under {@code /api/dynamia/fx/{functionName}}, resolving the
+ * functions as callable HTTP endpoints under {@code /api/functions/{functionName}}, resolving the
  * requested version (via the {@code X-Dynamia-Version} header or the {@code v} query parameter,
  * defaulting to the highest active version) and returning either a structured JSON response or the raw
  * binary payload produced by the function.
@@ -23,7 +23,7 @@ import java.util.Map;
  * @author Mario A. Serrano Leones
  */
 @RestController
-@RequestMapping("/api/dynamia/fx")
+@RequestMapping("/api/functions")
 public class DynamiaHttpFunctionsController {
 
     private static final String VERSION_HEADER = "X-Dynamia-Version";
