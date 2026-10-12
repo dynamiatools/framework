@@ -1,9 +1,13 @@
 package tools.dynamia.modules.reports.core.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import tools.dynamia.modules.reports.core.ReportSecretConverter;
 import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS;
 
 @Entity
@@ -16,6 +20,9 @@ public class ReportDataSourceConfig extends SimpleEntitySaaS {
     @NotEmpty
     private String url;
     private String username;
+    @Convert(converter = ReportSecretConverter.class)
+    @Column(length = 1000)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     @NotEmpty
     private String driverClassName;

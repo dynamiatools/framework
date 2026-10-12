@@ -1,0 +1,10 @@
+view: table
+beanClass: tools.dynamia.demos.movies.domain.Review
+autofields: false
+
+fields:
+  movie:
+  author:
+  score:
+  reviewDate:
+  comment:

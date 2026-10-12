@@ -1,0 +1,8 @@
+view: form
+beanClass: tools.dynamia.demos.movies.domain.Studio
+autofields: false
+
+fields:
+  name:
+  country:
+  foundedYear:

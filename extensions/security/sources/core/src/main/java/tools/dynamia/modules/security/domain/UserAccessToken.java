@@ -11,6 +11,7 @@ import tools.dynamia.modules.saas.api.AccountAware;
 
 import java.util.Date;
 import java.util.Random;
+import org.hibernate.annotations.TenantId;
 
 @Entity
 @Table(name = "sec_access_tokens")
@@ -23,6 +24,11 @@ public class UserAccessToken extends BaseEntity implements AccountAware {
     private String tokenName;
     @Column(unique = true)
     private String token;
+    /**
+     * The owner account, also Hibernate's tenant discriminator ({@link TenantId}): assigned from the current tenant on
+     * persist and added to every query and load.
+     */
+    @TenantId
     private Long accountId;
 
     @Temporal(TemporalType.TIMESTAMP)

@@ -89,4 +89,14 @@ public abstract class SimpleEntity extends AbstractEntity<Long> {
     public int currentVersion() {
         return version;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return JpaUtils.entityEquals(this, obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return JpaUtils.entityHashCode(this);
+    }
 }

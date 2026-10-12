@@ -2,12 +2,12 @@ import { describe, it, expect } from 'vitest';
 import { mockFetch, makeClient } from '../helpers.js';
 
 describe('ActionsApi', () => {
-  it('executeGlobal() calls POST /api/app/metadata/actions/{action}', async () => {
+  it('executeGlobal() calls POST /apps/api/metadata/actions/{action}', async () => {
     const fetchMock = mockFetch(200, { data: null, status: 'SUCCESS', statusCode: 200 });
     const client = makeClient(fetchMock);
     await client.actions.executeGlobal('sendEmail', { params: { to: 'a@b.com' } });
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toContain('/api/app/metadata/actions/sendEmail');
+    expect(url).toContain('/apps/api/metadata/actions/sendEmail');
     expect(init.method).toBe('POST');
   });
 
@@ -22,7 +22,7 @@ describe('ActionsApi', () => {
     });
 
     const [url] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toContain('/api/app/metadata/actions/ExportDataAction');
+    expect(url).toContain('/apps/api/metadata/actions/ExportDataAction');
   });
 
   it('execute() uses the entity endpoint for CrudAction metadata', async () => {
@@ -41,7 +41,7 @@ describe('ActionsApi', () => {
     );
 
     const [url] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toContain('/api/app/metadata/entities/mybookstore.domain.Book/action/SaveAction');
+    expect(url).toContain('/apps/api/metadata/entities/mybookstore.domain.Book/action/SaveAction');
   });
 
   it('execute() throws when entity-scoped metadata has no resolvable class name', async () => {

@@ -8,7 +8,7 @@ import org.zkoss.bind.annotation.ToServerCommand;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.ui.UIMessages;
-import tools.dynamia.zk.crud.actions.ViewDataAction;
+import tools.dynamia.crud.actions.ViewDataAction;
 
 @ToServerCommand({"hello", "showBook"})
 public class VueViewModel {

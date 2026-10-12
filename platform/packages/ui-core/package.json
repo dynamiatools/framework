@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/ui-core",
-  "version": "26.10.0",
+  "version": "26.10.1",
   "description": "Framework-agnostic view/viewer/renderer core for Dynamia Platform",
   "keywords": [
     "dynamia",
@@ -72,7 +72,29 @@
   },
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "exports": {
+      ".": {
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        },
+        "require": {
+          "types": "./dist/index.d.cts",
+          "default": "./dist/index.cjs"
+        }
+      },
+      "./embed": {
+        "import": {
+          "types": "./dist/embed.d.ts",
+          "default": "./dist/embed.js"
+        },
+        "require": {
+          "types": "./dist/embed.d.cts",
+          "default": "./dist/embed.cjs"
+        }
+      }
+    }
   },
   "engines": {
     "node": ">=24"

@@ -26,6 +26,37 @@ public interface ReportsService {
     ReportData execute(Report report, ReportFilters filters, ReportDataSource datasource);
 
     /**
+     * Executes a report returning at most {@code maxRows} rows (the result is flagged as truncated when there are more).
+     * @param report Report to execute
+     * @param filters Filters applied to the report
+     * @param datasource Data source for the report
+     * @param maxRows Maximum rows; zero or negative means no limit
+     * @return Result of the report execution
+     */
+    default ReportData execute(Report report, ReportFilters filters, ReportDataSource datasource, int maxRows) {
+        return execute(report, filters, datasource);
+    }
+
+    /**
+     * Executes a report resolving its datasource from the report definition.
+     * @param report Report to execute
+     * @param filters Filters applied to the report
+     * @return Result of the report execution
+     */
+    default ReportData execute(Report report, ReportFilters filters) {
+        return execute(report, filters, datasource(report));
+    }
+
+    /**
+     * Resolves the datasource a report runs on: its configured external datasource, or the application database.
+     * @param report the report
+     * @return the datasource
+     */
+    default ReportDataSource datasource(Report report) {
+        return tools.dynamia.modules.reports.core.ReportsUtils.findDatasource(report);
+    }
+
+    /**
      * Loads the report model by its unique identifier.
      * @param id Report identifier
      * @return Instance of the report

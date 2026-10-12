@@ -13,6 +13,7 @@ import tools.dynamia.domain.jdbc.Row;
 import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS;
 import tools.dynamia.modules.reports.core.ReportDataSource;
 import tools.dynamia.modules.reports.core.ReportFilterOption;
+import tools.dynamia.modules.reports.core.ReportQueryValidator;
 import tools.dynamia.modules.reports.core.ReportsException;
 import tools.dynamia.modules.reports.core.ReportsUtils;
 import tools.dynamia.modules.reports.core.domain.enums.DataType;
@@ -29,6 +30,7 @@ import java.util.stream.Stream;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReportFilter extends SimpleEntitySaaS {
 
+    private static final int MAX_OPTIONS = 1000;
     private final static LoggingService LOGGER = new SLF4JLoggingService(ReportFilter.class);
 
     @ManyToOne
@@ -102,33 +104,46 @@ public class ReportFilter extends SimpleEntitySaaS {
         List<ReportFilterOption> options = new ArrayList<>();
         if ("sql".equals(report.getQueryLang())) {
             try (Connection connection = ReportsUtils.getJdbcConnection(dataSource)) {
+                try {
+                    connection.setReadOnly(true);
+                } catch (Exception ignored) {
+                    // not supported by the driver, the query is validated anyway
+                }
                 JdbcHelper jdbc = new JdbcHelper(connection);
                 JdbcDataSet result = jdbc.query(ReportsUtils.checkQuery(queryValues));
 
+                List<String> columns = result.getColumnsLabels();
                 for (Row row : result) {
-                    row.loadAll(result.getColumnsLabels());
-                    Object value = row.col(result.getColumnsLabels().get(0));
-                    if (!result.getColumnsLabels().isEmpty()) {
-                        options.add(new ReportFilterOption(this, row.col(result.getColumnsLabels().get(1)).toString(), value));
+                    row.loadAll(columns);
+                    Object value = row.col(columns.get(0));
+                    if (columns.size() > 1) {
+                        options.add(new ReportFilterOption(this, String.valueOf(row.col(columns.get(1))), value));
                     } else {
-                        options.add(new ReportFilterOption(this, value.toString(), value));
+                        options.add(new ReportFilterOption(this, String.valueOf(value), value));
                     }
                 }
                 result.close();
+                try {
+                    connection.setReadOnly(false);
+                } catch (Exception ignored) {
+                    // connection is returned to its pool anyway
+                }
             } catch (Exception e) {
                 LOGGER.error("Error loading options using SQL for filter " + name, e);
             }
         } else if ("jpql".equals(report.getQueryLang())) {
-            ;
-            try (EntityManager em = ReportsUtils.getJpaEntityManager(dataSource)) {
-                List result = em.createQuery(queryValues).getResultList();
+            boolean owned = dataSource.getDelegate() instanceof EntityManagerFactory;
+            EntityManager em = ReportsUtils.getJpaEntityManager(dataSource);
+            try {
+                ReportQueryValidator.validateQuery(queryValues, "jpql");
+                List result = em.createQuery(queryValues).setMaxResults(MAX_OPTIONS).getResultList();
                 result.forEach(b -> {
                     if (b.getClass().isArray()) {
                         Object[] values = (Object[]) b;
                         if (values.length > 1) {
-                            options.add(new ReportFilterOption(this, values[1].toString(), values[0]));
+                            options.add(new ReportFilterOption(this, String.valueOf(values[1]), values[0]));
                         } else {
-                            options.add(new ReportFilterOption(this, values[0].toString(), values[0]));
+                            options.add(new ReportFilterOption(this, String.valueOf(values[0]), values[0]));
                         }
                     } else {
                         options.add(new ReportFilterOption(this, b.toString(), b));
@@ -136,6 +151,10 @@ public class ReportFilter extends SimpleEntitySaaS {
                 });
             } catch (Exception e) {
                 LOGGER.error("Error loading options using JPQL for filter " + name, e);
+            } finally {
+                if (owned) {
+                    em.close();
+                }
             }
         }
         return options;

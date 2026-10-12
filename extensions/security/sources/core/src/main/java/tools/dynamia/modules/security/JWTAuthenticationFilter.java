@@ -21,15 +21,47 @@ import tools.dynamia.modules.security.services.JWTService;
 import javax.security.sasl.AuthenticationException;
 import java.io.IOException;
 
+/**
+ * Authenticates requests with a JWT, taken from the {@code DYNAMIA_JWT} cookie or the {@code Authorization: Bearer}
+ * header.
+ * <p>
+ * By default it protects {@code /api/**} and accepts both sources. In {@code bearerOnly} mode it ignores the cookie:
+ * used for {@code /apps/api/**}, where the browser session is the primary credential and a cookie that is sent
+ * automatically must never authenticate a request by itself (CSRF).
+ */
 public class JWTAuthenticationFilter extends OncePerRequestFilter implements Loggable {
+
+    private static final String BEARER_PREFIX = "Bearer ";
 
     private final JWTService jwtService;
     private final AccountServiceAPI accountServiceAPI;
+    private final String pathPrefix;
+    private final boolean bearerOnly;
 
+    /**
+     * Creates the filter for {@code /api/**}, accepting the JWT cookie and the Bearer header.
+     *
+     * @param jwtService        the service that validates tokens
+     * @param accountServiceAPI the account service used to validate the account status
+     */
     public JWTAuthenticationFilter(JWTService jwtService, AccountServiceAPI accountServiceAPI) {
+        this(jwtService, accountServiceAPI, "/api/", false);
+    }
+
+    /**
+     * Creates the filter for the given path prefix.
+     *
+     * @param jwtService        the service that validates tokens
+     * @param accountServiceAPI the account service used to validate the account status
+     * @param pathPrefix        only requests whose URI starts with this prefix are filtered
+     * @param bearerOnly        if true the JWT cookie is ignored and only {@code Authorization: Bearer} is accepted
+     */
+    public JWTAuthenticationFilter(JWTService jwtService, AccountServiceAPI accountServiceAPI, String pathPrefix, boolean bearerOnly) {
         this.jwtService = jwtService;
         this.accountServiceAPI = accountServiceAPI;
-        log("JWTAuthenticationFilter initialized");
+        this.pathPrefix = pathPrefix;
+        this.bearerOnly = bearerOnly;
+        log("JWTAuthenticationFilter initialized for " + pathPrefix + (bearerOnly ? " (bearer only)" : ""));
     }
 
     @Override
@@ -49,15 +81,42 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter implements Log
             return;
         }
 
-        if (authHeader != null && authHeader.startsWith("Bearer ") && authHeader.length() > 7) {
-            token = authHeader.substring(7);
+        // Bearer only: anything that is not a Bearer token (Basic, ...) is left to the rest of the chain
+        boolean bearer = authHeader != null && authHeader.startsWith(BEARER_PREFIX) && authHeader.length() > BEARER_PREFIX.length();
+        if (bearerOnly && !bearer) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (bearer) {
+            token = authHeader.substring(BEARER_PREFIX.length());
         }
 
 
-        // Validar el token
-        doJwtLogin(token, request, response);
+        // Token requests are stateless: a session only created while handling this request (session-scoped
+        // beans such as CurrentUser) must not outlive it, or every cookie-less client leaks one session per call.
+        boolean hadSession = request.getSession(false) != null;
+        try {
+            // Validar el token
+            doJwtLogin(token, request, response);
 
-        filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response);
+        } finally {
+            if (!hadSession) {
+                invalidateSession(request);
+            }
+        }
+    }
+
+    private static void invalidateSession(HttpServletRequest request) {
+        var session = request.getSession(false);
+        if (session != null) {
+            try {
+                session.invalidate();
+            } catch (IllegalStateException ignored) {
+                // already invalidated
+            }
+        }
     }
 
     public SecurityContext doJwtLogin(String token, HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -106,8 +165,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter implements Log
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        // Aplica solo a rutas /api/**
+        // Applies only to the configured prefix (/api/ by default)
         String path = request.getRequestURI();
-        return !path.startsWith("/api/");
+        return !path.startsWith(pathPrefix);
     }
 }

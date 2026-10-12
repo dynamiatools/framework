@@ -3,6 +3,7 @@
 // ── Registry base ─────────────────────────────────────────────────────────────
 export { Registry } from './registry/Registry.js';
 export type { KeyNormalizer } from './registry/Registry.js';
+export { FieldComponentRegistry } from './registry/FieldComponentRegistry.js';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 export type { FieldComponent, ResolvedField } from './types/field.js';
@@ -97,3 +98,7 @@ export type { ConfirmChangeHandler } from './feedback/ConfirmManager.js';
 export { PromptManager, promptManager } from './feedback/PromptManager.js';
 export type { PromptChangeHandler } from './feedback/PromptManager.js';
 
+
+// Flow runner (framework free): drives a server side flow with handlers a front end provides
+export { runActionFlow, browserPickFiles, browserSaveFile } from './flow/runActionFlow.js';
+export type { FlowHandlers, FlowFormRequest, FlowChoiceOption } from './flow/runActionFlow.js';

@@ -2,7 +2,6 @@ package tools.dynamia.modules.reports.core;
 
 import org.springframework.jdbc.datasource.AbstractDataSource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import tools.dynamia.domain.ValidatorUtil;
 import tools.dynamia.modules.reports.core.domain.ReportDataSourceConfig;
 
 import javax.sql.DataSource;
@@ -41,15 +40,17 @@ public class ReportDataSource extends AbstractDataSource {
         } else if (delegate instanceof DataSource dataSource) {
             return dataSource.getConnection();
         } else if (delegate instanceof ReportDataSourceConfig config) {
-            return newConnection(config);
+            return ReportDataSourcePools.getConnection(config);
         }
 
         return null;
     }
 
+    /**
+     * Opens a new direct (not pooled) connection, for example to test a datasource. The caller must close it.
+     */
     public static Connection newConnection(ReportDataSourceConfig config) {
-        ValidatorUtil.validateEmpty(config.getDriverClassName(), "Select datasource driver class");
-        ValidatorUtil.validateEmpty(config.getUrl(), "Enter datasource jdbc valid URL");
+        ReportDataSourceValidator.validate(config);
 
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(config.getDriverClassName());
@@ -64,7 +65,7 @@ public class ReportDataSource extends AbstractDataSource {
         try {
             return dataSource.getConnection();
         } catch (SQLException e) {
-            throw new ReportsException("Cannot create database connection using datasource: " + config.getName() + ". " + e.getMessage());
+            throw new ReportsException("Cannot create database connection using datasource: " + config.getName(), e);
         }
     }
 

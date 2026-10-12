@@ -36,6 +36,7 @@ import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.modules.saas.AccountConfig;
 import tools.dynamia.modules.saas.AccountContext;
 import tools.dynamia.modules.saas.AccountSessionHolder;
+import tools.dynamia.modules.saas.AccountTenants;
 import tools.dynamia.modules.saas.api.AccountServiceAPI;
 import tools.dynamia.modules.saas.api.dto.AccountDTO;
 import tools.dynamia.modules.saas.api.dto.AccountLogDTO;
@@ -56,6 +57,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static tools.dynamia.domain.query.QueryConditions.eq;
 import static tools.dynamia.domain.util.QueryBuilder.select;
@@ -130,6 +132,12 @@ public class AccountServiceAPIImpl extends AbstractService implements AccountSer
 
     @Override
     public Long getCurrentAccountId() {
+        Long bound = AccountTenants.forcedTenantId();
+        if (bound != null && bound > 0) {
+            // runAs/with: the account the work runs as, not the one of the request or session
+            return bound;
+        }
+
         Long id = null;
 
         try {
@@ -159,6 +167,19 @@ public class AccountServiceAPIImpl extends AbstractService implements AccountSer
         }
 
         return id;
+    }
+
+    @Override
+    public <T> T withRootIfNoAccount(Supplier<T> work) {
+        if (getCurrentAccountId() != null) {
+            return work.get();
+        }
+        return AccountTenants.withRoot(work);
+    }
+
+    @Override
+    public <T> T withAccount(Long accountId, Supplier<T> work) {
+        return AccountTenants.with(accountId, work);
     }
 
     @Override

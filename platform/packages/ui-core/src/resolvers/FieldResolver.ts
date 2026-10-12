@@ -88,6 +88,11 @@ export class FieldResolver {
     // EntityRefPicker needs params.entityAlias to search `/api/entities/{alias}/search` — only
     // use it when the descriptor actually configured that; otherwise EntityRefLabel is the safe
     // default (read-only display of the already-loaded reference, works with zero extra config).
+    // Collections of entities (many-to-many) are picked as a list of references.
+    if (field.entity && field.collection) {
+      return params['entityAlias'] ? FieldComponent.EntityRefMultiPicker : FieldComponent.Label;
+    }
+
     if (field.entity) {
       return params['entityAlias'] ? FieldComponent.EntityRefPicker : FieldComponent.EntityRefLabel;
     }
@@ -95,6 +100,14 @@ export class FieldResolver {
     // 4. Infer from field class
     const fieldClass = field.fieldClass ?? '';
     return FieldResolver._inferComponent(fieldClass);
+  }
+
+  /**
+   * The component that matches a field class (`java.lang.Boolean` → checkbox, a number → a number box...). It is also
+   * the fallback of a front end for a descriptor component name nobody implements.
+   */
+  static inferComponent(fieldClass?: string | null): FieldComponent | string {
+    return FieldResolver._inferComponent(fieldClass ?? '');
   }
 
   private static _inferComponent(fieldClass: string): FieldComponent | string {

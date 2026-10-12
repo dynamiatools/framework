@@ -315,4 +315,12 @@ public interface CrudControllerAPI<E> {
 	 * This method is useful for resetting the controller to its initial state.
 	 */
 	void clear();
+
+	/**
+	 * Free-form state of the controller that must survive between actions of the same CRUD, such as the text of the last
+	 * search.
+	 *
+	 * @return a mutable map, never null
+	 */
+	Map<String, Object> getAttributes();
 }

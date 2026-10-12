@@ -4,6 +4,7 @@ package tools.dynamia.modules.security;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -20,6 +22,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -110,8 +113,9 @@ public class DynamiaSecurityConfig {
 
     @Bean
     @Primary
-    public SecurityService securityUserDetailsService(ProfileService profileService, CrudService crudService, PasswordEncoder passwordEncoder) {
-        return new SecurityServiceImpl(profileService, crudService, passwordEncoder);
+    public SecurityService securityUserDetailsService(ProfileService profileService, CrudService crudService, PasswordEncoder passwordEncoder,
+                                                      ObjectProvider<AccountServiceAPI> accountServiceAPI) {
+        return new SecurityServiceImpl(profileService, crudService, passwordEncoder, accountServiceAPI::getIfAvailable);
     }
 
     @Bean
@@ -164,7 +168,10 @@ public class DynamiaSecurityConfig {
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http, AccountServiceAPI accountServiceAPI, JWTService jwtService) throws Exception {
 
         http.securityMatcher("/api/**")
-                .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        // JWT requests must never rotate the JSESSIONID: the browser shares that cookie with the
+                        // stateful web chain (the shell at "/"), and parallel API calls would leave it with a stale id.
+                        .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::none))
                 .csrf(AbstractHttpConfigurer::disable)
                 .securityContext(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
@@ -189,6 +196,71 @@ public class DynamiaSecurityConfig {
                 );
 
         logger.info("Configured API SecurityFilterChain (stateless)");
+        return http.build();
+    }
+
+
+    /**
+     * Security configuration for the local API used by the application's own frontends and micro-frontends
+     * ({@code /apps/api/**}).
+     * <p>
+     * The web session established by the login is the default credential. A JWT is also accepted, but only through the
+     * {@code Authorization: Bearer} header, for clients that load the app stateless: the {@code DYNAMIA_JWT} cookie is
+     * ignored here because the browser sends it automatically and CSRF protection is disabled in this chain. Methods
+     * that modify data additionally require a same-origin request ({@link AppsApiSameOriginAuthorizationManager}).
+     * <p>
+     * An unauthenticated request gets a JSON 401 instead of the redirect to {@code /login} of the web chain, which
+     * would break {@code fetch} callers.
+     *
+     * @param http              HttpSecurity
+     * @param accountServiceAPI AccountServiceAPI
+     * @param jwtService        JWTService
+     * @return SecurityFilterChain
+     * @throws Exception if an error occurs
+     */
+    @Bean
+    @Order(2)
+    public SecurityFilterChain appsApiSecurityFilterChain(HttpSecurity http, AccountServiceAPI accountServiceAPI, JWTService jwtService) throws Exception {
+
+        var sameOrigin = new AppsApiSameOriginAuthorizationManager();
+
+        http.securityMatcher("/apps/api/**")
+                .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.NEVER))
+                .csrf(AbstractHttpConfigurer::disable)
+                .securityContext(ctx -> ctx.securityContextRepository(new HttpSessionSecurityContextRepository()))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/apps/api/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/apps/api/**").access(sameOrigin)
+                        .requestMatchers(HttpMethod.PUT, "/apps/api/**").access(sameOrigin)
+                        .requestMatchers(HttpMethod.PATCH, "/apps/api/**").access(sameOrigin)
+                        .requestMatchers(HttpMethod.DELETE, "/apps/api/**").access(sameOrigin)
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(new JWTAuthenticationFilter(jwtService, accountServiceAPI, "/apps/api/", true),
+                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new AppsApiAccountFilter(accountServiceAPI), JWTAuthenticationFilter.class)
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint((req, res, ex) -> {
+                            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            res.setContentType("application/json;charset=UTF-8");
+                            var message = ex.getMessage();
+                            if (message == null || message.isBlank()) {
+                                message = "Unauthorized access";
+                            }
+                            res.getWriter().write("""
+                                    {"status":401,"error":"Unauthorized","message":"%s"}
+                                    """.formatted(message.replace("\"", "'")));
+                        })
+                        .accessDeniedHandler((req, res, ex) -> {
+                            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            res.setContentType("application/json;charset=UTF-8");
+                            res.getWriter().write("""
+                                    {"status":403,"error":"Forbidden","message":"Cross-site request rejected"}
+                                    """);
+                        })
+                );
+
+        logger.info("Configured Apps API SecurityFilterChain (session by default, Bearer optional)");
         return http.build();
     }
 
@@ -439,7 +511,7 @@ public class DynamiaSecurityConfig {
         if (request == null) return false;
 
         String uri = request.getRequestURI();
-        if (uri != null && uri.startsWith("/api/")) return true;
+        if (uri != null && (uri.startsWith("/api/") || uri.startsWith("/apps/api/"))) return true;
 
         // Si usas subdominios: api.dynamiaerp.com
         String subdomain = HttpUtils.getSubdomain(request);

@@ -1,17 +1,89 @@
-# Version 5.0.0
-# This workflow will build a Java project with Maven
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+# Release policy (docs/RELEASING.md):
+#   - every GitHub Release is deployed to GitHub Packages (and npm, see publish-npm.yml);
+#   - only a normal release (not a pre-release) is also deployed to Maven Central, which limits what an
+#     organization can publish per month. The monthly YY.MM.0 is a release; maintenance versions are pre-releases.
+# Manual runs default to a dry run: they build, test and sign but deploy nothing.
 
 name: Release and Deploy
 
 on:
   release:
     types: [ published ]
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Build, test and sign only; do not deploy anything'
+        type: boolean
+        default: true
+      central:
+        description: 'Also run the Maven Central job (counts against the monthly Central quota when not a dry run)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run }}
 
 jobs:
-  build:
-
+  github-packages:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 25
+      uses: actions/setup-java@v4
+      with:
+        java-version: 25
+        architecture: x64
+        distribution: temurin
+        cache: maven
+        server-id: github
+        server-username: MAVEN_USERNAME
+        server-password: MAVEN_PASSWORD
+
+    - name: Check the version
+      # A wrong version would publish an immutable artifact (and spend Central quota), so fail before building.
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        TAG: ${{ github.event.release.tag_name }}
+      run: |
+        VERSION=$(mvn -B -q help:evaluate -Dexpression=project.version -DforceStdout)
+        echo "Project version: $VERSION"
+        if [[ "$VERSION" == *-SNAPSHOT ]]; then
+          echo "::error::$VERSION is a SNAPSHOT. Bump the version (chore: bump version to X) before releasing."
+          exit 1
+        fi
+        if [ "$EVENT_NAME" = "release" ] && [ "${TAG#v}" != "$VERSION" ]; then
+          echo "::error::Tag $TAG does not match the project version $VERSION."
+          exit 1
+        fi
+
+    - name: Verify and deploy to GitHub Packages
+      # deploy:deploy is called directly because central-publishing-maven-plugin (extensions=true)
+      # replaces the deploy phase of the lifecycle and would publish to Central.
+      run: |
+        GOALS="verify source:jar"
+        if [ "$DRY_RUN" != "true" ]; then
+          GOALS="$GOALS org.apache.maven.plugins:maven-deploy-plugin:3.1.4:deploy -DaltDeploymentRepository=github::https://maven.pkg.github.com/dynamiatools/framework"
+        fi
+        mvn -B -T 1C $GOALS
+      env:
+        MAVEN_USERNAME: ${{ github.actor }}
+        MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
+  central:
+    needs: github-packages
+    if: ${{ (github.event_name == 'release' && !github.event.release.prerelease) || (github.event_name == 'workflow_dispatch' && inputs.central) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
     - uses: actions/checkout@v4
@@ -27,8 +99,13 @@ jobs:
         server-password: MAVEN_PASSWORD # env variable for token in deploy
         gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
 
-    - name: Build with Maven
-      run: mvn clean javadoc:jar source:jar deploy -P release-sign-artifacts
+    - name: Sign and deploy to Maven Central
+      # The tests already ran in the github-packages job, on the same commit. A dry run stops at verify,
+      # which is where the artifacts are signed, so it proves the GPG setup without uploading anything.
+      run: |
+        GOAL=deploy
+        if [ "$DRY_RUN" = "true" ]; then GOAL=verify; fi
+        mvn -B clean javadoc:jar source:jar $GOAL -DskipTests -P release-sign-artifacts
       env:
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}

@@ -1,0 +1,1 @@
+{"flowId":"f1","type":"UPLOAD","title":"Import","data":{"accept":".json,.xlsx","multiple":true,"maxFiles":10,"maxFileSize":104857600,"maxTotalSize":0},"resumeToken":"tok.sig"}

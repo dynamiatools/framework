@@ -1,0 +1,44 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Georgia', 'Times New Roman', serif;
+  --color-ink-950: #0b0d12;
+  --color-ink-900: #11141b;
+  --color-ink-800: #1a1e29;
+  --color-ink-700: #272c3a;
+  --color-ink-500: #6b7488;
+  --color-ink-300: #aab2c5;
+  --color-gold: #fbbf24;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-ink-950 font-sans text-slate-100 antialiased;
+}
+
+a {
+  @apply transition-colors;
+}
+
+mark {
+  @apply rounded-sm bg-gold/25 px-0.5 text-inherit;
+}
+
+.chip {
+  @apply inline-flex items-center rounded-full border border-ink-700 bg-ink-900 px-3 py-1 text-sm text-ink-300 hover:border-gold/60 hover:text-white;
+}
+
+.chip-active {
+  @apply border-gold/70 bg-gold/10 text-gold;
+}
+
+.scroll-hide {
+  scrollbar-width: none;
+}
+.scroll-hide::-webkit-scrollbar {
+  display: none;
+}

@@ -48,7 +48,10 @@ public class ActionFlowStep implements Serializable {
     private String message;
     private MessageType messageType;
     private String viewDescriptor;
+    private String viewClass;
     private Object data;
+    private java.util.Map<String, String> fieldErrors;
+    private java.util.Map<String, String> hints;
     private String resumeToken;
 
     /** A yes/no question. The client answers with a {@code boolean}. */
@@ -87,6 +90,27 @@ public class ActionFlowStep implements Serializable {
         return step;
     }
 
+    /**
+     * Same as {@link #dialog(String, Object, String)} for a form of {@code viewClass}, which may differ from the entity
+     * the action runs on. {@code viewClass} is the id of the entity in the metadata API (its simple name), never a qualified
+     * class name: the metadata does not expose those and a client could not resolve one.
+     */
+    public static ActionFlowStep dialog(String viewDescriptor, String viewClass, Object data, String title) {
+        var step = dialog(viewDescriptor, data, title);
+        step.viewClass = viewClass;
+        return step;
+    }
+
+    /**
+     * The client shows {@code viewDescriptor} of {@code viewClass} read only, filled with {@code data}, and answers when
+     * the user closes it.
+     */
+    public static ActionFlowStep view(String viewDescriptor, String viewClass, Object data, String title) {
+        var step = dialog(viewDescriptor, viewClass, data, title);
+        step.type = ActionFlowStepType.VIEW;
+        return step;
+    }
+
     /** Fire-and-forget notification — the client shows it and immediately continues the flow. */
     public static ActionFlowStep notify(String message, MessageType messageType) {
         var step = new ActionFlowStep();
@@ -104,6 +128,15 @@ public class ActionFlowStep implements Serializable {
         var step = new ActionFlowStep();
         step.type = ActionFlowStepType.REDIRECT;
         step.data = Map.of("url", url, "awaitReturn", awaitReturn);
+        return step;
+    }
+
+    /**
+     * Same as {@link #redirect(String, boolean)}, asking the client to open the URL in a new window or tab.
+     */
+    public static ActionFlowStep redirect(String url, boolean awaitReturn, boolean newWindow) {
+        var step = redirect(url, awaitReturn);
+        step.data = Map.of("url", url, "awaitReturn", awaitReturn, "newWindow", newWindow);
         return step;
     }
 
@@ -127,6 +160,95 @@ public class ActionFlowStep implements Serializable {
         }
         step.data = payload;
         return step;
+    }
+
+    /**
+     * The client asks the user to choose among options and answers with the <b>keys</b> chosen, never with positions.
+     *
+     * @param title    title of the picker, may be null
+     * @param keys     stable key of each option
+     * @param labels   what to show for each option, in the same order as {@code keys}
+     * @param multiple whether several can be chosen
+     */
+    public static ActionFlowStep choice(String title, java.util.List<String> keys, java.util.List<String> labels, boolean multiple) {
+        var step = new ActionFlowStep();
+        step.type = ActionFlowStepType.CHOICE;
+        step.title = title;
+        var payload = new HashMap<String, Object>();
+        var options = new java.util.ArrayList<Map<String, String>>();
+        for (int i = 0; i < keys.size(); i++) {
+            options.add(Map.of("key", keys.get(i), "label", labels.get(i)));
+        }
+        payload.put("options", options);
+        payload.put("multiple", multiple);
+        step.data = payload;
+        return step;
+    }
+
+    /**
+     * The client asks the user for files, sends each one to {@code /apps/api/transfers} and answers with a list of
+     * {@code {ref}}: references, not content.
+     *
+     * @param title    title of the picker, may be null
+     * @param accept   accepted types as in an HTML {@code accept} attribute, may be null
+     * @param multiple whether several files can be chosen
+     */
+    public static ActionFlowStep upload(String title, String accept, boolean multiple) {
+        var step = new ActionFlowStep();
+        step.type = ActionFlowStepType.UPLOAD;
+        step.title = title;
+        var payload = new HashMap<String, Object>();
+        payload.put("accept", accept);
+        payload.put("multiple", multiple);
+        step.data = payload;
+        return step;
+    }
+
+    /**
+     * An {@code UPLOAD} step with the limits the server enforces. The client answers with a list of references to files it
+     * already sent to {@code /apps/api/transfers}: {@code [{ref}]}.
+     *
+     * @param title        title of the file chooser
+     * @param accept       accepted extensions and MIME types, may be null
+     * @param maxFiles     maximum number of files
+     * @param maxFileSize  maximum size of each file in bytes
+     * @param maxTotalSize maximum size of all files together in bytes, 0 for no extra limit
+     * @return the step
+     */
+    public static ActionFlowStep upload(String title, String accept, int maxFiles, long maxFileSize, long maxTotalSize) {
+        var step = upload(title, accept, maxFiles > 1);
+        @SuppressWarnings("unchecked")
+        var payload = (Map<String, Object>) step.data;
+        payload.put("maxFiles", maxFiles);
+        payload.put("maxFileSize", maxFileSize);
+        payload.put("maxTotalSize", maxTotalSize);
+        return step;
+    }
+
+    /**
+     * A long task runs in the background; the client follows it and answers when it stops waiting.
+     *
+     * @param title what the user is told the task does
+     * @param jobId identifier of the job; {@code null} until the job is started
+     */
+    public static ActionFlowStep progress(String title, String jobId) {
+        var step = new ActionFlowStep();
+        step.type = ActionFlowStepType.PROGRESS;
+        step.title = title;
+        step.data = progressData(title, jobId);
+        return step;
+    }
+
+    /**
+     * @param title the title of the task
+     * @param jobId the job
+     * @return the {@code data} of a {@code PROGRESS} step
+     */
+    public static Map<String, Object> progressData(String title, String jobId) {
+        var payload = new HashMap<String, Object>();
+        payload.put("title", title);
+        payload.put("jobId", jobId);
+        return payload;
     }
 
     /** Terminal step carrying the action's result. */
@@ -203,8 +325,44 @@ public class ActionFlowStep implements Serializable {
         return viewDescriptor;
     }
 
+    /**
+     * For {@code DIALOG}: class name of the bean {@link #getViewDescriptor()} belongs to, when it is not the entity the
+     * action runs on. {@code null} means the entity of the request.
+     */
+    public String getViewClass() {
+        return viewClass;
+    }
+
+    public void setViewClass(String viewClass) {
+        this.viewClass = viewClass;
+    }
+
     public void setViewDescriptor(String viewDescriptor) {
         this.viewDescriptor = viewDescriptor;
+    }
+
+    /**
+     * @return when a form is shown again after a validation error, the message of each field that failed, by field name;
+     * otherwise {@code null}
+     */
+    public java.util.Map<String, String> getFieldErrors() {
+        return fieldErrors;
+    }
+
+    public void setFieldErrors(java.util.Map<String, String> fieldErrors) {
+        this.fieldErrors = fieldErrors;
+    }
+
+    /**
+     * @return presentation hints the front end may follow, such as {@code width} and {@code height} of a dialog; {@code null}
+     * when there are none
+     */
+    public java.util.Map<String, String> getHints() {
+        return hints;
+    }
+
+    public void setHints(java.util.Map<String, String> hints) {
+        this.hints = hints;
     }
 
     public Object getData() {

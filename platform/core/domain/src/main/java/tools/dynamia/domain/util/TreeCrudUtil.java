@@ -96,7 +96,7 @@ public class TreeCrudUtil<T> {
      * @param qp the qp
      * @return the children
      */
-    private List<T> getChildren(T parent, QueryParameters qp) {
+    public List<T> getChildren(T parent, QueryParameters qp) {
         qp.add(parentName, parent);
 
         return crudService.find(entityClass, qp);

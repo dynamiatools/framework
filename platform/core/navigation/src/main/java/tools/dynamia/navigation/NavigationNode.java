@@ -3,6 +3,7 @@ package tools.dynamia.navigation;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import tools.dynamia.commons.LocalizedMessagesProvider;
 import tools.dynamia.commons.Messages;
 
 import java.io.Serializable;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"id", "name", "longName", "type", "description", "icon", "internalPath", "path", "position", "featured", "attributes", "children"})
+@JsonPropertyOrder({"id", "name", "longName", "type", "description", "icon", "internalPath", "path", "position", "featured", "url", "attributes", "children"})
 public class NavigationNode implements Serializable {
 
 
@@ -28,6 +29,13 @@ public class NavigationNode implements Serializable {
 
     private Double position;
     private Boolean featured;
+
+    /**
+     * Address a browser can load for this page: only for pages whose path is an absolute {@code http(s)://} URL or a
+     * root relative one ({@code /reports/sales.html}, {@code /widgets/chart.js}), typically an {@link ExternalPage}.
+     * Internal paths ({@code classpath:} resources, bean names, entity class names) are never exposed.
+     */
+    private String url;
 
     @JsonIgnore
     private NavigationNode parent;
@@ -49,10 +57,20 @@ public class NavigationNode implements Serializable {
     }
 
     public NavigationNode(NavigationElement element) {
+        this(element, NavigationLabels.providers());
+    }
+
+    /**
+     * Creates a node reusing already looked up label providers, so a whole tree build finds and sorts the providers
+     * once instead of once per node.
+     *
+     * @param element   the navigation element
+     * @param providers the localized messages providers sorted by priority, see {@code NavigationLabels.providers()}
+     */
+    NavigationNode(NavigationElement element, List<LocalizedMessagesProvider> providers) {
         this.element = element;
         this.id = element.getId();
         var locale = Messages.getDefaultLocale();
-        var providers = NavigationLabels.providers();
         this.name = NavigationLabels.resolve(providers, element.getVirtualPath(), locale, element.getLocalizedName(locale));
         this.longName = element.getLongNameSupplier() != null ? (String) element.getLongNameSupplier().get() : element.getLongName();
         var defaultDescription = element.getLocalizedDescription(locale);
@@ -65,9 +83,17 @@ public class NavigationNode implements Serializable {
         this.position = element.getPosition() != 0.0 ? element.getPosition() : null;
         this.type = element.getClass().getSimpleName();
         this.featured = element instanceof Page p ? p.isFeatured() : null;
+        this.url = element instanceof Page p ? browsableUrl(p.getPath()) : null;
         if (element.getAttributes() != null && !element.getAttributes().isEmpty()) {
             this.attributes = new HashMap<>(element.getAttributes());
         }
+    }
+
+    private static final java.util.regex.Pattern BROWSABLE_URL = java.util.regex.Pattern.compile("^(https?://|/(?!/)).*", java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    /** The path when a browser can load it as is, otherwise {@code null}. */
+    static String browsableUrl(String path) {
+        return path != null && BROWSABLE_URL.matcher(path).matches() ? path : null;
     }
 
     public void addChild(NavigationNode node) {
@@ -213,4 +239,12 @@ public class NavigationNode implements Serializable {
         this.attributes = attributes;
     }
 
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 }

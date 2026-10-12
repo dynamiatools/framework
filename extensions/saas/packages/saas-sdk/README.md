@@ -6,6 +6,15 @@
 
 The package is intentionally minimal: it delegates HTTP, authentication and error handling to the core `@dynamia-tools/sdk` `HttpClient`. The recommended usage is to construct `SaasApi` from an existing `DynamiaClient` (`client.http`).
 
+> **Server-side use only.** This SDK is for back-end code (a service, a script, a license check at startup), not for
+> browser bundles. The `/api/saas` endpoints are server-to-server operations (license validation, usage stats,
+> per-account parameters) whose authorization depends on the **system account** or on the **subdomain** of the request,
+> not on user roles; shipping a token that can call them inside a web application exposes it to every visitor.
+>
+> The package is also **intentionally small**. The account-migration endpoints (`/api/saas/migration/jobs/*`: export,
+> import, clone, backup, restore) and the stats/parameter endpoints are administrative and have no SDK on purpose. If
+> you have a real use case, open an issue so it can be designed as a separate, opt-in package.
+
 ---
 
 ## Table of Contents

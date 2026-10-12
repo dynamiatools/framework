@@ -19,6 +19,7 @@ package tools.dynamia.domain.jpa;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.orm.jpa.EntityManagerHolder;
@@ -48,6 +49,13 @@ public class OpenEntityManagerInViewPattern implements OpenPersistenceInViewProv
      */
     protected final LoggingService logger = new SLF4JLoggingService(OpenEntityManagerInViewPattern.class);
     private EntityManagerFactory emf;
+
+    /**
+     * Enables or disables the pattern. Bound to {@code dynamia.app.open-persistence-in-view} (default true).
+     * When disabled, views must not rely on lazy loading and lists are mapped to read-only BeanMaps by the CrudService.
+     */
+    @Value("${dynamia.app.open-persistence-in-view:true}")
+    private boolean enabled = true;
 
     /**
      * Before view.
@@ -114,6 +122,15 @@ public class OpenEntityManagerInViewPattern implements OpenPersistenceInViewProv
 
     @Override
     public boolean isDisabled() {
-        return false;
+        return !enabled;
+    }
+
+    /**
+     * Enables or disables the open entity manager in view pattern.
+     *
+     * @param enabled false to disable it
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

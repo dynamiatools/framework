@@ -30,6 +30,7 @@ import tools.dynamia.commons.reflect.ReflectionException;
 import tools.dynamia.domain.EntityReference;
 import tools.dynamia.domain.EntityReferenceRepository;
 import tools.dynamia.domain.Reference;
+import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.viewers.util.Viewers;
 import tools.jackson.core.JsonGenerator;
@@ -106,6 +107,8 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
                 PropertyInfo fieldInfo = field.getPropertyInfo();
                 if (field.isCollection() && fieldInfo != null) {
                     serializeCollectionField(field, fieldInfo, value, gen, provider);
+                } else if (fieldInfo == null && field.getParams().get("bindings") instanceof Map<?, ?> bindings) {
+                    serializeBindings(field, bindings, value, gen);
                 } else {
                     serializeSimpleField(field, fieldInfo, value, gen);
                 }
@@ -245,10 +248,7 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
             if (size == 0) return;
         } catch (Throwable e) {
             if (field.isEntity()) {
-                String parentName = ObjectOperations.findParentPropertyName(viewDescriptor.getBeanClass(), fieldInfo.getGenericType());
-                if (parentName != null) {
-                    collection = DomainUtils.lookupCrudService().find(fieldInfo.getGenericType(), parentName, value);
-                }
+                collection = loadEntityCollection(field, fieldInfo, value);
             } else {
                 collection = null;
                 LOGGER.warn("Cannot serialize collection " + field.getName() + " of class " + viewDescriptor.getBeanClass() + ": " + e.getMessage());
@@ -264,6 +264,50 @@ public class JsonViewDescriptorSerializer extends StdSerializer<Object> {
             }
             gen.writeEndArray();
         }
+    }
+
+    /**
+     * Loads a collection of entities that cannot be read from the (detached) owner. The items of a one-to-many detail
+     * are found through the property that points back to the owner; any other association, such as a many-to-many
+     * with no such property, is read with a join from the owner.
+     */
+    private Collection<?> loadEntityCollection(Field field, PropertyInfo fieldInfo, Object owner) {
+        Class<?> ownerType = viewDescriptor.getBeanClass();
+        Class<?> itemType = fieldInfo.getGenericType();
+        boolean hasBackReference = ObjectOperations.getPropertiesInfo(itemType).stream()
+                .anyMatch(info -> ObjectOperations.isAssignable(info.getType(), ownerType));
+
+        if (hasBackReference) {
+            String parentName = ObjectOperations.findParentPropertyName(ownerType, itemType);
+            return parentName != null ? DomainUtils.lookupCrudService().find(itemType, parentName, owner) : null;
+        }
+
+        return DomainUtils.lookupCrudService().executeQuery(
+                "select i from " + ownerType.getName() + " o join o." + field.getName() + " i where o = :owner",
+                QueryParameters.with("owner", owner));
+    }
+
+    /**
+     * Writes a virtual field (one with no property of its own, like a {@code coollabel} column) that declares
+     * {@code bindings} as an object with the value of every bound path, e.g. {@code bindings: {title: username}}
+     * becomes {@code "field": {"title": "admin"}}. Paths that cannot be read or are null are left out.
+     */
+    private void serializeBindings(Field field, Map<?, ?> bindings, Object value, JsonGenerator gen) {
+        if (!field.isVisible()) {
+            return;
+        }
+        gen.writeObjectPropertyStart(field.getName());
+        bindings.forEach((key, path) -> {
+            try {
+                Object bound = ObjectOperations.invokeGetMethod(value, String.valueOf(path));
+                if (bound != null) {
+                    writeField(gen, String.valueOf(key), bound);
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Cannot write binding " + key + " -> " + path + " of field " + field.getName() + " to json: " + e.getMessage());
+            }
+        });
+        gen.writeEndObject();
     }
 
     private void serializeSimpleField(Field field, PropertyInfo fieldInfo, Object value, JsonGenerator gen) {

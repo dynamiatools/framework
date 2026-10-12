@@ -4,7 +4,7 @@ type FindParams = Record<string, string | number | boolean | undefined | null>;
 
 /**
  * Low-level generic CRUD endpoint by fully-qualified Java class name.
- * Base path: /crud-service/{className}
+ * Base path: /apps/api/crud-service/{className}
  */
 export class CrudServiceApi<T = unknown> {
   private readonly http: HttpClient;
@@ -12,11 +12,11 @@ export class CrudServiceApi<T = unknown> {
 
   constructor(http: HttpClient, className: string) {
     this.http = http;
-    this.basePath = `/crud-service/${encodeURIComponent(className)}`;
+    this.basePath = `/apps/api/crud-service/${encodeURIComponent(className)}`;
   }
 
   /**
-   * `POST /crud-service/{className}` — Persist an entity (create or update).
+   * `POST /apps/api/crud-service/{className}` — Persist an entity (create or update).
    *
    * The Java controller uses a single `@PostMapping` for both create and
    * update operations.  Whether the request results in an INSERT or UPDATE is
@@ -27,22 +27,22 @@ export class CrudServiceApi<T = unknown> {
     return this.http.post<T>(this.basePath, entity);
   }
 
-  /** GET /crud-service/{className}/{id} — Find by ID */
+  /** GET /apps/api/crud-service/{className}/{id} — Find by ID */
   findById(id: string | number): Promise<T> {
     return this.http.get<T>(`${this.basePath}/${id}`);
   }
 
-  /** DELETE /crud-service/{className}/{id} — Delete by ID */
+  /** DELETE /apps/api/crud-service/{className}/{id} — Delete by ID */
   delete(id: string | number): Promise<void> {
     return this.http.delete<void>(`${this.basePath}/${id}`);
   }
 
-  /** POST /crud-service/{className}/find — Find by query parameters */
+  /** POST /apps/api/crud-service/{className}/find — Find by query parameters */
   find(params: FindParams): Promise<T[]> {
     return this.http.post<T[]>(`${this.basePath}/find`, params);
   }
 
-  /** POST /crud-service/{className}/id — Get just the ID matching query parameters */
+  /** POST /apps/api/crud-service/{className}/id — Get just the ID matching query parameters */
   getId(params: FindParams): Promise<string | number> {
     return this.http.post<string | number>(`${this.basePath}/id`, params);
   }

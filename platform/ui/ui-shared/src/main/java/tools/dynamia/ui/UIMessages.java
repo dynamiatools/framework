@@ -32,8 +32,6 @@ import java.util.function.Consumer;
  */
 public class UIMessages {
 
-    private static MessageDisplayer currentMessageDisplayer;
-
     private UIMessages() {
     }
 
@@ -81,20 +79,28 @@ public class UIMessages {
     }
 
     /**
-     * Return the current MessageDisplayer, if not set try to find one in the container
+     * Runs {@code work} with {@code displayer} as the {@link MessageDisplayer} of every {@code UIMessages} call made
+     * by it (and by the threads it forks with structured concurrency). Outside of it the displayer of the active
+     * {@link UIEnvironment} (ZK's, for example) is used as always.
+     *
+     * @param displayer the displayer for this execution
+     * @param work      the code that talks to the user through {@code UIMessages}
+     * @param <T>       result type
+     * @return what {@code work} returns
      */
-    public static MessageDisplayer getDisplayer() {
-        if (currentMessageDisplayer == null) {
-            currentMessageDisplayer = Containers.get().findObject(MessageDisplayer.class);
-            if (currentMessageDisplayer == null) {
-                throw new IllegalStateException("MessageDisplayer not found");
-            }
-        }
-        return currentMessageDisplayer;
+    public static <T> T withDisplayer(MessageDisplayer displayer, java.util.function.Supplier<T> work) {
+        return UIFacades.with(MessageDisplayer.class, displayer, work);
     }
 
-    public static void setCurrentMessageDisplayer(MessageDisplayer currentMessageDisplayer) {
-        UIMessages.currentMessageDisplayer = currentMessageDisplayer;
+    /**
+     * Returns the {@link MessageDisplayer} of the active {@link UIEnvironment}. It is resolved on every call, so it
+     * follows the environment the code runs in.
+     *
+     * @return the displayer
+     * @throws UIUnavailableException when the active environment cannot show messages
+     */
+    public static MessageDisplayer getDisplayer() {
+        return UIFacades.port(MessageDisplayer.class);
     }
 
     /**

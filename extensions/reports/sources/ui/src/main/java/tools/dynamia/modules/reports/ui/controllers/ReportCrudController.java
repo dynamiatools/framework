@@ -40,7 +40,7 @@ public class ReportCrudController extends CrudController<Report> {
 
     @Override
     protected void afterEdit() {
-        setEntity(getCrudService().findSingle(Report.class, QueryParameters.with("id", getSelected().getId())
+        setEntity(getCrudService().findSingle(Report.class, QueryParameters.with("id", getEntity().getId())
                 .add("accountId", QueryConditions.isNotNull())));
     }
 

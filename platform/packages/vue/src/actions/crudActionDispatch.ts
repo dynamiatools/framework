@@ -51,8 +51,8 @@ export async function dispatchCrudSave(
 }
 
 /**
- * Deletes an entity — action-aware, same pattern as {@link dispatchCrudSave}: typically resolves
- * to a `DeleteFlowRemoteAction`, which confirms before deleting.
+ * Deletes an entity — action-aware, same pattern as {@link dispatchCrudSave}: resolves to the server's
+ * `delete` action (the same `DeleteAction` ZK runs), which asks for confirmation through the flow protocol.
  */
 export async function dispatchCrudDelete(
   ctx: CrudActionDispatchContext,

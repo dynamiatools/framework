@@ -37,12 +37,15 @@ final class NavigationLabels {
 
     /**
      * Returns the first non-null provider message for the key, or {@code defaultValue} when none provides one.
+     * Providers are asked with a {@code null} default, never with {@code defaultValue}: a provider that echoes the
+     * default it receives when it has no message (as the ZK one does) would otherwise short-circuit the providers
+     * with a lower priority. The default is only applied at the end.
      * A failing provider is skipped so it can never break the navigation tree.
      */
     static String resolve(List<LocalizedMessagesProvider> providers, String key, Locale locale, String defaultValue) {
         for (var provider : providers) {
             try {
-                var message = provider.getMessage(key, null, locale, defaultValue);
+                var message = provider.getMessage(key, null, locale, null);
                 if (message != null) {
                     return message;
                 }

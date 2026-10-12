@@ -100,6 +100,7 @@ public class RestNavigationReadOperation {
 
         RestNavigationQuerySupport.parseConditions(query, descriptor);
         RestNavigationQuerySupport.applyRequestFilters(request, query, descriptor);
+        RestNavigationQuerySupport.applyRequestSearch(request, query, descriptor, "e");
         RestNavigationQuerySupport.applyRequestSorting(request, query, descriptor);
 
         int pageSize = RestNavigationQuerySupport.getParameterNumber(request, "size");

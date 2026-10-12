@@ -26,6 +26,7 @@ import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.modules.saas.api.ExportIgnore;
 import tools.dynamia.modules.saas.domain.Account;
+import tools.dynamia.modules.saas.AccountTenants;
 import tools.dynamia.modules.saas.migration.api.AccountExportOptions;
 import tools.dynamia.modules.saas.migration.api.CancellationToken;
 import tools.dynamia.modules.saas.migration.api.MigrationException;
@@ -277,7 +278,8 @@ public class ExportPipeline {
         List<Future<Long>> futures = new ArrayList<>(ordered.size());
 
         for (Class<?> entityClass : ordered) {
-            futures.add(pool.submit(() -> {
+            // The worker thread does not inherit the root tenant of the exporting thread: bind it inside the task
+            futures.add(pool.submit(() -> AccountTenants.callWithRoot(() -> {
                 semaphore.acquire();
                 try {
                     if (token != null && token.isCancelled()) return 0L;
@@ -293,7 +295,7 @@ public class ExportPipeline {
                 } finally {
                     semaphore.release();
                 }
-            }));
+            })));
         }
         pool.shutdown();
 

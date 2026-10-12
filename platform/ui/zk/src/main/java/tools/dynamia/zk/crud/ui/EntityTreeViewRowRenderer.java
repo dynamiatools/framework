@@ -21,7 +21,7 @@ import org.zkoss.zul.Treeitem;
 import tools.dynamia.domain.AbstractEntity;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.zk.viewers.tree.TreeView;
-import tools.dynamia.zk.viewers.tree.TreeViewNode;
+import tools.dynamia.viewers.TreeViewNode;
 import tools.dynamia.zk.viewers.tree.TreeViewRowRenderer;
 
 /**

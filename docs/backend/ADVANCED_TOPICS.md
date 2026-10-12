@@ -897,6 +897,45 @@ public class ProcessAllBooksAction extends AbstractCrudAction {
 }
 ```
 
+### Context variables and async tasks: `ObjectsContext`
+
+Code that needs the *current* objects of a request or task (current user, branch, account...) reads and binds them
+through the `ObjectsContext` facade (`tools.dynamia.integration.context`), without caring how they are stored.
+
+```java
+// read: bound objects, then the legacy ThreadLocalObjectContainer, then Spring
+Branch branch = ObjectsContext.require(Branch.class);   // get() returns null, find() an Optional
+
+// bind by scope (never set/clear); scopes add up and are undone automatically, also on exceptions
+ObjectsContext.with(branch).run(() -> {
+    ObjectsContext.with(cashbox).run(() -> {
+        ObjectsContext.get(Branch.class);               // the outer object is still visible
+    });
+});
+```
+
+It is built on `ScopedValue` (final in Java 25) through `ScopedValueObjectContainer`. A scoped value is **not
+inherited** by threads you start, so carry the context explicitly:
+
+```java
+var snapshot = ObjectsContext.capture();                  // immutable
+executor.submit(snapshot.wrap(() -> { ... }));           // also wrapSupplier / wrapCallable
+Executor withContext = ObjectsContext.wrap(executor);     // every task gets its submitter's context
+```
+
+`SchedulerUtil.run`, `runAndWait` and `runWithResult` do this for you. A snapshot contains the bound objects (or, when
+none are bound, the legacy thread-local container, or the `ThreadLocalObjectAware` beans cloned when they are
+`CloneableThreadLocalObject` plus the `ThreadLocalContextProvider` values) and the state contributed by every
+`ContextCapturer` bean. Implement `ContextCapturer` to carry state that lives outside the container, such as a value
+held in your own `ScopedValue` (the SaaS tenant of `AccountTenants` is carried this way).
+
+**Migration.** `ThreadLocalObjectContainer` is unchanged. While applications migrate, a snapshot also fills it inside
+the task and puts back its previous value afterwards; call `ObjectsContext.legacyThreadLocalBridge(false)` once nothing
+reads it. `ThreadLocalObjectAware`, `CloneableThreadLocalObject` and `ThreadLocalContextProvider` still work but are
+deprecated in favour of `ContextCapturer`. The variants that take several tasks (`run(Runnable, Runnable...)` and
+`run(List<Runnable>)`) and cron jobs scheduled with `schedule(...)` do not carry a context: bind what they need with
+`ObjectsContext.with(...)` when the job starts.
+
 ---
 
 ## REST API Development

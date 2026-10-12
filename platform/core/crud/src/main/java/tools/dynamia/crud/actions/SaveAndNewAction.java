@@ -43,4 +43,9 @@ public class SaveAndNewAction extends SaveAction {
         NewAction action = new NewAction();
         action.actionPerformed(new CrudActionEvent(entity, null, crud, crud.getController()));
     }
+
+    @Override
+    public boolean headlessSupported() {
+        return false; // it leaves the form open on a new or the saved record: that is up to the client
+    }
 }

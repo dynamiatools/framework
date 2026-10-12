@@ -99,7 +99,7 @@ public final class ActionFlowContext {
      * the triggering request's {@code data} spread flat (when it was itself a map, e.g. a whole entity
      * payload) plus {@code dataId}/{@code dataType}/{@code dataName}/{@code params}; see
      * {@link ActionFlows#dispatch}. Useful when an implementation needs the whole accumulated payload
-     * rather than one key at a time (e.g. {@code SaveFlowRemoteAction} re-collecting an edited entity).
+     * rather than one key at a time (e.g. a save step re-collecting an edited entity).
      */
     public Map<String, Object> asMap() {
         return Collections.unmodifiableMap(new HashMap<>(data));

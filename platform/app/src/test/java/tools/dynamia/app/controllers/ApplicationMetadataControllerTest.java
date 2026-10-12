@@ -16,8 +16,17 @@ import tools.dynamia.crud.CrudState;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
+import tools.dynamia.app.metadata.ViewDescriptorMetadata;
+import tools.dynamia.viewers.View;
+import tools.dynamia.viewers.ViewCustomizer;
+import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.impl.DefaultViewDescriptor;
+import tools.dynamia.viewers.ViewDescriptorFactory;
+import tools.dynamia.viewers.ViewDescriptorNotFoundException;
 import tools.dynamia.web.navigation.ErrorResult;
+import tools.jackson.databind.json.JsonMapper;
 
+import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
 
@@ -198,7 +207,7 @@ class ApplicationMetadataControllerTest {
         var action = new ValidationFailingAction();
         install(action);
         var metadata = new ActionMetadata(action);
-        var httpRequest = new MockHttpServletRequest("POST", "/api/app/metadata/actions/" + metadata.getId());
+        var httpRequest = new MockHttpServletRequest("POST", "/apps/api/metadata/actions/" + metadata.getId());
 
         var response = ApplicationMetadataController.executeAction(
                 metadata.getId(), new ActionExecutionRequest(), metadata, httpRequest);
@@ -207,7 +216,7 @@ class ApplicationMetadataControllerTest {
         var body = assertInstanceOf(ErrorResult.class, response.getBody());
         assertEquals("VALIDATION_ERROR", body.getError());
         assertEquals("Name is required", body.getMessage());
-        assertEquals("/api/app/metadata/actions/" + metadata.getId(), body.getPath());
+        assertEquals("/apps/api/metadata/actions/" + metadata.getId(), body.getPath());
         assertEquals("name", body.getDetails().get("invalidProperty"));
     }
 
@@ -217,6 +226,98 @@ class ApplicationMetadataControllerTest {
                 "doesNotExist", new ActionExecutionRequest(), null, new MockHttpServletRequest());
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        var body = assertInstanceOf(ActionExecutionResponse.class, response.getBody());
+        assertEquals(404, body.getStatusCode());
+    }
+
+    private static ApplicationMetadataController controllerWithDescriptor(ViewDescriptor known) {
+        var factory = (ViewDescriptorFactory) Proxy.newProxyInstance(
+                ViewDescriptorFactory.class.getClassLoader(), new Class[]{ViewDescriptorFactory.class},
+                (proxy, method, args) -> {
+                    if (method.getName().equals("getDescriptor") && args.length == 1 && args[0] instanceof String id) {
+                        if (known != null && id.equals(known.getId())) {
+                            return known;
+                        }
+                        throw new ViewDescriptorNotFoundException("Cannot found view descriptor using id: " + id);
+                    }
+                    throw new UnsupportedOperationException(method.getName());
+                });
+        return new ApplicationMetadataController(null, factory);
+    }
+
+    @Test
+    void viewDescriptorByIdReturnsTheDescriptor() {
+        var descriptor = new DefaultViewDescriptor();
+        descriptor.setId("mainDashboard");
+
+        var response = controllerWithDescriptor(descriptor).getViewDescriptor("mainDashboard");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("mainDashboard", response.getBody().getId());
+    }
+
+    @Test
+    void viewDescriptorByIdReturns404WhenUnknown() {
+        var response = controllerWithDescriptor(null).getViewDescriptor("missing");
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    public static class Book {
+        private String title;
+
+        public String getTitle() {
+            return title;
+        }
+    }
+
+    public static class BookCustomizer implements ViewCustomizer<View> {
+        @Override
+        public void customize(View view) {
+            // nothing to do
+        }
+    }
+
+    @Test
+    void viewDescriptorJsonDoesNotLeakClassNames() {
+        var descriptor = new DefaultViewDescriptor(Book.class, "form");
+        descriptor.setId("bookForm");
+        descriptor.setViewCustomizerClass(BookCustomizer.class);
+
+        var response = controllerWithDescriptor(descriptor).getViewDescriptor("bookForm");
+        var json = JsonMapper.builder().build().writeValueAsString(response.getBody());
+
+        assertFalse(json.contains("tools.dynamia"), json);
+        assertFalse(json.contains("viewCustomizerClass"), json);
+        assertFalse(json.contains("customViewRenderer"), json);
+        assertTrue(json.contains("\"beanClass\":\"Book\""), json);
+    }
+
+    @Test
+    void viewDescriptorMetadataUsesTheEntityIdInsteadOfTheClassName() {
+        var metadata = new ViewDescriptorMetadata(new DefaultViewDescriptor(Book.class, "form"));
+        var json = JsonMapper.builder().build().writeValueAsString(metadata);
+
+        assertFalse(json.contains("tools.dynamia"), json);
+        assertTrue(json.contains("/entities/Book/views/form"), json);
+    }
+
+    @tools.dynamia.actions.RunsOn(tools.dynamia.actions.ActionRuntime.FRONTEND)
+    private static class FrontendOnlyAction extends tools.dynamia.actions.AbstractLocalAction {
+        @Override
+        public void actionPerformed(tools.dynamia.actions.ActionEvent evt) {
+        }
+    }
+
+    @Test
+    void aFrontendActionIsNotFoundEvenIfSomeoneKnowsItsId() {
+        var action = new FrontendOnlyAction();
+        action.setId("find");
+        install(action);
+
+        var response = ApplicationMetadataController.executeAction(
+                "find", new ActionExecutionRequest(), new ActionMetadata(action), new MockHttpServletRequest());
+
         var body = assertInstanceOf(ActionExecutionResponse.class, response.getBody());
         assertEquals(404, body.getStatusCode());
     }

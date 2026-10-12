@@ -20,6 +20,9 @@ public class TestEntity extends SimpleEntity {
     @ManyToOne
     private TestEntity parent;
 
+    @jakarta.persistence.OneToMany(mappedBy = "parent")
+    private java.util.List<TestEntity> children = new java.util.ArrayList<>();
+
     public String getName() {
         return name;
     }
@@ -66,5 +69,13 @@ public class TestEntity extends SimpleEntity {
 
     public void setParent(TestEntity parent) {
         this.parent = parent;
+    }
+
+    public java.util.List<TestEntity> getChildren() {
+        return children;
+    }
+
+    public void setChildren(java.util.List<TestEntity> children) {
+        this.children = children;
     }
 }

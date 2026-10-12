@@ -30,8 +30,13 @@ export class CrudResourceApi<T = unknown> {
   }
 
   /** GET /api/{path}/{id} — Get by ID */
-  findById(id: string | number): Promise<T> {
-    return this.http.get<T>(`${this.basePath}/${id}`);
+  async findById(id: string | number): Promise<T> {
+    // The server wraps a single entity as { response: "OK", data: {...} }, like the list endpoints do.
+    const result = await this.http.get<T | { response?: string; data?: T }>(`${this.basePath}/${id}`);
+    if (result && typeof result === 'object' && 'response' in result && 'data' in result && result.data !== undefined) {
+      return result.data;
+    }
+    return result as T;
   }
 
   /** POST /api/{path} — Create */

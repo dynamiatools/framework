@@ -2,7 +2,6 @@ package tools.dynamia.modules.reports.core;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import tools.dynamia.domain.ValidationError;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.modules.saas.api.AccountServiceAPI;
 import tools.dynamia.modules.reports.api.EntityFilterProvider;
@@ -52,13 +51,12 @@ public class ReportsUtils {
         return Containers.get().findObjects(EntityFilterProvider.class).stream().toList();
     }
 
+    /**
+     * Validates a query (see {@link ReportQueryValidator}) and replaces the {@code :accountId} placeholder with the
+     * current account id.
+     */
     public static String checkQuery(String query) {
-        if (query == null) {
-            throw new ValidationError("Invalid Query");
-        }
-        if (query.toLowerCase().contains("delete ") || query.toLowerCase().contains("update ")) {
-            throw new ValidationError("Danger query detected: " + query);
-        }
+        ReportQueryValidator.validateQuery(query, "sql");
 
         if (query.contains(":accountId")) {
             AccountServiceAPI accountServiceAPI = Containers.get().findObject(AccountServiceAPI.class);

@@ -19,6 +19,7 @@
 package tools.dynamia.modules.saas.jpa;
 
 import jakarta.persistence.MappedSuperclass;
+import org.hibernate.annotations.TenantId;
 import jakarta.validation.constraints.NotNull;
 import tools.dynamia.domain.jpa.BaseEntityUuid;
 import tools.dynamia.modules.saas.api.AccountAware;
@@ -30,7 +31,12 @@ import tools.dynamia.modules.saas.api.AccountAware;
 @MappedSuperclass
 public abstract class BaseEntityUuidSaaS extends BaseEntityUuid implements AccountAware {
 
+    /**
+     * The owner account. Hibernate uses it as the tenant discriminator ({@link TenantId}): it is set from the current
+     * tenant on persist and added to every query and load. See {@code AccountTenantIdentifierResolver} in saas core.
+     */
     @NotNull
+    @TenantId
     private Long accountId;
 
     public Long getAccountId() {

@@ -23,7 +23,7 @@ public class EntityMetadata extends BasicMetadata {
      * Kept for server-side resolution only — never serialized to clients. The public identifier
      * for this entity is {@link #getId()} (the class's simple name), which is what appears in
      * {@code endpoint}/{@code actionsEndpoint}/{@code viewsEndpoint} and in
-     * {@code /api/app/metadata/entities/{id}}. See {@code docs/design} security note on why the
+     * {@code /apps/api/metadata/entities/{id}}. See {@code docs/design} security note on why the
      * FQCN (package structure) is not sent over the wire.
      */
     @JsonIgnore

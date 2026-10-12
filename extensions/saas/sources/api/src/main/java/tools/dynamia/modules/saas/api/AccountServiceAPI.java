@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Core service API for managing SaaS accounts in a multi-tenant environment.
@@ -87,6 +88,53 @@ public interface AccountServiceAPI {
     Long getCurrentAccountId();
 
     /**
+     * Runs work that has to see every account when no account is current: login lookups by username or token,
+     * startup defaults. When an account is current (for example resolved from the subdomain) the work runs as that
+     * account, so it stays isolated. Tenant resolution fails closed, so such code must use this instead of relying on
+     * an implicit root tenant. The tenant is fixed when the Hibernate session opens, so the work must open its own
+     * session (it must not be a method already running inside a transaction). The default implementation just runs
+     * the work.
+     *
+     * @param work the work
+     * @param <T>  the result type
+     * @return the result of the work
+     */
+    default <T> T withRootIfNoAccount(Supplier<T> work) {
+        return work.get();
+    }
+
+    /**
+     * Runs the work as the given account, whatever the current account is. It is meant for administration done from
+     * another account (for example the system account working on a customer account), where queries must see the
+     * data of the target account. The tenant is only bound while the work runs and no transaction is opened.
+     * work opens its own sessions and transactions. It must be bound again inside any callback that runs later.
+     * The default implementation just runs the work.
+     *
+     * @param accountId the account the work runs as
+     * @param work      the work
+     * @param <T>       the result type
+     * @return the result of the work
+     */
+    default <T> T withAccount(Long accountId, Supplier<T> work) {
+        return work.get();
+    }
+
+    /**
+     * Runs the work as the given account, whatever the current account is. It is meant for administration done from
+     * another account (for example the system account working on a customer account), where queries must
+     * see the data of the target account. The tenant is only bound while the work runs and no transaction is opened.
+     *
+     * @param accountId the account the work runs as
+     * @param work      the work
+     */
+    default void runAsAccount(Long accountId, Runnable work) {
+        withAccount(accountId, () -> {
+            work.run();
+            return null;
+        });
+    }
+
+    /**
      * Retrieves the complete information of the currently active account.
      *
      * @return an {@link AccountDTO} with the current account details
@@ -105,8 +153,8 @@ public interface AccountServiceAPI {
     /**
      * Updates the user count statistics for the specified account.
      *
-     * @param accountId the unique identifier of the account
-     * @param users the total number of users registered in the account
+     * @param accountId    the unique identifier of the account
+     * @param users        the total number of users registered in the account
      * @param activedUsers the number of currently active users in the account
      */
     void updateAccountUsers(Long accountId, long users, long activedUsers);
@@ -124,7 +172,7 @@ public interface AccountServiceAPI {
      *
      * @param accountId the unique identifier of the account
      * @param startDate the beginning of the date range for log retrieval
-     * @param endDate the end of the date range for log retrieval
+     * @param endDate   the end of the date range for log retrieval
      * @return a list of {@link AccountLogDTO} objects representing account activities
      */
     List<AccountLogDTO> getLogs(Long accountId, Date startDate, Date endDate);
@@ -140,7 +188,7 @@ public interface AccountServiceAPI {
     /**
      * Retrieves a configuration parameter value by name, with a default fallback.
      *
-     * @param name the name of the parameter to retrieve
+     * @param name         the name of the parameter to retrieve
      * @param defaultValue the default value to return if the parameter is not found
      * @return the parameter value, or the default value if not found
      */
@@ -149,7 +197,7 @@ public interface AccountServiceAPI {
     /**
      * Sets a configuration parameter for the current account.
      *
-     * @param name the name of the parameter to set
+     * @param name  the name of the parameter to set
      * @param value the value to assign to the parameter
      */
     void setParameter(String name, String value);
@@ -190,7 +238,7 @@ public interface AccountServiceAPI {
      * This method is used for audit trails and activity tracking.
      *
      * @param accountId the unique identifier of the account
-     * @param message the log message to record
+     * @param message   the log message to record
      */
     void log(Long accountId, String message);
 
@@ -237,7 +285,7 @@ public interface AccountServiceAPI {
     /**
      * Clears cached data for a specific account and its associated domain.
      *
-     * @param accountId the unique identifier of the account
+     * @param accountId     the unique identifier of the account
      * @param accountDomain the domain associated with the account
      */
     default void clearCache(Long accountId, String accountDomain) {

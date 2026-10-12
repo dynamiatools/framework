@@ -61,6 +61,11 @@ export interface NavigationNode {
     position?: number;
     /** Whether this node should appear in featured/shortcut areas — Java `Boolean`, nullable */
     featured?: boolean;
+    /**
+     * Address a browser can load for this page. Only present when the page's path is an absolute `http(s)://` URL or
+     * a root relative one (e.g. an `ExternalPage`); internal paths are never sent. Use it to embed the page.
+     */
+    url?: string;
     children?: NavigationNode[];
     attributes?: Record<string, unknown>;
 }
@@ -75,7 +80,7 @@ export interface ApplicationMetadataEntities {
  * Mirrors `tools.dynamia.app.EntityMetadata`.
  *
  * `id` (inherited from {@link BasicMetadata}) is the entity's identifier — the entity class's
- * *simple* name (e.g. `"Invoice"`), used in `/api/app/metadata/entities/{id}` and friends. The
+ * *simple* name (e.g. `"Invoice"`), used in `/apps/api/metadata/entities/{id}` and friends. The
  * fully-qualified Java class name is intentionally never sent to clients (it leaks internal
  * package/module structure) — there is no `className` field on this type.
  *
@@ -89,7 +94,7 @@ export interface EntityMetadata extends BasicMetadata {
     actionsEndpoint: string;
     /**
      * REST endpoint that returns the full list of ViewDescriptor objects for
-     * this entity (e.g. `/api/metadata/entities/MyClass/views`).
+     * this entity (e.g. `/apps/api/metadata/entities/MyClass/views`).
      */
     viewsEndpoint?: string;
 }
@@ -113,6 +118,12 @@ export interface ApplicationMetadataActions {
     actions: ActionMetadata[];
 }
 
+// ActionRuntime, ActionFlowStepType and ActionFlowStep are generated from the Java classes (src/generated/ui-contract.ts).
+// A `FRONTEND` action is in the catalog without `endpoint`: each front end implements it as a `ClientAction` with the same id,
+// or does not show it.
+export type {ActionRuntime, ActionFlowStepType, ActionFlowStep} from '../generated/ui-contract.js';
+import type {ActionRuntime, ActionFlowStep} from '../generated/ui-contract.js';
+
 export type ActionType = 'Action' | 'ClassAction' | 'CrudAction' | string;
 
 /**
@@ -124,6 +135,8 @@ export type ActionType = 'Action' | 'ClassAction' | 'CrudAction' | string;
 export interface ActionMetadata extends BasicMetadata {
     /** Logical server-side action type: Action, ClassAction or CrudAction */
     type?: ActionType;
+    /** How the action runs (`HEADLESS`, `FLOW`, `REMOTE` on the server; `FRONTEND` in each front end, without `endpoint`). */
+    runtime?: ActionRuntime;
     /** Simple Java class name of the action implementation */
     className?: string;
     /** Fully-qualified class name of the Java action implementation */
@@ -206,41 +219,26 @@ export interface ActionExecutionResponse {
     flow?: ActionFlowStep;
 }
 
-/** Mirrors `tools.dynamia.actions.ActionFlowStepType`. */
-export type ActionFlowStepType =
-    | 'CONFIRM'
-    | 'INPUT'
-    | 'DIALOG'
-    | 'NOTIFY'
-    | 'REDIRECT'
-    | 'CALL'
-    | 'DONE'
-    | 'CUSTOM';
+/**
+ * Reference to a file already sent to `/apps/api/transfers` (see `client.transfers.upload`): what an `UPLOAD` step is
+ * answered with. The content never travels inside the flow.
+ */
+export interface FlowFileRef {
+    ref: string;
+    name: string;
+    contentType?: string | null;
+    size: number;
+}
 
 /**
- * A single step of a `FlowRemoteAction` flow — mirrors `tools.dynamia.actions.ActionFlowStep`.
- *
- * `data`'s shape depends on `type`: the result for `DONE`, `{ url, awaitReturn }` for `REDIRECT`,
- * `{ action, ...}` for `CALL`, `{ component, ... }` for `CUSTOM`, prefill data for `DIALOG`, or absent
- * for `CONFIRM`/`INPUT`/`NOTIFY`.
- *
- * `REDIRECT` (terminal; `awaitReturn: true` unsupported) and `CALL` (`data.action`, optional `data.className`)
- * are experimental — see `docs/design/SERVER_DRIVEN_ACTION_FLOWS.md` §6.
- *
- * @experimental The whole flow protocol may still change.
+ * A file the action gave to the user: an entry of `ActionExecutionResponse.params.downloads`. Fetch `url` (relative to
+ * the server) with `client.transfers.download`, or use it as a link.
  */
-export interface ActionFlowStep {
-    flowId: string;
-    type: ActionFlowStepType;
-    title?: string;
-    message?: string;
-    /** Mirrors `tools.dynamia.ui.MessageType` (NORMAL/ERROR/WARNING/INFO/CRITICAL/SPECIAL). */
-    messageType?: string;
-    /** For `DIALOG`: name of the `ViewDescriptor` to render as a form. */
-    viewDescriptor?: string;
-    data?: unknown;
-    /** Opaque, signed — echo back verbatim as `ActionExecutionRequest.resumeToken` to continue the flow. */
-    resumeToken?: string;
+export interface FlowDownload {
+    name: string;
+    contentType?: string | null;
+    size: number;
+    url: string;
 }
 
 // ── View descriptors ───────────────────────────────────────────────────────
@@ -263,7 +261,7 @@ export interface ViewDescriptorMetadata {
     view?: string;
     /** Target device class (e.g. `"desktop"`, `"mobile"`) */
     device?: string;
-    /** Fully-qualified Java class name of the view bean */
+    /** Simple class name of the view bean (the entity id) */
     beanClass?: string;
     /** REST endpoint that returns the full ViewDescriptor for this view */
     endpoint?: string;
@@ -311,7 +309,7 @@ export interface ViewFieldGroup {
 /** Mirrors tools.dynamia.viewers.ViewDescriptor */
 export interface ViewDescriptor {
     id: string;
-    /** Fully qualified class name of the target domain class */
+    /** Simple class name of the target domain class (the entity id); the fully-qualified name is never sent */
     beanClass: string;
     /** View type name — matches the JSON "view" key produced by Java's @JsonProperty("view") */
     view: string;
@@ -325,8 +323,6 @@ export interface ViewDescriptor {
     actions?: ActionReference[];
     /** ID of the parent descriptor this one extends */
     extends?: string;
-    viewCustomizerClass?: string;
-    customViewRenderer?: string;
 }
 
 /**
@@ -355,6 +351,9 @@ export interface ViewField {
     action?: ActionReference;
     entity?: boolean;
     enum?: boolean;
+    /** The field holds a collection (e.g. a many-to-many `Set`); `genericType` is its element class */
+    collection?: boolean;
+    genericType?: string;
     localizedLabel?: string;
     localizedDescription?: string;
     /** Arbitrary field parameters — absent when empty (`@JsonInclude(NON_DEFAULT)`) */

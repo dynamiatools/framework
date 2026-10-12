@@ -2,7 +2,7 @@
 <template>
   <Teleport to="body">
     <div class="dynamia-dialog-backdrop" @click="handleBackdropClick">
-      <div :class="['dynamia-dialog', panelClass]" role="dialog" aria-modal="true" @click.stop>
+      <div :class="['dynamia-dialog', panelClass]" :style="panelStyle" role="dialog" aria-modal="true" @click.stop>
         <div v-if="title || closable" class="dynamia-dialog-header">
           <span v-if="title" class="dynamia-dialog-title">{{ title }}</span>
           <button
@@ -38,6 +38,8 @@ const props = withDefaults(defineProps<{
    * template root is `<Teleport>`, and Vue's attribute fallthrough does not propagate through it.
    */
   panelClass?: string;
+  /** Inline style of the panel, for a size the caller wants (`width: 60%`). */
+  panelStyle?: string;
 }>(), {
   closable: true,
 });

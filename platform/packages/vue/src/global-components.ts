@@ -5,6 +5,7 @@
 import type NavBreadcrumbComponent from './components/NavBreadcrumb.vue';
 import type NavMenuComponent from './components/NavMenu.vue';
 import type CrudPageComponent from './components/CrudPage.vue';
+import type ConfigPageComponent from './components/ConfigPage.vue';
 import type ViewerComponent from './components/Viewer.vue';
 import type FormComponent from './components/Form.vue';
 import type TableComponent from './components/Table.vue';
@@ -31,6 +32,7 @@ declare module 'vue' {
     DynamiaNavMenu: typeof NavMenuComponent;
     DynamiaNavBreadcrumb: typeof NavBreadcrumbComponent;
     DynamiaCrudPage: typeof CrudPageComponent;
+    DynamiaConfigPage: typeof ConfigPageComponent;
     DynamiaDialog: typeof DialogComponent;
     DynamiaZkEmbed: typeof ZkEmbedComponent;
     DynamiaConfirmHost: typeof ConfirmHostComponent;

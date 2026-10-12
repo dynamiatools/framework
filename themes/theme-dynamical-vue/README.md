@@ -20,7 +20,10 @@ navigation tree → menu mapping, `CrudPage`/embed rendering, the flow-step host
 - Deep links: pages are routed by their navigation path with hash history (`/#/library/books`)
 - **CRUD pages** (`NavigationNode.type === "CrudPage"`) render through `<DynamiaCrudPage>` (full
   client-side CRUD, no iframe)
-- **Every other page type** (`Page`, `ExternalPage`, `ConfigPage`, …) renders through
+- **Config pages** (`NavigationNode.type === "ConfigPage"`) render through `<DynamiaConfigPage>`: the form of the
+  `config` descriptor with the application parameters and a Save button (`GET`/`PUT /api/{internalPath}`); fields whose
+  component the Vue frontend does not know are text inputs
+- **Every other page type** (`Page`, `ExternalPage`, …) renders through
   [`<dynamia-embed>`](../../platform/packages/ui-core/src/embed/README.md) — it auto-detects HTML
   vs. JS and sandboxes accordingly, zero framework/build lock-in on the embedded side
 - All-in-one Maven + Node build: `mvn package` builds the Vue frontend too (via
@@ -84,14 +87,16 @@ Login uses the framework's existing `POST /login/json` endpoint (JSON in, JSON o
 ```
 
 `src/lib/resolveEmbedSrc.ts` resolves the embed URL: `ExternalPage`/HTML `Page` nodes have a real
-URL in `file`, used as-is. A ZUL-backed `Page` or `ConfigPage` has no browser-servable URL of its
+URL in `url` (a field of the navigation node the server only fills for `http(s)://` and root-relative paths), used as-is. A ZUL-backed `Page` has no browser-servable URL of its
 own — it falls back to `/page-embed/{node.path}`, served by the framework's
 `PageEmbedController` (`tools.dynamia.web.navigation`, `platform/core/web`): it renders just that
 page's ZK content into a bare `embed.zul` workspace (no header/sidebar/footer, independent of
 whichever `ApplicationTemplate` is active), so it iframes cleanly instead of nesting a second full
 app shell like `/page/{path}` would. This only works when the running app actually has ZK on its
 classpath (this theme itself doesn't) — an app with zero ZK views has no fallback and should point
-every non-CrudPage `file` at a real HTTP resource instead.
+every non-CrudPage path at a real HTTP resource instead (an `ExternalPage`). A resource of the same origin is framed with
+`allow-same-origin` so it can call `/api` with the login cookies; a JavaScript module (Content-Type `javascript`) is
+mounted by `<dynamia-embed>` in the page itself.
 
 ### How it uses `@dynamia-tools/tailadmin-vue`
 

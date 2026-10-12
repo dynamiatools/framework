@@ -11,6 +11,7 @@ import { useToast } from './useToast.js';
 import { useInput } from './useInput.js';
 import { useFormDialog } from './useFormDialog.js';
 import { dispatchCrudDelete, dispatchCrudSave } from '../actions/crudActionDispatch.js';
+import { toRestQuery } from '../actions/crudQuery.js';
 
 /** Options for the {@link useCrudPage} composable */
 export interface UseCrudPageOptions {
@@ -90,12 +91,16 @@ export function useCrudPage(options: UseCrudPageOptions) {
       // 3. CRUD resource API bound to the node's virtual path
       const api = client.crud(context.virtualPath);
 
+      // The list rows carry only the table columns: load the complete entity when editing starts.
+      crudView.setEntityLoader(async (row) => {
+        const id = (row as Record<string, unknown>)['id'] as string | number | undefined;
+        return id == null ? row : api.findById(id);
+      });
+
       // 4. Wire loader according to the resolved dataset view type.
       if (crudView.tableView) {
         crudView.tableView.setLoader(async (params) => {
-          const result = await api.findAll(
-            params as Record<string, string | number | boolean | undefined | null>,
-          );
+          const result = await api.findAll(toRestQuery(params));
           return {
             rows: result.content,
             pagination: {
@@ -109,9 +114,7 @@ export function useCrudPage(options: UseCrudPageOptions) {
         });
       } else if (crudView.treeView) {
         crudView.treeView.setLoader(async (params) => {
-          const result = await api.findAll(
-            params as Record<string, string | number | boolean | undefined | null>,
-          );
+          const result = await api.findAll(toRestQuery(params));
           return {
             nodes: mapCrudRowsToTreeNodes(result.content, context.descriptor),
           };
@@ -147,8 +150,8 @@ export function useCrudPage(options: UseCrudPageOptions) {
         void persist();
       });
 
-      // 6. Wire delete handler — same action-aware pattern as save (typically resolves to
-      // DeleteFlowRemoteAction, which confirms before deleting).
+      // 6. Wire delete handler — same action-aware pattern as save (resolves to the server's `delete`
+      // action, the same DeleteAction ZK runs, which asks for confirmation through the flow protocol).
       crudView.on('delete', (entity) => {
         const rec = entity as Record<string, unknown>;
         const id = rec['id'] as string | number | undefined;

@@ -23,6 +23,7 @@ import org.zkoss.zul.Treeitem;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.StringUtils;
 import tools.dynamia.domain.query.DataSet;
+import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.domain.util.TreeCrudUtil;
 import tools.dynamia.navigation.Page;
@@ -143,8 +144,9 @@ public class TreeCrudController<E> extends CrudController<E> implements Children
     @Override
     public void newEntity() {
         super.newEntity();
-        if (getSelected() != null && DomainUtils.findEntityId(getSelected()) != null) {
-            ObjectOperations.invokeSetMethod(getEntity(), parentName, getSelected());
+        Object parent = toEntity(getSelected());
+        if (parent != null && DomainUtils.findEntityId(parent) != null) {
+            ObjectOperations.invokeSetMethod(getEntity(), parentName, parent);
         }
     }
 
@@ -186,12 +188,24 @@ public class TreeCrudController<E> extends CrudController<E> implements Children
         }
     }
 
+    /**
+     * Loads the root nodes. When Open Persistence In View is disabled the nodes are read-only BeanMaps built from the
+     * tree view descriptor properties.
+     */
     protected Collection<E> loadRoots() {
-        return util.getRoots();
+        QueryParameters params = new QueryParameters();
+        configureEntityMapper(params);
+        return util.getRoots(params);
     }
 
+    /**
+     * Loads the children of a node. The parent may be a read-only BeanMap, it is reloaded by id to filter by it.
+     */
+    @SuppressWarnings("unchecked")
     protected Collection<E> loadChildren(E parent) {
-        return util.getChildren(parent);
+        QueryParameters params = new QueryParameters();
+        configureEntityMapper(params);
+        return util.getChildren((E) toEntity(parent), params);
     }
 
     public String getRootLabelField() {

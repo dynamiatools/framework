@@ -1,6 +1,6 @@
 import { defineComponent, h, type PropType } from 'vue';
 import type { ActionMetadata } from '@dynamia-tools/sdk';
-import type { View, ActionTriggerPayload } from '@dynamia-tools/ui-core';
+import { resolveIconClass, type View, type ActionTriggerPayload } from '@dynamia-tools/ui-core';
 
 export const VueButtonActionRenderer = defineComponent({
   name: 'VueButtonActionRenderer',
@@ -37,7 +37,7 @@ export const VueButtonActionRenderer = defineComponent({
       },
       [
         props.action.icon
-          ? h('span', { class: ['dynamia-action-icon', props.action.icon], 'aria-hidden': 'true' })
+          ? h('i', { class: ['dynamia-action-icon', resolveIconClass(props.action.icon)], 'aria-hidden': 'true' })
           : null,
         h('span', { class: 'dynamia-action-label' }, props.executing ? `${props.action.name}…` : props.action.name),
       ],

@@ -21,7 +21,12 @@ import tools.dynamia.actions.AbstractAction;
 import tools.dynamia.actions.AbstractLocalAction;
 import tools.dynamia.actions.ActionEvent;
 import tools.dynamia.actions.ActionSelfFilter;
+import tools.dynamia.commons.Callback;
 import tools.dynamia.integration.Containers;
+import tools.dynamia.modules.saas.api.dto.AccountDTO;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Base class for administrative actions that require authorization in a SaaS environment.
@@ -107,5 +112,62 @@ public abstract class AccountAdminAction extends AbstractLocalAction implements 
      */
     public void setAuthorizationRequired(boolean authorizationRequired) {
         this.authorizationRequired = authorizationRequired;
+    }
+
+    /**
+     * Runs the work as the target account of this action. Admin actions run in the session of another account (usually
+     * the system account), so queries on tenant-filtered entities must be bound to the target account. The tenant is
+     * held in a scoped value, so call it again inside every callback that runs later (dialog answers, long
+     * operations); binding it in {@link #actionPerformed(ActionEvent)} alone does not reach them.
+     *
+     * @param account the target account
+     * @param work    the work
+     * @param <T>     the result type
+     * @return the result of the work
+     */
+    protected <T> T withAccount(AccountDTO account, Supplier<T> work) {
+        var service = Containers.get().findObject(AccountServiceAPI.class);
+        if (service == null) {
+            return work.get();
+        }
+        return service.withAccount(account.getId(), work);
+    }
+
+    /**
+     * Same as {@link #withAccount(AccountDTO, Supplier)} for work without a result.
+     *
+     * @param account the target account
+     * @param work    the work
+     */
+    protected void runAsAccount(AccountDTO account, Runnable work) {
+        withAccount(account, () -> {
+            work.run();
+            return null;
+        });
+    }
+
+    /**
+     * Wraps a callback so it runs as the target account, for dialog answers such as
+     * {@code UIMessages.showInput(..., inAccount(account, value -> ...))}.
+     *
+     * @param account  the target account
+     * @param callback the callback
+     * @param <T>      the callback argument type
+     * @return a callback that binds the target account while it runs
+     */
+    protected <T> Consumer<T> inAccount(AccountDTO account, Consumer<T> callback) {
+        return value -> runAsAccount(account, () -> callback.accept(value));
+    }
+
+    /**
+     * Wraps a {@link Callback} so it runs as the target account, for confirmation dialogs such as
+     * {@code UIMessages.showQuestion(..., inAccount(account, () -> ...))}.
+     *
+     * @param account  the target account
+     * @param callback the callback
+     * @return a callback that binds the target account while it runs
+     */
+    protected Callback inAccount(AccountDTO account, Callback callback) {
+        return () -> runAsAccount(account, callback::doSomething);
     }
 }

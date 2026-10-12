@@ -41,7 +41,7 @@ public class AccountMigrationPropertiesTest {
     public void defaultOutputDirectoryContainsTmpdir() {
         String dir = new AccountMigrationProperties().getOutputDirectory();
         Assertions.assertNotNull(dir);
-        Assertions.assertTrue(dir.contains(System.getProperty("java.io.tmpdir").replace("\\", "/")),
+        Assertions.assertTrue(dir.replace("\\", "/").contains(System.getProperty("java.io.tmpdir").replace("\\", "/")),
                 "outputDirectory should use system tmpdir");
     }
 

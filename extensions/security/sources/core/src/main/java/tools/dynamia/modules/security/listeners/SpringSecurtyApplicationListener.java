@@ -26,8 +26,19 @@ import java.util.List;
 @Component
 public class SpringSecurtyApplicationListener implements ApplicationListener<AuthenticationSuccessEvent> {
 
+    /**
+     * How long a {@link CurrentUser} initialised from a token stays valid before user and permissions are reloaded.
+     */
+    private static final long TOKEN_USER_TTL_MILLIS = 5 * 60 * 1000L;
+
     public static void fireOnUserTokenLoginListeners(User user) {
-        CurrentUser.get().init(user);
+        var current = CurrentUser.get();
+        if (isFresh(current, user)) {
+            // Every API call carries the token: do not reload the user and its permissions each time.
+            current.update(user);
+            return;
+        }
+        current.init(user);
 
 
         List<LoginListener> listeners = Containers.get().findObjects(LoginListener.class).stream()
@@ -56,6 +67,14 @@ public class SpringSecurtyApplicationListener implements ApplicationListener<Aut
                 .sorted(Comparator.comparingInt(LoginListener::getPriority)).toList();
 
         listeners.forEach(listener -> listener.onLoginSuccess(usuario));
+    }
+
+    private static boolean isFresh(CurrentUser current, User user) {
+        return current.isLogged()
+                && user.getId() != null
+                && user.getId().equals(current.getUser().getId())
+                && current.getTimestamp() != null
+                && System.currentTimeMillis() - current.getTimestamp().getTime() < TOKEN_USER_TTL_MILLIS;
     }
 
 }

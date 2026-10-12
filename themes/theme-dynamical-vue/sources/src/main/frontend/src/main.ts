@@ -6,9 +6,11 @@ import App from './App.vue';
 import { router } from './router.js';
 import { client } from './lib/client.js';
 import { askStarRating } from './lib/starRatingManager.js';
+import { registerThemeFieldComponents } from './lib/fieldComponents.js';
 import './styles/app.css';
 
 registerDynamiaEmbed();
+registerThemeFieldComponents();
 
 // App-specific CUSTOM flow step renderer for RateBookAction's demo — see StarRatingHost.vue and
 // docs/design/SERVER_DRIVEN_ACTION_FLOWS.md §6.

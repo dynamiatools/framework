@@ -94,10 +94,23 @@ public abstract class BaseNavigationManager implements Serializable, NavigationM
         this.attributes = new HashMap<>();
         this.container = container;
         this.id = UUID.randomUUID().toString();
-        var registry = NavigationManagerRegistry.getInstance();
-        if (registry != null) {
-            registry.register(this);
+        if (shouldRegister()) {
+            var registry = NavigationManagerRegistry.getInstance();
+            if (registry != null) {
+                registry.register(this);
+            }
         }
+    }
+
+    /**
+     * Tells whether this instance registers itself in the {@link NavigationManagerRegistry} when it is built. Called
+     * from the constructor, so overrides must not rely on subclass state. Subclasses whose instances are not
+     * guaranteed to be unregistered later (for example a desktop-scoped manager built without a desktop) return false.
+     *
+     * @return true to register (the default)
+     */
+    protected boolean shouldRegister() {
+        return true;
     }
 
     /**

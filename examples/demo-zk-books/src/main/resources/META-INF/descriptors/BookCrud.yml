@@ -3,4 +3,4 @@ beanClass: mybookstore.domain.Book
 autofields: false
 
 params:
-  queryProjection: true
+  queryProjection: false

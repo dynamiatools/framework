@@ -16,20 +16,24 @@
 package tools.dynamia.modules.reports.ui.actions;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zkoss.zul.Filedownload;
+import tools.dynamia.actions.HeadlessCapable;
+import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.modules.reports.core.domain.Report;
 import tools.dynamia.modules.reports.core.services.ReportsService;
 import tools.dynamia.ui.MessageType;
+import tools.dynamia.ui.UIFiles;
 import tools.dynamia.ui.UIMessages;
 
 import java.io.File;
 
 @InstallAction
-public class ExportReportAction extends AbstractCrudAction {
+@RunsOn(ActionRuntime.HEADLESS)
+public class ExportReportAction extends AbstractCrudAction implements HeadlessCapable {
 
 
     private final ReportsService service;
@@ -50,7 +54,12 @@ public class ExportReportAction extends AbstractCrudAction {
         if (report != null) {
             try {
                 File file = service.exportReport(crudService().load(Report.class, report.getId()));
-                Filedownload.save(file, "text/json");
+                try {
+                    // a report definition is small, and the file is deleted below, so it is handed over as bytes
+                    UIFiles.download(file.getName(), "text/json", java.nio.file.Files.readAllBytes(file.toPath()));
+                } finally {
+                    file.delete();
+                }
             } catch (Exception e) {
                 UIMessages.showMessage("Error exporting report: " + e.getMessage(), MessageType.ERROR);
             }

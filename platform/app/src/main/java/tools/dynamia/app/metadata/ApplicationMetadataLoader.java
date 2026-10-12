@@ -1,7 +1,12 @@
 package tools.dynamia.app.metadata;
 
 import org.springframework.context.annotation.DependsOn;
+import tools.dynamia.actions.Action;
+import tools.dynamia.actions.ActionComparator;
 import tools.dynamia.actions.ActionLoader;
+import tools.dynamia.actions.ActionRuntime;
+import tools.dynamia.actions.ActionRuntimes;
+import tools.dynamia.actions.RemoteAction;
 import tools.dynamia.actions.ApplicationGlobalAction;
 import tools.dynamia.actions.ApplicationGlobalRemoteAction;
 import tools.dynamia.app.ApplicationInfo;
@@ -9,6 +14,7 @@ import tools.dynamia.app.controllers.ApplicationMetadataController;
 import tools.dynamia.commons.ApplicableClass;
 import tools.dynamia.crud.CrudAction;
 import tools.dynamia.crud.CrudRemoteAction;
+import tools.dynamia.crud.headless.HeadlessCrudRemoteAction;
 import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.viewers.ViewDescriptorFactory;
@@ -85,7 +91,7 @@ public class ApplicationMetadataLoader {
 
     /**
      * Fails fast if two entities resolve to the same {@link EntityMetadata#getId()} (the class's
-     * simple name). The {@code /api/app/metadata/entities/{id}} contract requires that id to be
+     * simple name). The {@code /apps/api/metadata/entities/{id}} contract requires that id to be
      * unique across the application — see {@code docs/design} note on entity metadata identifiers
      * for why the fully qualified class name is no longer used as the wire identifier.
      *
@@ -101,7 +107,7 @@ public class ApplicationMetadataLoader {
                 .collect(Collectors.joining("; "));
         if (!duplicates.isEmpty()) {
             throw new IllegalStateException("Duplicate entity simple class names found while building " +
-                    "application metadata: " + duplicates + ". /api/app/metadata/entities/{id} requires each " +
+                    "application metadata: " + duplicates + ". /apps/api/metadata/entities/{id} requires each " +
                     "entity's simple class name to be unique; rename one of the colliding classes.");
         }
     }
@@ -137,11 +143,30 @@ public class ApplicationMetadataLoader {
         entity.setDescriptors(descriptors.stream().map(ViewDescriptorMetadata::new).toList());
 
         ActionLoader<CrudRemoteAction> loader = new ActionLoader<>(CrudRemoteAction.class);
-        entity.setActions(loader
-                .load(action -> isApplicable(entityClass, action))
+        List<Action> actions = new ArrayList<>(loader.load(action -> isApplicable(entityClass, action)));
+
+        // Local actions, by what each concrete class declares: HEADLESS ones are served by replay and replace a hand
+        // written remote action with the same id; FRONTEND ones are published without endpoint; the rest are not published
+        var locals = new ActionLoader<>(CrudAction.class)
+                .load(action -> ApplicableClass.isApplicable(entityClass, action.getApplicableClasses(), true));
+        var headless = locals.stream()
+                .filter(action -> ActionRuntimes.of(action) == ActionRuntime.HEADLESS)
+                .<Action>map(HeadlessCrudRemoteAction::new).toList();
+        var frontend = locals.stream()
+                .filter(action -> ActionRuntimes.of(action) == ActionRuntime.FRONTEND)
+                .<Action>map(action -> action).toList();
+        var publishedIds = headless.stream().map(Action::getId).collect(Collectors.toSet());
+        actions.removeIf(a -> publishedIds.contains(a.getId()));
+        actions.addAll(headless);
+        actions.addAll(frontend);
+        actions.sort(new ActionComparator());
+
+        entity.setActions(actions
                 .stream().map(a -> {
                     var md = new ActionMetadata(a);
-                    md.setEndpoint(ApplicationMetadataController.PATH + "/entities/" + entity.getId() + "/actions/" + a.getId());
+                    if (a instanceof RemoteAction) {
+                        md.setEndpoint(ApplicationMetadataController.PATH + "/entities/" + entity.getId() + "/actions/" + a.getId());
+                    }
                     return md;
                 })
                 .toList());

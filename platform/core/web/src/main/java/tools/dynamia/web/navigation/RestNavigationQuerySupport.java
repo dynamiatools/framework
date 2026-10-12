@@ -19,12 +19,15 @@ package tools.dynamia.web.navigation;
 import jakarta.servlet.http.HttpServletRequest;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
+import tools.dynamia.commons.reflect.AccessMode;
+import tools.dynamia.domain.query.CustomQueryCondition;
 import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.ViewDescriptor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -168,6 +171,53 @@ public final class RestNavigationQuerySupport {
                         .warn("Ignoring filter param '" + paramName + "=" + rawValue + "': " + e.getMessage());
             }
         });
+    }
+
+    // -------------------------------------------------------------------------
+    // Free text search from the _q request parameter
+    // -------------------------------------------------------------------------
+
+    /** Request parameter with the text to search in every visible text field of the descriptor. */
+    public static final String SEARCH_PARAM = "_q";
+
+    private static final String SEARCH_QUERY_PARAM = "searchText";
+
+    /**
+     * Applies the free text search of the {@code _q} request parameter, the REST counterpart of the CRUD {@code FindAction}:
+     * the entities where <b>any</b> visible, writable {@link String} field of the descriptor contains the text, ignoring case.
+     * The group is combined with the other conditions using AND. Nothing is added when the parameter is missing or blank, or
+     * when the descriptor has no such field.
+     *
+     * <pre>{@code GET /api/store/books?_q=dune&year=1965 }</pre>
+     *
+     * @param request    the current HTTP request
+     * @param query      the query builder to augment
+     * @param descriptor the view descriptor whose visible fields are searched; if {@code null} this method does nothing
+     * @param alias      the alias of the entity in the query
+     */
+    public static void applyRequestSearch(HttpServletRequest request, QueryBuilder query, ViewDescriptor descriptor, String alias) {
+        String text = request.getParameter(SEARCH_PARAM);
+        if (descriptor == null || text == null || text.isBlank()) {
+            return;
+        }
+
+        var conditions = new ArrayList<String>();
+        for (Field field : descriptor.getFields()) {
+            if (field.isVisible() && field.getFieldClass() == String.class && field.getPropertyInfo() != null
+                    && field.getPropertyInfo().getAccessMode() == AccessMode.READ_WRITE) {
+                conditions.add("lower(" + alias + "." + field.getName() + ") like :" + SEARCH_QUERY_PARAM);
+            }
+        }
+        if (conditions.isEmpty()) {
+            return;
+        }
+
+        // A plain query parameter named "searchText" would also become an "e.searchText like ..." condition, which fails (or
+        // silently filters) depending on whether the entity happens to have such an attribute. A custom condition renders the
+        // OR group as is and binds the value itself, so the entity model plays no part.
+        String pattern = "%" + text.trim().toLowerCase() + "%";
+        query.getQueryParameters().add(SEARCH_PARAM, new CustomQueryCondition("(" + String.join(" or ", conditions) + ")",
+                q -> q.setParameter(SEARCH_QUERY_PARAM, pattern)));
     }
 
     // -------------------------------------------------------------------------

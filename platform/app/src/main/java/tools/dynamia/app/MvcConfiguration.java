@@ -16,10 +16,14 @@
  */
 package tools.dynamia.app;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.http.CacheControl;
+import org.springframework.web.filter.RequestContextFilter;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -42,7 +46,42 @@ import java.util.Map;
 @EnableWebMvc
 public class MvcConfiguration implements WebMvcConfigurer {
 
+    /**
+     * {@code @EnableWebMvc} turns off Spring Boot's MVC auto-configuration, and with it the default static resource
+     * locations. They are registered again here, unless the application disabled them
+     * ({@code spring.web.resources.add-mappings=false}).
+     */
+    @Value("${spring.web.resources.add-mappings:true}")
+    private boolean addDefaultResourceMappings = true;
+
     private final LoggingService logger = new SLF4JLoggingService(getClass());
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        if (addDefaultResourceMappings) {
+            registry.addResourceHandler("/**").addResourceLocations(
+                    "classpath:/META-INF/resources/", "classpath:/resources/", "classpath:/static/", "classpath:/public/");
+        }
+    }
+
+    /**
+     * Exposes the request to the thread, so request and session scoped beans work in servlet filters that run before
+     * the DispatcherServlet (the login filters of the security module use them). Boot's own filter goes away with
+     * its MVC auto-configuration, see above.
+     */
+    @Bean
+    @ConditionalOnMissingBean(RequestContextFilter.class)
+    public RequestContextFilter requestContextFilter() {
+        return new OrderedRequestContextFilter();
+    }
+
+    /** Same position as the filter of Spring Boot: before Spring Security (-100). */
+    static class OrderedRequestContextFilter extends RequestContextFilter implements Ordered {
+        @Override
+        public int getOrder() {
+            return -105;
+        }
+    }
 
     @Bean
     public ApplicationTemplateResourceHandler templateResourceHandler(ApplicationInfo applicationInfo) {

@@ -1,0 +1,14 @@
+view: form
+beanClass: tools.dynamia.demos.movies.domain.Review
+autofields: false
+
+fields:
+  movie:
+  author:
+  score:
+  reviewDate:
+  comment:
+    params:
+      span: 2
+      multiline: true
+      height: 70px

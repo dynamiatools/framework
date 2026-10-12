@@ -18,6 +18,8 @@
 
 package tools.dynamia.zk.viewers.form;
 
+import tools.dynamia.viewers.FormViewModel;
+
 import org.zkoss.zk.ui.event.Events;
 import tools.dynamia.zk.util.ZKBindingUtil;
 

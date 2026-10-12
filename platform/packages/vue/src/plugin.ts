@@ -32,6 +32,8 @@ import { VueFormRenderer } from './renderers/VueFormRenderer.js';
 import { VueTableRenderer } from './renderers/VueTableRenderer.js';
 import { VueCrudRenderer } from './renderers/VueCrudRenderer.js';
 import { VueButtonActionRenderer } from './action-renderers/VueButtonActionRenderer.js';
+import { VueFindActionRenderer } from './action-renderers/VueFindActionRenderer.js';
+import { VueFiltersActionRenderer } from './action-renderers/VueFiltersActionRenderer.js';
 import ViewerComponent from './components/Viewer.vue';
 import FormComponent from './components/Form.vue';
 import TableComponent from './components/Table.vue';
@@ -42,6 +44,7 @@ import ActionsComponent from './components/Actions.vue';
 import NavMenuComponent from './components/NavMenu.vue';
 import NavBreadcrumbComponent from './components/NavBreadcrumb.vue';
 import CrudPageComponent from './components/CrudPage.vue';
+import ConfigPageComponent from './components/ConfigPage.vue';
 import DialogComponent from './components/Dialog.vue';
 import ZkEmbedComponent from './components/ZkEmbed.vue';
 import ConfirmHostComponent from './components/ConfirmHost.vue';
@@ -82,6 +85,8 @@ export const DynamiaVue = {
       'MenuitemActionRenderer',
       'MenuActionRenderer',
     ]);
+    ActionRendererRegistry.register('find', VueFindActionRenderer);
+    ActionRendererRegistry.register('filters', VueFiltersActionRenderer);
 
     // Register view factories
     ViewRendererRegistry.registerViewFactory(
@@ -120,6 +125,7 @@ export const DynamiaVue = {
     app.component('DynamiaNavMenu', NavMenuComponent);
     app.component('DynamiaNavBreadcrumb', NavBreadcrumbComponent);
     app.component('DynamiaCrudPage', CrudPageComponent);
+    app.component('DynamiaConfigPage', ConfigPageComponent);
     app.component('DynamiaDialog', DialogComponent);
     app.component('DynamiaZkEmbed', ZkEmbedComponent);
     app.component('DynamiaConfirmHost', ConfirmHostComponent);

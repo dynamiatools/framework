@@ -21,16 +21,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent } from 'vue';
+import { computed } from 'vue';
 import type { Component } from 'vue';
 import type { ResolvedField, FormView } from '@dynamia-tools/ui-core';
-import { FieldComponents } from '@dynamia-tools/ui-core';
+import { resolveFieldComponent } from './fields/fieldComponents.js';
 
 const props = defineProps<{
   /** The resolved field descriptor */
   field: ResolvedField;
-  /** The parent FormView */
-  view: FormView;
+  /** The parent FormView (absent when the field renders a table cell) */
+  view?: FormView;
   /** Current field value */
   modelValue?: unknown;
   /** Whether the field is in read-only mode */
@@ -41,32 +41,6 @@ defineEmits<{
   'update:modelValue': [value: unknown];
 }>();
 
-// Map of component names to async component loaders
-const componentMap: Record<string, () => Promise<Component>> = {
-  [FieldComponents.Textbox]: () => import('./fields/Textbox.vue'),
-  [FieldComponents.Intbox]: () => import('./fields/Intbox.vue'),
-  // Longbox (64-bit integer) shares the integer input component; browser inputs handle the range
-  [FieldComponents.Longbox]: () => import('./fields/Intbox.vue'),
-  [FieldComponents.Decimalbox]: () => import('./fields/Spinner.vue'),
-  [FieldComponents.Spinner]: () => import('./fields/Spinner.vue'),
-  [FieldComponents.Combobox]: () => import('./fields/Combobox.vue'),
-  [FieldComponents.Datebox]: () => import('./fields/Datebox.vue'),
-  [FieldComponents.Checkbox]: () => import('./fields/Checkbox.vue'),
-  [FieldComponents.EntityPicker]: () => import('./fields/EntityPicker.vue'),
-  [FieldComponents.EntityRefPicker]: () => import('./fields/EntityRefPicker.vue'),
-  [FieldComponents.EntityRefLabel]: () => import('./fields/EntityRefLabel.vue'),
-  [FieldComponents.Label]: () => import('./fields/Label.vue'),
-  [FieldComponents.EnumLabel]: () => import('./fields/EnumLabel.vue'),
-  [FieldComponents.CoolLabel]: () => import('./fields/CoolLabel.vue'),
-  [FieldComponents.Link]: () => import('./fields/Link.vue'),
-  [FieldComponents.Textareabox]: () => import('./fields/Textareabox.vue'),
-};
-
-const resolvedFieldComponent = computed<Component | null>(() => {
-  const comp = props.field.resolvedComponent;
-  if (comp in componentMap) {
-    return defineAsyncComponent(componentMap[comp]!);
-  }
-  return null;
-});
+// Registered (theme/app) -> built in -> basic one for the field type; see fields/fieldComponents.ts
+const resolvedFieldComponent = computed<Component | null>(() => resolveFieldComponent(props.field));
 </script>

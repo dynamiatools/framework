@@ -37,7 +37,7 @@ import { VueViewer } from '../views/VueViewer.js';
 export interface ViewerProps extends Omit<ViewerConfig, 'client'> {
   /** View type name ('form', 'table', 'crud', etc.) */
   viewType?: string;
-  /** Entity bean class name (e.g. 'com.example.Book') */
+  /** Entity id: the entity class simple name (e.g. 'Book') */
   beanClass?: string;
   /** Whether the view is in read-only mode */
   readOnly?: boolean;

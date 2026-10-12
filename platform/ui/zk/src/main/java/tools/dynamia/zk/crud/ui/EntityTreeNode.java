@@ -18,7 +18,7 @@ package tools.dynamia.zk.crud.ui;
 
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zul.event.TreeDataEvent;
-import tools.dynamia.zk.viewers.tree.TreeViewNode;
+import tools.dynamia.viewers.TreeViewNode;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -206,7 +206,9 @@ public class EntityTreeNode<E> extends TreeViewNode<E> implements Serializable {
     }
 
     public Class getEntityType() {
-        if (getData() != null) {
+        if (getData() instanceof tools.dynamia.commons.BeanMap beanMap && beanMap.getBeanClass() != null) {
+            return beanMap.getBeanClass();
+        } else if (getData() != null) {
             return getData().getClass();
         } else {
             return null;

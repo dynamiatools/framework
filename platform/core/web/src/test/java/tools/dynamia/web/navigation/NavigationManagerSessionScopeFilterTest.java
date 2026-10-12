@@ -162,16 +162,15 @@ public class NavigationManagerSessionScopeFilterTest {
 
         AtomicReference<Page> restored = new AtomicReference<>();
         runRequest(session, () -> {
-            restored.set(NavigationManagerSession.getInstance().getPage());
             // a desktop bootstrap consumes it
-            NavigationManagerSession.getInstance().updateNavManager(noOpNavigationManager());
+            restored.set(consumedPage());
             NavigationManagerSession.getInstance().executeQueue();
         });
         assertSame(page, restored.get());
         assertEquals(List.of("cb"), ran);
 
         AtomicReference<Page> third = new AtomicReference<>();
-        runRequest(session, () -> third.set(NavigationManagerSession.getInstance().getPage()));
+        runRequest(session, () -> third.set(consumedPage()));
         assertNull(third.get(), "an intent consumed by a desktop must not be handed off again");
     }
 
@@ -201,7 +200,7 @@ public class NavigationManagerSessionScopeFilterTest {
         assertNotNull(session, "a session must be created before the redirect commits the response");
 
         AtomicReference<Page> restored = new AtomicReference<>();
-        runRequest((MockHttpSession) session, () -> restored.set(NavigationManagerSession.getInstance().getPage()));
+        runRequest((MockHttpSession) session, () -> restored.set(consumedPage()));
         assertSame(page, restored.get());
     }
     @Test
@@ -210,15 +209,67 @@ public class NavigationManagerSessionScopeFilterTest {
                 NavigationManagerSession.getInstance().setPage(new Page("page", "Page", "the/page"), null));
 
         AtomicReference<Page> other = new AtomicReference<>();
-        runRequest(new MockHttpSession(), () -> other.set(NavigationManagerSession.getInstance().getPage()));
+        runRequest(new MockHttpSession(), () -> other.set(consumedPage()));
         assertNull(other.get());
     }
 
     @Test
-    public void filterShouldRunBeforeSpringSecurity() {
+    public void filterShouldRunBeforeSpringSecurityAndAfterSpringSession() {
         var order = NavigationManagerSessionScopeFilter.class.getAnnotation(org.springframework.core.annotation.Order.class);
         assertNotNull(order);
         assertTrue(order.value() < -100, "must precede the Spring Security filter chain (order -100)");
+        assertTrue(order.value() > Integer.MIN_VALUE + 50, "must run after Spring Session's SessionRepositoryFilter");
+    }
+
+    /** A request that never bootstraps a desktop (static resource, /zkau, /api) must not steal the parked intent. */
+    @Test
+    public void parkedIntentShouldNotBeTakenByARequestThatDoesNotConsumeIt() throws ServletException, IOException {
+        var session = new MockHttpSession();
+        Page page = new Page("page", "Page", "the/page");
+        runRequest(session, () -> NavigationManagerSession.getInstance().setPage(page, null));
+
+        AtomicReference<Boolean> otherHadPending = new AtomicReference<>();
+        runRequest(session, () -> otherHadPending.set(NavigationManagerSession.getInstance().hasPendingState()));
+        assertEquals(Boolean.FALSE, otherHadPending.get(), "restoration is lazy: nothing is pulled until a desktop consumes");
+
+        AtomicReference<Page> desktop = new AtomicReference<>();
+        runRequest(session, () -> desktop.set(consumedPage()));
+        assertSame(page, desktop.get(), "the desktop bootstrap still gets the intent after other requests ran");
+    }
+
+    @Test
+    public void parkedIntentShouldExpireAfterTheTtl() throws Exception {
+        filter.setHandOffTtl(java.time.Duration.ofMillis(20));
+        var session = new MockHttpSession();
+        runRequest(session, () -> NavigationManagerSession.getInstance().setPage(new Page("page", "Page", "the/page"), null));
+
+        Thread.sleep(60);
+
+        AtomicReference<Page> desktop = new AtomicReference<>();
+        runRequest(session, () -> desktop.set(consumedPage()));
+        assertNull(desktop.get(), "an expired intent must be discarded, not fire in an unrelated tab");
+        assertNull(session.getAttribute(NavigationManagerSessionScopeFilter.HAND_OFF_ATTRIBUTE));
+    }
+
+    @Test
+    public void defaultTtlShouldBeTwoMinutes() {
+        assertEquals(java.time.Duration.ofMinutes(2), new NavigationManagerSessionScopeFilter().getHandOffTtl());
+    }
+
+    /** Plays the desktop bootstrap: hands the instance of the current scope to a manager and returns its page. */
+    private static Page consumedPage() {
+        AtomicReference<Page> page = new AtomicReference<>();
+        var manager = (tools.dynamia.navigation.NavigationManager) java.lang.reflect.Proxy.newProxyInstance(
+                NavigationManagerSessionScopeFilterTest.class.getClassLoader(),
+                new Class<?>[]{tools.dynamia.navigation.NavigationManager.class},
+                (proxy, method, args) -> {
+                    if (method.getName().equals("setCurrentPage")) {
+                        page.set((Page) args[0]);
+                    }
+                    return method.getReturnType() == boolean.class ? Boolean.TRUE : null;
+                });
+        NavigationManagerSession.getInstance().updateNavManager(manager);
+        return page.get();
     }
 
     private void runRequest(MockHttpSession session, Runnable body) throws ServletException, IOException {
@@ -232,10 +283,4 @@ public class NavigationManagerSessionScopeFilterTest {
         });
     }
 
-    private static tools.dynamia.navigation.NavigationManager noOpNavigationManager() {
-        return (tools.dynamia.navigation.NavigationManager) java.lang.reflect.Proxy.newProxyInstance(
-                NavigationManagerSessionScopeFilterTest.class.getClassLoader(),
-                new Class<?>[]{tools.dynamia.navigation.NavigationManager.class},
-                (proxy, method, args) -> method.getReturnType() == boolean.class ? Boolean.TRUE : null);
-    }
 }

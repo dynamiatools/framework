@@ -1,0 +1,30 @@
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Not committed: a fresh install should resolve current @dynamia-tools/* versions rather
+# than whatever was pinned when this template was authored.
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Env
+.env
+.env.*
+!.env.example

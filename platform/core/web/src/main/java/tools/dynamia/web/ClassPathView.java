@@ -39,6 +39,10 @@ public class ClassPathView extends AbstractView {
      */
     @Override
     protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        // Without it the response has no Content-Type and browsers (X-Content-Type-Options: nosniff) show the HTML as text
+        if (getContentType() != null) {
+            response.setContentType(getContentType());
+        }
         try (InputStream inputStream = resource.getInputStream();
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
              PrintWriter writer = response.getWriter()) {

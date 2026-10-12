@@ -32,6 +32,8 @@ import tools.dynamia.navigation.NavigationManagerSession;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.time.Duration;
+import java.util.Objects;
 
 /**
  * Binds a fresh {@link NavigationManagerSession} to the {@link ScopedValue} scope of the whole
@@ -47,30 +49,69 @@ import java.io.Serializable;
  * <b>Hand-off across requests.</b> Some callers record a navigation intent and then end the request
  * without forwarding into a desktop — typically a login listener followed by an HTTP redirect, or a
  * ZK event that calls {@code sendRedirect}. If the instance still has a pending intent when the
- * request ends, it is parked in the HTTP session and restored into the next request's instance, so
- * the first desktop that bootstraps consumes it. Parked state is never shared between sessions, and
- * it is not persisted with the session (queued callbacks are not serializable).
+ * request ends, it is parked in the HTTP session until the first desktop that bootstraps consumes it. Parked state
+ * is never shared between sessions, and it is not persisted with the session (queued callbacks are not
+ * serializable).
  * <p>
- * <b>Ordering.</b> Registered with the highest precedence so the scope is already bound when Spring
- * Security authenticates the user and fires its login listeners, which run before the rest of the
- * chain.
+ * The restoration is <b>lazy</b>: a request does not touch the parked state when it starts. It installs a
+ * {@link NavigationManagerSession#setParkedStateSupplier(java.util.function.Supplier) supplier} on its instance, and
+ * the parked state is only taken from the HTTP session when a desktop consumes the instance, so concurrent requests
+ * that never bootstrap a desktop (static resources, {@code /zkau}, {@code /api}) cannot steal it. Parked state
+ * <b>expires</b> after {@link #getHandOffTtl() a TTL} (default
+ * {@link NavigationManagerSession#DEFAULT_PARKED_STATE_TTL}) and is then discarded instead of firing later in an
+ * unrelated tab.
+ * <p>
+ * <b>Ordering.</b> Runs just after Spring Session's {@code SessionRepositoryFilter} (so it uses the session managed by
+ * Spring Session, when present, and not the container's one) and before Spring Security's filter chain, so the scope
+ * is already bound when Spring Security authenticates the user and fires its login listeners.
  *
  * @author Mario A. Serrano Leones
  */
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE + 10)
+@Order(NavigationManagerSessionScopeFilter.ORDER)
 public class NavigationManagerSessionScopeFilter extends OncePerRequestFilter {
+
+    /**
+     * Order of Spring Session's {@code SessionRepositoryFilter} ({@code Integer.MIN_VALUE + 50}), copied as a literal
+     * so this module does not depend on spring-session.
+     */
+    static final int SPRING_SESSION_FILTER_ORDER = Ordered.HIGHEST_PRECEDENCE + 50;
+
+    /**
+     * Filter order: just after Spring Session's filter, and well before Spring Security's chain (order -100).
+     */
+    public static final int ORDER = SPRING_SESSION_FILTER_ORDER + 1;
 
     static final String HAND_OFF_ATTRIBUTE = NavigationManagerSessionScopeFilter.class.getName() + ".HAND_OFF";
 
     private static final LoggingService LOGGER = new SLF4JLoggingService(NavigationManagerSessionScopeFilter.class);
+
+    private volatile Duration handOffTtl = NavigationManagerSession.DEFAULT_PARKED_STATE_TTL;
+
+    /**
+     * Returns how long a parked intent stays valid.
+     *
+     * @return the hand-off time to live
+     */
+    public Duration getHandOffTtl() {
+        return handOffTtl;
+    }
+
+    /**
+     * Sets how long a parked intent stays valid before it is discarded.
+     *
+     * @param handOffTtl the hand-off time to live; must not be null
+     */
+    public void setHandOffTtl(Duration handOffTtl) {
+        this.handOffTtl = Objects.requireNonNull(handOffTtl, "handOffTtl");
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         var current = new NavigationManagerSession();
         current.setOnPending(() -> ensureSession(request));
-        restoreParkedState(request, current);
+        current.setParkedStateSupplier(() -> takeParkedState(request));
         try {
             ScopedValue.where(NavigationManagerSession.SCOPE, current)
                     .call(() -> {
@@ -94,17 +135,26 @@ public class NavigationManagerSessionScopeFilter extends OncePerRequestFilter {
         }
     }
 
-    private void restoreParkedState(HttpServletRequest request, NavigationManagerSession target) {
+    /**
+     * Takes the parked state out of the HTTP session (so it is consumed once). Returns null when there is none or it
+     * expired, in which case it is discarded.
+     */
+    private NavigationManagerSession takeParkedState(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session == null) {
-            return;
+            return null;
         }
         synchronized (WebUtils.getSessionMutex(session)) {
             if (session.getAttribute(HAND_OFF_ATTRIBUTE) instanceof HandOff handOff) {
                 session.removeAttribute(HAND_OFF_ATTRIBUTE);
-                target.absorb(handOff.state());
+                if (handOff.isExpired(handOffTtl)) {
+                    LOGGER.debug("Parked navigation state expired and was discarded");
+                    return null;
+                }
+                return handOff.state();
             }
         }
+        return null;
     }
 
     private void parkPendingState(HttpServletRequest request, NavigationManagerSession current) {
@@ -114,8 +164,10 @@ public class NavigationManagerSessionScopeFilter extends OncePerRequestFilter {
         try {
             HttpSession session = request.getSession(true);
             synchronized (WebUtils.getSessionMutex(session)) {
-                HandOff handOff = session.getAttribute(HAND_OFF_ATTRIBUTE) instanceof HandOff existing ? existing : new HandOff();
+                HandOff handOff = session.getAttribute(HAND_OFF_ATTRIBUTE) instanceof HandOff existing
+                        && !existing.isExpired(handOffTtl) ? existing : new HandOff();
                 handOff.state().absorb(current);
+                handOff.touch();
                 session.setAttribute(HAND_OFF_ATTRIBUTE, handOff);
             }
         } catch (IllegalStateException e) {
@@ -130,6 +182,15 @@ public class NavigationManagerSessionScopeFilter extends OncePerRequestFilter {
     private static final class HandOff implements Serializable {
         private static final long serialVersionUID = 1L;
         private transient NavigationManagerSession state;
+        private long parkedAt = System.currentTimeMillis();
+
+        void touch() {
+            parkedAt = System.currentTimeMillis();
+        }
+
+        boolean isExpired(Duration ttl) {
+            return System.currentTimeMillis() - parkedAt >= ttl.toMillis();
+        }
 
         NavigationManagerSession state() {
             if (state == null) {

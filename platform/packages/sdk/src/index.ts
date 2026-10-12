@@ -33,6 +33,9 @@ export type {
     ActionExecutionRequest,
     ActionExecutionResponse,
     ActionFlowStepType,
+    ActionRuntime,
+    FlowFileRef,
+    FlowDownload,
     ActionFlowStep,
     // Views
     ViewDescriptorMetadata,
@@ -44,7 +47,8 @@ export type {
 } from './metadata/index.js';
 
 // ── CRUD module ───────────────────────────────────────────────────────────────
-export {CrudResourceApi, CrudServiceApi} from './cruds/index.js';
+export {CrudResourceApi, CrudServiceApi, ConfigResourceApi} from './cruds/index.js';
+export type {ConfigResult, ConfigValues} from './cruds/index.js';
 export type {
     CrudListResult,
     CrudQueryParams,
@@ -54,3 +58,9 @@ export type {
 
 // ── Schedule API (platform-core feature) ─────────────────────────────────────
 export {ScheduleApi} from './schedule/index.js';
+export {TransfersApi} from './transfers/index.js';
+export {JobsApi} from './jobs/index.js';
+export type {JobStatus, JobState} from './jobs/index.js';
+export {ACTION_FLOW_STEP_TYPES, ACTION_FLOW_STEP_FIELDS, ACTION_RUNTIMES, UI_PORTS} from './generated/ui-contract.js';
+export type {UIPortName} from './generated/ui-contract.js';
+export type {UploadOptions} from './transfers/index.js';

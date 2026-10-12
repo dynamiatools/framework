@@ -1,4 +1,4 @@
-@url = http://localhost:8484/api/app/metadata
+@url = http://localhost:8484/apps/api/metadata
 ### Load Metadata
 GET {{url}}
 

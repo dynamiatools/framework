@@ -1,0 +1,10 @@
+view: json
+beanClass: tools.dynamia.demos.movies.domain.Person
+autofields: false
+
+fields:
+  name:
+  birthYear:
+  nationality:
+  biography:
+  photoUrl:

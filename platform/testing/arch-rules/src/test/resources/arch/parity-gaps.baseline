@@ -1,0 +1,36 @@
+extensions/email-sms/sources/core/src/main/java/tools/dynamia/modules/email/ui/actions/SetPreferredAccountAction.java | runtime UNDECLARED
+extensions/email-sms/sources/ui/src/main/java/tools/dynamia/modules/email/ui/actions/PreviewEmailTemplateAction.java | uses the front end (UNDECLARED)
+extensions/email-sms/sources/ui/src/main/java/tools/dynamia/modules/email/ui/actions/TestEmailAccountAction.java | uses the front end (UNDECLARED)
+extensions/email-sms/sources/ui/src/main/java/tools/dynamia/modules/email/ui/actions/TestSMSAction.java | uses the front end (UNDECLARED)
+extensions/entity-files/sources/core/src/main/java/tools/dynamia/modules/entityfile/ui/actions/ClearEntityFileCacheAction.java | runtime UNDECLARED
+extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/DeleteFileAction.java | runtime UNDECLARED
+extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/DownloadFileAction.java | runtime UNDECLARED
+extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/FileAction.java | runtime UNDECLARED
+extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/NewDirectoryAction.java | uses the front end (UNDECLARED)
+extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/NewFileAction.java | uses the front end (UNDECLARED)
+extensions/entity-files/sources/ui/src/main/java/tools/dynamia/modules/entityfile/ui/actions/ViewFileURLAction.java | uses the front end (UNDECLARED)
+extensions/http-functions/sources/ui/src/main/java/tools/dynamia/modules/functions/ui/actions/TestHttpFunctionAction.java | uses the front end (UNDECLARED)
+extensions/reports/sources/ui/src/main/java/tools/dynamia/modules/reports/ui/actions/TestReportDatasourceAction.java | uses the front end (UNDECLARED)
+extensions/reports/sources/ui/src/main/java/tools/dynamia/modules/reports/ui/actions/ViewReportAction.java | runtime UNDECLARED
+extensions/saas/sources/core/src/main/java/tools/dynamia/modules/saas/ui/action/ClearAccountCacheAction.java | runtime UNDECLARED
+extensions/saas/sources/core/src/main/java/tools/dynamia/modules/saas/ui/action/ReinitAccountAction.java | runtime UNDECLARED
+extensions/saas/sources/core/src/main/java/tools/dynamia/modules/saas/ui/action/ResetAccountBalanceAction.java | runtime UNDECLARED
+extensions/saas/sources/core/src/main/java/tools/dynamia/modules/saas/ui/action/SaveAccountFeaturesAction.java | runtime UNDECLARED
+extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/FilterAccountByRegionAction.java | uses the front end (UNDECLARED)
+extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/ShowAccountAdminActions.java | uses the front end (UNDECLARED)
+extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/ViewAccountLogAction.java | uses the front end (UNDECLARED)
+extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/ViewAccountLogoAction.java | uses the front end (UNDECLARED)
+extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/ViewAccountPayments.java | uses the front end (UNDECLARED)
+extensions/saas/sources/ui/src/main/java/tools/dynamia/modules/saas/ui/action/ViewAccountStatsAction.java | uses the front end (UNDECLARED)
+extensions/security/sources/ui/src/main/java/tools/dynamia/modules/security/ui/action/ResetPasswordAction.java | uses the front end (UNDECLARED)
+extensions/security/sources/ui/src/main/java/tools/dynamia/modules/security/ui/action/SetUserProfilesAction.java | runtime UNDECLARED
+platform/core/crud/src/main/java/tools/dynamia/crud/actions/SaveAndEditAction.java | runtime UNDECLARED
+platform/core/crud/src/main/java/tools/dynamia/crud/actions/SaveAndNewAction.java | runtime UNDECLARED
+platform/ui/zk/src/main/java/tools/dynamia/zk/actions/CallZKGlobalCommandViewAction.java | uses the front end (UNDECLARED)
+platform/ui/zk/src/main/java/tools/dynamia/zk/actions/SendHttpRequestViewAction.java | uses the front end (UNDECLARED)
+platform/ui/zk/src/main/java/tools/dynamia/zk/crud/cfg/SaveConfigAction.java | uses the front end (FRONTEND)
+platform/ui/zk/src/main/java/tools/dynamia/zk/reports/actions/ExportAction.java | uses the front end (FRONTEND)
+platform/ui/zk/src/main/java/tools/dynamia/zk/reports/actions/ExportCSVAction.java | uses the front end (FRONTEND)
+platform/ui/zk/src/main/java/tools/dynamia/zk/reports/actions/ExportExcelAction.java | uses the front end (FRONTEND)
+platform/ui/zk/src/main/java/tools/dynamia/zk/reports/actions/ExportJsonAction.java | uses the front end (FRONTEND)
+platform/ui/zk/src/main/java/tools/dynamia/zk/reports/actions/ViewReportParametersAction.java | uses the front end (UNDECLARED)

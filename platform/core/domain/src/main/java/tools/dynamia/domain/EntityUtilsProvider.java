@@ -123,4 +123,37 @@ public interface EntityUtilsProvider {
      * }</pre>
      */
     Class<? extends Parameter> getDefaultParameterClass();
+
+    /**
+     * Returns the real entity behind a persistence proxy, initializing it if needed. Must be called while the
+     * persistence context is open. The default implementation returns the object unchanged.
+     *
+     * @param entity the entity or proxy, may be null
+     * @return the real entity
+     */
+    default Object unproxy(Object entity) {
+        return entity;
+    }
+
+    /**
+     * Returns the real entity with its to-one relations unproxied and initialized, so it stays usable after the
+     * persistence context is closed. Must be called while the persistence context is open. The default implementation
+     * returns {@link #unproxy(Object)}.
+     *
+     * @param entity the entity or proxy, may be null
+     * @return the real, initialized entity
+     */
+    default Object initializeEntity(Object entity) {
+        return unproxy(entity);
+    }
+
+    /**
+     * Returns the real entity class, never a proxy subclass. The default implementation uses {@code getClass()}.
+     *
+     * @param entity the entity or proxy
+     * @return the entity class
+     */
+    default Class<?> getEntityClass(Object entity) {
+        return entity.getClass();
+    }
 }

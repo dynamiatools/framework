@@ -1,6 +1,8 @@
 <template>
   <DynamiaCrudPage v-if="node.type === 'CrudPage'" :node="node" :client="client" />
 
+  <DynamiaConfigPage v-else-if="node.type === 'ConfigPage'" :node="node" :client="client" />
+
   <!--
     AdminLayout scrolls the whole page (no fixed-height content area), so an embedded page gets an
     explicit viewport-relative height and scrolls internally — instead of dynamia-embed's default
@@ -10,6 +12,7 @@
   <dynamia-embed
     v-else-if="embedSrc"
     :src="embedSrc"
+    :sandbox="sandbox"
     height="100%"
     no-resize
     class="block h-[calc(100vh-12rem)] w-full"
@@ -18,7 +21,7 @@
   <div v-else class="flex h-64 items-center justify-center text-sm text-gray-400">
     <p>
       Page <code>{{ node.name }}</code> (type <code>{{ node.type }}</code>) has no embeddable URL —
-      set its <code>file</code> to a real HTTP resource to use it with this theme.
+      set its path to a real HTTP resource to use it with this theme.
     </p>
   </div>
 </template>
@@ -26,7 +29,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { DynamiaClient, NavigationNode } from '@dynamia-tools/sdk';
-import { resolveEmbedSrc } from '../lib/resolveEmbedSrc.js';
+import { embedSandbox, resolveEmbedSrc } from '../lib/resolveEmbedSrc.js';
 
 const props = defineProps<{
   node: NavigationNode;
@@ -34,4 +37,5 @@ const props = defineProps<{
 }>();
 
 const embedSrc = computed(() => resolveEmbedSrc(props.node));
+const sandbox = computed(() => embedSandbox(embedSrc.value));
 </script>

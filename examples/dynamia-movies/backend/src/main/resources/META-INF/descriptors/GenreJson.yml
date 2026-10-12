@@ -1,0 +1,9 @@
+view: json
+beanClass: tools.dynamia.demos.movies.domain.Genre
+autofields: false
+
+fields:
+  name:
+  description:
+  color:
+    component: colorpicker

@@ -109,6 +109,11 @@ export class VueCrudView extends CrudView {
     }
   }
 
+  /** Reads the reactive mode (the parent reads a plain field), so computeds depending on the CRUD state re-run on a mode change. */
+  override getMode(): CrudMode {
+    return this.mode.value;
+  }
+
   // ── Mode transitions ──────────────────────────────────────────────────────
 
   override startCreate(): void {

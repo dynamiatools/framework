@@ -16,6 +16,7 @@
  */
 package tools.dynamia.viewers.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import tools.dynamia.actions.ActionReference;
@@ -219,8 +220,20 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
      * @see com.dynamia.tools.viewers.ViewDescriptor#getBeanClass()
      */
     @Override
+    @JsonIgnore
     public Class<?> getBeanClass() {
         return beanClass;
+    }
+
+    /**
+     * Returns the simple name of the bean class, which is what the JSON {@code beanClass} property carries: the
+     * fully-qualified class name must not be sent to clients (it is the entity id of the metadata API).
+     *
+     * @return the bean class simple name, or {@code null} if there is no bean class
+     */
+    @JsonProperty("beanClass")
+    public String getBeanClassName() {
+        return beanClass != null ? beanClass.getSimpleName() : null;
     }
 
     /**
@@ -250,6 +263,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
      * @see com.dynamia.tools.viewers.ViewDescriptor#getViewCustomizerClass()
      */
     @Override
+    @JsonIgnore
     public Class<? extends ViewCustomizer> getViewCustomizerClass() {
         return viewCustomizerClass;
     }
@@ -738,6 +752,7 @@ public abstract class AbstractViewDescriptor implements MergeableViewDescriptor,
     }
 
     @Override
+    @JsonIgnore
     public Class<? extends ViewRenderer> getCustomViewRenderer() {
         return customViewRenderer;
     }

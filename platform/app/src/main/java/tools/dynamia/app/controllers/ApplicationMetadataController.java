@@ -13,6 +13,7 @@ import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.crud.CrudRemoteAction;
 import tools.dynamia.crud.CrudState;
+import tools.dynamia.crud.headless.HeadlessCrudRemoteAction;
 import tools.dynamia.domain.EntityReference;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.util.DomainUtils;
@@ -21,6 +22,8 @@ import tools.dynamia.navigation.NavigationNode;
 import tools.dynamia.navigation.NavigationTree;
 import tools.dynamia.navigation.Page;
 import tools.dynamia.viewers.ViewDescriptor;
+import tools.dynamia.viewers.ViewDescriptorFactory;
+import tools.dynamia.viewers.ViewDescriptorNotFoundException;
 import tools.dynamia.web.navigation.ErrorResult;
 
 import java.util.Collection;
@@ -38,13 +41,14 @@ import java.util.function.Predicate;
  * <p>
  * Endpoints:
  * <ul>
- *   <li>GET /api/app/metadata - Application metadata</li>
- *   <li>GET /api/app/metadata/navigation - Navigation tree</li>
- *   <li>GET /api/app/metadata/actions - Global actions metadata</li>
- *   <li>POST /api/app/metadata/actions/{action} - Execute global action</li>
- *   <li>GET /api/app/metadata/entities - Entities metadata</li>
- *   <li>GET /api/app/metadata/entities/{id} - Metadata for a specific entity, by id (simple class name)</li>
- *   <li>GET /api/app/metadata/entities/by-path?path={virtualPath} - Metadata for the CrudPage registered at that navigation virtual path</li>
+ *   <li>GET /apps/api/metadata - Application metadata</li>
+ *   <li>GET /apps/api/metadata/navigation - Navigation tree</li>
+ *   <li>GET /apps/api/metadata/actions - Global actions metadata</li>
+ *   <li>POST /apps/api/metadata/actions/{action} - Execute global action</li>
+ *   <li>GET /apps/api/metadata/entities - Entities metadata</li>
+ *   <li>GET /apps/api/metadata/entities/{id} - Metadata for a specific entity, by id (simple class name)</li>
+ *   <li>GET /apps/api/metadata/entities/by-path?path={virtualPath} - Metadata for the CrudPage registered at that navigation virtual path</li>
+ *   <li>GET /apps/api/metadata/views/{id} - A view descriptor by id, for descriptors not bound to an entity (e.g. dashboards)</li>
  * </ul>
  *
  * @author Mario A. Serrano Leones
@@ -61,11 +65,12 @@ public class ApplicationMetadataController {
     /**
      * Base path for all metadata endpoints.
      */
-    public static final String PATH = "/api/app/metadata";
+    public static final String PATH = "/apps/api/metadata";
     /**
      * Loader for application metadata.
      */
     private final ApplicationMetadataLoader metadataLoader;
+    private final ViewDescriptorFactory viewDescriptorFactory;
     private final EntityMetadata unknowEntity;
     /**
      * Cached entities metadata. Application metadata and global actions are deliberately not cached because
@@ -80,10 +85,12 @@ public class ApplicationMetadataController {
     /**
      * Constructs a new {@code ApplicationMetadataController} with the given metadata loader.
      *
-     * @param metadataLoader the loader for application metadata
+     * @param metadataLoader        the loader for application metadata
+     * @param viewDescriptorFactory the factory used to resolve view descriptors by id
      */
-    public ApplicationMetadataController(ApplicationMetadataLoader metadataLoader) {
+    public ApplicationMetadataController(ApplicationMetadataLoader metadataLoader, ViewDescriptorFactory viewDescriptorFactory) {
         this.metadataLoader = metadataLoader;
+        this.viewDescriptorFactory = viewDescriptorFactory;
         this.unknowEntity = new EntityMetadata();
         unknowEntity.setClassName("unknown");
         unknowEntity.setName("Unknown Entity");
@@ -141,7 +148,7 @@ public class ApplicationMetadataController {
      * {@link #executeAction} and {@code docs/design/SERVER_DRIVEN_ACTION_FLOWS.md} §7.6 point 3
      */
     @PostMapping(value = "/actions/{action}", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Object> executeGlobalAction(@PathVariable("action") String action, ActionExecutionRequest request,
+    public ResponseEntity<Object> executeGlobalAction(@PathVariable("action") String action, @RequestBody ActionExecutionRequest request,
                                                         HttpServletRequest httpRequest) {
         var actionMetadata = getGlobalActions().getAction(action);
         return executeAction(action, request, actionMetadata, httpRequest);
@@ -167,10 +174,14 @@ public class ApplicationMetadataController {
      */
     static ResponseEntity<Object> executeAction(String action, ActionExecutionRequest request,
                                                           ActionMetadata actionMetadata, HttpServletRequest httpRequest) {
-        if (actionMetadata != null) {
+        if (actionMetadata != null && actionMetadata.isExecutable()) {
             try {
                 RemoteAction actionInstance = null;
-                if (actionMetadata.getAction() != null) {
+                if (actionMetadata.getAction() instanceof HeadlessCrudRemoteAction headless) {
+                    // a local action served headless: every request works on a fresh instance of it
+                    var fresh = Containers.get().findObject(headless.getDelegate().getClass());
+                    actionInstance = fresh != null ? new HeadlessCrudRemoteAction(fresh) : null;
+                } else if (actionMetadata.getAction() != null) {
                     actionInstance = Containers.get().findObject(actionMetadata.getAction().getClass());
                 }
                 if (!ActionRestrictions.allowAccess(actionInstance)) {
@@ -236,6 +247,10 @@ public class ApplicationMetadataController {
      */
     static boolean isApplicableState(RemoteAction actionInstance, ActionExecutionRequest request) {
         if (!(actionInstance instanceof CrudRemoteAction crudRemoteAction)) {
+            return true;
+        }
+        if (request.getResumeToken() != null && !request.getResumeToken().isBlank()) {
+            // continues a flow already started: its state was checked then and the signed token carries the request
             return true;
         }
         CrudState[] applicableStates = crudRemoteAction.getApplicableStates();
@@ -407,6 +422,24 @@ public class ApplicationMetadataController {
     }
 
     /**
+     * Returns a view descriptor by its id, without going through an entity. This is how descriptors that are not
+     * bound to an entity (for example {@code view: dashboard}) are reached from a JS frontend. It exposes the
+     * same descriptors that the entity endpoints already serve; access is governed by the application's
+     * web security configuration, like every other metadata endpoint.
+     *
+     * @param id the view descriptor id
+     * @return {@code 200} with the {@link ViewDescriptor}, or {@code 404} if no descriptor has that id
+     */
+    @GetMapping(value = "/views/{id}", produces = "application/json")
+    public ResponseEntity<ViewDescriptor> getViewDescriptor(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(viewDescriptorFactory.getDescriptor(id));
+        } catch (ViewDescriptorNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
      * Executes an action on an entity by its id and action ID.
      *
      * @param id          the entity id
@@ -421,6 +454,11 @@ public class ApplicationMetadataController {
         var entityMetadata = getEntityMetadata(id);
         if (entityMetadata != null) {
             var actionMetadata = entityMetadata.getActions().stream().filter(a -> a.getId().equals(action)).findFirst().orElse(null);
+            // The entity comes from the URL, resolved here: clients no longer receive the class name (see
+            // EntityMetadata#getClassName), and one that sent it could point the action at any class.
+            if (entityMetadata.getClassName() != null) {
+                request.setDataType(entityMetadata.getClassName());
+            }
             return executeAction(action, request, actionMetadata, httpRequest);
         }
         return okBody(new ActionExecutionResponse("Entity " + id + " not found", HttpStatus.NOT_FOUND.getReasonPhrase(), 404));

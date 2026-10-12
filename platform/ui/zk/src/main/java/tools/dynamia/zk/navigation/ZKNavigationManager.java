@@ -77,7 +77,10 @@ public class ZKNavigationManager extends BaseNavigationManager implements Serial
         Desktop desktop = ZKUtil.getCurrentDesktop();
         LOGGER.info("Initializing new " + getClass().getSimpleName() + " for desktop " + desktop);
 
-        NavigationManagerSession.getInstance().updateNavManager(this);
+        var navSession = NavigationManagerSession.current();
+        if (navSession != null) {
+            navSession.updateNavManager(this);
+        }
 
         if (desktop != null) {
             String managerId = getId();
@@ -89,6 +92,15 @@ public class ZKNavigationManager extends BaseNavigationManager implements Serial
                 }
             });
         }
+    }
+
+    /**
+     * Registers in the {@link NavigationManagerRegistry} only when built inside a desktop, because the desktop cleanup
+     * is what unregisters it.
+     */
+    @Override
+    protected boolean shouldRegister() {
+        return ZKUtil.getCurrentDesktop() != null;
     }
 
     @Override
@@ -164,7 +176,10 @@ public class ZKNavigationManager extends BaseNavigationManager implements Serial
     public void setCurrentComposer(ZKNavigationComposer currentComposer) {
         this.currentComposer = currentComposer;
         if (ZKUtil.isInEventListener()) {
-            NavigationManagerSession.getInstance().executeQueue();
+            var navSession = NavigationManagerSession.current();
+            if (navSession != null) {
+                navSession.executeQueue();
+            }
         }
     }
 

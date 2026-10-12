@@ -35,6 +35,52 @@ extensions/
 └── http-functions/          # HTTP functions
 ```
 
+### Module Layout: `core` and `ui`
+
+Extensions are split so a frontend that is not ZK can use them. ZK is being removed from Dynamia in the medium term, so
+new code follows this rule:
+
+- **`core`** (and `api`, `jpa`, ...) holds everything that does not need ZK: entities, services, REST controllers,
+  `ModuleProvider`s and navigation restrictions, actions, view descriptors, listeners. It must have **no ZK
+  dependency**. Each extension that has a `core` guards this with a test that `org.zkoss.zk.ui.Component` is not on the
+  classpath.
+- **`ui`** holds only what needs ZK: ZK components, view models, `CrudController`s, view customizers, zul pages and
+  the descriptors that point to any of those.
+
+Package names do **not** change when code moves from `ui` to `core` (for example `SecurityModuleProvider` is still
+`tools.dynamia.modules.security.ui.SecurityModuleProvider`), so component scanning, descriptor references and user code
+keep working. An application that depends on `ui` still gets everything, because `ui` depends on `core`.
+
+Two things decide whether something can move to `core`:
+
+- **Imports of ZK are not the whole story.** A class also stays in `ui` if it extends or calls a ZK-bound class
+  (for example an action that needs a ZK `CrudController`).
+- **A descriptor stays in `ui` if it names a ZK class** (`controller:`, `customizer:`, `customView: ...zul`, or a
+  `formView` that does). The YAML reader turns `customizer` into a `Class` when it loads the descriptor, so such a
+  descriptor cannot live in a module without ZK. Component hints such as `component: textbox` are only hints and are
+  harmless.
+
+A page that is a zul (`new Page(..., "classpath:zk/.../x.zul")`) must be registered by a provider in `ui`. The
+navigation container merges modules and page groups with the same id, so a `core` and a `ui` provider can both
+contribute to the same group (see `SecurityModuleProvider` and `SecurityProfileModuleProvider`; the zul page uses
+`position = -1` to stay first).
+
+Moving code from `ui` to `core` changes what is registered in an application that depends on `core` **without** `ui`
+(see [MIGRATION_ZK_SEPARATION.md](./MIGRATION_ZK_SEPARATION.md#2-extensions-zk-free-code-moved-from-ui-to-core)).
+
+State of the separation:
+
+| extension | in `core` | still ZK-bound in `ui` |
+|---|---|---|
+| security | providers, restrictions, login controller, `UserInterfaceController`, table descriptors | views, view models, crud controllers, customizers, `My Profile` page, form/crud descriptors |
+| saas | provider, restrictions, `HttpAccountResolver`, non-ZK actions, descriptors | controllers, view models, customizer, window-opening actions, 5 descriptors |
+| entity-files | config page provider, cache action, 4 descriptors | field customizers, file actions, explorer controller, icons, components |
+| email-sms | provider, listener, action, all descriptors | OTP dialog, test/preview actions |
+| http-functions | provider, descriptors | test action |
+| reports | `reports-core`: domain, services, REST API, exports, module classes, dashboard widget, 12 descriptors | `reports-ui`: ZK viewer, user module, report page, actions, crud controller |
+| dashboard | `dashboard-core`: widget contract, context, REST endpoint | `dashboard-zk`: `Dashboard`, renderer, ZK widgets |
+| file-importer | - | everything (the whole module is ZK UI) |
+
 ### Extension Dependency Format
 
 All extensions use CalVer versioning (same as core platform):
@@ -490,6 +536,52 @@ dynamia.sms.aws.secret-key=${AWS_SECRET_KEY}
 </dependency>
 ```
 
+### Dashboard Modules
+
+The extension has two modules so dashboards can be rendered without ZK:
+
+| artifact | contents |
+|---|---|
+| `tools.dynamia.modules.dashboard.core` | UI-agnostic API: `DashboardWidgetDefinition`, `AbstractDashboardWidgetDefinition`, `WidgetContext`, `DashboardAction`, `UserInfoProvider`, the widget data DTOs and `DashboardRestController`. No ZK. |
+| `tools.dynamia.modules.dashboard` | ZK implementation: `Dashboard`, `DashboardViewRenderer`, `DashboardWidget`, `AbstractDashboardWidget`, `ChartjsDashboardWidget`, `ViewerDashboardWidget`. Depends on `core`. |
+
+Existing applications keep depending on `tools.dynamia.modules.dashboard`. `DashboardWidget`, `AbstractDashboardWidget`
+and `DashboardContext` keep their names and packages and now extend the core types; `DashboardWidget.init(WidgetContext)`
+bridges to `init(DashboardContext)`.
+
+### Dashboards from a JS Frontend
+
+A dashboard is a `view: dashboard` descriptor. A JS client gets the layout (columns, `span`, `span-sm`, `span-xs`) and
+the widget slots from the descriptor with `client.metadata.getView(id)` (`GET /apps/api/metadata/views/{id}`), and each
+widget's data from:
+
+```
+GET /apps/api/dashboard/{descriptorId}/widgets/{field}?param=value
+```
+
+- Only widgets declared as a **field of the descriptor** can be loaded; the widget id is read from the field's
+  `widget` param, never from the request. Unknown dashboards, non-dashboard descriptors, fields and widgets answer
+  `404`; a failing widget answers a generic `500` (the cause is only logged).
+- Query parameters are passed to `DashboardWidgetDefinition.update(params)`.
+- Each request gets its **own widget instance** (prototype beans, such as `@InstallDashboardWidget`, are new per lookup;
+  a singleton widget bean is replaced by a new instance from the bean factory), so concurrent users never share widget
+  state.
+- The caller must be **authenticated** (`401` otherwise). A dashboard descriptor is not linked to the navigation pages
+  that show it, so `NavigationRestrictions` cannot be applied: any authenticated user can read any dashboard's widgets.
+  Restrict `/apps/api/dashboard/**` in the web security configuration for per-dashboard authorization.
+- View descriptors served by the metadata API never include class names: `beanClass` is the entity simple name (the
+  entity id), and `viewCustomizerClass` / `customViewRenderer` are not serialized.
+- A widget chooses how a JS frontend renders it with `getType()` (`chart`, `viewer`, `kpi`, `html`, `custom`, see
+  `DashboardWidgetTypes`) and `getData(WidgetContext)`. `ChartjsDashboardWidget` and `ViewerDashboardWidget` implement
+  them, so existing ZK dashboards work from JS unchanged. `KpiWidgetData` is provided for key indicators.
+- ZK widgets are initialized over REST with a *headless* `DashboardContext` (no `Dashboard`, no
+  `DashboardWidgetWindow`): they must not call `getDashboard()` or `getWindow()` if they are meant to be served this way.
+- `ChartjsData` fills its labels and datasets lazily and does not serialize with Jackson; `ChartjsDashboardWidget`
+  calls `init()` and converts it with ZK's JSON parser.
+
+Frontend side: `@dynamia-tools/dashboard-sdk` (`DashboardApi`, `resolveDashboardLayout`) and
+`@dynamia-tools/dashboard-vue` (`useDashboard`, `<DynamiaDashboard>`, `WidgetRendererRegistry`).
+
 ### Creating Dashboard Widgets
 
 #### 1. Custom Widget
@@ -586,115 +678,85 @@ public class DashboardModuleProvider implements ModuleProvider {
 
 ## Reports Extension
 
-**Artifact ID**: `tools.dynamia.reports.core`
+**Artifacts**: `tools.dynamia.modules.reports.api` (DTOs, filter providers), `tools.dynamia.modules.reports.core`
+(domain, services, REST API, exports; no ZK) and `tools.dynamia.modules.reports.ui` (the legacy ZK front end).
 
-**Purpose**: Advanced reporting framework with multiple export formats and visualization.
+**Purpose**: Reports defined as data: a SQL or JPQL query stored in the database, with filters, columns and charts,
+run by any front end. Multi-tenant (reports belong to an account, the system account shares its reports).
 
 ### Key Features
 
-- **Query Builders**: JPQL and native SQL
-- **Export Formats**: CSV, Excel, PDF
-- **Charts**: Built-in chart support
-- **Templates**: Reusable report templates
-- **Scheduling**: Scheduled report generation
-- **Email Delivery**: Send reports via email
-- **Caching**: Performance optimization
+- **Queries**: SQL (application database or an external datasource) and JPQL, with named parameters bound from filters.
+- **Filters**: text, number, boolean, date, date time, time, enum, entity, query and static options.
+- **Outputs**: table with paging and sorting, Chart.js charts, export to xlsx, csv and pdf.
+- **Safe execution**: read-only single `SELECT`, read-only connection, timeout and row limit, validated on save and on run.
+- **Authorization**: `Report.accessRoles` plus pluggable `ReportAccessPolicy` beans.
+- **Dashboards**: the `report` widget shows a report, a chart or a KPI in any dashboard.
 
-### Adding the Dependency
+### Modules and fronts
 
-```xml
-<dependency>
-    <groupId>tools.dynamia.reports</groupId>
-    <artifactId>tools.dynamia.reports.core</artifactId>
-    <version>26.3.2</version>
-</dependency>
+| Module | Contents |
+|---|---|
+| `reports.api` | `EntityFilterProvider`, `EnumFilterProvider`, the DTOs of the UI API (`api.v2` records) |
+| `reports.core` | Entities, `ReportsService`, `ReportsApiService`, REST controllers, exporters, `DynamiaReportsModule`, `ReportDashboardWidget`. No ZK on the classpath. |
+| `reports.ui` | Legacy ZK front end: `ReportViewer`, `ReportPage`, actions, designer customizers |
+| `@dynamia-tools/reports-sdk` | Typed TypeScript client |
+| `@dynamia-tools/reports-vue` | Vue 3 list, viewer, designer and dashboard renderer |
+
+`dynamia.reports.ui` chooses what the navigation pages are: `vue` (default) makes the viewer page a `ReportViewerPage`
+that a Vue shell renders natively (the ZK shell still opens its legacy view); `zk` keeps a plain ZK page, which a Vue
+shell embeds with its ZK bridge. The design pages are CRUD pages and work in both shells.
+
+### REST API
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /apps/api/reports/catalog` | Reports the user can run, grouped |
+| `GET /apps/api/reports/{id}` | Filters, declared columns, charts, export formats |
+| `GET /apps/api/reports/{id}/filters/{filter}/options` | Options of enum, entity, query and static filters |
+| `POST /apps/api/reports/{id}/run` | Run with filters, paging and sorting; returns columns, rows, total, truncation flag and chart data |
+| `POST /apps/api/reports/{id}/export?format=xlsx\|csv\|pdf` | Download the whole result as a file |
+| `/apps/api/reports/design/**` | Designer tools (query preview, definition import/export, datasource test) for designer roles only |
+| `/api/reports/{group}/{endpoint}` | Original endpoints for reports published with `exportEndpoint`, kept for existing integrations |
+
+All endpoints require an authenticated user and use `ErrorResult` for errors. Details and examples are in the
+extension README.
+
+### Settings
+
+| Property | Default | Meaning |
+|---|---|---|
+| `dynamia.reports.ui` | `vue` | Front end of the navigation pages, `vue` or `zk` |
+| `dynamia.reports.max-rows` | `100000` | Rows after which a result is truncated |
+| `dynamia.reports.query-timeout` | `60` | Default query timeout, seconds; a report overrides it with its own `queryTimeout` |
+| `dynamia.reports.allowed-drivers` | MySQL, MariaDB, PostgreSQL, Oracle, SQL Server | JDBC drivers allowed in external datasources |
+| `dynamia.reports.encryption-key` | empty | Encrypts datasource passwords at rest |
+| `dynamia.reports.designer-roles` | empty | Roles allowed to use the designer API; nobody by default |
+| `dynamia.reports.preview-limit` | `50` | Rows of a query preview |
+
+### Dashboard widget
+
+`ReportDashboardWidget` (widget id `report`) is registered with `@InstallDashboardWidget`. In a dashboard descriptor:
+
+```yaml
+fields:
+  salesByRegion:
+    params:
+      widget: report
+      report: Sales by region     # name or id
+      display: chart              # table (default), chart or kpi
+      filters.year: 2026
 ```
 
-### Creating Reports
+`chart` and `kpi` reuse the standard `chart` and `kpi` renderers; `table` serves the `report` widget type, drawn by
+`registerReportWidget()` from `@dynamia-tools/reports-vue`. The widget runs the report through `ReportsApiService`, so
+account scoping, access policies and row limits apply.
 
-#### 1. Simple Report
+### Extending
 
-```java
-@Service
-public class ContactListReportService {
-    
-    private final ReportService reportService;
-    
-    public Report generateContactReport() {
-        Report report = new Report();
-        report.setName("contact-list");
-        report.setTitle("All Contacts");
-        report.setQuery("SELECT c FROM Contact c ORDER BY c.name");
-        
-        report.addColumn("id", "ID");
-        report.addColumn("name", "Name");
-        report.addColumn("email", "Email");
-        report.addColumn("company.name", "Company");
-        
-        return report;
-    }
-}
-```
-
-#### 2. Report with Filtering
-
-```java
-@Service
-public class FilteredReportService {
-    
-    private final ReportService reportService;
-    
-    public Report generateActiveContactsReport(String city) {
-        Report report = new Report();
-        report.setName("active-contacts-by-city");
-        report.setTitle("Active Contacts in " + city);
-        
-        String query = "SELECT c FROM Contact c WHERE c.active = true AND c.city = :city";
-        report.setQuery(query);
-        report.addParameter("city", city);
-        
-        report.addColumn("name", "Name");
-        report.addColumn("email", "Email");
-        report.addColumn("phone", "Phone");
-        
-        return report;
-    }
-}
-```
-
-#### 3. Report Export
-
-```java
-@RestController
-@RequestMapping("/api/reports")
-public class ReportExportController {
-    
-    private final ReportService reportService;
-    
-    @GetMapping("/{reportId}/export")
-    public ResponseEntity<InputStreamResource> exportReport(
-            @PathVariable String reportId,
-            @RequestParam(defaultValue = "EXCEL") String format) {
-        
-        Report report = reportService.getReport(reportId);
-        byte[] data = reportService.export(report, ExportFormat.valueOf(format));
-        
-        return ResponseEntity.ok()
-            .header("Content-Disposition", "attachment; filename=\"" + report.getName() + "." + format.toLowerCase() + "\"")
-            .body(new InputStreamResource(new ByteArrayInputStream(data)));
-    }
-}
-```
-
-### When to Use Reports Extension
-
-- Business intelligence
-- Data export
-- Compliance reporting
-- Analytics dashboards
-- Scheduled report generation
-
----
+- `ReportAccessPolicy`: decide who can see and run a report (all policies must allow).
+- `ReportDesignerPolicy`: decide who can use the designer API (any policy that allows is enough).
+- `EnumFilterProvider` / `EntityFilterProvider`: publish the enums and entities that filters can use.
 
 ## Finance Framework
 

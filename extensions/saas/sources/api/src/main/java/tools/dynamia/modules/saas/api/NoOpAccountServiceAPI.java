@@ -84,6 +84,7 @@ public class NoOpAccountServiceAPI implements AccountServiceAPI {
     public AccountDTO setCurrentAccount(Long accountId) {
         if (accountId != null) {
             defaultAccountId = accountId;
+            getCurrentAccount(); // creates the account on first use
             CURRENT_ACCOUNT.setId(defaultAccountId);
             return CURRENT_ACCOUNT;
         }

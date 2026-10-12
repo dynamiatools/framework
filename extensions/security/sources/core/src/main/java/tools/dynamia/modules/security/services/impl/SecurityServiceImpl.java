@@ -30,6 +30,7 @@ import tools.dynamia.domain.services.AbstractService;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.modules.saas.api.AccountServiceAPI;
+import tools.dynamia.modules.security.SecurityTenancy;
 import tools.dynamia.modules.security.TokenRequest;
 import tools.dynamia.modules.security.TokenResponse;
 import tools.dynamia.modules.security.domain.Profile;
@@ -41,6 +42,7 @@ import tools.dynamia.modules.security.services.SecurityService;
 
 import java.util.Date;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * @author Mario Serrano Leones
@@ -53,12 +55,32 @@ public class SecurityServiceImpl extends AbstractService implements SecurityServ
     private final ProfileService profileService;
     private final CrudService crudService;
     private final PasswordEncoder passwordEncoder;
+    private final Supplier<AccountServiceAPI> accountServiceAPI;
 
 
     public SecurityServiceImpl(ProfileService profileService, CrudService crudService, PasswordEncoder passwordEncoder) {
+        this(profileService, crudService, passwordEncoder, () -> Containers.get().findObject(AccountServiceAPI.class));
+    }
+
+    /**
+     * Creates the service with an explicit way to reach the {@link AccountServiceAPI}, needed by the startup defaults
+     * because {@link Containers} may not be ready when this bean is initialized.
+     *
+     * @param profileService    the profile service
+     * @param crudService       the crud service
+     * @param passwordEncoder   the password encoder
+     * @param accountServiceAPI supplies the account service, or null when there is none (no SaaS)
+     */
+    public SecurityServiceImpl(ProfileService profileService, CrudService crudService, PasswordEncoder passwordEncoder,
+                               Supplier<AccountServiceAPI> accountServiceAPI) {
         this.profileService = profileService;
         this.crudService = crudService;
         this.passwordEncoder = passwordEncoder;
+        this.accountServiceAPI = accountServiceAPI;
+    }
+
+    private <T> T withRootIfNoAccount(Supplier<T> work) {
+        return SecurityTenancy.withRootIfNoAccount(accountServiceAPI.get(), work);
     }
 
     @Override
@@ -71,9 +93,12 @@ public class SecurityServiceImpl extends AbstractService implements SecurityServ
     @PostConstruct
     public void checkAccountDefaultsSettings() {
         try {
-            profileService.getDefaultProfile();
-            profileService.getAdminProfile();
-            createDefaultUser();
+            withRootIfNoAccount(() -> {
+                profileService.getDefaultProfile();
+                profileService.getAdminProfile();
+                createDefaultUser();
+                return null;
+            });
 
         } catch (Exception e) {
             log("Error checking account default settings ", e);
@@ -83,7 +108,7 @@ public class SecurityServiceImpl extends AbstractService implements SecurityServ
     @Override
     public User loadUserByUsername(String username) {
         log("Loading user by username: " + username);
-        var user = crudService().findSingle(User.class, "username", QueryConditions.eq(username));
+        var user = withRootIfNoAccount(() -> crudService().findSingle(User.class, "username", QueryConditions.eq(username)));
 
         if (user == null) {
             throw new UsernameNotFoundException("User with username " + username + " not found");
@@ -159,7 +184,7 @@ public class SecurityServiceImpl extends AbstractService implements SecurityServ
 
     @Override
     public User getUserByEmail(String email) {
-        return crudService().findSingle(User.class, "email", QueryConditions.eq(email));
+        return withRootIfNoAccount(() -> crudService().findSingle(User.class, "email", QueryConditions.eq(email)));
     }
 
     @Override
@@ -194,7 +219,7 @@ public class SecurityServiceImpl extends AbstractService implements SecurityServ
             params.add("accountId", QueryConditions.isNotNull());
         }
 
-        return crudService().findSingle(UserAccessToken.class, params);
+        return withRootIfNoAccount(() -> crudService().findSingle(UserAccessToken.class, params));
     }
 
     @Override
@@ -228,7 +253,11 @@ public class SecurityServiceImpl extends AbstractService implements SecurityServ
             token.setOtp(request.isOtp());
         }
         token.generate();
-        token.save();
+        final UserAccessToken newToken = token;
+        withRootIfNoAccount(() -> {
+            newToken.save();
+            return null;
+        });
 
         var response = new TokenResponse(token.getTokenName(), token.getToken(), token.getUser().getUsername(),
                 token.getUser().getId(), token.getExpirationDate());

@@ -1,0 +1,14 @@
+view: form
+beanClass: tools.dynamia.demos.movies.domain.Person
+autofields: false
+
+fields:
+  name:
+  birthYear:
+  nationality:
+  photoUrl:
+  biography:
+    params:
+      span: 2
+      multiline: true
+      height: 90px

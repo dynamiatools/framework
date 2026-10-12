@@ -7,7 +7,10 @@ import java.util.Map;
  * are used to supply context-specific data that can vary between different threads of execution
  * in {@link tools.dynamia.integration.scheduling.SchedulerUtil} and {@link ThreadLocalObjectContainer}.
  *
+ *
+ * @deprecated still honoured (adapter in {@code ObjectsContext#capture()}), but new code should use a {@link tools.dynamia.integration.context.ContextCapturer}.
  */
+@Deprecated
 public interface ThreadLocalContextProvider {
 
     Map<String, Object> getContextObjects();

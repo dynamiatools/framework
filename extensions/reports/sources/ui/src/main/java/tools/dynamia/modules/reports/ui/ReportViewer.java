@@ -32,13 +32,13 @@ import tools.dynamia.crud.FilterCondition;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.query.QueryCondition;
 import tools.dynamia.domain.query.QueryParameters;
-import tools.dynamia.modules.dashboard.ChartjsDashboardWidget;
 import tools.dynamia.modules.reports.api.EnumFilterProvider;
 import tools.dynamia.modules.reports.core.*;
 import tools.dynamia.modules.reports.core.domain.Report;
 import tools.dynamia.modules.reports.core.domain.ReportField;
 import tools.dynamia.modules.reports.core.domain.ReportFilter;
 import tools.dynamia.modules.reports.core.domain.enums.DataType;
+import tools.dynamia.modules.reports.core.security.ReportAccessDeniedException;
 import tools.dynamia.modules.reports.core.services.ReportsService;
 import tools.dynamia.ui.MessageType;
 import tools.dynamia.ui.UIMessages;
@@ -49,10 +49,12 @@ import tools.dynamia.zk.actions.ButtonActionRenderer;
 import tools.dynamia.zk.crud.ui.EntityFiltersPanel;
 import tools.dynamia.zk.ui.chartjs.CategoryChartjsData;
 import tools.dynamia.zk.ui.chartjs.Chartjs;
+import tools.dynamia.zk.ui.chartjs.ChartjsColorPalette;
 import tools.dynamia.zk.ui.chartjs.ChartjsOptions;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -60,6 +62,8 @@ public class ReportViewer extends Div implements ActionEventBuilder {
 
 
     public static final int MAX_RESULT_TO_DISPLAY = 2000;
+    private static final ChartjsColorPalette MATERIAL_COLORS = new ChartjsColorPalette("Material", ReportChartPalette.COLORS);
+    private static final tools.dynamia.commons.logger.LoggingService LOGGER = tools.dynamia.commons.logger.LoggingService.get(ReportViewer.class);
     private final ClassMessages messages = ClassMessages.get(ReportViewer.class);
     private final ReportsService service;
     private Report report;
@@ -325,12 +329,15 @@ public class ReportViewer extends Div implements ActionEventBuilder {
 
         } catch (ValidationError e) {
             UIMessages.showMessage(e.getMessage(), MessageType.ERROR);
+        } catch (ReportAccessDeniedException e) {
+            UIMessages.showMessage(e.getMessage(), MessageType.ERROR);
         } catch (Exception e) {
-            if (e.getMessage().contains("interrupted")) {
+            String message = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            if (message.contains("interrupted") || message.toLowerCase().contains("timeout") || message.toLowerCase().contains("timed out")) {
                 Messagebox.show("La consulta demora mucho tiempo en procesarse, por favor utilice otros filtros" + " o intente mas tarde. Por ejemplo, si esta usando un rango de fechas reduzca la diferencia.", "Error al Consultar", Messagebox.OK, Messagebox.ERROR);
             } else {
-                Messagebox.show(e.getMessage());
-                e.printStackTrace();
+                Messagebox.show(message);
+                LOGGER.error("Error executing report " + report.getName(), e);
             }
         }
 
@@ -373,9 +380,13 @@ public class ReportViewer extends Div implements ActionEventBuilder {
 
         if (file != null) {
             try {
-                Filedownload.save(file, "application/excel");
-            } catch (FileNotFoundException e) {
+                // The file is read into memory and deleted right away, so no temporary file is left behind
+                byte[] content = Files.readAllBytes(file.toPath());
+                Filedownload.save(content, "application/excel", file.getName());
+            } catch (IOException e) {
                 UIMessages.showMessage("Error al exportar", MessageType.ERROR);
+            } finally {
+                file.delete();
             }
         }
 
@@ -497,7 +508,7 @@ public class ReportViewer extends Div implements ActionEventBuilder {
 
             for (var c : report.getCharts()) {
                 CategoryChartjsData data = new CategoryChartjsData();
-                data.getDataset().setColorPalette(ChartjsDashboardWidget.MATERIAL_COLORS);
+                data.getDataset().setColorPalette(MATERIAL_COLORS);
 
                 if (c.isGrouped()) {
                     Map<String, Number> groups = new HashMap<>();

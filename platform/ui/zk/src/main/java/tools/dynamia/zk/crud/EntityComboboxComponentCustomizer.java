@@ -19,6 +19,7 @@ package tools.dynamia.zk.crud;
 import org.zkoss.zul.Combobox;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.AbstractEntity;
+import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.sterotypes.Provider;
@@ -43,12 +44,13 @@ public class EntityComboboxComponentCustomizer implements ComponentCustomizer<Co
                     String orderBy = (String) field.getParams().get(Viewers.PARAM_ORDER_BY);
 
                     CrudService crudService = Containers.get().findObject(CrudService.class);
-                    List entities = null;
+                    QueryParameters params = new QueryParameters();
                     if (orderBy != null) {
-                        entities = crudService.findAll(field.getFieldClass(), orderBy);
-                    } else {
-                        entities = crudService.findAll(field.getFieldClass());
+                        params.orderBy(orderBy, true);
                     }
+                    // the model items are assigned to the entity property, so they must stay entities (not BeanMaps)
+                    EntityMapperSupport.configureEntities(params);
+                    List entities = crudService.find(field.getFieldClass(), params);
 
                     component.setReadonly(true);
                     ZKUtil.fillCombobox(component, entities);

@@ -383,6 +383,28 @@ Here's how a typical request flows through the layers:
 
 ---
 
+### REST API surface: `/api` and `/apps/api`
+
+Endpoints are split by audience, not by technology. A host application protects each prefix with its own security chain.
+
+| Prefix | Audience | Auth | Examples |
+|---|---|---|---|
+| `/api/{module}/...` | External or public integrations | Stateless JWT (`Authorization: Bearer` or the `DYNAMIA_JWT` cookie) | `/api/reports/{group}/{endpoint}`, `/api/functions/{name}`, `/api/saas`, `/api/storage`, generated CRUD REST `/api/{crudPath}` |
+| `/apps/api/{module}/...` | Local: the application's own frontends and micro-frontends | Web session by default; `Authorization: Bearer` also accepted. The JWT **cookie** is ignored | `/apps/api/metadata`, `/apps/api/dashboard`, `/apps/api/reports`, `/apps/api/crud-service/{className}`, `/apps/api/jobs`, `/apps/api/transfers` |
+
+Rules:
+
+- The module name is the same under both prefixes. There is no version segment in the path.
+- Anything that exists only to feed a Dynamia frontend (metadata, dashboard data, report designer, class-name based
+  CRUD) goes under `/apps/api`. Anything a third party is meant to call goes under `/api`.
+- `/apps/api/**` has CSRF disabled (the session cookie is sent by the browser), so writes (`POST`, `PUT`, `PATCH`,
+  `DELETE`) require a same-origin request (`Origin` or `Sec-Fetch-Site`), checked by
+  `AppsApiSameOriginAuthorizationManager`. Requests with a Bearer token are exempt: that header is never added by the
+  browser on its own.
+- Unauthenticated requests get a JSON 401 (not a redirect to `/login`), so `fetch` callers can handle them.
+
+---
+
 ## Dependency Injection & Spring Integration
 
 DynamiaTools is built on Spring's dependency injection. All components are managed by the Spring container.
@@ -663,6 +685,105 @@ The `@EnableDynamiaTools` annotation triggers:
 4. Configuration of default beans (CrudService, NavigationManager, etc.)
 
 ---
+
+## Direction: Removing ZK
+
+ZK is being removed from Dynamia in the medium term, and the TypeScript SDK plus the Vue adapter are the replacement
+frontend. Practical consequences for contributors:
+
+- Code that does not need ZK must not live in a ZK-dependent module. For extensions this is the `core` / `ui` rule in
+  [EXTENSIONS.md](./EXTENSIONS.md#module-layout-core-and-ui).
+- New UI features should be reachable through the REST/metadata API (`/apps/api/metadata/*`, `/api/crud/*`, extension
+  endpoints) and described by view descriptors, not only by ZK components.
+- ZK-specific hints in descriptors (`component:`, `controller:`, `customizer:`, `customView:`) are tolerated, but a
+  descriptor that names a ZK class stays in a ZK module.
+
+---
+
+## Running Without Open Persistence In View
+
+By default a ZK execution keeps one `EntityManager` open while views render (`ZKOpenPersistenceInViewListener` +
+`OpenEntityManagerInViewPattern`), so views can lazy-load relations. It can be turned off:
+
+```yaml
+dynamia:
+  app:
+    open-persistence-in-view: false   # default: true
+```
+
+`spring.jpa.open-in-view` does not affect this; it only configures Spring MVC.
+
+When disabled, `CrudController.query()` attaches a `BeanMapEntityMapper` (built from the properties the table/list
+`ViewDescriptor` needs, see `ViewDescriptorProperties`) to the `QueryParameters`. `JpaCrudService` applies any
+`QueryParameters.getMapper()` to its results inside the transaction, including every page of a `PagedList`.
+
+- Rows are **read-only `BeanMap`s**. Nested paths are stored under flat keys (`category.name`); related entities are
+  kept as already-loaded objects; collections are copied to plain collections; `@Transient` values are included.
+- Actions that need the entity must reload it by id (`CrudView.buildActionEvent` already does).
+- A mapper set explicitly on the parameters is never replaced. Use `new BeanMapEntityMapper("name", "category.name")`
+  in your own queries: `QueryParameters.with(...).mapWith(mapper)`.
+- Anything the view reads that is not a descriptor field (e.g. `row.getX().getY()` in a customizer) is not available
+  on a `BeanMap`.
+
+### Using entities without a persistence context
+
+Without OSIV an entity returned by `find`, `load`, `reload` or `findSingle` is **detached** as soon as the call
+returns: touching one of its lazy collections throws `LazyInitializationException`. `CrudService` therefore
+initializes the associations an entity needs **before** it leaves the persistence context. This only happens when the
+call is the outermost one (no transaction active, or the call started it); inside a service that already runs in a
+transaction nothing extra is loaded, so there is no cost there.
+
+1. **Declare the plan on the aggregate root** with `@InitializeOnLoad`. Paths walk through collections:
+
+   ```java
+   @Entity
+   @InitializeOnLoad({"detalles", "impuestos", "detalles.subdetalles"})
+   public class Venta { ... }
+   ```
+
+   `@InitializeOnLoad(allCollections = true, depth = 2)` initializes every to-many association instead.
+
+   It can also go **directly on a field** (or getter), which reads better for collections; `value` is then relative to
+   that property, and declarations on the class and on fields (also of superclasses) add up:
+
+   ```java
+   @InitializeOnLoad("subdetalles")            // detalles and detalles.subdetalles
+   @OneToMany(mappedBy = "venta") private List<DetalleVenta> detalles;
+
+   @InitializeOnLoad                            // impuestos
+   @OneToMany(mappedBy = "venta") private List<ImpuestoVenta> impuestos;
+   ```
+
+2. **Ask for what you need at the call site** (adds to the declared plan, and is honored in every mode):
+
+   ```java
+   var venta = crudService.load(Venta.class, id, "detalles", "pago.detalles");
+   venta = crudService.reload(venta, "retenciones");          // entity that reached you detached
+   var plan = crudService.load(Venta.class, id, LoadPlan.of("detalles"));
+   ```
+
+   An entity that is already detached **cannot** be repaired (Hibernate 7 has no re-attach): reload it with the paths.
+
+3. **The CRUD view does it for you**: `CrudController.doEdit`, `reloadEntity` and `CrudView.buildActionEvent` load the
+   entity with the *collection fields of the form descriptor* (`ViewDescriptorProperties.collectionsOf`), so a form
+   with a child table, `afterEdit()` and the actions launched from the view receive those collections initialized.
+
+Global mode, `dynamia.crud.load-collections`:
+
+| Value | Effect |
+|---|---|
+| `annotated` (default) | Applies `@InitializeOnLoad`. Entities without the annotation behave as before. |
+| `all` | Also initializes every to-many association, up to `dynamia.crud.load-depth` (default 1). Handy to find what an app depends on; can be expensive. |
+| `none` | Ignores `@InitializeOnLoad`. Explicit paths are still honored. |
+
+**Safety net (off by default).** `dynamia.app.lazy-load-no-trans=true` (or, in Spring Boot,
+`spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true`) makes Hibernate load a lazy association touched on a
+detached entity in a temporary session. It works, but each touched collection opens its own session and connection
+(N+1 when walking collections) and it hides the problem; use it as a temporary bridge, not as the design.
+
+Do **not** keep an `EntityManager` open outside a transaction to get the old behavior back: `REQUIRES_NEW`
+(`executeWithinTransaction`, `AccountTenants.runAs`) reuses it, and the `EntityManager` keeps the tenant it was opened
+with.
 
 ## Summary
 

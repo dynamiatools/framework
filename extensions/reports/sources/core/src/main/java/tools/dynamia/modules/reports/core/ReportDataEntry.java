@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.domain.jdbc.Row;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +15,7 @@ public class ReportDataEntry {
     private String name;
     private Object value;
 
-    private Map<String, Object> values = new HashMap<>();
+    private Map<String, Object> values = new LinkedHashMap<>();
     @JsonIgnore
     private boolean singleValue;
 
@@ -34,6 +34,15 @@ public class ReportDataEntry {
         names.forEach(name -> {
             entry.values.put(name, row.col(name));
         });
+        return entry;
+    }
+
+    public static ReportDataEntry build(List<String> names, Object[] row) {
+        ReportDataEntry entry = new ReportDataEntry();
+        entry.singleValue = false;
+        for (int i = 0; i < names.size(); i++) {
+            entry.values.put(names.get(i), i < row.length ? row[i] : null);
+        }
         return entry;
     }
 

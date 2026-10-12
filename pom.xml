@@ -24,7 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>tools.dynamia</groupId>
     <artifactId>tools.dynamia.parent</artifactId>
-    <version>26.10.0</version>
+    <version>26.10.1</version>
     <packaging>pom</packaging>
     <organization>
         <name>Dynamia Soluciones IT SAS</name>
@@ -112,6 +112,12 @@
         <module>platform/ui/ui-shared</module>
         <module>platform/ui/zk</module>
 
+        <!-- Testing platform (scope test for consumers) -->
+        <module>platform/testing/arch-rules</module>
+        <module>platform/contract/ui-contract-generator</module>
+        <module>platform/testing/ui-contract</module>
+        <module>platform/testing/ui-testing</module>
+
         <!-- Starters -->
         <module>platform/starters/zk-starter</module>
 
@@ -137,6 +143,17 @@
                     <encoding>${source.encoding}</encoding>
                     <parameters>true</parameters>
                 </configuration>
+                <dependencies>
+                    <!-- Maven 3.10 sets project.build.outputTimestamp by default, which makes the compiler plugin
+                         rewrite module-info.class with its own ASM (9.7.1). That version cannot read Java 25 class
+                         files ("Unsupported class file major version 69"). Plugin dependencies are inherited by
+                         every module, including those that redeclare the plugin. -->
+                    <dependency>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm</artifactId>
+                        <version>9.9.1</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

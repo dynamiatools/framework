@@ -29,6 +29,7 @@ import tools.dynamia.modules.saas.api.AccountServiceAPI;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import org.hibernate.annotations.TenantId;
 
 /**
  * @author Mario Serrano Leones
@@ -42,6 +43,11 @@ public class AccountParameter extends JpaParameter implements AccountAware {
                 .add("name", QueryConditions.eq(param)));
     }
 
+    /**
+     * The owner account, also Hibernate's tenant discriminator ({@link TenantId}): assigned from the current tenant on
+     * persist and added to every query and load.
+     */
+    @TenantId
     private Long accountId;
 
     public static AccountParameter create(String name, String value, Long accountId) {

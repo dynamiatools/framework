@@ -32,6 +32,7 @@ import tools.dynamia.modules.saas.api.enums.AccountPeriodicity;
 import tools.dynamia.modules.saas.api.enums.AccountStatus;
 import tools.dynamia.modules.saas.domain.Account;
 import tools.dynamia.modules.saas.domain.AccountLog;
+import tools.dynamia.modules.saas.AccountTenants;
 import tools.dynamia.modules.saas.jpa.AccountParameter;
 import tools.dynamia.modules.saas.services.AccountService;
 import tools.dynamia.web.util.HttpUtils;
@@ -77,8 +78,11 @@ public class AccountApiController extends AbstractService {
         if (account != null) {
             newLog(uuid, request, account);
             AccountDTO accountDTO = account.toDTO();
-            if (accountDTO.getRequiredInstanceUuid()) {
+            if (Boolean.TRUE.equals(accountDTO.getRequiredInstanceUuid())) {
                 String uuidhw = request.getParameter("uuid");
+                if (uuidhw == null || uuidhw.isBlank()) {
+                    return ResponseEntity.badRequest().build();
+                }
                 if (!uuidhw.equalsIgnoreCase(accountDTO.getInstanceUuid())) {
                     accountDTO.setStatus(AccountStatus.NEW);
                     accountDTO.setStatusDescription("Licencia invalida");
@@ -132,25 +136,30 @@ public class AccountApiController extends AbstractService {
         String value = null;
         Account account = getAccount(uuid);
         if (account != null) {
-            AccountParameter parameter = crudService().findSingle(AccountParameter.class, QueryParameters.with("name", QueryConditions.eq(name)).add("accountId", account.getId()));
-            if (parameter != null) {
-                value = parameter.getValue();
-            } else if (defautlValue != null) {
-                value = defautlValue;
-                crudService().executeWithinTransaction(() -> {
-                    AccountParameter newParam = new AccountParameter();
-                    newParam.setAccountId(account.getId());
-                    newParam.setName(name);
-                    newParam.setValue(defautlValue);
-                    newParam.save();
-                });
-            }
+            // the parameter belongs to the requested account, which may not be the current tenant (e.g. the system account)
+            value = AccountTenants.runAs(account.getId(), () -> findOrCreateParameter(account, name, defautlValue));
         }
         if (value != null) {
             return ResponseEntity.ok(Map.of("parameter", name, "value", value));
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    private String findOrCreateParameter(Account account, String name, String defaultValue) {
+        AccountParameter parameter = crudService().findSingle(AccountParameter.class, QueryParameters.with("name", QueryConditions.eq(name)).add("accountId", account.getId()));
+        if (parameter != null) {
+            return parameter.getValue();
+        }
+        if (defaultValue != null) {
+            AccountParameter newParam = new AccountParameter();
+            newParam.setAccountId(account.getId());
+            newParam.setName(name);
+            newParam.setValue(defaultValue);
+            newParam.save();
+            return defaultValue;
+        }
+        return null;
     }
 
     private void newLog(String uuid, HttpServletRequest request, Account account) {
@@ -164,17 +173,30 @@ public class AccountApiController extends AbstractService {
         }
     }
 
+    /**
+     * Tells whether the current request runs as the system account.
+     *
+     * @param request the current request
+     * @return true only if a system account is configured and it is the current account
+     */
     public boolean isAuthorized(HttpServletRequest request) {
-        if (serviceAPI.getSystemAccountId().equals(serviceAPI.getCurrentAccountId())) {
-            return true;
-        }
-
-        return false;
+        var systemAccountId = serviceAPI.getSystemAccountId();
+        return systemAccountId != null && systemAccountId.equals(serviceAPI.getCurrentAccountId());
     }
 
+    /**
+     * Tells whether {@code uuid} is the account of the request's subdomain.
+     *
+     * @param uuid    the account uuid from the request path
+     * @param request the current request
+     * @return false when the request has no subdomain or no account matches it
+     */
     public boolean isSameAccount(String uuid, HttpServletRequest request) {
         var subdomain = HttpUtils.getSubdomain(request);
+        if (subdomain == null || uuid == null) {
+            return false;
+        }
         var currentAccount = service.getAccount(subdomain);
-        return uuid.equals(currentAccount.getUuid());
+        return currentAccount != null && uuid.equals(currentAccount.getUuid());
     }
 }

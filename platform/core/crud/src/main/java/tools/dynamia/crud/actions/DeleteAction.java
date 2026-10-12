@@ -17,7 +17,10 @@
 package tools.dynamia.crud.actions;
 
 import tools.dynamia.actions.ActionGroup;
+import tools.dynamia.actions.HeadlessCapable;
+import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
@@ -28,7 +31,8 @@ import tools.dynamia.crud.CrudState;
  * @author Mario A. Serrano Leones
  */
 @InstallAction
-public class DeleteAction extends AbstractCrudAction {
+@RunsOn(ActionRuntime.HEADLESS)
+public class DeleteAction extends AbstractCrudAction implements HeadlessCapable {
 
     public DeleteAction() {
         setName(Messages.get(DeleteAction.class, "delete"));

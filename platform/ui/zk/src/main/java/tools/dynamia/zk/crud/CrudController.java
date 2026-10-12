@@ -31,6 +31,7 @@ import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.crud.CrudControllerAPI;
 import tools.dynamia.crud.QueryProjectionBuilder;
 import tools.dynamia.domain.CrudServiceException;
+import tools.dynamia.domain.LoadPlan;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.jdbc.QueryInterruptedException;
 import tools.dynamia.domain.query.DataPaginator;
@@ -39,6 +40,7 @@ import tools.dynamia.domain.query.ListDataSet;
 import tools.dynamia.domain.query.QueryExecuter;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
+import tools.dynamia.commons.BeanMap;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.integration.Containers;
@@ -216,6 +218,12 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
      * Flag indicating whether to automatically reload the entity from database after operations.
      */
     private boolean autoReloadEntity = true;
+
+    /**
+     * Associations (the collection fields of the form) loaded together with the entity being edited, so the form can
+     * show them after the persistence context closes. {@code null} means "resolve it from the default form descriptor".
+     */
+    private LoadPlan formLoadPlan;
 
     /**
      * List of subcrud controllers for managing child entities in master-detail relationships.
@@ -431,7 +439,9 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
      */
     @Override
     public void delete() {
-        if (DomainUtils.isEntity(getSelected())) {
+        if (getSelected() instanceof BeanMap beanMap) {
+            crudService.delete(beanMap.getBeanClass(), (java.io.Serializable) beanMap.getId());
+        } else if (DomainUtils.isEntity(getSelected())) {
             crudService.delete(getSelected().getClass(), DomainUtils.findEntityId(getSelected()));
         } else {
             crudService.delete(getSelected());
@@ -478,6 +488,30 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
             logger.error(e);
             UIMessages.showException(messages.get("searchErrorMessage", e.getMessage()), e);
         }
+    }
+
+    /**
+     * When Open Persistence In View is disabled, attaches a mapper built from the data set view descriptor so the
+     * CrudService returns read-only {@link BeanMap}s created while the persistence context is still open.
+     * A mapper set explicitly by the application is never replaced.
+     *
+     * @param params the query parameters to configure
+     */
+    protected void configureEntityMapper(QueryParameters params) {
+        if (dataSetView != null) {
+            EntityMapperSupport.configure(params, dataSetView.getViewDescriptor());
+        }
+    }
+
+    /**
+     * Returns the real entity for a row that may be a read-only {@link BeanMap} (see {@link #configureEntityMapper}),
+     * reloading it by id. Any other object is returned unchanged.
+     *
+     * @param row an entity or a BeanMap row
+     * @return the entity
+     */
+    protected Object toEntity(Object row) {
+        return EntityMapperSupport.toEntity(crudService, row);
     }
 
     /**
@@ -545,9 +579,24 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     @Override
     public void reloadEntity() {
         if (entity != null && DomainUtils.findEntityId(entity) != null && autoReloadEntity) {
-            entity = crudService.findSingle(entityClass, "id", DomainUtils.findEntityId(entity));
+            entity = crudService.load(entityClass, DomainUtils.findEntityId(entity), getFormLoadPlan());
             autoReloadEntity = true;
         }
+    }
+
+    /**
+     * The associations loaded with the entity being edited: the collection fields of the form. When the CRUD view did
+     * not set one, it is resolved from the default {@code form} descriptor of the entity class.
+     */
+    public LoadPlan getFormLoadPlan() {
+        if (formLoadPlan == null) {
+            formLoadPlan = EntityMapperSupport.loadPlanOf(entityClass, "form");
+        }
+        return formLoadPlan;
+    }
+
+    public void setFormLoadPlan(LoadPlan formLoadPlan) {
+        this.formLoadPlan = formLoadPlan;
     }
 
     /**
@@ -743,7 +792,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     @Override
     public QueryParameters getParams() {
         if (params == null) {
-            params = new QueryParameters();
+            initParams();
         }
         return params;
     }
@@ -754,9 +803,11 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
      */
     @Override
     public void setParams(QueryParameters params) {
-        this.params = params;
-        if (this.getParams() == null) {
-            this.params = new QueryParameters();
+        if (params == null) {
+            initParams();
+        } else {
+            this.params = params;
+            configureEntityMapper(params);
         }
     }
 
@@ -881,6 +932,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
      */
     public void setDataSetView(DataSetView dataSetView) {
         this.dataSetView = dataSetView;
+        configureEntityMapper(getParams());
     }
 
     /**
@@ -944,7 +996,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
             logger = new SLF4JLoggingService(CrudController.class);
         }
 
-        params = new QueryParameters();
+        initParams();
         if (entityClass == null) {
             try {
                 setEntityClass(ObjectOperations.getGenericTypeClass(this));
@@ -956,6 +1008,11 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
 
         newEntity();
         afterInit();
+    }
+
+    private void initParams() {
+        params = new QueryParameters();
+        configureEntityMapper(params);
     }
 
     /**
@@ -1165,7 +1222,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
             beforeEdit();
             var entityId = DomainUtils.findEntityId(ent);
             if (entityId != null) {
-                setEntity(crudService.find(entityClass, entityId));
+                setEntity(crudService.load(entityClass, entityId, getFormLoadPlan()));
             } else {
                 setEntity((E) ent);
             }
@@ -1257,7 +1314,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     @Override
     public void clear() {
         queryResult = null;
-        params = new QueryParameters();
+        initParams();
     }
 
     /**
@@ -1272,7 +1329,7 @@ public class CrudController<E> extends SelectorComposer implements Serializable,
     /**
      * Logs an error message with exception details using the controller's logger.
      *
-     * @param messsage the error message
+     * @param messsage  the error message
      * @param exception the exception to log
      */
     protected void log(String messsage, Throwable exception) {

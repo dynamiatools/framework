@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/microfrontend-bridge",
-  "version": "26.10.0",
+  "version": "26.10.1",
   "website": "https://dynamia.tools",
   "description": "Typed helpers for JS/TS bundles (Vue, React, Svelte, plain JS) embedded via tools.dynamia.zk.ui.MicroFrontend",
   "keywords": [
@@ -56,7 +56,19 @@
   },
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "exports": {
+      ".": {
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        },
+        "require": {
+          "types": "./dist/index.d.cts",
+          "default": "./dist/index.cjs"
+        }
+      }
+    }
   },
   "devDependencies": {
     "@types/node": "^26.4.1",

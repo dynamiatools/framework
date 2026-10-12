@@ -23,7 +23,7 @@
     <parent>
         <groupId>tools.dynamia.modules</groupId>
         <artifactId>tools.dynamia.modules.reports.parent</artifactId>
-        <version>26.10.0</version>
+        <version>26.10.1</version>
     </parent>
 
     <name>DynamiaModules - Reports Core</name>
@@ -50,17 +50,17 @@
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.reports.api</artifactId>
-            <version>26.10.0</version>
+            <version>26.10.1</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.domain.jpa</artifactId>
-            <version>26.10.0</version>
+            <version>26.10.1</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.saas.jpa</artifactId>
-            <version>26.10.0</version>
+            <version>26.10.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -69,18 +69,67 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.reports</artifactId>
-            <version>26.10.0</version>
+            <version>26.10.1</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.templates</artifactId>
-            <version>26.10.0</version>
+            <version>26.10.1</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.web</artifactId>
+            <version>26.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.dashboard.core</artifactId>
+            <version>26.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>1.3.32</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
         </dependency>
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

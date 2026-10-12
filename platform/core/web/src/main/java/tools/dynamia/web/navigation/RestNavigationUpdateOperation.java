@@ -29,6 +29,7 @@ import tools.dynamia.viewers.ViewDescriptor;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 
+
 /**
  * Handles the <em>update</em> operation for the REST navigation API.
  *
@@ -87,8 +88,13 @@ public class RestNavigationUpdateOperation extends AbstractLoggable {
             node.properties().forEach(entry -> {
                 Field field = descriptor.getField(entry.getKey());
                 if (field != null) {
-                    Object fieldValue = JsonViewDescriptorDeserializer.getNodeValue(field.getPropertyInfo(), entry.getValue());
-                    ObjectOperations.invokeSetMethod(entity, field.getPropertyInfo(), fieldValue);
+                    var info = field.getPropertyInfo();
+                    if (info != null && info.isCollection()) {
+                        JsonViewDescriptorDeserializer.applyCollectionPatch(entity, info, entry.getValue());
+                        return;
+                    }
+                    Object fieldValue = JsonViewDescriptorDeserializer.getNodeValue(info, entry.getValue());
+                    ObjectOperations.invokeSetMethod(entity, info, fieldValue);
                 }
             });
         } catch (JacksonException e) {
@@ -98,4 +104,3 @@ public class RestNavigationUpdateOperation extends AbstractLoggable {
         return RestNavigationContext.buildJsonResponse(descriptor, ctx.getCrudService().update(entity), "Updated Successfully");
     }
 }
-

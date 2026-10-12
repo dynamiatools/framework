@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: dynamia-movies
+  threads:
+    virtual:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+server:
+  port: 8484
+  servlet:
+    session:
+      tracking-modes: cookie
+
+# DynamiaTools configuration
+dynamia:
+  app:
+    version: @project.version@
+    name: Dynamia Movies
+    description: "@project.description@"
+    template: DynamicalVue
+    default-skin: Dynamia
+    short-name: Movies
+    base-package: tools.dynamia.demos.movies
+    open-persistence-in-view: false
+  security:
+    jwt-secret-key: dynamia-movies-demo-secret-key-change-me-0123456789
+  reports:
+    designer-roles: ROLE_ADMIN,ADMIN

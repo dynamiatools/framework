@@ -1,0 +1,1 @@
+{"flowId":"f1","type":"CHOICE","title":"Storage","data":{"options":[{"key":"local","label":"LOCAL"},{"key":"s3","label":"S3"}],"multiple":false},"resumeToken":"tok.sig"}

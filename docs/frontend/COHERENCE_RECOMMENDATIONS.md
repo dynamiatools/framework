@@ -381,7 +381,7 @@ const client = new DynamiaClient({
     enabled: true,
     ttl: 60000, // 60 seconds
     policies: {
-      'GET /api/metadata': 'long', // 1 hour
+      'GET /apps/api/metadata': 'long', // 1 hour
       'GET /api/crud': 'short',    // 5 minutes
     },
   },

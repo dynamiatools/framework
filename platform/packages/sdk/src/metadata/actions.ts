@@ -20,18 +20,18 @@ export class ActionsApi {
   }
 
   /**
-   * POST /api/app/metadata/actions/{action}
+   * POST /apps/api/metadata/actions/{action}
    * Execute a global action.
    */
   executeGlobal(action: string, request?: ActionExecutionRequest): Promise<ActionExecutionResponse> {
     return this.http.post<ActionExecutionResponse>(
-      `/api/app/metadata/actions/${encodeURIComponent(action)}`,
+      `/apps/api/metadata/actions/${encodeURIComponent(action)}`,
       request ?? {},
     );
   }
 
   /**
-   * POST /api/app/metadata/entities/{id}/action/{action}
+   * POST /apps/api/metadata/entities/{id}/action/{action}
    * Execute an entity-scoped action.
    *
    * @param entityId - the entity id (its simple class name, e.g. `"Invoice"`), not a
@@ -43,7 +43,7 @@ export class ActionsApi {
     request?: ActionExecutionRequest,
   ): Promise<ActionExecutionResponse> {
     return this.http.post<ActionExecutionResponse>(
-      `/api/app/metadata/entities/${encodeURIComponent(entityId)}/action/${encodeURIComponent(action)}`,
+      `/apps/api/metadata/entities/${encodeURIComponent(entityId)}/action/${encodeURIComponent(action)}`,
       request ?? {},
     );
   }

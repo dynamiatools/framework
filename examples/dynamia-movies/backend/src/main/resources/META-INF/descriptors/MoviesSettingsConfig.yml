@@ -1,0 +1,33 @@
+view: config
+id: MoviesSettingsCFG
+fields:
+  siteName:
+    label: Site name
+    params:
+      parameterName: MOVIES_SITE_NAME
+      defaultValue: Dynamia Movies
+  tagline:
+    label: Tagline
+    description: Shown under the site name
+    params:
+      parameterName: MOVIES_TAGLINE
+  featuredLimit:
+    label: Featured movies
+    description: How many movies the home page features
+    params:
+      parameterName: MOVIES_FEATURED_LIMIT
+      defaultValue: "12"
+  maintenance:
+    label: Maintenance mode
+    component: checkbox
+    params:
+      parameterName: MOVIES_MAINTENANCE
+  # a component only the ZK front end knows: Vue shows it as a text input
+  storage:
+    label: Posters storage
+    component: storagebox
+    params:
+      parameterName: MOVIES_POSTERS_STORAGE
+
+layout:
+  columns: 2

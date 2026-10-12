@@ -12,7 +12,7 @@ import type { ViewDescriptor } from '@dynamia-tools/sdk';
  *
  * Example:
  * <pre>{@code
- * const viewer = new VueViewer({ viewType: 'form', beanClass: 'com.example.Book', client });
+ * const viewer = new VueViewer({ viewType: 'form', beanClass: 'Book', client });
  * await viewer.initialize();
  * // viewer.currentView.value is now reactive
  * }</pre>

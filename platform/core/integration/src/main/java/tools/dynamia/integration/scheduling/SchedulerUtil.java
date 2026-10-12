@@ -24,6 +24,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.integration.*;
+import tools.dynamia.integration.context.ObjectsContext;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -115,62 +116,8 @@ public class SchedulerUtil {
     }
 
     public static Runnable getWithContext(Runnable runnable) {
-
-
-        SimpleObjectContainer context = buildAsyncContext();
-
-        // return runnable that set the context before run and clear after run
-        return () -> {
-            ThreadLocalObjectContainer.set(context);
-            try {
-                runnable.run();
-            } finally {
-                ThreadLocalObjectContainer.clear();
-            }
-        };
+        return ObjectsContext.capture().wrap(runnable);
     }
-
-    /**
-     * Build the async context from current thread local context and
-     * ThreadLocalObjectAware beans in containers
-     *
-     * @return the simple object container
-     */
-    private static SimpleObjectContainer buildAsyncContext() {
-        SimpleObjectContainer context = new SimpleObjectContainer();
-        if (ThreadLocalObjectContainer.isInitialized()) {
-            // copy current thread context
-            ThreadLocalObjectContainer.copyTo(context);
-        } else {
-            Collection<ThreadLocalObjectAware> sessionBeans = Containers.get().findObjects(ThreadLocalObjectAware.class);
-            if (sessionBeans != null) {
-                sessionBeans.forEach(bean -> {
-                    if (bean instanceof CloneableThreadLocalObject cloneable) {
-                        try {
-                            context.addObject(cloneable.clone());
-                        } catch (Exception e) {
-                            context.addObject(bean); // fallback a referencia
-                        }
-                    } else {
-                        context.addObject(bean);
-                    }
-                });
-            }
-
-            // add context objects from providers
-            Collection<ThreadLocalContextProvider> providers = Containers.get().findObjects(ThreadLocalContextProvider.class);
-            if (providers != null) {
-                providers.forEach(provider -> {
-                    Map<String, Object> contextObjects = provider.getContextObjects();
-                    if (contextObjects != null) {
-                        contextObjects.forEach(context::addObject);
-                    }
-                });
-            }
-        }
-        return context;
-    }
-
 
     /**
      * Run the WorkerTask asynchronously using a Virtual Thread executor from {@link VT} helper class.
@@ -192,17 +139,7 @@ public class SchedulerUtil {
      * @return the future
      */
     public static <T> CompletableFuture<T> runWithResult(Supplier<T> task) {
-        SimpleObjectContainer context = buildAsyncContext();
-        Supplier<T> supplierWithContext = () -> {
-            ThreadLocalObjectContainer.set(context);
-            try {
-                return task.get();
-            } finally {
-                ThreadLocalObjectContainer.clear();
-            }
-        };
-
-        return CompletableFuture.supplyAsync(supplierWithContext, VT.executor());
+        return CompletableFuture.supplyAsync(ObjectsContext.capture().wrapSupplier(task), VT.executor());
     }
 
     /**

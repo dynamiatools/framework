@@ -1,0 +1,64 @@
+:host, :root {
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --ink: #1d2433;
+  --muted: #667085;
+  --line: #e4e7ee;
+  --accent: #4f46e5;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host, :root {
+    --bg: #12151d;
+    --card: #1b2030;
+    --ink: #e8ebf3;
+    --muted: #9aa3b8;
+    --line: #2b3247;
+    --accent: #818cf8;
+  }
+}
+
+/* The page is mounted in the shadow root of <dynamia-embed>, so everything is scoped to .insights */
+.insights, .insights * { box-sizing: border-box; }
+
+.insights {
+  padding: 20px 24px 40px;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+.insights-head h1 { margin: 0; font-size: 22px; }
+.insights-head p { margin: 4px 0 18px; color: var(--muted); }
+.insights code { background: var(--line); padding: 1px 5px; border-radius: 4px; }
+.hint { color: var(--muted); padding: 40px 0; text-align: center; }
+
+/* Cards around every dashboard widget */
+.dynamia-dashboard { gap: 16px; }
+.dynamia-dashboard-cell, .dynamia-widget {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.dynamia-dashboard-cell h3, .dynamia-widget-title { margin: 0 0 8px; font-size: 13px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+
+.reports-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; align-items: start; }
+.reports-layout > aside, .reports-layout > section {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  min-width: 0;
+}
+@media (max-width: 800px) { .reports-layout { grid-template-columns: 1fr; } }
+
+.feed { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.feed li { border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.feed li:last-child { border-bottom: 0; }
+.feed-top { display: flex; justify-content: space-between; gap: 8px; }
+.feed .score { color: var(--accent); font-weight: 700; }
+.feed p { margin: 2px 0; color: var(--muted); }
+.feed small { color: var(--muted); }
+.feed .empty { color: var(--muted); }
