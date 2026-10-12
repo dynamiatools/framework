@@ -32,9 +32,19 @@ Starting with version **26.2.0**, Dynamia Platform adopts **Calendar Versioning 
 - No more version mismatches between platform components!
 
 **Examples**:
-- `26.2.0` → February 2026, first release
-- `26.2.1` → February 2026, second release (hotfix or minor update)
+- `26.10.0` → October 2026, monthly release
+- `26.10.1` → October 2026, maintenance release (fixes and small improvements)
 - `26.12.3` → December 2026, fourth release
+
+**Where each version is published** (details in [docs/RELEASING.md](docs/RELEASING.md)):
+
+| Version | Maven Central | GitHub Packages | npm |
+|---|---|---|---|
+| `YY.MM.0` (monthly release) | yes | yes | yes |
+| `YY.MM.N`, N > 0 (maintenance) | no | yes | yes |
+| `*-SNAPSHOT` (`next` branch) | no | yes | no |
+
+Maven Central limits what an organization can publish per month, so it only receives the monthly `YY.MM.0` release. Maintenance versions are published to this repository's [GitHub Packages](https://github.com/orgs/dynamiatools/packages?repo_name=framework), which requires a GitHub token with `read:packages` even to download public packages. Unless you need a maintenance fix, use the latest `YY.MM.0` from Maven Central.
 
 ## 🚀 What Makes Dynamia Platform Special
 
@@ -265,19 +275,19 @@ Enterprise authentication and authorization:
        <dependency>
            <groupId>tools.dynamia</groupId>
            <artifactId>tools.dynamia.app</artifactId>
-           <version>26.5.2</version>
+           <version>26.10.0</version>
        </dependency>
    
        <dependency>
            <groupId>tools.dynamia</groupId>
            <artifactId>tools.dynamia.zk</artifactId>
-           <version>26.5.2</version>
+           <version>26.10.0</version>
        </dependency>
    
        <dependency>
            <groupId>tools.dynamia</groupId>
            <artifactId>tools.dynamia.domain.jpa</artifactId>
-           <version>26.5.2</version>
+           <version>26.10.0</version>
        </dependency>
    </dependencies>
    ```
@@ -285,9 +295,9 @@ Enterprise authentication and authorization:
    **Gradle** (`build.gradle`)
    ```groovy
    dependencies {
-       implementation 'tools.dynamia:tools.dynamia.app:26.5.2'
-       implementation 'tools.dynamia:tools.dynamia.zk:26.5.2'
-       implementation 'tools.dynamia:tools.dynamia.domain.jpa:26.5.2'
+       implementation 'tools.dynamia:tools.dynamia.app:26.10.0'
+       implementation 'tools.dynamia:tools.dynamia.zk:26.10.0'
+       implementation 'tools.dynamia:tools.dynamia.domain.jpa:26.10.0'
    }
    ```
 
@@ -326,61 +336,61 @@ Enterprise authentication and authorization:
 
 ### Adding Extensions
 
-To use any of the built-in extensions, simply add their dependencies. **All extensions now share the same version (26.5.2)** thanks to unified CalVer:
+To use any of the built-in extensions, simply add their dependencies. **All extensions now share the same version (26.10.0)** thanks to unified CalVer:
 
 ```xml
 <!-- Multi-tenancy / SaaS -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.saas</artifactId>
-    <version>26.5.2</version>
+    <version>26.10.0</version>
 </dependency>
 
 <!-- Email & SMS -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.email</artifactId>
-    <version>26.5.2</version>
+    <version>26.10.0</version>
 </dependency>
 
 <!-- Entity Files with S3 Support -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.entityfiles</artifactId>
-    <version>26.5.2</version>
+    <version>26.10.0</version>
 </dependency>
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.entityfiles.s3</artifactId>
-    <version>26.5.2</version>
+    <version>26.10.0</version>
 </dependency>
 
 <!-- Dashboard -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.dashboard</artifactId>
-    <version>26.5.2</version>
+    <version>26.10.0</version>
 </dependency>
 
 <!-- Reporting -->
 <dependency>
     <groupId>tools.dynamia.reports</groupId>
     <artifactId>tools.dynamia.reports.core</artifactId>
-    <version>26.5.2</version>
+    <version>26.10.0</version>
 </dependency>
 
 <!-- File Importer -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.fileimporter</artifactId>
-    <version>26.5.2</version>
+    <version>26.10.0</version>
 </dependency>
 
 <!-- Security -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.security</artifactId>
-    <version>26.5.2</version>
+    <version>26.10.0</version>
 </dependency>
 ```
 
@@ -400,7 +410,7 @@ npm install @dynamia-tools/reports-sdk
 npm install @dynamia-tools/buckie
 ```
 
-> **💡 Pro Tip**: With CalVer, all Dynamia Platform components use the same version. Just use `26.5.2` for everything!
+> **💡 Pro Tip**: With CalVer, all Dynamia Platform components use the same version. Just use `26.10.0` for everything!
 
 > **Note**: All artifacts are available on [Maven Central](https://search.maven.org/search?q=tools.dynamia) and npm packages on [npmjs.com](https://www.npmjs.com/search?q=%40dynamia-tools)
 
@@ -523,7 +533,7 @@ Java 11+ and ecosystem update:
 - 🚀 **Spring Boot 4** - Next-gen Spring ecosystem
 - 🎨 **ZK 10+** - Modern web UI capabilities
 - 🔄 **Synchronized Releases** - Core, extensions, starters, and themes share the same version
-- 🎯 **Simplified Dependencies** - One version to rule them all (e.g., 26.5.2 for February 2026)
+- 🎯 **Simplified Dependencies** - One version to rule them all (e.g., 26.10.0 for February 2026)
 - ⚡ **Enhanced Performance** - Optimized for modern JVM and cloud environments
 - 🛡️ **Production Hardened** - Battle-tested in enterprise environments
 
