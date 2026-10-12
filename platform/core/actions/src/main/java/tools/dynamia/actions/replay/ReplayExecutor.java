@@ -46,7 +46,7 @@ public final class ReplayExecutor {
     /** Messages the action showed in the final pass, in {@link ActionExecutionResponse#getParams()}. */
     public static final String NOTIFICATIONS_PARAM = "notifications";
     /** Path of the transfers endpoint; downloads are fetched from {@code TRANSFERS_PATH/{ref}}. */
-    public static final String TRANSFERS_PATH = "/api/app/transfers";
+    public static final String TRANSFERS_PATH = "/apps/api/transfers";
     /** Response param with the files the action gave to the user: a list of {@code {name, contentType, size, url}}. */
     public static final String DOWNLOADS_PARAM = "downloads";
 

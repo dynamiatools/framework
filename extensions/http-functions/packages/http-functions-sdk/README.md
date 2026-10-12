@@ -1,7 +1,7 @@
 # @dynamia-tools/http-functions-sdk
 
 TypeScript / JavaScript client for the Dynamia **HTTP Functions** extension: functions exposed as HTTP endpoints under
-`/api/dynamia/fx/{functionName}`. It delegates HTTP, auth and errors to the core `@dynamia-tools/sdk` client.
+`/api/functions/{functionName}`. It delegates HTTP, auth and errors to the core `@dynamia-tools/sdk` client.
 
 ## Installation
 

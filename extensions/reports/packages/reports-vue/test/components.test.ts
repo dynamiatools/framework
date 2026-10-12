@@ -43,7 +43,7 @@ describe('ReportList', () => {
   ];
 
   it('lists the groups and emits the selected report', async () => {
-    const { client } = makeClient({ '/api/reports/v2/catalog': catalog });
+    const { client } = makeClient({ '/apps/api/reports/catalog': catalog });
     const wrapper = mount(DynamiaReportList, { props: { client } });
     await flushPromises();
 
@@ -55,7 +55,7 @@ describe('ReportList', () => {
   });
 
   it('filters by name, title or description and hides empty groups', async () => {
-    const { client } = makeClient({ '/api/reports/v2/catalog': catalog });
+    const { client } = makeClient({ '/apps/api/reports/catalog': catalog });
     const wrapper = mount(DynamiaReportList, { props: { client } });
     await flushPromises();
 
@@ -68,7 +68,7 @@ describe('ReportList', () => {
   });
 
   it('shows errors and supports custom labels', async () => {
-    const { client } = makeClient({ '/api/reports/v2/catalog': () => ({ status: 500, body: { message: 'boom' } }) });
+    const { client } = makeClient({ '/apps/api/reports/catalog': () => ({ status: 500, body: { message: 'boom' } }) });
     const wrapper = mount(DynamiaReportList, { props: { client, labels: spanishLabels } });
     await flushPromises();
 
@@ -242,14 +242,14 @@ describe('ReportViewer', () => {
 
   function routes(extra: Record<string, unknown> = {}) {
     return makeClient({
-      '/api/reports/v2/7/filters/': [{ value: 'north', label: 'North' }],
-      '/api/reports/v2/7/export': () => ({ blob: new Blob(['x']), contentType: 'text/csv' }),
-      '/api/reports/v2/7/run': () => ({
+      '/apps/api/reports/7/filters/': [{ value: 'north', label: 'North' }],
+      '/apps/api/reports/7/export': () => ({ blob: new Blob(['x']), contentType: 'text/csv' }),
+      '/apps/api/reports/7/run': () => ({
         body: runResult({
           charts: [{ index: 0, title: 'Totals', type: 'bar', labels: ['north'], datasets: [{ label: 'Totals', data: [1], backgroundColor: ['#111'] }] }],
         }),
       }),
-      '/api/reports/v2/7': report,
+      '/apps/api/reports/7': report,
       ...extra,
     });
   }
@@ -276,7 +276,7 @@ describe('ReportViewer', () => {
   });
 
   it('can hide the charts', async () => {
-    const { client } = routes({ '/api/reports/v2/7': definition([]) });
+    const { client } = routes({ '/apps/api/reports/7': definition([]) });
     mount(DynamiaReportViewer, { props: { id: 7, client, showCharts: false } });
     await flushPromises();
     expect(chartCtor).not.toHaveBeenCalled();
@@ -284,8 +284,8 @@ describe('ReportViewer', () => {
 
   it('warns when the result is truncated', async () => {
     const { client } = routes({
-      '/api/reports/v2/7/run': () => ({ body: runResult({ truncated: true }) }),
-      '/api/reports/v2/7': definition([]),
+      '/apps/api/reports/7/run': () => ({ body: runResult({ truncated: true }) }),
+      '/apps/api/reports/7': definition([]),
     });
     const wrapper = mount(DynamiaReportViewer, { props: { id: 7, client } });
     await flushPromises();
@@ -295,8 +295,8 @@ describe('ReportViewer', () => {
 
   it('shows run errors without losing the filters', async () => {
     const { client } = routes({
-      '/api/reports/v2/7/run': () => ({ status: 400, body: { message: 'Invalid value for filter [year]' } }),
-      '/api/reports/v2/7': definition([filter('year', { dataType: 'NUMBER' })]),
+      '/apps/api/reports/7/run': () => ({ status: 400, body: { message: 'Invalid value for filter [year]' } }),
+      '/apps/api/reports/7': definition([filter('year', { dataType: 'NUMBER' })]),
     });
     const wrapper = mount(DynamiaReportViewer, { props: { id: 7, client } });
     await flushPromises();
@@ -306,7 +306,7 @@ describe('ReportViewer', () => {
   });
 
   it('shows definition errors and a custom error slot', async () => {
-    const { client } = routes({ '/api/reports/v2/7': () => ({ status: 403, body: { message: 'Access denied to this report' } }) });
+    const { client } = routes({ '/apps/api/reports/7': () => ({ status: 403, body: { message: 'Access denied to this report' } }) });
     const wrapper = mount(DynamiaReportViewer, {
       props: { id: 7, client },
       slots: { error: '<template #error="{ error }"><b class="custom">{{ error }}</b></template>' },
@@ -318,8 +318,8 @@ describe('ReportViewer', () => {
 
   it('sorts and pages through the table', async () => {
     const { client, fetchMock } = routes({
-      '/api/reports/v2/7/run': () => ({ body: runResult({ total: 60 }) }),
-      '/api/reports/v2/7': definition([]),
+      '/apps/api/reports/7/run': () => ({ body: runResult({ total: 60 }) }),
+      '/apps/api/reports/7': definition([]),
     });
     const wrapper = mount(DynamiaReportViewer, { props: { id: 7, client } });
     await flushPromises();
@@ -335,7 +335,7 @@ describe('ReportViewer', () => {
   });
 
   it('exports in the chosen format', async () => {
-    const { client, fetchMock } = routes({ '/api/reports/v2/7': definition([]) });
+    const { client, fetchMock } = routes({ '/apps/api/reports/7': definition([]) });
     const create = vi.fn(() => 'blob:x');
     vi.stubGlobal('URL', Object.assign(URL, { createObjectURL: create, revokeObjectURL: vi.fn() }));
     const wrapper = mount(DynamiaReportViewer, { props: { id: 7, client } });

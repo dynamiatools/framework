@@ -86,7 +86,7 @@ In Node.js you will typically use `node-fetch` (or a global `fetch` polyfill) an
 
 `ReportsApi` has three groups of methods.
 
-### UI API (`/api/reports/v2`)
+### UI API (`/apps/api/reports`)
 
 | method | purpose |
 |---|---|
@@ -118,7 +118,7 @@ Filter values are sent by filter name: text, number, boolean, date `yyyy-MM-dd`,
 `HH:mm:ss`, enum name or entity id. A missing required filter, an invalid value or an unknown sort column answers `400`
 with the problem in `DynamiaApiError.message`; a report the user cannot access answers `404` or `403`.
 
-### Designer API (`/api/reports/v2/design`)
+### Designer API (`/apps/api/reports/design`)
 
 Only for users with a designer role (`dynamia.reports.designer-roles`), `403` for everyone else.
 

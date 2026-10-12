@@ -33,7 +33,7 @@ describe('DynamiaApiError', () => {
       expect(err).toBeInstanceOf(DynamiaApiError);
       const apiErr = err as DynamiaApiError;
       expect(apiErr.status).toBe(403);
-      expect(apiErr.url).toContain('/api/app/metadata');
+      expect(apiErr.url).toContain('/apps/api/metadata');
       expect(apiErr.message).toBe('Forbidden');
     }
   });

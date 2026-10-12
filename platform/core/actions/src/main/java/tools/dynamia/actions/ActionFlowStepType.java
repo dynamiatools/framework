@@ -66,14 +66,14 @@ public enum ActionFlowStepType {
     /**
      * Asks the user for files. {@link ActionFlowStep#getData()} carries {@code accept} (as in an HTML {@code accept}
      * attribute), {@code multiple}, {@code maxFiles}, {@code maxFileSize} and {@code maxTotalSize}. The client sends each
-     * file to {@code /api/app/transfers} and answers with a list of references {@code {ref}}; the server resolves them,
+     * file to {@code /apps/api/transfers} and answers with a list of references {@code {ref}}; the server resolves them,
      * checks owner, expiry, type and sizes, and hands the action streaming handles. An empty list means the user cancelled.
      */
     UPLOAD,
 
     /**
      * A long task is running in the background. {@link ActionFlowStep#getData()} carries {@code jobId} and {@code title}. The
-     * client polls {@code GET /api/app/jobs/{jobId}} ({@code state}, {@code current}, {@code max}, {@code message}) and, when
+     * client polls {@code GET /apps/api/jobs/{jobId}} ({@code state}, {@code current}, {@code max}, {@code message}) and, when
      * the job is no longer {@code RUNNING}, answers with {@code {jobId, state}}. The server reads the real state of the job
      * itself (the answer only says the client stopped waiting): if it still runs the step is asked again; otherwise the
      * action goes on with {@code onFinish} or {@code onError}, and the task is never run twice.

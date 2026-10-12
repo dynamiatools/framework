@@ -22,11 +22,11 @@ import java.nio.charset.StandardCharsets;
  * REST API to build report UIs: catalog, definition (filters, columns, charts), filter options, execution with paging
  * and sorting, and exports.
  * <pre>
- * GET  /api/reports/v2/catalog
- * GET  /api/reports/v2/{id}
- * GET  /api/reports/v2/{id}/filters/{filter}/options?q=&amp;limit=
- * POST /api/reports/v2/{id}/run
- * POST /api/reports/v2/{id}/export?format=xlsx|csv|pdf
+ * GET  /apps/api/reports/catalog
+ * GET  /apps/api/reports/{id}
+ * GET  /apps/api/reports/{id}/filters/{filter}/options?q=&amp;limit=
+ * POST /apps/api/reports/{id}/run
+ * POST /apps/api/reports/{id}/export?format=xlsx|csv|pdf
  * </pre>
  * The caller must be authenticated. Only active reports of the current account (and the system account) that pass
  * the report access policies are visible; anything else answers {@code 404}. Errors use {@link ErrorResult}.
@@ -37,7 +37,7 @@ import java.nio.charset.StandardCharsets;
 @RequestMapping(ReportsApiController.PATH)
 public class ReportsApiController extends AbstractReportsApiController {
 
-    public static final String PATH = "/api/reports/v2";
+    public static final String PATH = "/apps/api/reports";
 
     private final ReportsApiService service;
 

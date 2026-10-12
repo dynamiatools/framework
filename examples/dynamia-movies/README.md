@@ -17,7 +17,7 @@ repository (`26.10.1-SNAPSHOT`).
 - **Automatic REST API** (`CrudPage` → `/api/{module}/{page}`): filters by field (`?year=1999`, `?genresText=Drama`,
   `?movie.id=7`), sorting (`_sort`, `_order`), paging and `json` view descriptors. A hidden `public` module publishes
   read-only copies under `/api/public/**` (open to anonymous users), see `PublicApiModuleProvider`.
-- **Reports** (DynamiaReports) — 10 reports stored as data (SQL and JPQL, filters, charts), REST API `/api/reports/v2`,
+- **Reports** (DynamiaReports) — 10 reports stored as data (SQL and JPQL, filters, charts), REST API `/apps/api/reports`,
   the `report` dashboard widget and `@dynamia-tools/reports-vue` (list, viewer, filters, export).
 - **Dashboard** (DynamiaDashboard) — `MoviesDashboard.yml` + `@dynamia-tools/dashboard-vue`, with a custom Java widget
   (`LatestReviewsWidget`) and its own Vue renderer.
@@ -60,8 +60,8 @@ The database is HSQLDB in memory: every start loads the catalog again.
  browser ── public site (Vue, :5173) ──/api/public/**──┐
                                                        ├── Spring Boot (:8484) ── HSQLDB
  browser ── backoffice (Dynamical Vue theme) ──/api/**─┘      │
-            ├─ CRUD pages (view descriptors)                  ├─ reports.core  (/api/reports/v2)
-            └─ Dashboard / Reports ← <dynamia-embed> imports  └─ dashboard.core (/api/dashboard)
+            ├─ CRUD pages (view descriptors)                  ├─ reports.core  (/apps/api/reports)
+            └─ Dashboard / Reports ← <dynamia-embed> imports  └─ dashboard.core (/apps/api/dashboard)
                /page-embed/insights/* (a JS module that mounts frontend/insights)
 ```
 

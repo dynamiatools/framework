@@ -80,7 +80,7 @@ class JobsControllerTest {
         }, FlowPrincipal.current());
         started.await(5, TimeUnit.SECONDS);
 
-        mvc.perform(get("/api/app/jobs/" + id).accept(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/apps/api/jobs/" + id).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.state", is("RUNNING")))
                 .andExpect(jsonPath("$.title", is("Moving files")))
@@ -92,7 +92,7 @@ class JobsControllerTest {
         for (int i = 0; i < 100 && !jobs.status(id, FlowPrincipal.current()).orElseThrow().state().isFinished(); i++) {
             Thread.sleep(20);
         }
-        mvc.perform(get("/api/app/jobs/" + id)).andExpect(jsonPath("$.state", is("DONE")));
+        mvc.perform(get("/apps/api/jobs/" + id)).andExpect(jsonPath("$.state", is("DONE")));
     }
 
     @Test
@@ -104,7 +104,7 @@ class JobsControllerTest {
             Thread.sleep(20);
         }
 
-        mvc.perform(get("/api/app/jobs/" + id))
+        mvc.perform(get("/apps/api/jobs/" + id))
                 .andExpect(jsonPath("$.state", is("FAILED")))
                 .andExpect(jsonPath("$.error", is("disk full")));
     }
@@ -115,8 +115,8 @@ class JobsControllerTest {
         }, FlowPrincipal.current());
 
         user = "luis";
-        mvc.perform(get("/api/app/jobs/" + id)).andExpect(status().isNotFound());
+        mvc.perform(get("/apps/api/jobs/" + id)).andExpect(status().isNotFound());
         user = "ana";
-        mvc.perform(get("/api/app/jobs/nope")).andExpect(status().isNotFound());
+        mvc.perform(get("/apps/api/jobs/nope")).andExpect(status().isNotFound());
     }
 }

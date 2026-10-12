@@ -129,14 +129,14 @@ class DashboardRestControllerTest {
     }
 
     private static MockHttpServletRequest authenticatedRequest() {
-        var request = new MockHttpServletRequest("GET", "/api/dashboard");
+        var request = new MockHttpServletRequest("GET", "/apps/api/dashboard");
         request.setUserPrincipal(() -> "user");
         return request;
     }
 
     @Test
     void anonymousCallerIs401() {
-        var response = controller.getWidget("mainDashboard", "totalSales", Map.of(), new MockHttpServletRequest("GET", "/api/dashboard"));
+        var response = controller.getWidget("mainDashboard", "totalSales", Map.of(), new MockHttpServletRequest("GET", "/apps/api/dashboard"));
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertNull(widget.updated);

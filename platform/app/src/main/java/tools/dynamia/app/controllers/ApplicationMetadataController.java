@@ -41,14 +41,14 @@ import java.util.function.Predicate;
  * <p>
  * Endpoints:
  * <ul>
- *   <li>GET /api/app/metadata - Application metadata</li>
- *   <li>GET /api/app/metadata/navigation - Navigation tree</li>
- *   <li>GET /api/app/metadata/actions - Global actions metadata</li>
- *   <li>POST /api/app/metadata/actions/{action} - Execute global action</li>
- *   <li>GET /api/app/metadata/entities - Entities metadata</li>
- *   <li>GET /api/app/metadata/entities/{id} - Metadata for a specific entity, by id (simple class name)</li>
- *   <li>GET /api/app/metadata/entities/by-path?path={virtualPath} - Metadata for the CrudPage registered at that navigation virtual path</li>
- *   <li>GET /api/app/metadata/views/{id} - A view descriptor by id, for descriptors not bound to an entity (e.g. dashboards)</li>
+ *   <li>GET /apps/api/metadata - Application metadata</li>
+ *   <li>GET /apps/api/metadata/navigation - Navigation tree</li>
+ *   <li>GET /apps/api/metadata/actions - Global actions metadata</li>
+ *   <li>POST /apps/api/metadata/actions/{action} - Execute global action</li>
+ *   <li>GET /apps/api/metadata/entities - Entities metadata</li>
+ *   <li>GET /apps/api/metadata/entities/{id} - Metadata for a specific entity, by id (simple class name)</li>
+ *   <li>GET /apps/api/metadata/entities/by-path?path={virtualPath} - Metadata for the CrudPage registered at that navigation virtual path</li>
+ *   <li>GET /apps/api/metadata/views/{id} - A view descriptor by id, for descriptors not bound to an entity (e.g. dashboards)</li>
  * </ul>
  *
  * @author Mario A. Serrano Leones
@@ -65,7 +65,7 @@ public class ApplicationMetadataController {
     /**
      * Base path for all metadata endpoints.
      */
-    public static final String PATH = "/api/app/metadata";
+    public static final String PATH = "/apps/api/metadata";
     /**
      * Loader for application metadata.
      */

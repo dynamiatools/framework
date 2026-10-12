@@ -3,7 +3,7 @@ import type { FunctionCallOptions, FunctionParams, FunctionResponse } from './ty
 
 /**
  * Access the HTTP Functions extension REST API.
- * Base path: /api/dynamia/fx
+ * Base path: /api/functions
  *
  * A function answers either structured JSON (`call`) or a binary payload such as a PDF or an image
  * (`callBinary`). Which one is decided by the function, not by the client.
@@ -19,7 +19,7 @@ export class FunctionsApi {
   }
 
   /**
-   * POST /api/dynamia/fx/{functionName} — Calls a function that returns JSON and resolves with its `data`.
+   * POST /api/functions/{functionName} — Calls a function that returns JSON and resolves with its `data`.
    *
    * @param functionName - the function name, e.g. `WhatsApp.sendMessage`
    * @param params - the function parameters
@@ -41,7 +41,7 @@ export class FunctionsApi {
   }
 
   /**
-   * POST /api/dynamia/fx/{functionName} — Calls a function that returns a binary payload (e.g. a file).
+   * POST /api/functions/{functionName} — Calls a function that returns a binary payload (e.g. a file).
    *
    * @param functionName - the function name
    * @param params - the function parameters
@@ -58,6 +58,6 @@ export class FunctionsApi {
 
   private post<T>(functionName: string, params?: FunctionParams, options?: FunctionCallOptions): Promise<T> {
     const query = options?.version !== undefined ? `?v=${encodeURIComponent(String(options.version))}` : '';
-    return this.http.post<T>(`/api/dynamia/fx/${encodeURIComponent(functionName)}${query}`, { params: params ?? {} });
+    return this.http.post<T>(`/api/functions/${encodeURIComponent(functionName)}${query}`, { params: params ?? {} });
   }
 }

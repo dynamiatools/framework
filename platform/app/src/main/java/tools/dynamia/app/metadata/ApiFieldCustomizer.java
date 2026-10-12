@@ -36,7 +36,7 @@ import java.util.List;
  * <ul>
  *   <li><b>Enums:</b> the {@code ENUM_CONSTANTS} param, with the constant names, so a combobox has its options.</li>
  *   <li><b>Entities and collections of entities:</b> the {@code entityAlias} param, so the client can search the
- *   referenced entity with {@code /api/app/metadata/entities/ref/{alias}/search}. Entities that do not declare an
+ *   referenced entity with {@code /apps/api/metadata/entities/ref/{alias}/search}. Entities that do not declare an
  *   {@code EntityReferenceRepository} get a {@link DefaultEntityReferenceRepository} registered on demand.</li>
  * </ul>
  * Params already set by the view descriptor are never overwritten.

@@ -102,10 +102,10 @@ When generating frontend code for Dynamia Platform, prefer the current APIs from
 ### `@dynamia-tools/sdk`
 
 - Use `new DynamiaClient({ baseUrl, token? })` as the entry point.
-- Prefer `baseUrl` as app origin (for example `https://app.example.com`), because SDK endpoints already include `/api/...` internally.
+- Prefer `baseUrl` as app origin (for example `https://app.example.com`), because SDK endpoints already include `/api/...` (integrations) or `/apps/api/...` (local: metadata, dashboard, reports UI, crud-service) internally.
 - Use `client.metadata.getNavigation()` for menus/routing (shape: `NavigationTree.navigation`, not `modules/groups/pages`).
 - Use `client.crud(path)` for `CrudPage` virtual paths (`findAll`, `findById`, `create`, `update`, `delete`).
-- Use `client.crudService(className)` only for class-name based `/crud-service` use cases.
+- Use `client.crudService(className)` only for class-name based `/apps/api/crud-service` use cases.
 - `findAll()` returns `CrudListResult` with `content`, `total`, `page`, `pageSize`, `totalPages`.
 - Handle API failures with `DynamiaApiError` (`status`, `url`, `body`).
 

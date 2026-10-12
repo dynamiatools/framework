@@ -73,7 +73,7 @@ this data, so a Vue-only application had enums without options and entity fields
 `entityAlias` is the one of the entity's `EntityReferenceRepository`, or the `@Reference` value. An entity without a
 repository gets a `DefaultEntityReferenceRepository` registered on demand (searches the first of `name`, `title`,
 `fullName`, `label`, `description`). Params already set in the descriptor are never overwritten. The pickers search with
-`GET /api/app/metadata/entities/ref/{alias}/search?q=`.
+`GET /apps/api/metadata/entities/ref/{alias}/search?q=`.
 
 ## Saving collections
 

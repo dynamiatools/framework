@@ -524,7 +524,7 @@ public class ActivateAction extends AbstractCrudAction {
 ### Pattern: One action for ZK and for REST/JS front ends (headless)
 
 Write the action once, against the UI-neutral ports, and mark it `HeadlessCapable`. A ZK desktop runs it as always; a
-REST client (Vue, React, mobile) runs the same class through `/api/app/metadata/entities/{id}/action/{action}`, and the
+REST client (Vue, React, mobile) runs the same class through `/apps/api/metadata/entities/{id}/action/{action}`, and the
 questions the action asks (`UIMessages.showQuestion`, `showInput`) reach the client as steps of the action flow protocol.
 
 ```java

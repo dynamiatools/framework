@@ -3,7 +3,7 @@ import type { DashboardWidgetParams, DashboardWidgetResponse } from './types.js'
 
 /**
  * Access the Dashboard extension REST API.
- * Base path: /api/dashboard
+ * Base path: /apps/api/dashboard
  *
  * The layout and the widget slots of a dashboard come from its view descriptor
  * (`client.metadata.getView(id)` and {@link resolveDashboardLayout}); this API only loads widget data.
@@ -16,7 +16,7 @@ export class DashboardApi {
   }
 
   /**
-   * GET /api/dashboard/{descriptorId}/widgets/{field} — Loads a widget: its definition and current data.
+   * GET /apps/api/dashboard/{descriptorId}/widgets/{field} — Loads a widget: its definition and current data.
    *
    * @param descriptorId - the dashboard view descriptor id
    * @param field - the descriptor field name the widget is bound to
@@ -29,7 +29,7 @@ export class DashboardApi {
     params?: DashboardWidgetParams,
   ): Promise<DashboardWidgetResponse<T>> {
     return this.http.get<DashboardWidgetResponse<T>>(
-      `/api/dashboard/${encodeURIComponent(descriptorId)}/widgets/${encodeURIComponent(field)}`,
+      `/apps/api/dashboard/${encodeURIComponent(descriptorId)}/widgets/${encodeURIComponent(field)}`,
       params,
     );
   }

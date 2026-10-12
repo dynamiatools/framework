@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 
 /**
  * {@link FileTransfer} of a headless run. Nothing travels inside the flow: an upload is an {@code UPLOAD} step the client
- * answers with references to files it already sent to {@code /api/app/transfers}, which are resolved in the
+ * answers with references to files it already sent to {@code /apps/api/transfers}, which are resolved in the
  * {@link TransferStore} (owner, expiry, accepted types and sizes) and handed to the action as streaming handles. A
  * download is recorded in the {@link ReplaySession} as a {@link DownloadSource} and only written to the store by the pass
  * that ends, so passes that are later discarded never read it.

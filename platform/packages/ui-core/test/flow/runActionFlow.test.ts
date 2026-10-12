@@ -230,7 +230,7 @@ describe('runActionFlow UPLOAD and downloads', () => {
   });
 
   it('gives params.downloads of the final response to saveFile with the client', async () => {
-    const file = { name: 'out.txt', contentType: 'text/plain', size: 5, url: '/api/app/transfers/abc' };
+    const file = { name: 'out.txt', contentType: 'text/plain', size: 5, url: '/apps/api/transfers/abc' };
     const final = { ...flowResponse(step({ type: 'DONE' })), params: { downloads: [file] } };
     const { client } = fakeClient({ main: [final] });
     const saveFile = vi.fn();

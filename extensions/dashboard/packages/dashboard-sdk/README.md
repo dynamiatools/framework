@@ -36,7 +36,7 @@ for (const cell of rows.flat()) {
 
 | | |
 |---|---|
-| `DashboardApi.widget(descriptorId, field, params?)` | `GET /api/dashboard/{descriptorId}/widgets/{field}`. Rejects with `DynamiaApiError` (`404` for an unknown dashboard, field or widget). `params` are forwarded to the widget's `update(params)`. |
+| `DashboardApi.widget(descriptorId, field, params?)` | `GET /apps/api/dashboard/{descriptorId}/widgets/{field}`. Rejects with `DynamiaApiError` (`404` for an unknown dashboard, field or widget). `params` are forwarded to the widget's `update(params)`. |
 | `resolveDashboardLayout(descriptor)` | Rows of cells on a 12-column grid, with the same rules as the ZK renderer: `layout.params.columns` (default 4), `span`, `span-sm`, `span-xs`. |
 
 ### Widget data

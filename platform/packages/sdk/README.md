@@ -141,7 +141,7 @@ const client = new DynamiaClient({ baseUrl: 'https://app.example.com', token: '.
 
 ### Metadata API
 
-Maps to **`GET /api/app/metadata`** and sub-resources.
+Maps to **`GET /apps/api/metadata`** and sub-resources.
 
 ```typescript
 // Application-level metadata (name, version, description, modules, etc.)
@@ -173,13 +173,13 @@ const formDescriptor: ViewDescriptor = await client.metadata.getEntityView(
 
 | Method | Endpoint | SDK call |
 |--------|----------|----------|
-| `GET` | `/api/app/metadata` | `metadata.getApp()` |
-| `GET` | `/api/app/metadata/navigation` | `metadata.getNavigation()` |
-| `GET` | `/api/app/metadata/actions` | `metadata.getGlobalActions()` |
-| `GET` | `/api/app/metadata/entities` | `metadata.getEntities()` |
-| `GET` | `/api/app/metadata/entities/{className}` | `metadata.getEntity(className)` |
-| `GET` | `/api/app/metadata/entities/{className}/views` | `metadata.getEntityViews(className)` |
-| `GET` | `/api/app/metadata/entities/{className}/views/{view}` | `metadata.getEntityView(className, view)` |
+| `GET` | `/apps/api/metadata` | `metadata.getApp()` |
+| `GET` | `/apps/api/metadata/navigation` | `metadata.getNavigation()` |
+| `GET` | `/apps/api/metadata/actions` | `metadata.getGlobalActions()` |
+| `GET` | `/apps/api/metadata/entities` | `metadata.getEntities()` |
+| `GET` | `/apps/api/metadata/entities/{className}` | `metadata.getEntity(className)` |
+| `GET` | `/apps/api/metadata/entities/{className}/views` | `metadata.getEntityViews(className)` |
+| `GET` | `/apps/api/metadata/entities/{className}/views/{view}` | `metadata.getEntityView(className, view)` |
 
 ---
 
@@ -268,15 +268,15 @@ const results = await svc.find({ author: 'Evans' });
 const id = await svc.getId({ isbn: '978-0321125217' });
 ```
 
-**Endpoint map** (prefix = `/crud-service/{className}`):
+**Endpoint map** (prefix = `/apps/api/crud-service/{className}`):
 
 | Method | Endpoint | SDK call |
 |--------|----------|----------|
-| `POST` / `PUT` | `/crud-service/{className}` | `crudService(cls).save(entity)` |
-| `GET` | `/crud-service/{className}/{id}` | `crudService(cls).findById(id)` |
-| `DELETE` | `/crud-service/{className}/{id}` | `crudService(cls).delete(id)` |
-| `POST` | `/crud-service/{className}/find` | `crudService(cls).find(params)` |
-| `POST` | `/crud-service/{className}/id` | `crudService(cls).getId(params)` |
+| `POST` / `PUT` | `/apps/api/crud-service/{className}` | `crudService(cls).save(entity)` |
+| `GET` | `/apps/api/crud-service/{className}/{id}` | `crudService(cls).findById(id)` |
+| `DELETE` | `/apps/api/crud-service/{className}/{id}` | `crudService(cls).delete(id)` |
+| `POST` | `/apps/api/crud-service/{className}/find` | `crudService(cls).find(params)` |
+| `POST` | `/apps/api/crud-service/{className}/id` | `crudService(cls).getId(params)` |
 
 ---
 
@@ -302,8 +302,8 @@ const entityResponse: ActionExecutionResponse = await client.actions.executeEnti
 
 | Method | Endpoint | SDK call |
 |--------|----------|----------|
-| `POST` | `/api/app/metadata/actions/{action}` | `actions.executeGlobal(action, request)` |
-| `POST` | `/api/app/metadata/entities/{className}/action/{action}` | `actions.executeEntity(className, action, request)` |
+| `POST` | `/apps/api/metadata/actions/{action}` | `actions.executeGlobal(action, request)` |
+| `POST` | `/apps/api/metadata/entities/{className}/action/{action}` | `actions.executeEntity(className, action, request)` |
 
 ---
 

@@ -12,10 +12,10 @@ const filters = [
 function setup(extra: Record<string, unknown> = {}, report = definition(filters)) {
   const download = vi.fn();
   const { client, fetchMock } = makeClient({
-    '/api/reports/v2/7/filters/': [{ value: 'n', label: 'North' }],
-    '/api/reports/v2/7/export': () => ({ blob: new Blob(['x']), contentType: 'text/csv' }),
-    '/api/reports/v2/7/run': () => ({ body: runResult() }),
-    '/api/reports/v2/7': report,
+    '/apps/api/reports/7/filters/': [{ value: 'n', label: 'North' }],
+    '/apps/api/reports/7/export': () => ({ blob: new Blob(['x']), contentType: 'text/csv' }),
+    '/apps/api/reports/7/run': () => ({ body: runResult() }),
+    '/apps/api/reports/7': report,
     ...extra,
   });
   return { client, fetchMock, download };
@@ -86,7 +86,7 @@ describe('useReport', () => {
   });
 
   it('pages within the available pages and resets to the first page when the size changes', async () => {
-    const { client, fetchMock } = setup({ '/api/reports/v2/7/run': () => ({ body: runResult({ total: 95 }) }) }, definition([]));
+    const { client, fetchMock } = setup({ '/apps/api/reports/7/run': () => ({ body: runResult({ total: 95 }) }) }, definition([]));
     const report = useReport(client, 7, { pageSize: 25 });
     await flushPromises();
 
@@ -100,7 +100,7 @@ describe('useReport', () => {
   });
 
   it('keeps the error message of a failed run', async () => {
-    const { client } = setup({ '/api/reports/v2/7/run': () => ({ status: 400, body: { message: 'Invalid value for filter [year]' } }) }, definition([]));
+    const { client } = setup({ '/apps/api/reports/7/run': () => ({ status: 400, body: { message: 'Invalid value for filter [year]' } }) }, definition([]));
     const report = useReport(client, 7);
     await flushPromises();
 
@@ -110,7 +110,7 @@ describe('useReport', () => {
   });
 
   it('reports a definition that cannot be loaded', async () => {
-    const { client } = setup({ '/api/reports/v2/7': () => ({ status: 404, body: { message: 'Report not found: 7' } }) });
+    const { client } = setup({ '/apps/api/reports/7': () => ({ status: 404, body: { message: 'Report not found: 7' } }) });
     const report = useReport(client, 7);
     await flushPromises();
 
@@ -126,7 +126,7 @@ describe('useReport', () => {
     await report.exportAs('csv');
 
     const [url] = callsTo(fetchMock, '/export');
-    expect(url).toContain('/api/reports/v2/7/export?format=csv');
+    expect(url).toContain('/apps/api/reports/7/export?format=csv');
     expect(bodyOf(fetchMock, '/export')).toEqual({ filters: { year: '2026' }, sort: 'total', direction: 'asc' });
     expect(download).toHaveBeenCalledTimes(1);
     expect(download.mock.calls[0]![1]).toMatch(/^sales-by-region-\d{4}-\d{2}-\d{2}\.csv$/);
@@ -144,7 +144,7 @@ describe('useReport', () => {
   });
 
   it('keeps an export error', async () => {
-    const { client } = setup({ '/api/reports/v2/7/export': () => ({ status: 403, body: { message: 'Access denied to this report' } }) }, definition([]));
+    const { client } = setup({ '/apps/api/reports/7/export': () => ({ status: 403, body: { message: 'Access denied to this report' } }) }, definition([]));
     const report = useReport(client, 7, { download: vi.fn() });
     await flushPromises();
     await report.exportAs('pdf');
@@ -175,7 +175,7 @@ describe('useReport', () => {
   it('ignores the answer of an older run', async () => {
     let call = 0;
     const { client } = setup({
-      '/api/reports/v2/7/run': () => {
+      '/apps/api/reports/7/run': () => {
         call++;
         return { body: runResult({ total: call }) };
       },

@@ -15,7 +15,7 @@ application code or redeploying.
 It acts as an internal capability bus for Dynamia-based applications, and provides:
 
 - Versioned function contracts (`name` + `functionVersion`)
-- HTTP-based invocation (`POST /api/dynamia/fx/{functionName}`) and direct Java invocation
+- HTTP-based invocation (`POST /api/functions/{functionName}`) and direct Java invocation
   (`DynamiaFunctions.call(...)`)
 - Parameter validation and type coercion before execution
 - JSON and binary responses (images, PDFs, CSV, etc.)
@@ -94,7 +94,7 @@ if (result.isSuccess()) {
 Or over HTTP:
 
 ```http
-POST /api/dynamia/fx/WhatsApp.sendMessage
+POST /api/functions/WhatsApp.sendMessage
 Content-Type: application/json
 
 { "params": { "number": "123456789", "message": "Hello" } }
@@ -176,7 +176,7 @@ Before invoking the function, declared parameters are validated against the call
 ### Base Endpoint
 
 ```
-POST /api/dynamia/fx/{functionName}
+POST /api/functions/{functionName}
 ```
 
 ### Optional Version Selection
@@ -189,7 +189,7 @@ If not specified, the latest `ACTIVE` version is used.
 ### Request
 
 ```http
-POST /api/dynamia/fx/WhatsApp.sendMessage
+POST /api/functions/WhatsApp.sendMessage
 Content-Type: application/json
 
 { "params": { "number": "123456789", "message": "Hello" } }
@@ -323,7 +323,7 @@ The `ui` submodule (`tools.dynamia.modules.functions.ui`, ZK-based) adds a back 
 ## Known Limitations / Roadmap
 
 - **401/403 enforcement is not done at the function level** — securing who can call
-  `/api/dynamia/fx/{functionName}` is currently delegated entirely to the application's security
+  `/api/functions/{functionName}` is currently delegated entirely to the application's security
   layer (e.g. Spring Security rules on the base path).
 - `interfaceName` / `methodName` fields exist on `DynamiaHttpFunction` reserved for a future
   dynamic Java interface proxy (call a function through a regular interface method instead of

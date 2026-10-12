@@ -25,18 +25,18 @@ import java.util.List;
  * <p>
  * Endpoints:
  * <ul>
- *   <li>POST/PUT /crud-service/{className} - Create or update entity</li>
- *   <li>DELETE /crud-service/{className}/{id} - Delete entity by ID</li>
- *   <li>GET /crud-service/{className}/{id} - Get entity by ID</li>
- *   <li>POST /crud-service/{className}/find - Find entities by query parameters</li>
- *   <li>POST /crud-service/{className}/id - Get entity ID by query parameters</li>
+ *   <li>POST/PUT /apps/api/crud-service/{className} - Create or update entity</li>
+ *   <li>DELETE /apps/api/crud-service/{className}/{id} - Delete entity by ID</li>
+ *   <li>GET /apps/api/crud-service/{className}/{id} - Get entity by ID</li>
+ *   <li>POST /apps/api/crud-service/{className}/find - Find entities by query parameters</li>
+ *   <li>POST /apps/api/crud-service/{className}/id - Get entity ID by query parameters</li>
  * </ul>
  *
  * @author Mario A. Serrano Leones
  * @since 2023
  */
 
-@RequestMapping(value = "/crud-service/{className}", consumes = "application/json", produces = "application/json")
+@RequestMapping(value = "/apps/api/crud-service/{className}", consumes = "application/json", produces = "application/json")
 @Tag(name = "DynamiaCrudService")
 public abstract class AbstractCrudServiceRestController {
 

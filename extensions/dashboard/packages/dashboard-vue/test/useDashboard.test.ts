@@ -15,7 +15,7 @@ async function settled(): Promise<void> {
 describe('useDashboard', () => {
   it('loads the descriptor, computes the layout and loads every widget', async () => {
     const { client, fetchMock } = makeClient({
-      '/api/app/metadata/views/main': descriptor,
+      '/apps/api/metadata/views/main': descriptor,
       '/widgets/totalSales': widgetResponse('totalSales', 'kpi', { value: 7 }),
       '/widgets/monthSales': widgetResponse('monthSales', 'chart', { type: 'bar', data: {} }),
     });
@@ -30,15 +30,15 @@ describe('useDashboard', () => {
     expect(d.widgets.value['monthSales']?.response?.type).toBe('chart');
     expect(fetchMock.mock.calls.map((c) => String(c[0]))).toEqual(
       expect.arrayContaining([
-        'https://app.example.com/api/dashboard/main/widgets/totalSales',
-        'https://app.example.com/api/dashboard/main/widgets/monthSales',
+        'https://app.example.com/apps/api/dashboard/main/widgets/totalSales',
+        'https://app.example.com/apps/api/dashboard/main/widgets/monthSales',
       ]),
     );
   });
 
   it('keeps a failing widget from affecting the others', async () => {
     const { client } = makeClient({
-      '/api/app/metadata/views/main': descriptor,
+      '/apps/api/metadata/views/main': descriptor,
       '/widgets/totalSales': () => ({ status: 500, body: { message: 'Error loading widget totalSales' } }),
       '/widgets/monthSales': widgetResponse('monthSales', 'chart', null),
     });
@@ -54,7 +54,7 @@ describe('useDashboard', () => {
 
   it('exposes a descriptor loading error', async () => {
     const { client } = makeClient({
-      '/api/app/metadata/views/missing': () => ({ status: 404, body: { message: 'not found' } }),
+      '/apps/api/metadata/views/missing': () => ({ status: 404, body: { message: 'not found' } }),
     });
 
     const d = useDashboard(client, 'missing');
@@ -66,19 +66,19 @@ describe('useDashboard', () => {
 
   it('sends params to every widget and reloads a single widget with other params', async () => {
     const { client, fetchMock } = makeClient({
-      '/api/app/metadata/views/main': descriptor,
+      '/apps/api/metadata/views/main': descriptor,
       '/widgets/': (url: string) => ({ body: widgetResponse(url.includes('totalSales') ? 'totalSales' : 'monthSales', 'kpi', 1) }),
     });
 
     const d = useDashboard(client, 'main', { params: { range: 'month' } });
     await settled();
     expect(fetchMock.mock.calls.map((c) => String(c[0]))).toContain(
-      'https://app.example.com/api/dashboard/main/widgets/totalSales?range=month',
+      'https://app.example.com/apps/api/dashboard/main/widgets/totalSales?range=month',
     );
 
     await d.reloadWidget('totalSales', { range: 'year' });
     expect(String(fetchMock.mock.calls.at(-1)![0])).toBe(
-      'https://app.example.com/api/dashboard/main/widgets/totalSales?range=year',
+      'https://app.example.com/apps/api/dashboard/main/widgets/totalSales?range=year',
     );
   });
 
@@ -86,8 +86,8 @@ describe('useDashboard', () => {
     const other = dashboardDescriptor([['only', { widget: 'x' }]]);
     other.id = 'second';
     const { client } = makeClient({
-      '/api/app/metadata/views/main': descriptor,
-      '/api/app/metadata/views/second': other,
+      '/apps/api/metadata/views/main': descriptor,
+      '/apps/api/metadata/views/second': other,
       '/widgets/': (url: string) => ({ body: widgetResponse(url.split('/widgets/')[1]!, 'kpi', 1) }),
     });
     const id = ref('main');
@@ -102,7 +102,7 @@ describe('useDashboard', () => {
   });
 
   it('does not load until load() when immediate is false', async () => {
-    const { client, fetchMock } = makeClient({ '/api/app/metadata/views/main': descriptor });
+    const { client, fetchMock } = makeClient({ '/apps/api/metadata/views/main': descriptor });
 
     useDashboard(client, 'main', { immediate: false });
     await settled();

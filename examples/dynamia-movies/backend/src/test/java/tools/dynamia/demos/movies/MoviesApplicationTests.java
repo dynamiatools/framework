@@ -29,20 +29,46 @@ class MoviesApplicationTests {
 
     private final HttpClient anonymous = HttpClient.newHttpClient();
     private HttpClient admin;
+    private CookieManager cookies;
 
     private HttpResponse<String> get(HttpClient client, String path) throws Exception {
         return client.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path)).GET().build(),
                 HttpResponse.BodyHandlers.ofString());
     }
 
+    /** Posts like a browser on the same origin: the local API ({@code /apps/api}) rejects writes without it. */
     private HttpResponse<String> post(HttpClient client, String path, String body) throws Exception {
-        return client.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
-                .header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(body)).build(), HttpResponse.BodyHandlers.ofString());
+        return post(client, path, body, "Origin", "http://localhost:" + port);
+    }
+
+    private HttpResponse<String> post(HttpClient client, String path, String body, String... headers) throws Exception {
+        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
+                .header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(body));
+        for (int i = 0; i < headers.length; i += 2) {
+            request.header(headers[i], headers[i + 1]);
+        }
+        return client.send(request.build(), HttpResponse.BodyHandlers.ofString());
+    }
+
+    private HttpResponse<String> get(HttpClient client, String path, String... headers) throws Exception {
+        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path)).GET();
+        for (int i = 0; i < headers.length; i += 2) {
+            request.header(headers[i], headers[i + 1]);
+        }
+        return client.send(request.build(), HttpResponse.BodyHandlers.ofString());
+    }
+
+    /** The JWT the web login put in its cookie, to use it the way a stateless client would. */
+    private String jwt() throws Exception {
+        admin();
+        return cookies.getCookieStore().getCookies().stream()
+                .filter(c -> c.getName().equals("DYNAMIA_JWT")).findFirst().orElseThrow().getValue();
     }
 
     private HttpClient admin() throws Exception {
         if (admin == null) {
-            var client = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
+            cookies = new CookieManager();
+            var client = HttpClient.newBuilder().cookieHandler(cookies).build();
             var login = post(client, "/login/json", "{\"username\":\"admin\",\"password\":\"adminadmin\"}");
             assertEquals(200, login.statusCode(), login.body());
             admin = client;
@@ -92,13 +118,47 @@ class MoviesApplicationTests {
     @Test
     void backofficeApiAndReportsRequireLogin() throws Exception {
         assertEquals(401, get(anonymous, "/api/catalog/movies").statusCode());
-        assertEquals(401, get(anonymous, "/api/reports/v2/catalog").statusCode());
-        assertEquals(401, get(anonymous, "/api/dashboard/moviesDashboard/widgets/totalMovies").statusCode());
+        assertEquals(401, get(anonymous, "/apps/api/reports/catalog").statusCode());
+        assertEquals(401, get(anonymous, "/apps/api/dashboard/moviesDashboard/widgets/totalMovies").statusCode());
+    }
+
+    @Test
+    void localApiAuthenticatesWithTheSessionOrABearerTokenButNeverWithTheJwtCookie() throws Exception {
+        var jwt = jwt();
+
+        // the browser session is the default credential
+        assertEquals(200, get(admin(), "/apps/api/reports/catalog").statusCode());
+
+        // a stateless client sends the token in the header
+        assertEquals(200, get(anonymous, "/apps/api/reports/catalog", "Authorization", "Bearer " + jwt).statusCode());
+
+        // the cookie is sent by the browser on its own, so it must not authenticate by itself (CSRF)
+        assertEquals(401, get(anonymous, "/apps/api/reports/catalog", "Cookie", "DYNAMIA_JWT=" + jwt).statusCode());
+        // ... while the integration API keeps accepting it
+        assertEquals(200, get(anonymous, "/api/catalog/movies?size=1", "Cookie", "DYNAMIA_JWT=" + jwt).statusCode());
+    }
+
+    @Test
+    void localApiWritesNeedASameOriginRequestUnlessTheyCarryABearerToken() throws Exception {
+        var run = "/apps/api/reports/" + firstReportId() + "/run";
+        var body = "{\"filters\":{}}";
+
+        assertEquals(200, post(admin(), run, body).statusCode(), "same-origin session");
+        assertEquals(403, post(admin(), run, body, "Origin", "http://evil.example.org").statusCode(), "cross-origin session");
+        assertEquals(403, post(admin(), run, body, new String[0]).statusCode(), "no Origin header");
+        assertEquals(200, post(anonymous, run, body, "Authorization", "Bearer " + jwt()).statusCode(), "bearer needs no Origin");
+        assertEquals(401, post(anonymous, run, body, "Cookie", "DYNAMIA_JWT=" + jwt(), "Origin", "http://localhost:" + port).statusCode(),
+                "the cookie alone does not authenticate");
+    }
+
+    private String firstReportId() throws Exception {
+        var catalog = JSON.readTree(get(admin(), "/apps/api/reports/catalog").body());
+        return catalog.get(0).get("reports").get(0).get("id").asString();
     }
 
     @Test
     void reportsRunWithFilters() throws Exception {
-        var catalog = JSON.readTree(get(admin(), "/api/reports/v2/catalog").body());
+        var catalog = JSON.readTree(get(admin(), "/apps/api/reports/catalog").body());
         long reports = catalog.valueStream().mapToLong(group -> group.get("reports").size()).sum();
         assertTrue(reports >= 9, "the demo reports were created");
 
@@ -112,7 +172,7 @@ class MoviesApplicationTests {
         }
         assertTrue(id > 0);
 
-        var run = post(admin(), "/api/reports/v2/" + id + "/run",
+        var run = post(admin(), "/apps/api/reports/" + id + "/run",
                 "{\"filters\":{\"fromYear\":\"2010\",\"certification\":\"PG_13\"},\"page\":1,\"size\":5}");
         assertEquals(200, run.statusCode(), run.body());
         JsonNode rows = JSON.readTree(run.body()).get("rows");
@@ -125,14 +185,14 @@ class MoviesApplicationTests {
 
     @Test
     void dashboardWidgetsAreServed() throws Exception {
-        var kpi = JSON.readTree(get(admin(), "/api/dashboard/moviesDashboard/widgets/totalMovies").body());
+        var kpi = JSON.readTree(get(admin(), "/apps/api/dashboard/moviesDashboard/widgets/totalMovies").body());
         assertEquals("kpi", kpi.get("type").asString());
         assertTrue(kpi.get("data").get("value").asInt() >= 100);
 
-        var chart = JSON.readTree(get(admin(), "/api/dashboard/moviesDashboard/widgets/moviesPerDecade").body());
+        var chart = JSON.readTree(get(admin(), "/apps/api/dashboard/moviesDashboard/widgets/moviesPerDecade").body());
         assertEquals("chart", chart.get("type").asString());
 
-        var feed = JSON.readTree(get(admin(), "/api/dashboard/moviesDashboard/widgets/latestReviews").body());
+        var feed = JSON.readTree(get(admin(), "/apps/api/dashboard/moviesDashboard/widgets/latestReviews").body());
         assertEquals("reviews-feed", feed.get("type").asString());
         assertEquals(6, feed.get("data").size());
     }
@@ -160,7 +220,7 @@ class MoviesApplicationTests {
 
     @Test
     void navigationHidesTheTechnicalPublicModuleAndExposesExternalPageUrls() throws Exception {
-        var nav = get(admin(), "/api/app/metadata/navigation").body();
+        var nav = get(admin(), "/apps/api/metadata/navigation").body();
         assertFalse(nav.contains("\"id\" : \"public\"") || nav.contains("\"path\":\"public\""), "the public module is not a menu entry");
         var tree = JSON.readTree(nav).get("navigation");
         boolean found = false;
@@ -187,7 +247,7 @@ class MoviesApplicationTests {
     @Test
     void theSameDeleteActionZkRunsAsksAndDeletesThroughTheReplayProtocol() throws Exception {
         var client = admin();
-        var action = "/api/app/metadata/entities/Review/action/delete";
+        var action = "/apps/api/metadata/entities/Review/action/delete";
         long before = JSON.readTree(get(client, "/api/catalog/reviews?size=1").body()).get("pageable").get("totalSize").asLong();
         JsonNode first = JSON.readTree(get(anonymous, "/api/public/reviews?size=1&_sort=id").body()).get("data").get(0);
         var id = first.get("id").asString();
@@ -219,7 +279,7 @@ class MoviesApplicationTests {
     @Test
     void theSameSaveActionSavesAndAnInvalidEntityIsA422() throws Exception {
         var client = admin();
-        var action = "/api/app/metadata/entities/Review/action/save";
+        var action = "/apps/api/metadata/entities/Review/action/save";
         var saved = JSON.readTree(post(client, action,
                 "{\"data\":{\"id\":3,\"comment\":\"Edited by SaveAction\"},\"dataType\":\"Review\"}").body());
         assertEquals("SUCCESS", saved.get("status").asString());
@@ -237,13 +297,13 @@ class MoviesApplicationTests {
     @Test
     void bulkDeleteAsksOnceForAllTheRecordsAndTheDuplicatedRemoteActionsAreGone() throws Exception {
         var client = admin();
-        var meta = JSON.readTree(get(client, "/api/app/metadata/entities/Review").body());
+        var meta = JSON.readTree(get(client, "/apps/api/metadata/entities/Review").body());
         var ids = new java.util.ArrayList<String>();
         meta.get("actions").forEach(a -> ids.add(a.get("id").asString()));
         assertTrue(ids.containsAll(java.util.List.of("save", "delete")), "the actions of ZK are served: " + ids);
         assertFalse(ids.contains("deleteDirect") || ids.contains("saveDirect"), "no hand written duplicates: " + ids);
 
-        var action = "/api/app/metadata/entities/Review/action/delete";
+        var action = "/apps/api/metadata/entities/Review/action/delete";
         long before = JSON.readTree(get(client, "/api/catalog/reviews?size=1").body()).get("pageable").get("totalSize").asLong();
         var question = JSON.readTree(post(client, action, "{\"data\":{\"ids\":[\"10\",\"11\",\"12\"]}}").body());
         assertEquals("CONFIRM", question.get("flow").get("type").asString(), question.toString());

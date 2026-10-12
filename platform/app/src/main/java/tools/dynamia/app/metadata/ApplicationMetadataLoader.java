@@ -91,7 +91,7 @@ public class ApplicationMetadataLoader {
 
     /**
      * Fails fast if two entities resolve to the same {@link EntityMetadata#getId()} (the class's
-     * simple name). The {@code /api/app/metadata/entities/{id}} contract requires that id to be
+     * simple name). The {@code /apps/api/metadata/entities/{id}} contract requires that id to be
      * unique across the application — see {@code docs/design} note on entity metadata identifiers
      * for why the fully qualified class name is no longer used as the wire identifier.
      *
@@ -107,7 +107,7 @@ public class ApplicationMetadataLoader {
                 .collect(Collectors.joining("; "));
         if (!duplicates.isEmpty()) {
             throw new IllegalStateException("Duplicate entity simple class names found while building " +
-                    "application metadata: " + duplicates + ". /api/app/metadata/entities/{id} requires each " +
+                    "application metadata: " + duplicates + ". /apps/api/metadata/entities/{id} requires each " +
                     "entity's simple class name to be unique; rename one of the colliding classes.");
         }
     }

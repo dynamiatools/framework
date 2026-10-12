@@ -18,7 +18,7 @@ describe('client.transfers', () => {
 
     expect(ref).toEqual({ ref: 'r1', name: 'my report.json', contentType: 'application/json', size: 2 });
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
-    expect(url).toBe('https://app.example.com/api/app/transfers');
+    expect(url).toBe('https://app.example.com/apps/api/transfers');
     expect(init.method).toBe('POST');
     expect(init.body).toBe(file);
     const headers = init.headers as Record<string, string>;
@@ -39,17 +39,17 @@ describe('client.transfers', () => {
     const fetchMock = vi.fn(async () => new Response('hello', { status: 200, headers: { 'content-type': 'text/plain' } }));
     const client = clientWith(fetchMock, { token: 't' });
 
-    const blob = await client.transfers.download('/api/app/transfers/abc');
+    const blob = await client.transfers.download('/apps/api/transfers/abc');
 
     expect(await blob.text()).toBe('hello');
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
-    expect(url).toBe('https://app.example.com/api/app/transfers/abc');
+    expect(url).toBe('https://app.example.com/apps/api/transfers/abc');
     expect((init.headers as Record<string, string>)['Authorization']).toBe('Bearer t');
   });
 
   it('knows when a plain link cannot be used', () => {
     expect(clientWith(vi.fn(), { token: 't' }).transfers.needsAuthorizedFetch()).toBe(true);
     expect(clientWith(vi.fn(), { withCredentials: true }).transfers.needsAuthorizedFetch()).toBe(false);
-    expect(clientWith(vi.fn()).transfers.absoluteUrl('/api/app/transfers/abc')).toBe('https://app.example.com/api/app/transfers/abc');
+    expect(clientWith(vi.fn()).transfers.absoluteUrl('/apps/api/transfers/abc')).toBe('https://app.example.com/apps/api/transfers/abc');
   });
 });

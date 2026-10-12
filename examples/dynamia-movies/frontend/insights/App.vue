@@ -4,7 +4,7 @@
       <h1>{{ titles[page] }}</h1>
       <p v-if="page === 'reports'">Run, filter and export the reports stored in the database.</p>
       <p v-else-if="page === 'design'">Create and edit the report definitions, test their queries and move them between systems.</p>
-      <p v-else>Live figures of the movie catalog, served by <code>/api/dashboard</code> and <code>/api/reports/v2</code>.</p>
+      <p v-else>Live figures of the movie catalog, served by <code>/apps/api/dashboard</code> and <code>/apps/api/reports</code>.</p>
     </header>
 
     <DynamiaDashboard v-if="page === 'dashboard'" id="moviesDashboard" />

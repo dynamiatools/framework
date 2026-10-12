@@ -54,17 +54,17 @@ in both shells.
 
 ## REST API for UIs
 
-`/api/reports/v2` serves any front end. The caller must be authenticated; only active reports of the current account
+`/apps/api/reports` serves any front end. The caller must be authenticated; only active reports of the current account
 (and the system account) that pass the access policies are visible, anything else answers `404`/`403`. Errors use the
 platform `ErrorResult`.
 
 | endpoint | purpose |
 |---|---|
-| `GET /api/reports/v2/catalog` | Groups with their reports |
-| `GET /api/reports/v2/{id}` | Definition: summary, filters (type, required, options source), declared columns, charts, export formats |
-| `GET /api/reports/v2/{id}/filters/{filter}/options?q=&limit=` | Options of enum, entity (only entities published by an `EntityFilterProvider`), query and static filters |
-| `POST /api/reports/v2/{id}/run` | Body `{filters, page, size, sort, direction}`. Returns `{columns, rows, total, page, size, truncated, durationMs, charts}` |
-| `POST /api/reports/v2/{id}/export?format=xlsx\|csv\|pdf` | Same body; downloads the file. `X-Report-Truncated: true` when the row limit was reached |
+| `GET /apps/api/reports/catalog` | Groups with their reports |
+| `GET /apps/api/reports/{id}` | Definition: summary, filters (type, required, options source), declared columns, charts, export formats |
+| `GET /apps/api/reports/{id}/filters/{filter}/options?q=&limit=` | Options of enum, entity (only entities published by an `EntityFilterProvider`), query and static filters |
+| `POST /apps/api/reports/{id}/run` | Body `{filters, page, size, sort, direction}`. Returns `{columns, rows, total, page, size, truncated, durationMs, charts}` |
+| `POST /apps/api/reports/{id}/export?format=xlsx\|csv\|pdf` | Same body; downloads the file. `X-Report-Truncated: true` when the row limit was reached |
 
 Filter values are sent by filter name: text, number, boolean, date `yyyy-MM-dd`, date time `yyyy-MM-dd HH:mm:ss`,
 time `HH:mm:ss`, enum name or entity id. Values in rows are plain JSON (dates as ISO text, enums by name, other objects
@@ -75,7 +75,7 @@ The older `/api/reports/{group}/{endpoint}` endpoints keep working for existing 
 
 ### Designer API
 
-`/api/reports/v2/design` serves the report designer UI. It runs queries typed by the user and moves definitions
+`/apps/api/reports/design` serves the report designer UI. It runs queries typed by the user and moves definitions
 between systems, so it is closed unless the user is a designer: set `dynamia.reports.designer-roles` (comma separated
 roles, for example `ADMIN`) or register a `ReportDesignerPolicy` bean (use a bean when roles are not exposed as servlet
 roles, for example to ask the application's own security API). Everyone else gets `403`; `GET /design/info` tells the UI which case
@@ -83,11 +83,11 @@ applies.
 
 | endpoint | purpose |
 |---|---|
-| `GET /api/reports/v2/design/info` | `{allowed, previewLimit}` |
-| `POST /api/reports/v2/design/preview` | Body `{queryLang, queryScript, dataSourceId?, parameters?}`. Runs the query with the usual validation and returns the first rows (`dynamia.reports.preview-limit`) |
-| `GET /api/reports/v2/design/{id}/definition` | The report definition as JSON, without ids |
-| `POST /api/reports/v2/design/import` | Imports a definition. The new report is inactive and has no datasource |
-| `POST /api/reports/v2/design/datasources/{id}/test` | Tests the connection of a saved datasource |
+| `GET /apps/api/reports/design/info` | `{allowed, previewLimit}` |
+| `POST /apps/api/reports/design/preview` | Body `{queryLang, queryScript, dataSourceId?, parameters?}`. Runs the query with the usual validation and returns the first rows (`dynamia.reports.preview-limit`) |
+| `GET /apps/api/reports/design/{id}/definition` | The report definition as JSON, without ids |
+| `POST /apps/api/reports/design/import` | Imports a definition. The new report is inactive and has no datasource |
+| `POST /apps/api/reports/design/datasources/{id}/test` | Tests the connection of a saved datasource |
 
 ## Dashboard widget
 

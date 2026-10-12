@@ -9,11 +9,11 @@ const preview = { columns: ['id', 'name'], rows: [{ id: 1, name: 'Ana' }], trunc
 
 function routes(extra: Record<string, unknown> = {}) {
   return makeClient({
-    '/api/reports/v2/design/info': allowed,
-    '/api/reports/v2/design/preview': preview,
-    '/api/reports/v2/design/import': { id: 42 },
-    '/api/reports/v2/design/5/definition': { name: 'Sales', queryScript: 'select 1' },
-    '/api/reports/v2/design/datasources/3/test': { ok: true, message: 'Connection ok' },
+    '/apps/api/reports/design/info': allowed,
+    '/apps/api/reports/design/preview': preview,
+    '/apps/api/reports/design/import': { id: 42 },
+    '/apps/api/reports/design/5/definition': { name: 'Sales', queryScript: 'select 1' },
+    '/apps/api/reports/design/datasources/3/test': { ok: true, message: 'Connection ok' },
     ...extra,
   });
 }
@@ -29,7 +29,7 @@ describe('useReportDesigner', () => {
   });
 
   it('treats a failing info call as not allowed and keeps the error', async () => {
-    const { client } = routes({ '/api/reports/v2/design/info': () => ({ status: 403, body: { message: 'Access denied to this report' } }) });
+    const { client } = routes({ '/apps/api/reports/design/info': () => ({ status: 403, body: { message: 'Access denied to this report' } }) });
     const designer = useReportDesigner(client);
     await flushPromises();
     expect(designer.info.value).toEqual({ allowed: false, previewLimit: 0 });
@@ -51,7 +51,7 @@ describe('useReportDesigner', () => {
     const designer = useReportDesigner(client);
     await designer.preview({ queryLang: 'sql', queryScript: 'select 1' });
 
-    const failing = routes({ '/api/reports/v2/design/preview': () => ({ status: 400, body: { message: 'Keyword not allowed in reports: DROP' } }) });
+    const failing = routes({ '/apps/api/reports/design/preview': () => ({ status: 400, body: { message: 'Keyword not allowed in reports: DROP' } }) });
     const second = useReportDesigner(failing.client);
     expect(await second.preview({ queryLang: 'sql', queryScript: 'drop table t' })).toBeUndefined();
     expect(second.error.value).toContain('DROP');
@@ -189,7 +189,7 @@ describe('designer components', () => {
   });
 
   it('ReportDesigner shows only the tools without a node and hides them from non designers', async () => {
-    const { client } = routes({ '/api/reports/v2/design/info': { allowed: false, previewLimit: 0 } });
+    const { client } = routes({ '/apps/api/reports/design/info': { allowed: false, previewLimit: 0 } });
     const wrapper = mount(DynamiaReportDesigner, { props: { client } });
     await flushPromises();
 

@@ -80,7 +80,7 @@ export interface ApplicationMetadataEntities {
  * Mirrors `tools.dynamia.app.EntityMetadata`.
  *
  * `id` (inherited from {@link BasicMetadata}) is the entity's identifier — the entity class's
- * *simple* name (e.g. `"Invoice"`), used in `/api/app/metadata/entities/{id}` and friends. The
+ * *simple* name (e.g. `"Invoice"`), used in `/apps/api/metadata/entities/{id}` and friends. The
  * fully-qualified Java class name is intentionally never sent to clients (it leaks internal
  * package/module structure) — there is no `className` field on this type.
  *
@@ -94,7 +94,7 @@ export interface EntityMetadata extends BasicMetadata {
     actionsEndpoint: string;
     /**
      * REST endpoint that returns the full list of ViewDescriptor objects for
-     * this entity (e.g. `/api/metadata/entities/MyClass/views`).
+     * this entity (e.g. `/apps/api/metadata/entities/MyClass/views`).
      */
     viewsEndpoint?: string;
 }
@@ -220,7 +220,7 @@ export interface ActionExecutionResponse {
 }
 
 /**
- * Reference to a file already sent to `/api/app/transfers` (see `client.transfers.upload`): what an `UPLOAD` step is
+ * Reference to a file already sent to `/apps/api/transfers` (see `client.transfers.upload`): what an `UPLOAD` step is
  * answered with. The content never travels inside the flow.
  */
 export interface FlowFileRef {

@@ -207,7 +207,7 @@ class ApplicationMetadataControllerTest {
         var action = new ValidationFailingAction();
         install(action);
         var metadata = new ActionMetadata(action);
-        var httpRequest = new MockHttpServletRequest("POST", "/api/app/metadata/actions/" + metadata.getId());
+        var httpRequest = new MockHttpServletRequest("POST", "/apps/api/metadata/actions/" + metadata.getId());
 
         var response = ApplicationMetadataController.executeAction(
                 metadata.getId(), new ActionExecutionRequest(), metadata, httpRequest);
@@ -216,7 +216,7 @@ class ApplicationMetadataControllerTest {
         var body = assertInstanceOf(ErrorResult.class, response.getBody());
         assertEquals("VALIDATION_ERROR", body.getError());
         assertEquals("Name is required", body.getMessage());
-        assertEquals("/api/app/metadata/actions/" + metadata.getId(), body.getPath());
+        assertEquals("/apps/api/metadata/actions/" + metadata.getId(), body.getPath());
         assertEquals("name", body.getDetails().get("invalidProperty"));
     }
 
