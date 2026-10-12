@@ -28,17 +28,17 @@ jobs:
     timeout-minutes: 30
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Set up JDK 25
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v6
       with:
         java-version: 25
         architecture: x64
         distribution: temurin
         cache: maven
         server-id: github
-        server-username: MAVEN_USERNAME
-        server-password: MAVEN_PASSWORD
+        server-username-env-var: MAVEN_USERNAME
+        server-password-env-var: MAVEN_PASSWORD
 
     - name: Verify and deploy SNAPSHOT
       # Se invoca deploy:deploy directo porque central-publishing-maven-plugin (extensions=true)
