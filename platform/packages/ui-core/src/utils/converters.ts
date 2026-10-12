@@ -41,28 +41,46 @@ export const decimalConverter: Converter = (value, params) => {
   return num.toFixed(decimals);
 };
 
+/** A date-only ISO string (`yyyy-MM-dd`), as the backend sends `LocalDate` values. */
+const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
+
 /**
- * Formats a Date or date string as a locale date string.
+ * Parses a converter input into a `Date`. A date-only string is a calendar date, not an instant: `new Date('2026-10-07')`
+ * would read it as UTC midnight and, rendered in the browser zone, show the previous day anywhere behind UTC. It is built
+ * at local midnight instead so it keeps its day in every time zone.
+ */
+function toDate(value: unknown): Date {
+  if (typeof value === 'string') {
+    const m = DATE_ONLY.exec(value.trim());
+    if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  }
+  return new Date(value as string | number);
+}
+
+/**
+ * Formats a Date or date string as a locale date string. A date-only string (`yyyy-MM-dd`) keeps its calendar day
+ * whatever the browser time zone.
  * @param value - Date value to format
  * @returns Formatted date string (locale-dependent)
  */
 export const dateConverter: Converter = (value) => {
   if (value === null || value === undefined) return '';
   try {
-    const d = new Date(value as string | number);
+    const d = toDate(value);
     return isNaN(d.getTime()) ? String(value) : d.toLocaleDateString();
   } catch { return String(value); }
 };
 
 /**
- * Formats a Date or date string as a locale date-time string.
+ * Formats a Date or date string as a locale date-time string. A date-only string (`yyyy-MM-dd`) keeps its calendar day
+ * whatever the browser time zone.
  * @param value - Date-time value to format
  * @returns Formatted date-time string (locale-dependent)
  */
 export const dateTimeConverter: Converter = (value) => {
   if (value === null || value === undefined) return '';
   try {
-    const d = new Date(value as string | number);
+    const d = toDate(value);
     return isNaN(d.getTime()) ? String(value) : d.toLocaleString();
   } catch { return String(value); }
 };
