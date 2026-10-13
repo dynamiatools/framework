@@ -1,0 +1,17 @@
+version: 2
+
+# Solo actualizaciones de SEGURIDAD (limit 0 desactiva las de version). Los PR van contra `next`:
+# todo llega primero a `next` y de ahi se promueve. GitHub solo lee este archivo desde la rama por defecto.
+updates:
+  - package-ecosystem: maven
+    directory: "/"
+    target-branch: next
+    open-pull-requests-limit: 0
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: "/"
+    target-branch: next
+    open-pull-requests-limit: 0
+    schedule:
+      interval: weekly

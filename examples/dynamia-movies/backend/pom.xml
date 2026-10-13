@@ -10,12 +10,12 @@
     </parent>
     <groupId>tools.dynamia.demos</groupId>
     <artifactId>movies</artifactId>
-    <version>26.10.2-SNAPSHOT</version>
+    <version>26.10.3-SNAPSHOT</version>
     <name>dynamia-movies</name>
     <description>Movie catalog demo: Dynamia Tools backoffice + public Vue site</description>
     <properties>
         <java.version>25</java.version>
-        <dynamia.version>26.10.2-SNAPSHOT</dynamia.version>
+        <dynamia.version>26.10.3-SNAPSHOT</dynamia.version>
     </properties>
     <dependencies>
         <dependency>
