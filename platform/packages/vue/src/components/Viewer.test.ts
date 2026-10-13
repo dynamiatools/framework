@@ -7,6 +7,8 @@ import { View, ViewRendererRegistry } from '@dynamia-tools/ui-core';
 import type { ViewType } from '@dynamia-tools/ui-core';
 import Viewer from './Viewer.vue';
 import { DYNAMIA_CLIENT_KEY } from '../composables/useDynamiaClient.js';
+import { VueTableRenderer } from '../renderers/VueTableRenderer.js';
+import { VueTableView } from '../views/VueTableView.js';
 
 const TABLE: ViewType = { name: 'table' };
 
@@ -102,5 +104,27 @@ describe('DynamiaViewer', () => {
 
     expect(onError).toHaveBeenCalledTimes(1);
     expect(wrapper.find('.dynamia-viewer-error').exists()).toBe(true);
+  });
+});
+
+describe('DynamiaViewer with the real table renderer', () => {
+  it('draws the table of a plain descriptor, with no app.use(DynamiaVue)', async () => {
+    ViewRendererRegistry.register(TABLE, new VueTableRenderer());
+    ViewRendererRegistry.registerViewFactory(TABLE, (descriptor, metadata) => new VueTableView(descriptor, metadata));
+
+    const wrapper = mount(Viewer, {
+      props: {
+        descriptor: { view: 'table', fields: { name: { label: 'Name' }, total: { label: 'Total', component: 'label', params: { converter: 'converters.Currency' } } } },
+        source: [{ name: 'Ana', total: 1500 }, { name: 'Luis', total: 20 }],
+        readOnly: true,
+      },
+    });
+    await vi.waitFor(() => expect(wrapper.find('.dynamia-table-grid').exists()).toBe(true));
+
+    const text = wrapper.find('.dynamia-table-grid').text();
+    expect(text).toContain('Name');
+    expect(text).toContain('Ana');
+    expect(text).toContain('1,500.00');
+    expect(wrapper.findAll('.dynamia-table-row')).toHaveLength(2);
   });
 });

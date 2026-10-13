@@ -1,6 +1,7 @@
 // VueTableRenderer: implements TableRenderer<Component> for Vue
 
 import type { Component } from 'vue';
+import TableComponent from '../components/Table.vue';
 import { ViewTypes } from '@dynamia-tools/ui-core';
 import type { TableRenderer } from '@dynamia-tools/ui-core';
 import type { TableView } from '@dynamia-tools/ui-core';
@@ -13,6 +14,6 @@ export class VueTableRenderer implements TableRenderer<Component> {
   readonly supportedViewType = ViewTypes.Table;
 
   render(_view: TableView): Component {
-    return { name: 'DynamiaTable' } as Component;
+    return TableComponent as Component;
   }
 }
