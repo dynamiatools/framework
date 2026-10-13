@@ -129,11 +129,18 @@ const { viewer, loading, error } = useViewer({
 <DynamiaViewer view-type="table" bean-class="Book" />
 <DynamiaViewer view-type="crud"  bean-class="Book" />
 
-<!-- By descriptor ID (fetched by ID from backend) -->
-<DynamiaViewer descriptor-id="BookCustomForm" v-model="book" />
+<!-- By descriptor ID: any descriptor served by /apps/api/metadata/views/{id}, bound to an entity or not -->
+<DynamiaViewer descriptor-id="BookCustomForm" :value="book" />
+<DynamiaViewer descriptor-id="clientesWidget" :source="rows" :read-only="true" />
 
 <!-- With a pre-loaded descriptor (skips network fetch) -->
-<DynamiaViewer :descriptor="myDescriptor" v-model="book" :read-only="true" />
+<DynamiaViewer :descriptor="myDescriptor" :value="book" :read-only="true" />
+
+<!-- From a plain object with the shape of a descriptor (no backend, no client needed) -->
+<DynamiaViewer
+  :descriptor="{ view: 'table', fields: { name: { label: 'Name' }, total: { params: { converter: 'converters.Currency' } } } }"
+  :source="rows"
+/>
 
 <!-- Custom view type registered by a third-party module -->
 <DynamiaViewer view-type="kanban" bean-class="com.example.Task" />
@@ -155,9 +162,14 @@ const { viewer, loading, error } = useViewer({
 |------|------|-------------|
 | `viewType` | `string` | View type name: `'form'`, `'table'`, `'crud'`, `'tree'`, `'kanban'`, … |
 | `beanClass` | `string` | Entity id (class simple name) |
-| `descriptor` | `ViewDescriptor` | Pre-loaded descriptor (skips backend fetch) |
+| `descriptor` | `ViewDescriptor \| ViewDescriptorInput` | Pre-loaded descriptor (skips backend fetch). A hand-written object is completed with defaults: only `view` is required, `fields` may be names, partial fields or a record keyed by field name (the YAML shape) — see `normalizeViewDescriptor` in `@dynamia-tools/ui-core` |
 | `descriptorId` | `string` | Descriptor ID to fetch from backend |
+| `client` | `DynamiaClient` | Client used to fetch descriptors; defaults to the one provided to `DynamiaVue` |
+| `source` | `unknown` | Data source of the view (the rows of a table); changes are applied to the live view |
+| `value` | `unknown` | Primary value of the view (the object of a form); changes are applied to the live view |
 | `readOnly` | `boolean` | Propagates to the inner view |
+
+The viewer is rebuilt when `descriptor` (by content), `descriptorId`, `viewType`, `beanClass` or `client` change.
 
 **Events:**
 

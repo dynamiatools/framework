@@ -27,11 +27,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, shallowRef } from 'vue';
+import { computed, onMounted, onUnmounted, shallowRef, watch } from 'vue';
 import type { Component } from 'vue';
+import type { DynamiaClient } from '@dynamia-tools/sdk';
 import type { ViewerConfig, View } from '@dynamia-tools/ui-core';
 import { ViewRendererRegistry } from '@dynamia-tools/ui-core';
 import { VueViewer } from '../views/VueViewer.js';
+import { useDynamiaClient } from '../composables/useDynamiaClient.js';
 
 /** Props for the Viewer component */
 export interface ViewerProps extends Omit<ViewerConfig, 'client'> {
@@ -41,6 +43,11 @@ export interface ViewerProps extends Omit<ViewerConfig, 'client'> {
   beanClass?: string;
   /** Whether the view is in read-only mode */
   readOnly?: boolean;
+  /**
+   * Client used to fetch the descriptor (`descriptorId`, `beanClass` + `viewType`). Defaults to the one provided to
+   * `DynamiaVue`. Not needed with a `descriptor` object.
+   */
+  client?: DynamiaClient;
 }
 
 const props = withDefaults(defineProps<ViewerProps>(), {
@@ -54,42 +61,68 @@ const emit = defineEmits<{
   error: [message: string];
 }>();
 
-const viewer = new VueViewer({
-  viewType: props.viewType ?? null,
-  beanClass: props.beanClass ?? null,
-  readOnly: props.readOnly,
-  ...(props.descriptor != null ? { descriptor: props.descriptor } : {}),
-  ...(props.descriptorId != null ? { descriptorId: props.descriptorId } : {}),
-});
+const injectedClient = useDynamiaClient();
 
-const loading = viewer.loading;
-const error = viewer.error;
-const view = viewer.currentView;
-
+const viewer = shallowRef<VueViewer | null>(null);
+const loading = computed(() => viewer.value?.loading.value ?? true);
+const error = computed(() => viewer.value?.error.value ?? null);
+const view = computed(() => viewer.value?.currentView.value ?? null);
 const resolvedComponent = shallowRef<Component | null>(null);
 
-onMounted(async () => {
+let generation = 0;
+
+/** (Re)builds the viewer from the current props. A load that finishes after a newer one started is discarded. */
+async function load(): Promise<void> {
+  const current = ++generation;
+  const client = props.client ?? injectedClient;
+  const next = new VueViewer({
+    viewType: props.viewType ?? null,
+    beanClass: props.beanClass ?? null,
+    readOnly: props.readOnly,
+    ...(client != null ? { client } : {}),
+    ...(props.descriptor != null ? { descriptor: props.descriptor } : {}),
+    ...(props.descriptorId != null ? { descriptorId: props.descriptorId } : {}),
+    ...(props.value !== undefined ? { value: props.value } : {}),
+    ...(props.source !== undefined ? { source: props.source } : {}),
+  });
+  viewer.value?.destroy();
+  viewer.value = next;
+  resolvedComponent.value = null;
   try {
-    await viewer.initialize();
-    if (viewer.resolvedViewType && ViewRendererRegistry.hasRenderer(viewer.resolvedViewType)) {
-      const renderer = ViewRendererRegistry.getRenderer(viewer.resolvedViewType);
-      resolvedComponent.value = renderer.render(view.value!) as Component;
+    await next.initialize();
+    if (current !== generation) return;
+    if (next.resolvedViewType && ViewRendererRegistry.hasRenderer(next.resolvedViewType)) {
+      const renderer = ViewRendererRegistry.getRenderer(next.resolvedViewType);
+      resolvedComponent.value = renderer.render(next.currentView.value!) as Component;
     }
-    if (view.value) emit('ready', view.value);
+    if (next.currentView.value) emit('ready', next.currentView.value);
   } catch (e) {
-    emit('error', String(e));
+    if (current === generation) emit('error', String(e));
   }
-});
+}
+
+onMounted(load);
+
+// A descriptor written inline (`:descriptor="{ ... }"`) is a new object on every parent render: compare its content.
+const descriptorKey = computed(() => JSON.stringify(props.descriptor ?? null));
+watch(
+  () => [descriptorKey.value, props.descriptorId, props.viewType, props.beanClass, props.client] as const,
+  () => { void load(); },
+);
+watch(() => props.source, (source) => viewer.value?.setSource(source));
+watch(() => props.value, (value) => viewer.value?.setValue(value));
+watch(() => props.readOnly, (readOnly) => viewer.value?.setReadonly(readOnly));
 
 onUnmounted(() => {
-  viewer.destroy();
+  generation++;
+  viewer.value?.destroy();
 });
 
 /** Get the primary value from the view */
-const getValue = () => viewer.getValue();
+const getValue = () => viewer.value?.getValue();
 
 /** Set the primary value on the view */
-const setValue = (value: unknown) => viewer.setValue(value);
+const setValue = (value: unknown) => viewer.value?.setValue(value);
 
 defineExpose({ viewer, getValue, setValue });
 </script>

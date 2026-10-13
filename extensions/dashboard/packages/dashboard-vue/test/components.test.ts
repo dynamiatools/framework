@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { defineComponent } from 'vue';
+import { defineComponent, h } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
-import { DynamiaDashboard, KpiWidget, WidgetRendererRegistry, registerBuiltinWidgets } from '../src/index.js';
+import { DynamiaDashboard, KpiWidget, ViewerWidget, WidgetRendererRegistry, registerBuiltinWidgets } from '../src/index.js';
 import { dashboardDescriptor, makeClient, widgetResponse } from './helpers.js';
 
 const chartCtor = vi.fn();
@@ -137,5 +137,25 @@ describe('built-in widgets', () => {
 
     wrapper.unmount();
     expect(chartDestroy).toHaveBeenCalled();
+  });
+});
+
+describe('ViewerWidget', () => {
+  const Viewer = defineComponent({ props: ['descriptorId', 'viewType', 'source', 'value', 'readOnly'], setup: () => () => h('div', { 'data-testid': 'viewer' }) });
+  const mountWidget = (data: unknown) => mount(ViewerWidget, { props: { data: data as never }, global: { stubs: { DynamiaViewer: Viewer } } });
+
+  it('gives a list value to the viewer as its data source', () => {
+    const rows = [{ a: 1 }, { a: 2 }];
+    const props = mountWidget({ descriptorId: 'clientesWidget', value: rows }).findComponent(Viewer).props();
+
+    expect(props).toMatchObject({ descriptorId: 'clientesWidget', source: rows, readOnly: true });
+    expect(props.value).toBeUndefined();
+  });
+
+  it('gives any other value to the viewer as its value', () => {
+    const props = mountWidget({ viewType: 'form', value: { name: 'Ana' } }).findComponent(Viewer).props();
+
+    expect(props).toMatchObject({ viewType: 'form', value: { name: 'Ana' } });
+    expect(props.source).toBeUndefined();
   });
 });
