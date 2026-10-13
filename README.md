@@ -1,13 +1,14 @@
-[![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia/tools.dynamia.app)](https://search.maven.org/search?q=tools.dynamia)
+[![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia/tools.dynamia.app?label=Maven%20Central)](https://central.sonatype.com/search?q=g%3Atools.dynamia)
+[![GitHub Packages](https://img.shields.io/github/v/release/dynamiatools/framework?include_prereleases&label=GitHub%20Packages&logo=github)](https://github.com/orgs/dynamiatools/packages?repo_name=framework)
+[![npm](https://img.shields.io/npm/v/@dynamia-tools/sdk?label=npm&logo=npm)](https://www.npmjs.com/search?q=%40dynamia-tools)
 ![Java Version Required](https://img.shields.io/badge/java-25-blue)
 ![CalVer](https://img.shields.io/badge/versioning-CalVer%20YY.MM.MINOR-blue)
+[![License](https://img.shields.io/github/license/dynamiatools/framework)](LICENSE)
+
 [![Java CI with Maven](https://github.com/dynamiatools/framework/actions/workflows/maven.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/maven.yml)
 [![Release and Deploy](https://github.com/dynamiatools/framework/actions/workflows/release.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/release.yml)
 [![Publish NPM Packages](https://github.com/dynamiatools/framework/actions/workflows/publish-npm.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/publish-npm.yml)
 [![DynamiaTools Documentation](https://img.shields.io/badge/DynamiaTools-Documentation-orange)](https://dynamia.tools/getting-started/)
-
-
-
 
 <h1 align="center">
 <img src="https://raw.githubusercontent.com/dynamiatools/website/main/public/icon.png" alt="Dynamia Logo" width="150"/>
@@ -26,7 +27,7 @@ Dynamia Platform
 Starting with version **26.2.0**, Dynamia Platform adopts **Calendar Versioning (CalVer)** with the format `YY.MM.MINOR`. This means:
 - **All modules share the same version**: Core, extensions, starters, themes—everything is released together
 - **26.2.0** = First release of February 2026 (Year 26, Month 02, Release 0)
-- **26.2.1** = Second release of February 2026
+- **26.2.1** = Second release of February 2026 (maintenance)
 - **26.3.0** = First release of March 2026
 - **Unified releases** ensure compatibility and simplify dependency management
 - No more version mismatches between platform components!
@@ -45,6 +46,36 @@ Starting with version **26.2.0**, Dynamia Platform adopts **Calendar Versioning 
 | `*-SNAPSHOT` (`next` branch) | no | yes | no |
 
 Maven Central limits what an organization can publish per month, so it only receives the monthly `YY.MM.0` release. Maintenance versions are published to this repository's [GitHub Packages](https://github.com/orgs/dynamiatools/packages?repo_name=framework), which requires a GitHub token with `read:packages` even to download public packages. Unless you need a maintenance fix, use the latest `YY.MM.0` from Maven Central.
+
+<details>
+<summary>Using a maintenance release from GitHub Packages</summary>
+
+Add the repository to your `pom.xml`:
+
+```xml
+<repositories>
+    <repository>
+        <id>dynamia-github</id>
+        <url>https://maven.pkg.github.com/dynamiatools/framework</url>
+    </repository>
+</repositories>
+```
+
+And a matching server in `~/.m2/settings.xml`, with a personal access token that has `read:packages`:
+
+```xml
+<servers>
+    <server>
+        <id>dynamia-github</id>
+        <username>YOUR_GITHUB_USER</username>
+        <password>YOUR_GITHUB_TOKEN</password>
+    </server>
+</servers>
+```
+
+npm packages of every release, maintenance included, are on the public npm registry: no token needed.
+
+</details>
 
 ## 🚀 What Makes Dynamia Platform Special
 
@@ -77,7 +108,7 @@ By default, **Dynamia Platform automatically generates full-featured web interfa
 
 ## 🗺️ Roadmap
 
-### 📋 Short-Term Goals (2026 Q1-Q2)
+### 📋 Short-Term Goals
 
 We're actively working on making Dynamia Platform more accessible, flexible, and developer-friendly. Here's what's coming:
 
@@ -105,6 +136,9 @@ A complete TypeScript/JavaScript package ecosystem for frontend development, ava
 | **[`@dynamia-tools/vue`](https://www.npmjs.com/package/@dynamia-tools/vue)** | Vue 3 composables and components for reactive integration |
 | **[`@dynamia-tools/microfrontend-bridge`](https://www.npmjs.com/package/@dynamia-tools/microfrontend-bridge)** | Typed helpers for bundles embedded via `<microfrontend>` |
 | **[`@dynamia-tools/cli`](https://www.npmjs.com/package/@dynamia-tools/cli)** | CLI tool for scaffolding Dynamia Platform projects |
+| **[`@dynamia-tools/dashboard-sdk`](https://www.npmjs.com/package/@dynamia-tools/dashboard-sdk)** · **[`dashboard-vue`](https://www.npmjs.com/package/@dynamia-tools/dashboard-vue)** | Dashboard extension client and Vue 3 components |
+| **[`@dynamia-tools/reports-sdk`](https://www.npmjs.com/package/@dynamia-tools/reports-sdk)** · **[`reports-vue`](https://www.npmjs.com/package/@dynamia-tools/reports-vue)** | Reports extension client and Vue 3 components |
+| **[`@dynamia-tools/saas-sdk`](https://www.npmjs.com/package/@dynamia-tools/saas-sdk)** · **[`files-sdk`](https://www.npmjs.com/package/@dynamia-tools/files-sdk)** · **[`http-functions-sdk`](https://www.npmjs.com/package/@dynamia-tools/http-functions-sdk)** | Clients for the SaaS, Entity Files and HTTP Functions extensions |
 
 ```bash
 # Install the core SDK
@@ -374,15 +408,15 @@ To use any of the built-in extensions, simply add their dependencies. **All exte
 
 <!-- Reporting -->
 <dependency>
-    <groupId>tools.dynamia.reports</groupId>
-    <artifactId>tools.dynamia.reports.core</artifactId>
+    <groupId>tools.dynamia.modules</groupId>
+    <artifactId>tools.dynamia.modules.reports.core</artifactId>
     <version>26.10.0</version>
 </dependency>
 
 <!-- File Importer -->
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
-    <artifactId>tools.dynamia.modules.fileimporter</artifactId>
+    <artifactId>tools.dynamia.modules.importer</artifactId>
     <version>26.10.0</version>
 </dependency>
 
@@ -412,7 +446,7 @@ npm install @dynamia-tools/buckie
 
 > **💡 Pro Tip**: With CalVer, all Dynamia Platform components use the same version. Just use `26.10.0` for everything!
 
-> **Note**: All artifacts are available on [Maven Central](https://search.maven.org/search?q=tools.dynamia) and npm packages on [npmjs.com](https://www.npmjs.com/search?q=%40dynamia-tools)
+> **Note**: All artifacts are available on [Maven Central](https://central.sonatype.com/search?q=g%3Atools.dynamia) and npm packages on [npmjs.com](https://www.npmjs.com/search?q=%40dynamia-tools)
 
 ## 📚 Documentation
 
@@ -427,13 +461,13 @@ Comprehensive guides, tutorials, and API documentation are available at:
 - **[View Descriptors](https://dynamia.tools/docs/view-descriptors/)** - Declarative UI with YAML
 - **[API Reference](https://dynamia.tools/api/)** - Complete API documentation
 - **[Extensions Guide](https://dynamia.tools/extensions/)** - Working with built-in modules
-- **[Examples](https://github.com/dynamiatools/framework/tree/master/examples)** - Sample applications
+- **[Examples](https://github.com/dynamiatools/framework/tree/main/examples)** - Sample applications
 
 ## 🏗️ Building from Source
 
 ### Prerequisites
 - OpenJDK 25
-- Maven 3.8+
+- Maven 3.9+
 - Git
 
 ### Build Instructions
@@ -461,23 +495,28 @@ mvn clean install
 ### Project Structure
 
 ```
-DynamiaPlatform/
+framework/
 ├── platform/           # Core framework modules
-│   ├── app/           # Application bootstrap
-│   ├── core/          # Core utilities and APIs
-│   ├── starters/      # Spring Boot starters
-│   └── ui/            # UI components and themes
-├── extensions/        # Enterprise extensions
-│   ├── saas/          # Multi-tenancy support
-│   ├── entity-files/  # File attachment system
-│   ├── email-sms/     # Communication module
-│   ├── dashboard/     # Dashboard widgets
-│   ├── reports/       # Reporting engine
-│   ├── finances/      # Financial calculations
-│   ├── file-importer/ # Data import utilities
-│   └── security/      # Authentication & authorization
-├── themes/            # UI themes
-└── examples/          # Sample applications
+│   ├── app/            # Application bootstrap
+│   ├── core/           # Core utilities and APIs
+│   ├── contract/       # UI contract generator
+│   ├── packages/       # TypeScript packages (sdk, ui-core, vue, cli, microfrontend-bridge)
+│   ├── starters/       # Spring Boot starters
+│   ├── testing/        # Test support (UI contract, UI testing, architecture rules)
+│   └── ui/             # ZK UI and shared UI components
+├── extensions/         # Enterprise extensions (each with its own TS SDK under packages/)
+│   ├── saas/           # Multi-tenancy support
+│   ├── entity-files/   # File attachment system
+│   ├── email-sms/      # Communication module
+│   ├── dashboard/      # Dashboard widgets
+│   ├── reports/        # Reporting engine
+│   ├── finances/       # Financial calculations
+│   ├── file-importer/  # Data import utilities
+│   ├── http-functions/ # Declarative, versioned HTTP functions
+│   └── security/       # Authentication & authorization
+├── themes/             # UI themes
+├── examples/           # Sample applications
+└── docs/               # Project docs (see RELEASING.md)
 ```
 
 ## 📜 Version History & Evolution
@@ -533,7 +572,7 @@ Java 11+ and ecosystem update:
 - 🚀 **Spring Boot 4** - Next-gen Spring ecosystem
 - 🎨 **ZK 10+** - Modern web UI capabilities
 - 🔄 **Synchronized Releases** - Core, extensions, starters, and themes share the same version
-- 🎯 **Simplified Dependencies** - One version to rule them all (e.g., 26.10.0 for February 2026)
+- 🎯 **Simplified Dependencies** - One version to rule them all (e.g., `26.10.0` for October 2026)
 - ⚡ **Enhanced Performance** - Optimized for modern JVM and cloud environments
 - 🛡️ **Production Hardened** - Battle-tested in enterprise environments
 
@@ -577,6 +616,6 @@ Dynamia Platform is built with dedication to help developers speed up their proj
 
 **Made with ❤️ by [Dynamia Soluciones IT](https://www.dynamiasoluciones.com)**
 
-[Website](https://dynamia.tools) • [Documentation](https://dynamia.tools/getting-started/) • [GitHub](https://github.com/dynamiatools/framework) • [Maven Central](https://search.maven.org/search?q=tools.dynamia)
+[Website](https://dynamia.tools) • [Documentation](https://dynamia.tools/getting-started/) • [GitHub](https://github.com/dynamiatools/framework) • [Maven Central](https://central.sonatype.com/search?q=g%3Atools.dynamia)
 
 </div>
