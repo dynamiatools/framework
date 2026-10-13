@@ -41,7 +41,7 @@
                 :model-value="(row as Record<string, unknown>)[col.name]"
                 read-only
               />
-              <template v-else>{{ getCellValue(row, col.name) }}</template>
+              <template v-else>{{ cellValue(row, col) }}</template>
             </slot>
           </td>
           <td v-if="$slots['actions']" class="dynamia-table-actions-cell">
@@ -65,9 +65,9 @@
 </template>
 
 <script setup lang="ts">
-import { entityDisplayLabel } from '@dynamia-tools/ui-core';
 import type { VueTableView } from '../views/VueTableView.js';
 import Field from './Field.vue';
+import { cellValue } from './cellValue.js';
 import { isCellComponent } from './fields/fieldComponents.js';
 
 defineProps<{
@@ -76,12 +76,4 @@ defineProps<{
   /** Whether the table is in read-only mode */
   readOnly?: boolean;
 }>();
-
-function getCellValue(row: unknown, field: string): unknown {
-  if (!row || typeof row !== 'object') return '';
-  const value = (row as Record<string, unknown>)[field];
-  // Entity-reference columns (e.g. a @ManyToOne) carry the whole referenced object — display
-  // its name instead of Vue's default toDisplayString, which JSON-stringifies plain objects.
-  return value && typeof value === 'object' ? entityDisplayLabel(value) : value;
-}
 </script>
