@@ -122,6 +122,10 @@ export interface ReportColumn {
   format?: string | null;
   width?: string | null;
   upperCase: boolean;
+  /** CSS class name(s) the designer chose for every cell of the column, e.g. `green lighten-5`; absent when not set */
+  cellStyle?: string;
+  /** CSS class name(s) the designer chose for the header of the column; absent when not set */
+  columnStyle?: string;
 }
 
 /** A filter a report accepts. */

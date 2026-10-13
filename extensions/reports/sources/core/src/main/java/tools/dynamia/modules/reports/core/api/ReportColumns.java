@@ -80,7 +80,11 @@ public final class ReportColumns {
         DataType type = field.getDataType() != null ? field.getDataType() : DataType.TEXT;
         TextAlign align = field.getAlign() != null ? field.getAlign() : TextAlign.LEFT;
         return new ReportColumn(field.getName(), field.getLabel(), type.name(), align.name(), field.getFormat(),
-                field.getWidth(), field.isUpperCase());
+                field.getWidth(), field.isUpperCase(), blankToNull(field.getCellStyle()), blankToNull(field.getColumnStyle()));
+    }
+
+    private static String blankToNull(String style) {
+        return style == null || style.isBlank() ? null : style.trim();
     }
 
     private static DataType infer(String name, ReportData data) {
