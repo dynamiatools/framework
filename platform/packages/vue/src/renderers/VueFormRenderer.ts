@@ -1,6 +1,7 @@
 // VueFormRenderer: implements FormRenderer<Component> for Vue
 
 import type { Component } from 'vue';
+import FormComponent from '../components/Form.vue';
 import { ViewTypes } from '@dynamia-tools/ui-core';
 import type { FormRenderer } from '@dynamia-tools/ui-core';
 import type { FormView } from '@dynamia-tools/ui-core';
@@ -14,6 +15,6 @@ export class VueFormRenderer implements FormRenderer<Component> {
 
   render(_view: FormView): Component {
     // Lazy import to avoid circular dependency at module initialization time
-    return { name: 'DynamiaForm' } as Component;
+    return FormComponent as Component;
   }
 }
