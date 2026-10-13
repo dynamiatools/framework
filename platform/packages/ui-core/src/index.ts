@@ -73,6 +73,8 @@ export {
   currencyConverter, currencySimpleConverter, decimalConverter, dateConverter, dateTimeConverter,
   entityDisplayLabel, resolveConverter, builtinConverters,
 } from './utils/converters.js';
+export { normalizeViewDescriptor, defineViewDescriptor } from './utils/descriptors.js';
+export type { ViewDescriptorInput, ViewFieldInput } from './utils/descriptors.js';
 export { resolveIconClass } from './utils/icons.js';
 export { requiredValidator, constraintValidator, builtinValidators } from './utils/validators.js';
 

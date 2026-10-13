@@ -2,7 +2,7 @@
 
 A movie catalog in the spirit of IMDb, built to try **everything new in DynamiaTools** in one project that was
 generated with the CLI (`dynamia new`, backend Java + frontend Vue) and runs against the **SNAPSHOT** of this
-repository (`26.10.1`).
+repository (`26.10.2`).
 
 | Folder | What it is |
 |---|---|

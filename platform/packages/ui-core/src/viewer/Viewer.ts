@@ -6,6 +6,8 @@ import { ViewTypes } from '../view/ViewType.js';
 import type { View, EventHandler } from '../view/View.js';
 import type { ActionMetadata } from '@dynamia-tools/sdk';
 import { ViewRendererRegistry } from './ViewRendererRegistry.js';
+import { normalizeViewDescriptor } from '../utils/descriptors.js';
+import type { ViewDescriptorInput } from '../utils/descriptors.js';
 
 /** Configuration options for Viewer initialization */
 export interface ViewerConfig {
@@ -13,9 +15,12 @@ export interface ViewerConfig {
   viewType?: string | ViewType | null;
   /** Entity id: the entity class simple name (e.g. 'Book') */
   beanClass?: string | null;
-  /** Pre-loaded view descriptor (skips fetch) */
-  descriptor?: ViewDescriptor | null;
-  /** Descriptor ID to fetch from backend */
+  /**
+   * Pre-loaded view descriptor (skips fetch). It can be a hand-written object with the shape of a descriptor — only `view` is
+   * required, see {@link ViewDescriptorInput} — and is completed with defaults.
+   */
+  descriptor?: ViewDescriptor | ViewDescriptorInput | null;
+  /** Descriptor ID to fetch from backend: any descriptor served by `/apps/api/metadata/views/{id}`, entity-bound or not */
   descriptorId?: string | null;
   /** Initial value for the view */
   value?: unknown;
@@ -41,7 +46,7 @@ export interface ViewerConfig {
 export class Viewer {
   viewType: string | ViewType | null;
   beanClass: string | null;
-  descriptor: ViewDescriptor | null;
+  descriptor: ViewDescriptor | ViewDescriptorInput | null;
   descriptorId: string | null;
   value: unknown;
   source: unknown;
@@ -142,6 +147,12 @@ export class Viewer {
     this._initialized = false;
   }
 
+  /** Replace the data source of the view (rows of a table, …) */
+  setSource(source: unknown): void {
+    this.source = source;
+    if (this._view) this._view.setSource(source);
+  }
+
   /** Get the primary value from the view */
   getValue(): unknown { return this._view?.getValue(); }
 
@@ -199,7 +210,7 @@ export class Viewer {
   private async _resolveDescriptor(): Promise<void> {
     if (this.descriptor) {
       // Use pre-loaded descriptor directly
-      this._resolvedDescriptor = this.descriptor;
+      this._resolvedDescriptor = normalizeViewDescriptor(this.descriptor);
       return;
     }
     if (!this.client) {
@@ -207,7 +218,16 @@ export class Viewer {
       throw new Error('Either provide a descriptor directly or a DynamiaClient to fetch it from the backend');
     }
     if (this.descriptorId) {
-      // Fetch by descriptor ID:
+      // Fetch by descriptor ID. /views/{id} serves any descriptor, entity-bound or not (dashboard widgets, …).
+      try {
+        this._resolvedDescriptor = await this.client.metadata.getView(this.descriptorId);
+      } catch (_e) {
+        // Not served by id (older backend): fall back to the entity descriptors below
+      }
+      if (this._resolvedDescriptor) {
+        if (!this.beanClass && this._resolvedDescriptor.beanClass) this.beanClass = this._resolvedDescriptor.beanClass;
+        return;
+      }
       // ViewDescriptorMetadata.descriptor is @JsonIgnore in Java — the actual
       // ViewDescriptor content must be fetched via the /views endpoint.
       // We match on d.id (the ViewDescriptorMetadata lightweight id field)

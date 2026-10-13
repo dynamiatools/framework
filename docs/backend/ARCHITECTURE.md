@@ -403,6 +403,24 @@ Rules:
   browser on its own.
 - Unauthenticated requests get a JSON 401 (not a redirect to `/login`), so `fetch` callers can handle them.
 
+### Caching the metadata endpoints
+
+View descriptors, entity metadata and navigation (`GET /apps/api/metadata/views/{id}`, `/entities`, `/entities/{id}`,
+`/entities/{id}/views[/{view}]`, `/entities/by-path`, `/navigation`) are practically static, but not always: texts depend
+on the request locale (`Messages.getDefaultLocale()`, which an application resolves per request through its
+`LocaleProvider`), and an application may build descriptors dynamically or vary them per user. The framework therefore
+adds nothing by default and leaves the decision to the application through `MetadataHttpCachePolicy`:
+
+- **Default:** no cache headers, exactly as before.
+- **`dynamia.app.metadata.http-cache=etag`:** the included `ContentEtagMetadataHttpCachePolicy`. A strong ETag from the
+  content and the locale, `Cache-Control: private, no-cache` and `Vary: Accept-Language`. The client revalidates on every
+  use and gets a `304` with no body when nothing changed, and never a stale descriptor after a deployment or a hot-reload.
+- **Your own policy:** register a `MetadataHttpCachePolicy` bean (for example an ETag from the application version, or a
+  `Vary` that includes the user). It replaces the included one.
+
+Only the read-only endpoints above take part; actions, entity data (`/entities/ref/**`) and executions are never cached,
+and neither are `/apps/api/dashboard` or `/apps/api/reports`.
+
 ---
 
 ## Dependency Injection & Spring Integration
