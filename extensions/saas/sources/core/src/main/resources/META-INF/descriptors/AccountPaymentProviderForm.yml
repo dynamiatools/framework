@@ -27,7 +27,9 @@ fields:
   serviceURL:
     label: API Service URL
   webCheckoutURL:
+    label: Webcheckout URL
   librariesURL:
+    label: Libraries URL
 
   # Webhooks & events
   webCheckoutSecret:
