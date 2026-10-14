@@ -38,12 +38,7 @@ public class AutoQueryCrudStateChangedListener implements CrudStateChangedListen
 
                 if (crudView.getViewDescriptor().getParams().get(Viewers.PARAM_AUTOQUERY) != Boolean.FALSE
                         && crudView.getController().isQueryResultEmpty()) {
-                    var cvComp = (org.zkoss.zk.ui.Component)crudView;
-                    Clients.showBusy(cvComp, "");
-                    ZKUtil.runLater(Duration.ofMillis(100), () -> {
-                        Clients.clearBusy(cvComp);
-                        crudView.getController().doQuery();
-                    });
+                    ZKUtil.runLater(Duration.ofMillis(50), () -> crudView.getController().doQuery());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
