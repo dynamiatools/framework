@@ -244,4 +244,8 @@ public class BeanMap extends HashMap<String, Object> implements Serializable, Js
             return super.toString();
         }
     }
+
+    public boolean isLoadable() {
+        return beanClass != null && id != null;
+    }
 }

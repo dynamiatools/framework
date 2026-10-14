@@ -53,7 +53,9 @@ import java.util.function.Supplier;
 public final class AccountTenants {
 
     /**
-     * Tenant id of the root tenant: it is not an account, and sees and may write every account's data.
+     * Default tenant id of the root tenant: it is not an account, and sees and may write every account's data. It can
+     * be changed with the {@value AccountTenantIdentifierResolver#ROOT_TENANT_PROPERTY} property, see
+     * {@link #rootTenantId()}.
      */
     public static final Long ROOT_TENANT_ID = 0L;
 
@@ -65,8 +67,30 @@ public final class AccountTenants {
     public static final Long NO_TENANT_ID = -1L;
 
     private static final ScopedValue<Long> TENANT = ScopedValue.newInstance();
+    private static volatile Long rootTenantId = ROOT_TENANT_ID;
 
     private AccountTenants() {
+    }
+
+    /**
+     * Returns the id of the root tenant in use: {@link #ROOT_TENANT_ID} unless the application configured another one
+     * with the {@value AccountTenantIdentifierResolver#ROOT_TENANT_PROPERTY} property. {@code withRoot},
+     * {@code runAsRoot} and {@code callWithRoot} bind this tenant.
+     *
+     * @return the root tenant id, never {@code null}
+     */
+    public static Long rootTenantId() {
+        return rootTenantId;
+    }
+
+    /**
+     * Sets the id of the root tenant. Called once at startup by {@link AccountTenantIdentifierResolver}; it must match
+     * what the resolver answers to {@code isRoot}.
+     *
+     * @param tenantId the root tenant id, {@code null} restores {@link #ROOT_TENANT_ID}
+     */
+    static void configureRootTenantId(Long tenantId) {
+        rootTenantId = tenantId != null ? tenantId : ROOT_TENANT_ID;
     }
 
     /**
@@ -109,14 +133,14 @@ public final class AccountTenants {
 
     /**
      * Runs the work as the root tenant: it sees every account and may persist data for any account.
-     * Entities persisted without an {@code accountId} get the {@link #ROOT_TENANT_ID}.
+     * Entities persisted without an {@code accountId} get the {@link #rootTenantId() root tenant id}.
      *
      * @param work the work
      * @param <T>  the result type
      * @return the result of the work
      */
     public static <T> T runAsRoot(Supplier<T> work) {
-        return ScopedValue.where(TENANT, ROOT_TENANT_ID).call(() -> inNewTransaction(work));
+        return ScopedValue.where(TENANT, rootTenantId()).call(() -> inNewTransaction(work));
     }
 
     /**
@@ -155,7 +179,7 @@ public final class AccountTenants {
      * @return the result of the work
      */
     public static <T> T withRoot(Supplier<T> work) {
-        return ScopedValue.where(TENANT, ROOT_TENANT_ID).call(work::get);
+        return ScopedValue.where(TENANT, rootTenantId()).call(work::get);
     }
 
     /**
@@ -180,11 +204,11 @@ public final class AccountTenants {
      * @throws Exception whatever the work throws
      */
     public static <T> T callWithRoot(Callable<T> work) throws Exception {
-        return ScopedValue.where(TENANT, ROOT_TENANT_ID).call(work::call);
+        return ScopedValue.where(TENANT, rootTenantId()).call(work::call);
     }
 
     /**
-     * Binds the given tenant (the root tenant is {@link #ROOT_TENANT_ID}) around the operation, without opening a
+     * Binds the given tenant (the root tenant is {@link #rootTenantId()}) around the operation, without opening a
      * transaction. Used to re-apply a tenant captured on another thread, see {@link AccountTenantContextCapturer}.
      *
      * @param tenantId the tenant id

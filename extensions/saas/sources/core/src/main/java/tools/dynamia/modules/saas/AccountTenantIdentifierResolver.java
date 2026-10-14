@@ -19,6 +19,8 @@
 package tools.dynamia.modules.saas;
 
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
@@ -38,6 +40,10 @@ import java.util.concurrent.atomic.AtomicLong;
  * background jobs, a thread that lost its context) it answers {@link AccountTenants#NO_TENANT_ID}, a tenant that does
  * not exist, so nothing is visible. The {@link AccountTenants#ROOT_TENANT_ID root} tenant, which sees every account,
  * is only used inside an explicit {@code AccountTenants.withRoot/runAsRoot/callWithRoot}.
+ * <p>
+ * Which id is the root is configured with the {@value #ROOT_TENANT_PROPERTY} property (default
+ * {@link AccountTenants#ROOT_TENANT_ID}). It is a plain value on purpose: Hibernate asks {@link #isRoot(Long)} while
+ * opening sessions, so it cannot be looked up in the database (for example the system account).
  *
  * @author Mario Serrano Leones
  */
@@ -47,6 +53,36 @@ public class AccountTenantIdentifierResolver implements CurrentTenantIdentifierR
     private static final LoggingService LOGGER = new SLF4JLoggingService(AccountTenantIdentifierResolver.class);
     private static final long WARN_INTERVAL_MILLIS = 60_000;
     private static final AtomicLong lastWarning = new AtomicLong();
+
+    /**
+     * Property that sets the id of the root tenant.
+     */
+    public static final String ROOT_TENANT_PROPERTY = "dynamia.saas.root-tenant-id";
+
+    private final Long rootTenantId;
+
+    /**
+     * Creates the resolver with the default root tenant, {@link AccountTenants#ROOT_TENANT_ID}.
+     */
+    public AccountTenantIdentifierResolver() {
+        this(AccountTenants.ROOT_TENANT_ID);
+    }
+
+    /**
+     * Creates the resolver and makes {@code rootTenantId} the root tenant of {@link AccountTenants}.
+     *
+     * @param rootTenantId the root tenant id, taken from {@value #ROOT_TENANT_PROPERTY}
+     * @throws IllegalArgumentException if it is {@code null} or equals {@link AccountTenants#NO_TENANT_ID}
+     */
+    @Autowired
+    public AccountTenantIdentifierResolver(@Value("${" + ROOT_TENANT_PROPERTY + ":0}") Long rootTenantId) {
+        if (rootTenantId == null || AccountTenants.NO_TENANT_ID.equals(rootTenantId)) {
+            throw new IllegalArgumentException(ROOT_TENANT_PROPERTY + " cannot be empty or " + AccountTenants.NO_TENANT_ID
+                    + ", the tenant used when none can be resolved");
+        }
+        this.rootTenantId = rootTenantId;
+        AccountTenants.configureRootTenantId(rootTenantId);
+    }
 
     @Override
     public Long resolveCurrentTenantIdentifier() {
@@ -118,6 +154,6 @@ public class AccountTenantIdentifierResolver implements CurrentTenantIdentifierR
 
     @Override
     public boolean isRoot(Long tenantId) {
-        return AccountTenants.ROOT_TENANT_ID.equals(tenantId);
+        return rootTenantId.equals(tenantId);
     }
 }

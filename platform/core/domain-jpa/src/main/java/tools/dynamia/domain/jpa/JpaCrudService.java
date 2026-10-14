@@ -333,14 +333,10 @@ public class JpaCrudService extends AbstractCrudService {
         query.setMaxResults(1);
         parameters.applyTo(wrap(query));
 
-        List<T> resultList = new ArrayList();
         T result = null;
-        try {
-            resultList = query.getResultList();
-            if (!resultList.isEmpty()) {
-                result = resultList.getFirst();
-            }
-        } catch (Exception ignored) {
+        List<T> resultList = query.getResultList();
+        if (!resultList.isEmpty()) {
+            result = resultList.getFirst();
         }
 
         fireListeners(resultList, EventType.AFTER_QUERY);

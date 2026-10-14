@@ -21,7 +21,7 @@ attribute `currentAccountId`, and the `AccountSessionHolder` of the thread. `Acc
 core) never touches the database, because Hibernate calls it while opening a session. Hibernate fixes the tenant when
 the session opens and it cannot change afterwards.
 
-The **root tenant** (`AccountTenants.ROOT_TENANT_ID`, `0`) is not an account: it sees every account and may persist data
+The **root tenant** (`AccountTenants.rootTenantId()`: `0` by default, configurable with `dynamia.saas.root-tenant-id`; it is a plain id, never looked up in the database, and cannot be `-1`) is not an account: it sees every account and may persist data
 for any account. It is only used inside an explicit `AccountTenants.withRoot/runAsRoot/callWithRoot`. Tenant
 resolution **fails closed**: when nothing resolves (startup, a background thread that lost its context) the resolver
 answers `AccountTenants.NO_TENANT_ID` (`-1`), a tenant that does not exist, so nothing is visible, and logs a warning
