@@ -16,6 +16,7 @@
  */
 package tools.dynamia.domain.util;
 
+import tools.dynamia.commons.BeanMap;
 import tools.dynamia.commons.BeanSorter;
 import tools.dynamia.commons.Identifiable;
 import tools.dynamia.commons.ObjectOperations;
@@ -500,7 +501,9 @@ public abstract class DomainUtils {
 
         if (entity instanceof Identifiable) {
             return ((Identifiable) entity).getId();
-        } else {
+        }else if(entity instanceof BeanMap bmap){
+            return (Serializable) bmap.getId();
+        }else {
             for (EntityUtilsProvider finder : Containers.get().findObjects(EntityUtilsProvider.class)) {
                 Serializable id = finder.findId(entity);
                 if (id != null) {
