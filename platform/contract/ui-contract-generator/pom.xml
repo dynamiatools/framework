@@ -23,7 +23,7 @@
     <parent>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.parent</artifactId>
-        <version>26.10.3-SNAPSHOT</version>
+        <version>26.10.3</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
@@ -64,12 +64,12 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.actions</artifactId>
-            <version>26.10.3-SNAPSHOT</version>
+            <version>26.10.3</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.ui</artifactId>
-            <version>26.10.3-SNAPSHOT</version>
+            <version>26.10.3</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

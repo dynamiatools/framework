@@ -1,7 +1,7 @@
 {
   "name": "dynamia-movies",
   "private": true,
-  "version": "26.10.3-SNAPSHOT",
+  "version": "26.10.3",
   "description": "Public movie site (Vue 3) for the Dynamia Movies demo. It reads the automatic REST API of DynamiaTools.",
   "type": "module",
   "scripts": {
