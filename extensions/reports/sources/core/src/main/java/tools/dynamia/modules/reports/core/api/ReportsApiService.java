@@ -200,7 +200,25 @@ public class ReportsApiService {
             rows.add(ReportValues.row(entry, data));
         }
         return new ReportRunResult(ReportColumns.of(report, data), rows, total, page, size, data.isTruncated(), duration,
-                ReportCharts.build(report, data));
+                ReportCharts.build(report, data), totals(data));
+    }
+
+    /** Sum of each numeric column over every entry of the result, regardless of the requested page. */
+    private static Map<String, Number> totals(ReportData data) {
+        Map<String, java.math.BigDecimal> sums = new java.util.LinkedHashMap<>();
+        for (var entry : data.getEntries()) {
+            if (entry.isSingleValue() || entry.getValues() == null) {
+                continue;
+            }
+            entry.getValues().forEach((name, value) -> {
+                if (value instanceof Number n) {
+                    sums.merge(name, new java.math.BigDecimal(n.toString()), java.math.BigDecimal::add);
+                }
+            });
+        }
+        Map<String, Number> totals = new java.util.LinkedHashMap<>();
+        sums.forEach((name, sum) -> totals.put(name, sum.stripTrailingZeros().scale() <= 0 ? (Number) sum.longValue() : (Number) sum.doubleValue()));
+        return totals;
     }
 
     // ---- export

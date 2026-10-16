@@ -161,6 +161,22 @@ class ReportsApiServiceTest {
     }
 
     @Test
+    void totalsCoverTheWholeResultNotJustThePage() {
+        var all = service.run(1L, filters());
+        var page0 = service.run(1L, new ReportRunRequest(Map.of(), 0, 3, null, null));
+        var page1 = service.run(1L, new ReportRunRequest(Map.of(), 1, 3, null, null));
+
+        assertTrue(all.totals().containsKey("TOTAL"));
+        assertFalse(all.totals().containsKey("REGION"), "only numeric columns are summed");
+        assertEquals(all.totals(), page0.totals());
+        assertEquals(all.totals(), page1.totals());
+        double pageSum = page0.rows().stream().mapToDouble(r -> ((Number) r.get("TOTAL")).doubleValue()).sum();
+        double allSum = all.rows().stream().mapToDouble(r -> ((Number) r.get("TOTAL")).doubleValue()).sum();
+        assertEquals(allSum, all.totals().get("TOTAL").doubleValue(), 0.001);
+        assertTrue(pageSum < allSum);
+    }
+
+    @Test
     void pageBeyondTheEndIsEmpty() {
         var result = service.run(1L, new ReportRunRequest(Map.of(), 10, 3, null, null));
         assertTrue(result.rows().isEmpty());
