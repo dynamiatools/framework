@@ -24,4 +24,4 @@ export { default as DataSourceTest } from './components/DataSourceTest.vue';
 
 export { englishLabels, spanishLabels, resolveLabels } from './labels.js';
 export type { ReportLabels } from './labels.js';
-export { formatCell, toApiValue, toInputValue, exportFileName, downloadBlob } from './format.js';
+export { formatCell, toApiValue, toInputValue, exportFileName, downloadBlob, chartKind } from './format.js';

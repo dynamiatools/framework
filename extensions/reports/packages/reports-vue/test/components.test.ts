@@ -232,6 +232,24 @@ describe('ReportChart', () => {
     expect(chartCtor).toHaveBeenCalledTimes(2);
     expect(chartDestroy).toHaveBeenCalled();
   });
+
+  it.each([
+    ['horizontalBar', 'bar', 'y'],
+    ['HorizontalBar', 'bar', 'y'],
+    ['horizontal_bar', 'bar', 'y'],
+    ['bar', 'bar', undefined],
+    ['line', 'line', undefined],
+    ['doughnut', 'doughnut', undefined],
+    ['pie', 'pie', undefined],
+    ['unknown', 'bar', undefined],
+  ])('draws type %s as a Chart.js %s chart (index axis %s)', async (type, expected, axis) => {
+    mount(ReportChart, { props: { chart: { ...chart, type } } });
+    await flushPromises();
+
+    const config = chartCtor.mock.calls[0]![1] as { type: string; options: { indexAxis?: string } };
+    expect(config.type).toBe(expected);
+    expect(config.options.indexAxis).toBe(axis);
+  });
 });
 
 describe('ReportViewer', () => {
