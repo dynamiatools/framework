@@ -7,6 +7,7 @@ import AppShell from './layout/AppShell.vue';
 import { router } from './router.js';
 import { client } from './lib/client.js';
 import { registerThemeFieldComponents } from './lib/fieldComponents.js';
+import { configureAuth, type DynamiaAuthOptions } from './lib/auth.js';
 import './styles/app.css';
 
 /** Options of {@link createDynamiaApp}. */
@@ -15,6 +16,8 @@ export interface DynamiaAppOptions {
   mount?: string | Element;
   /** Components mounted once inside the shell, e.g. hosts that render app-specific flow steps. */
   hosts?: Component[];
+  /** What happens without a session or on sign out. Defaults to the Dynamia backend's `/login` and `/logout`. */
+  auth?: DynamiaAuthOptions;
   /** Called with the app before it is mounted, to install plugins or register more field components. */
   setup?: (app: App) => void;
 }
@@ -30,6 +33,7 @@ export interface DynamiaAppOptions {
  * @returns the mounted Vue app
  */
 export function createDynamiaApp(options: DynamiaAppOptions = {}): App {
+  configureAuth(options.auth ?? {});
   registerDynamiaEmbed();
   registerThemeFieldComponents();
 

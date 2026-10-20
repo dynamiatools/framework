@@ -25,14 +25,16 @@
     "!src/main.ts",
     "!src/login.ts",
     "!src/components/StarRatingHost.vue",
-    "!src/lib/starRatingManager.ts"
+    "!src/lib/starRatingManager.ts",
+    "!src/**/*.test.ts"
   ],
   "packageManager": "pnpm@11.13.1",
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/copy-shell-views.mjs",
     "preview": "vite preview",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@dynamia-tools/sdk": "workspace:*",
@@ -54,6 +56,7 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "vite": "^8.3.0",
+    "vitest": "^4.1.11",
     "vue-tsc": "^2.2.12"
   }
 }

@@ -91,6 +91,7 @@ import { currentUsername, initialsAvatar } from '../lib/currentUser.js';
 import { toMenuGroups } from '../lib/navMenu.js';
 import { withResolvedIcons } from '../lib/withResolvedIcons.js';
 import { useSkin } from '../lib/useSkin.js';
+import { signOut } from '../lib/auth.js';
 import AppFooter from './AppFooter.vue';
 import ContentArea from './ContentArea.vue';
 
@@ -148,8 +149,5 @@ onMounted(async () => {
   }
 });
 
-async function logout(): Promise<void> {
-  await fetch('/logout', { method: 'POST', credentials: 'include' });
-  window.location.href = '/login';
-}
+const logout = signOut;
 </script>

@@ -74,6 +74,14 @@ import { createDynamiaApp } from '@dynamia-tools/theme-dynamical-vue'
 createDynamiaApp({ hosts: [], setup: app => {} })
 ```
 
+Sign-in is the Dynamia backend's (`POST /login/json`, `POST /logout`, page at `/login`). A 401, or an API call redirected
+to the login page, sends the user to `auth.loginUrl`. With another sign-in, override it:
+
+```ts
+createDynamiaApp({ auth: { loginUrl: '/sso', onUnauthorized: () => startOidc(), logout: () => endSession() } })
+mountLogin({ endpoint: '/auth/token' })   // or skip login.html and mountLogin() altogether
+```
+
 `VITE_DYNAMIA_BASE_URL` sets the backend origin; leave it empty to use the dev proxy (`DYNAMIA_BACKEND`). The login page
 is `mountLogin()`. The CLI's `template-frontend-vue` is a ready-made app on top of this package.
 

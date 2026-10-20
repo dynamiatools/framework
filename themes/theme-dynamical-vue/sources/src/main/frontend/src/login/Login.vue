@@ -44,6 +44,8 @@ import { ref } from 'vue';
 import AuthSplit from '@dynamia-tools/tailadmin-vue/components/ext/layouts/AuthSplit.vue';
 import { rememberUsername } from '../lib/currentUser.js';
 
+const props = withDefaults(defineProps<{ endpoint?: string }>(), { endpoint: '/login/json' });
+
 interface LoginJsonResponse {
   status: 'ok' | 'error';
   message?: string;
@@ -65,7 +67,7 @@ async function submit(): Promise<void> {
   errorMessage.value = null;
 
   try {
-    const response = await fetch('/login/json', {
+    const response = await fetch(props.endpoint, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
