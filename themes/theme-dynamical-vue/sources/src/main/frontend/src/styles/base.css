@@ -1,9 +1,14 @@
 /* theme.css (not style.css): same tokens/utilities as the package's stylesheet, minus the Google Fonts
    request — this app is served by the Spring Boot backend and must work on intranets/strict CSP. */
 @import '@dynamia-tools/tailadmin-vue/theme.css';
-/* Tailwind v4 doesn't scan node_modules: point it at the package's source so the classes used in its
-   .vue templates get generated. */
+/* Tailwind v4 doesn't scan node_modules: point it at the sources so the classes used in their .vue
+   templates get generated. Paths are relative to this file; one that does not exist matches nothing.
+   - this package's own src, which matters when it is installed from npm;
+   - tailadmin-vue inside this package's node_modules (this repo's workspace) or next to the package
+     (installed from npm, pnpm or flat). */
+@source '../';
 @source '../../node_modules/@dynamia-tools/tailadmin-vue/src';
+@source '../../../tailadmin-vue/src';
 
 /*
  * Skins: DynamicalVueTemplate.java registers "blue" (default), "dynamia" and "dark" — each maps to
