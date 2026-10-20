@@ -165,6 +165,27 @@ describe('renameJavaPackages', () => {
     expect(pom).toContain('<name>my-erp</name>')
   })
 
+  // The template's own version is bumped freely; the CLI must pin the one cli.properties declares.
+  it('sets <dynamia.version> in pom.xml whatever version the template carries', async () => {
+    const pom = join(projectDir, 'pom.xml')
+    writeFileSync(pom, readFileSync(pom, 'utf-8').replace('</project>', '<properties><dynamia.version>26.10.3</dynamia.version></properties></project>'))
+
+    await renameJavaPackages({
+      projectDir,
+      projectName: 'my-erp',
+      groupId: 'com.acme',
+      artifactId: 'my-erp',
+      version: '1.0.0-SNAPSHOT',
+      description: 'desc',
+      dynamiaVersion: '26.4.1',
+      springBootVersion: '4.0.5',
+      language: 'java',
+      tokens,
+    })
+
+    expect(readFileSync(pom, 'utf-8')).toContain('<dynamia.version>26.4.1</dynamia.version>')
+  })
+
   it('updates the pom.xml <description> with the user-provided value', async () => {
     await renameJavaPackages({
       projectDir,

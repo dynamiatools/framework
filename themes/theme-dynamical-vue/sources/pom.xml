@@ -140,7 +140,7 @@
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <arguments>pnpm --filter theme-dynamical-vue-frontend^... run build</arguments>
+                            <arguments>pnpm --filter @dynamia-tools/theme-dynamical-vue^... run build</arguments>
                         </configuration>
                     </execution>
                     <execution>
