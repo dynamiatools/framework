@@ -54,6 +54,29 @@ dynamia:
     skin: Blue
 ```
 
+## Use it from npm (no Maven)
+
+The frontend of this theme is also published as `@dynamia-tools/theme-dynamical-vue`, so a standalone Vite app can
+build on the same shell, served apart from the backend. It ships its sources (`.vue`/`.ts`), like `tailadmin-vue`.
+
+```bash
+pnpm add @dynamia-tools/theme-dynamical-vue @dynamia-tools/sdk @dynamia-tools/vue vue vue-router
+```
+
+```ts
+// vite.config.ts
+import { dynamiaViteConfig } from '@dynamia-tools/theme-dynamical-vue/vite'
+export default defineConfig(dynamiaViteConfig({ input: { index: 'index.html', login: 'login.html' } }))
+
+// main.ts
+import './style.css'                       // @import '@dynamia-tools/theme-dynamical-vue/styles/app.css';
+import { createDynamiaApp } from '@dynamia-tools/theme-dynamical-vue'
+createDynamiaApp({ hosts: [], setup: app => {} })
+```
+
+`VITE_DYNAMIA_BASE_URL` sets the backend origin; leave it empty to use the dev proxy (`DYNAMIA_BACKEND`). The login page
+is `mountLogin()`. The CLI's `template-frontend-vue` is a ready-made app on top of this package.
+
 ## Available skins
 
 - Blue (default)
