@@ -48,6 +48,8 @@ export function dynamiaViteConfig(options = {}) {
       proxy: {
         // Same-origin in production; only needed against a locally running Spring Boot backend.
         '/api': { target: backend, changeOrigin: true },
+        // The SDK's local endpoints (metadata, navigation, dashboards) live under /apps/api.
+        '/apps': { target: backend, changeOrigin: true },
         '/login': { target: backend, changeOrigin: true },
         '/logout': { target: backend, changeOrigin: true },
       },
