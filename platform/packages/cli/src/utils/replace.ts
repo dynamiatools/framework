@@ -144,7 +144,6 @@ export async function renameJavaPackages(options: RenameOptions): Promise<void> 
   replacements['<artifactId>demo</artifactId>'] = `<artifactId>${artifactId}</artifactId>`
   replacements['<version>0.0.1-SNAPSHOT</version>'] = `<version>${version}</version>`
   replacements['<name>DynamiaTools App Backend</name>'] = `<name>${projectName}</name>`
-  replacements['<dynamia.version>26.9.0</dynamia.version>'] = `<dynamia.version>${dynamiaVersion}</dynamia.version>`
   replacements['<version>4.0.5</version>'] = `<version>${springBootVersion}</version>`
   replacements['<version>4.0.5.RELEASE</version>'] = `<version>${springBootVersion}</version>`
 
@@ -157,6 +156,7 @@ export async function renameJavaPackages(options: RenameOptions): Promise<void> 
 
   // Ensure a user-provided description updates pom.xml even when template has multiline defaults.
   replacePomDescription(projectDir, description)
+  replacePomProperty(projectDir, 'dynamia.version', dynamiaVersion)
 
   // 5. Rename the main Application class file
   renameApplicationClass(projectDir, artifactId, basePackagePath, srcExtension)
@@ -213,6 +213,27 @@ function replacePomDescription(projectDir: string, description: string): void {
 
   const normalized = description.trim().replace(/[\r\n]+/g, ' ')
   const updated = pomContent.replace(/<description>[\s\S]*?<\/description>/, `<description>${normalized}</description>`)
+
+  if (updated !== pomContent) {
+    writeFileSync(pomPath, updated, 'utf-8')
+  }
+}
+
+/**
+ * Sets a `<name>value</name>` property of pom.xml whatever value the template carries, so bumping the version in a
+ * template never needs a matching change here.
+ */
+function replacePomProperty(projectDir: string, name: string, value: string): void {
+  const pomPath = join(projectDir, 'pom.xml')
+  let pomContent: string
+  try {
+    pomContent = readFileSync(pomPath, 'utf-8')
+  } catch {
+    return
+  }
+
+  const tag = name.replace(/\./g, '\\.')
+  const updated = pomContent.replace(new RegExp(`<${tag}>[^<]*</${tag}>`), `<${name}>${value}</${name}>`)
 
   if (updated !== pomContent) {
     writeFileSync(pomPath, updated, 'utf-8')
