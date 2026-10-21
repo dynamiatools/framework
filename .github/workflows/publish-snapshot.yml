@@ -2,6 +2,8 @@
 # https://maven.pkg.github.com/dynamiatools/framework) cada vez que cambia `next`.
 # dynamia-erp lo resuelve desde ahí (dynamiatools.version = *-SNAPSHOT).
 # No publica en Maven Central: eso sigue siendo release.yml.
+# Solo publica versiones -SNAPSHOT: una versión de release (26.10.3) no se puede sobrescribir en GitHub
+# Packages (HTTP 409) y su publicación es de release.yml.
 
 name: Publish Snapshot
 
@@ -40,7 +42,18 @@ jobs:
         server-username-env-var: MAVEN_USERNAME
         server-password-env-var: MAVEN_PASSWORD
 
+    - name: Read project version
+      id: version
+      run: |
+        version=$(mvn -B -q help:evaluate -Dexpression=project.version -DforceStdout)
+        echo "version=$version" >> "$GITHUB_OUTPUT"
+        case "$version" in
+          *-SNAPSHOT) echo "snapshot=true" >> "$GITHUB_OUTPUT" ;;
+          *) echo "::notice::Version $version is not a SNAPSHOT, nothing to publish" ;;
+        esac
+
     - name: Verify and deploy SNAPSHOT
+      if: steps.version.outputs.snapshot == 'true'
       # Se invoca deploy:deploy directo porque central-publishing-maven-plugin (extensions=true)
       # reemplaza la fase deploy del ciclo de vida y publicaría en Central.
       run: >
