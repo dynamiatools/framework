@@ -1,15 +1,40 @@
 {
-  "name": "theme-dynamical-vue-frontend",
-  "version": "26.10.2",
-  "description": "Vue 3 + Tailwind CSS frontend for the DynamicalVue application template",
-  "private": true,
+  "name": "@dynamia-tools/theme-dynamical-vue",
+  "version": "26.10.3",
+  "description": "Vue 3 + Tailwind CSS 4 application shell of the DynamicalVue theme: navigation-driven layout, login, skins, CRUD / config / embedded pages",
+  "license": "Apache-2.0",
   "type": "module",
+  "sideEffects": [
+    "*.css",
+    "./src/createDynamiaApp.ts",
+    "./src/mountLogin.ts"
+  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./vite": {
+      "types": "./vite-preset.d.ts",
+      "default": "./vite-preset.js"
+    },
+    "./styles/*": "./src/styles/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "vite-preset.js",
+    "vite-preset.d.ts",
+    "!src/main.ts",
+    "!src/login.ts",
+    "!src/components/StarRatingHost.vue",
+    "!src/lib/starRatingManager.ts",
+    "!src/**/*.test.ts"
+  ],
   "packageManager": "pnpm@11.13.1",
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/copy-shell-views.mjs",
     "preview": "vite preview",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@dynamia-tools/sdk": "workspace:*",
@@ -17,15 +42,21 @@
     "@dynamia-tools/ui-core": "workspace:*",
     "@dynamia-tools/vue": "workspace:*",
     "@fortawesome/fontawesome-free": "^7.3.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-vue": "^6.0.9",
     "vue": "^3.5.43",
     "vue-router": "^5.3.1"
   },
+  "peerDependencies": {
+    "vite": "^8.0.0",
+    "vue": "^3.5.0",
+    "vue-router": "^5.0.0"
+  },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.3.3",
-    "@vitejs/plugin-vue": "^6.0.9",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "vite": "^8.3.0",
+    "vitest": "^4.1.11",
     "vue-tsc": "^2.2.12"
   }
 }

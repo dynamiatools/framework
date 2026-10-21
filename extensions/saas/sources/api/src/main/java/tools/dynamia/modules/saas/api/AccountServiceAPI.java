@@ -17,6 +17,7 @@
 
 package tools.dynamia.modules.saas.api;
 
+import tools.dynamia.integration.Containers;
 import tools.dynamia.modules.saas.api.dto.AccountDTO;
 import tools.dynamia.modules.saas.api.dto.AccountLogDTO;
 import tools.dynamia.modules.saas.api.dto.AccountPaymentDTO;
@@ -24,10 +25,7 @@ import tools.dynamia.modules.saas.api.dto.AccountStatusDTO;
 import tools.dynamia.modules.saas.api.enums.AccountStatus;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -55,6 +53,10 @@ public interface AccountServiceAPI {
      * Attribute name used to store the current account ID in the session or context.
      */
     String CURRENT_ACCOUNT_ID_ATTRIBUTE = "currentAccountId";
+
+    static AccountServiceAPI getInstance() {
+        return Containers.get().findObject(AccountServiceAPI.class);
+    }
 
     /**
      * Retrieves the current status of the specified account.

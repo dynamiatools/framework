@@ -14,7 +14,17 @@ import java.util.Map;
  * @param truncated  true if the report reached the maximum rows ({@code dynamia.reports.max-rows}) and has more data
  * @param durationMs execution time in milliseconds
  * @param charts     data of the report charts, empty when the report has none
+ * @param totals     sum of every numeric column over the whole result (all pages, not only {@code rows}), by column name
  */
 public record ReportRunResult(List<ReportColumn> columns, List<Map<String, Object>> rows, long total, int page, int size,
-                              boolean truncated, long durationMs, List<ReportChartResult> charts) {
+                              boolean truncated, long durationMs, List<ReportChartResult> charts,
+                              Map<String, Number> totals) {
+
+    /**
+     * A result without column totals.
+     */
+    public ReportRunResult(List<ReportColumn> columns, List<Map<String, Object>> rows, long total, int page, int size,
+                           boolean truncated, long durationMs, List<ReportChartResult> charts) {
+        this(columns, rows, total, page, size, truncated, durationMs, charts, Map.of());
+    }
 }

@@ -22,6 +22,7 @@ import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.actions.RunsOn;
 import tools.dynamia.actions.ReadableOnly;
+import tools.dynamia.commons.BeanMap;
 import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.Messages;
 import tools.dynamia.crud.AbstractCrudAction;
@@ -68,8 +69,9 @@ public class ViewDataAction extends AbstractCrudAction implements ReadableOnly, 
         crudService().executeWithinTransaction(() -> {
             Object entity = data;
             Serializable id = DomainUtils.findEntityId(entity);
+            Class entityClass = data instanceof BeanMap bm ? bm.getBeanClass() : entity.getClass();
             if (id != null) {
-                entity = crudService().load(entity.getClass(), id);
+                entity = crudService().load(entityClass, id);
             }
 
             view(entity);

@@ -66,8 +66,8 @@
     <DynamiaToastHost />
     <DynamiaPromptHost />
     <DynamiaFormDialogHost />
-    <!-- App-specific CUSTOM flow step renderer, registered under "star-rating" in main.ts. -->
-    <StarRatingHost />
+    <!-- Extra hosts of the app (createDynamiaApp({ hosts })), e.g. renderers of custom flow steps. -->
+    <slot name="hosts" />
   </AdminLayout>
 </template>
 
@@ -91,9 +91,9 @@ import { currentUsername, initialsAvatar } from '../lib/currentUser.js';
 import { toMenuGroups } from '../lib/navMenu.js';
 import { withResolvedIcons } from '../lib/withResolvedIcons.js';
 import { useSkin } from '../lib/useSkin.js';
+import { signOut } from '../lib/auth.js';
 import AppFooter from './AppFooter.vue';
 import ContentArea from './ContentArea.vue';
-import StarRatingHost from '../components/StarRatingHost.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -149,8 +149,5 @@ onMounted(async () => {
   }
 });
 
-async function logout(): Promise<void> {
-  await fetch('/logout', { method: 'POST', credentials: 'include' });
-  window.location.href = '/login';
-}
+const logout = signOut;
 </script>

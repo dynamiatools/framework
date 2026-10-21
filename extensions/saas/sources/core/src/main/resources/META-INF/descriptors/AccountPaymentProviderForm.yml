@@ -3,6 +3,7 @@ beanClass: tools.dynamia.modules.saas.domain.AccountPaymentProvider
 autofields: false
 
 fields:
+  # General
   name:
   paymentProcessor:
     label: Processor
@@ -11,19 +12,31 @@ fields:
       className: tools.dynamia.modules.saas.AccountPaymentProcessor
       nameField: name
       idField: id
+  providerAlias:
+    label: Provider Alias
   merchantId:
-  apiKey:
-  apiSecret:
-  webCheckoutSecret:
-  integritySecret:
-  eventsSecret:
-  webhooksSecret:
-
-  serviceURL:
-    label: Service URL
   testMode:
   active:
 
+  # Credentials
+  apiKey:
+  apiSecret:
+  integritySecret:
+
+  # Endpoints
+  serviceURL:
+    label: API Service URL
+  webCheckoutURL:
+    label: Webcheckout URL
+  librariesURL:
+    label: Libraries URL
+
+  # Webhooks & events
+  webCheckoutSecret:
+  eventsSecret:
+  webhooksSecret:
+
+  # Extra
   extra0:
     label: Extra 0
   extra1:
@@ -34,13 +47,21 @@ fields:
     label: Extra 3
 
 groups:
+  credentials:
+    label: Credentials
+    fields: [ apiKey, apiSecret, integritySecret ]
+
+  endpoints:
+    label: Endpoints
+    fields: [ serviceURL, webCheckoutURL, librariesURL ]
+
+  webhooks:
+    label: Webhooks & Events
+    fields: [ webCheckoutSecret, eventsSecret, webhooksSecret ]
+
   extraProperties:
     label: Extra Properties
-    fields:
-      - extra0
-      - extra1
-      - extra2
-      - extra3
+    fields: [ extra0, extra1, extra2, extra3 ]
 
 layout:
   columns: 4

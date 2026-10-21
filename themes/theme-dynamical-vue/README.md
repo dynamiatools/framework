@@ -54,6 +54,37 @@ dynamia:
     skin: Blue
 ```
 
+## Use it from npm (no Maven)
+
+The frontend of this theme is also published as `@dynamia-tools/theme-dynamical-vue`, so a standalone Vite app can
+build on the same shell, served apart from the backend. It ships its sources (`.vue`/`.ts`), like `tailadmin-vue`.
+
+```bash
+pnpm add @dynamia-tools/theme-dynamical-vue @dynamia-tools/sdk @dynamia-tools/vue vue vue-router
+```
+
+```ts
+// vite.config.ts
+import { dynamiaViteConfig } from '@dynamia-tools/theme-dynamical-vue/vite'
+export default defineConfig(dynamiaViteConfig({ input: { index: 'index.html', login: 'login.html' } }))
+
+// main.ts
+import './style.css'                       // @import '@dynamia-tools/theme-dynamical-vue/styles/app.css';
+import { createDynamiaApp } from '@dynamia-tools/theme-dynamical-vue'
+createDynamiaApp({ hosts: [], setup: app => {} })
+```
+
+Sign-in is the Dynamia backend's (`POST /login/json`, `POST /logout`, page at `/login`). A 401, or an API call redirected
+to the login page, sends the user to `auth.loginUrl`. With another sign-in, override it:
+
+```ts
+createDynamiaApp({ auth: { loginUrl: '/sso', onUnauthorized: () => startOidc(), logout: () => endSession() } })
+mountLogin({ endpoint: '/auth/token' })   // or skip login.html and mountLogin() altogether
+```
+
+`VITE_DYNAMIA_BASE_URL` sets the backend origin; leave it empty to use the dev proxy (`DYNAMIA_BACKEND`). The login page
+is `mountLogin()`. The CLI's `template-frontend-vue` is a ready-made app on top of this package.
+
 ## Available skins
 
 - Blue (default)

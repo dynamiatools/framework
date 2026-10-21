@@ -146,7 +146,7 @@ export interface ReportFilterDefinition {
 export interface ReportChartDefinition {
   index: number;
   title: string;
-  /** Chart.js type: bar, line, pie, doughnut... */
+  /** Chart type chosen by the designer: pie, bar, horizontalBar, line or doughnut (any case); `ReportChart` maps `horizontalBar` to a Chart.js `bar` with `indexAxis: y` */
   type: string;
   labelField: string;
   valueField: string;
@@ -210,6 +210,8 @@ export interface ReportRunResult {
   truncated: boolean;
   durationMs: number;
   charts: ReportChartResult[];
+  /** Sum of every numeric column over the whole result (all pages, not only `rows`), by column name */
+  totals?: Record<string, number>;
 }
 
 /** Result of the legacy endpoints `/api/reports/{group}/{endpoint}`. */

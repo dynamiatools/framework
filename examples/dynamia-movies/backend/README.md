@@ -1,6 +1,6 @@
 # Dynamia Movies — backend
 
-Spring Boot 4 + DynamiaTools `26.10.2`. See the [project README](../README.md) for the whole picture.
+Spring Boot 4 + DynamiaTools `26.10.3`. See the [project README](../README.md) for the whole picture.
 
 ```bash
 ./mvnw spring-boot:run     # http://localhost:8484  (admin / adminadmin)

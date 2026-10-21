@@ -24,7 +24,7 @@
     <parent>
         <groupId>tools.dynamia.themes</groupId>
         <artifactId>tools.dynamia.themes.parent</artifactId>
-        <version>26.10.2</version>
+        <version>26.10.3</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -140,7 +140,7 @@
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <arguments>pnpm --filter theme-dynamical-vue-frontend^... run build</arguments>
+                            <arguments>pnpm --filter @dynamia-tools/theme-dynamical-vue^... run build</arguments>
                         </configuration>
                     </execution>
                     <execution>
@@ -166,7 +166,7 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.templates</artifactId>
-            <version>26.10.2</version>
+            <version>26.10.3</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

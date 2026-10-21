@@ -22,6 +22,11 @@ public class AccountPaymentProvider extends SimpleEntity {
 
     @Column(length = 500)
     private String webCheckoutSecret;
+    @Column(length = 500)
+    private String webCheckoutURL;
+    @Column(length = 500)
+    private String librariesURL;
+    private String providerAlias;
 
     @Column(length = 500)
     private String eventsSecret;
@@ -172,5 +177,29 @@ public class AccountPaymentProvider extends SimpleEntity {
 
     public void setPaymentProcessor(String paymentProcessor) {
         this.paymentProcessor = paymentProcessor;
+    }
+
+    public String getWebCheckoutURL() {
+        return webCheckoutURL;
+    }
+
+    public void setWebCheckoutURL(String webCheckoutURL) {
+        this.webCheckoutURL = webCheckoutURL;
+    }
+
+    public String getLibrariesURL() {
+        return librariesURL;
+    }
+
+    public void setLibrariesURL(String librariesURL) {
+        this.librariesURL = librariesURL;
+    }
+
+    public String getProviderAlias() {
+        return providerAlias;
+    }
+
+    public void setProviderAlias(String providerAlias) {
+        this.providerAlias = providerAlias;
     }
 }

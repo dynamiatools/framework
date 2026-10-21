@@ -10,6 +10,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type { ReportChartResult } from '@dynamia-tools/reports-sdk';
+import { chartKind } from '../format.js';
 import { resolveLabels } from '../labels.js';
 import type { ReportLabels } from '../labels.js';
 
@@ -27,11 +28,12 @@ async function draw(): Promise<void> {
   instance?.destroy();
   instance = null;
   if (!canvas.value) return;
-  const circular = props.chart.type === 'pie' || props.chart.type === 'doughnut';
+  const kind = chartKind(props.chart.type);
+  const circular = kind.type === 'pie' || kind.type === 'doughnut';
   try {
     const { Chart } = await import('chart.js/auto');
     instance = new Chart(canvas.value, {
-      type: props.chart.type,
+      type: kind.type,
       data: {
         labels: props.chart.labels,
         datasets: props.chart.datasets.map((dataset) => ({
@@ -40,7 +42,7 @@ async function draw(): Promise<void> {
           backgroundColor: dataset.backgroundColor,
         })),
       },
-      options: { responsive: true, plugins: { legend: { display: circular } } },
+      options: { responsive: true, ...(kind.horizontal ? { indexAxis: 'y' } : {}), plugins: { legend: { display: circular } } },
     } as never);
     error.value = null;
   } catch (e) {

@@ -100,3 +100,14 @@ export function downloadBlob(blob: Blob, filename: string): void {
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
+
+/**
+ * The designer's chart types are `pie`, `bar`, `horizontalBar`, `line` and `doughnut` (any case). Chart.js has no `horizontalBar` controller since
+ * v3: it is a `bar` with the index axis on `y`. An unknown type falls back to `bar` instead of failing.
+ */
+export function chartKind(type: string | null | undefined): { type: 'pie' | 'bar' | 'line' | 'doughnut'; horizontal: boolean } {
+  const normalized = (type ?? '').toLowerCase().replace(/[\s_-]/g, '');
+  if (normalized === 'horizontalbar') return { type: 'bar', horizontal: true };
+  if (normalized === 'pie' || normalized === 'line' || normalized === 'doughnut') return { type: normalized, horizontal: false };
+  return { type: 'bar', horizontal: false };
+}
