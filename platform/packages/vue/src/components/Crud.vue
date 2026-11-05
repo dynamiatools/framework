@@ -49,6 +49,8 @@
               :client="client"
               :auto-execute="autoExecuteActions"
               :entity-class-name="view.getEntityClassName() ?? undefined"
+              :edit-label="editLabel"
+              :more-label="moreLabel"
               @edit="view.startEdit($event)"
               @action-executed="emit('action-executed', $event)"
               @action-response="emit('action-response', $event)"
@@ -67,8 +69,22 @@
       >
         <template #actions="{ node }">
           <slot name="node-actions" :node="node">
-            <button v-if="!readOnly" type="button" @click="view.startEdit(node.data ?? node)">Edit</button>
-            <button v-if="!readOnly" type="button" @click="view.delete(node.data ?? node)">Delete</button>
+            <RowActions
+              v-if="!readOnly"
+              :row="node.data ?? node"
+              :actions="rowActions"
+              :show-edit="!hasEditAction"
+              :view="view"
+              :client="client"
+              :auto-execute="autoExecuteActions"
+              :entity-class-name="view.getEntityClassName() ?? undefined"
+              :edit-label="editLabel"
+              :more-label="moreLabel"
+              @edit="view.startEdit($event)"
+              @action-executed="emit('action-executed', $event)"
+              @action-response="emit('action-response', $event)"
+              @action-error="emit('action-error', $event)"
+            />
           </slot>
         </template>
       </Tree>
@@ -117,6 +133,10 @@ const props = withDefaults(defineProps<{
   client?: DynamiaClient;
   /** Enables automatic SDK execution for non-local actions */
   autoExecuteActions?: boolean;
+  /** Accessible label of the row edit button (defaults to the built-in English text) */
+  editLabel?: string | undefined;
+  /** Accessible label of the row "more actions" menu button (defaults to the built-in English text) */
+  moreLabel?: string | undefined;
 }>(), { readOnly: false, autoExecuteActions: false });
 
 const emit = defineEmits<{
