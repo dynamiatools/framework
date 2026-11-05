@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/reports-vue",
-  "version": "26.10.3",
+  "version": "26.11.0",
   "website": "https://dynamia.tools",
   "description": "Vue 3 components and composables to list, run, export and design Dynamia reports without ZK",
   "keywords": [
@@ -79,16 +79,16 @@
   "devDependencies": {
     "@dynamia-tools/sdk": "workspace:*",
     "@dynamia-tools/vue": "workspace:*",
-    "@types/node": "^26.4.1",
-    "@vitejs/plugin-vue": "^6.0.8",
-    "@vue/test-utils": "^2.4.6",
-    "chart.js": "^4.4.0",
-    "happy-dom": "^20.14.5",
+    "@types/node": "^26.6.6",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "@vue/test-utils": "^2.5.1",
+    "chart.js": "^4.6.1",
+    "happy-dom": "^20.14.6",
     "typescript": "^6.0.3",
-    "vite": "^8.2.2",
-    "vite-plugin-dts": "^5.1.0",
-    "vitest": "^4.1.11",
-    "vue": "^3.5.43",
+    "vite": "^8.3.6",
+    "vite-plugin-dts": "^5.1.2",
+    "vitest": "^4.1.12",
+    "vue": "^3.5.45",
     "vue-tsc": "^2.2.12"
   },
   "engines": {

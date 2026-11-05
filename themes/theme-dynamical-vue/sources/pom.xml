@@ -24,7 +24,7 @@
     <parent>
         <groupId>tools.dynamia.themes</groupId>
         <artifactId>tools.dynamia.themes.parent</artifactId>
-        <version>26.10.3</version>
+        <version>26.11.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -64,7 +64,7 @@
 
     <properties>
         <frontend.dir>src/main/frontend</frontend.dir>
-        <frontend-maven-plugin.version>2.0.1</frontend-maven-plugin.version>
+        <frontend-maven-plugin.version>2.0.2</frontend-maven-plugin.version>
         <node.version>v24.13.1</node.version>
     </properties>
 
@@ -166,7 +166,7 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.templates</artifactId>
-            <version>26.10.3</version>
+            <version>26.11.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

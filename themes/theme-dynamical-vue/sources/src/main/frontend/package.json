@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/theme-dynamical-vue",
-  "version": "26.10.3",
+  "version": "26.11.0",
   "description": "Vue 3 + Tailwind CSS 4 application shell of the DynamicalVue theme: navigation-driven layout, login, skins, CRUD / config / embedded pages",
   "license": "Apache-2.0",
   "type": "module",
@@ -42,10 +42,10 @@
     "@dynamia-tools/ui-core": "workspace:*",
     "@dynamia-tools/vue": "workspace:*",
     "@fortawesome/fontawesome-free": "^7.3.1",
-    "@tailwindcss/vite": "^4.3.3",
-    "@vitejs/plugin-vue": "^6.0.9",
-    "vue": "^3.5.43",
-    "vue-router": "^5.3.1"
+    "@tailwindcss/vite": "^4.3.4",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "vue": "^3.5.45",
+    "vue-router": "^5.4.0"
   },
   "peerDependencies": {
     "vite": "^8.0.0",
@@ -53,10 +53,10 @@
     "vue-router": "^5.0.0"
   },
   "devDependencies": {
-    "tailwindcss": "^4.3.3",
+    "tailwindcss": "^4.3.4",
     "typescript": "^6.0.3",
-    "vite": "^8.3.0",
-    "vitest": "^4.1.11",
+    "vite": "^8.3.6",
+    "vitest": "^4.1.12",
     "vue-tsc": "^2.2.12"
   }
 }

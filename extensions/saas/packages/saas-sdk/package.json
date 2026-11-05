@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/saas-sdk",
-  "version": "26.10.3",
+  "version": "26.11.0",
   "website": "https://dynamia.tools",
   "description": "TypeScript/JavaScript client SDK for the Dynamia SaaS extension REST API",
   "keywords": [
@@ -76,12 +76,12 @@
   },
   "devDependencies": {
     "@dynamia-tools/sdk": "workspace:*",
-    "@types/node": "^26.4.1",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@types/node": "^26.6.6",
+    "@vitest/coverage-v8": "^4.1.12",
     "typescript": "^6.0.3",
-    "vite": "^8.2.2",
-    "vite-plugin-dts": "^5.1.0",
-    "vitest": "^4.1.11"
+    "vite": "^8.3.6",
+    "vite-plugin-dts": "^5.1.2",
+    "vitest": "^4.1.12"
   },
   "engines": {
     "node": ">=24"
