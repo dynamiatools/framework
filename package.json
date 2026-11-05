@@ -15,14 +15,14 @@
     "publish:all": "pnpm -r publish --access public --no-git-checks"
   },
   "devDependencies": {
-    "@types/node": "^26.4.1",
-    "@vitest/coverage-v8": "^4.1.11",
-    "eslint": "^10.9.1",
-    "prettier": "^3.9.6",
+    "@types/node": "^26.6.6",
+    "@vitest/coverage-v8": "^4.1.12",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
     "typescript": "^6.0.3",
-    "vite": "^8.2.2",
-    "vite-plugin-dts": "^5.1.0",
-    "vitest": "^4.1.11"
+    "vite": "^8.3.5",
+    "vite-plugin-dts": "^5.1.2",
+    "vitest": "^4.1.12"
   },
   "engines": {
     "node": ">=24",
