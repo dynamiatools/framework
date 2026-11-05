@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/reports-vue",
-  "version": "26.10.3",
+  "version": "26.11.0",
   "website": "https://dynamia.tools",
   "description": "Vue 3 components and composables to list, run, export and design Dynamia reports without ZK",
   "keywords": [
