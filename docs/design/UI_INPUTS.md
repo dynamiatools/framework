@@ -1,127 +1,135 @@
-# Portable action controls: `HeadlessActionRenderer` (design)
+# Portable action controls and the standard list query
 
-**Status:** proposal for review. No code yet.
-**Context:** [UI_PORTS_WAVE2.md](UI_PORTS_WAVE2.md) §6.3, [dynamia-ui-inventory.md](../next/dynamia-ui-inventory.md), `UIMessages.showInput` with
-`LocalDateRange` (already implemented, see "What exists").
+**Status:** implemented in this branch for the list of a CRUD page (ZK and Vue verified in a browser against `demo-zk-books`).
+Not done: migrating the ERP, the other operations over a `QuerySpec` (count, export, bulk, lookup), and the policies for ZK.
+**Context:** [UI_PORTS_WAVE2.md](UI_PORTS_WAVE2.md) §6.3, [dynamia-ui-inventory.md](../next/dynamia-ui-inventory.md).
 
 ## Problem
 
-A headless action is launched from a button. Many actions of `dynamia-erp` are not launched from a button: the user leaves a
-widget in the toolbar (a date range, a "find by number" box, a combo of states) and the action runs when its value changes.
+A headless action is launched from a button. Many actions of `dynamia-erp` are not: the user leaves a widget in the toolbar (a
+date range, a search box, a combo of states) and the list is filtered when its value changes. In ZK that widget is built by an
+`ActionRenderer<Component>`, and `ActionMetadata.renderer` published its class name, which a remote client cannot use.
 
-In ZK that widget is built by an `ActionRenderer<Component>` assigned with `Action.setRenderer(...)`. The renderer is a Java
-class that creates ZK components, and `ActionMetadata.renderer` publishes its class name, which a remote client cannot use.
-So these actions cannot be headless: the parameter is collected by a widget, not by a port.
+A filter is also not something to run on the server: it changes the query state of the list (`setParemeter`, `doQuery`), and the
+headless controller has no such state. So the value must travel with the list request, not with an action execution.
 
-Count in `dynamia-erp` (heuristic, 2026-11-08): about 52 actions put their own renderer in the toolbar. The renderers they
-use today:
+About 52 actions of the ERP have a renderer of their own (heuristic count, 2026-11-08). Five kinds cover almost all: date, date
+range, date and time range, text, choice. A button with another style (`ToolbarbuttonActionRenderer`, 12 uses) is not a control.
 
-| Renderer | Uses | What it is |
-|---|---|---|
-| `ToolbarbuttonActionRenderer` | 12 | A button with another style. Not a control |
-| `LocalDateboxRangeActionRenderer` | 5 | Date range, runs on change |
-| `FindActionRenderer` | 5 | Text box, runs on Enter |
-| `LocalDateboxActionRenderer` | 1 | Single date |
-| `ComboboxActionRenderer` | 1 | Choice among values |
-| other (`ActionRenderer<EntityReferencePickerBox>`, ...) | few | Entity picker; stays custom |
+## Design
 
-Five kinds cover almost everything: button, date, date range, text, choice.
+Three pieces that share one vocabulary.
 
-## What exists
+### 1. `QuerySpec`: the standard message of a list query
 
-- `ActionRenderer<T>` is generic: `T render(Action, ActionEventBuilder)`. Every renderer returns a ZK `Component` today, but
-  nothing in the interface requires it.
-- `Action.setRenderer(ActionRenderer)`; `ActionMetadata` copies the renderer class name.
-- `ActionToolbar` renders with `(Component) Actions.render(renderer, action, builder)`.
-- `UIMessages.showInput(title, LocalDateRange.class, ...)` asks for a range in a modal dialog. The `INPUT` step carries
-  `inputType` (`text`, `number`, `date`, `daterange`) and a range travels as `start/end`; `InputValues` converts it. This
-  solves the actions that ask when they run, not the ones that leave a widget in the toolbar.
+`POST /api/{path}/find` takes plain JSON; the answer is the same list result as `GET`.
 
-## Proposal
+```json
+{
+  "version": 1,
+  "filters": [
+    {"field": "stockStatus", "op": "in", "value": ["OUT_STOCK"]},
+    {"field": "publishDate", "op": "between", "value": ["2026-01-01", null]},
+    {"field": "year", "op": "gte", "value": 2018}
+  ],
+  "search": "dune",
+  "sort": [{"field": "title", "dir": "desc"}],
+  "page": 1,
+  "size": 20
+}
+```
+
+- Operators mirror the `QueryConditions` factories: `eq`, `like`, `between`, `gte`, `lte`, `in`, `isNull`. A `null` side of a
+  `between` is open. No `QueryCondition` object crosses the wire.
+- One filter per field; filters combine with AND. "All" is a missing filter.
+- `FilterConditions` (`tools.dynamia.crud.query`) is the one mapping from a filter to a condition, shared by the endpoint and ZK.
+  Values are coerced by the type of the field (text, numbers, boolean, enum, `LocalDate`, `LocalDateTime`, `Date`); a date
+  without time covers the whole day of a field that has time. Anything invalid is a 422 naming the field, never ignored.
+- The descriptor is the whitelist: every field of `filters` and `sort` must be a field of the page's table view descriptor.
+- Limits (`QuerySpecLimits`): 20 filters, 100 values of an `in`, 5 sort keys, 200 characters of search, page size 500.
+- Same vocabulary as `ReportRunRequest` (`filters`, `page`, `size`, `sort`) so the platform has one request shape.
+- `GET /api/{path}` now reads only `page`, `size`, the text search `_q` and the order `_sort`/`_order`. The per-field parameters
+  were removed: they could filter on any bean property, hidden ones included.
+
+TS: `client.crud(path).find(spec)`, types `QuerySpec`, `CrudFilter`, `CrudSort`.
+
+### 2. Server filters: `QuerySpecFilter`
+
+Every `QuerySpec` goes through `QuerySpecProcessor` before it becomes a query: limits, then the `QuerySpecFilter` beans by
+`order()`, then the descriptor whitelist and the conditions. A filter may change the spec or refuse it:
+
+```java
+@Component
+class NoAccountFilter implements QuerySpecFilter {
+    public QuerySpec filter(QueryContext context, QuerySpec spec) {
+        return spec.without("accountId");                           // drop what the client may not choose
+        // return spec.with(new Filter("accountId", "eq", mine));   // or impose a condition it cannot override
+        // throw new ValidationError("...");                        // or refuse (422); NavigationNotAllowedException is a 403
+    }
+}
+```
+
+The context carries the path, the entity class, the descriptor and the operation; the account comes from `AccountTenants`. A
+filter only narrows what the descriptor allows. Dropping a field is not a defence by itself for something like `accountId`: impose
+the current account as a condition after the client's filters.
+
+### 3. Controls: `Control` + `HeadlessActionRenderer` + `FilterAction`
 
 A renderer that describes instead of building.
 
 ```java
-setRenderer(HeadlessActionRenderer.dateRange());
-setRenderer(HeadlessActionRenderer.choice(EstadoVenta.class));
-setRenderer(HeadlessActionRenderer.search("Number"));
+@InstallAction
+@RunsOn(ActionRuntime.FRONTEND)
+public class FilterBookByStockAction extends FilterAction {
+    public FilterBookByStockAction() {
+        super(Book.class, Control.choice("stockStatus", StockStatus.class).allLabel("All"));
+        setName("Stock");
+    }
+}
 ```
 
-`HeadlessActionRenderer implements ActionRenderer<Control>`. `render` returns a `Control`: plain, serializable data, with no
-ZK type and no callbacks.
-
-```java
-record Control(Kind kind, String label, List<Option> options, Object defaultValue) { enum Kind { BUTTON, DATE, DATE_RANGE, TEXT, CHOICE } }
-```
-
-### Metadata
-
-`ActionMetadata` recognizes a `HeadlessActionRenderer` and publishes `control: { kind, label, options, defaultValue }`
-instead of the renderer class name. The generated TS contract gets the `Control` type and fixtures. An action with a
-renderer of any other class keeps publishing the class name and stays `FRONTEND`.
-
-### When it runs and what it sends
-
-| Kind | Runs when | Value sent |
-|---|---|---|
-| `DATE` | the user picks a date | `YYYY-MM-DD` |
-| `DATE_RANGE` | both sides were chosen or cleared | `start/end`, either side may be empty |
-| `TEXT` | Enter | the text |
-| `CHOICE` | a value is selected | the option key |
-
-The value arrives in `ActionEvent.getData()`, as it does in ZK today, and in `ActionExecutionRequest.data` for a remote
-client. The server converts and validates it with `InputValues`, the same code the modal prompt uses; a value that does not
-convert is a validation error, never a 500. Options of a `CHOICE` are enumerated on the server (an enum or a fixed list);
-an answer that is not one of them is refused, as `CHOICE` steps already do.
-
-### ZK
-
-`ActionToolbar` stops casting blindly. If the renderer is a `HeadlessActionRenderer`, a `ControlZKAdapter` maps the `Control`
-to the existing renderer of its kind (`DATE_RANGE` to `LocalDateboxRangeActionRenderer`, `CHOICE` to
-`ComboboxActionRenderer`, `TEXT` to `FindActionRenderer`, `DATE` to `LocalDateboxActionRenderer`, `BUTTON` to the default).
-The existing renderers do not change, so what the user sees in ZK is the same. A renderer that is not headless is rendered as
-before.
-
-### Vue and other clients
-
-One component per kind in the toolbar; the range reuses the two date inputs of `PromptHost`. When the value changes the
-client runs the action with that value and then re-reads the list.
+- `Control(kind, field, label, options, allLabel, preset)` is plain data. Kinds: `DATE`, `DATE_RANGE`, `DATETIME_RANGE`, `TEXT`,
+  `CHOICE`. `preset` (`TODAY`, `THIS_MONTH`, `LAST_MONTH`) is symbolic: each front end resolves it in the user's time zone.
+- `HeadlessActionRenderer implements ActionRenderer<Control>`; `FilterAction` sets it. The action declares `FRONTEND`
+  (the annotation is not inherited): the client draws the control and does not execute the action.
+- `ActionMetadata` publishes `control` and sets `renderer` to the stable key `control` (not a class name, so existing clients
+  that look at `renderer` keep working).
+- **ZK:** `ControlRenderers.adapt` maps a control to the renderer ZK already had (date range box, combo, search box) wherever an
+  action renderer is resolved. On a change `FilterAction.actionPerformed` turns the value into a filter with `FilterValues`, then
+  into a condition with `FilterConditions`, sets it on the controller (or removes it) and runs the query.
+- **Vue:** `VueControlActionRenderer` (renderer `control`) draws the widget. A change calls `TableView.setQueryFilter(field, filter)`;
+  the list loader asks `POST /find` when the table has field filters and the plain `GET` otherwise. The advanced search panel
+  uses the same path (`like` for text fields, `eq` for the rest).
 
 ## Rules that keep it portable
 
-1. A `Control` is data. It never holds a component, a `Consumer` or a class name. A renderer that needs those is a
-   `FRONTEND` renderer and says so.
-2. The action does not know how it is drawn. It reads `getData()` and works the same from a button, a widget or a REST call.
-3. No new ports: the action still talks to the user through `UIMessages`, `UIFiles` and the rest.
+1. A `Control` is data: no component, callback or class name. A renderer that needs those stays `FRONTEND` and custom.
+2. A control filters the list; it does not run the action remotely. An action that must do something with the value (the
+   `CapturarItem*` family reads a ViewModel from the event) is not a control and stays `FRONTEND`.
+3. Read context from the event, never from the page at construction time (`TipoVentaPage.current()` in a constructor).
+4. The list endpoint stays the only place a client reads data; policies go in `QuerySpecFilter`, not in each action.
 
-## Questions for the review
+## Migrating the ERP actions
 
-1. **Typing.** `AbstractAction` stores a raw `ActionRenderer`, `Actions.render` returns `T`, and `ActionToolbar` casts to
-   `Component`. Is a `Control` as `T` safe, or does it need a marker interface so the cast fails with a clear error?
-2. **Where the value goes.** `getData()` or `getParams()`. ZK uses `data` for a widget value today; does a remote request
-   keep the two apart?
-3. **State of the widget.** In ZK the widget keeps its value after the action ran. A remote client re-reads and redraws:
-   who holds the value, and does the server need to know it to render the list?
-4. **Several controls in one bar.** The ERP puts a range and a search together and the filters combine through controller
-   parameters. Is that ordering and combination left to the actions, or does the metadata need to say it?
-5. **Defaults and presets** (`LocalDateRange.lastMonth()`, current period): are they part of `Control` or of the action?
-6. **`ActionLifecycleAware.afterRenderer(renderer, component)`** receives the component today; what does it receive now?
-7. **Security.** A control is a new way to feed a value to an action. Is the `InputValues` validation plus the existing
-   `HEADLESS` runtime check enough, and what stops a `TEXT` control from reaching an action not declared headless?
-8. **`FindAction` and `FiltersAction`,** `FRONTEND` today: do they become `TEXT` and a set of controls, or stay as they are?
-9. **Localization** of labels and of date formats (ZK formats by locale; the wire format is ISO).
-10. **Contract versioning.** `control` is a new optional field; which existing clients break, if any?
+| Group | What they are | Do |
+|---|---|---|
+| A. Pure filter | `setParemeter` + `doQuery` behind a date, range, combo or text renderer | `extends FilterAction` with a `Control`; delete `actionPerformed` and `getRenderer` |
+| B. Filter with logic | `setQueryResult`, `getParams().remove`, several derived fields | stays `FRONTEND`; some become A if the extra field is declared |
+| C. Control that feeds an action | `CapturarItem*`, `AgregarDetalleVenta` | stays `FRONTEND` |
 
-## Migration order
+Open before migrating: `FiltrarFechaVentaAction` sets `creationDate` and `creationTimestamp` together; if the first is only an
+index helper, one field is enough, otherwise the control needs a second derived field. The "-Todos-" combo item becomes
+`allLabel`. About 17 ERP actions override `getRenderer()` instead of calling `setRenderer`; both forms are covered, the count in
+the inventory only saw `setRenderer`.
 
-1. Contract: `Control`, `HeadlessActionRenderer`, `ActionMetadata.control`, TS type and fixtures, contract test.
-2. ZK adapter for `DATE_RANGE`, `TEXT` and `CHOICE`; `ActionToolbar` branch; test in the demo.
-3. Vue toolbar components for `DATE_RANGE` and `TEXT`.
-4. Demo: one real action per kind in `demo-zk-books`, headless, run from ZK and from REST.
-5. ERP: migrate one `Filtrar*` action before the rest.
+## Known limits
 
-## Not in this proposal
-
-- A list of parameters per action (several inputs for one run). A modal form (`UIViews.showForm`) already covers it.
-- Entity pickers in the toolbar (`EntityReferencePickerBox`); they need `EntityLookup` and a search UI of their own.
-- Changing how buttons are laid out or grouped.
+- `QuerySpecFilter` runs for the REST list only. ZK builds its filters from controller parameters, so a policy that forbids a
+  field protects REST, not ZK.
+- Only the list operation uses a `QuerySpec`; `COUNT`, `EXPORT`, `BULK` and `LOOKUP` are not wired yet.
+- `QuerySpec` has no OR groups and no filters across relations.
+- Presets are resolved in the server's time zone in ZK (it has no other) and in the browser's in Vue.
+- Outside this design, and not fixed: `POST /apps/api/crud-service/{className}/find` binds a `QueryParameters` whose keys reach
+  the query text unchecked (`QueryBuilder`), a possible JPQL injection on a class-name endpoint. Validate the keys against the
+  descriptor or stop using it from Vue.
+- The `endpoint` published for an entity action says `/actions/{id}` but the controller maps `/action/{id}` (the SDK uses the latter).
