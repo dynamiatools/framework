@@ -554,7 +554,7 @@ export function browserPickFiles(options: { accept?: string; multiple?: boolean 
 }
 
 /**
- * Default handler of an inline file: opens it in a new tab. With token authentication the file is fetched with the
+ * Default handler of an inline file: opens it in a new tab; when the browser blocks the popup the file is saved instead. With token authentication the file is fetched with the
  * client's credentials and re-wrapped in a `Blob` whose type is forced to the allowed type, so the object URL can never
  * be an active document; a type outside the allow list is saved instead.
  */
@@ -566,11 +566,17 @@ export async function browserPreviewFile(file: FlowDownload, client: DynamiaClie
     const fetched = await client.transfers.download(file.url);
     const type = (file.contentType ?? '').split(';')[0]!.trim().toLowerCase();
     const objectUrl = URL.createObjectURL(new Blob([fetched], { type }));
-    window.open(objectUrl, '_blank', 'noopener');
+    // same origin object URL: no "noopener", so a blocked popup is detectable and the file is saved instead
+    const tab = window.open(objectUrl, '_blank');
+    if (!tab) {
+      URL.revokeObjectURL(objectUrl);
+      return browserSaveFile(file, client);
+    }
     // the tab keeps its own reference while it loads; release ours later
     setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
-  } else {
-    window.open(client.transfers.absoluteUrl(file.url), '_blank', 'noopener');
+  } else if (!window.open(client.transfers.absoluteUrl(file.url), '_blank')) {
+    // the popup was blocked (the answer arrives after an async request, outside the user gesture): save it instead
+    return browserSaveFile(file, client);
   }
 }
 

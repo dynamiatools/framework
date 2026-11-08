@@ -76,9 +76,14 @@ public class ZKFileTransfer implements FileTransfer {
         }
         byte[] content;
         try (InputStream in = source.openStream()) {
-            content = in.readAllBytes();
+            // a source of unknown size is read one byte past the cap, so a huge stream is never loaded whole
+            content = in.readNBytes((int) PREVIEW_MAX_BYTES + 1);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+        if (content.length > PREVIEW_MAX_BYTES) {
+            download(source);
+            return;
         }
         var frame = new Iframe();
         frame.setHflex("1");

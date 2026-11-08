@@ -486,7 +486,8 @@ public final class ActionTester {
                         .orElseThrow(() -> new AssertionError("The download " + url + " is not in the transfer store"));
                 try (var in = stored.openStream()) {
                     downloads.add(new CapturedDownload(String.valueOf(map.get("name")),
-                            map.get("contentType") == null ? null : String.valueOf(map.get("contentType")), in.readAllBytes()));
+                            map.get("contentType") == null ? null : String.valueOf(map.get("contentType")), in.readAllBytes(),
+                            "inline".equals(map.get("disposition"))));
                 } catch (java.io.IOException e) {
                     throw new java.io.UncheckedIOException(e);
                 }
@@ -528,7 +529,7 @@ public final class ActionTester {
     }
 
     private static List<String> downloaded(ActionResult result) {
-        return result.downloads().stream().map(d -> d.name() + " " + d.size()).toList();
+        return result.downloads().stream().map(d -> d.name() + " " + d.size() + (d.inline() ? " inline" : "")).toList();
     }
 
     private static String describe(Throwable exception) {

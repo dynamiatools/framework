@@ -265,7 +265,20 @@ class ActionTesterTest {
 
         assertEquals(1, result.downloads().size());
         assertEquals(3, result.downloads().get(0).size());
+        assertTrue(result.downloads().get(0).inline(), "a preview is not a download");
+        assertTrue(result.remote().downloads().get(0).inline());
         assertEquals(3, result.remote().downloads().get(0).size(), "the inline url resolves to the stored file");
+    }
+
+    @Test
+    void aDownloadAndAPreviewOfAnActiveTypeAreNotInline() {
+        var result = ActionTester.of(action("not-inline", e -> {
+            tools.dynamia.ui.UIFiles.download("a.pdf", "application/pdf", new byte[]{1});
+            tools.dynamia.ui.UIFiles.preview("a.html", "text/html", new byte[]{1});
+        })).runEverywhere();
+
+        assertTrue(result.downloads().stream().noneMatch(d -> d.inline()));
+        assertTrue(result.remote().downloads().stream().noneMatch(d -> d.inline()));
     }
 
     @Test

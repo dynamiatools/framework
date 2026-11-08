@@ -322,8 +322,18 @@ public final class TestUIEnvironment implements UIEnvironment {
 
         @Override
         public void download(DownloadSource source) {
+            capture(source, false);
+        }
+
+        /** Shown inline only for the types the policy allows, as in every other adapter. */
+        @Override
+        public void preview(DownloadSource source) {
+            capture(source, tools.dynamia.ui.files.InlinePolicy.allows(source.contentType()));
+        }
+
+        private void capture(DownloadSource source, boolean inline) {
             try (var in = source.openStream()) {
-                downloads.add(new CapturedDownload(source.name(), source.contentType(), in.readAllBytes()));
+                downloads.add(new CapturedDownload(source.name(), source.contentType(), in.readAllBytes(), inline));
             } catch (java.io.IOException e) {
                 throw new java.io.UncheckedIOException(e);
             }

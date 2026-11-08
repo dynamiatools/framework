@@ -248,7 +248,7 @@ Built, each with tests (Java: JUnit; TS: vitest) and a commit per piece:
 | Notification title | `ReplayExecutor` keeps `title` in `params.notifications` |
 | `getSelection()` | `CrudControllerAPI.getSelection()` (default: the selected record), headless override, cap `MAX_BULK_IDS = 1000` on bulk `ids` |
 | `UIChoices.pickEntity` | `EntityLookup`/`EntityLookups`; `ChoicesProvider.pickEntity`; `ActionFlowStep.entityChoice`; replay re-checks the key every pass; `LookupsController`; ZK picker dialog; test platform; `LookupsApi` and `pickEntity` handler in TS; fixture |
-| `pickFromStorage` | `EntityFileLookup` (entity-files): files of the current account only, fails closed without an account |
+| `pickFromStorage` | `EntityFileLookup` (entity-files): files of the current account only, fails closed without an account. **Not a bean**: it ignores `EntityFileSecurityProvider`, so an application registers it deliberately |
 | `confirmWithInput` | Documented pattern (`INPUT` + `ReplayRetry`) in `DEVELOPMENT_PATTERNS.md`; no code |
 
 ### Changes from the plan above
@@ -261,6 +261,10 @@ Built, each with tests (Java: JUnit; TS: vitest) and a commit per piece:
   `/storage/{uuid}/{file}` and `EntityFileSecurityProvider.generateToken` issues a tokenized URL for private ones. A second
   HMAC scheme would duplicate it. Whatever expiry is wanted belongs in the security provider.
 - **`pickFromStorage` is an `EntityLookup`,** not a separate port, so it reuses `UIChoices.pickEntity` in ZK and remotely.
+- **Remote lookup search is opt-in** (`EntityLookup.isSearchable()`, default `false`), after the review found that the
+  endpoint had no authorization beyond authentication. Tying a search to a resume token whose pending step names the
+  lookup would be stronger and is not done.
+- **Open page parameters** must be `String`, `Number` or `Boolean`; anything else is refused in every adapter.
 
 ### Not done
 

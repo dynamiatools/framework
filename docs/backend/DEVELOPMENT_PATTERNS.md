@@ -589,8 +589,10 @@ something the user receives once the action has ended: it is published only by t
 it only informs.
 
 **Asking for a reason (confirm with input).** There is no port for it: `UIMessages.showInput` already returns a `String`
-and a cancelled answer is `null`. To make the text required, throw `ReplayRetry` on a blank answer; the same question is
-asked again:
+and a cancelled answer is `null`. To make the text required in a **headless run**, throw `ReplayRetry` on a blank answer;
+the same question is asked again. `ReplayRetry` is handled only by the replay runtime: in ZK and in the direct mode of the
+test platform it is an unhandled exception, so an action that must behave the same everywhere asks again itself
+(call `showInput` again from the callback) instead of throwing:
 
 ```java
 UIMessages.<String>showInput("Why do you void this sale?", String.class, reason -> {
@@ -603,7 +605,9 @@ UIMessages.<String>showInput("Why do you void this sale?", String.class, reason 
 
 **`EntityLookup` rules.** `search` and `find` must apply the same filters and the tenant (use the tenant aware
 `CrudService`): every pass of a headless run calls `find` again with the key the client sent, and a key outside the set is
-refused.
+refused. Remote search is **opt-in**: the `/apps/api/lookups/{name}` endpoint answers only when `isSearchable()` returns
+`true`, because it is authenticated but not tied to an action the user may run; expose only lookups whose records every
+user of the account may see.
 
 Implement `FlowRemoteAction` directly (the low level API, see
 [`SERVER_DRIVEN_ACTION_FLOWS.md`](../design/SERVER_DRIVEN_ACTION_FLOWS.md)) only for an action that exists for REST clients
