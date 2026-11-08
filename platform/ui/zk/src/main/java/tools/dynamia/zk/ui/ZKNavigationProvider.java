@@ -24,6 +24,36 @@ import tools.dynamia.ui.NavigationProvider;
  */
 public class ZKNavigationProvider implements NavigationProvider {
 
+    /**
+     * Opens the page with the ZK navigation manager of the desktop, the same way a menu item does.
+     */
+    @Override
+    public void openPage(String path, java.util.Map<String, Object> params) {
+        var manager = tools.dynamia.navigation.NavigationManager.getCurrent();
+        if (manager == null) {
+            throw new IllegalStateException("No navigation manager to open the page " + path);
+        }
+        var serializable = new java.util.HashMap<String, java.io.Serializable>();
+        params.forEach((key, value) -> {
+            if (value instanceof java.io.Serializable s) {
+                serializable.put(key, s);
+            }
+        });
+        manager.navigateTo(path, serializable);
+    }
+
+    /**
+     * Reloads the current page with the navigation manager.
+     */
+    @Override
+    public void refresh() {
+        var manager = tools.dynamia.navigation.NavigationManager.getCurrent();
+        if (manager == null) {
+            throw new IllegalStateException("No navigation manager to refresh the view");
+        }
+        manager.refresh();
+    }
+
     @Override
     public void open(String url, boolean newWindow) {
         var execution = Executions.getCurrent();
