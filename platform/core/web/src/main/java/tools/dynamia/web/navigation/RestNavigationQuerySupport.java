@@ -17,27 +17,24 @@
 package tools.dynamia.web.navigation;
 
 import jakarta.servlet.http.HttpServletRequest;
-import tools.dynamia.commons.ObjectOperations;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.reflect.AccessMode;
 import tools.dynamia.domain.query.CustomQueryCondition;
-import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.viewers.Field;
 import tools.dynamia.viewers.ViewDescriptor;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Utility class that encapsulates all query-building support for the REST navigation layer.
  *
- * <p>Provides three independent, stateless helpers consumed by the read operation class:</p>
+ * <p>Provides independent, stateless helpers consumed by the read operation class:</p>
  * <ul>
  *   <li>{@link #parseConditions} — static JPQL conditions declared in a {@link ViewDescriptor}</li>
- *   <li>{@link #applyRequestFilters} — dynamic per-field filters from HTTP query parameters</li>
+ *   <li>{@link #applyRequestSearch} — free text search from the {@code _q} parameter (field filters go through
+ *       {@code POST /find} with a {@code QuerySpec})</li>
  *   <li>{@link #applyRequestSorting} — dynamic ORDER BY from {@code _sort} / {@code _order} parameters</li>
  * </ul>
  *
@@ -49,8 +46,6 @@ import java.util.Set;
 public final class RestNavigationQuerySupport {
 
     /** Reserved parameter names that must never be treated as field filters. */
-    private static final Set<String> RESERVED_PARAMS = Set.of("page", "size");
-
     private RestNavigationQuerySupport() {
         // utility class — no instances
     }
@@ -79,101 +74,6 @@ public final class RestNavigationQuerySupport {
     }
 
     // -------------------------------------------------------------------------
-    // Dynamic per-field filters from request parameters
-    // -------------------------------------------------------------------------
-
-    /**
-     * Applies dynamic field filters derived from HTTP query parameters to the given {@link QueryBuilder}.
-     *
-     * <p>Any request parameter whose name does not start with {@code _} and is not a reserved
-     * pagination keyword ({@code page}, {@code size}) is treated as a potential field filter.
-     * The filter value is matched against the entity field registered in the {@link ViewDescriptor}
-     * and the appropriate {@link QueryConditions} condition is selected based on the field's Java type:</p>
-     *
-     * <ul>
-     *   <li>{@link String} — {@code LIKE} with auto-searchable wildcard wrapping</li>
-     *   <li>{@link Number} / numeric primitives — exact equality ({@code =})</li>
-     *   <li>{@link Boolean} / {@code boolean} — exact equality ({@code =})</li>
-     *   <li>{@link Enum} subtypes — exact equality ({@code =}) using {@link Enum#valueOf}</li>
-     *   <li>Any other type — skipped; not safe to cast without type information</li>
-     * </ul>
-     *
-     * <p>Parameters for fields not present in the descriptor are silently ignored.</p>
-     *
-     * <p><b>Usage example:</b></p>
-     * <pre>{@code GET /api/users?name=john&status=ACTIVE&age=30 }</pre>
-     *
-     * @param request    the current HTTP request carrying the filter parameters
-     * @param query      the query builder to augment with filter conditions
-     * @param descriptor the view descriptor used to resolve field metadata; if {@code null} this
-     *                   method does nothing
-     */
-    public static void applyRequestFilters(HttpServletRequest request, QueryBuilder query, ViewDescriptor descriptor) {
-        if (descriptor == null) {
-            return;
-        }
-
-        request.getParameterMap().forEach((paramName, values) -> {
-            if (paramName.startsWith("_") || RESERVED_PARAMS.contains(paramName) || values.length == 0) {
-                return;
-            }
-
-            Field field = descriptor.getField(paramName);
-            if (field == null) {
-                try {
-                    var property = ObjectOperations.getPropertyInfo(descriptor.getBeanClass(), paramName);
-                    if (property != null) {
-                        field = new Field(paramName, property.getType());
-                    } else {
-                        return;
-                    }
-                }catch (Exception e) {
-                    return;
-                }
-            }
-
-            Class<?> fieldType = field.getFieldClass();
-            if (fieldType == null && field.getPropertyInfo() != null) {
-                fieldType = field.getPropertyInfo().getType();
-            }
-            if (fieldType == null) {
-                return;
-            }
-
-            String rawValue = values[0];
-            if (rawValue == null || rawValue.isBlank()) {
-                return;
-            }
-
-            try {
-                if (fieldType == String.class) {
-                    query.and(paramName, QueryConditions.like(rawValue));
-
-                } else if (Number.class.isAssignableFrom(fieldType)
-                        || (fieldType.isPrimitive() && fieldType != boolean.class)) {
-                    Object numericValue = parseNumber(rawValue, fieldType);
-                    if (numericValue != null) {
-                        query.and(paramName, QueryConditions.eq(numericValue));
-                    }
-
-                } else if (fieldType == Boolean.class || fieldType == boolean.class) {
-                    boolean boolValue = "true".equalsIgnoreCase(rawValue) || "1".equals(rawValue);
-                    query.and(paramName, QueryConditions.eq(boolValue));
-
-                } else if (fieldType.isEnum()) {
-                    @SuppressWarnings({"unchecked", "rawtypes"})
-                    Object enumValue = Enum.valueOf((Class<Enum>) fieldType, rawValue.toUpperCase());
-                    query.and(paramName, QueryConditions.eq(enumValue));
-                }
-                // Date, entity references, collections → skipped (require richer handling)
-            } catch (Exception e) {
-                LoggingService.get(RestNavigationQuerySupport.class)
-                        .warn("Ignoring filter param '" + paramName + "=" + rawValue + "': " + e.getMessage());
-            }
-        });
-    }
-
-    // -------------------------------------------------------------------------
     // Free text search from the _q request parameter
     // -------------------------------------------------------------------------
 
@@ -196,7 +96,18 @@ public final class RestNavigationQuerySupport {
      * @param alias      the alias of the entity in the query
      */
     public static void applyRequestSearch(HttpServletRequest request, QueryBuilder query, ViewDescriptor descriptor, String alias) {
-        String text = request.getParameter(SEARCH_PARAM);
+        applySearch(request.getParameter(SEARCH_PARAM), query, descriptor, alias);
+    }
+
+    /**
+     * Same as {@link #applyRequestSearch} with the text given, so a {@code QuerySpec} can use it too.
+     *
+     * @param text       the text to search, ignored when null or blank
+     * @param query      the query builder to augment
+     * @param descriptor the view descriptor whose visible fields are searched; if {@code null} this method does nothing
+     * @param alias      the alias of the entity in the query
+     */
+    public static void applySearch(String text, QueryBuilder query, ViewDescriptor descriptor, String alias) {
         if (descriptor == null || text == null || text.isBlank()) {
             return;
         }
@@ -307,33 +218,4 @@ public final class RestNavigationQuerySupport {
         }
         return 0;
     }
-
-    // -------------------------------------------------------------------------
-    // Internal numeric parser
-    // -------------------------------------------------------------------------
-
-    /**
-     * Parses a raw string value into the target numeric type.
-     *
-     * <p>Supports {@link Integer}, {@code int}, {@link Long}, {@code long},
-     * {@link Double}, {@code double}, {@link Float}, {@code float},
-     * {@link Short}, {@code short}, {@link Byte}, {@code byte},
-     * and {@link BigDecimal}.</p>
-     *
-     * @param raw        the raw string to parse
-     * @param targetType the target numeric {@link Class}
-     * @return the parsed number, or {@code null} if the type is not supported
-     */
-    static Object parseNumber(String raw, Class<?> targetType) {
-        if (targetType == Integer.class || targetType == int.class) return Integer.parseInt(raw);
-        if (targetType == Long.class || targetType == long.class) return Long.parseLong(raw);
-        if (targetType == Double.class || targetType == double.class) return Double.parseDouble(raw);
-        if (targetType == Float.class || targetType == float.class) return Float.parseFloat(raw);
-        if (targetType == Short.class || targetType == short.class) return Short.parseShort(raw);
-        if (targetType == Byte.class || targetType == byte.class) return Byte.parseByte(raw);
-        if (targetType == BigDecimal.class) return new BigDecimal(raw);
-        return null;
-    }
 }
-
-

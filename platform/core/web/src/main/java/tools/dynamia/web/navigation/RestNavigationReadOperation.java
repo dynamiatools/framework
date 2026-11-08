@@ -20,12 +20,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import tools.dynamia.commons.collect.PagedList;
 import tools.dynamia.crud.CrudPage;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
+import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.query.DataPaginator;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.navigation.PageNotFoundException;
 import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.web.navigation.RestNavigationContext.ListResult;
+import tools.dynamia.web.query.QueryContext;
+import tools.dynamia.web.query.QueryOperation;
+import tools.dynamia.web.query.QuerySpec;
+import tools.dynamia.web.query.QuerySpecProcessor;
 
 import java.util.List;
 
@@ -49,6 +56,8 @@ public class RestNavigationReadOperation {
 
     /** Default page size when the client does not supply a {@code size} parameter. */
     private static final int DEFAULT_PAGINATION_SIZE = 50;
+
+    private static final JsonMapper SPEC_MAPPER = JsonMapper.builder().build();
 
     private final RestNavigationContext ctx;
 
@@ -99,7 +108,6 @@ public class RestNavigationReadOperation {
         }
 
         RestNavigationQuerySupport.parseConditions(query, descriptor);
-        RestNavigationQuerySupport.applyRequestFilters(request, query, descriptor);
         RestNavigationQuerySupport.applyRequestSearch(request, query, descriptor, "e");
         RestNavigationQuerySupport.applyRequestSorting(request, query, descriptor);
 
@@ -117,6 +125,61 @@ public class RestNavigationReadOperation {
         }
 
         return RestNavigationContext.buildJsonResponse(descriptor, buildListResult(content, paginator, currentPage), "OK");
+    }
+
+    // -------------------------------------------------------------------------
+    // Find (POST with a QuerySpec)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Reads a page of entities for a {@link QuerySpec}: filters, search, sort and paging in one JSON message. The spec goes
+     * through the {@link tools.dynamia.web.query.QuerySpecFilter} chain and the view descriptor whitelist before it becomes a
+     * query. An empty body is the first page with no filters.
+     *
+     * @param path    the CRUD page path
+     * @param json    the {@code QuerySpec} as JSON, may be blank
+     * @param request the current HTTP request
+     * @return the same list response as {@link #readAll}
+     * @throws tools.dynamia.domain.ValidationError (422) when the message is malformed, over a limit, or uses a field the
+     *                                              descriptor does not have
+     */
+    public ResponseEntity<String> find(String path, String json, HttpServletRequest request) {
+        CrudPage page = ctx.findCrudPage(path);
+        Class entityClass = page.getEntityClass();
+        ViewDescriptor descriptor = RestNavigationContext.getJsonTableDescriptor(entityClass);
+
+        QuerySpec spec = parseSpec(json);
+        var context = new QueryContext(path, entityClass, descriptor, QueryOperation.LIST);
+        spec = QuerySpecProcessor.filter(context, spec);
+
+        QueryBuilder query = QueryBuilder.select().from(entityClass, "e");
+        QueryParameters pageParams = (QueryParameters) page.getAttribute("queryParameters");
+        if (pageParams != null) {
+            query.where(pageParams);
+        }
+        RestNavigationQuerySupport.parseConditions(query, descriptor);
+        QuerySpecProcessor.apply(spec, query, descriptor, "e");
+
+        int currentPage = spec.page() == null ? 1 : spec.page();
+        query.getQueryParameters().paginate(QuerySpecProcessor.pageSize(spec));
+
+        List content = ctx.getCrudService().executeQuery(query);
+        DataPaginator paginator = query.getQueryParameters().getPaginator();
+        if (paginator != null) {
+            paginator.setPage(currentPage);
+        }
+        return RestNavigationContext.buildJsonResponse(descriptor, buildListResult(content, paginator, currentPage), "OK");
+    }
+
+    private static QuerySpec parseSpec(String json) {
+        if (json == null || json.isBlank()) {
+            return QuerySpec.empty();
+        }
+        try {
+            return SPEC_MAPPER.readValue(json, QuerySpec.class);
+        } catch (JacksonException e) {
+            throw new ValidationError("The query is not valid JSON of a QuerySpec: " + e.getOriginalMessage());
+        }
     }
 
     // -------------------------------------------------------------------------

@@ -54,6 +54,8 @@ public class RestApiNavigationConfiguration {
 
         Method routeReadAll = RestNavigationController.class.getMethod("routeReadAll",
                 HttpServletRequest.class);
+        Method routeFind = RestNavigationController.class.getMethod("routeFind",
+                String.class, HttpServletRequest.class);
         Method routeReadOne = RestNavigationController.class.getMethod("routeReadOne",
                 Long.class, HttpServletRequest.class);
         Method routeCreate = RestNavigationController.class.getMethod("routeCreate",
@@ -74,6 +76,7 @@ public class RestApiNavigationConfiguration {
                 module.forEachPage(page -> {
                     if (page instanceof CrudPage) {
                         addRoute(controller, "", RequestMethod.GET, routeReadAll, mapping, page, customizers);
+                        addRoute(controller, "/find", RequestMethod.POST, routeFind, mapping, page, customizers);
                         addRoute(controller, "/{id}", RequestMethod.GET, routeReadOne, mapping, page, customizers);
                         addRoute(controller, "", RequestMethod.POST, routeCreate, mapping, page, customizers);
                         addRoute(controller, "/{id}", RequestMethod.PUT, routeUpdate, mapping, page, customizers);

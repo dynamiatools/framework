@@ -96,6 +96,21 @@ public class RestNavigationController {
     }
 
     /**
+     * Entry point for {@code POST /api/{path}/find}: a page of entities for a {@code QuerySpec} sent as JSON.
+     *
+     * @param json    the {@code QuerySpec} as JSON; an empty body asks for the first page
+     * @param request the current HTTP request
+     * @return a JSON response containing the paginated entity list
+     */
+    public ResponseEntity<String> routeFind(@RequestBody(required = false) String json, HttpServletRequest request) {
+        var path = ctx.getPath(request);
+        if (path.endsWith("/find")) {
+            path = path.substring(0, path.length() - "/find".length());
+        }
+        return readOp.find(path, json, request);
+    }
+
+    /**
      * Entry point for reading a single entity by its ID.
      *
      * @param id      the entity identifier
@@ -219,13 +234,6 @@ public class RestNavigationController {
      */
     public static void parseConditions(QueryBuilder query, ViewDescriptor descriptor) {
         RestNavigationQuerySupport.parseConditions(query, descriptor);
-    }
-
-    /**
-     * @see RestNavigationQuerySupport#applyRequestFilters(HttpServletRequest, QueryBuilder, ViewDescriptor)
-     */
-    public static void applyRequestFilters(HttpServletRequest request, QueryBuilder query, ViewDescriptor descriptor) {
-        RestNavigationQuerySupport.applyRequestFilters(request, query, descriptor);
     }
 
     /**
