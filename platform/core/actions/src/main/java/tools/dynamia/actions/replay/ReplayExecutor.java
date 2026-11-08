@@ -51,6 +51,9 @@ public final class ReplayExecutor {
     /** Response param with the files the action gave to the user: a list of {@code {name, contentType, size, url}}. */
     public static final String DOWNLOADS_PARAM = "downloads";
 
+    /** Param of the final response with the text the action put in the clipboard: {@code {text}}. */
+    public static final String CLIPBOARD_PARAM = "clipboard";
+
     /** Query of the URL of a file that must be shown inline; the transfers endpoint still checks the type and direction. */
     public static final String INLINE_QUERY = "inline=1";
 
@@ -118,7 +121,8 @@ public final class ReplayExecutor {
         if (!session.failed()) {
             deleteConsumed(session);
         }
-        if (!notifications.isEmpty() || !published.isEmpty()) {
+        var clipboard = session.failed() ? null : session.clipboardText();
+        if (!notifications.isEmpty() || !published.isEmpty() || clipboard != null) {
             var params = new HashMap<String, Object>();
             if (!notifications.isEmpty()) {
                 params.put(NOTIFICATIONS_PARAM, notifications.stream()
@@ -127,6 +131,9 @@ public final class ReplayExecutor {
             }
             if (!published.isEmpty()) {
                 params.put(DOWNLOADS_PARAM, published);
+            }
+            if (clipboard != null) {
+                params.put(CLIPBOARD_PARAM, Map.of("text", clipboard));
             }
             response.setParams(params);
         }

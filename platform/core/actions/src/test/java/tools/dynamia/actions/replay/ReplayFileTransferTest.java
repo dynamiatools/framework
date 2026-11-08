@@ -301,6 +301,23 @@ class ReplayFileTransferTest {
     }
 
     @Test
+    void theClipboardTextTravelsInTheFinalResponseOnlyFromThePassThatFinishes() {
+        java.util.function.Function<ActionExecutionRequest, Object> body = request -> {
+            tools.dynamia.ui.UIClipboard.copy("https://x/y");
+            UIMessages.showQuestion("Sure?", () -> {
+            });
+            return null;
+        };
+
+        var pending = ReplayExecutor.execute("copy", new ActionExecutionRequest(), body);
+        assertNull(pending.getParams(), "a pass that stopped at a question delivers nothing");
+
+        var done = ReplayExecutor.execute("copy", answer(pending, true), body);
+        var clip = (Map<?, ?>) done.getParams().get(ReplayExecutor.CLIPBOARD_PARAM);
+        assertEquals("https://x/y", clip.get("text"));
+    }
+
+    @Test
     void withoutATransferStoreTheErrorSaysSo() {
         Containers.get().removeAllContainers();
 

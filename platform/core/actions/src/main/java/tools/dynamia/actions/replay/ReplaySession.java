@@ -41,6 +41,7 @@ public final class ReplaySession {
     private final List<Object> answers;
     private final List<ReplayInteractions.Notification> notifications = new ArrayList<>();
     private final List<DownloadSource> downloads = new ArrayList<>();
+    private String clipboardText;
     private final java.util.Set<DownloadSource> inline = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
     private final List<String> consumedRefs = new ArrayList<>();
     private final List<String> consumedJobs = new ArrayList<>();
@@ -250,6 +251,20 @@ public final class ReplaySession {
             downloads.add(source);
             inline.add(source);
         }
+    }
+
+    /**
+     * Records a text for the user's clipboard. Ignored once the pass has stopped at a question; the last text wins.
+     */
+    public void copyToClipboard(String text) {
+        if (pending == null) {
+            clipboardText = text;
+        }
+    }
+
+    /** @return the text the action put in the clipboard, or {@code null} */
+    public String clipboardText() {
+        return clipboardText;
     }
 
     /** @return {@code true} when the action asked to show {@code source} instead of saving it */
