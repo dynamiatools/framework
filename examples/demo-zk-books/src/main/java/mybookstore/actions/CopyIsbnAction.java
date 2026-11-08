@@ -2,7 +2,6 @@ package mybookstore.actions;
 
 import mybookstore.domain.Book;
 import tools.dynamia.actions.ActionRuntime;
-import tools.dynamia.actions.HeadlessCapable;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.actions.RunsOn;
 import tools.dynamia.crud.AbstractCrudAction;
@@ -14,12 +13,13 @@ import tools.dynamia.ui.UIMessages;
 /** Demo of {@link UIClipboard#copy}: copies the ISBN of the selected book to the user's clipboard. */
 @InstallAction
 @RunsOn(ActionRuntime.HEADLESS)
-public class CopyIsbnAction extends AbstractCrudAction implements HeadlessCapable {
+public class CopyIsbnAction extends AbstractCrudAction {
 
     public CopyIsbnAction() {
         setName("Copy ISBN");
         setImage("copy");
         setApplicableClass(Book.class);
+        setMenuSupported(true); // acts on one record: listed in the row menu
     }
 
     @Override

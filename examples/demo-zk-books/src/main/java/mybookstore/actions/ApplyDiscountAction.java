@@ -2,7 +2,6 @@ package mybookstore.actions;
 
 import mybookstore.domain.Book;
 import tools.dynamia.actions.ActionRuntime;
-import tools.dynamia.actions.HeadlessCapable;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.actions.RunsOn;
 import tools.dynamia.crud.AbstractCrudAction;
@@ -20,12 +19,13 @@ import java.math.RoundingMode;
  */
 @InstallAction
 @RunsOn(ActionRuntime.HEADLESS)
-public class ApplyDiscountAction extends AbstractCrudAction implements HeadlessCapable {
+public class ApplyDiscountAction extends AbstractCrudAction {
 
     public ApplyDiscountAction() {
         setName("Apply Discount");
         setImage("tag");
         setApplicableClass(Book.class);
+        setMenuSupported(true); // acts on one record: listed in the row menu
     }
 
     @Override

@@ -17,7 +17,6 @@
 package tools.dynamia.crud.actions;
 
 import tools.dynamia.actions.ActionGroup;
-import tools.dynamia.actions.HeadlessCapable;
 import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.actions.RunsOn;
@@ -35,7 +34,7 @@ import tools.dynamia.domain.ValidationError;
  */
 @InstallAction
 @RunsOn(ActionRuntime.HEADLESS)
-public class SaveAction extends AbstractCrudAction implements HeadlessCapable {
+public class SaveAction extends AbstractCrudAction {
 
     public SaveAction() {
         setName(Messages.get(getClass(), "save"));

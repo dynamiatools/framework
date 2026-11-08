@@ -2,7 +2,6 @@ package mybookstore.actions;
 
 import mybookstore.domain.Book;
 import tools.dynamia.actions.ActionRuntime;
-import tools.dynamia.actions.HeadlessCapable;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.actions.RunsOn;
 import tools.dynamia.crud.AbstractCrudAction;
@@ -13,7 +12,7 @@ import java.time.LocalDate;
 
 @InstallAction
 @RunsOn(ActionRuntime.HEADLESS)
-public class FilterBookByBuyDateAction extends AbstractCrudAction implements HeadlessCapable {
+public class FilterBookByBuyDateAction extends AbstractCrudAction {
 
     public FilterBookByBuyDateAction() {
         setName("Filter By Buy Date");
