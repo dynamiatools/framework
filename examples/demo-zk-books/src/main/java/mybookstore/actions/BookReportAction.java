@@ -23,7 +23,7 @@ public class BookReportAction extends AbstractCrudAction implements HeadlessCapa
 
     public BookReportAction() {
         setName("Preview Book Report");
-        setImage("file-text");
+        setImage("report");
         setApplicableClass(Book.class);
     }
 

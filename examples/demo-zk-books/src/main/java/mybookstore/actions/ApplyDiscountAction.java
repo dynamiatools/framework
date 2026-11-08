@@ -24,7 +24,7 @@ public class ApplyDiscountAction extends AbstractCrudAction implements HeadlessC
 
     public ApplyDiscountAction() {
         setName("Apply Discount");
-        setImage("discount");
+        setImage("tag");
         setApplicableClass(Book.class);
     }
 

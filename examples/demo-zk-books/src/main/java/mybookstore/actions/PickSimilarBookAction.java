@@ -21,7 +21,7 @@ public class PickSimilarBookAction extends AbstractCrudAction implements Headles
 
     public PickSimilarBookAction() {
         setName("Pick Similar Book");
-        setImage("search");
+        setImage("find");
         setApplicableClass(Book.class);
     }
 

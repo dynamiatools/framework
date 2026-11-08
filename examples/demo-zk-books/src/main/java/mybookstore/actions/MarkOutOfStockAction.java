@@ -22,7 +22,7 @@ public class MarkOutOfStockAction extends AbstractCrudAction implements Headless
 
     public MarkOutOfStockAction() {
         setName("Mark Out of Stock");
-        setImage("warning");
+        setImage("cancel");
         setApplicableClass(Book.class);
     }
 
