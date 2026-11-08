@@ -125,9 +125,7 @@ public final class ReplayExecutor {
         if (!notifications.isEmpty() || !published.isEmpty() || clipboard != null) {
             var params = new HashMap<String, Object>();
             if (!notifications.isEmpty()) {
-                params.put(NOTIFICATIONS_PARAM, notifications.stream()
-                        .map(n -> Map.of("message", String.valueOf(n.message()), "type", String.valueOf(n.type())))
-                        .toList());
+                params.put(NOTIFICATIONS_PARAM, notifications.stream().map(ReplayExecutor::describe).toList());
             }
             if (!published.isEmpty()) {
                 params.put(DOWNLOADS_PARAM, published);
@@ -172,6 +170,17 @@ public final class ReplayExecutor {
             published.add(file);
         }
         return published;
+    }
+
+    /** A notification for the client: {@code {message, type}} and, when the action gave one, {@code title}. */
+    private static Map<String, Object> describe(ReplayInteractions.Notification n) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("message", String.valueOf(n.message()));
+        map.put("type", String.valueOf(n.type()));
+        if (n.title() != null) {
+            map.put("title", n.title());
+        }
+        return map;
     }
 
     private static void deleteConsumed(ReplaySession session) {
