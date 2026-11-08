@@ -24,6 +24,9 @@ function fakeClient(opts: {
     jobs: {
       status: vi.fn(async (id: string) => ({ id, title: 'Moving', message: '', ...(jobStatuses.length > 1 ? jobStatuses.shift()! : jobStatuses[0]!) })),
     },
+    lookups: {
+      search: vi.fn(async (name: string, q: string) => [{ key: `${name}-1`, label: `${q} one` }]),
+    },
     transfers: {
       upload: vi.fn(async (file: File) => {
         uploads.push(file);
@@ -241,6 +244,124 @@ describe('runActionFlow UPLOAD and downloads', () => {
   });
 });
 
+describe('runActionFlow inline files', () => {
+  const pdf = { name: 'a.pdf', contentType: 'application/pdf', size: 5, url: '/apps/api/transfers/a?inline=1', disposition: 'inline' as const };
+
+  it('gives an inline PDF to previewFile and not to saveFile', async () => {
+    const final = { ...flowResponse(step({ type: 'DONE' })), params: { downloads: [pdf] } };
+    const { client } = fakeClient({ main: [final] });
+    const saveFile = vi.fn();
+    const previewFile = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ saveFile, previewFile }));
+
+    expect(previewFile).toHaveBeenCalledWith(pdf, client);
+    expect(saveFile).not.toHaveBeenCalled();
+  });
+
+  it('saves a file marked inline whose type is not allowed', async () => {
+    const html = { ...pdf, name: 'a.html', contentType: 'text/html' };
+    const svg = { ...pdf, name: 'a.svg', contentType: 'image/svg+xml' };
+    const final = { ...flowResponse(step({ type: 'DONE' })), params: { downloads: [html, svg] } };
+    const { client } = fakeClient({ main: [final] });
+    const saveFile = vi.fn();
+    const previewFile = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ saveFile, previewFile }));
+
+    expect(previewFile).not.toHaveBeenCalled();
+    expect(saveFile).toHaveBeenCalledTimes(2);
+  });
+
+  it('saves a file the server did not mark inline', async () => {
+    const attachment = { ...pdf, disposition: 'attachment' as const };
+    const final = { ...flowResponse(step({ type: 'DONE' })), params: { downloads: [attachment] } };
+    const { client } = fakeClient({ main: [final] });
+    const saveFile = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ saveFile, previewFile: vi.fn() }));
+
+    expect(saveFile).toHaveBeenCalledWith(attachment, client);
+  });
+});
+
+describe('runActionFlow clipboard', () => {
+  const clip = { ...flowResponse(step({ type: 'DONE' })), params: { clipboard: { text: 'https://x/y' } } };
+
+  it('writes params.clipboard to the clipboard', async () => {
+    const writeText = vi.fn(async () => undefined);
+    vi.stubGlobal('navigator', { clipboard: { writeText } });
+    const { client } = fakeClient({ main: [clip] });
+    const showClipboardFallback = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ showClipboardFallback }));
+
+    expect(writeText).toHaveBeenCalledWith('https://x/y');
+    expect(showClipboardFallback).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
+  it('shows the text when the browser refuses the write', async () => {
+    vi.stubGlobal('navigator', { clipboard: { writeText: vi.fn(async () => { throw new Error('NotAllowedError'); }) } });
+    const { client } = fakeClient({ main: [clip] });
+    const showClipboardFallback = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ showClipboardFallback }));
+
+    expect(showClipboardFallback).toHaveBeenCalledWith('https://x/y');
+    vi.unstubAllGlobals();
+  });
+});
+
+describe('runActionFlow pages and refresh', () => {
+  it('opens the page and refreshes the view after the action ended', async () => {
+    const final = { ...flowResponse(step({ type: 'DONE' })), params: { page: { path: 'ventas/ventas', params: { id: 7 } }, refresh: true } };
+    const { client } = fakeClient({ main: [final] });
+    const openPage = vi.fn();
+    const refresh = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ openPage, refresh }));
+
+    expect(openPage).toHaveBeenCalledWith('ventas/ventas', { id: 7 });
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('never treats a URL as a page path', async () => {
+    const final = { ...flowResponse(step({ type: 'DONE' })), params: { page: { path: 'https://evil.example/x', params: {} } } };
+    const { client } = fakeClient({ main: [final] });
+    const openPage = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ openPage }));
+
+    expect(openPage).not.toHaveBeenCalled();
+  });
+});
+
+describe('runActionFlow searchable pick', () => {
+  const pick = flowResponse(step({ type: 'CHOICE', title: 'Customer', data: { options: [], multiple: false, lookup: 'customers' } }));
+
+  it('searches the lookup through the client and answers with the key picked', async () => {
+    const done = flowResponse(step({ type: 'DONE' }));
+    const { client, calls } = fakeClient({ main: [pick, done] });
+    const pickEntity = vi.fn(async ({ search }: { search: (q: string) => Promise<{ key: string; label: string }[]> }) => {
+      const found = await search('an');
+      return [found[0]!.key];
+    });
+
+    await runActionFlow(client, action, {}, handlers({ pickEntity }));
+
+    expect(pickEntity).toHaveBeenCalledWith(expect.objectContaining({ title: 'Customer' }));
+    expect((client as never as { lookups: { search: unknown } }).lookups.search).toHaveBeenCalledWith('customers', 'an');
+    expect(calls.main[1]!.data).toEqual(['customers-1']);
+  });
+
+  it('fails clearly without a pickEntity handler', async () => {
+    const { client } = fakeClient({ main: [pick] });
+
+    await expect(runActionFlow(client, action, {}, handlers())).rejects.toThrow(/pickEntity/);
+  });
+});
+
 describe('runActionFlow DIALOG view class', () => {
   it('fetches the view of step.viewClass instead of the entity of the request', async () => {
     const dialog = flowResponse(step({ type: 'DIALOG', viewDescriptor: 'form', viewClass: 'x.AccountPayment', data: { amount: 5 } }));
@@ -379,5 +500,28 @@ describe('runActionFlow PROGRESS', () => {
     const { client } = fakeClient({ main: [flowResponse(step({ type: 'PROGRESS', data: {} }))] });
 
     await expect(runActionFlow(client, action, {}, handlers())).rejects.toThrow(/jobId/);
+  });
+});
+
+describe('runActionFlow INPUT kinds', () => {
+  it('tells the prompt it must ask for a date range, with the default, and answers with what it returned', async () => {
+    const { client, calls } = fakeClient({
+      main: [flowResponse(step({ type: 'INPUT', message: 'Period', inputType: 'daterange', data: '2026-01-01/' })), flowResponse(step({ type: 'DONE' }))],
+    });
+    const prompt = vi.fn(async () => '2026-01-01/2026-01-31');
+
+    await runActionFlow(client, action, {}, handlers({ prompt }));
+
+    expect(prompt).toHaveBeenCalledWith({ message: 'Period', inputType: 'daterange', defaultValue: '2026-01-01/' });
+    expect(calls.main[1]!.data).toBe('2026-01-01/2026-01-31');
+  });
+
+  it('ignores an input kind it does not know', async () => {
+    const { client } = fakeClient({ main: [flowResponse(step({ type: 'INPUT', message: 'X', inputType: 'hologram' })), flowResponse(step({ type: 'DONE' }))] });
+    const prompt = vi.fn(async () => 'x');
+
+    await runActionFlow(client, action, {}, handlers({ prompt }));
+
+    expect(prompt).toHaveBeenCalledWith({ message: 'X' });
   });
 });

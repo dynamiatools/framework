@@ -50,6 +50,7 @@ public class ActionFlowStep implements Serializable {
     private String viewDescriptor;
     private String viewClass;
     private Object data;
+    private String inputType;
     private java.util.Map<String, String> fieldErrors;
     private java.util.Map<String, String> hints;
     private String resumeToken;
@@ -74,6 +75,18 @@ public class ActionFlowStep implements Serializable {
         step.type = ActionFlowStepType.INPUT;
         step.message = message;
         step.title = title;
+        return step;
+    }
+
+    /**
+     * A single-value prompt of a given kind.
+     *
+     * @param inputType what the client must render: {@code text}, {@code number}, {@code date} or {@code daterange}
+     *                  (see {@code InputValues}); a date range is answered as {@code "start/end"}
+     */
+    public static ActionFlowStep input(String message, String title, String inputType) {
+        var step = input(message, title);
+        step.inputType = inputType;
         return step;
     }
 
@@ -182,6 +195,22 @@ public class ActionFlowStep implements Serializable {
         payload.put("options", options);
         payload.put("multiple", multiple);
         step.data = payload;
+        return step;
+    }
+
+    /**
+     * The user searches a big catalog and picks one record. {@code data} carries {@code lookup} (the name to search at
+     * {@code GET /apps/api/lookups/{name}?q=}), an empty {@code options} list and {@code multiple = false}; the client
+     * answers with the list of the key picked. The server checks the key again, so the answer is never trusted.
+     *
+     * @param title      title of the picker, may be null
+     * @param lookupName name of the {@code EntityLookup}
+     */
+    public static ActionFlowStep entityChoice(String title, String lookupName) {
+        var step = choice(title, java.util.List.of(), java.util.List.of(), false);
+        @SuppressWarnings("unchecked")
+        var payload = (Map<String, Object>) step.data;
+        payload.put("lookup", lookupName);
         return step;
     }
 
@@ -363,6 +392,15 @@ public class ActionFlowStep implements Serializable {
 
     public void setHints(java.util.Map<String, String> hints) {
         this.hints = hints;
+    }
+
+    /** @return the kind of value an {@code INPUT} step asks for, or null for free text */
+    public String getInputType() {
+        return inputType;
+    }
+
+    public void setInputType(String inputType) {
+        this.inputType = inputType;
     }
 
     public Object getData() {

@@ -12,6 +12,8 @@ export type {
     ApplicationMetadataActions,
     ActionType,
     ActionMetadata,
+    ActionControl,
+    ActionControlKind,
     ActionExecutionRequest,
     ActionExecutionResponse,
     ActionFlowStepType,

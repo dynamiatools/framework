@@ -31,7 +31,18 @@ import java.nio.file.Path;
  * @param contentType MIME type, may be null
  * @param content     the bytes
  */
-public record CapturedDownload(String name, String contentType, byte[] content) {
+public record CapturedDownload(String name, String contentType, byte[] content, boolean inline) {
+
+    /**
+     * A file given to be saved.
+     *
+     * @param name        file name
+     * @param contentType MIME type
+     * @param content     the bytes
+     */
+    public CapturedDownload(String name, String contentType, byte[] content) {
+        this(name, contentType, content, false);
+    }
 
     /** @return the size in bytes */
     public long size() {

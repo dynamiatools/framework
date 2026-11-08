@@ -6,6 +6,12 @@ export default defineConfig({
   server: {
     proxy: {
       // Todas las peticiones que empiecen con /api se redirigirán
+      // Metadata (navigation, entities, actions) lives under /apps/api
+      '/apps/api': {
+        target: 'http://localhost:8484',
+        changeOrigin: true,
+        secure: false,
+      },
       '/api': {
         target: 'http://localhost:8484', // La URL de tu Spring Boot
         changeOrigin: true,

@@ -13,4 +13,5 @@ open module tools.dynamia.crud {
     exports tools.dynamia.crud.actions.remote;
     exports tools.dynamia.crud.cfg;
     exports tools.dynamia.crud.headless;
+    exports tools.dynamia.crud.query;
 }

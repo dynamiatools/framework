@@ -1,27 +1,22 @@
 package mybookstore.actions;
 
 import mybookstore.domain.Book;
+import tools.dynamia.actions.Control;
+import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.InstallAction;
-import tools.dynamia.commons.LocalDateRange;
-import tools.dynamia.crud.AbstractCrudAction;
-import tools.dynamia.crud.CrudActionEvent;
-import tools.dynamia.domain.query.QueryConditions;
-import tools.dynamia.zk.actions.LocalDateboxRangeActionRenderer;
+import tools.dynamia.actions.RunsOn;
+import tools.dynamia.crud.actions.FilterAction;
 
+/**
+ * Filters the list by publish date. Declares the control and the field; ZK draws a date range box and a remote client draws
+ * its own from the metadata, and the filtering is the same for both.
+ */
 @InstallAction
-public class FilterBookByPublishDateAction extends AbstractCrudAction {
+@RunsOn(ActionRuntime.FRONTEND)
+public class FilterBookByPublishDateAction extends FilterAction {
 
     public FilterBookByPublishDateAction() {
-        setRenderer(new LocalDateboxRangeActionRenderer()); //use a renderer that provides a date range input
-        setApplicableClass(Book.class);
+        super(Book.class, Control.dateRange("publishDate").label("Publish date"));
         setAlwaysVisible(true);
-    }
-
-    @Override
-    public void actionPerformed(CrudActionEvent evt) {
-        if(evt.getData() instanceof LocalDateRange dateRange && !dateRange.isNull()){
-            evt.getController().setParemeter("publishDate", QueryConditions.between(dateRange)); //set parameter with a between condition
-            evt.getController().doQuery(); //execute query with the new parameter
-        }
     }
 }

@@ -200,13 +200,17 @@ This table is **normative**: both adapters (ZK and replay) must meet it, and eac
 | All | Cancelling never calls the success callback. If the signature has `onCancel`, that one is called. |
 | All | The callback runs with the same tenant, user and bindings as the action (§8). |
 | `UIMessages.showQuestion` | Yes → `onYes`; No or close → `onNo` if present. |
-| `UIMessages.showInput` | Value converted to `valueClass`; if it cannot be converted, it is asked again with the error (in replay: the same step, with `message`). |
+| `UIMessages.showInput` | The step asks for the kind of `valueClass` (`text`, `number`, `date`, `daterange` for `LocalDateRange`, answered as `start/end`). Value converted to `valueClass`; if it cannot be converted, it is asked again with the error (in replay: the same step, with `message`). |
 | `UIViews.showForm` | `onSubmit(bean, dialog)`. If `onSubmit` throws `ValidationError`, **the form stays open with the submitted values and the message**, in both adapters (§5.2). `dialog.close()` is what closes it; if `onSubmit` returns without closing it, it stays open in ZK and is shown again in replay. |
 | `UIViews.showView` | Shown and closed; no callback (or optional `onClose`). Presentation hints (`width`, `height`, collections as tables) come from `ViewOptions`/descriptor and both adapters interpret them. |
 | `UIChoices` | Options are identified by a **stable key** (§5.3), not by position. Choosing nothing equals cancelling: the callback is not called, not even in multiple mode. |
 | `UIFiles.upload` | The callback receives streaming handles (§6). `accept`, `maxFileSize`, `maxFiles` and `maxTotalSize` are enforced on the server in both adapters. |
 | `UIFiles.download` | Streaming source; no fixed in-memory limit. Name and MIME type reach the user. |
 | `UIProgress.run` | `run` **returns control without waiting** in both adapters; the continuation goes in `onFinish`/`onError`. The task runs **without an ambient transaction** and with the propagated context (§8). **No UI facade can be used inside the task** (throws `UIUnavailableException`); progress is reported with `ProgressMonitor`. On error, `onError` receives the exception and whatever the task did is **not committed** if it ran in its own transaction. |
+| `UIFiles.preview` | Shown only when `InlinePolicy` allows the type (PDF, PNG, JPEG, GIF, WebP, plain text); any other type is downloaded. Final effect in replay (`disposition: inline`); the transfers endpoint serves an inline `DOWNLOAD` only, with `nosniff`, and keeps it readable until it expires. |
+| `UIClipboard.copy` | The text reaches the user. It is in the clipboard when the browser allows it; otherwise it is shown so the user can copy it. Final effect in replay (`params.clipboard`). |
+| `UINavigation.openPage` / `refresh` | The path is a virtual page path, never a URL. Final effects in replay (`params.page`, `params.refresh`); the first page wins. |
+| `UIChoices.pickEntity` | The key is checked with `EntityLookup.find` on every pass; a key outside the set is asked again. Cancelling picks nothing. |
 | `UINavigation.open` | Terminal in practice: whatever the action does afterwards runs, but the user is already leaving. In replay, the final `REDIRECT` keeps the notifications and they are shown before navigating. |
 
 ---

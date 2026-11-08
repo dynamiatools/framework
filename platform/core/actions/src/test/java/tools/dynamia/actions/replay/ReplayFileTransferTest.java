@@ -245,6 +245,79 @@ class ReplayFileTransferTest {
     }
 
     @Test
+    void aPdfPreviewIsPublishedInlineAndADownloadIsNot() {
+        var done = ReplayExecutor.execute("view", new ActionExecutionRequest(), request -> {
+            UIFiles.preview("a.pdf", "application/pdf", new byte[]{1});
+            UIFiles.download("b.pdf", "application/pdf", new byte[]{2});
+            return null;
+        });
+
+        var files = (List<?>) done.getParams().get(ReplayExecutor.DOWNLOADS_PARAM);
+        var preview = (Map<?, ?>) files.get(0);
+        var download = (Map<?, ?>) files.get(1);
+        assertEquals("inline", preview.get("disposition"));
+        assertTrue(((String) preview.get("url")).endsWith("?" + ReplayExecutor.INLINE_QUERY));
+        assertEquals("attachment", download.get("disposition"));
+        assertFalse(((String) download.get("url")).contains("?"));
+    }
+
+    @Test
+    void aPreviewOfAnActiveTypeFallsBackToAnAttachment() {
+        var done = ReplayExecutor.execute("view", new ActionExecutionRequest(), request -> {
+            UIFiles.preview("page.html", "text/html", "<script>alert(1)</script>".getBytes(StandardCharsets.UTF_8));
+            UIFiles.preview("logo.svg", "image/svg+xml", new byte[]{1});
+            return null;
+        });
+
+        var files = (List<?>) done.getParams().get(ReplayExecutor.DOWNLOADS_PARAM);
+        for (Object f : files) {
+            var file = (Map<?, ?>) f;
+            assertEquals("attachment", file.get("disposition"));
+            assertFalse(((String) file.get("url")).contains("?"));
+        }
+    }
+
+    @Test
+    void aPreviewIsPublishedOnlyByThePassThatFinishes() {
+        var opened = new int[1];
+        java.util.function.Function<ActionExecutionRequest, Object> body = request -> {
+            UIFiles.preview(new tools.dynamia.ui.files.DownloadSource.StreamSource("a.pdf", "application/pdf", -1, () -> {
+                opened[0]++;
+                return new ByteArrayInputStream(new byte[]{1});
+            }));
+            UIMessages.showQuestion("Sure?", () -> {
+            });
+            return null;
+        };
+
+        var pending = ReplayExecutor.execute("view", new ActionExecutionRequest(), body);
+        assertNull(pending.getParams());
+        assertEquals(0, opened[0]);
+
+        var done = ReplayExecutor.execute("view", answer(pending, true), body);
+        var file = (Map<?, ?>) ((List<?>) done.getParams().get(ReplayExecutor.DOWNLOADS_PARAM)).get(0);
+        assertEquals("inline", file.get("disposition"));
+        assertEquals(1, opened[0]);
+    }
+
+    @Test
+    void theClipboardTextTravelsInTheFinalResponseOnlyFromThePassThatFinishes() {
+        java.util.function.Function<ActionExecutionRequest, Object> body = request -> {
+            tools.dynamia.ui.UIClipboard.copy("https://x/y");
+            UIMessages.showQuestion("Sure?", () -> {
+            });
+            return null;
+        };
+
+        var pending = ReplayExecutor.execute("copy", new ActionExecutionRequest(), body);
+        assertNull(pending.getParams(), "a pass that stopped at a question delivers nothing");
+
+        var done = ReplayExecutor.execute("copy", answer(pending, true), body);
+        var clip = (Map<?, ?>) done.getParams().get(ReplayExecutor.CLIPBOARD_PARAM);
+        assertEquals("https://x/y", clip.get("text"));
+    }
+
+    @Test
     void withoutATransferStoreTheErrorSaysSo() {
         Containers.get().removeAllContainers();
 

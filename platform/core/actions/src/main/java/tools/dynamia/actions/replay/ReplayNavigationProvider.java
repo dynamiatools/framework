@@ -31,6 +31,16 @@ public final class ReplayNavigationProvider implements NavigationProvider {
     }
 
     @Override
+    public void openPage(String path, java.util.Map<String, Object> params) {
+        session.openPage(path, params);
+    }
+
+    @Override
+    public void refresh() {
+        session.requestRefresh();
+    }
+
+    @Override
     public void open(String url, boolean newWindow) {
         session.redirect(url, newWindow);
     }

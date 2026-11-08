@@ -18,6 +18,7 @@ package tools.dynamia.zk.ui;
 
 import tools.dynamia.integration.Containers;
 import tools.dynamia.ui.ChoicesProvider;
+import tools.dynamia.ui.Clipboard;
 import tools.dynamia.ui.FileTransfer;
 import tools.dynamia.ui.MessageDisplayer;
 import tools.dynamia.ui.NavigationProvider;
@@ -41,6 +42,7 @@ public class ZKUIEnvironment implements UIEnvironment {
     private final Map<Class<?>, Object> defaults = Map.of(
             MessageDisplayer.class, new MessageNotification(),
             FileTransfer.class, new ZKFileTransfer(),
+            Clipboard.class, new ZKClipboard(),
             ProgressRunner.class, new ZKProgressRunner(),
             ViewsProvider.class, new ZKViewsProvider(),
             ChoicesProvider.class, new ZKChoicesProvider(),

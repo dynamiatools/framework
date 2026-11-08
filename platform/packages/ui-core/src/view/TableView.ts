@@ -1,6 +1,6 @@
 // TableView: handles tabular data, columns, pagination, sorting and search
 
-import type { ViewDescriptor, EntityMetadata, CrudPageable } from '@dynamia-tools/sdk';
+import type { ViewDescriptor, EntityMetadata, CrudPageable, CrudFilter } from '@dynamia-tools/sdk';
 import { DataSetView } from './DataSetView.js';
 import { ViewTypes } from './ViewType.js';
 import type { ResolvedField } from '../types/field.js';
@@ -24,6 +24,7 @@ export class TableView extends DataSetView {
   private _resolvedColumns: ResolvedField[] = [];
   private _readOnly = false;
   private _filters: Record<string, unknown> = {};
+  private _queryFilters: Record<string, CrudFilter> = {};
   private _crudPath?: string;
   private _tableLoader?: (params: Record<string, unknown>) => Promise<{ rows: unknown[]; pagination: CrudPageable | null }>;
 
@@ -151,6 +152,22 @@ export class TableView extends DataSetView {
     await this.load({ page: 1 });
   }
 
+  /**
+   * Sets, or with `null` removes, the filter of a toolbar control on `field` and loads the first page. These are real
+   * filters with an operator (`between`, `in`, ...): the loader receives them as `filters` and asks `POST /find`.
+   */
+  async setQueryFilter(field: string, filter: CrudFilter | null): Promise<void> {
+    if (filter) {
+      this._queryFilters[field] = filter;
+    } else {
+      delete this._queryFilters[field];
+    }
+    await this.load({ page: 1 });
+  }
+
+  /** The filters of the toolbar controls in effect */
+  getQueryFilters(): CrudFilter[] { return Object.values(this._queryFilters); }
+
   /** The text of the last search */
   getSearchQuery(): string { return this.state.searchQuery; }
 
@@ -180,6 +197,7 @@ export class TableView extends DataSetView {
       params['sortDir'] = this.state.sortDir ?? 'asc';
     }
     if (this.state.searchQuery) params['q'] = this.state.searchQuery;
+    if (Object.keys(this._queryFilters).length > 0) params['filters'] = this.getQueryFilters();
     return params;
   }
 }

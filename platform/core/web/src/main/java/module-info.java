@@ -21,5 +21,6 @@ open module tools.dynamia.web {
     requires tools.jackson.databind;
     exports tools.dynamia.web;
     exports tools.dynamia.web.navigation;
+    exports tools.dynamia.web.query;
     exports tools.dynamia.web.util;
 }
