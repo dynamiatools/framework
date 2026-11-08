@@ -30,7 +30,6 @@ import java.util.function.Consumer;
  */
 public class ZKChoicesProvider implements ChoicesProvider {
 
-    /** An option with the text the list shows for it. */
     /**
      * Shows a dialog with a search box and a list; typing searches the lookup (at most 20 results) and selecting a row
      * picks it. The lookup applies its own filters, as it does for remote clients.
@@ -71,6 +70,7 @@ public class ZKChoicesProvider implements ChoicesProvider {
         load.accept("");
     }
 
+    /** An option with the text the list shows for it. */
     private record Labeled<T>(String label, T value) {
         @Override
         public String toString() {

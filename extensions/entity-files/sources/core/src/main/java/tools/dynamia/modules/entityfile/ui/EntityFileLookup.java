@@ -10,7 +10,6 @@
  */
 package tools.dynamia.modules.entityfile.ui;
 
-import org.springframework.stereotype.Component;
 import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
@@ -30,8 +29,11 @@ import java.util.Optional;
  *
  * <p>Only valid files (not directories) of the account given by {@link EntityFileAccountProvider} can be found or picked.
  * Without a provider, or when it has no account, nothing can be picked: the lookup fails closed.
+ *
+ * <p><strong>It is not a bean on purpose.</strong> It ignores {@code EntityFileSecurityProvider}, so it lists every valid file
+ * of the account by name and uuid. Register it ({@code @Bean}) only in an application where every user of an account may see
+ * all its files; subclass it and override {@link #search} and {@link #find} to apply a per-file rule otherwise.
  */
-@Component
 public class EntityFileLookup implements EntityLookup<EntityFile> {
 
     /** Name of the lookup. */
@@ -49,6 +51,11 @@ public class EntityFileLookup implements EntityLookup<EntityFile> {
     @Override
     public String name() {
         return NAME;
+    }
+
+    @Override
+    public boolean isSearchable() {
+        return true;
     }
 
     @Override

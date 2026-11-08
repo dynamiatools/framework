@@ -35,20 +35,29 @@ public final class UINavigation {
     }
 
     /**
-     * Sends the user to {@code url} in a new window or tab.
-     */
-    /**
      * Sends the user to a page of the application by its virtual path.
      *
      * @param path   virtual path of the page, such as {@code ventas/ventas}
-     * @param params parameters for the page
-     * @throws IllegalArgumentException when {@code path} is not a valid page path (a URL, for example)
+     * @param params parameters for the page; values must be {@code String}, {@code Number} or {@code Boolean}, because they
+     *               travel to the client (an entity or any other object is refused)
+     * @throws IllegalArgumentException when {@code path} is not a valid page path (a URL, for example) or a parameter has a
+     *                                  null key or value, or a value of another type
      */
     public static void openPage(String path, java.util.Map<String, Object> params) {
         if (!NavigationProvider.isValidPagePath(path)) {
             throw new IllegalArgumentException("Not a page path: " + path + " (use UINavigation.open for URLs)");
         }
-        UIFacades.port(NavigationProvider.class).openPage(path, params == null ? java.util.Map.of() : params);
+        var checked = new java.util.LinkedHashMap<String, Object>();
+        if (params != null) {
+            params.forEach((key, value) -> {
+                if (key == null || !(value instanceof String || value instanceof Number || value instanceof Boolean)) {
+                    throw new IllegalArgumentException("Page parameter " + key + " must be a String, Number or Boolean, not "
+                            + (value == null ? "null" : value.getClass().getName()));
+                }
+                checked.put(key, value);
+            });
+        }
+        UIFacades.port(NavigationProvider.class).openPage(path, java.util.Collections.unmodifiableMap(checked));
     }
 
     /**
@@ -68,6 +77,9 @@ public final class UINavigation {
         UIFacades.port(NavigationProvider.class).refresh();
     }
 
+    /**
+     * Sends the user to {@code url} in a new window or tab.
+     */
     public static void openInNewWindow(String url) {
         UIFacades.port(NavigationProvider.class).open(url, true);
     }

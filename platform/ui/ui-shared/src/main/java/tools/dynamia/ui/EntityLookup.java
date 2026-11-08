@@ -18,6 +18,10 @@ import java.util.Optional;
  * as a list of options. It is declared as a bean, so a remote client can search it through
  * {@code GET /apps/api/lookups/{name}} while the action waits for the answer.
  *
+ * <p><strong>Remote search is opt-in.</strong> {@code GET /apps/api/lookups/{name}} answers only for a lookup whose
+ * {@link #isSearchable()} is {@code true}. The endpoint is authenticated but it is not tied to an action the user may run,
+ * so only expose a lookup whose records every authenticated user of the account may see.
+ *
  * <p><strong>Security contract.</strong> {@link #search} and {@link #find} must apply the same filters and the same tenant
  * rules (use the tenant aware {@code CrudService}). Every pass of a headless run calls {@link #find} again with the key the
  * client sent, so a key that is not in the searchable set is refused.
@@ -45,6 +49,16 @@ public interface EntityLookup<T> {
      * @return the unique name clients use to search this lookup
      */
     String name();
+
+    /**
+     * Tells whether remote clients may search this lookup through {@code /apps/api/lookups/{name}}. {@code false} by
+     * default: a lookup used only by actions in ZK, or whose records need a per-record check, must stay private.
+     *
+     * @return {@code true} to allow the search endpoint
+     */
+    default boolean isSearchable() {
+        return false;
+    }
 
     /**
      * Searches the records the user may pick.

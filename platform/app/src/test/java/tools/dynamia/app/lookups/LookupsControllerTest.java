@@ -45,6 +45,11 @@ class LookupsControllerTest {
             }
 
             @Override
+            public boolean isSearchable() {
+                return true;
+            }
+
+            @Override
             public List<String> search(String text, int limit) {
                 askedLimits.add(limit);
                 return java.util.stream.IntStream.range(0, 500).mapToObj(i -> text + i).toList();
@@ -96,6 +101,37 @@ class LookupsControllerTest {
         controller.search("names", "x", -5);
 
         assertEquals(List.of(LookupsController.DEFAULT_LIMIT, 1), askedLimits);
+    }
+
+    @Test
+    void aLookupThatIsNotSearchableIsNotFoundEvenWithAKnownName() {
+        var beans = new SimpleObjectContainer("private-lookup");
+        beans.addObject(new EntityLookup<String>() {
+            public String name() { return "private"; }
+            public List<String> search(String text, int limit) { return List.of("secret"); }
+            public Optional<String> find(String key) { return Optional.of(key); }
+            public String key(String value) { return value; }
+            public String label(String value) { return value; }
+        });
+        Containers.get().installObjectContainer(beans);
+
+        assertEquals(404, controller.search("private", "", null).getStatusCode().value());
+    }
+
+    @Test
+    void aNullLabelDoesNotBreakTheAnswer() {
+        var beans = new SimpleObjectContainer("null-label");
+        beans.addObject(new EntityLookup<String>() {
+            public String name() { return "nulls"; }
+            public boolean isSearchable() { return true; }
+            public List<String> search(String text, int limit) { return List.of("a"); }
+            public Optional<String> find(String key) { return Optional.of(key); }
+            public String key(String value) { return value; }
+            public String label(String value) { return null; }
+        });
+        Containers.get().installObjectContainer(beans);
+
+        assertEquals(List.of(java.util.Map.of("key", "a", "label", "")), controller.search("nulls", "", null).getBody());
     }
 
     @Test

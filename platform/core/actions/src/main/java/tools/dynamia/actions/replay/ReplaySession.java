@@ -272,7 +272,7 @@ public final class ReplaySession {
     public void openPage(String path, java.util.Map<String, Object> params) {
         if (pending == null && pagePath == null) {
             pagePath = path;
-            pageParams = params == null ? java.util.Map.of() : java.util.Map.copyOf(params);
+            pageParams = params == null ? java.util.Map.of() : java.util.Collections.unmodifiableMap(new java.util.LinkedHashMap<>(params));
         }
     }
 

@@ -288,6 +288,15 @@ class ActionTesterTest {
     }
 
     @Test
+    void pageParametersMustBePlainValues() {
+        var withNull = new java.util.HashMap<String, Object>();
+        withNull.put("id", null);
+        assertThrows(IllegalArgumentException.class, () -> tools.dynamia.ui.UINavigation.openPage("ventas/ventas", withNull));
+        assertThrows(IllegalArgumentException.class, () ->
+                tools.dynamia.ui.UINavigation.openPage("ventas/ventas", java.util.Map.of("entity", new Object())));
+    }
+
+    @Test
     void aUrlIsNotAPagePath() {
         assertThrows(IllegalArgumentException.class, () -> tools.dynamia.ui.UINavigation.openPage("https://evil.example/x"));
         assertThrows(IllegalArgumentException.class, () -> tools.dynamia.ui.UINavigation.openPage("../secret"));

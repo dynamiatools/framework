@@ -26,13 +26,15 @@ import tools.dynamia.ui.EntityLookup;
 import tools.dynamia.ui.EntityLookups;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Map;
 
 /**
  * Lets a remote client search the {@link EntityLookup} named by a {@code CHOICE} step of {@code UIChoices.pickEntity}:
  * {@code GET /apps/api/lookups/{name}?q=text&limit=20} answers {@code [{key, label}]}. It only exposes what the lookup
  * returns, so the lookup is responsible for the tenant and the filters; the page is capped at
- * {@link EntityLookup#MAX_LIMIT}. An unknown name is {@code 404}.
+ * {@link EntityLookup#MAX_LIMIT}. An unknown lookup, or one that is not {@link EntityLookup#isSearchable() searchable}, is
+ * {@code 404}.
  */
 @RestController
 @RequestMapping(LookupsController.PATH)
@@ -57,14 +59,14 @@ public class LookupsController {
                                                             @RequestParam(value = "q", defaultValue = "") String query,
                                                             @RequestParam(value = "limit", required = false) Integer limit) {
         var found = EntityLookups.find(name);
-        if (found.isEmpty()) {
+        if (found.isEmpty() || !found.get().isSearchable()) {
             return ResponseEntity.notFound().build();
         }
         int page = Math.max(1, Math.min(limit == null ? DEFAULT_LIMIT : limit, EntityLookup.MAX_LIMIT));
         var lookup = found.get();
         var results = lookup.search(query, page).stream()
                 .limit(page)
-                .map(value -> Map.of("key", lookup.key(value), "label", lookup.label(value)))
+                .map(value -> Map.of("key", Objects.toString(lookup.key(value), ""), "label", Objects.toString(lookup.label(value), "")))
                 .toList();
         return ResponseEntity.ok(results);
     }
