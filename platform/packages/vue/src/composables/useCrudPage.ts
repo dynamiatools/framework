@@ -99,7 +99,7 @@ export function useCrudPage(options: UseCrudPageOptions) {
 
       // 4. Wire loader according to the resolved dataset view type.
       // A query with field filters goes to POST /find; without them the plain GET is enough.
-      const fieldClassOf = (name: string) => context.descriptor.fields?.find(field => field.name === name)?.fieldClass;
+      const fieldClassOf = (name: string) => dataSetDescriptor.fields?.find(field => field.name === name)?.fieldClass;
       const loadList = (params: Record<string, unknown>) => {
         const spec = toQuerySpec(params, fieldClassOf);
         return spec ? api.find(spec) : api.findAll(toRestQuery(params));
