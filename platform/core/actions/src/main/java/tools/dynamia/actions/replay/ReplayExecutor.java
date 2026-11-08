@@ -8,6 +8,7 @@ import tools.dynamia.actions.flow.FlowTokenException;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.ui.UIFacades;
 import tools.dynamia.ui.files.DownloadSource;
+import tools.dynamia.ui.files.InlinePolicy;
 import tools.dynamia.ui.files.FlowPrincipal;
 import tools.dynamia.ui.files.TransferMeta;
 import tools.dynamia.ui.files.TransferRef;
@@ -49,6 +50,18 @@ public final class ReplayExecutor {
     public static final String TRANSFERS_PATH = "/apps/api/transfers";
     /** Response param with the files the action gave to the user: a list of {@code {name, contentType, size, url}}. */
     public static final String DOWNLOADS_PARAM = "downloads";
+
+    /** Param of the final response with the text the action put in the clipboard: {@code {text}}. */
+    public static final String CLIPBOARD_PARAM = "clipboard";
+
+    /** Param of the final response with the page the action opened: {@code {path, params}}. */
+    public static final String PAGE_PARAM = "page";
+
+    /** Param of the final response, {@code true} when the action asked to reload the view. */
+    public static final String REFRESH_PARAM = "refresh";
+
+    /** Query of the URL of a file that must be shown inline; the transfers endpoint still checks the type and direction. */
+    public static final String INLINE_QUERY = "inline=1";
 
     private ReplayExecutor() {
     }
@@ -110,19 +123,29 @@ public final class ReplayExecutor {
                 : ActionFlowStep.redirect(session.redirectUrl(), false, session.redirectInNewWindow());
         var response = ActionFlows.toResponse(flowId, actionId, Map.of(), finalStep);
         var downloads = session.downloads();
-        var published = session.failed() ? List.<Map<String, Object>>of() : publishDownloads(downloads);
+        var published = session.failed() ? List.<Map<String, Object>>of() : publishDownloads(downloads, session);
         if (!session.failed()) {
             deleteConsumed(session);
         }
-        if (!notifications.isEmpty() || !published.isEmpty()) {
+        var clipboard = session.failed() ? null : session.clipboardText();
+        var openedPage = session.failed() ? null : session.pagePath();
+        var refresh = !session.failed() && session.refreshRequested();
+        if (!notifications.isEmpty() || !published.isEmpty() || clipboard != null || openedPage != null || refresh) {
             var params = new HashMap<String, Object>();
             if (!notifications.isEmpty()) {
-                params.put(NOTIFICATIONS_PARAM, notifications.stream()
-                        .map(n -> Map.of("message", String.valueOf(n.message()), "type", String.valueOf(n.type())))
-                        .toList());
+                params.put(NOTIFICATIONS_PARAM, notifications.stream().map(ReplayExecutor::describe).toList());
             }
             if (!published.isEmpty()) {
                 params.put(DOWNLOADS_PARAM, published);
+            }
+            if (openedPage != null) {
+                params.put(PAGE_PARAM, Map.of("path", openedPage, "params", session.pageParams()));
+            }
+            if (refresh) {
+                params.put(REFRESH_PARAM, true);
+            }
+            if (clipboard != null) {
+                params.put(CLIPBOARD_PARAM, Map.of("text", clipboard));
             }
             response.setParams(params);
         }
@@ -133,7 +156,7 @@ public final class ReplayExecutor {
      * Writes the files the action gave to the user into the {@link TransferStore}, by streaming, and describes them for the
      * client: {@code {name, contentType, size, url}}. Called only for the pass that ran to the end.
      */
-    private static List<Map<String, Object>> publishDownloads(List<DownloadSource> downloads) {
+    private static List<Map<String, Object>> publishDownloads(List<DownloadSource> downloads, ReplaySession session) {
         if (downloads.isEmpty()) {
             return List.of();
         }
@@ -155,10 +178,23 @@ public final class ReplayExecutor {
             file.put("name", ref.name());
             file.put("contentType", ref.contentType());
             file.put("size", ref.size());
-            file.put("url", TRANSFERS_PATH + "/" + ref.ref());
+            boolean inline = session.isPreview(source) && InlinePolicy.allows(ref.contentType());
+            file.put("url", TRANSFERS_PATH + "/" + ref.ref() + (inline ? "?" + INLINE_QUERY : ""));
+            file.put("disposition", inline ? "inline" : "attachment");
             published.add(file);
         }
         return published;
+    }
+
+    /** A notification for the client: {@code {message, type}} and, when the action gave one, {@code title}. */
+    private static Map<String, Object> describe(ReplayInteractions.Notification n) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("message", String.valueOf(n.message()));
+        map.put("type", String.valueOf(n.type()));
+        if (n.title() != null) {
+            map.put("title", n.title());
+        }
+        return map;
     }
 
     private static void deleteConsumed(ReplaySession session) {

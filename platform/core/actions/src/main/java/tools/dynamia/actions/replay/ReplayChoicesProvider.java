@@ -56,6 +56,22 @@ public final class ReplayChoicesProvider implements ChoicesProvider {
         });
     }
 
+    @Override
+    public <T> void pickEntity(String title, tools.dynamia.ui.EntityLookup<T> lookup, Consumer<T> onPick) {
+        session.interact(ActionFlowStep.entityChoice(title, lookup.name()), answer -> {
+            var keys = keysOf(answer);
+            if (keys.isEmpty()) {
+                return; // cancelled
+            }
+            // never trust the key: the lookup applies its filters and the tenant again on every pass
+            var picked = lookup.find(keys.get(0));
+            if (picked.isEmpty()) {
+                throw new ReplayRetry(ClassMessages.get(ReplayChoicesProvider.class).get("flow.invalidChoice"));
+            }
+            onPick.accept(picked.get());
+        });
+    }
+
     private static List<String> keysOf(Object answer) {
         var keys = new ArrayList<String>();
         if (answer instanceof List<?> list) {

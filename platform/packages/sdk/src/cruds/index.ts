@@ -5,6 +5,10 @@ export type {
   CrudRawResponse,
   CrudListResult,
   CrudQueryParams,
+  CrudFilter,
+  CrudFilterOp,
+  CrudSort,
+  QuerySpec,
 } from './types.js';
 export { ConfigResourceApi } from './config-resource.js';
 export type { ConfigResult, ConfigValues } from './config-resource.js';

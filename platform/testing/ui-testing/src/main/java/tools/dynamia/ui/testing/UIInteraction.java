@@ -45,6 +45,12 @@ public record UIInteraction(Type type, String title, String message, MessageType
         CHOICE,
         /** A request for files. */
         UPLOAD,
+        /** A text given to the user's clipboard. */
+        CLIPBOARD,
+        /** A page of the application opened. */
+        PAGE,
+        /** A request to reload the view. */
+        REFRESH,
         /** A message that needs no answer. */
         NOTIFY,
         /** A long task shown with progress. */

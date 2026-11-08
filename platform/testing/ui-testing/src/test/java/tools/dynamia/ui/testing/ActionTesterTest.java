@@ -259,6 +259,111 @@ class ActionTesterTest {
     }
 
     @Test
+    void aPreviewBehavesTheSameDirectAndRemote() {
+        var result = ActionTester.of(action("preview", e ->
+                tools.dynamia.ui.UIFiles.preview("a.pdf", "application/pdf", new byte[]{1, 2, 3}))).runEverywhere();
+
+        assertEquals(1, result.downloads().size());
+        assertEquals(3, result.downloads().get(0).size());
+        assertTrue(result.downloads().get(0).inline(), "a preview is not a download");
+        assertTrue(result.remote().downloads().get(0).inline());
+        assertEquals(3, result.remote().downloads().get(0).size(), "the inline url resolves to the stored file");
+    }
+
+    @Test
+    void aDownloadAndAPreviewOfAnActiveTypeAreNotInline() {
+        var result = ActionTester.of(action("not-inline", e -> {
+            tools.dynamia.ui.UIFiles.download("a.pdf", "application/pdf", new byte[]{1});
+            tools.dynamia.ui.UIFiles.preview("a.html", "text/html", new byte[]{1});
+        })).runEverywhere();
+
+        assertTrue(result.downloads().stream().noneMatch(d -> d.inline()));
+        assertTrue(result.remote().downloads().stream().noneMatch(d -> d.inline()));
+    }
+
+    @Test
+    void theClipboardBehavesTheSameDirectAndRemote() {
+        var result = ActionTester.of(action("clip", e -> tools.dynamia.ui.UIClipboard.copy("https://x/y"))).runEverywhere();
+
+        assertEquals(List.of(tools.dynamia.ui.testing.UIInteraction.Type.CLIPBOARD), result.types());
+        assertEquals("https://x/y", result.interactions().get(0).message());
+    }
+
+    @Test
+    void openingAPageAndRefreshingBehaveTheSameDirectAndRemote() {
+        var result = ActionTester.of(action("page", e -> {
+            tools.dynamia.ui.UINavigation.openPage("ventas/ventas", java.util.Map.of("id", 7));
+            tools.dynamia.ui.UINavigation.refresh();
+        })).runEverywhere();
+
+        assertEquals(List.of(tools.dynamia.ui.testing.UIInteraction.Type.PAGE, tools.dynamia.ui.testing.UIInteraction.Type.REFRESH), result.types());
+        assertEquals("ventas/ventas", result.interactions().get(0).message());
+    }
+
+    @Test
+    void pageParametersMustBePlainValues() {
+        var withNull = new java.util.HashMap<String, Object>();
+        withNull.put("id", null);
+        assertThrows(IllegalArgumentException.class, () -> tools.dynamia.ui.UINavigation.openPage("ventas/ventas", withNull));
+        assertThrows(IllegalArgumentException.class, () ->
+                tools.dynamia.ui.UINavigation.openPage("ventas/ventas", java.util.Map.of("entity", new Object())));
+    }
+
+    @Test
+    void aUrlIsNotAPagePath() {
+        assertThrows(IllegalArgumentException.class, () -> tools.dynamia.ui.UINavigation.openPage("https://evil.example/x"));
+        assertThrows(IllegalArgumentException.class, () -> tools.dynamia.ui.UINavigation.openPage("../secret"));
+        assertThrows(IllegalArgumentException.class, () -> tools.dynamia.ui.UINavigation.openPage("//host/x"));
+    }
+
+    private static final class Names implements tools.dynamia.ui.EntityLookup<String> {
+        @Override
+        public String name() {
+            return "names";
+        }
+
+        @Override
+        public List<String> search(String text, int limit) {
+            return List.of("Ana", "Andres");
+        }
+
+        @Override
+        public java.util.Optional<String> find(String key) {
+            return List.of("Ana", "Andres").contains(key) ? java.util.Optional.of(key) : java.util.Optional.empty();
+        }
+
+        @Override
+        public String key(String value) {
+            return value;
+        }
+
+        @Override
+        public String label(String value) {
+            return value;
+        }
+    }
+
+    @Test
+    void pickingAnEntityBehavesTheSameDirectAndRemote() {
+        var beans = new tools.dynamia.integration.SimpleObjectContainer("names");
+        beans.addObject(new Names());
+        tools.dynamia.integration.Containers.get().installObjectContainer(beans);
+        try {
+            var picked = new ArrayList<String>();
+            var result = ActionTester.of(action("pick", e ->
+                    tools.dynamia.ui.UIChoices.<String>pickEntity("names", "Customer", name -> {
+                        picked.add(name);
+                        UIMessages.showMessage("Picked " + name);
+                    }))).user(u -> u.choose("Ana")).runEverywhere();
+
+            assertEquals(List.of(CHOICE, NOTIFY), result.types());
+            assertTrue(picked.contains("Ana"));
+        } finally {
+            tools.dynamia.integration.Containers.get().removeAllContainers();
+        }
+    }
+
+    @Test
     void runEverywhereComparesDirectAndRemote() {
         var result = ActionTester.of(action("same", e -> {
             UIMessages.showQuestion("Delete?", () -> {

@@ -270,7 +270,10 @@ public class TabPanel extends AbstractZKWorkspaceBuilder implements Serializable
         }
     }
 
-    protected void refreshSelectedPage() {
+    /**
+     * Renders the page of the selected tab again, so it reloads its data. Same as the refresh button of the tab bar.
+     */
+    public void refreshSelectedPage() {
         Tab tab = tabbox.getSelectedTab();
         if (tab != null) {
             Page page = (Page) tab.getAttribute(TAB_PAGE);

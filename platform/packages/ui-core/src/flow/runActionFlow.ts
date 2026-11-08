@@ -46,7 +46,12 @@ export interface FlowHandlers {
    * Renders an `INPUT` step. Optional for backward compatibility — callers that don't supply it get the
    * same "no renderer wired" error `INPUT` steps threw before, only for `INPUT` specifically.
    */
-  prompt?: (options: { message: string; title?: string }) => Promise<string | null>;
+  prompt?: (options: {
+    message: string;
+    title?: string;
+    inputType?: 'text' | 'number' | 'date' | 'daterange';
+    defaultValue?: string;
+  }) => Promise<string | null>;
   /**
    * Renders a `DIALOG` or `VIEW` step as a form ({@link FlowFormRequest}: descriptor fetched and values prefilled by
    * {@link runActionFlow} itself) and returns what was submitted, or `null` if the user cancelled.
@@ -81,6 +86,50 @@ export interface FlowHandlers {
    * file is fetched with the client's credentials.
    */
   saveFile?: (file: FlowDownload, client: DynamiaClient) => void | Promise<void>;
+  /**
+   * Shows a file the action wants displayed (`disposition: 'inline'` in `params.downloads`). Called only for types that
+   * pass {@link isInlineAllowed}; any other type goes to `saveFile`. Optional: defaults to {@link browserPreviewFile}.
+   */
+  previewFile?: (file: FlowDownload, client: DynamiaClient) => void | Promise<void>;
+  /**
+   * Gives the user a text the action put in the clipboard (`params.clipboard`). Called after the browser refused to write
+   * the clipboard (no user gesture any more) so the text can be shown with a "copy" button. Optional: defaults to
+   * `window.prompt`.
+   */
+  showClipboardFallback?: (text: string) => void | Promise<void>;
+  /**
+   * Opens a page of the application (`params.page` of the final response), by its virtual path, for example a `CrudPage`
+   * such as `ventas/ventas`. The path is not a URL. Optional: without it the request is ignored.
+   */
+  openPage?: (path: string, params: Record<string, unknown>) => void | Promise<void>;
+  /** Reloads what the user is looking at (`params.refresh` of the final response). Optional. */
+  refresh?: () => void | Promise<void>;
+  /**
+   * Lets the user search and pick one record of a big catalog (`CHOICE` step that names a `lookup`). `search` queries the
+   * server lookup; resolve with the key of the record picked, or `[]` when the user cancels. The server checks the key
+   * again, so it is never trusted. Required for such steps.
+   */
+  pickEntity?: (options: {
+    title?: string;
+    search: (query: string) => Promise<FlowChoiceOption[]>;
+  }) => Promise<string[] | null>;
+}
+
+/** A page path the server may send: relative, letters, digits and `_ - . /`, no `..`. A URL is never a page path. */
+export function isPagePath(path: unknown): path is string {
+  return typeof path === 'string' && /^[A-Za-z0-9_\-./]+$/.test(path)
+    && !path.startsWith('/') && !path.includes('..') && !path.includes('//');
+}
+
+const INLINE_TYPES = ['application/pdf', 'image/png', 'image/jpeg', 'image/gif', 'image/webp', 'text/plain'];
+
+/**
+ * Whether a content type may be displayed instead of saved. Same allow list as the server (`InlinePolicy`): `text/html`,
+ * SVG and unknown types are never shown, because an object URL of an active document would run in the app's origin.
+ */
+export function isInlineAllowed(contentType?: string | null): boolean {
+  const base = (contentType ?? '').split(';')[0]!.trim().toLowerCase();
+  return INLINE_TYPES.includes(base);
 }
 
 /** An option of a `CHOICE` step: the client answers with the `key`. */
@@ -143,6 +192,8 @@ async function driveFlow(
 
     if (step.type === 'REDIRECT') {
       await saveDownloads(response, handlers, client);
+      await deliverClipboard(response, handlers);
+      await deliverNavigation(response, handlers);
       await redirect(step, handlers);
       return response; // terminal — see runActionFlow
     }
@@ -171,6 +222,8 @@ async function driveFlow(
   }
 
   await saveDownloads(response, handlers, client);
+  await deliverClipboard(response, handlers);
+  await deliverNavigation(response, handlers);
 
   return response;
 }
@@ -276,6 +329,8 @@ async function renderFlowStep(
       return handlers.prompt({
         message: step.message ?? '',
         ...(step.title !== undefined ? { title: step.title } : {}),
+        ...(isInputType(step.inputType) ? { inputType: step.inputType } : {}),
+        ...(typeof step.data === 'string' || typeof step.data === 'number' ? { defaultValue: String(step.data) } : {}),
       });
 
     case 'DIALOG':
@@ -286,10 +341,19 @@ async function renderFlowStep(
       return true; // the user only had to see it
 
     case 'CHOICE': {
+      const { options, multiple, lookup } = (step.data ?? {}) as { options?: FlowChoiceOption[]; multiple?: boolean; lookup?: string };
+      if (typeof lookup === 'string' && lookup) {
+        if (!handlers.pickEntity) {
+          throw new Error('runActionFlow: no "pickEntity" handler provided for a CHOICE step with a lookup');
+        }
+        return (await handlers.pickEntity({
+          ...(step.title ? { title: step.title } : {}),
+          search: query => client.lookups.search(lookup, query),
+        })) ?? [];
+      }
       if (!handlers.choose) {
         throw new Error('runActionFlow: no "choose" handler provided for flow step type "CHOICE"');
       }
-      const { options, multiple } = (step.data ?? {}) as { options?: FlowChoiceOption[]; multiple?: boolean };
       return (await handlers.choose({
         ...(step.title ? { title: step.title } : {}),
         ...(step.message ? { message: step.message } : {}),
@@ -442,9 +506,48 @@ async function saveDownloads(response: ActionExecutionResponse, handlers: FlowHa
   const downloads = response.params?.downloads;
   if (!Array.isArray(downloads)) return;
   const save = handlers.saveFile ?? browserSaveFile;
+  const preview = handlers.previewFile ?? browserPreviewFile;
   for (const file of downloads as FlowDownload[]) {
-    await save(file, client);
+    if (file.disposition === 'inline' && isInlineAllowed(file.contentType)) {
+      await preview(file, client);
+    } else {
+      await save(file, client);
+    }
   }
+}
+
+/**
+ * Puts the text of `params.clipboard` in the user's clipboard. The answer of the server arrives after an asynchronous
+ * request, so the browser may refuse the write for lack of a user gesture; then the text is shown through
+ * `showClipboardFallback` so it always reaches the user.
+ */
+async function deliverClipboard(response: ActionExecutionResponse, handlers: FlowHandlers): Promise<void> {
+  const clip = response.params?.clipboard as { text?: unknown } | undefined;
+  if (!clip || typeof clip.text !== 'string') return;
+  const text = clip.text;
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const fallback = handlers.showClipboardFallback ?? ((t: string) => { window.prompt('Copy', t); });
+    await fallback(text);
+  }
+}
+
+/** Opens the page and reloads the view the action asked for (`params.page`, `params.refresh`). */
+async function deliverNavigation(response: ActionExecutionResponse, handlers: FlowHandlers): Promise<void> {
+  const page = response.params?.page as { path?: unknown; params?: Record<string, unknown> } | undefined;
+  if (page && isPagePath(page.path) && handlers.openPage) {
+    await handlers.openPage(page.path, page.params ?? {});
+  }
+  if (response.params?.refresh === true && handlers.refresh) {
+    await handlers.refresh();
+  }
+}
+
+const INPUT_TYPES = ['text', 'number', 'date', 'daterange'] as const;
+
+function isInputType(value: unknown): value is (typeof INPUT_TYPES)[number] {
+  return typeof value === 'string' && (INPUT_TYPES as readonly string[]).includes(value);
 }
 
 /** Default `UPLOAD` renderer: the browser's file picker. Resolves with `null` when the user cancels. */
@@ -461,6 +564,33 @@ export function browserPickFiles(options: { accept?: string; multiple?: boolean 
     });
     input.click();
   });
+}
+
+/**
+ * Default handler of an inline file: opens it in a new tab; when the browser blocks the popup the file is saved instead. With token authentication the file is fetched with the
+ * client's credentials and re-wrapped in a `Blob` whose type is forced to the allowed type, so the object URL can never
+ * be an active document; a type outside the allow list is saved instead.
+ */
+export async function browserPreviewFile(file: FlowDownload, client: DynamiaClient): Promise<void> {
+  if (!isInlineAllowed(file.contentType)) {
+    return browserSaveFile(file, client);
+  }
+  if (client.transfers.needsAuthorizedFetch()) {
+    const fetched = await client.transfers.download(file.url);
+    const type = (file.contentType ?? '').split(';')[0]!.trim().toLowerCase();
+    const objectUrl = URL.createObjectURL(new Blob([fetched], { type }));
+    // same origin object URL: no "noopener", so a blocked popup is detectable and the file is saved instead
+    const tab = window.open(objectUrl, '_blank');
+    if (!tab) {
+      URL.revokeObjectURL(objectUrl);
+      return browserSaveFile(file, client);
+    }
+    // the tab keeps its own reference while it loads; release ours later
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+  } else if (!window.open(client.transfers.absoluteUrl(file.url), '_blank')) {
+    // the popup was blocked (the answer arrives after an async request, outside the user gesture): save it instead
+    return browserSaveFile(file, client);
+  }
 }
 
 /**

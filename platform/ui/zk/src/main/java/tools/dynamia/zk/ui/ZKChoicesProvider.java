@@ -30,6 +30,46 @@ import java.util.function.Consumer;
  */
 public class ZKChoicesProvider implements ChoicesProvider {
 
+    /**
+     * Shows a dialog with a search box and a list; typing searches the lookup (at most 20 results) and selecting a row
+     * picks it. The lookup applies its own filters, as it does for remote clients.
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> void pickEntity(String title, tools.dynamia.ui.EntityLookup<T> lookup, Consumer<T> onPick) {
+        var search = new org.zkoss.zul.Textbox();
+        search.setHflex("1");
+        search.setInstant(true);
+        var list = new org.zkoss.zul.Listbox();
+        list.setHflex("1");
+        list.setHeight("300px");
+        var layout = new org.zkoss.zul.Vlayout();
+        layout.setHflex("1");
+        layout.appendChild(search);
+        layout.appendChild(list);
+
+        java.util.function.Consumer<String> load = text -> {
+            list.getItems().clear();
+            for (T value : lookup.search(text == null ? "" : text, 20)) {
+                var item = new org.zkoss.zul.Listitem(lookup.label(value));
+                item.setValue(value);
+                item.setParent(list);
+            }
+        };
+        var dialog = ZKUtil.showDialog(title != null ? title : lookup.name(), layout, "480px", "440px");
+        search.addEventListener(org.zkoss.zk.ui.event.Events.ON_CHANGING,
+                event -> load.accept(((org.zkoss.zk.ui.event.InputEvent) event).getValue()));
+        list.addEventListener(org.zkoss.zk.ui.event.Events.ON_SELECT, event -> {
+            var selected = list.getSelectedItem();
+            if (selected != null) {
+                T value = selected.getValue();
+                dialog.detach();
+                onPick.accept(value);
+            }
+        });
+        load.accept("");
+    }
+
     /** An option with the text the list shows for it. */
     private record Labeled<T>(String label, T value) {
         @Override

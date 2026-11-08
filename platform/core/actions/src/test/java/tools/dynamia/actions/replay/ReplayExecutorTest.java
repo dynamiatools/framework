@@ -151,4 +151,17 @@ class ReplayExecutorTest {
                 }));
         assertEquals("validation", e.getMessage());
     }
+
+    @Test
+    void aNotificationKeepsItsTitle() {
+        var done = ReplayExecutor.execute("notify", new tools.dynamia.actions.ActionExecutionRequest(), request -> {
+            tools.dynamia.ui.UIMessages.showMessage("Saved", "Sales", tools.dynamia.ui.MessageType.NORMAL);
+            tools.dynamia.ui.UIMessages.showMessage("Plain");
+            return null;
+        });
+
+        var notifications = (java.util.List<?>) done.getParams().get(ReplayExecutor.NOTIFICATIONS_PARAM);
+        assertEquals("Sales", ((java.util.Map<?, ?>) notifications.get(0)).get("title"));
+        assertEquals(false, ((java.util.Map<?, ?>) notifications.get(1)).containsKey("title"));
+    }
 }

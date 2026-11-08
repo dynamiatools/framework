@@ -34,6 +34,24 @@ public final class UIChoices {
     }
 
     /**
+     * Lets the user search and pick one record of a big catalog served by a registered {@link EntityLookup}. The
+     * callback receives the record; it is not called when the user cancels. Under replay every pass checks the picked
+     * key again with {@link EntityLookup#find(String)}.
+     *
+     * @param lookupName name of the {@link EntityLookup} bean
+     * @param title      title of the picker, may be null
+     * @param onPick     receives the picked record
+     * @param <T>        the record type
+     * @throws IllegalArgumentException when no lookup has that name
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> void pickEntity(String lookupName, String title, Consumer<T> onPick) {
+        EntityLookup<T> lookup = (EntityLookup<T>) EntityLookups.find(lookupName).orElseThrow(() ->
+                new IllegalArgumentException("No EntityLookup named " + lookupName));
+        UIFacades.port(ChoicesProvider.class).pickEntity(title, lookup, onPick);
+    }
+
+    /**
      * Asks for one option, shown with {@code String.valueOf}.
      */
     public static <T> void chooseOne(String title, List<T> options, Consumer<T> onChoice) {

@@ -269,7 +269,7 @@ public class Viewer extends Div implements ActionEventBuilder, CanBeReadonly {
         for (Action action : allActions) {
             ActionRenderer actionRenderer = new ButtonActionRenderer();
             if (action.getRenderer() != null) {
-                actionRenderer = action.getRenderer();
+                actionRenderer = tools.dynamia.zk.actions.ControlRenderers.adapt(action.getRenderer());
             }
 
             Component actionComponent = (Component) Actions.render(actionRenderer, action, this);

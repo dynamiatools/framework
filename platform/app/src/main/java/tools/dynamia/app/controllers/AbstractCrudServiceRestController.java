@@ -120,6 +120,7 @@ public abstract class AbstractCrudServiceRestController {
     @PostMapping("/find")
     public ResponseEntity<List<Object>> find(@PathVariable String className, @RequestBody QueryParameters parameters) {
         Class entityClass = loadClass(className);
+        checkParameterNames(parameters);
         List<Object> result = crudService.find(entityClass, parameters);
         return ResponseEntity.ok(result);
     }
@@ -133,6 +134,7 @@ public abstract class AbstractCrudServiceRestController {
      */
     @PostMapping("/id")
     public ResponseEntity<Object> getId(@PathVariable String className, @RequestBody QueryParameters parameters) {
+        checkParameterNames(parameters);
         Class entityClass = loadClass(className);
         Object result = crudService.getId(entityClass, parameters);
         return ResponseEntity.ok(result);
@@ -179,6 +181,23 @@ public abstract class AbstractCrudServiceRestController {
                     var entityClass = d.getKey();
                     allowedClasses.add(entityClass.getName(), entityClass);
                 });
+            }
+        }
+    }
+
+    private static final java.util.regex.Pattern PARAMETER_NAME = java.util.regex.Pattern.compile("[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*");
+
+    /**
+     * The keys of client parameters become part of the query text and some of them switch tenant scoping off, so only
+     * plain property paths are accepted and the reserved ones are refused.
+     */
+    private static void checkParameterNames(QueryParameters parameters) {
+        if (parameters == null) {
+            return;
+        }
+        for (String key : parameters.keySet()) {
+            if (!PARAMETER_NAME.matcher(key).matches() || tools.dynamia.crud.query.QuerySpecLimits.RESERVED_FIELDS.contains(key)) {
+                throw new tools.dynamia.domain.ValidationError("Invalid parameter " + key, null, key, null);
             }
         }
     }

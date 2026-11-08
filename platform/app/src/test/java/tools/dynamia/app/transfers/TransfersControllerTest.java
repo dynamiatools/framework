@@ -28,6 +28,7 @@ import tools.dynamia.integration.Containers;
 import tools.dynamia.integration.SimpleObjectContainer;
 import tools.dynamia.ui.files.FlowPrincipal;
 import tools.dynamia.ui.files.TransferMeta;
+import tools.dynamia.ui.files.TransferRef;
 import tools.dynamia.ui.files.TransferTooLargeException;
 import tools.dynamia.ui.files.UploadDefaults;
 
@@ -179,12 +180,12 @@ class TransfersControllerTest {
 
         principal.set(new LocalTransferStoreTest.Owner("luis", "1"));
         var foreign = new MockHttpServletResponse();
-        controller.download(ref.ref(), foreign);
+        controller.download(ref.ref(), null, foreign);
         assertEquals(404, foreign.getStatus());
 
         principal.set(new LocalTransferStoreTest.Owner("ana", "1"));
         var own = new MockHttpServletResponse();
-        controller.download(ref.ref(), own);
+        controller.download(ref.ref(), null, own);
         assertEquals(200, own.getStatus());
         assertEquals("hello", own.getContentAsString());
         assertEquals("text/plain", own.getContentType());
@@ -197,9 +198,9 @@ class TransfersControllerTest {
         var ref = store.put(new ByteArrayInputStream("hello".getBytes()),
                 TransferMeta.of("out.txt", "text/plain", TransferMeta.Direction.DOWNLOAD, principal.get()), 1024);
 
-        controller.download(ref.ref(), new MockHttpServletResponse());
+        controller.download(ref.ref(), null, new MockHttpServletResponse());
         var again = new MockHttpServletResponse();
-        controller.download(ref.ref(), again);
+        controller.download(ref.ref(), null, again);
 
         assertEquals(404, again.getStatus());
     }
@@ -215,6 +216,67 @@ class TransfersControllerTest {
         assertTrue(store.get(ref.ref(), principal.get()).isPresent(), "someone else cannot cancel it");
 
         controller.cancel(ref.ref());
+        assertTrue(store.get(ref.ref(), principal.get()).isEmpty());
+    }
+
+    private TransferRef published(String name, String type, TransferMeta.Direction direction) {
+        return store.put(new ByteArrayInputStream("data".getBytes()), TransferMeta.of(name, type, direction, principal.get()), 1024);
+    }
+
+    @Test
+    void anInlinePdfIsDisplayedAndSurvivesSeveralReads() throws IOException {
+        var ref = published("a.pdf", "application/pdf", TransferMeta.Direction.DOWNLOAD);
+
+        var first = new MockHttpServletResponse();
+        controller.download(ref.ref(), "1", first);
+        var second = new MockHttpServletResponse();
+        controller.download(ref.ref(), "1", second);
+
+        assertTrue(first.getHeader("Content-Disposition").startsWith("inline"));
+        assertEquals("nosniff", first.getHeader("X-Content-Type-Options"));
+        assertEquals(200, second.getStatus(), "a reloaded viewer still gets the file");
+        assertEquals("data", second.getContentAsString());
+    }
+
+    @Test
+    void inlineImagesAndTextCarryASandbox() throws IOException {
+        var ref = published("a.png", "image/png", TransferMeta.Direction.DOWNLOAD);
+
+        var response = new MockHttpServletResponse();
+        controller.download(ref.ref(), "1", response);
+
+        assertEquals("sandbox", response.getHeader("Content-Security-Policy"));
+    }
+
+    @Test
+    void anActiveTypeIsNeverServedInlineEvenWhenAsked() throws IOException {
+        var html = published("a.html", "text/html", TransferMeta.Direction.DOWNLOAD);
+
+        var response = new MockHttpServletResponse();
+        controller.download(html.ref(), "1", response);
+
+        assertTrue(response.getHeader("Content-Disposition").startsWith("attachment"));
+    }
+
+    @Test
+    void anUploadIsNeverServedInlineBecauseItsTypeCameFromTheClient() throws IOException {
+        var upload = published("a.pdf", "application/pdf", TransferMeta.Direction.UPLOAD);
+
+        var response = new MockHttpServletResponse();
+        controller.download(upload.ref(), "1", response);
+
+        assertTrue(response.getHeader("Content-Disposition").startsWith("attachment"));
+        assertTrue(store.get(upload.ref(), principal.get()).isPresent(), "and it is not deleted either");
+    }
+
+    @Test
+    void withoutTheInlineFlagAPdfDownloadIsStillAnAttachmentDeletedAfterTheRead() throws IOException {
+        var ref = published("a.pdf", "application/pdf", TransferMeta.Direction.DOWNLOAD);
+
+        var response = new MockHttpServletResponse();
+        controller.download(ref.ref(), null, response);
+
+        assertTrue(response.getHeader("Content-Disposition").startsWith("attachment"));
         assertTrue(store.get(ref.ref(), principal.get()).isEmpty());
     }
 }

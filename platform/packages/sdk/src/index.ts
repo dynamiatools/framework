@@ -29,6 +29,8 @@ export type {
     ApplicationMetadataActions,
     ActionType,
     ActionMetadata,
+    ActionControl,
+    ActionControlKind,
     // Actions
     ActionExecutionRequest,
     ActionExecutionResponse,
@@ -52,6 +54,10 @@ export type {ConfigResult, ConfigValues} from './cruds/index.js';
 export type {
     CrudListResult,
     CrudQueryParams,
+    CrudFilter,
+    CrudFilterOp,
+    CrudSort,
+    QuerySpec,
     CrudRawResponse,
     CrudPageable,
 } from './cruds/index.js';
@@ -61,6 +67,8 @@ export {ScheduleApi} from './schedule/index.js';
 export {TransfersApi} from './transfers/index.js';
 export {JobsApi} from './jobs/index.js';
 export type {JobStatus, JobState} from './jobs/index.js';
+export {LookupsApi} from './lookups/index.js';
+export type {LookupResult} from './lookups/index.js';
 export {ACTION_FLOW_STEP_TYPES, ACTION_FLOW_STEP_FIELDS, ACTION_RUNTIMES, UI_PORTS} from './generated/ui-contract.js';
 export type {UIPortName} from './generated/ui-contract.js';
 export type {UploadOptions} from './transfers/index.js';

@@ -1,5 +1,5 @@
 import type { HttpClient } from '../http.js';
-import type { CrudListResult, CrudQueryParams, CrudRawResponse } from './types.js';
+import type { CrudListResult, CrudQueryParams, CrudRawResponse, QuerySpec } from './types.js';
 
 /**
  * CRUD operations for a single CrudPage resource (navigation-based endpoints).
@@ -20,7 +20,26 @@ export class CrudResourceApi<T = unknown> {
     this.basePath = `/api/${clean}`;
   }
 
-  /** GET /api/{path} — List all (with optional pagination / filter params) */
+  /**
+   * POST /api/{path}/find — a page of records for a {@link QuerySpec}: filters with operators, search, sort and paging.
+   *
+   * <pre>{@code
+   * const result = await client.crud('library/books').find({
+   *   filters: [{ field: 'publishDate', op: 'between', value: ['2026-01-01', '2026-01-31'] }],
+   *   sort: [{ field: 'title' }],
+   *   size: 20,
+   * });
+   * }</pre>
+   */
+  async find(spec: QuerySpec = {}): Promise<CrudListResult<T>> {
+    const raw = await this.http.post<CrudRawResponse<T>>(`${this.basePath}/find`, spec);
+    return normaliseCrudResponse(raw);
+  }
+
+  /**
+   * GET /api/{path} — List all. Only `page`, `size`, the text search `_q` and the order (`_sort`, `_order`) are read; any other
+   * parameter is ignored, use {@link find} to filter by field.
+   */
   async findAll(params?: CrudQueryParams): Promise<CrudListResult<T>> {
     const raw = await this.http.get<CrudRawResponse<T>>(
       this.basePath,

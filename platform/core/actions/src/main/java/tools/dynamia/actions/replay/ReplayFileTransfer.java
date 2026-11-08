@@ -41,6 +41,11 @@ public final class ReplayFileTransfer implements FileTransfer {
     }
 
     @Override
+    public void preview(DownloadSource source) {
+        session.preview(source);
+    }
+
+    @Override
     public void upload(UploadOptions options, Consumer<List<UploadedFile>> onFiles) {
         session.interact(ActionFlowStep.upload(options.title(), options.accept(), options.maxFiles(),
                 options.maxFileSize(), options.maxTotalSize()), answer -> {

@@ -10,7 +10,7 @@ export const ACTION_RUNTIMES = ['HEADLESS', 'FLOW', 'REMOTE', 'FRONTEND', 'UNDEC
 export type ActionRuntime = (typeof ACTION_RUNTIMES)[number];
 
 /** The JSON properties of a step, as `tools.dynamia.actions.ActionFlowStep` serialises them. */
-export const ACTION_FLOW_STEP_FIELDS = ['flowId', 'type', 'title', 'message', 'messageType', 'viewDescriptor', 'viewClass', 'data', 'fieldErrors', 'hints', 'resumeToken'] as const;
+export const ACTION_FLOW_STEP_FIELDS = ['flowId', 'type', 'title', 'message', 'messageType', 'viewDescriptor', 'viewClass', 'data', 'fieldErrors', 'hints', 'resumeToken', 'inputType'] as const;
 
 /**
  * A single step of a `FlowRemoteAction` flow, mirroring `tools.dynamia.actions.ActionFlowStep`. `data` depends on
@@ -28,6 +28,7 @@ export interface ActionFlowStep {
     fieldErrors?: Record<string, string>;
     hints?: Record<string, string>;
     resumeToken?: string;
+    inputType?: string;
 }
 
 /**
@@ -36,6 +37,7 @@ export interface ActionFlowStep {
  */
 export const UI_PORTS = {
     choices: { spi: 'ChoicesProvider', steps: ['CHOICE'] },
+    clipboard: { spi: 'Clipboard', steps: [] },
     files: { spi: 'FileTransfer', steps: ['UPLOAD'] },
     messages: { spi: 'MessageDisplayer', steps: ['CONFIRM', 'INPUT', 'NOTIFY'] },
     navigation: { spi: 'NavigationProvider', steps: ['REDIRECT'] },

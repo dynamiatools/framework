@@ -68,6 +68,43 @@ export interface CrudListResult<T = unknown> {
     totalPages: number;
 }
 
+/**
+ * Operators of a {@link CrudFilter}; they mirror the factories of `QueryConditions` on the server.
+ *
+ * `between` takes `[from, to]` (a `null` side is open), `in` a list, `isNull` a boolean (`true` when missing), and the rest
+ * one value. A date without time covers the whole day of a field that has time.
+ */
+export type CrudFilterOp = 'eq' | 'like' | 'between' | 'gte' | 'lte' | 'in' | 'isNull';
+
+/** One condition on a field of the page's view descriptor. At most one per field. */
+export interface CrudFilter {
+    field: string;
+    op: CrudFilterOp;
+    value?: string | number | boolean | null | Array<string | number | boolean | null>;
+}
+
+/** One sort key. `dir` defaults to `asc`. */
+export interface CrudSort {
+    field: string;
+    dir?: 'asc' | 'desc';
+}
+
+/**
+ * The standard message of `POST /api/{path}/find`: filters, text search, sort and paging in one JSON body. Mirrors the Java
+ * `tools.dynamia.web.query.QuerySpec`. A field the descriptor does not have, a value of the wrong type or a query over a limit
+ * is rejected with a 422 (`DynamiaApiError`), never ignored.
+ */
+export interface QuerySpec {
+    version?: 1;
+    filters?: CrudFilter[];
+    /** Text to look for in the visible text fields. */
+    search?: string;
+    sort?: CrudSort[];
+    /** 1-based page. */
+    page?: number;
+    size?: number;
+}
+
 export type CrudQueryParams = Record<string, string | number | boolean | undefined | null>;
 
 

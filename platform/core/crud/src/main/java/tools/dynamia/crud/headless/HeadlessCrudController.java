@@ -113,6 +113,16 @@ public class HeadlessCrudController<E> implements CrudControllerAPI<E> {
 
     /** What a delete acts on: the whole selection when there is one, else the selected record. */
     private List<E> targets() {
+        return getSelection();
+    }
+
+    /**
+     * The records the request selected: all of them for a bulk request, else the single selected record.
+     *
+     * @return the selected records, in order
+     */
+    @Override
+    public List<E> getSelection() {
         return selection.size() > 1 ? selection : (selected != null ? List.of(selected) : List.of());
     }
 

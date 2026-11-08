@@ -90,6 +90,7 @@ public class ActionToolbar extends Toolbar {
         if (currentActionRenderer == null) {
             currentActionRenderer = getActionRenderer();
         }
+        currentActionRenderer = ControlRenderers.adapt(currentActionRenderer);
 
         Component component = (Component) Actions.render(currentActionRenderer, action, eventBuilder);
         component.setParent(this);
