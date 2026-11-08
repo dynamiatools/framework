@@ -14,6 +14,7 @@ import org.springframework.core.io.InputStreamSource;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.util.QueryBuilder;
+import tools.dynamia.modules.saas.AccountTenants;
 import tools.dynamia.modules.saas.migration.api.MigrationProgressListener;
 import tools.dynamia.navigation.Page;
 import tools.jackson.databind.ObjectMapper;
@@ -342,6 +343,13 @@ public class AccountMigrationJobServiceImpl implements AccountMigrationJobServic
      * behind on local/container disk.
      */
     private void finalizeJob(String jobUuid, Throwable ex, Path exportedZipFile, CancellationToken token) {
+        // This runs from the completion callback of a virtual thread, which does not inherit the tenant
+        // (AccountTenants uses a ScopedValue). Without a bound tenant Hibernate resolves NO_TENANT_ID and filters
+        // out every @TenantId entity, so the job lookup, the result upload and the status update must run as root.
+        AccountTenants.withRoot(() -> doFinalizeJob(jobUuid, ex, exportedZipFile, token));
+    }
+
+    private void doFinalizeJob(String jobUuid, Throwable ex, Path exportedZipFile, CancellationToken token) {
         boolean cancelled = token != null && token.isCancelled();
         EntityFile uploadedResult = null;
         String uploadError = null;
