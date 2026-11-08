@@ -41,6 +41,7 @@ public final class ReplaySession {
     private final List<Object> answers;
     private final List<ReplayInteractions.Notification> notifications = new ArrayList<>();
     private final List<DownloadSource> downloads = new ArrayList<>();
+    private final java.util.Set<DownloadSource> inline = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
     private final List<String> consumedRefs = new ArrayList<>();
     private final List<String> consumedJobs = new ArrayList<>();
     private String redirectUrl;
@@ -238,6 +239,22 @@ public final class ReplaySession {
         if (pending == null) {
             downloads.add(source);
         }
+    }
+
+    /**
+     * Records a file the user must see instead of saving it. Like {@link #download(DownloadSource)} it is ignored once the
+     * pass has stopped at a question, and it is only published by the pass that ran to the end.
+     */
+    public void preview(DownloadSource source) {
+        if (pending == null) {
+            downloads.add(source);
+            inline.add(source);
+        }
+    }
+
+    /** @return {@code true} when the action asked to show {@code source} instead of saving it */
+    public boolean isPreview(DownloadSource source) {
+        return inline.contains(source);
     }
 
     /**

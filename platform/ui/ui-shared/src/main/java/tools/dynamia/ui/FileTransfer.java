@@ -40,6 +40,18 @@ public interface FileTransfer {
     void download(DownloadSource source);
 
     /**
+     * Shows a file to the user instead of saving it (a PDF, an image, plain text). Adapters display it only when
+     * {@link tools.dynamia.ui.files.InlinePolicy#allows(String)} accepts its content type; otherwise they fall back to
+     * {@link #download(DownloadSource)}. The default implementation always downloads, so an adapter that cannot show
+     * files keeps working.
+     *
+     * @param source where the content comes from
+     */
+    default void preview(DownloadSource source) {
+        download(source);
+    }
+
+    /**
      * Asks the user for files. {@code onFiles} runs when the user has chosen them (never when they cancel). The limits of {@code options} are enforced on the server.
      *
      * @param options what to ask

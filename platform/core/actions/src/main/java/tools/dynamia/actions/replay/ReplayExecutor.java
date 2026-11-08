@@ -8,6 +8,7 @@ import tools.dynamia.actions.flow.FlowTokenException;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.ui.UIFacades;
 import tools.dynamia.ui.files.DownloadSource;
+import tools.dynamia.ui.files.InlinePolicy;
 import tools.dynamia.ui.files.FlowPrincipal;
 import tools.dynamia.ui.files.TransferMeta;
 import tools.dynamia.ui.files.TransferRef;
@@ -49,6 +50,9 @@ public final class ReplayExecutor {
     public static final String TRANSFERS_PATH = "/apps/api/transfers";
     /** Response param with the files the action gave to the user: a list of {@code {name, contentType, size, url}}. */
     public static final String DOWNLOADS_PARAM = "downloads";
+
+    /** Query of the URL of a file that must be shown inline; the transfers endpoint still checks the type and direction. */
+    public static final String INLINE_QUERY = "inline=1";
 
     private ReplayExecutor() {
     }
@@ -110,7 +114,7 @@ public final class ReplayExecutor {
                 : ActionFlowStep.redirect(session.redirectUrl(), false, session.redirectInNewWindow());
         var response = ActionFlows.toResponse(flowId, actionId, Map.of(), finalStep);
         var downloads = session.downloads();
-        var published = session.failed() ? List.<Map<String, Object>>of() : publishDownloads(downloads);
+        var published = session.failed() ? List.<Map<String, Object>>of() : publishDownloads(downloads, session);
         if (!session.failed()) {
             deleteConsumed(session);
         }
@@ -133,7 +137,7 @@ public final class ReplayExecutor {
      * Writes the files the action gave to the user into the {@link TransferStore}, by streaming, and describes them for the
      * client: {@code {name, contentType, size, url}}. Called only for the pass that ran to the end.
      */
-    private static List<Map<String, Object>> publishDownloads(List<DownloadSource> downloads) {
+    private static List<Map<String, Object>> publishDownloads(List<DownloadSource> downloads, ReplaySession session) {
         if (downloads.isEmpty()) {
             return List.of();
         }
@@ -155,7 +159,9 @@ public final class ReplayExecutor {
             file.put("name", ref.name());
             file.put("contentType", ref.contentType());
             file.put("size", ref.size());
-            file.put("url", TRANSFERS_PATH + "/" + ref.ref());
+            boolean inline = session.isPreview(source) && InlinePolicy.allows(ref.contentType());
+            file.put("url", TRANSFERS_PATH + "/" + ref.ref() + (inline ? "?" + INLINE_QUERY : ""));
+            file.put("disposition", inline ? "inline" : "attachment");
             published.add(file);
         }
         return published;
