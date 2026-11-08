@@ -567,6 +567,11 @@ instead of ZK classes:
 |---|---|---|
 | `Messagebox`, `ZKUtil.showMessage` | `UIMessages` | `CONFIRM`, `INPUT`, messages in the response |
 | `Filedownload`, `Fileupload` | `UIFiles.download`, `UIFiles.upload` | `UPLOAD`; downloads in `params.downloads` (limits: 1 MB up, 10 MB down) |
+| Show a PDF, image or text instead of saving it | `UIFiles.preview` | final effect: `params.downloads[].disposition = "inline"` (only `InlinePolicy` types; others are downloaded) |
+| Copy a text or URL to the clipboard | `UIClipboard.copy` | final effect: `params.clipboard` (the client falls back to showing the text if the browser refuses) |
+| `NavigationManager.navigateTo`, reload the view | `UINavigation.openPage`, `UINavigation.refresh` | final effects: `params.page = {path, params}` and `params.refresh` |
+| Pick a record of a big catalog | `UIChoices.pickEntity(lookupName, ...)` over an `EntityLookup` bean | `CHOICE` with `data.lookup`; the client searches `GET /apps/api/lookups/{name}` |
+| The selected rows of the CRUD | `CrudControllerAPI.getSelection()` | bulk `ids` of the request (at most `HeadlessCrudRemoteAction.MAX_BULK_IDS`) |
 | `LongOperation` + monitor window | `UIProgress.run` | runs inside the request; must be the last interaction |
 | `Window` + `Viewer` with a form | `UIViews.showForm` (entity classes only) | `DIALOG` with `viewClass` |
 | `ZKUtil.showListboxSelector` | `UIChoices.chooseOne` / `chooseMany` | `CHOICE` |
@@ -576,6 +581,29 @@ A new facade is an SPI interface annotated `@UIPort`, a static facade resolving 
 implementation in `ReplayUIEnvironment` (or a `ReplayPortContributor` bean when it needs a module such as `crud`). Declare the runtime on the concrete class with `@RunsOn` (`HEADLESS` for an action written against the facades,
 `FRONTEND` for behaviour each front end implements; it is never inherited, so a subclass is `UNDECLARED` until declared) (client actions are written in TypeScript with `registerClientAction`, never in Java). ZK may only be used in the modules listed in
 `ZkCornerRuleTest`. Design: [`docs/next/dynamia-ui.md`](../next/dynamia-ui.md).
+
+Two kinds of port exist. A **question** (`showQuestion`, `showInput`, `chooseOne`, `upload`, `pickEntity`) waits for an
+answer and is an `ActionFlowStep`. A **final effect** (`download`, `preview`, `copy`, `openPage`, `refresh`, notifications) is
+something the user receives once the action has ended: it is published only by the pass that ran to the end, in
+`params.*` of the final response, so it needs no step type. Never make a port that waits for an acknowledgement a step if
+it only informs.
+
+**Asking for a reason (confirm with input).** There is no port for it: `UIMessages.showInput` already returns a `String`
+and a cancelled answer is `null`. To make the text required, throw `ReplayRetry` on a blank answer; the same question is
+asked again:
+
+```java
+UIMessages.<String>showInput("Why do you void this sale?", String.class, reason -> {
+    if (reason == null || reason.isBlank()) {
+        throw new ReplayRetry("A reason is required");
+    }
+    sale.void(reason);
+});
+```
+
+**`EntityLookup` rules.** `search` and `find` must apply the same filters and the tenant (use the tenant aware
+`CrudService`): every pass of a headless run calls `find` again with the key the client sent, and a key outside the set is
+refused.
 
 Implement `FlowRemoteAction` directly (the low level API, see
 [`SERVER_DRIVEN_ACTION_FLOWS.md`](../design/SERVER_DRIVEN_ACTION_FLOWS.md)) only for an action that exists for REST clients

@@ -1,7 +1,8 @@
 # UI ports, second wave: plan
 
-**Status:** proposal, revised after an architecture review (Opus). Not implemented. The review checked its findings
-against the source (file references are in §9); nothing was run.
+**Status:** waves 1 to 3 implemented on branch `int/ui-ports-wave2` (see §13 for what was built, what changed from this
+plan and what is not done). Revised after an architecture review (Opus); the review checked its findings against the
+source (file references are in §9).
 **Builds on:** [dynamia-ui.md](../next/dynamia-ui.md) (architecture, invariants I1 to I9, WP1 to WP10),
 [UI_PORTS_FOR_ACTIONS.md](UI_PORTS_FOR_ACTIONS.md), [HEADLESS_ACTIONS.md](HEADLESS_ACTIONS.md),
 [dynamia-ui-inventory.md](../next/dynamia-ui-inventory.md).
@@ -234,3 +235,41 @@ All of these are from the Opus review and were not re-checked by the author of t
 ## 12. Tracking
 
 When the plan is accepted: one GitHub Issue per wave in `dynamia-tools`, linked from here. No Issue number exists yet.
+
+## 13. Implementation status
+
+Built, each with tests (Java: JUnit; TS: vitest) and a commit per piece:
+
+| Port | What exists |
+|---|---|
+| `UIFiles.preview` | `InlinePolicy`; `FileTransfer.preview` (default falls back to download); replay publishes `disposition` and `?inline=1`; `TransfersController` serves inline only for `DOWNLOAD` refs of allowed types, with `nosniff`, `CSP: sandbox` for non-PDF, and keeps them readable until expiry; `ZKFileTransfer.preview` (Iframe dialog, 25 MB cap); TS `previewFile`/`browserPreviewFile` with the client allow list; fixture |
+| `UIClipboard.copy` | `Clipboard` SPI + facade; `ReplayClipboard` (`params.clipboard`); `ZKClipboard` (escaped script, prompt fallback); TS `showClipboardFallback`; test platform; fixture |
+| `UINavigation.openPage` / `refresh` | `NavigationProvider` default methods; `UINavigation` validates the path; replay `params.page` / `params.refresh`; ZK through `NavigationManager`; TS `openPage`/`refresh` handlers; test platform; fixture |
+| Notification title | `ReplayExecutor` keeps `title` in `params.notifications` |
+| `getSelection()` | `CrudControllerAPI.getSelection()` (default: the selected record), headless override, cap `MAX_BULK_IDS = 1000` on bulk `ids` |
+| `UIChoices.pickEntity` | `EntityLookup`/`EntityLookups`; `ChoicesProvider.pickEntity`; `ActionFlowStep.entityChoice`; replay re-checks the key every pass; `LookupsController`; ZK picker dialog; test platform; `LookupsApi` and `pickEntity` handler in TS; fixture |
+| `pickFromStorage` | `EntityFileLookup` (entity-files): files of the current account only, fails closed without an account |
+| `confirmWithInput` | Documented pattern (`INPUT` + `ReplayRetry`) in `DEVELOPMENT_PATTERNS.md`; no code |
+
+### Changes from the plan above
+
+- **Final effects use `params.*`, not `data.page`.** `openPage` is `params.page = {path, params}` because the final response
+  is a `DONE` step; this keeps `REDIRECT` for URLs only.
+- **Inline is requested with `?inline=1` in the URL the server builds,** and the controller still checks the direction and
+  the type, so the flag cannot make anything unsafe inline. The ref is not stored with a disposition.
+- **`shareLink` was not built.** entity-files already has the extension point: shared files are public at
+  `/storage/{uuid}/{file}` and `EntityFileSecurityProvider.generateToken` issues a tokenized URL for private ones. A second
+  HMAC scheme would duplicate it. Whatever expiry is wanted belongs in the security provider.
+- **`pickFromStorage` is an `EntityLookup`,** not a separate port, so it reuses `UIChoices.pickEntity` in ZK and remotely.
+
+### Not done
+
+- **`UIInputs`:** it needs its own design document, see [UI_INPUTS.md](UI_INPUTS.md); no code.
+- **Default Vue components** for `previewFile`, `pickEntity` and the clipboard fallback: the handlers are in `ui-core`; an
+  application passes its own, as it does for `choose`.
+- **The Chrome PDF viewer spike (Q7):** PDFs are served without the `sandbox` directive; revisit after trying it in a browser.
+  Nothing in this branch was run in a browser, in ZK or in Vue.
+- **Refresh in ZK** reloads through `NavigationManager.refresh()`; whether that reloads the current CRUD list was not checked.
+- **A shared `TransferStore`** for several nodes (Q8) and a size limit for the browser `Blob` of a large inline file.
+- **Migration of the ERP actions** (`ExportarVentaPDFAction` to `preview`, `ViewFileURLAction` to `copy`): needs
+  `dynamia-erp` in the same batch.
