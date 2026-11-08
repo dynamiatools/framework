@@ -460,6 +460,13 @@ public final class ActionTester {
                         MessageType.valueOf(String.valueOf(map.get("type"))), Map.of()));
             }
         }
+        if (params.get("page") instanceof Map<?, ?> page) {
+            interactions.add(new UIInteraction(Type.PAGE, null, String.valueOf(page.get("path")), null,
+                    Map.of("path", String.valueOf(page.get("path")), "params", page.get("params"))));
+        }
+        if (Boolean.TRUE.equals(params.get("refresh"))) {
+            interactions.add(new UIInteraction(Type.REFRESH, null, null, null, Map.of()));
+        }
         if (params.get("clipboard") instanceof Map<?, ?> clip) {
             interactions.add(new UIInteraction(Type.CLIPBOARD, null, String.valueOf(clip.get("text")), null,
                     Map.of("text", String.valueOf(clip.get("text")))));

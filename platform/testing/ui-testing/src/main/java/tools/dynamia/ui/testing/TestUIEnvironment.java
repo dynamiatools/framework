@@ -357,6 +357,16 @@ public final class TestUIEnvironment implements UIEnvironment {
     private final class Navigation implements NavigationProvider {
 
         @Override
+        public void openPage(String path, Map<String, Object> params) {
+            record(Type.PAGE, null, path, null, Map.of("path", path, "params", params));
+        }
+
+        @Override
+        public void refresh() {
+            record(Type.REFRESH, null, null, null, Map.of());
+        }
+
+        @Override
         public void open(String url, boolean newWindow) {
             redirectUrl = url;
             record(Type.REDIRECT, null, url, null, Map.of("url", url, "newWindow", newWindow));

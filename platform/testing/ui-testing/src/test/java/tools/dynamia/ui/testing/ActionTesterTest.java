@@ -277,6 +277,24 @@ class ActionTesterTest {
     }
 
     @Test
+    void openingAPageAndRefreshingBehaveTheSameDirectAndRemote() {
+        var result = ActionTester.of(action("page", e -> {
+            tools.dynamia.ui.UINavigation.openPage("ventas/ventas", java.util.Map.of("id", 7));
+            tools.dynamia.ui.UINavigation.refresh();
+        })).runEverywhere();
+
+        assertEquals(List.of(tools.dynamia.ui.testing.UIInteraction.Type.PAGE, tools.dynamia.ui.testing.UIInteraction.Type.REFRESH), result.types());
+        assertEquals("ventas/ventas", result.interactions().get(0).message());
+    }
+
+    @Test
+    void aUrlIsNotAPagePath() {
+        assertThrows(IllegalArgumentException.class, () -> tools.dynamia.ui.UINavigation.openPage("https://evil.example/x"));
+        assertThrows(IllegalArgumentException.class, () -> tools.dynamia.ui.UINavigation.openPage("../secret"));
+        assertThrows(IllegalArgumentException.class, () -> tools.dynamia.ui.UINavigation.openPage("//host/x"));
+    }
+
+    @Test
     void runEverywhereComparesDirectAndRemote() {
         var result = ActionTester.of(action("same", e -> {
             UIMessages.showQuestion("Delete?", () -> {
