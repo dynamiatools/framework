@@ -211,6 +211,211 @@ button:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   ACTIONS: toolbar buttons, controls, search, row actions and the row menu
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dynamia-crud-toolbar .dynamia-actions {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dynamia-action-btn,
+.dynamia-crud-new-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.dynamia-action-btn:hover {
+  background: var(--primary-soft);
+}
+
+.dynamia-crud-new-btn {
+  order: 2;
+  margin-left: auto;
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #04202e;
+  font-weight: 600;
+}
+
+.dynamia-crud-new-btn:hover {
+  filter: brightness(1.1);
+}
+
+.dynamia-action-icon {
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+
+/* Controls (text, choice, date, date range) and the search field share one look. */
+.dynamia-control {
+  display: inline-flex;
+  align-items: center;
+}
+
+.dynamia-control-input,
+.dynamia-action-find-input {
+  padding: 0.4rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.dynamia-control-input:focus,
+.dynamia-action-find-input:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: -1px;
+}
+
+.dynamia-control-text .dynamia-control-input {
+  width: 11rem;
+}
+
+.dynamia-control-date_range {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+}
+
+.dynamia-control-date_range .dynamia-control-input {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.dynamia-control-date_range .dynamia-control-to {
+  border-left: 1px solid var(--border);
+}
+
+.dynamia-action-find {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 16rem;
+}
+
+.dynamia-action-find-icon {
+  position: absolute;
+  left: 0.7rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.dynamia-action-find-input {
+  width: 100%;
+  padding-left: 2rem;
+}
+
+/* Enter submits the search; the button stays for screen readers only. */
+.dynamia-action-find-submit,
+.dynamia-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Row actions: icon buttons that appear when the row is hovered, focused or selected. */
+.dynamia-table-actions-cell {
+  width: 1px;
+}
+
+.dynamia-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.dynamia-row-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.dynamia-row-action:hover,
+.dynamia-row-action[aria-expanded='true'] {
+  background: var(--primary-soft);
+  color: var(--text);
+}
+
+@media (hover: hover) {
+  .dynamia-row-actions {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .dynamia-table-row:hover .dynamia-row-actions,
+  .dynamia-row-actions:focus-within {
+    opacity: 1;
+  }
+}
+
+/* The row menu is teleported to <body> and positioned with inline top/left. */
+.dynamia-row-menu {
+  position: fixed;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 11rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.dynamia-row-menu .dynamia-actions {
+  display: block;
+}
+
+.dynamia-row-menu .dynamia-action-btn {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.dynamia-row-menu .dynamia-action-btn:hover {
+  background: var(--primary-soft);
+}
+
+.dynamia-row-menu .dynamia-action-icon {
+  width: 1rem;
+  text-align: center;
+}
+
+.dynamia-row-menu-item-danger .dynamia-action-btn {
+  color: var(--danger);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    TABLE
    ═══════════════════════════════════════════════════════════════════════════ */
 
