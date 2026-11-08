@@ -26,8 +26,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tools.dynamia.ui.files.FlowPrincipal;
+import tools.dynamia.ui.files.InlinePolicy;
 import tools.dynamia.ui.files.TransferMeta;
 import tools.dynamia.ui.files.TransferRef;
 import tools.dynamia.ui.files.TransferStore;
@@ -102,26 +104,42 @@ public class TransfersController {
     /**
      * Sends a file to its owner.
      *
+     * <p>A download is an attachment and is deleted after the first complete read. With {@code inline=1} the browser is
+     * asked to display it, but only when the file is a {@code DOWNLOAD} (made by the server, never an upload, whose type
+     * the client chose) and its type passes {@link InlinePolicy}; otherwise the request is served as an attachment. An
+     * inline file is not deleted on read, so a reloaded viewer still works until the store expires it.
+     *
      * @param ref      the reference id
+     * @param inline   {@code "1"} to display the file instead of saving it
      * @param response the response, written by streaming
      * @throws IOException when writing fails
      */
     @GetMapping("/{ref}")
-    public void download(@PathVariable("ref") String ref, HttpServletResponse response) throws IOException {
+    public void download(@PathVariable("ref") String ref,
+                         @RequestParam(value = "inline", required = false) String inline,
+                         HttpServletResponse response) throws IOException {
         var found = store.get(ref, FlowPrincipal.current());
         if (found.isEmpty()) {
             response.sendError(HttpStatus.NOT_FOUND.value());
             return;
         }
         var stored = found.get();
+        boolean isDownload = stored.meta().direction() == TransferMeta.Direction.DOWNLOAD;
+        boolean showInline = "1".equals(inline) && isDownload && InlinePolicy.allows(stored.ref().contentType());
         response.setContentType(stored.ref().contentType() == null ? "application/octet-stream" : stored.ref().contentType());
         response.setContentLengthLong(stored.ref().size());
-        response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + encode(stored.ref().name()));
+        response.setHeader("Content-Disposition", (showInline ? "inline" : "attachment") + "; filename*=UTF-8''" + encode(stored.ref().name()));
         response.setHeader("Cache-Control", "no-store");
+        response.setHeader("X-Content-Type-Options", "nosniff");
+        if (showInline && !InlinePolicy.baseType(stored.ref().contentType()).equals("application/pdf")) {
+            // shortcut: the PDF is shown without the sandbox directive because Chrome's viewer refuses a sandboxed
+            // response; revisit once the viewer spike (docs/design/UI_PORTS_WAVE2.md, Q7) is done.
+            response.setHeader("Content-Security-Policy", "sandbox");
+        }
         try (InputStream in = stored.openStream(); OutputStream out = response.getOutputStream()) {
             in.transferTo(out);
         }
-        if (stored.meta().direction() == TransferMeta.Direction.DOWNLOAD) {
+        if (isDownload && !showInline) {
             store.delete(ref);
         }
     }
