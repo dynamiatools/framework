@@ -52,6 +52,10 @@ export type {ConfigResult, ConfigValues} from './cruds/index.js';
 export type {
     CrudListResult,
     CrudQueryParams,
+    CrudFilter,
+    CrudFilterOp,
+    CrudSort,
+    QuerySpec,
     CrudRawResponse,
     CrudPageable,
 } from './cruds/index.js';
