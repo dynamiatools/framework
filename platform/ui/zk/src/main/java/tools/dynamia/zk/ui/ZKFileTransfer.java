@@ -16,11 +16,15 @@
  */
 package tools.dynamia.zk.ui;
 
+import org.zkoss.util.media.AMedia;
 import org.zkoss.util.media.Media;
+import org.zkoss.zul.Iframe;
 import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.Fileupload;
 import tools.dynamia.ui.FileTransfer;
 import tools.dynamia.ui.files.DownloadSource;
+import tools.dynamia.ui.files.InlinePolicy;
+import tools.dynamia.zk.util.ZKUtil;
 import tools.dynamia.ui.files.UploadOptions;
 import tools.dynamia.ui.files.UploadPolicy;
 import tools.dynamia.ui.files.UploadedFile;
@@ -47,6 +51,10 @@ import java.util.function.Consumer;
  */
 public class ZKFileTransfer implements FileTransfer {
 
+    /** Largest file that is shown in a dialog; it is held in memory while the dialog is open. */
+    static final long PREVIEW_MAX_BYTES = 25L * 1024 * 1024;
+
+
     @Override
     public void download(DownloadSource source) {
         switch (source) {
@@ -54,6 +62,41 @@ public class ZKFileTransfer implements FileTransfer {
             case DownloadSource.PathSource path -> Filedownload.save(path.openStream(), path.contentType(), path.name());
             case DownloadSource.StreamSource stream -> Filedownload.save(stream.openStream(), stream.contentType(), stream.name());
         }
+    }
+
+    /**
+     * Shows the file in a dialog with an {@code Iframe} when its type passes {@link InlinePolicy} and it is small enough
+     * to be served from memory; otherwise it is downloaded.
+     */
+    @Override
+    public void preview(DownloadSource source) {
+        if (!canShowInline(source)) {
+            download(source);
+            return;
+        }
+        byte[] content;
+        try (InputStream in = source.openStream()) {
+            content = in.readAllBytes();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        var frame = new Iframe();
+        frame.setHflex("1");
+        frame.setVflex("1");
+        frame.setContent(new AMedia(source.name(), null, source.contentType(), content));
+        ZKUtil.showDialog(source.name(), frame, "80%", "80%");
+    }
+
+    /**
+     * Tells whether {@code source} can be shown in a dialog: its type must pass {@link InlinePolicy} and, when its size is
+     * known, not exceed {@link #PREVIEW_MAX_BYTES}.
+     *
+     * @param source the file
+     * @return {@code true} when it is shown inline, {@code false} when it is downloaded
+     */
+    static boolean canShowInline(DownloadSource source) {
+        return InlinePolicy.allows(source.contentType())
+                && (source.size().isEmpty() || source.size().getAsLong() <= PREVIEW_MAX_BYTES);
     }
 
     @Override
