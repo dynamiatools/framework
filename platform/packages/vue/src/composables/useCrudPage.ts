@@ -11,7 +11,7 @@ import { useToast } from './useToast.js';
 import { useInput } from './useInput.js';
 import { useFormDialog } from './useFormDialog.js';
 import { dispatchCrudDelete, dispatchCrudSave } from '../actions/crudActionDispatch.js';
-import { toRestQuery } from '../actions/crudQuery.js';
+import { toQuerySpec, toRestQuery } from '../actions/crudQuery.js';
 
 /** Options for the {@link useCrudPage} composable */
 export interface UseCrudPageOptions {
@@ -98,9 +98,16 @@ export function useCrudPage(options: UseCrudPageOptions) {
       });
 
       // 4. Wire loader according to the resolved dataset view type.
+      // A query with field filters goes to POST /find; without them the plain GET is enough.
+      const fieldClassOf = (name: string) => context.descriptor.fields?.find(field => field.name === name)?.fieldClass;
+      const loadList = (params: Record<string, unknown>) => {
+        const spec = toQuerySpec(params, fieldClassOf);
+        return spec ? api.find(spec) : api.findAll(toRestQuery(params));
+      };
+
       if (crudView.tableView) {
         crudView.tableView.setLoader(async (params) => {
-          const result = await api.findAll(toRestQuery(params));
+          const result = await loadList(params);
           return {
             rows: result.content,
             pagination: {
@@ -114,7 +121,7 @@ export function useCrudPage(options: UseCrudPageOptions) {
         });
       } else if (crudView.treeView) {
         crudView.treeView.setLoader(async (params) => {
-          const result = await api.findAll(toRestQuery(params));
+          const result = await loadList(params);
           return {
             nodes: mapCrudRowsToTreeNodes(result.content, context.descriptor),
           };

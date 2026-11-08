@@ -122,3 +122,16 @@ describe('CrudView action helpers', () => {
 });
 
 
+
+describe('ActionResolver FRONTEND controls', () => {
+  it('shows a FRONTEND action that describes a control, which the front end draws by itself', () => {
+    const control = { id: 'filterByStock', runtime: 'FRONTEND', type: 'ClassAction', renderer: 'control', control: { kind: 'CHOICE', field: 'stock' } } as never;
+    const plain = { id: 'someFrontendOnly', runtime: 'FRONTEND', type: 'ClassAction' } as never;
+    const entity = { actions: [control, plain] } as never;
+
+    const ids = ActionResolver.resolveActions(entity, 'crud').map((a: { id: string }) => a.id);
+
+    expect(ids).toContain('filterByStock');
+    expect(ids).not.toContain('someFrontendOnly');
+  });
+});

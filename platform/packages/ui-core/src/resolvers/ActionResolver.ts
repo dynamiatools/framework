@@ -50,10 +50,10 @@ export class ActionResolver {
 
   /**
    * A `FRONTEND` action has no server side: it is only shown when this front end registered a
-   * {@link ClientAction} for the same id.
+   * {@link ClientAction} for the same id, or when it describes a toolbar `control` the front end can draw by itself.
    */
   private static _isAvailable(action: ActionMetadata): boolean {
-    return action.runtime !== 'FRONTEND' || ClientActionRegistry.resolve(action) !== null;
+    return action.runtime !== 'FRONTEND' || action.control !== undefined || ClientActionRegistry.resolve(action) !== null;
   }
 
   private static _matchesType(action: ActionMetadata, context: ActionResolutionContext): boolean {
