@@ -42,6 +42,9 @@ public final class ReplaySession {
     private final List<ReplayInteractions.Notification> notifications = new ArrayList<>();
     private final List<DownloadSource> downloads = new ArrayList<>();
     private String clipboardText;
+    private String pagePath;
+    private java.util.Map<String, Object> pageParams = java.util.Map.of();
+    private boolean refreshRequested;
     private final java.util.Set<DownloadSource> inline = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
     private final List<String> consumedRefs = new ArrayList<>();
     private final List<String> consumedJobs = new ArrayList<>();
@@ -260,6 +263,39 @@ public final class ReplaySession {
         if (pending == null) {
             clipboardText = text;
         }
+    }
+
+    /**
+     * Records the page the user must go to when the action ends. Ignored once the pass has stopped at a question; the first
+     * page wins.
+     */
+    public void openPage(String path, java.util.Map<String, Object> params) {
+        if (pending == null && pagePath == null) {
+            pagePath = path;
+            pageParams = params == null ? java.util.Map.of() : java.util.Map.copyOf(params);
+        }
+    }
+
+    /** @return the virtual path of the page the action opened, or {@code null} */
+    public String pagePath() {
+        return pagePath;
+    }
+
+    /** @return the parameters of the page the action opened */
+    public java.util.Map<String, Object> pageParams() {
+        return pageParams;
+    }
+
+    /** Records that the view must be reloaded when the action ends. Ignored once the pass has stopped at a question. */
+    public void requestRefresh() {
+        if (pending == null) {
+            refreshRequested = true;
+        }
+    }
+
+    /** @return {@code true} when the action asked to reload the view */
+    public boolean refreshRequested() {
+        return refreshRequested;
     }
 
     /** @return the text the action put in the clipboard, or {@code null} */

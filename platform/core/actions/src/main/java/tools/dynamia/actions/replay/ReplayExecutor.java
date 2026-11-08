@@ -54,6 +54,12 @@ public final class ReplayExecutor {
     /** Param of the final response with the text the action put in the clipboard: {@code {text}}. */
     public static final String CLIPBOARD_PARAM = "clipboard";
 
+    /** Param of the final response with the page the action opened: {@code {path, params}}. */
+    public static final String PAGE_PARAM = "page";
+
+    /** Param of the final response, {@code true} when the action asked to reload the view. */
+    public static final String REFRESH_PARAM = "refresh";
+
     /** Query of the URL of a file that must be shown inline; the transfers endpoint still checks the type and direction. */
     public static final String INLINE_QUERY = "inline=1";
 
@@ -122,13 +128,21 @@ public final class ReplayExecutor {
             deleteConsumed(session);
         }
         var clipboard = session.failed() ? null : session.clipboardText();
-        if (!notifications.isEmpty() || !published.isEmpty() || clipboard != null) {
+        var openedPage = session.failed() ? null : session.pagePath();
+        var refresh = !session.failed() && session.refreshRequested();
+        if (!notifications.isEmpty() || !published.isEmpty() || clipboard != null || openedPage != null || refresh) {
             var params = new HashMap<String, Object>();
             if (!notifications.isEmpty()) {
                 params.put(NOTIFICATIONS_PARAM, notifications.stream().map(ReplayExecutor::describe).toList());
             }
             if (!published.isEmpty()) {
                 params.put(DOWNLOADS_PARAM, published);
+            }
+            if (openedPage != null) {
+                params.put(PAGE_PARAM, Map.of("path", openedPage, "params", session.pageParams()));
+            }
+            if (refresh) {
+                params.put(REFRESH_PARAM, true);
             }
             if (clipboard != null) {
                 params.put(CLIPBOARD_PARAM, Map.of("text", clipboard));
