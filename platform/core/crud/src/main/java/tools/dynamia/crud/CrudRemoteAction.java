@@ -17,4 +17,15 @@ public interface CrudRemoteAction extends RemoteAction, ClassAction {
      * @return the array of applicable CRUD states
      */
     CrudState[] getApplicableStates();
+
+    /**
+     * Whether this action is listed in the context (row) menu of a record, like {@link CrudAction#isMenuSupported()}
+     * does for local actions. A hand written remote action is meant for REST clients, whose only place for a
+     * per-record action is that menu, so it is listed unless it says otherwise.
+     *
+     * @return {@code true} by default
+     */
+    default boolean isMenuSupported() {
+        return true;
+    }
 }

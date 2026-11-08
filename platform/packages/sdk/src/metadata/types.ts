@@ -172,6 +172,10 @@ export interface ActionMetadata extends BasicMetadata {
     applicableClasses?: string[];
     /** Entity state names in which this action is available */
     applicableStates?: string[];
+    /** Where the action goes among the others of its list, lower first (default 0). The server sends them sorted. */
+    position?: number;
+    /** Crud actions only: whether the action is listed in the context (row) menu of a record. */
+    menuSupported?: boolean;
 }
 
 /**

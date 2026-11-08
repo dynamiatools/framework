@@ -43,7 +43,7 @@
             <RowActions
               v-if="!readOnly"
               :row="row"
-              :actions="rowActions"
+              :actions="menuActions"
               :show-edit="!hasEditAction"
               :view="view"
               :client="client"
@@ -72,7 +72,7 @@
             <RowActions
               v-if="!readOnly"
               :row="node.data ?? node"
-              :actions="rowActions"
+              :actions="menuActions"
               :show-edit="!hasEditAction"
               :view="view"
               :client="client"
@@ -160,7 +160,9 @@ const resolvedActions = computed(() => {
     mergedActions.set(action.id, action);
   }
 
-  return props.view.resolveActions(Array.from(mergedActions.values()));
+  // Stable sort: actions with the same position keep the order the server (or the caller) gave them.
+  const sorted = Array.from(mergedActions.values()).sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+  return props.view.resolveActions(sorted);
 });
 
 /**
@@ -175,6 +177,8 @@ function isRowAction(action: ActionMetadata): boolean {
 }
 
 const rowActions = computed(() => resolvedActions.value.filter(isRowAction));
+// Only the actions that declare `menuSupported` go to the row menu (a server that does not send the flag lists all).
+const menuActions = computed(() => rowActions.value.filter(action => action.menuSupported !== false));
 // Save and Cancel are the form's own buttons, so they are not repeated in the toolbar.
 const toolbarActions = computed(() => resolvedActions.value.filter(
   action => !isRowAction(action) && !isSaveCrudAction(action) && !isCancelCrudAction(action),

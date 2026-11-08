@@ -60,6 +60,11 @@ public final class HeadlessCrudRemoteAction extends AbstractCrudRemoteAction {
     }
 
     /** @return the action this one serves */
+    @Override
+    public boolean isMenuSupported() {
+        return delegate.isMenuSupported();
+    }
+
     public CrudAction getDelegate() {
         return delegate;
     }
