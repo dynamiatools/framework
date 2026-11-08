@@ -43,13 +43,20 @@ public class ZKNavigationProvider implements NavigationProvider {
     }
 
     /**
-     * Reloads the current page with the navigation manager.
+     * Renders the selected page again, as the refresh button of the tab bar does, so it reloads its data. Without a tab
+     * workspace it reloads the current page with the navigation manager.
      */
     @Override
     public void refresh() {
         var manager = tools.dynamia.navigation.NavigationManager.getCurrent();
         if (manager == null) {
             throw new IllegalStateException("No navigation manager to refresh the view");
+        }
+        if (manager instanceof tools.dynamia.zk.navigation.ZKNavigationManager zkManager
+                && zkManager.getCurrentComposer() != null
+                && zkManager.getCurrentComposer().getWorkspaceViewBuilder() instanceof tools.dynamia.zk.workspace.builders.TabPanel tabs) {
+            tabs.refreshSelectedPage();
+            return;
         }
         manager.refresh();
     }
