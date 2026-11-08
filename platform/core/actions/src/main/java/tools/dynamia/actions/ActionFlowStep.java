@@ -186,6 +186,22 @@ public class ActionFlowStep implements Serializable {
     }
 
     /**
+     * The user searches a big catalog and picks one record. {@code data} carries {@code lookup} (the name to search at
+     * {@code GET /apps/api/lookups/{name}?q=}), an empty {@code options} list and {@code multiple = false}; the client
+     * answers with the list of the key picked. The server checks the key again, so the answer is never trusted.
+     *
+     * @param title      title of the picker, may be null
+     * @param lookupName name of the {@code EntityLookup}
+     */
+    public static ActionFlowStep entityChoice(String title, String lookupName) {
+        var step = choice(title, java.util.List.of(), java.util.List.of(), false);
+        @SuppressWarnings("unchecked")
+        var payload = (Map<String, Object>) step.data;
+        payload.put("lookup", lookupName);
+        return step;
+    }
+
+    /**
      * The client asks the user for files, sends each one to {@code /apps/api/transfers} and answers with a list of
      * {@code {ref}}: references, not content.
      *
