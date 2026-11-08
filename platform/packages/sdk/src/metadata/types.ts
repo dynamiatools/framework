@@ -239,6 +239,8 @@ export interface FlowDownload {
     contentType?: string | null;
     size: number;
     url: string;
+    /** `inline` when the action asked to show the file instead of saving it. The client must still check the type. */
+    disposition?: 'inline' | 'attachment';
 }
 
 // ── View descriptors ───────────────────────────────────────────────────────

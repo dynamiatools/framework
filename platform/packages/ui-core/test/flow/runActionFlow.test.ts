@@ -241,6 +241,47 @@ describe('runActionFlow UPLOAD and downloads', () => {
   });
 });
 
+describe('runActionFlow inline files', () => {
+  const pdf = { name: 'a.pdf', contentType: 'application/pdf', size: 5, url: '/apps/api/transfers/a?inline=1', disposition: 'inline' as const };
+
+  it('gives an inline PDF to previewFile and not to saveFile', async () => {
+    const final = { ...flowResponse(step({ type: 'DONE' })), params: { downloads: [pdf] } };
+    const { client } = fakeClient({ main: [final] });
+    const saveFile = vi.fn();
+    const previewFile = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ saveFile, previewFile }));
+
+    expect(previewFile).toHaveBeenCalledWith(pdf, client);
+    expect(saveFile).not.toHaveBeenCalled();
+  });
+
+  it('saves a file marked inline whose type is not allowed', async () => {
+    const html = { ...pdf, name: 'a.html', contentType: 'text/html' };
+    const svg = { ...pdf, name: 'a.svg', contentType: 'image/svg+xml' };
+    const final = { ...flowResponse(step({ type: 'DONE' })), params: { downloads: [html, svg] } };
+    const { client } = fakeClient({ main: [final] });
+    const saveFile = vi.fn();
+    const previewFile = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ saveFile, previewFile }));
+
+    expect(previewFile).not.toHaveBeenCalled();
+    expect(saveFile).toHaveBeenCalledTimes(2);
+  });
+
+  it('saves a file the server did not mark inline', async () => {
+    const attachment = { ...pdf, disposition: 'attachment' as const };
+    const final = { ...flowResponse(step({ type: 'DONE' })), params: { downloads: [attachment] } };
+    const { client } = fakeClient({ main: [final] });
+    const saveFile = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ saveFile, previewFile: vi.fn() }));
+
+    expect(saveFile).toHaveBeenCalledWith(attachment, client);
+  });
+});
+
 describe('runActionFlow DIALOG view class', () => {
   it('fetches the view of step.viewClass instead of the entity of the request', async () => {
     const dialog = flowResponse(step({ type: 'DIALOG', viewDescriptor: 'form', viewClass: 'x.AccountPayment', data: { amount: 5 } }));

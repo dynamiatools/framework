@@ -81,6 +81,22 @@ export interface FlowHandlers {
    * file is fetched with the client's credentials.
    */
   saveFile?: (file: FlowDownload, client: DynamiaClient) => void | Promise<void>;
+  /**
+   * Shows a file the action wants displayed (`disposition: 'inline'` in `params.downloads`). Called only for types that
+   * pass {@link isInlineAllowed}; any other type goes to `saveFile`. Optional: defaults to {@link browserPreviewFile}.
+   */
+  previewFile?: (file: FlowDownload, client: DynamiaClient) => void | Promise<void>;
+}
+
+const INLINE_TYPES = ['application/pdf', 'image/png', 'image/jpeg', 'image/gif', 'image/webp', 'text/plain'];
+
+/**
+ * Whether a content type may be displayed instead of saved. Same allow list as the server (`InlinePolicy`): `text/html`,
+ * SVG and unknown types are never shown, because an object URL of an active document would run in the app's origin.
+ */
+export function isInlineAllowed(contentType?: string | null): boolean {
+  const base = (contentType ?? '').split(';')[0]!.trim().toLowerCase();
+  return INLINE_TYPES.includes(base);
 }
 
 /** An option of a `CHOICE` step: the client answers with the `key`. */
@@ -442,8 +458,13 @@ async function saveDownloads(response: ActionExecutionResponse, handlers: FlowHa
   const downloads = response.params?.downloads;
   if (!Array.isArray(downloads)) return;
   const save = handlers.saveFile ?? browserSaveFile;
+  const preview = handlers.previewFile ?? browserPreviewFile;
   for (const file of downloads as FlowDownload[]) {
-    await save(file, client);
+    if (file.disposition === 'inline' && isInlineAllowed(file.contentType)) {
+      await preview(file, client);
+    } else {
+      await save(file, client);
+    }
   }
 }
 
@@ -461,6 +482,27 @@ export function browserPickFiles(options: { accept?: string; multiple?: boolean 
     });
     input.click();
   });
+}
+
+/**
+ * Default handler of an inline file: opens it in a new tab. With token authentication the file is fetched with the
+ * client's credentials and re-wrapped in a `Blob` whose type is forced to the allowed type, so the object URL can never
+ * be an active document; a type outside the allow list is saved instead.
+ */
+export async function browserPreviewFile(file: FlowDownload, client: DynamiaClient): Promise<void> {
+  if (!isInlineAllowed(file.contentType)) {
+    return browserSaveFile(file, client);
+  }
+  if (client.transfers.needsAuthorizedFetch()) {
+    const fetched = await client.transfers.download(file.url);
+    const type = (file.contentType ?? '').split(';')[0]!.trim().toLowerCase();
+    const objectUrl = URL.createObjectURL(new Blob([fetched], { type }));
+    window.open(objectUrl, '_blank', 'noopener');
+    // the tab keeps its own reference while it loads; release ours later
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+  } else {
+    window.open(client.transfers.absoluteUrl(file.url), '_blank', 'noopener');
+  }
 }
 
 /**
