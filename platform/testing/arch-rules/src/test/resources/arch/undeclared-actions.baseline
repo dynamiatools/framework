@@ -1,4 +1,3 @@
-examples/demo-zk-books/src/main/java/mybookstore/actions/FilterBookByPublishDateAction.java
 examples/demo-zk-books/src/main/java/mybookstore/actions/LongOperationActionDemo.java
 examples/demo-zk-books/src/main/java/mybookstore/actions/SomeGlobalAction.java
 extensions/email-sms/sources/core/src/main/java/tools/dynamia/modules/email/ui/actions/SetPreferredAccountAction.java
