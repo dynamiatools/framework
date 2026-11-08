@@ -263,6 +263,28 @@ public final class TestUIEnvironment implements UIEnvironment {
     private final class Choices implements ChoicesProvider {
 
         @Override
+        public <T> void pickEntity(String title, tools.dynamia.ui.EntityLookup<T> lookup, Consumer<T> onPick) {
+            var payload = new LinkedHashMap<String, Object>();
+            payload.put("lookup", lookup.name());
+            payload.put("multiple", false);
+            var interaction = record(Type.CHOICE, title, null, null, payload);
+            var answer = ask(interaction);
+            if (answer == null || answer instanceof UIScript.Cancel) {
+                return;
+            }
+            if (!(answer instanceof UIScript.Choose choose)) {
+                throw UIScript.mismatch(interaction, interactions.size(), answer);
+            }
+            if (choose.selection().isEmpty()) {
+                return;
+            }
+            String key = String.valueOf(choose.selection().get(0));
+            // the same check as a remote run: the lookup decides what can be picked
+            onPick.accept(lookup.find(key).orElseThrow(() ->
+                    new AssertionError("Key " + key + " is not in the set of the lookup " + lookup.name())));
+        }
+
+        @Override
         public <T> void choose(ChoiceOptions<T> options, Consumer<List<T>> onChoice) {
             var payload = new LinkedHashMap<String, Object>();
             payload.put("options", options.labels());

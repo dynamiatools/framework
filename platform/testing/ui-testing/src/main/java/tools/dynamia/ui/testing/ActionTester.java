@@ -395,6 +395,11 @@ public final class ActionTester {
                 if (answer instanceof UIScript.Cancel) {
                     return ABANDONED;
                 }
+                if (answer instanceof UIScript.Choose choose
+                        && ((Map<String, Object>) step.getData()).containsKey("lookup")) {
+                    // a searchable pick: the client answers with the key it found through the lookup endpoint
+                    return choose.selection().stream().map(String::valueOf).toList();
+                }
                 if (answer instanceof UIScript.Choose choose) {
                     var options = (List<Map<String, String>>) ((Map<String, Object>) step.getData()).get("options");
                     var keys = new ArrayList<String>();

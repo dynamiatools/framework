@@ -294,6 +294,53 @@ class ActionTesterTest {
         assertThrows(IllegalArgumentException.class, () -> tools.dynamia.ui.UINavigation.openPage("//host/x"));
     }
 
+    private static final class Names implements tools.dynamia.ui.EntityLookup<String> {
+        @Override
+        public String name() {
+            return "names";
+        }
+
+        @Override
+        public List<String> search(String text, int limit) {
+            return List.of("Ana", "Andres");
+        }
+
+        @Override
+        public java.util.Optional<String> find(String key) {
+            return List.of("Ana", "Andres").contains(key) ? java.util.Optional.of(key) : java.util.Optional.empty();
+        }
+
+        @Override
+        public String key(String value) {
+            return value;
+        }
+
+        @Override
+        public String label(String value) {
+            return value;
+        }
+    }
+
+    @Test
+    void pickingAnEntityBehavesTheSameDirectAndRemote() {
+        var beans = new tools.dynamia.integration.SimpleObjectContainer("names");
+        beans.addObject(new Names());
+        tools.dynamia.integration.Containers.get().installObjectContainer(beans);
+        try {
+            var picked = new ArrayList<String>();
+            var result = ActionTester.of(action("pick", e ->
+                    tools.dynamia.ui.UIChoices.<String>pickEntity("names", "Customer", name -> {
+                        picked.add(name);
+                        UIMessages.showMessage("Picked " + name);
+                    }))).user(u -> u.choose("Ana")).runEverywhere();
+
+            assertEquals(List.of(CHOICE, NOTIFY), result.types());
+            assertTrue(picked.contains("Ana"));
+        } finally {
+            tools.dynamia.integration.Containers.get().removeAllContainers();
+        }
+    }
+
     @Test
     void runEverywhereComparesDirectAndRemote() {
         var result = ActionTester.of(action("same", e -> {
