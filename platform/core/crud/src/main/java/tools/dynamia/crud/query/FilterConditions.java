@@ -73,7 +73,9 @@ public final class FilterConditions {
         try {
             switch (op) {
                 case IS_NULL:
-                    return value == null || truthy(value) ? QueryConditions.isNull() : QueryConditions.isNotNull();
+                    if (value == null) return QueryConditions.isNull();
+                    if (!(value instanceof Boolean flag)) throw refuse(name, "isNull expects true or false");
+                    return flag ? QueryConditions.isNull() : QueryConditions.isNotNull();
                 case EQ: {
                     var scalar = scalar(name, value);
                     if (hasTime(type) && isDateOnly(scalar)) {
@@ -191,10 +193,6 @@ public final class FilterConditions {
         return value instanceof String s && s.length() == 10;
     }
 
-    private static boolean truthy(Object value) {
-        return value instanceof Boolean b ? b : "true".equalsIgnoreCase(String.valueOf(value));
-    }
-
     private static Object scalar(String name, Object value) {
         if (value == null || value instanceof List<?> || value instanceof java.util.Map<?, ?>) {
             throw refuse(name, "a single value is expected");
@@ -212,14 +210,18 @@ public final class FilterConditions {
         return list;
     }
 
+    private static BigDecimal exact(String name, Number n) {
+        return n instanceof BigDecimal b ? b : new BigDecimal(n.toString());
+    }
+
     private static Object convert(String name, Class<?> type, Object raw, Edge edge) {
         var text = raw.toString().trim();
         try {
             if (type == String.class) return raw.toString();
             if (type == Boolean.class) return raw instanceof Boolean b ? b : Boolean.valueOf(requireBoolean(name, text));
-            if (type == Integer.class) return raw instanceof Number n ? n.intValue() : Integer.valueOf(text);
-            if (type == Long.class) return raw instanceof Number n ? n.longValue() : Long.valueOf(text);
-            if (type == Short.class) return raw instanceof Number n ? n.shortValue() : Short.valueOf(text);
+            if (type == Integer.class) return raw instanceof Number n ? exact(name, n).intValueExact() : Integer.valueOf(text);
+            if (type == Long.class) return raw instanceof Number n ? exact(name, n).longValueExact() : Long.valueOf(text);
+            if (type == Short.class) return raw instanceof Number n ? exact(name, n).shortValueExact() : Short.valueOf(text);
             if (type == Double.class) return raw instanceof Number n ? n.doubleValue() : Double.valueOf(text);
             if (type == Float.class) return raw instanceof Number n ? n.floatValue() : Float.valueOf(text);
             if (type == BigDecimal.class) return new BigDecimal(text);
@@ -228,7 +230,7 @@ public final class FilterConditions {
             if (type == LocalDate.class) return LocalDate.parse(text);
             if (type == LocalDateTime.class) return dateTime(text, edge);
             if (type == Date.class) return Date.from(dateTime(text, edge).atZone(ZoneId.systemDefault()).toInstant());
-        } catch (DateTimeParseException | NumberFormatException e) {
+        } catch (DateTimeParseException | NumberFormatException | ArithmeticException e) {
             throw refuse(name, "\"" + text + "\" is not a valid " + type.getSimpleName());
         }
         throw refuse(name, "fields of type " + type.getSimpleName() + " cannot be filtered");

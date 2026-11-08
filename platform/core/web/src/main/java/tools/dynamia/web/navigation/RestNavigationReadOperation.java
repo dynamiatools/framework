@@ -57,7 +57,7 @@ public class RestNavigationReadOperation {
     /** Default page size when the client does not supply a {@code size} parameter. */
     private static final int DEFAULT_PAGINATION_SIZE = 50;
 
-    private static final JsonMapper SPEC_MAPPER = JsonMapper.builder().build();
+    private static final JsonMapper SPEC_MAPPER = JsonMapper.builder().enable(tools.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
 
     private final RestNavigationContext ctx;
 
@@ -104,7 +104,7 @@ public class RestNavigationReadOperation {
         QueryBuilder query = QueryBuilder.select().from(entityClass, "e");
         QueryParameters pageParams = (QueryParameters) page.getAttribute("queryParameters");
         if (pageParams != null) {
-            query.where(pageParams);
+            query.where(pageParams.clone());
         }
 
         RestNavigationQuerySupport.parseConditions(query, descriptor);
@@ -113,8 +113,12 @@ public class RestNavigationReadOperation {
 
         int pageSize = RestNavigationQuerySupport.getParameterNumber(request, "size");
         int currentPage = RestNavigationQuerySupport.getParameterNumber(request, "page");
-        if (pageSize == 0) {
+        if (pageSize <= 0) {
             pageSize = DEFAULT_PAGINATION_SIZE;
+        }
+        pageSize = Math.min(pageSize, tools.dynamia.crud.query.QuerySpecLimits.MAX_SIZE);
+        if (currentPage < 0) {
+            currentPage = 0;
         }
         query.getQueryParameters().paginate(pageSize);
 
@@ -150,15 +154,14 @@ public class RestNavigationReadOperation {
 
         QuerySpec spec = parseSpec(json);
         var context = new QueryContext(path, entityClass, descriptor, QueryOperation.LIST);
-        spec = QuerySpecProcessor.filter(context, spec);
 
         QueryBuilder query = QueryBuilder.select().from(entityClass, "e");
         QueryParameters pageParams = (QueryParameters) page.getAttribute("queryParameters");
         if (pageParams != null) {
-            query.where(pageParams);
+            query.where(pageParams.clone());
         }
         RestNavigationQuerySupport.parseConditions(query, descriptor);
-        QuerySpecProcessor.apply(spec, query, descriptor, "e");
+        spec = QuerySpecProcessor.process(context, spec, query, "e");
 
         int currentPage = spec.page() == null ? 1 : spec.page();
         query.getQueryParameters().paginate(QuerySpecProcessor.pageSize(spec));

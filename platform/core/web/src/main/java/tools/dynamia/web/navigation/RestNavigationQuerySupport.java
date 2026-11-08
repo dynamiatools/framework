@@ -180,7 +180,7 @@ public final class RestNavigationQuerySupport {
                 continue;
             }
 
-            if (descriptor != null && descriptor.getField(fieldName) == null) {
+            if (descriptor != null && (descriptor.getField(fieldName) == null || !descriptor.getField(fieldName).isVisible())) {
                 LoggingService.get(RestNavigationQuerySupport.class)
                         .warn("Ignoring unknown sort field '" + fieldName + "'");
                 continue;

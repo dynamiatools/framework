@@ -46,6 +46,31 @@ public final class QuerySpecProcessor {
     }
 
     /**
+     * The only entry point for callers outside this package: refuses client filters on {@link QuerySpecLimits#RESERVED_FIELDS}
+     * (tenant keys that other code uses to scope queries), runs the policies and applies the result, so no caller can
+     * skip the chain.
+     *
+     * @param context what is queried (carries the descriptor)
+     * @param spec    the query as the client sent it
+     * @param query   the query to augment
+     * @param alias   alias of the entity in the query
+     * @return the query that was applied (its page and size)
+     * @throws ValidationError when the query is not valid
+     */
+    public static QuerySpec process(QueryContext context, QuerySpec spec, QueryBuilder query, String alias) {
+        if (spec != null) {
+            for (var filter : spec.filters()) {
+                if (filter.field() != null && QuerySpecLimits.RESERVED_FIELDS.contains(filter.field())) {
+                    throw new ValidationError("Field " + filter.field() + " cannot be filtered by the client", null, filter.field(), null);
+                }
+            }
+        }
+        var checked = filter(context, spec);
+        apply(checked, query, context.descriptor(), alias);
+        return checked;
+    }
+
+    /**
      * Checks the limits and runs the {@link QuerySpecFilter} beans, by order.
      *
      * @param context what is queried
@@ -53,7 +78,7 @@ public final class QuerySpecProcessor {
      * @return the query to run
      * @throws ValidationError when the query is over a limit
      */
-    public static QuerySpec filter(QueryContext context, QuerySpec spec) {
+    static QuerySpec filter(QueryContext context, QuerySpec spec) {
         List<QuerySpecFilter> filters = Containers.get() == null ? List.of()
                 : Containers.get().findObjects(QuerySpecFilter.class).stream()
                 .sorted(Comparator.comparingInt(QuerySpecFilter::order)).toList();
@@ -68,7 +93,7 @@ public final class QuerySpecProcessor {
      * @param filters the chain, already ordered
      * @return the query to run
      */
-    public static QuerySpec filter(QueryContext context, QuerySpec spec, List<QuerySpecFilter> filters) {
+    static QuerySpec filter(QueryContext context, QuerySpec spec, List<QuerySpecFilter> filters) {
         if (spec == null) {
             spec = QuerySpec.empty();
         }
@@ -96,7 +121,7 @@ public final class QuerySpecProcessor {
      * @param alias      alias of the entity in the query
      * @throws ValidationError when a field is not in the descriptor, is repeated, or a value is invalid
      */
-    public static void apply(QuerySpec spec, QueryBuilder query, ViewDescriptor descriptor, String alias) {
+    static void apply(QuerySpec spec, QueryBuilder query, ViewDescriptor descriptor, String alias) {
         var seen = new HashSet<String>();
         for (var filter : spec.filters()) {
             Field field = field(descriptor, filter.field());
@@ -110,6 +135,9 @@ public final class QuerySpecProcessor {
         }
         for (var sort : spec.sort()) {
             Field field = field(descriptor, sort.field());
+            if (sort.dir() != null && !"asc".equalsIgnoreCase(sort.dir()) && !"desc".equalsIgnoreCase(sort.dir())) {
+                throw new ValidationError("Sort direction must be asc or desc", null, sort.field(), null);
+            }
             query.orderBy(field.getName() + ("desc".equalsIgnoreCase(sort.dir()) ? " DESC" : " ASC"));
         }
     }
@@ -124,7 +152,7 @@ public final class QuerySpecProcessor {
 
     private static Field field(ViewDescriptor descriptor, String name) {
         Field field = name == null || descriptor == null ? null : descriptor.getField(name);
-        if (field == null) {
+        if (field == null || !field.isVisible()) {
             throw new ValidationError("Unknown field " + name, null, name, null);
         }
         return field;

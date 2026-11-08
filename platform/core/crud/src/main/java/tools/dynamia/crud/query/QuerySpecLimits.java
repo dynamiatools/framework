@@ -32,6 +32,12 @@ public final class QuerySpecLimits {
     /** Largest page size. */
     public static final int MAX_SIZE = 500;
 
+    /**
+     * Fields a client can never filter: other code scopes queries with them (the SaaS listener adds the current account
+     * unless the parameters already hold one), so a client value would switch the scoping off.
+     */
+    public static final java.util.Set<String> RESERVED_FIELDS = java.util.Set.of("accountId");
+
     private QuerySpecLimits() {
     }
 }

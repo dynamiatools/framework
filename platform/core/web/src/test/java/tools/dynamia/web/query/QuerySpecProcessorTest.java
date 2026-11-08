@@ -210,4 +210,26 @@ class QuerySpecProcessorTest {
         }
         assertThrows(ValidationError.class, () -> jpql(spec(f("total", "in", many))));
     }
+
+    @Test
+    void theClientCannotFilterOnTenantKeysThroughTheEntryPoint() {
+        var query = QueryBuilder.select().from(Invoice.class, "e");
+        var error = assertThrows(ValidationError.class,
+                () -> QuerySpecProcessor.process(CONTEXT, spec(f("accountId", "in", List.of(1, 2))), query, "e"));
+        assertTrue(error.getMessage().contains("accountId"));
+    }
+
+    @Test
+    void numbersAreNotTruncatedNorWrapped() {
+        assertThrows(ValidationError.class, () -> jpql(spec(f("total", "eq", 2018.9))));
+        assertThrows(ValidationError.class, () -> jpql(spec(f("total", "eq", 5_000_000_000L))));
+    }
+
+    @Test
+    void isNullNeedsABooleanAndSortDirectionIsChecked() {
+        assertThrows(ValidationError.class, () -> jpql(spec(f("number", "isNull", "maybe"))));
+        var bad = new QuerySpec(1, List.of(), null, List.of(new QuerySpec.Sort("number", "sideways")), null, null);
+        var query = QueryBuilder.select().from(Invoice.class, "e");
+        assertThrows(ValidationError.class, () -> QuerySpecProcessor.apply(bad, query, CONTEXT.descriptor(), "e"));
+    }
 }
