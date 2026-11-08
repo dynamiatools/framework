@@ -31,7 +31,7 @@ import tools.dynamia.viewers.ViewDescriptor;
 import tools.dynamia.web.navigation.RestNavigationContext.ListResult;
 import tools.dynamia.web.query.QueryContext;
 import tools.dynamia.web.query.QueryOperation;
-import tools.dynamia.web.query.QuerySpec;
+import tools.dynamia.crud.query.QuerySpec;
 import tools.dynamia.web.query.QuerySpecProcessor;
 
 import java.util.List;

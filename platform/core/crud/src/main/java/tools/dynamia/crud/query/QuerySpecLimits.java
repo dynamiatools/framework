@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tools.dynamia.web.query;
+package tools.dynamia.crud.query;
 
 /** Bounds of a {@link QuerySpec}, so a client cannot ask for an unbounded query. */
 public final class QuerySpecLimits {

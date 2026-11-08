@@ -16,6 +16,8 @@
  */
 package tools.dynamia.web.query;
 
+import tools.dynamia.crud.query.QuerySpec;
+
 /**
  * Hook that sees every {@link QuerySpec} before it becomes a query, to change it or refuse it. Register one as a bean: the
  * processor finds them all and runs them by {@link #order()}, like an {@code ActionFilter}.

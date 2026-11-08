@@ -16,6 +16,10 @@
  */
 package tools.dynamia.web.query;
 
+import tools.dynamia.crud.query.QuerySpec;
+import tools.dynamia.crud.query.FilterConditions;
+import tools.dynamia.crud.query.QuerySpecLimits;
+
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.util.QueryBuilder;
 import tools.dynamia.integration.Containers;

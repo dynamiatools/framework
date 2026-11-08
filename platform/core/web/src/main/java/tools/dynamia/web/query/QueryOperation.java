@@ -16,6 +16,8 @@
  */
 package tools.dynamia.web.query;
 
+import tools.dynamia.crud.query.QuerySpec;
+
 /** What a {@link QuerySpec} is used for; a {@link QuerySpecFilter} may behave differently for each. */
 public enum QueryOperation {
     /** A page of entities, {@code POST /api/{path}/find}. */

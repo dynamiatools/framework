@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tools.dynamia.web.query;
+package tools.dynamia.crud.query;
 
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.query.GreaterEqualsThan;
@@ -54,8 +54,20 @@ public final class FilterConditions {
      * @throws ValidationError when the operator does not fit the type of the field or a value is invalid
      */
     public static QueryCondition toCondition(Field field, QuerySpec.Filter filter) {
+        return toCondition(typeOf(field), filter);
+    }
+
+    /**
+     * Same as {@link #toCondition(Field, QuerySpec.Filter)} for a property whose type is known without a descriptor field,
+     * as in a ZK controller that only has the entity class.
+     *
+     * @param fieldType type of the property
+     * @param filter    the filter
+     * @return the condition
+     */
+    public static QueryCondition toCondition(Class<?> fieldType, QuerySpec.Filter filter) {
         var op = QuerySpec.Op.of(filter.op());
-        var type = typeOf(field);
+        var type = wrap(fieldType);
         var name = filter.field();
         var value = filter.value();
         try {
@@ -153,6 +165,10 @@ public final class FilterConditions {
         if (type == null) {
             throw new ValidationError("Field " + field.getName() + " has no known type");
         }
+        return wrap(type);
+    }
+
+    private static Class<?> wrap(Class<?> type) {
         if (type.isPrimitive()) {
             return switch (type.getName()) {
                 case "boolean" -> Boolean.class;

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tools.dynamia.web.query;
+package tools.dynamia.crud.query;
 
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
