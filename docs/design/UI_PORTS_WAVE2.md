@@ -1,6 +1,7 @@
 # UI ports, second wave: plan
 
-**Status:** proposal, not implemented. Needs review before any code.
+**Status:** proposal, revised after an architecture review (Opus). Not implemented. The review checked its findings
+against the source (file references are in §9); nothing was run.
 **Builds on:** [dynamia-ui.md](../next/dynamia-ui.md) (architecture, invariants I1 to I9, WP1 to WP10),
 [UI_PORTS_FOR_ACTIONS.md](UI_PORTS_FOR_ACTIONS.md), [HEADLESS_ACTIONS.md](HEADLESS_ACTIONS.md),
 [dynamia-ui-inventory.md](../next/dynamia-ui-inventory.md).
@@ -11,185 +12,210 @@
 Today an action can talk to the user through six facades: `UIMessages`, `UIViews`, `UIChoices`, `UIFiles`, `UIProgress`
 and `UINavigation`. That covers the EASY and part of the MEDIUM buckets of the inventory. What still forces an action to
 import ZK, or to be rewritten as a `FRONTEND` client action, is a short list of recurring needs. This plan adds the ports
-for them, so more actions can be `HeadlessCapable` and run in ZK, Vue, POS and shop without a line of front end code.
+for them, so more actions can be `HeadlessCapable` and run in ZK, Vue, POS and shop without front end code.
 
 Out of scope:
 
-- **Printing.** It is a backend concern solved by dynamia-printing, not a UI port. When printing produces a document,
-  the result is shown or downloaded with `UIFiles` (see `preview` below). No `UIPrint` port.
+- **Printing.** It is a backend concern solved by dynamia-printing, not a UI port. When printing produces a document, the
+  result is shown or downloaded with `UIFiles`. No `UIPrint` port.
 - Porting widgets one by one. A need that is really a widget is declared (a descriptor, an input declaration) or stays
   `FRONTEND`.
 
-## 2. What counts as "a port is done"
+## 2. The model that shapes this wave: final-pass effects
 
-Every port below must ship all of these, or it is not done (this is the existing model of `dynamia-ui.md` §1.1, §4 and §9):
+In replay, an action runs from the start on every pass, and a pass that stops at a question is rolled back. Two kinds of
+port follow from that:
+
+| Kind | What it is | Examples | Protocol |
+|---|---|---|---|
+| **Question** | Waits for an answer; the pass stops there | `showQuestion`, `showInput`, `choose*`, `showForm`, `upload`, `progress` | An `ActionFlowStep` of its own type |
+| **Final-pass effect** | Something the user sees or receives once the action has ended; published only by the pass that ran to the end, after the commit | `download`, toasts (`params.notifications`), and in this wave `preview`, `clipboard`, `refresh`, `openPage` | A field of the final response (`params.*`), **no new `ActionFlowStepType`** |
+
+A port that waits for an acknowledgement would leave the pass pending, discard the effect and regenerate the source on
+every pass, so preview and clipboard are effects, not steps. Add an `ActionFlowStepType` only for a real question.
+
+## 3. What counts as "a port is done"
+
+Every port must ship all of these (model of `dynamia-ui.md` §1.1, §4 and §9):
 
 | # | Piece | Where |
 |---|---|---|
-| 1 | Static facade with callbacks, no ZK in any type (I3) | `ui-shared` |
-| 2 | SPI annotated `@UIPort(name, steps)` | `ui-shared` |
+| 1 | Static facade with callbacks, no ZK in any type (I3) | `ui-shared`, or the module that owns the concept (see 5.2) |
+| 2 | SPI annotated `@UIPort(name, steps)` | same module |
 | 3 | Row(s) in the normative table of `dynamia-ui.md` §4 | docs |
-| 4 | Replay adapter, producing an `ActionFlowStep` only in the pass that ends when it has a side effect | `core/actions` (`ReplayUIEnvironment` and a `ReplayPortContributor` if the port lives in another module) |
-| 5 | ZK adapter | `platform/ui/zk` (`ZKUIEnvironment`) |
+| 4 | Replay adapter | `core/actions` |
+| 5 | ZK adapter | `platform/ui/zk` |
 | 6 | Test platform driver ("answer as the user") | `platform/testing/ui-testing` |
 | 7 | Contract suite case, run against replay, ZK and the test platform | `ui-shared` test-jar |
-| 8 | Protocol fixture per new step and answer | `platform/contract/fixtures` |
-| 9 | TS: step type in `sdk`, handler in `ui-core/flow`, default adapter in `vue` | `platform/packages/*` |
-| 10 | `UIPlatform.supports(Port.class)` answers correctly in every environment | `ui-shared` |
+| 8 | Protocol fixture per new step, effect and answer | `platform/contract/fixtures` |
+| 9 | TS: types in `sdk`, handler in `ui-core/flow`, default adapter in `vue` | `platform/packages/*` |
+| 10 | `UIPlatform.supports(Port.class)` right in every environment | `ui-shared` |
 | 11 | One real action migrated to it, as proof | extension or ERP |
 
-Rule for new steps: a step type is added to `ActionFlowStepType` only when no existing one can carry the intent. Prefer
-`CUSTOM` plus a registered renderer for anything used by a single app.
+An ERP action migrated as proof needs `dynamia-tools` and `dynamia-erp` in the same batch.
 
-## 3. The ports
+## 4. Wave 1: files family and final-pass effects
 
-Priority is by how many actions need it and by how little new protocol it needs. Counts come from the inventory and were
-not re-measured for this plan.
+### 4.1 `UIFiles.preview(DownloadSource)`
 
-### Wave 1: files family (smallest, reuses `TransferStore`)
+Show a file inline (PDF, image, text) that the backend sends, instead of saving it.
 
-**1.1 `UIFiles.preview(DownloadSource)`**: show a file inline (PDF, image, text) that the backend sends, instead of
-saving it. Typical case: "view PDF" for a sale, a report or an entity file.
+- **No new step.** The effect travels in `params.downloads` of the final response, as a new `disposition: "inline"` on the
+  entry (`{name, contentType, size, url, disposition}`); default stays `attachment`. This also answers former Q1.
+- **Inline is decided by the server when the file is published,** only for `DOWNLOAD`-direction transfers, and only for an
+  allow list (`application/pdf`, `image/png|jpeg|gif|webp`, `text/plain`). Anything else is published as `attachment`.
+  It is never decided by a query parameter or by a header the client sends (an upload's `X-File-Type` is client-set).
+- **Serving rules on `TransfersController`** for an inline ref: `X-Content-Type-Options: nosniff` and a `Content-Security-Policy: sandbox`
+  header on the response itself (an iframe `sandbox` attribute does not protect a URL opened directly).
+- **Reads.** Today a download is deleted after the first complete read, so a reloaded iframe, the "download" button of the
+  PDF viewer or a second mount would get 404. An inline ref allows a few reads until its TTL.
+- **Client XSS.** With header authentication the TS client fetches the file as a `Blob` and uses an object URL; a `blob:`
+  URL of type `text/html` in an iframe runs in the app origin and server headers no longer apply. The allow list is
+  enforced in the TS handler too, and a type outside it falls back to `saveFile`.
+- **ZK:** a window with an `<iframe>`/`<img>` over the same inline URL; `Filedownload` is not used.
+- **Open risk:** Chrome's built-in PDF viewer does not render inside a sandboxed iframe. The acceptance "PDF opens inline"
+  and the `sandbox` rule conflict; resolve it with a spike (open the PDF with `CSP: sandbox allow-scripts`-less variants, or
+  in a new tab) before writing the handler.
+- **Memory.** A 50 MB preview with header auth becomes a 50 MB `Blob` in the browser. Set a size limit for inline
+  (above it, `attachment`).
+- **Serves:** the ERP `ExportarVentaPDFAction` (to verify whether dynamia-printing hands the PDF over as a stream or as a
+  `byte[]`), `ViewReportAction`, entity-files `FileAction`.
 
-- New step `PREVIEW`: `data = {name, contentType, size, url}`, same shape as `params.downloads`. The client shows it in a
-  viewer and answers with a plain acknowledgement when the user closes it (like `VIEW`).
-- Replay: like `download`, the source is stored in the pass that ends, after the commit. The ref is served by
-  `TransfersController` with `Content-Disposition: inline`.
-- ZK: a window with an `<iframe>` or `<img>` over the same inline URL; `Filedownload` is not used.
-- Security (decide before coding): inline only for an allow list of types (`application/pdf`, `image/png|jpeg|gif|webp`,
-  `text/plain`). `text/html`, `image/svg+xml` and anything unknown are served as attachment, never inline (script
-  execution). Always send `X-Content-Type-Options: nosniff`; the iframe is `sandbox`ed. A type outside the list falls
-  back to `download`.
-- Serves: `ExportarVentaPDFAction` (the ERP one, which today downloads), `ViewReportAction`, entity-files `FileAction`.
+### 4.2 `UIClipboard.copy(String)`
 
-**1.2 `UIClipboard.copy(String)`**: put a text or URL in the clipboard.
+- A final-pass effect, `params.clipboard = {text}`. `NOTIFY` is not used: in replay `NOTIFY` is never emitted mid-flow
+  (`showMessage` feeds `params.notifications`).
+- Browsers require a user gesture to write the clipboard and the response arrives after an async request, so the handler
+  tries `navigator.clipboard.writeText` and, if refused, shows the text in a dialog with a "copy" button. The contract
+  says "the text reaches the user", not "it is in the clipboard".
+- **Serves:** `ViewFileURLAction` (today a `<pre>` with the URL).
 
-- Step `NOTIFY`-like, fire and forget: `CLIPBOARD` with `data.text`.
-- Known risk: browsers require a user gesture to write the clipboard, and in replay the answer arrives after an async
-  request. The client handler must try `navigator.clipboard.writeText` and, if refused, show the text in a dialog with a
-  "copy" button. The contract says "the text reaches the user", not "it is in the clipboard". ZK does the same through
-  its client-side command.
-- Serves: `ViewFileURLAction` (today a `<pre>` with the URL).
+### 4.3 Acceptance for W1
 
-**1.3 `UIFiles.shareLink(DownloadSource, Duration)`**: returns a signed, expiring public URL for a file, to send by
-WhatsApp or mail.
+- A second read of an inline ref works within the TTL; after it, 404.
+- A forged inline flag on an upload is ignored (served as attachment).
+- `text/html`, `image/svg+xml` and unknown types are served and published as attachment.
+- The TS client refuses a `blob:` of a type outside the allow list.
+- A 50 MB file streams on the server with `-Xmx256m` (existing `TransfersController` test pattern).
+- Contract case and fixture for `disposition: inline` and for `params.clipboard`.
 
-- Not a step: it returns a value to the action, so it must be deterministic under replay (same request, same link in all
-  passes) or be created only in the final pass. Open question Q3.
-- Needs a public (no session) endpoint with its own signature and TTL, separate from `/apps/api/transfers`, which is
-  bound to the owner. This is the one item of the wave with real security design; it can move to wave 3.
+## 5. Wave 2: context and navigation
 
-**1.4 `UIFiles.pickFromStorage`**: choose a file already stored in entity-files instead of uploading. Depends on the
-entity-files extension, so the port lives there (an own `@UIPort`), not in `ui-shared`. Wave 3.
+### 5.1 `UINavigation.openPage(path, params)` and `refresh()`
 
-### Wave 2: context and navigation
+- `REDIRECT` requires `data.url` to be relative or http(s) (checked in `runActionFlow.ts`), so a `CrudPage` virtual path
+  must not be overloaded into `url`. `openPage` is a final-pass effect with its own field, `data.page = {path, params}`.
+- `refresh()` is a final-pass flag next to the `saved`/`deleted` result of `HeadlessCrudRemoteAction`, not a step.
+- **Re-measure before building:** the inventory's "28 ERP actions with a navigation need" were redirect needs that
+  `open(url)` already covers. Count the real `openPage` need first.
+- Side bug found by the review: `ReplayExecutor` drops the notification title when it builds `params.notifications`. Fix it
+  in the same change, with a test.
 
-**2.1 `UINavigation.openPage(path, params)` and `refresh()`.** Today only `open(url)` exists. `openPage` goes to a
-`CrudPage` virtual path with parameters (the replay `REDIRECT` step carries it); `refresh()` asks the client to reload the
-current view. The Vue CRUD and the ZK `CrudController` already know how to reload; the work is the contract.
-`dynamia-ui.md` lists "navigation / refresh" as missing. The inventory counts 28 ERP actions with a navigation need.
+### 5.2 `UISelection`
 
-**2.2 `UIContext`.** Read-only access to user, account, locale and time zone for an action, without ZK. Most of this
-already travels with the replay execution context (§8 of `dynamia-ui.md`); the port makes it explicit and testable. It
-needs no step.
+- It belongs in `core/crud`, not `ui-shared` (which does not depend on crud). The read side is a `getSelection()` on
+  `CrudControllerAPI`; `HeadlessCrudController.selection` is private with no getter today.
+- I4: the `ids` of the request are loaded one `find` at a time with no limit; add a cap before exposing the selection.
+- Setting the selection from the server is a client concern; do not build it until a case asks for it.
 
-**2.3 `UISelection`.** Read the selected rows of the current CRUD and set the selection. In replay the selection already
-arrives in the request (`ids`), so the read side is a view over the request; setting the selection is a client step.
-Verify first how `HeadlessCrudController` exposes `ids` before designing this.
+### 5.3 `UIContext` is dropped
 
-### Wave 3: richer input
+It would duplicate `UserInfo` (commons), `FlowPrincipal` (`ui-shared`) and `AccountServiceAPI` (saas), and `ui-shared`
+cannot name an account. If a need remains, limit it to locale and time zone. Note for authors: "now" is not deterministic
+across passes, so a confirmation text that contains a timestamp changes its fingerprint.
 
-**3.1 `UIChoices.pickEntity(Class, filters)`.** A searchable selector for large catalogs (customers, items). `chooseOne`
-takes an already loaded list, which does not scale. The step is a `CHOICE` with a server-side search: the client sends
-the query text, the server answers with a page of `{key, label}`. This needs a small search endpoint tied to the signed
-token, not a new step type. Replay must keep the key stable across passes (already true for `CHOICE`).
+## 6. Wave 3: richer input
 
-**3.2 `UIMessages.confirmWithInput`.** Confirm and ask for a reason in one step ("why are you voiding this sale?").
-Can be an `INPUT` step with `confirm = true`; check that the existing `INPUT` answer can carry a required text before
-adding anything.
+### 6.1 `UIChoices.pickEntity(Class, filters)`
 
-**3.3 `UIInputs` (declarative action parameters).** Today 42 ERP actions use a custom ZK renderer for a date range, a
-search box or a combo in the toolbar. The proposal is not to port widgets but to let an action declare its parameters
-(`DATE_RANGE`, `TEXT`, `ENTITY`, `CHOICE`), and for each front end to render them. This is the biggest item of the plan
-and the one that needs a design review of its own: it changes how `ActionRenderer` and the metadata work, and touches
-`FRONTEND` actions such as `FindAction` and `FiltersAction`. Treat it as a separate design document before coding.
+- `CHOICE` is safe today because the answer is checked against the options in the step. `pickEntity` has no options in the
+  step, so a client could send any key. **Every pass must re-check the key** against the same filters and the tenant, and a
+  failed check goes through `ReplayRetry`.
+- The action is **not** re-run on each search keystroke. The step names a registered server-side lookup that a search
+  endpoint resolves, bound to the `FlowPrincipal`.
+- Acceptance: a 10,000-row catalog answers in pages; a key from another tenant is refused; the key stays stable across passes.
 
-**3.4 `UIFiles.pickFromStorage`** (see 1.4) and **`shareLink`** (see 1.3), if moved here.
+### 6.2 `confirmWithInput`: no new port
 
-### Wave 4: composition
+An `INPUT` step already returns a `String`, and a `null` answer means cancel. "Required" is the action throwing `ReplayRetry`
+on a blank answer, which asks the same question again. At most add a `data.required` hint so the client can disable the
+button. Document the pattern in `DEVELOPMENT_PATTERNS.md`; write no code.
 
-**4.1 `UIForms.wizard(steps)`.** A multi-step form with validation between steps. Today it would be chained
-`showForm` calls; under replay each pass re-runs all previous steps with their answers, which is correct but verbose. A
-`WIZARD` step lets the client keep the steps and send the answers at the end. Weigh against the determinism rule: a wizard
-whose later steps depend on earlier answers still has to be replayable.
+### 6.3 `UIInputs` (declarative action parameters)
 
-**4.2 `UIExport.export(view, format)`.** `ExportAction`, `ExportCSV`, `ExportExcel` and `ExportJson` live in ZK today
-(`dynamia-ui-inventory.md` marks three as EASY/MEDIUM and one as HARD, because of its renderer). One port that combines
-progress and download removes the repeated pattern. It builds on `UIProgress` and `UIFiles`.
+Today 42 ERP actions (inventory count, to re-measure) use a custom ZK renderer for a date range, a search box or a combo.
+Letting an action declare its parameters changes `ActionRenderer` and the metadata contract. It gets **its own design
+document** and review, outside this plan.
 
-**4.3 `UIEvents`.** Tell other views that data changed ("sale paid, refresh the KDS"), replacing ZK event queues. This is
-a push channel to the client, which does not exist for the flow protocol today (the protocol is request and answer). It
-needs a transport decision (SSE or WebSocket) and tenant isolation; do not start before that is decided.
+### 6.4 `shareLink` and `pickFromStorage`
 
-**4.4 `UIUndo`.** Offer "undo" for a few seconds after a delete or void. Depends on the action being reversible; a
-generic port cannot guarantee that. Low priority, and possibly an application pattern and not a framework port.
+- The transfer stores are temporary and node-local (`InMemoryTransferStore` keeps bytes in memory, `LocalTransferStore`
+  writes to the local disk), which is wrong for a link sent by WhatsApp or mail under a load balancer.
+- `shareLink` lives in **entity-files** as a stateless HMAC URL over a stored file, with the expiry taken from the flow
+  start carried in the token. That makes it deterministic across passes with no storage.
+- `pickFromStorage` also lives in entity-files, with its own `@UIPort`.
 
-### Wave 5: device (only when a consumer asks)
+## 7. Dropped from the first draft
 
-`UIDevice` (barcode scanner, camera, signature), `UIPermissions` (ask the browser for camera or location) and
-`UISpeak`/`UIBeep`. These are mostly for POS and kitchen screens. Per `dynamia-ui.md` §1.1 they are the textbook case
-of an own port: one SPI, a ZK stub that throws `UIUnavailableException` with a clear message, and a TS renderer of a
-`CUSTOM` step. Build them in the ERP/POS repos if the consumer is only there.
+| Port | Why |
+|---|---|
+| `PREVIEW` step | A step that waits leaves the pass pending and discards the effect; replaced by `disposition: inline` (4.1) |
+| `confirmWithInput` as a port | `INPUT` plus `ReplayRetry` already does it (6.2) |
+| `UIContext` | Duplicates existing types (5.3) |
+| `UIExport` | The inventory marks Export CSV/Excel/Json as `FRONTEND`, not conversion targets (`dynamia-ui-inventory.md` "Corrections") |
+| `UIForms.wizard` | Chained `DIALOG` steps already replay correctly; a `WIZARD` step adds protocol and determinism risk without a new capability |
+| `UIEvents` | A transport and infrastructure topic (SSE or WebSocket, tenant isolation), not an action port |
+| `UIUndo` | An application pattern: reversibility cannot be guaranteed by a generic port |
+| Device ports in `ui-shared` | POS is a pnpm-only repo: build them as a `CUSTOM` step plus a renderer in `dynamia-pos` (answers former Q5) |
 
-## 4. Order of work
+## 8. Order of work
 
-| WP | Content | Depends on | Acceptance (summary) |
-|---|---|---|---|
-| W1a | `PREVIEW` step, `UIFiles.preview`, inline serving rules, ZK window, TS handler | none | PDF opens inline in ZK and Vue; `text/html` and SVG are served as attachment; a 50 MB PDF with `-Xmx256m` streams; contract case; fixture |
-| W1b | `UIClipboard.copy` with dialog fallback | none | the fallback shows when the clipboard is refused; contract case |
-| W1c | Migrate `ExportarVentaPDFAction` (ERP) and entity-files `FileAction` to `preview` | W1a | the action is `HeadlessCapable` and passes the test platform in direct and remote mode |
-| W2a | `UINavigation.openPage` and `refresh` | none | replay returns `REDIRECT` to a page path; ZK reloads the current view |
-| W2b | `UIContext`, `UISelection` read side | W2a | action reads user, account and selection with no ZK import |
-| W3a | `pickEntity` and its search endpoint | none | 10,000-row catalog answers in pages; key stable across passes; tenant isolation test |
-| W3b | `confirmWithInput` | none | reason is required and reaches the callback |
-| W3c | Design document for `UIInputs`, then implement | W2, W3a | separate review |
-| W3d | `shareLink` and `pickFromStorage` | W1a | public link expires; another tenant's file is refused |
-| W4 | `wizard`, `UIExport`, `UIEvents` (after transport decision), `UIUndo` | W3 | per port, using §2 |
-| W5 | Device ports | a consumer | per port, using §2 |
+| WP | Content | Depends on |
+|---|---|---|
+| **W1** | Final-pass effects: `disposition: inline` on `params.downloads`, inline rules on `TransfersController`, TS preview handler with client allow list and download fallback, `params.clipboard`, fixtures. First proof: `ViewFileURLAction` (clipboard) and a report or sale PDF (preview) | none; starts with the Chrome spike |
+| W1c | Migrate `ExportarVentaPDFAction` (ERP) and entity-files `FileAction` | W1 |
+| W2a | `openPage` (`data.page`) and `refresh` flag; fix the dropped notification title | W1 pattern; re-measure need first |
+| W2b | `UISelection` read side in `core/crud` with a cap on `ids` | none |
+| W3a | `pickEntity` with a registered lookup endpoint and key re-check | W2 not required |
+| W3b | Document the `INPUT` + `ReplayRetry` pattern | none |
+| W3c | `UIInputs` design document | W3a |
+| W3d | `shareLink` and `pickFromStorage` in entity-files | W1 |
+| later | Device ports in `dynamia-pos`, when POS asks | consumer |
 
-Each WP ends in a working, tested commit. The migration of a real action is part of the WP, not a later step.
+Each WP ends in a working, tested commit; migrating a real action is part of the WP.
 
-## 5. Risks
+## 9. Findings of the review, with where they were checked
 
-- **Replay determinism.** Ports that return a value to the action (`shareLink`, `pickEntity` search) are the ones that
-  can break "same request and answers, same questions". Each needs an explicit rule and a replay test that runs the action
-  twice.
-- **Inline file serving is a security surface** (XSS through HTML or SVG, MIME sniffing). §3 1.1 sets the allow list;
-  review it with the security owner before merge.
-- **Scope creep in `UIInputs`.** It touches the action metadata contract. Do not start it inside a feature WP.
-- **ERP consumers.** Actions are migrated one at a time; each one published to REST becomes visible to clients, so its
-  restrictions must be reviewed first (`UI_PORTS_FOR_ACTIONS.md`, "Suggested order" step 3).
-- **Counts in this document** (28, 42, 100 actions) come from `dynamia-ui-inventory.md`, written on 2026-10-10 and by
-  static analysis; re-measure before using them to justify priority.
+All of these are from the Opus review and were not re-checked by the author of this plan.
 
-## 6. Open questions
+- Downloads are published only by the pass that ran to the end: `ReplaySession.java:237`, `ReplayExecutor.java:112-113`.
+- `VIEW` renders a descriptor: `runActionFlow.ts` (VIEW case). `NOTIFY` is not emitted mid-flow; `showMessage` feeds
+  `params.notifications`: `ReplayInteractions.java:75`, `ReplayExecutor.java:117-125`; the TS `NOTIFY` case calls
+  `handlers.showToast` (`runActionFlow.ts:264`); notification title dropped at `ReplayExecutor.java:121`.
+- Deleted after first complete read; `X-File-Type` set by the client: `TransfersController.java:86-88, 109-126`.
+- Blob and object URL: `runActionFlow.ts:470-475`. `REDIRECT` `data.url` rule: `runActionFlow.ts:197`.
+- `CHOICE` answer checked against the step options: `ReplayChoicesProvider.java:49`. `INPUT` answer type:
+  `ActionFlowStep.java:72`; `null` means cancel: `ReplayInteractions.java:125`; `ReplayRetry`: `ReplaySession.java:118-122`;
+  fingerprint: `ReplaySession.java:168`.
+- Selection: `HeadlessCrudController.java:41` (private); `ids` loading: `HeadlessCrudRemoteAction.java:116-127`;
+  result flags: `HeadlessCrudRemoteAction.java:86-90`.
+- Inventory corrections on export actions: `dynamia-ui-inventory.md:71-73`; redirect needs: `:56`.
+
+## 10. Open questions
 
 | # | Question |
 |---|---|
-| Q1 | `PREVIEW` as a new step, or `VIEW` with a file view class? This plan proposes a new step because `VIEW` expects a `ViewDescriptor`. |
-| Q2 | Which types are allowed inline, and who signs off the list? |
-| Q3 | `shareLink` returns a value: created only in the final pass, or idempotent by content hash? |
-| Q4 | `UIEvents` transport (SSE or WebSocket) and whether it belongs in `ui-shared` at all. |
-| Q5 | Do device ports live in `ui-shared` or in the ERP/POS repos? |
-| Q6 | Which wave 1 action in the ERP is the first proof, `ExportarVentaPDFAction` or a report? |
+| Q2 | Who signs off the inline allow list and the `CSP: sandbox` choice (security owner)? |
+| Q6 | Is the PDF of `ExportarVentaPDFAction` produced by dynamia-printing as a stream or as a `byte[]`? It decides whether the 50 MB / `Blob` limits matter. |
+| Q7 | Chrome PDF viewer under a sandboxed response: which variant works (spike in W1)? |
+| Q8 | Do we run more than one node in production? It decides whether the node-local transfer store needs a shared one before inline refs allow repeated reads. |
 
-## 7. Not verified while writing this plan
+## 11. Not verified
 
-- No code was run. The facades, steps and files named here were read in `ui-shared`, `core/actions` and the design docs
-  on branch `next`; whether `UIMessages` already exposes `NOTIFY` as a toast, and how `INPUT` answers carry a required
-  text, were not checked.
-- The ZK and Vue adapters were not run (the existing docs state the same for the first wave).
+- No code was run. The review read the source but did not execute anything; Chrome's PDF behaviour under a sandboxed
+  iframe or `CSP: sandbox` is from memory. The ERP actions and the ZK adapter were not inspected.
+- Counts of actions come from the inventory of 2026-10-10 (static analysis); re-measure before using them to rank work.
 
-## 8. Tracking
+## 12. Tracking
 
 When the plan is accepted: one GitHub Issue per wave in `dynamia-tools`, linked from here. No Issue number exists yet.
