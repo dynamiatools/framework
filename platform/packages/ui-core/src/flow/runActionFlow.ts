@@ -46,7 +46,12 @@ export interface FlowHandlers {
    * Renders an `INPUT` step. Optional for backward compatibility — callers that don't supply it get the
    * same "no renderer wired" error `INPUT` steps threw before, only for `INPUT` specifically.
    */
-  prompt?: (options: { message: string; title?: string }) => Promise<string | null>;
+  prompt?: (options: {
+    message: string;
+    title?: string;
+    inputType?: 'text' | 'number' | 'date' | 'daterange';
+    defaultValue?: string;
+  }) => Promise<string | null>;
   /**
    * Renders a `DIALOG` or `VIEW` step as a form ({@link FlowFormRequest}: descriptor fetched and values prefilled by
    * {@link runActionFlow} itself) and returns what was submitted, or `null` if the user cancelled.
@@ -324,6 +329,8 @@ async function renderFlowStep(
       return handlers.prompt({
         message: step.message ?? '',
         ...(step.title !== undefined ? { title: step.title } : {}),
+        ...(isInputType(step.inputType) ? { inputType: step.inputType } : {}),
+        ...(typeof step.data === 'string' || typeof step.data === 'number' ? { defaultValue: String(step.data) } : {}),
       });
 
     case 'DIALOG':
@@ -535,6 +542,12 @@ async function deliverNavigation(response: ActionExecutionResponse, handlers: Fl
   if (response.params?.refresh === true && handlers.refresh) {
     await handlers.refresh();
   }
+}
+
+const INPUT_TYPES = ['text', 'number', 'date', 'daterange'] as const;
+
+function isInputType(value: unknown): value is (typeof INPUT_TYPES)[number] {
+  return typeof value === 'string' && (INPUT_TYPES as readonly string[]).includes(value);
 }
 
 /** Default `UPLOAD` renderer: the browser's file picker. Resolves with `null` when the user cancels. */

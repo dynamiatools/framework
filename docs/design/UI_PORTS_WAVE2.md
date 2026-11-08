@@ -249,6 +249,7 @@ Built, each with tests (Java: JUnit; TS: vitest) and a commit per piece:
 | `getSelection()` | `CrudControllerAPI.getSelection()` (default: the selected record), headless override, cap `MAX_BULK_IDS = 1000` on bulk `ids` |
 | `UIChoices.pickEntity` | `EntityLookup`/`EntityLookups`; `ChoicesProvider.pickEntity`; `ActionFlowStep.entityChoice`; replay re-checks the key every pass; `LookupsController`; ZK picker dialog; test platform; `LookupsApi` and `pickEntity` handler in TS; fixture |
 | `pickFromStorage` | `EntityFileLookup` (entity-files): files of the current account only, fails closed without an account. **Not a bean**: it ignores `EntityFileSecurityProvider`, so an application registers it deliberately |
+| `showInput` kinds | `INPUT` step carries `inputType` (`text`, `number`, `date`, `daterange`) chosen from the value class by `InputValues`; a `LocalDateRange` travels as `start/end` (ISO dates, either side may be empty); a malformed answer is asked again with the reason (`ReplayRetry`). Vue `PromptHost` renders two date inputs; ZK `InputPanel` shows `LocalDateRangebox`. A modal prompt only: the inline toolbar widget stays [UIInputs](UI_INPUTS.md) |
 | `confirmWithInput` | Documented pattern (`INPUT` + `ReplayRetry`) in `DEVELOPMENT_PATTERNS.md`; no code |
 
 ### Changes from the plan above

@@ -502,3 +502,26 @@ describe('runActionFlow PROGRESS', () => {
     await expect(runActionFlow(client, action, {}, handlers())).rejects.toThrow(/jobId/);
   });
 });
+
+describe('runActionFlow INPUT kinds', () => {
+  it('tells the prompt it must ask for a date range, with the default, and answers with what it returned', async () => {
+    const { client, calls } = fakeClient({
+      main: [flowResponse(step({ type: 'INPUT', message: 'Period', inputType: 'daterange', data: '2026-01-01/' })), flowResponse(step({ type: 'DONE' }))],
+    });
+    const prompt = vi.fn(async () => '2026-01-01/2026-01-31');
+
+    await runActionFlow(client, action, {}, handlers({ prompt }));
+
+    expect(prompt).toHaveBeenCalledWith({ message: 'Period', inputType: 'daterange', defaultValue: '2026-01-01/' });
+    expect(calls.main[1]!.data).toBe('2026-01-01/2026-01-31');
+  });
+
+  it('ignores an input kind it does not know', async () => {
+    const { client } = fakeClient({ main: [flowResponse(step({ type: 'INPUT', message: 'X', inputType: 'hologram' })), flowResponse(step({ type: 'DONE' }))] });
+    const prompt = vi.fn(async () => 'x');
+
+    await runActionFlow(client, action, {}, handlers({ prompt }));
+
+    expect(prompt).toHaveBeenCalledWith({ message: 'X' });
+  });
+});

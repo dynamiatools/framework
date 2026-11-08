@@ -41,8 +41,6 @@ import tools.dynamia.ui.ViewOptions;
 import tools.dynamia.ui.ViewsProvider;
 import tools.dynamia.ui.testing.UIInteraction.Type;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -182,30 +180,12 @@ public final class TestUIEnvironment implements UIEnvironment {
             }
             if (answer instanceof UIScript.Input input) {
                 if (input.value() != null && onValue != null) {
-                    onValue.accept(convert(input.value(), valueClass));
+                    onValue.accept(tools.dynamia.ui.InputValues.convert(input.value(), valueClass));
                 }
                 return;
             }
             throw UIScript.mismatch(interaction, interactions.size(), answer);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T convert(Object answer, Class<T> type) {
-        if (type.isInstance(answer)) {
-            return (T) answer;
-        }
-        var text = String.valueOf(answer).trim();
-        Object value;
-        if (type == String.class) value = text;
-        else if (type == Integer.class || type == int.class) value = Integer.valueOf(text);
-        else if (type == Long.class || type == long.class) value = Long.valueOf(text);
-        else if (type == Double.class || type == double.class) value = Double.valueOf(text);
-        else if (type == BigDecimal.class) value = new BigDecimal(text);
-        else if (type == Boolean.class || type == boolean.class) value = Boolean.valueOf(text);
-        else if (type == LocalDate.class) value = LocalDate.parse(text);
-        else throw new IllegalArgumentException("Cannot convert the answer to " + type.getName());
-        return (T) value;
     }
 
     // -- views ---------------------------------------------------------------------------------------------

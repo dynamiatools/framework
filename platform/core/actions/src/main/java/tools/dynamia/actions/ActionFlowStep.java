@@ -50,6 +50,7 @@ public class ActionFlowStep implements Serializable {
     private String viewDescriptor;
     private String viewClass;
     private Object data;
+    private String inputType;
     private java.util.Map<String, String> fieldErrors;
     private java.util.Map<String, String> hints;
     private String resumeToken;
@@ -74,6 +75,18 @@ public class ActionFlowStep implements Serializable {
         step.type = ActionFlowStepType.INPUT;
         step.message = message;
         step.title = title;
+        return step;
+    }
+
+    /**
+     * A single-value prompt of a given kind.
+     *
+     * @param inputType what the client must render: {@code text}, {@code number}, {@code date} or {@code daterange}
+     *                  (see {@code InputValues}); a date range is answered as {@code "start/end"}
+     */
+    public static ActionFlowStep input(String message, String title, String inputType) {
+        var step = input(message, title);
+        step.inputType = inputType;
         return step;
     }
 
@@ -379,6 +392,15 @@ public class ActionFlowStep implements Serializable {
 
     public void setHints(java.util.Map<String, String> hints) {
         this.hints = hints;
+    }
+
+    /** @return the kind of value an {@code INPUT} step asks for, or null for free text */
+    public String getInputType() {
+        return inputType;
+    }
+
+    public void setInputType(String inputType) {
+        this.inputType = inputType;
     }
 
     public Object getData() {

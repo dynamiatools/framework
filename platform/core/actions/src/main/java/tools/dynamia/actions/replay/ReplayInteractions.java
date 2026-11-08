@@ -5,8 +5,6 @@ import tools.dynamia.commons.Callback;
 import tools.dynamia.ui.MessageDisplayer;
 import tools.dynamia.ui.MessageType;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -119,34 +117,23 @@ public final class ReplayInteractions implements MessageDisplayer {
 
     @Override
     public <T> void showInput(String title, Class<T> valueClass, T defaultValue, Consumer<T> onValue) {
-        var step = ActionFlowStep.input(title, title);
-        step.setData(defaultValue);
+        var step = ActionFlowStep.input(title, title, tools.dynamia.ui.InputValues.typeOf(valueClass));
+        step.setData(tools.dynamia.ui.InputValues.toWire(defaultValue));
         interact(step, answer -> {
             if (answer != null && onValue != null) {
-                onValue.accept(convert(answer, valueClass));
+                T value;
+                try {
+                    value = tools.dynamia.ui.InputValues.convert(answer, valueClass);
+                } catch (RuntimeException e) {
+                    // a value the client got wrong is a question asked again with the reason, not a server error
+                    throw new ReplayRetry("Invalid value: " + e.getMessage());
+                }
+                onValue.accept(value);
             }
         });
     }
 
     private static boolean isYes(Object answer) {
         return answer instanceof Boolean b ? b : "true".equalsIgnoreCase(String.valueOf(answer));
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T convert(Object answer, Class<T> type) {
-        if (type.isInstance(answer)) {
-            return (T) answer;
-        }
-        var text = String.valueOf(answer).trim();
-        Object value;
-        if (type == String.class) value = text;
-        else if (type == Integer.class || type == int.class) value = Integer.valueOf(text);
-        else if (type == Long.class || type == long.class) value = Long.valueOf(text);
-        else if (type == Double.class || type == double.class) value = Double.valueOf(text);
-        else if (type == BigDecimal.class) value = new BigDecimal(text);
-        else if (type == Boolean.class || type == boolean.class) value = Boolean.valueOf(text);
-        else if (type == LocalDate.class) value = LocalDate.parse(text);
-        else throw new IllegalArgumentException("Cannot convert the answer to " + type.getName());
-        return (T) value;
     }
 }
