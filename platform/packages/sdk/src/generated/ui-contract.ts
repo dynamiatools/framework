@@ -36,6 +36,7 @@ export interface ActionFlowStep {
  */
 export const UI_PORTS = {
     choices: { spi: 'ChoicesProvider', steps: ['CHOICE'] },
+    clipboard: { spi: 'Clipboard', steps: [] },
     files: { spi: 'FileTransfer', steps: ['UPLOAD'] },
     messages: { spi: 'MessageDisplayer', steps: ['CONFIRM', 'INPUT', 'NOTIFY'] },
     navigation: { spi: 'NavigationProvider', steps: ['REDIRECT'] },

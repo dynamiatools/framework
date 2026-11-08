@@ -86,6 +86,12 @@ export interface FlowHandlers {
    * pass {@link isInlineAllowed}; any other type goes to `saveFile`. Optional: defaults to {@link browserPreviewFile}.
    */
   previewFile?: (file: FlowDownload, client: DynamiaClient) => void | Promise<void>;
+  /**
+   * Gives the user a text the action put in the clipboard (`params.clipboard`). Called after the browser refused to write
+   * the clipboard (no user gesture any more) so the text can be shown with a "copy" button. Optional: defaults to
+   * `window.prompt`.
+   */
+  showClipboardFallback?: (text: string) => void | Promise<void>;
 }
 
 const INLINE_TYPES = ['application/pdf', 'image/png', 'image/jpeg', 'image/gif', 'image/webp', 'text/plain'];
@@ -159,6 +165,7 @@ async function driveFlow(
 
     if (step.type === 'REDIRECT') {
       await saveDownloads(response, handlers, client);
+      await deliverClipboard(response, handlers);
       await redirect(step, handlers);
       return response; // terminal — see runActionFlow
     }
@@ -187,6 +194,7 @@ async function driveFlow(
   }
 
   await saveDownloads(response, handlers, client);
+  await deliverClipboard(response, handlers);
 
   return response;
 }
@@ -465,6 +473,23 @@ async function saveDownloads(response: ActionExecutionResponse, handlers: FlowHa
     } else {
       await save(file, client);
     }
+  }
+}
+
+/**
+ * Puts the text of `params.clipboard` in the user's clipboard. The answer of the server arrives after an asynchronous
+ * request, so the browser may refuse the write for lack of a user gesture; then the text is shown through
+ * `showClipboardFallback` so it always reaches the user.
+ */
+async function deliverClipboard(response: ActionExecutionResponse, handlers: FlowHandlers): Promise<void> {
+  const clip = response.params?.clipboard as { text?: unknown } | undefined;
+  if (!clip || typeof clip.text !== 'string') return;
+  const text = clip.text;
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const fallback = handlers.showClipboardFallback ?? ((t: string) => { window.prompt('Copy', t); });
+    await fallback(text);
   }
 }
 

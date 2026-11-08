@@ -282,6 +282,34 @@ describe('runActionFlow inline files', () => {
   });
 });
 
+describe('runActionFlow clipboard', () => {
+  const clip = { ...flowResponse(step({ type: 'DONE' })), params: { clipboard: { text: 'https://x/y' } } };
+
+  it('writes params.clipboard to the clipboard', async () => {
+    const writeText = vi.fn(async () => undefined);
+    vi.stubGlobal('navigator', { clipboard: { writeText } });
+    const { client } = fakeClient({ main: [clip] });
+    const showClipboardFallback = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ showClipboardFallback }));
+
+    expect(writeText).toHaveBeenCalledWith('https://x/y');
+    expect(showClipboardFallback).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
+  it('shows the text when the browser refuses the write', async () => {
+    vi.stubGlobal('navigator', { clipboard: { writeText: vi.fn(async () => { throw new Error('NotAllowedError'); }) } });
+    const { client } = fakeClient({ main: [clip] });
+    const showClipboardFallback = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ showClipboardFallback }));
+
+    expect(showClipboardFallback).toHaveBeenCalledWith('https://x/y');
+    vi.unstubAllGlobals();
+  });
+});
+
 describe('runActionFlow DIALOG view class', () => {
   it('fetches the view of step.viewClass instead of the entity of the request', async () => {
     const dialog = flowResponse(step({ type: 'DIALOG', viewDescriptor: 'form', viewClass: 'x.AccountPayment', data: { amount: 5 } }));
