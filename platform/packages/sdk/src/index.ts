@@ -29,6 +29,8 @@ export type {
     ApplicationMetadataActions,
     ActionType,
     ActionMetadata,
+    ActionControl,
+    ActionControlKind,
     // Actions
     ActionExecutionRequest,
     ActionExecutionResponse,

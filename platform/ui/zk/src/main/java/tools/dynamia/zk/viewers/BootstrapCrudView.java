@@ -134,6 +134,7 @@ public class BootstrapCrudView<T> extends CrudView<T> {
         if (actionRenderer == null) {
             actionRenderer = getDefaultActionRenderer();
         }
+        actionRenderer = tools.dynamia.zk.actions.ControlRenderers.adapt(actionRenderer);
         Component component = (Component) Actions.render(actionRenderer, action, this);
 
         String actionId = action.getId();

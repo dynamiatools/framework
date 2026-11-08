@@ -31,6 +31,7 @@ import tools.dynamia.crud.query.FilterValues;
  *
  * <pre>{@code
  * @InstallAction
+ * @RunsOn(ActionRuntime.FRONTEND)
  * public class FilterByStatusAction extends FilterAction {
  *     public FilterByStatusAction() {
  *         super(Invoice.class, Control.choice("status", Status.class).allLabel("All"));
@@ -39,6 +40,9 @@ import tools.dynamia.crud.query.FilterValues;
  * }
  * }</pre>
  *
+ * Declare {@code @RunsOn(ActionRuntime.FRONTEND)} on the concrete class, as for any action: the annotation is not inherited, and
+ * without it the action is not published. A remote client then gets the {@link Control} in the metadata instead of an endpoint.
+ * <p>
  * In ZK the control is drawn with the widget of its kind and this action runs on every change. A remote client draws the
  * same control from the metadata and sends the value as a filter of {@code POST /find}, so it never runs this class: the
  * filtering is the same through {@link FilterConditions}.

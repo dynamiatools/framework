@@ -132,6 +132,27 @@ export type ActionType = 'Action' | 'ClassAction' | 'CrudAction' | string;
  * All nullable fields are annotated `@JsonInclude(NON_NULL)` in Java and may
  * therefore be absent from the JSON response.
  */
+/** What a toolbar control is. Mirrors `tools.dynamia.actions.Control.Kind`. */
+export type ActionControlKind = 'DATE' | 'DATE_RANGE' | 'DATETIME_RANGE' | 'TEXT' | 'CHOICE';
+
+/**
+ * A control a front end draws in the toolbar for an action that filters the list instead of being a button. The value goes
+ * into the list query as a {@link CrudFilter} on `field` (`client.crud(path).find({ filters })`); the action is not run.
+ * Mirrors `tools.dynamia.actions.Control`.
+ */
+export interface ActionControl {
+    kind: ActionControlKind;
+    /** The list query field the value filters. */
+    field: string;
+    label?: string;
+    /** Options of a `CHOICE`. */
+    options?: Array<{ key: string; label: string }>;
+    /** Label of the "no filter" option of a `CHOICE`; when set, offer it and send no filter for it. */
+    allLabel?: string;
+    /** Symbolic initial value to resolve in the user's time zone: `TODAY`, `THIS_MONTH` or `LAST_MONTH`. */
+    preset?: string;
+}
+
 export interface ActionMetadata extends BasicMetadata {
     /** Logical server-side action type: Action, ClassAction or CrudAction */
     type?: ActionType;
@@ -143,8 +164,10 @@ export interface ActionMetadata extends BasicMetadata {
     actionClass?: string;
     /** Optional grouping label for the action */
     group?: string;
-    /** Custom renderer key for the action button/widget */
+    /** Custom renderer key for the action button/widget; `'control'` when the action is drawn from {@link control}. */
     renderer?: string;
+    /** Present when the action is a toolbar control (a filter) and not a button. */
+    control?: ActionControl;
     /** Simple class names of entity types this action applies to */
     applicableClasses?: string[];
     /** Entity state names in which this action is available */
