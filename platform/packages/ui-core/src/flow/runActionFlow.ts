@@ -92,6 +92,19 @@ export interface FlowHandlers {
    * `window.prompt`.
    */
   showClipboardFallback?: (text: string) => void | Promise<void>;
+  /**
+   * Opens a page of the application (`params.page` of the final response), by its virtual path, for example a `CrudPage`
+   * such as `ventas/ventas`. The path is not a URL. Optional: without it the request is ignored.
+   */
+  openPage?: (path: string, params: Record<string, unknown>) => void | Promise<void>;
+  /** Reloads what the user is looking at (`params.refresh` of the final response). Optional. */
+  refresh?: () => void | Promise<void>;
+}
+
+/** A page path the server may send: relative, letters, digits and `_ - . /`, no `..`. A URL is never a page path. */
+export function isPagePath(path: unknown): path is string {
+  return typeof path === 'string' && /^[A-Za-z0-9_\-./]+$/.test(path)
+    && !path.startsWith('/') && !path.includes('..') && !path.includes('//');
 }
 
 const INLINE_TYPES = ['application/pdf', 'image/png', 'image/jpeg', 'image/gif', 'image/webp', 'text/plain'];
@@ -166,6 +179,7 @@ async function driveFlow(
     if (step.type === 'REDIRECT') {
       await saveDownloads(response, handlers, client);
       await deliverClipboard(response, handlers);
+      await deliverNavigation(response, handlers);
       await redirect(step, handlers);
       return response; // terminal — see runActionFlow
     }
@@ -195,6 +209,7 @@ async function driveFlow(
 
   await saveDownloads(response, handlers, client);
   await deliverClipboard(response, handlers);
+  await deliverNavigation(response, handlers);
 
   return response;
 }
@@ -490,6 +505,17 @@ async function deliverClipboard(response: ActionExecutionResponse, handlers: Flo
   } catch {
     const fallback = handlers.showClipboardFallback ?? ((t: string) => { window.prompt('Copy', t); });
     await fallback(text);
+  }
+}
+
+/** Opens the page and reloads the view the action asked for (`params.page`, `params.refresh`). */
+async function deliverNavigation(response: ActionExecutionResponse, handlers: FlowHandlers): Promise<void> {
+  const page = response.params?.page as { path?: unknown; params?: Record<string, unknown> } | undefined;
+  if (page && isPagePath(page.path) && handlers.openPage) {
+    await handlers.openPage(page.path, page.params ?? {});
+  }
+  if (response.params?.refresh === true && handlers.refresh) {
+    await handlers.refresh();
   }
 }
 

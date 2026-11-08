@@ -310,6 +310,30 @@ describe('runActionFlow clipboard', () => {
   });
 });
 
+describe('runActionFlow pages and refresh', () => {
+  it('opens the page and refreshes the view after the action ended', async () => {
+    const final = { ...flowResponse(step({ type: 'DONE' })), params: { page: { path: 'ventas/ventas', params: { id: 7 } }, refresh: true } };
+    const { client } = fakeClient({ main: [final] });
+    const openPage = vi.fn();
+    const refresh = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ openPage, refresh }));
+
+    expect(openPage).toHaveBeenCalledWith('ventas/ventas', { id: 7 });
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('never treats a URL as a page path', async () => {
+    const final = { ...flowResponse(step({ type: 'DONE' })), params: { page: { path: 'https://evil.example/x', params: {} } } };
+    const { client } = fakeClient({ main: [final] });
+    const openPage = vi.fn();
+
+    await runActionFlow(client, action, {}, handlers({ openPage }));
+
+    expect(openPage).not.toHaveBeenCalled();
+  });
+});
+
 describe('runActionFlow DIALOG view class', () => {
   it('fetches the view of step.viewClass instead of the entity of the request', async () => {
     const dialog = flowResponse(step({ type: 'DIALOG', viewDescriptor: 'form', viewClass: 'x.AccountPayment', data: { amount: 5 } }));
