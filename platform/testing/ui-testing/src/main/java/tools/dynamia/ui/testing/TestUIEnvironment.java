@@ -77,6 +77,8 @@ public final class TestUIEnvironment implements UIEnvironment {
         ports.put(ViewsProvider.class, new Views());
         ports.put(ChoicesProvider.class, new Choices());
         ports.put(FileTransfer.class, new Files());
+        ports.put(tools.dynamia.ui.Clipboard.class, (tools.dynamia.ui.Clipboard) text ->
+                record(Type.CLIPBOARD, null, text, null, Map.of("text", text)));
         ports.put(ProgressRunner.class, new Progress());
         ports.put(NavigationProvider.class, new Navigation());
     }

@@ -259,6 +259,24 @@ class ActionTesterTest {
     }
 
     @Test
+    void aPreviewBehavesTheSameDirectAndRemote() {
+        var result = ActionTester.of(action("preview", e ->
+                tools.dynamia.ui.UIFiles.preview("a.pdf", "application/pdf", new byte[]{1, 2, 3}))).runEverywhere();
+
+        assertEquals(1, result.downloads().size());
+        assertEquals(3, result.downloads().get(0).size());
+        assertEquals(3, result.remote().downloads().get(0).size(), "the inline url resolves to the stored file");
+    }
+
+    @Test
+    void theClipboardBehavesTheSameDirectAndRemote() {
+        var result = ActionTester.of(action("clip", e -> tools.dynamia.ui.UIClipboard.copy("https://x/y"))).runEverywhere();
+
+        assertEquals(List.of(tools.dynamia.ui.testing.UIInteraction.Type.CLIPBOARD), result.types());
+        assertEquals("https://x/y", result.interactions().get(0).message());
+    }
+
+    @Test
     void runEverywhereComparesDirectAndRemote() {
         var result = ActionTester.of(action("same", e -> {
             UIMessages.showQuestion("Delete?", () -> {

@@ -460,11 +460,17 @@ public final class ActionTester {
                         MessageType.valueOf(String.valueOf(map.get("type"))), Map.of()));
             }
         }
+        if (params.get("clipboard") instanceof Map<?, ?> clip) {
+            interactions.add(new UIInteraction(Type.CLIPBOARD, null, String.valueOf(clip.get("text")), null,
+                    Map.of("text", String.valueOf(clip.get("text")))));
+        }
         if (params.get("downloads") instanceof List<?> files) {
             for (Object item : files) {
                 var map = (Map<String, Object>) item;
                 String url = String.valueOf(map.get("url"));
-                var stored = transfers.get(url.substring(url.lastIndexOf('/') + 1), FlowPrincipal.current())
+                int query = url.indexOf('?');
+                String path = query < 0 ? url : url.substring(0, query);
+                var stored = transfers.get(path.substring(path.lastIndexOf('/') + 1), FlowPrincipal.current())
                         .orElseThrow(() -> new AssertionError("The download " + url + " is not in the transfer store"));
                 try (var in = stored.openStream()) {
                     downloads.add(new CapturedDownload(String.valueOf(map.get("name")),
