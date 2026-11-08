@@ -99,6 +99,15 @@ export interface FlowHandlers {
   openPage?: (path: string, params: Record<string, unknown>) => void | Promise<void>;
   /** Reloads what the user is looking at (`params.refresh` of the final response). Optional. */
   refresh?: () => void | Promise<void>;
+  /**
+   * Lets the user search and pick one record of a big catalog (`CHOICE` step that names a `lookup`). `search` queries the
+   * server lookup; resolve with the key of the record picked, or `[]` when the user cancels. The server checks the key
+   * again, so it is never trusted. Required for such steps.
+   */
+  pickEntity?: (options: {
+    title?: string;
+    search: (query: string) => Promise<FlowChoiceOption[]>;
+  }) => Promise<string[] | null>;
 }
 
 /** A page path the server may send: relative, letters, digits and `_ - . /`, no `..`. A URL is never a page path. */
@@ -325,10 +334,19 @@ async function renderFlowStep(
       return true; // the user only had to see it
 
     case 'CHOICE': {
+      const { options, multiple, lookup } = (step.data ?? {}) as { options?: FlowChoiceOption[]; multiple?: boolean; lookup?: string };
+      if (typeof lookup === 'string' && lookup) {
+        if (!handlers.pickEntity) {
+          throw new Error('runActionFlow: no "pickEntity" handler provided for a CHOICE step with a lookup');
+        }
+        return (await handlers.pickEntity({
+          ...(step.title ? { title: step.title } : {}),
+          search: query => client.lookups.search(lookup, query),
+        })) ?? [];
+      }
       if (!handlers.choose) {
         throw new Error('runActionFlow: no "choose" handler provided for flow step type "CHOICE"');
       }
-      const { options, multiple } = (step.data ?? {}) as { options?: FlowChoiceOption[]; multiple?: boolean };
       return (await handlers.choose({
         ...(step.title ? { title: step.title } : {}),
         ...(step.message ? { message: step.message } : {}),

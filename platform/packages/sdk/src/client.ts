@@ -7,6 +7,7 @@ import { ConfigResourceApi } from './cruds/config-resource.js';
 import { ScheduleApi } from './schedule/api.js';
 import { TransfersApi } from './transfers/api.js';
 import { JobsApi } from './jobs/api.js';
+import { LookupsApi } from './lookups/api.js';
 import type { DynamiaClientConfig } from './types.js';
 
 /**
@@ -38,6 +39,8 @@ export class DynamiaClient {
   readonly transfers: TransfersApi;
   /** Background jobs: follow the task of a `PROGRESS` flow step */
   readonly jobs: JobsApi;
+  /** Searchable catalogs: the records a `CHOICE` step with a `lookup` lets the user pick */
+  readonly lookups: LookupsApi;
 
   constructor(config: DynamiaClientConfig) {
     this.http = new HttpClient(config);
@@ -46,6 +49,7 @@ export class DynamiaClient {
     this.schedule = new ScheduleApi(this.http);
     this.transfers = new TransfersApi(this.http);
     this.jobs = new JobsApi(this.http);
+    this.lookups = new LookupsApi(this.http);
   }
 
   /**

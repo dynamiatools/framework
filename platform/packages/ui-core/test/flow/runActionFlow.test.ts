@@ -24,6 +24,9 @@ function fakeClient(opts: {
     jobs: {
       status: vi.fn(async (id: string) => ({ id, title: 'Moving', message: '', ...(jobStatuses.length > 1 ? jobStatuses.shift()! : jobStatuses[0]!) })),
     },
+    lookups: {
+      search: vi.fn(async (name: string, q: string) => [{ key: `${name}-1`, label: `${q} one` }]),
+    },
     transfers: {
       upload: vi.fn(async (file: File) => {
         uploads.push(file);
@@ -331,6 +334,31 @@ describe('runActionFlow pages and refresh', () => {
     await runActionFlow(client, action, {}, handlers({ openPage }));
 
     expect(openPage).not.toHaveBeenCalled();
+  });
+});
+
+describe('runActionFlow searchable pick', () => {
+  const pick = flowResponse(step({ type: 'CHOICE', title: 'Customer', data: { options: [], multiple: false, lookup: 'customers' } }));
+
+  it('searches the lookup through the client and answers with the key picked', async () => {
+    const done = flowResponse(step({ type: 'DONE' }));
+    const { client, calls } = fakeClient({ main: [pick, done] });
+    const pickEntity = vi.fn(async ({ search }: { search: (q: string) => Promise<{ key: string; label: string }[]> }) => {
+      const found = await search('an');
+      return [found[0]!.key];
+    });
+
+    await runActionFlow(client, action, {}, handlers({ pickEntity }));
+
+    expect(pickEntity).toHaveBeenCalledWith(expect.objectContaining({ title: 'Customer' }));
+    expect((client as never as { lookups: { search: unknown } }).lookups.search).toHaveBeenCalledWith('customers', 'an');
+    expect(calls.main[1]!.data).toEqual(['customers-1']);
+  });
+
+  it('fails clearly without a pickEntity handler', async () => {
+    const { client } = fakeClient({ main: [pick] });
+
+    await expect(runActionFlow(client, action, {}, handlers())).rejects.toThrow(/pickEntity/);
   });
 });
 
