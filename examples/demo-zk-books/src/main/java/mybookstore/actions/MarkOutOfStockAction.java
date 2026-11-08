@@ -3,7 +3,6 @@ package mybookstore.actions;
 import mybookstore.domain.Book;
 import mybookstore.domain.enums.StockStatus;
 import tools.dynamia.actions.ActionRuntime;
-import tools.dynamia.actions.HeadlessCapable;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.actions.RunsOn;
 import tools.dynamia.crud.AbstractCrudAction;
@@ -18,12 +17,13 @@ import tools.dynamia.ui.UINavigation;
  */
 @InstallAction
 @RunsOn(ActionRuntime.HEADLESS)
-public class MarkOutOfStockAction extends AbstractCrudAction implements HeadlessCapable {
+public class MarkOutOfStockAction extends AbstractCrudAction {
 
     public MarkOutOfStockAction() {
         setName("Mark Out of Stock");
         setImage("cancel");
         setApplicableClass(Book.class);
+        setMenuSupported(true); // acts on one record: listed in the row menu
     }
 
     @Override

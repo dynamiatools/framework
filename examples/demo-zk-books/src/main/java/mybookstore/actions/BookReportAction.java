@@ -2,7 +2,6 @@ package mybookstore.actions;
 
 import mybookstore.domain.Book;
 import tools.dynamia.actions.ActionRuntime;
-import tools.dynamia.actions.HeadlessCapable;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.actions.RunsOn;
 import tools.dynamia.crud.AbstractCrudAction;
@@ -19,12 +18,13 @@ import java.nio.charset.StandardCharsets;
  */
 @InstallAction
 @RunsOn(ActionRuntime.HEADLESS)
-public class BookReportAction extends AbstractCrudAction implements HeadlessCapable {
+public class BookReportAction extends AbstractCrudAction {
 
     public BookReportAction() {
         setName("Preview Book Report");
         setImage("report");
         setApplicableClass(Book.class);
+        setMenuSupported(true); // acts on one record: listed in the row menu
     }
 
     @Override

@@ -76,6 +76,8 @@ public class ActionMetadata extends BasicMetadata {
     private String type;
     private String className;
     private String runtime;
+    private boolean menuSupported;
+    private double position;
 
     /**
      * Default constructor for serialization and manual instantiation.
@@ -98,6 +100,7 @@ public class ActionMetadata extends BasicMetadata {
         setDescription(action.getLocalizedDescription());
         setIcon(action.getImage());
         this.runtime = ActionRuntimes.of(action).name();
+        this.position = action.getPosition();
         if (action instanceof RemoteAction) {
             setEndpoint(ApplicationMetadataController.PATH + "/actions/execute/" + getId());
         }
@@ -118,8 +121,10 @@ public class ActionMetadata extends BasicMetadata {
 
         if (action instanceof CrudAction crudAction) {
             this.applicableStates = Streams.mapAndCollect(crudAction.getApplicableStates(), Enum::name);
+            this.menuSupported = crudAction.isMenuSupported();
         } else if (action instanceof CrudRemoteAction crudRemoteAction) {
             this.applicableStates = Streams.mapAndCollect(crudRemoteAction.getApplicableStates(), Enum::name);
+            this.menuSupported = crudRemoteAction.isMenuSupported();
         }
 
         if (action instanceof ClassAction classAction) {
@@ -145,6 +150,29 @@ public class ActionMetadata extends BasicMetadata {
 
     public void setRuntime(String runtime) {
         this.runtime = runtime;
+    }
+
+    /**
+     * @return whether a front end lists this action in the context menu of a record; only meaningful for crud actions
+     */
+    public boolean isMenuSupported() {
+        return menuSupported;
+    }
+
+    public void setMenuSupported(boolean menuSupported) {
+        this.menuSupported = menuSupported;
+    }
+
+    /**
+     * @return where the action goes among the others of its list, lower first; the server publishes the actions
+     * already sorted by it, and a front end that merges actions of its own sorts by it again
+     */
+    public double getPosition() {
+        return position;
+    }
+
+    public void setPosition(double position) {
+        this.position = position;
     }
 
     public String getGroup() {

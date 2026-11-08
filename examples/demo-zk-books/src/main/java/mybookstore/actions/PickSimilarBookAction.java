@@ -2,7 +2,6 @@ package mybookstore.actions;
 
 import mybookstore.domain.Book;
 import tools.dynamia.actions.ActionRuntime;
-import tools.dynamia.actions.HeadlessCapable;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.actions.RunsOn;
 import tools.dynamia.crud.AbstractCrudAction;
@@ -17,12 +16,13 @@ import tools.dynamia.ui.UIMessages;
  */
 @InstallAction
 @RunsOn(ActionRuntime.HEADLESS)
-public class PickSimilarBookAction extends AbstractCrudAction implements HeadlessCapable {
+public class PickSimilarBookAction extends AbstractCrudAction {
 
     public PickSimilarBookAction() {
         setName("Pick Similar Book");
         setImage("find");
         setApplicableClass(Book.class);
+        setMenuSupported(true); // acts on one record: listed in the row menu
     }
 
     @Override

@@ -2,7 +2,6 @@ package mybookstore.actions;
 
 import mybookstore.domain.Book;
 import tools.dynamia.actions.ActionRuntime;
-import tools.dynamia.actions.HeadlessCapable;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.actions.RunsOn;
 import tools.dynamia.commons.LocalDateRange;
@@ -18,7 +17,7 @@ import tools.dynamia.ui.UIMessages;
  */
 @InstallAction
 @RunsOn(ActionRuntime.HEADLESS)
-public class FilterBookByPublishRangeAction extends AbstractCrudAction implements HeadlessCapable {
+public class FilterBookByPublishRangeAction extends AbstractCrudAction {
 
     public FilterBookByPublishRangeAction() {
         setName("Filter By Publish Range");
