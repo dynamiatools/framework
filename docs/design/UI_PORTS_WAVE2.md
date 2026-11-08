@@ -12,7 +12,9 @@ against the source (file references are in §9); nothing was run.
 Today an action can talk to the user through six facades: `UIMessages`, `UIViews`, `UIChoices`, `UIFiles`, `UIProgress`
 and `UINavigation`. That covers the EASY and part of the MEDIUM buckets of the inventory. What still forces an action to
 import ZK, or to be rewritten as a `FRONTEND` client action, is a short list of recurring needs. This plan adds the ports
-for them, so more actions can be `HeadlessCapable` and run in ZK, Vue, POS and shop without front end code.
+for them, so the existing actions of `dynamia-erp` and the extensions can be migrated off direct ZK calls and become
+`HeadlessCapable`. ZK stays the main front end: **every port has a ZK adapter, and an action migrated to a port must behave
+in ZK exactly as before** (§3, piece 5). Other front ends (Vue, POS, shop) get the port through the flow protocol.
 
 Out of scope:
 
@@ -53,6 +55,20 @@ Every port must ship all of these (model of `dynamia-ui.md` §1.1, §4 and §9):
 | 11 | One real action migrated to it, as proof | extension or ERP |
 
 An ERP action migrated as proof needs `dynamia-tools` and `dynamia-erp` in the same batch.
+
+### ZK adapter of each port (required, same WP)
+
+| Port | ZK adapter |
+|---|---|
+| `UIFiles.preview` | Window with `<iframe>`/`<img>` over the inline URL; types outside the allow list use `Filedownload` |
+| `UIClipboard.copy` | Client-side command that writes the clipboard, with the same dialog fallback |
+| `UINavigation.openPage` / `refresh` | Navigate to the `CrudPage` path through the existing ZK navigation; `refresh` reloads the current `CrudController` view |
+| `UISelection` (`getSelection()`) | Read the selected rows from the ZK `CrudController` |
+| `UIChoices.pickEntity` | Searchable selector window over the same registered lookup (`Combobox`/`Bandbox` with server search) |
+| `shareLink` / `pickFromStorage` | Plain Java call in ZK (no UI for `shareLink`); entity-files file chooser dialog for `pickFromStorage` |
+
+Each ZK adapter runs the same contract case as replay. The proof action of a WP is migrated in the ERP and checked in ZK
+first, since that is where it is used today.
 
 ## 4. Wave 1: files family and final-pass effects
 
@@ -166,7 +182,7 @@ document** and review, outside this plan.
 | `UIForms.wizard` | Chained `DIALOG` steps already replay correctly; a `WIZARD` step adds protocol and determinism risk without a new capability |
 | `UIEvents` | A transport and infrastructure topic (SSE or WebSocket, tenant isolation), not an action port |
 | `UIUndo` | An application pattern: reversibility cannot be guaranteed by a generic port |
-| Device ports in `ui-shared` | POS is a pnpm-only repo: build them as a `CUSTOM` step plus a renderer in `dynamia-pos` (answers former Q5) |
+| Device ports (scanner, camera, signature, permissions, sound) | Out of this plan. They are not needed to migrate the existing ERP actions; a consumer can declare its own `@UIPort` later (`dynamia-ui.md` §1.1) |
 
 ## 8. Order of work
 
@@ -180,7 +196,6 @@ document** and review, outside this plan.
 | W3b | Document the `INPUT` + `ReplayRetry` pattern | none |
 | W3c | `UIInputs` design document | W3a |
 | W3d | `shareLink` and `pickFromStorage` in entity-files | W1 |
-| later | Device ports in `dynamia-pos`, when POS asks | consumer |
 
 Each WP ends in a working, tested commit; migrating a real action is part of the WP.
 
