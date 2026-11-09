@@ -202,9 +202,33 @@ install_cli() {
   info "Installing @dynamia-tools/cli..."
   npm install -g @dynamia-tools/cli
   success "@dynamia-tools/cli installed"
+
+  # The npm global bin dir may not be on PATH (Node installed outside fnm,
+  # custom npm prefix...). Make `dynamia` reachable now and in new shells.
+  local bin_dir
+  bin_dir="$(npm prefix -g)/bin"
+  if ! command -v dynamia &>/dev/null; then
+    export PATH="$bin_dir:$PATH"
+    local profile
+    case "$SHELL" in
+      */zsh)  profile="$HOME/.zshrc" ;;
+      */bash) profile="$HOME/.bashrc" ;;
+      *)      profile="$HOME/.profile" ;;
+    esac
+    if ! grep -qF "$bin_dir" "$profile" 2>/dev/null; then
+      printf '\n# npm global bin (dynamia CLI)\nexport PATH="%s:$PATH"\n' "$bin_dir" >> "$profile"
+      success "Added $bin_dir to PATH in $profile"
+    fi
+  fi
+
   echo ""
   info "Launching project wizard..."
-  dynamia new
+  # stdin is the curl pipe: give the interactive wizard the terminal instead.
+  if [ -r /dev/tty ]; then
+    dynamia new </dev/tty
+  else
+    dynamia new
+  fi
 }
 
 # ---------------------------------------------------------------------------
