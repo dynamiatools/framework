@@ -89,9 +89,9 @@ withDefaults(defineProps<{
   /** Entity class name for entity-scoped execution */
   entityClassName?: string | undefined;
   /** Accessible label of the edit button */
-  editLabel?: string;
+  editLabel?: string | undefined;
   /** Accessible label of the menu button */
-  moreLabel?: string;
+  moreLabel?: string | undefined;
 }>(), {
   showEdit: true,
   autoExecute: false,

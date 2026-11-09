@@ -36,6 +36,9 @@ import java.util.Map;
 @RunsOn(ActionRuntime.HEADLESS)
 public final class HeadlessCrudRemoteAction extends AbstractCrudRemoteAction {
 
+    /** Most records one bulk request may select; each one is loaded with its own query. */
+    public static final int MAX_BULK_IDS = 1000;
+
     private final CrudAction delegate;
 
     /**
@@ -57,6 +60,11 @@ public final class HeadlessCrudRemoteAction extends AbstractCrudRemoteAction {
     }
 
     /** @return the action this one serves */
+    @Override
+    public boolean isMenuSupported() {
+        return delegate.isMenuSupported();
+    }
+
     public CrudAction getDelegate() {
         return delegate;
     }
@@ -109,13 +117,16 @@ public final class HeadlessCrudRemoteAction extends AbstractCrudRemoteAction {
      * single record.
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private List<Object> entitiesOf(ActionExecutionRequest request, Class entityClass, CrudService crudService) {
+    List<Object> entitiesOf(ActionExecutionRequest request, Class entityClass, CrudService crudService) {
         if (request.getDataId() != null && !request.getDataId().isBlank()) {
             return List.of();
         }
         Object ids = request.getData() instanceof Map<?, ?> map ? map.get("ids") : request.getData();
         if (!(ids instanceof List<?> list) || list.isEmpty()) {
             return List.of();
+        }
+        if (list.size() > MAX_BULK_IDS) {
+            throw new IllegalArgumentException("A bulk action accepts at most " + MAX_BULK_IDS + " records, got " + list.size());
         }
         List<Object> entities = new ArrayList<>();
         for (Object id : list) {

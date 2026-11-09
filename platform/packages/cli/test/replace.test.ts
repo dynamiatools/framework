@@ -168,7 +168,7 @@ describe('renameJavaPackages', () => {
   // The template's own version is bumped freely; the CLI must pin the one cli.properties declares.
   it('sets <dynamia.version> in pom.xml whatever version the template carries', async () => {
     const pom = join(projectDir, 'pom.xml')
-    writeFileSync(pom, readFileSync(pom, 'utf-8').replace('</project>', '<properties><dynamia.version>26.10.3</dynamia.version></properties></project>'))
+    writeFileSync(pom, readFileSync(pom, 'utf-8').replace('</project>', '<properties><dynamia.version>26.11.0</dynamia.version></properties></project>'))
 
     await renameJavaPackages({
       projectDir,

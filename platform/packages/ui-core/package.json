@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/ui-core",
-  "version": "26.10.3",
+  "version": "26.11.0",
   "description": "Framework-agnostic view/viewer/renderer core for Dynamia Platform",
   "keywords": [
     "dynamia",
@@ -63,12 +63,12 @@
   },
   "devDependencies": {
     "@dynamia-tools/sdk": "workspace:*",
-    "@types/node": "^26.4.1",
-    "happy-dom": "^20.14.5",
+    "@types/node": "^26.6.6",
+    "happy-dom": "^20.14.6",
     "typescript": "^6.0.3",
-    "vite": "^8.2.2",
-    "vite-plugin-dts": "^5.1.0",
-    "vitest": "^4.1.11"
+    "vite": "^8.3.6",
+    "vite-plugin-dts": "^5.1.2",
+    "vitest": "^4.1.12"
   },
   "publishConfig": {
     "access": "public",

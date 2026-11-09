@@ -1,6 +1,7 @@
 package tools.dynamia.actions.replay;
 
 import tools.dynamia.ui.ChoicesProvider;
+import tools.dynamia.ui.Clipboard;
 import tools.dynamia.ui.FileTransfer;
 import tools.dynamia.ui.MessageDisplayer;
 import tools.dynamia.ui.NavigationProvider;
@@ -34,6 +35,7 @@ public final class ReplayUIEnvironment implements UIEnvironment {
         this.interactions = new ReplayInteractions(session);
         ports.put(MessageDisplayer.class, interactions);
         ports.put(FileTransfer.class, new ReplayFileTransfer(session));
+        ports.put(Clipboard.class, new ReplayClipboard(session));
         ports.put(ProgressRunner.class, new ReplayProgressRunner(session));
         ports.put(ChoicesProvider.class, new ReplayChoicesProvider(session));
         ports.put(NavigationProvider.class, new ReplayNavigationProvider(session));

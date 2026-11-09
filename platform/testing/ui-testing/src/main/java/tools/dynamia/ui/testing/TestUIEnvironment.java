@@ -41,8 +41,6 @@ import tools.dynamia.ui.ViewOptions;
 import tools.dynamia.ui.ViewsProvider;
 import tools.dynamia.ui.testing.UIInteraction.Type;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -77,6 +75,8 @@ public final class TestUIEnvironment implements UIEnvironment {
         ports.put(ViewsProvider.class, new Views());
         ports.put(ChoicesProvider.class, new Choices());
         ports.put(FileTransfer.class, new Files());
+        ports.put(tools.dynamia.ui.Clipboard.class, (tools.dynamia.ui.Clipboard) text ->
+                record(Type.CLIPBOARD, null, text, null, Map.of("text", text)));
         ports.put(ProgressRunner.class, new Progress());
         ports.put(NavigationProvider.class, new Navigation());
     }
@@ -180,30 +180,12 @@ public final class TestUIEnvironment implements UIEnvironment {
             }
             if (answer instanceof UIScript.Input input) {
                 if (input.value() != null && onValue != null) {
-                    onValue.accept(convert(input.value(), valueClass));
+                    onValue.accept(tools.dynamia.ui.InputValues.convert(input.value(), valueClass));
                 }
                 return;
             }
             throw UIScript.mismatch(interaction, interactions.size(), answer);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T convert(Object answer, Class<T> type) {
-        if (type.isInstance(answer)) {
-            return (T) answer;
-        }
-        var text = String.valueOf(answer).trim();
-        Object value;
-        if (type == String.class) value = text;
-        else if (type == Integer.class || type == int.class) value = Integer.valueOf(text);
-        else if (type == Long.class || type == long.class) value = Long.valueOf(text);
-        else if (type == Double.class || type == double.class) value = Double.valueOf(text);
-        else if (type == BigDecimal.class) value = new BigDecimal(text);
-        else if (type == Boolean.class || type == boolean.class) value = Boolean.valueOf(text);
-        else if (type == LocalDate.class) value = LocalDate.parse(text);
-        else throw new IllegalArgumentException("Cannot convert the answer to " + type.getName());
-        return (T) value;
     }
 
     // -- views ---------------------------------------------------------------------------------------------
@@ -261,6 +243,28 @@ public final class TestUIEnvironment implements UIEnvironment {
     private final class Choices implements ChoicesProvider {
 
         @Override
+        public <T> void pickEntity(String title, tools.dynamia.ui.EntityLookup<T> lookup, Consumer<T> onPick) {
+            var payload = new LinkedHashMap<String, Object>();
+            payload.put("lookup", lookup.name());
+            payload.put("multiple", false);
+            var interaction = record(Type.CHOICE, title, null, null, payload);
+            var answer = ask(interaction);
+            if (answer == null || answer instanceof UIScript.Cancel) {
+                return;
+            }
+            if (!(answer instanceof UIScript.Choose choose)) {
+                throw UIScript.mismatch(interaction, interactions.size(), answer);
+            }
+            if (choose.selection().isEmpty()) {
+                return;
+            }
+            String key = String.valueOf(choose.selection().get(0));
+            // the same check as a remote run: the lookup decides what can be picked
+            onPick.accept(lookup.find(key).orElseThrow(() ->
+                    new AssertionError("Key " + key + " is not in the set of the lookup " + lookup.name())));
+        }
+
+        @Override
         public <T> void choose(ChoiceOptions<T> options, Consumer<List<T>> onChoice) {
             var payload = new LinkedHashMap<String, Object>();
             payload.put("options", options.labels());
@@ -298,8 +302,18 @@ public final class TestUIEnvironment implements UIEnvironment {
 
         @Override
         public void download(DownloadSource source) {
+            capture(source, false);
+        }
+
+        /** Shown inline only for the types the policy allows, as in every other adapter. */
+        @Override
+        public void preview(DownloadSource source) {
+            capture(source, tools.dynamia.ui.files.InlinePolicy.allows(source.contentType()));
+        }
+
+        private void capture(DownloadSource source, boolean inline) {
             try (var in = source.openStream()) {
-                downloads.add(new CapturedDownload(source.name(), source.contentType(), in.readAllBytes()));
+                downloads.add(new CapturedDownload(source.name(), source.contentType(), in.readAllBytes(), inline));
             } catch (java.io.IOException e) {
                 throw new java.io.UncheckedIOException(e);
             }
@@ -353,6 +367,16 @@ public final class TestUIEnvironment implements UIEnvironment {
     // -- navigation ----------------------------------------------------------------------------------------
 
     private final class Navigation implements NavigationProvider {
+
+        @Override
+        public void openPage(String path, Map<String, Object> params) {
+            record(Type.PAGE, null, path, null, Map.of("path", path, "params", params));
+        }
+
+        @Override
+        public void refresh() {
+            record(Type.REFRESH, null, null, null, Map.of());
+        }
 
         @Override
         public void open(String url, boolean newWindow) {

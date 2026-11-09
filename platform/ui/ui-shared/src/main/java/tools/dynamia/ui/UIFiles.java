@@ -83,6 +83,38 @@ public final class UIFiles {
     }
 
     /**
+     * Shows a file to the user instead of saving it. Only PDF, common images and plain text are shown inline (see
+     * {@link tools.dynamia.ui.files.InlinePolicy}); any other type is downloaded. In a remote run the file reaches the
+     * client in the final response, like a download.
+     *
+     * @param source where the content comes from
+     */
+    public static void preview(DownloadSource source) {
+        UIFacades.port(FileTransfer.class).preview(source);
+    }
+
+    /**
+     * Shows in-memory content to the user.
+     *
+     * @param fileName    name shown to the user
+     * @param contentType MIME type, for example {@code application/pdf}
+     * @param content     the bytes
+     */
+    public static void preview(String fileName, String contentType, byte[] content) {
+        preview(new DownloadSource.BytesSource(fileName, contentType, content));
+    }
+
+    /**
+     * Shows a file of the file system to the user.
+     *
+     * @param file        the file
+     * @param contentType MIME type, for example {@code application/pdf}
+     */
+    public static void preview(Path file, String contentType) {
+        preview(new DownloadSource.PathSource(file.getFileName().toString(), contentType, file));
+    }
+
+    /**
      * Asks the user for files.
      */
     public static void upload(UploadOptions options, Consumer<List<UploadedFile>> onFiles) {

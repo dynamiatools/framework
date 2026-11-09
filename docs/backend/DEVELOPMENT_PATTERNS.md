@@ -523,13 +523,14 @@ public class ActivateAction extends AbstractCrudAction {
 
 ### Pattern: One action for ZK and for REST/JS front ends (headless)
 
-Write the action once, against the UI-neutral ports, and mark it `HeadlessCapable`. A ZK desktop runs it as always; a
+Write the action once, against the UI-neutral ports, and declare `@RunsOn(ActionRuntime.HEADLESS)` on the class. A ZK desktop runs it as always; a
 REST client (Vue, React, mobile) runs the same class through `/apps/api/metadata/entities/{id}/action/{action}`, and the
 questions the action asks (`UIMessages.showQuestion`, `showInput`) reach the client as steps of the action flow protocol.
 
 ```java
 @InstallAction
-public class ArchiveAction extends AbstractCrudAction implements HeadlessCapable {
+@RunsOn(ActionRuntime.HEADLESS)
+public class ArchiveAction extends AbstractCrudAction {
 
     public ArchiveAction() {
         setName("Archive");
@@ -567,6 +568,11 @@ instead of ZK classes:
 |---|---|---|
 | `Messagebox`, `ZKUtil.showMessage` | `UIMessages` | `CONFIRM`, `INPUT`, messages in the response |
 | `Filedownload`, `Fileupload` | `UIFiles.download`, `UIFiles.upload` | `UPLOAD`; downloads in `params.downloads` (limits: 1 MB up, 10 MB down) |
+| Show a PDF, image or text instead of saving it | `UIFiles.preview` | final effect: `params.downloads[].disposition = "inline"` (only `InlinePolicy` types; others are downloaded) |
+| Copy a text or URL to the clipboard | `UIClipboard.copy` | final effect: `params.clipboard` (the client falls back to showing the text if the browser refuses) |
+| `NavigationManager.navigateTo`, reload the view | `UINavigation.openPage`, `UINavigation.refresh` | final effects: `params.page = {path, params}` and `params.refresh` |
+| Pick a record of a big catalog | `UIChoices.pickEntity(lookupName, ...)` over an `EntityLookup` bean | `CHOICE` with `data.lookup`; the client searches `GET /apps/api/lookups/{name}` |
+| The selected rows of the CRUD | `CrudControllerAPI.getSelection()` | bulk `ids` of the request (at most `HeadlessCrudRemoteAction.MAX_BULK_IDS`) |
 | `LongOperation` + monitor window | `UIProgress.run` | runs inside the request; must be the last interaction |
 | `Window` + `Viewer` with a form | `UIViews.showForm` (entity classes only) | `DIALOG` with `viewClass` |
 | `ZKUtil.showListboxSelector` | `UIChoices.chooseOne` / `chooseMany` | `CHOICE` |
@@ -576,6 +582,33 @@ A new facade is an SPI interface annotated `@UIPort`, a static facade resolving 
 implementation in `ReplayUIEnvironment` (or a `ReplayPortContributor` bean when it needs a module such as `crud`). Declare the runtime on the concrete class with `@RunsOn` (`HEADLESS` for an action written against the facades,
 `FRONTEND` for behaviour each front end implements; it is never inherited, so a subclass is `UNDECLARED` until declared) (client actions are written in TypeScript with `registerClientAction`, never in Java). ZK may only be used in the modules listed in
 `ZkCornerRuleTest`. Design: [`docs/next/dynamia-ui.md`](../next/dynamia-ui.md).
+
+Two kinds of port exist. A **question** (`showQuestion`, `showInput`, `chooseOne`, `upload`, `pickEntity`) waits for an
+answer and is an `ActionFlowStep`. A **final effect** (`download`, `preview`, `copy`, `openPage`, `refresh`, notifications) is
+something the user receives once the action has ended: it is published only by the pass that ran to the end, in
+`params.*` of the final response, so it needs no step type. Never make a port that waits for an acknowledgement a step if
+it only informs.
+
+**Asking for a reason (confirm with input).** There is no port for it: `UIMessages.showInput` already returns a `String`
+and a cancelled answer is `null`. To make the text required in a **headless run**, throw `ReplayRetry` on a blank answer;
+the same question is asked again. `ReplayRetry` is handled only by the replay runtime: in ZK and in the direct mode of the
+test platform it is an unhandled exception, so an action that must behave the same everywhere asks again itself
+(call `showInput` again from the callback) instead of throwing:
+
+```java
+UIMessages.<String>showInput("Why do you void this sale?", String.class, reason -> {
+    if (reason == null || reason.isBlank()) {
+        throw new ReplayRetry("A reason is required");
+    }
+    sale.void(reason);
+});
+```
+
+**`EntityLookup` rules.** `search` and `find` must apply the same filters and the tenant (use the tenant aware
+`CrudService`): every pass of a headless run calls `find` again with the key the client sent, and a key outside the set is
+refused. Remote search is **opt-in**: the `/apps/api/lookups/{name}` endpoint answers only when `isSearchable()` returns
+`true`, because it is authenticated but not tied to an action the user may run; expose only lookups whose records every
+user of the account may see.
 
 Implement `FlowRemoteAction` directly (the low level API, see
 [`SERVER_DRIVEN_ACTION_FLOWS.md`](../design/SERVER_DRIVEN_ACTION_FLOWS.md)) only for an action that exists for REST clients

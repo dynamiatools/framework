@@ -145,6 +145,19 @@ public interface CrudControllerAPI<E> {
 	E getSelected();
 
 	/**
+	 * Gets every record the user selected in the query results: the selected rows of a multi select table, or just the
+	 * selected record. An action that works on several records (a bulk void, an export of the selection) reads it here
+	 * instead of looking into the front end. The default implementation answers with {@link #getSelected()}; a controller
+	 * with multiple selection overrides it.
+	 *
+	 * @return the selected records, in order; empty when nothing is selected
+	 */
+	default java.util.List<E> getSelection() {
+		E selected = getSelected();
+		return selected != null ? java.util.List.of(selected) : java.util.List.of();
+	}
+
+	/**
 	 * Checks if the current entity has been successfully saved.
 	 *
 	 * @return true if the entity was saved in the last operation, false otherwise

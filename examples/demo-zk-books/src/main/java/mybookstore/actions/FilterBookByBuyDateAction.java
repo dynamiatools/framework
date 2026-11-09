@@ -1,7 +1,9 @@
 package mybookstore.actions;
 
 import mybookstore.domain.Book;
+import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.ui.UIMessages;
@@ -9,6 +11,7 @@ import tools.dynamia.ui.UIMessages;
 import java.time.LocalDate;
 
 @InstallAction
+@RunsOn(ActionRuntime.HEADLESS)
 public class FilterBookByBuyDateAction extends AbstractCrudAction {
 
     public FilterBookByBuyDateAction() {

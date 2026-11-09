@@ -43,12 +43,14 @@
             <RowActions
               v-if="!readOnly"
               :row="row"
-              :actions="rowActions"
+              :actions="menuActions"
               :show-edit="!hasEditAction"
               :view="view"
               :client="client"
               :auto-execute="autoExecuteActions"
               :entity-class-name="view.getEntityClassName() ?? undefined"
+              :edit-label="editLabel"
+              :more-label="moreLabel"
               @edit="view.startEdit($event)"
               @action-executed="emit('action-executed', $event)"
               @action-response="emit('action-response', $event)"
@@ -67,8 +69,22 @@
       >
         <template #actions="{ node }">
           <slot name="node-actions" :node="node">
-            <button v-if="!readOnly" type="button" @click="view.startEdit(node.data ?? node)">Edit</button>
-            <button v-if="!readOnly" type="button" @click="view.delete(node.data ?? node)">Delete</button>
+            <RowActions
+              v-if="!readOnly"
+              :row="node.data ?? node"
+              :actions="menuActions"
+              :show-edit="!hasEditAction"
+              :view="view"
+              :client="client"
+              :auto-execute="autoExecuteActions"
+              :entity-class-name="view.getEntityClassName() ?? undefined"
+              :edit-label="editLabel"
+              :more-label="moreLabel"
+              @edit="view.startEdit($event)"
+              @action-executed="emit('action-executed', $event)"
+              @action-response="emit('action-response', $event)"
+              @action-error="emit('action-error', $event)"
+            />
           </slot>
         </template>
       </Tree>
@@ -117,6 +133,10 @@ const props = withDefaults(defineProps<{
   client?: DynamiaClient;
   /** Enables automatic SDK execution for non-local actions */
   autoExecuteActions?: boolean;
+  /** Accessible label of the row edit button (defaults to the built-in English text) */
+  editLabel?: string | undefined;
+  /** Accessible label of the row "more actions" menu button (defaults to the built-in English text) */
+  moreLabel?: string | undefined;
 }>(), { readOnly: false, autoExecuteActions: false });
 
 const emit = defineEmits<{
@@ -140,7 +160,9 @@ const resolvedActions = computed(() => {
     mergedActions.set(action.id, action);
   }
 
-  return props.view.resolveActions(Array.from(mergedActions.values()));
+  // Stable sort: actions with the same position keep the order the server (or the caller) gave them.
+  const sorted = Array.from(mergedActions.values()).sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+  return props.view.resolveActions(sorted);
 });
 
 /**
@@ -155,6 +177,8 @@ function isRowAction(action: ActionMetadata): boolean {
 }
 
 const rowActions = computed(() => resolvedActions.value.filter(isRowAction));
+// Only the actions that declare `menuSupported` go to the row menu (a server that does not send the flag lists all).
+const menuActions = computed(() => rowActions.value.filter(action => action.menuSupported !== false));
 // Save and Cancel are the form's own buttons, so they are not repeated in the toolbar.
 const toolbarActions = computed(() => resolvedActions.value.filter(
   action => !isRowAction(action) && !isSaveCrudAction(action) && !isCancelCrudAction(action),

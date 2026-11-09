@@ -41,6 +41,11 @@ public final class ReplaySession {
     private final List<Object> answers;
     private final List<ReplayInteractions.Notification> notifications = new ArrayList<>();
     private final List<DownloadSource> downloads = new ArrayList<>();
+    private String clipboardText;
+    private String pagePath;
+    private java.util.Map<String, Object> pageParams = java.util.Map.of();
+    private boolean refreshRequested;
+    private final java.util.Set<DownloadSource> inline = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
     private final List<String> consumedRefs = new ArrayList<>();
     private final List<String> consumedJobs = new ArrayList<>();
     private String redirectUrl;
@@ -238,6 +243,69 @@ public final class ReplaySession {
         if (pending == null) {
             downloads.add(source);
         }
+    }
+
+    /**
+     * Records a file the user must see instead of saving it. Like {@link #download(DownloadSource)} it is ignored once the
+     * pass has stopped at a question, and it is only published by the pass that ran to the end.
+     */
+    public void preview(DownloadSource source) {
+        if (pending == null) {
+            downloads.add(source);
+            inline.add(source);
+        }
+    }
+
+    /**
+     * Records a text for the user's clipboard. Ignored once the pass has stopped at a question; the last text wins.
+     */
+    public void copyToClipboard(String text) {
+        if (pending == null) {
+            clipboardText = text;
+        }
+    }
+
+    /**
+     * Records the page the user must go to when the action ends. Ignored once the pass has stopped at a question; the first
+     * page wins.
+     */
+    public void openPage(String path, java.util.Map<String, Object> params) {
+        if (pending == null && pagePath == null) {
+            pagePath = path;
+            pageParams = params == null ? java.util.Map.of() : java.util.Collections.unmodifiableMap(new java.util.LinkedHashMap<>(params));
+        }
+    }
+
+    /** @return the virtual path of the page the action opened, or {@code null} */
+    public String pagePath() {
+        return pagePath;
+    }
+
+    /** @return the parameters of the page the action opened */
+    public java.util.Map<String, Object> pageParams() {
+        return pageParams;
+    }
+
+    /** Records that the view must be reloaded when the action ends. Ignored once the pass has stopped at a question. */
+    public void requestRefresh() {
+        if (pending == null) {
+            refreshRequested = true;
+        }
+    }
+
+    /** @return {@code true} when the action asked to reload the view */
+    public boolean refreshRequested() {
+        return refreshRequested;
+    }
+
+    /** @return the text the action put in the clipboard, or {@code null} */
+    public String clipboardText() {
+        return clipboardText;
+    }
+
+    /** @return {@code true} when the action asked to show {@code source} instead of saving it */
+    public boolean isPreview(DownloadSource source) {
+        return inline.contains(source);
     }
 
     /**

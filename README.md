@@ -2,7 +2,6 @@
 [![GitHub Packages](https://img.shields.io/github/v/release/dynamiatools/framework?include_prereleases&label=GitHub%20Packages&logo=github)](https://github.com/orgs/dynamiatools/packages?repo_name=framework)
 [![npm](https://img.shields.io/npm/v/@dynamia-tools/sdk?label=npm&logo=npm)](https://www.npmjs.com/search?q=%40dynamia-tools)
 ![Java Version Required](https://img.shields.io/badge/java-25-blue)
-![CalVer](https://img.shields.io/badge/versioning-CalVer%20YY.MM.MINOR-blue)
 [![License](https://img.shields.io/github/license/dynamiatools/framework)](LICENSE)
 
 [![Java CI with Maven](https://github.com/dynamiatools/framework/actions/workflows/maven.yml/badge.svg)](https://github.com/dynamiatools/framework/actions/workflows/maven.yml)
@@ -16,41 +15,282 @@
 Dynamia Platform
 </h1>
 
+<p align="center"><b>Describe your business. Get a working enterprise app.</b></p>
 
+**Dynamia Platform** is a full-stack framework for building enterprise web applications fast, without giving up quality. Define your entities, describe your screens in a few lines of YAML, and the platform gives you the REST API, the metadata and the components to render complete CRUD screens in a modern **Vue 3** app, with navigation, security and multi-tenancy included. The backend runs on the JVM (**Java 25**, **Kotlin** or **Groovy**) with **Spring Boot 4**, and comes with the enterprise modules most business apps end up needing, all in one place.
 
-> **The Next Generation of DynamiaTools**
+Not a Vue fan? Dynamia can also render the whole UI on the server with **ZK**, with no JavaScript at all, or mix both in the same application.
 
-**Dynamia Platform** is a cutting-edge full-stack Java 25 framework engineered for building robust, scalable enterprise web applications. Powered by **Spring Boot 4** and **ZK 10**, this new generation consolidates the core framework with essential enterprise extensions in a unified, batteries-included platform.
+It is not a new experiment: it has been running real businesses for **13+ years**, across **10+ production applications** and **40+ reusable modules**.
 
-### 📅 CalVer Versioning
+## 🚀 Why teams choose Dynamia
 
-Starting with version **26.2.0**, Dynamia Platform adopts **Calendar Versioning (CalVer)** with the format `YY.MM.MINOR`. This means:
-- **All modules share the same version**: Core, extensions, starters, themes—everything is released together
-- **26.2.0** = First release of February 2026 (Year 26, Month 02, Release 0)
-- **26.2.1** = Second release of February 2026 (maintenance)
-- **26.3.0** = First release of March 2026
-- **Unified releases** ensure compatibility and simplify dependency management
-- No more version mismatches between platform components!
+- **Ship in days, not months.** An entity and a descriptor give you a full CRUD screen with search, filters, validation and REST endpoints.
+- **A modern frontend, ready to go.** Build with **Vue 3** and TypeScript on the official SDK and components: `DynamiaCrudPage`, forms, tables, navigation and more render straight from your backend's metadata. Prefer no JavaScript? ZK renders the same screens on the server.
+- **Your JVM language, your choice.** Write the backend in **Java**, **Kotlin** or **Groovy**: the CLI has a template for each, and any other JVM language that works with Spring Boot works here too.
+- **Write less code, keep more control.** Screens are declared in YAML; when you need something custom, you drop down to plain code, Vue components or ZK.
+- **Batteries included.** Multi-tenant SaaS, file storage, reporting, dashboards, email and SMS, finance calculations, data import and security are ready to plug in.
+- **Modular by design.** Package your domain as reusable modules (plain JARs) and share them across projects.
+- **AI-ready.** An official Claude Code plugin teaches your AI assistant the platform's conventions.
 
-**Examples**:
-- `26.10.0` → October 2026, monthly release
-- `26.10.1` → October 2026, maintenance release (fixes and small improvements)
-- `26.12.3` → December 2026, fourth release
+## ⚡ Getting Started
 
-**Where each version is published** (details in [docs/RELEASING.md](docs/RELEASING.md)):
+The fastest way to start is the **Dynamia CLI**. In a couple of minutes you will have a backend and a frontend running.
+
+### 1. Install the CLI
+
+**One line (Linux and macOS).** Installs JDK 25, Node.js and the CLI for you:
+
+```bash
+curl -fsSL https://get.dynamia.tools | bash
+```
+
+**Or with npm**, if you already have Node.js 24+, Git and JDK 25:
+
+```bash
+npm install -g @dynamia-tools/cli
+```
+
+### 2. Create your project
+
+```bash
+dynamia new
+```
+
+The wizard asks for a project name, what to generate (backend, frontend or both), the backend language (**Java**, **Kotlin** or **Groovy**), your Maven coordinates, the frontend (**Vue 3**) and your package manager. It shows a summary before generating anything.
+
+Prefer scripts or CI? Pass flags and skip every prompt:
+
+```bash
+dynamia new --name my-erp --scaffold both --backend-lang java \
+  --group-id com.acme --artifact-id erp --frontend vue --pm pnpm --yes
+```
+
+| Flag | Values |
+|---|---|
+| `--name` | Project folder name (lowercase, numbers and hyphens) |
+| `--scaffold` | `both`, `backend` or `frontend` |
+| `--backend-lang` | `java`, `kotlin` or `groovy` |
+| `--group-id`, `--artifact-id`, `--version`, `--description` | Maven coordinates |
+| `--frontend` | `vue` |
+| `--pm` | `pnpm`, `npm` or `yarn` |
+| `--yes` | Accept the summary without asking |
+| `--no-git` | Do not initialize a Git repository |
+
+### 3. Run it
+
+```
+my-erp/
+├── backend/     Spring Boot + Dynamia Platform
+└── frontend/    Vue 3 + Vite + @dynamia-tools/vue
+```
+
+```bash
+cd my-erp/backend && ./mvnw spring-boot:run      # backend on http://localhost:8080
+cd my-erp/frontend && pnpm dev                   # Vue app (use npm or yarn if you chose them)
+```
+
+The generated backend already includes Spring Data JPA with an in-memory database, so it runs out of the box. See the [CLI documentation](platform/packages/cli/README.md) for every option.
+
+## 🧭 The Dynamia Way
+
+Dynamia has one idea at its center: **your domain model drives everything else.** You work in four small steps.
+
+**1. Model your domain.** A plain JPA entity, in Java, Kotlin or Groovy. Extend `BaseEntity` to get the id, audit fields and CRUD support.
+
+```java
+@Entity
+public class Book extends BaseEntity {
+
+    @NotNull
+    private String title;
+    private BigDecimal price;
+    @ManyToOne
+    private Category category;
+    // getters and setters
+}
+```
+
+**2. Describe the screens.** A YAML view descriptor in `META-INF/descriptors/` declares the form, table, tree or filters. No templates, no boilerplate.
+
+```yaml
+# BookForm.yml
+view: form
+beanClass: mybookstore.domain.Book
+fields:
+  title:
+  category:
+  price:
+    params:
+      format: $###,###
+```
+
+**3. Register it in a module.** A `ModuleProvider` places the entity in your app's navigation with one line.
+
+```java
+@Provider
+public class LibraryModuleProvider implements ModuleProvider {
+
+    @Override
+    public Module getModule() {
+        return new Module("library", "Library")
+                .addPage(new CrudPage("books", "Books", Book.class));
+    }
+}
+```
+
+**4. Add behavior where it matters.** Validators, `CrudServiceListener`s, view customizers and **actions** (toolbar buttons and flows) hold your business rules. Actions written against the UI-neutral ports (`UIMessages`, `CrudControllerAPI`) run unchanged in ZK and for REST clients.
+
+Run the app and you get a complete screen with list, search, create, edit and delete, validation, and the matching REST endpoints, ready for a Vue or a ZK frontend. Customize only what is different about your business.
+
+> **See it working:** [`examples/demo-zk-books`](examples) is a full application following exactly these steps, and `examples/demo-vue-books` is a Vue frontend for it.
+
+### Choose your frontend
+
+| You want | Use |
+|---|---|
+| A modern, decoupled SPA | **Vue 3** with [`@dynamia-tools/vue`](https://www.npmjs.com/package/@dynamia-tools/vue) on top of the REST API and the TypeScript SDK. This is what the CLI generates |
+| A complete UI with no JavaScript | **ZK**: screens are rendered on the server from the same descriptors |
+| The best of both | **Microfrontends**: drop a Vue, React or Svelte bundle into any ZK page with `<microfrontend>` |
+
+## 🤖 Build with AI: the Claude Code plugin
+
+Working with [Claude Code](https://claude.com/claude-code)? The **`dynamia-platform`** plugin teaches Claude the platform's patterns, so the code it writes follows them: entities and `CrudService`, `ModuleProvider` and `CrudPage`, actions, YAML descriptors, ZK pages, the `@dynamia-tools` Vue packages, the extensions, and live docs read from GitHub at your project's version. It can also install the `dynamia` CLI and scaffold new projects for you.
+
+Install it from the [`dynamia-tools` plugin marketplace](https://github.com/dynamiatools/claude-plugins). Inside Claude Code:
+
+```
+/plugin marketplace add dynamiatools/claude-plugins
+/plugin install dynamia-platform@dynamia-tools
+```
+
+Or from a terminal:
+
+```bash
+claude plugin marketplace add dynamiatools/claude-plugins
+claude plugin install dynamia-platform@dynamia-tools
+```
+
+Then open Claude Code in your project and ask for what you need, or call a skill directly: `dynamia-platform:backend`, `dynamia-platform:zk-ui`, `dynamia-platform:vue-frontend`, `dynamia-platform:extensions`, `dynamia-platform:docs` or `dynamia-platform:cli`. See the [plugin README](https://github.com/dynamiatools/claude-plugins/tree/master/plugins/dynamia-platform) for the full list.
+
+## ✨ Core Capabilities
+
+- **Automatic CRUD and REST**: define entities, get full interfaces and RESTful APIs instantly
+- **Vue 3 and TypeScript SDK**: typed REST client, composables and ready-made CRUD components
+- **View descriptors**: declare forms, tables, trees and filters in YAML
+- **Any JVM language**: Java, Kotlin or Groovy, with a CLI template for each
+- **Modular architecture**: build and reuse modules (JARs) across projects
+- **Server-driven actions**: write an action once and run it in Vue, ZK or any REST client
+- **Flexible patterns**: MVC or MVVM, as you prefer
+- **Pluggable themes**: change the look and feel without touching business code
+- **Microfrontends**: embed Vue, React or Svelte bundles in ZK pages, with MVVM binding included
+- **Works with your stack**: integrates with any Java framework or library
+
+## 📦 Built-in Enterprise Extensions
+
+Add only what you need. Each extension is a dependency away, and the ones with a REST API ship a TypeScript SDK.
+
+| Extension | What you get | npm SDK |
+|---|---|---|
+| **Multi-tenancy (SaaS)** | Account isolation, per-tenant data, subscriptions and payments, status control | [`saas-sdk`](https://www.npmjs.com/package/@dynamia-tools/saas-sdk) |
+| **Entity Files** | Attach files to any entity: local disk, AWS S3 or [Buckie](https://dynamia.tools/buckie/), the lightweight file server built by Dynamia | [`files-sdk`](https://www.npmjs.com/package/@dynamia-tools/files-sdk) |
+| **Reports** | JPQL and SQL reports, CSV, Excel and PDF export, email delivery, charts and embeddable reports | [`reports-sdk`](https://www.npmjs.com/package/@dynamia-tools/reports-sdk), [`reports-vue`](https://www.npmjs.com/package/@dynamia-tools/reports-vue) |
+| **Dashboard** | Responsive dashboards with custom widgets and charts | [`dashboard-sdk`](https://www.npmjs.com/package/@dynamia-tools/dashboard-sdk), [`dashboard-vue`](https://www.npmjs.com/package/@dynamia-tools/dashboard-vue) |
+| **Email & SMS** | Email through JavaMail, SMS through AWS, templates and delivery logs | |
+| **Finances** | Invoices, credit and debit notes, quotes, multi-currency, taxes, discounts and withholdings, with deterministic results | |
+| **File Importer** | Excel and CSV imports with field mapping, validation and batch operations | |
+| **HTTP Functions** | Declarative, versioned calls to third-party APIs | [`http-functions-sdk`](https://www.npmjs.com/package/@dynamia-tools/http-functions-sdk) |
+| **Security** | Role-based access control, users, permissions and profiles, built on Spring Security | |
+
+## 📦 Add Dynamia to an Existing Spring Boot Project
+
+Already have a Spring Boot 4 application? Add the platform by hand.
+
+**Maven**
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>tools.dynamia</groupId>
+        <artifactId>tools.dynamia.app</artifactId>
+        <version>26.11.0</version>
+    </dependency>
+    <dependency>
+        <groupId>tools.dynamia</groupId>
+        <artifactId>tools.dynamia.zk</artifactId>
+        <version>26.11.0</version>
+    </dependency>
+    <dependency>
+        <groupId>tools.dynamia</groupId>
+        <artifactId>tools.dynamia.domain.jpa</artifactId>
+        <version>26.11.0</version>
+    </dependency>
+</dependencies>
+```
+
+**Gradle**
+
+```groovy
+dependencies {
+    implementation 'tools.dynamia:tools.dynamia.app:26.11.0'
+    implementation 'tools.dynamia:tools.dynamia.zk:26.11.0'
+    implementation 'tools.dynamia:tools.dynamia.domain.jpa:26.11.0'
+}
+```
+
+Then enable the platform on your main class:
+
+```java
+@SpringBootApplication
+@EnableDynamiaTools  // this is all you need
+public class MyApplication {
+
+    static void main(String[] args) {
+        SpringApplication.run(MyApplication.class, args);
+    }
+}
+```
+
+Run it with `mvn spring-boot:run` (or `gradle bootRun`) and open `http://localhost:8080`.
+
+Every Dynamia artifact, core and extensions alike, shares the same version, so you never have to match them. Extensions live under the `tools.dynamia.modules` group:
+
+```xml
+<dependency>
+    <groupId>tools.dynamia.modules</groupId>
+    <artifactId>tools.dynamia.modules.saas</artifactId>
+    <version>26.11.0</version>
+</dependency>
+```
+
+Other artifact ids: `email`, `entityfiles`, `entityfiles.s3`, `dashboard`, `reports.core`, `importer` and `security`.
+
+### TypeScript packages
+
+```bash
+npm install @dynamia-tools/sdk @dynamia-tools/vue
+```
+
+| Package | Description |
+|---|---|
+| [`@dynamia-tools/sdk`](https://www.npmjs.com/package/@dynamia-tools/sdk) | Typed client for the REST API |
+| [`@dynamia-tools/ui-core`](https://www.npmjs.com/package/@dynamia-tools/ui-core) | Framework-agnostic view, viewer and renderer core |
+| [`@dynamia-tools/vue`](https://www.npmjs.com/package/@dynamia-tools/vue) | Vue 3 plugin, components and composables |
+| [`@dynamia-tools/microfrontend-bridge`](https://www.npmjs.com/package/@dynamia-tools/microfrontend-bridge) | Typed helpers for bundles embedded with `<microfrontend>` |
+| [`@dynamia-tools/cli`](https://www.npmjs.com/package/@dynamia-tools/cli) | Project scaffolding |
+
+<details>
+<summary>Where each version is published</summary>
 
 | Version | Maven Central | GitHub Packages | npm |
 |---|---|---|---|
-| `YY.MM.0` (monthly release) | yes | yes | yes |
-| `YY.MM.N`, N > 0 (maintenance) | no | yes | yes |
+| Monthly release (`YY.MM.0`) | yes | yes | yes |
+| Maintenance release (`YY.MM.N`, N > 0) | no | yes | yes |
 | `*-SNAPSHOT` (`next` branch) | no | yes | no |
 
-Maven Central limits what an organization can publish per month, so it only receives the monthly `YY.MM.0` release. Maintenance versions are published to this repository's [GitHub Packages](https://github.com/orgs/dynamiatools/packages?repo_name=framework), which requires a GitHub token with `read:packages` even to download public packages. Unless you need a maintenance fix, use the latest `YY.MM.0` from Maven Central.
+Unless you need a maintenance fix, use the latest monthly release from Maven Central. Details are in [docs/RELEASING.md](docs/RELEASING.md).
 
-<details>
-<summary>Using a maintenance release from GitHub Packages</summary>
-
-Add the repository to your `pom.xml`:
+To use a maintenance release, add the GitHub Packages repository to your `pom.xml`:
 
 ```xml
 <repositories>
@@ -61,7 +301,7 @@ Add the repository to your `pom.xml`:
 </repositories>
 ```
 
-And a matching server in `~/.m2/settings.xml`, with a personal access token that has `read:packages`:
+and a matching server in `~/.m2/settings.xml`, with a personal access token that has `read:packages`:
 
 ```xml
 <servers>
@@ -73,395 +313,33 @@ And a matching server in `~/.m2/settings.xml`, with a personal access token that
 </servers>
 ```
 
-npm packages of every release, maintenance included, are on the public npm registry: no token needed.
+npm packages of every release are on the public npm registry, with no token needed.
 
 </details>
 
-## 🚀 What Makes Dynamia Platform Special
-
-Dynamia Platform represents a major evolution from DynamiaTools, bringing together:
-
-- **Unified Repository**: Core framework + enterprise extensions in one place
-- **Production-Ready Extensions**: Pre-integrated modules for common enterprise needs
-- **Zero-Config Philosophy**: Sensible defaults with easy customization
-- **Enterprise-Grade**: Built for scalability, multi-tenancy, and security
-- **Developer Experience**: Focus on productivity and code simplicity
-
-### 🎨 Automatic Frontend Generation
-
-By default, **Dynamia Platform automatically generates full-featured web interfaces** using **ZK Framework**, a powerful server-side component framework that eliminates the need to write JavaScript, HTML, or CSS manually. Simply define your entities and view descriptors, and ZK renders responsive, interactive UIs with zero frontend code.
-
-**Coming Soon**: In upcoming releases, Dynamia Platform will support additional **modern frontend frameworks** like **React** and **Angular**. **Vue 3** is already supported via [`@dynamia-tools/vue`](https://www.npmjs.com/package/@dynamia-tools/vue). You can leverage our **TypeScript SDK** and pre-built components to build modern, decoupled SPAs that consume Dynamia's RESTful APIs.
-
-## ✨ Core Capabilities
-
-- **Automatic CRUD Generation**: Define entities, get full-featured interfaces instantly
-- **Automatic REST Endpoints**: RESTful APIs generated from your domain models
-- **Modular Architecture**: Build and reuse modules (JARs) across projects
-- **DRY Principle**: Write once, use everywhere approach
-- **View Descriptors**: Declare UIs with YAML instead of verbose code
-- **Modern Web Stack**: HTML5, CSS3, Bootstrap via ZK Framework
-- **Flexible Patterns**: Use MVC or MVVM as per your preference
-- **Theme Support**: Customize look and feel with pluggable themes
-- **Microfrontend Embedding**: Drop a Vue/React/Svelte bundle into any ZK page with `<microfrontend>`, MVVM binding included
-- **Seamless Integration**: Works with any Java framework or library
-
-## 🗺️ Roadmap
-
-### 📋 Short-Term Goals
-
-We're actively working on making Dynamia Platform more accessible, flexible, and developer-friendly. Here's what's coming:
-
-#### 📚 **Enhanced Documentation**
-- Comprehensive guides and tutorials
-- Real-world use cases and examples
-- API reference improvements
-- Video tutorials and screencasts
-- Interactive documentation with live code samples
-
-#### 🌐 **Website Improvements**
-- Modernized dynamia.tools website
-- Interactive playground for testing features
-- Community showcase and success stories
-- Regular blog posts with tips and best practices
-- Better search and navigation
-
-#### 📦 **TypeScript SDK**
-A complete TypeScript/JavaScript package ecosystem for frontend development, available on npm:
-
-| Package | Description |
-|---|---|
-| **[`@dynamia-tools/sdk`](https://www.npmjs.com/package/@dynamia-tools/sdk)** | Core client library for REST API interaction |
-| **[`@dynamia-tools/ui-core`](https://www.npmjs.com/package/@dynamia-tools/ui-core)** | Framework-agnostic view/viewer/renderer core |
-| **[`@dynamia-tools/vue`](https://www.npmjs.com/package/@dynamia-tools/vue)** | Vue 3 composables and components for reactive integration |
-| **[`@dynamia-tools/microfrontend-bridge`](https://www.npmjs.com/package/@dynamia-tools/microfrontend-bridge)** | Typed helpers for bundles embedded via `<microfrontend>` |
-| **[`@dynamia-tools/cli`](https://www.npmjs.com/package/@dynamia-tools/cli)** | CLI tool for scaffolding Dynamia Platform projects |
-| **[`@dynamia-tools/dashboard-sdk`](https://www.npmjs.com/package/@dynamia-tools/dashboard-sdk)** · **[`dashboard-vue`](https://www.npmjs.com/package/@dynamia-tools/dashboard-vue)** | Dashboard extension client and Vue 3 components |
-| **[`@dynamia-tools/reports-sdk`](https://www.npmjs.com/package/@dynamia-tools/reports-sdk)** · **[`reports-vue`](https://www.npmjs.com/package/@dynamia-tools/reports-vue)** | Reports extension client and Vue 3 components |
-| **[`@dynamia-tools/saas-sdk`](https://www.npmjs.com/package/@dynamia-tools/saas-sdk)** · **[`files-sdk`](https://www.npmjs.com/package/@dynamia-tools/files-sdk)** · **[`http-functions-sdk`](https://www.npmjs.com/package/@dynamia-tools/http-functions-sdk)** | Clients for the SaaS, Entity Files and HTTP Functions extensions |
-
-```bash
-# Install the core SDK
-npm install @dynamia-tools/sdk
-
-# Install the Vue adapter
-npm install @dynamia-tools/vue
-
-# Install the CLI globally
-npm install -g @dynamia-tools/cli
-```
-
-- Full type safety and IntelliSense support
-- Automatic API client generation from backend schema
-- WebSocket support for real-time features
-
-#### 🎨 **Vue Integration** ✅ Available
-Modern Vue 3 frontend integration with:
-- Vue 3 + TypeScript + Vite
-- Pre-configured integration with Dynamia Platform APIs via `@dynamia-tools/vue`
-- Responsive design with Tailwind CSS
-- Authentication and authorization out of the box
-- CRUD components library
-- Form validation and data binding
-- Real-time updates with WebSocket
-- Dashboard and reporting components
-
-#### 🧩 **Microfrontend Embedding** ✅ Available
-Drop external JS bundles (Vue, React, Svelte, plain JS) directly into a ZK page via `<microfrontend>`, no iframe:
-- Three mounting modes: custom element, single-spa-style `mountFn`/`unmountFn`, and auto-discovery of a Vite-style `dist/` build
-- Full ZK MVVM support — `@bind`/`@command` work out of the box, including binding whole Java objects as JSON
-- Update-in-place on prop changes, shadow-DOM CSS isolation, server↔bundle events, and automatic tenant/locale/auth context injection
-- Typed bundle-side helpers via [`@dynamia-tools/microfrontend-bridge`](https://www.npmjs.com/package/@dynamia-tools/microfrontend-bridge)
-
-#### 🔗 **Frontend Framework Integration**
-Seamless integration with popular frameworks:
-- **React** - Components and hooks for React apps
-- **Vue** - Full Vue 3 template and composables
-- **Angular** - Services and components for Angular projects
-- **Svelte** - Stores and components for Svelte
-- **Next.js / Nuxt** - SSR support and optimizations
-- Zero-config setup with sensible defaults
-- Automatic API discovery and client generation
-- Built-in authentication flows
-
-#### ⚡ **Automation & Developer Experience**
-- **[`@dynamia-tools/cli`](https://www.npmjs.com/package/@dynamia-tools/cli)** ✅ CLI tool for scaffolding projects and modules
-- Code generators for entities, views, and endpoints
-- Hot reload for view descriptors
-- Development dashboard for monitoring
-- Docker Compose templates for quick setup
-- GitHub Actions templates for CI/CD
-- Automated testing utilities
-
-### 🔮 Long-Term Vision
-
-- **GraphQL Support** - Alternative to REST with automatic schema generation
-- **Microservices Toolkit** - Tools for building distributed systems
-- **Cloud-Native Features** - Enhanced Kubernetes support, service mesh integration
-- **AI-Powered Code Generation** - Generate CRUD, forms, and reports from natural language
-- **Mobile SDK** - Native iOS and Android libraries
-- **Low-Code Builder** - Visual editor for building apps without coding
-
----
-
-### 🤝 Help Shape the Future
-
-We value community feedback! If you have ideas, suggestions, or want to contribute to any of these initiatives:
-- 💬 Join discussions on [GitHub Discussions](https://github.com/dynamiatools/framework/discussions)
-- 🐛 Report issues or request features on [GitHub Issues](https://github.com/dynamiatools/framework/issues)
-- 🌟 Star the project and spread the word!
-
----
-## 📦 Built-in Enterprise Extensions
-
-Dynamia Platform includes powerful extensions in the `/extensions` folder:
-
-### **Multi-Tenancy (SaaS)**
-Full-featured SaaS support with:
-- Account management and isolation
-- Payment and subscription handling
-- Per-tenant data segregation
-- Status monitoring and control
-- 📦 **npm:** [`@dynamia-tools/saas-sdk`](https://www.npmjs.com/package/@dynamia-tools/saas-sdk) — TypeScript/JavaScript client SDK for the SaaS REST API
-
-### **Entity File Management**
-Attach files to any entity with:
-- Local disk storage
-- **AWS S3 integration** for cloud storage
-- **[Buckie](https://dynamia.tools/buckie/) integration** — the lightweight, filesystem-native file server built by Dynamia (see [GitHub](https://github.com/dynamiatools/buckie) · [npm `@dynamia-tools/buckie`](https://www.npmjs.com/package/@dynamia-tools/buckie))
-- Metadata persistence
-- Automatic file handling
-- 📦 **npm:** [`@dynamia-tools/files-sdk`](https://www.npmjs.com/package/@dynamia-tools/files-sdk) — TypeScript/JavaScript client SDK for the Entity Files REST API
-
-### **Email & SMS**
-Professional communication capabilities:
-- Email sending via JavaMail
-- SMS delivery via AWS
-- Template management
-- Account configuration
-- Delivery logging and tracking
-
-### **Dashboard**
-Beautiful, responsive dashboards featuring:
-- Custom widget system
-- Chart integration
-- Responsive layouts
-- Real-time data display
-
-### **Reporting**
-Comprehensive reporting framework:
-- JPQL and native SQL queries
-- Datasource management
-- Export to CSV, Excel, PDF
-- Email delivery
-- Chart visualization
-- Embeddable reports
-- 📦 **npm:** [`@dynamia-tools/reports-sdk`](https://www.npmjs.com/package/@dynamia-tools/reports-sdk) — TypeScript/JavaScript client SDK for the Reports REST API
-
-### **Finance Framework**
-Domain-driven financial calculations for:
-- Invoices, credit/debit notes
-- Purchase orders and quotes
-- Multi-currency support
-- Tax, discount, and withholding calculations
-- Auditable, deterministic results
-
-### **File Importer**
-Streamlined data import workflows:
-- Excel/CSV file processing
-- Field mapping
-- Validation and error handling
-- Batch operations
-
-### **Security**
-Enterprise authentication and authorization:
-- Role-based access control (RBAC)
-- User and permission management
-- Security profiles
-- Integration with Spring Security
-
-## 🚀 Quick Start
-
-### Prerequisites
-- **Java 25** or higher
-- Maven 3.9+ or Gradle 8+
-- Your favorite IDE (IntelliJ IDEA, Eclipse, VS Code)
-
-### Installation
-
-1. **Create a Spring Boot Project**
-   
-   Visit [start.spring.io](https://start.spring.io) or [click here for a preconfigured template](https://start.spring.io/#!type=maven-project&language=java&packaging=jar&jvmVersion=25&groupId=com.example&artifactId=my-dynamia-app&name=MyApp&description=Dynamia%20Platform%20Application&packageName=com.example.myapp&dependencies=web,data-jpa,h2)
-   
-   Select:
-   - **Java 25**
-   - **Spring Boot 4.x**
-   - **Spring Web**
-   - **Spring Data JPA**
-   - **H2 Database** (or your preferred database)
-   - Your preferred language (Java, Kotlin, or Groovy)
-
-2. **Add Dynamia Platform Dependencies**
-
-   **Maven** (`pom.xml`)
-   ```xml
-   <dependencies>
-       <dependency>
-           <groupId>tools.dynamia</groupId>
-           <artifactId>tools.dynamia.app</artifactId>
-           <version>26.10.0</version>
-       </dependency>
-   
-       <dependency>
-           <groupId>tools.dynamia</groupId>
-           <artifactId>tools.dynamia.zk</artifactId>
-           <version>26.10.0</version>
-       </dependency>
-   
-       <dependency>
-           <groupId>tools.dynamia</groupId>
-           <artifactId>tools.dynamia.domain.jpa</artifactId>
-           <version>26.10.0</version>
-       </dependency>
-   </dependencies>
-   ```
-
-   **Gradle** (`build.gradle`)
-   ```groovy
-   dependencies {
-       implementation 'tools.dynamia:tools.dynamia.app:26.10.0'
-       implementation 'tools.dynamia:tools.dynamia.zk:26.10.0'
-       implementation 'tools.dynamia:tools.dynamia.domain.jpa:26.10.0'
-   }
-   ```
-
-3. **Enable Dynamia Platform**
-
-   Add the `@EnableDynamiaTools` annotation to your main application class:
-
-   ```java
-   import org.springframework.boot.SpringApplication;
-   import org.springframework.boot.autoconfigure.SpringBootApplication;
-   import tools.dynamia.app.EnableDynamiaTools;
-   
-   @SpringBootApplication
-   @EnableDynamiaTools  // ← This is all you need!
-   public class MyApplication {
-   
-       static void main(String[] args) {
-           SpringApplication.run(MyApplication.class, args);
-       }
-   }
-   ```
-
-4. **Run Your Application**
-   
-   ```bash
-   mvn spring-boot:run
-   # or
-   gradle bootRun
-   ```
-
-5. **Access Your Application**
-   
-   Open your browser and navigate to: `http://localhost:8080`
-   
-   You'll see a fully functional web application with the Dynamical theme!
-
-### Adding Extensions
-
-To use any of the built-in extensions, simply add their dependencies. **All extensions now share the same version (26.10.0)** thanks to unified CalVer:
-
-```xml
-<!-- Multi-tenancy / SaaS -->
-<dependency>
-    <groupId>tools.dynamia.modules</groupId>
-    <artifactId>tools.dynamia.modules.saas</artifactId>
-    <version>26.10.0</version>
-</dependency>
-
-<!-- Email & SMS -->
-<dependency>
-    <groupId>tools.dynamia.modules</groupId>
-    <artifactId>tools.dynamia.modules.email</artifactId>
-    <version>26.10.0</version>
-</dependency>
-
-<!-- Entity Files with S3 Support -->
-<dependency>
-    <groupId>tools.dynamia.modules</groupId>
-    <artifactId>tools.dynamia.modules.entityfiles</artifactId>
-    <version>26.10.0</version>
-</dependency>
-<dependency>
-    <groupId>tools.dynamia.modules</groupId>
-    <artifactId>tools.dynamia.modules.entityfiles.s3</artifactId>
-    <version>26.10.0</version>
-</dependency>
-
-<!-- Dashboard -->
-<dependency>
-    <groupId>tools.dynamia.modules</groupId>
-    <artifactId>tools.dynamia.modules.dashboard</artifactId>
-    <version>26.10.0</version>
-</dependency>
-
-<!-- Reporting -->
-<dependency>
-    <groupId>tools.dynamia.modules</groupId>
-    <artifactId>tools.dynamia.modules.reports.core</artifactId>
-    <version>26.10.0</version>
-</dependency>
-
-<!-- File Importer -->
-<dependency>
-    <groupId>tools.dynamia.modules</groupId>
-    <artifactId>tools.dynamia.modules.importer</artifactId>
-    <version>26.10.0</version>
-</dependency>
-
-<!-- Security -->
-<dependency>
-    <groupId>tools.dynamia.modules</groupId>
-    <artifactId>tools.dynamia.modules.security</artifactId>
-    <version>26.10.0</version>
-</dependency>
-```
-
-For extensions that expose a REST API, install their **TypeScript/JavaScript SDK** from npm:
-
-```bash
-# Multi-tenancy / SaaS SDK
-npm install @dynamia-tools/saas-sdk
-
-# Entity Files SDK (works with local, S3 and Buckie storage)
-npm install @dynamia-tools/files-sdk
-
-# Reporting SDK
-npm install @dynamia-tools/reports-sdk
-
-# Buckie file server (standalone or as Dynamia storage backend)
-npm install @dynamia-tools/buckie
-```
-
-> **💡 Pro Tip**: With CalVer, all Dynamia Platform components use the same version. Just use `26.10.0` for everything!
-
-> **Note**: All artifacts are available on [Maven Central](https://central.sonatype.com/search?q=g%3Atools.dynamia) and npm packages on [npmjs.com](https://www.npmjs.com/search?q=%40dynamia-tools)
-
 ## 📚 Documentation
 
-Comprehensive guides, tutorials, and API documentation are available at:
+Guides, tutorials and API reference live at **[dynamia.tools](https://dynamia.tools)**.
 
-**🌐 [https://dynamia.tools](https://dynamia.tools)**
+- **[Getting Started Guide](https://dynamia.tools/getting-started/)**: your first Dynamia app in minutes
+- **[Core Concepts](https://dynamia.tools/docs/)**: the framework architecture
+- **[View Descriptors](https://dynamia.tools/docs/view-descriptors/)**: declarative UI with YAML
+- **[API Reference](https://dynamia.tools/api/)**
+- **[Extensions Guide](https://dynamia.tools/extensions/)**
+- **[Backend developer docs](docs/backend/README.md)** and **[frontend docs](docs/frontend/README.md)** in this repository
+- **[Examples](examples)**: sample applications
 
-### Key Resources
+## 🗺️ Where We Are Heading
 
-- **[Getting Started Guide](https://dynamia.tools/getting-started/)** - Your first Dynamia app in 5 minutes
-- **[Core Concepts](https://dynamia.tools/docs/)** - Understanding the framework architecture
-- **[View Descriptors](https://dynamia.tools/docs/view-descriptors/)** - Declarative UI with YAML
-- **[API Reference](https://dynamia.tools/api/)** - Complete API documentation
-- **[Extensions Guide](https://dynamia.tools/extensions/)** - Working with built-in modules
-- **[Examples](https://github.com/dynamiatools/framework/tree/main/examples)** - Sample applications
+Dynamia keeps growing. Here is what we are working on:
+
+- **Developer experience**: more generators, hot reload for view descriptors, Docker Compose and CI templates
+- **More frontends**: React and other frameworks on top of the same SDK, and the React option in the CLI
+- **Richer docs and website**: tutorials, an interactive playground and community showcases
+- **Beyond REST**: GraphQL, a microservices toolkit and cloud-native features
+- **AI-assisted development**: code generation for CRUDs, forms and reports from natural language
+
+Have an idea? Join the [GitHub Discussions](https://github.com/dynamiatools/framework/discussions), open an [issue](https://github.com/dynamiatools/framework/issues), or just star the project.
 
 ## 🏗️ Building from Source
 
@@ -519,72 +397,20 @@ framework/
 └── docs/               # Project docs (see RELEASING.md)
 ```
 
-## 📜 Version History & Evolution
+## 📜 A Mature Platform
 
-Dynamia Platform has evolved over **13+ years** of continuous development at [Dynamia Soluciones IT](https://www.dynamiasoluciones.com), powering **10+ production projects** and **40+ modules** in real-world enterprise environments.
+Dynamia Platform grew over **13+ years** at [Dynamia Soluciones IT](https://www.dynamiasoluciones.com), used by companies across **Latin America**, the **USA** and **Europe** in many industries.
 
-### 🎯 Evolution Journey
+| Era | Years | Highlights |
+|---|---|---|
+| **v1.x Foundation** | 2011-2013 | An internal library that hid the complexity of Spring and ZK |
+| **v2.x Automation** | 2014-2016 | View descriptors, automatic CRUD and the navigation framework |
+| **v3.x Open Source** | 2017-2019 | A full reorganization and the first public release |
+| **v4.x Modernization** | 2020-2022 | Java 11+, Spring Boot integration and a growing community |
+| **v5.x Platform** | 2023-2025 | Core and extensions together, Java 21, Spring Boot 3, multi-tenancy, reporting and dashboards |
+| **v26.x Today** | 2026+ | Java 25, Spring Boot 4, one version for every module, Vue and microfrontends, the CLI and the Claude Code plugin |
 
-#### **v1.x - Foundation** (2011-2013)
-The beginning: Internal utility library focused on:
-- Hiding Spring and ZK complexity
-- Database abstraction and configuration
-- Service layer patterns
-- Basic modular architecture
-
-#### **v2.x - Automation** (2014-2016)
-Revolutionary leap with:
-- **View Descriptors**: YAML-based UI declaration
-- **Automatic CRUD generation**: Zero-code interfaces
-- **Navigation framework**: Modular page system
-- Focus on maintainability over code generation
-
-#### **v3.x - Open Source** (2017-2019)
-Major refactoring and public release:
-- Complete code reorganization
-- Performance optimizations
-- First public open-source release
-- Community-driven development begins
-
-#### **v4.x - Modernization** (2020-2022)
-Java 11+ and ecosystem update:
-- Java 11+ support
-- Spring Boot integration
-- Modern framework compatibility
-- Enhanced documentation and demos
-- Growing community adoption
-
-#### **v5.x - Platform Era** (2023-2025)
-**The Dynamia Platform Era** - Enterprise-ready unified platform:
-- ☕ **Java 21** - Latest LTS features
-- 🚀 **Spring Boot 3** - Modern Spring ecosystem
-- 🎨 **ZK 10** - Advanced UI framework
-- 🏢 **Unified Repository** - Core + Extensions together
-- 📦 **Production Extensions** - Battle-tested enterprise modules
-- 🔐 **Security First** - Built-in authentication & authorization
-- ☁️ **Cloud Ready** - AWS integration, containerization support
-- 📊 **Enterprise Features** - Multi-tenancy, reporting, dashboards
-
-#### **v26.x - CalVer Generation** (2026+)
-**The Modern Era** - Simplified versioning and cutting-edge technology:
-- 📅 **CalVer Versioning** (YY.MM.MINOR) - All modules unified under same version (Year.Month.Release)
-- ☕ **Java 25** - Latest Java innovations and performance
-- 🚀 **Spring Boot 4** - Next-gen Spring ecosystem
-- 🎨 **ZK 10+** - Modern web UI capabilities
-- 🔄 **Synchronized Releases** - Core, extensions, starters, and themes share the same version
-- 🎯 **Simplified Dependencies** - One version to rule them all (e.g., `26.10.0` for October 2026)
-- ⚡ **Enhanced Performance** - Optimized for modern JVM and cloud environments
-- 🛡️ **Production Hardened** - Battle-tested in enterprise environments
-
-### 🏆 Production Proven
-
-- **13+ years** of continuous development
-- **10+ enterprise applications** in production
-- **40+ reusable modules** built with the framework
-- Used by companies across **Latin America**, **USA** and **Europe**
-- Powers critical business systems in various industries
-
-This is not a new framework—it's a **mature, battle-tested platform** that's been serving real businesses for over a decade. Now open-source and ready for the global developer community.
+This is not a new framework: it is a battle-tested platform, now open source and ready for the global developer community.
 
 ## 🤝 Contributing
 

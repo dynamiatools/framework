@@ -30,4 +30,18 @@ public interface ChoicesProvider {
      * or chooses nothing.
      */
     <T> void choose(ChoiceOptions<T> options, Consumer<List<T>> onChoice);
+
+    /**
+     * Lets the user search and pick one record of a big catalog. {@code onPick} is not called when the user cancels. The
+     * default implementation refuses, so an adapter without a searchable picker fails loudly.
+     *
+     * @param title   title of the picker, may be null
+     * @param lookup  where the records come from
+     * @param onPick  receives the record the user picked
+     * @param <T>     the record type
+     * @throws UnsupportedOperationException when the front end cannot search
+     */
+    default <T> void pickEntity(String title, EntityLookup<T> lookup, Consumer<T> onPick) {
+        throw new UnsupportedOperationException(getClass().getSimpleName() + " cannot search " + lookup.name());
+    }
 }

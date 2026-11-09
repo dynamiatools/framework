@@ -33,6 +33,7 @@ import { VueTableRenderer } from './renderers/VueTableRenderer.js';
 import { VueCrudRenderer } from './renderers/VueCrudRenderer.js';
 import { VueButtonActionRenderer } from './action-renderers/VueButtonActionRenderer.js';
 import { VueFindActionRenderer } from './action-renderers/VueFindActionRenderer.js';
+import { VueControlActionRenderer } from './action-renderers/VueControlActionRenderer.js';
 import { VueFiltersActionRenderer } from './action-renderers/VueFiltersActionRenderer.js';
 import ViewerComponent from './components/Viewer.vue';
 import FormComponent from './components/Form.vue';
@@ -87,6 +88,7 @@ export const DynamiaVue = {
     ]);
     ActionRendererRegistry.register('find', VueFindActionRenderer);
     ActionRendererRegistry.register('filters', VueFiltersActionRenderer);
+    ActionRendererRegistry.register('control', VueControlActionRenderer);
 
     // Register view factories
     ViewRendererRegistry.registerViewFactory(

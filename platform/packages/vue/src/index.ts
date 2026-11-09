@@ -17,6 +17,9 @@ export { VueTableRenderer } from './renderers/VueTableRenderer.js';
 export { VueCrudRenderer } from './renderers/VueCrudRenderer.js';
 export { VueFieldRenderer } from './renderers/VueFieldRenderer.js';
 export { VueButtonActionRenderer } from './action-renderers/VueButtonActionRenderer.js';
+export { VueControlActionRenderer } from './action-renderers/VueControlActionRenderer.js';
+export { controlFilter, resolvePreset } from './actions/controlFilter.js';
+export type { ControlValue } from './actions/controlFilter.js';
 
 // ── Actions ────────────────────────────────────────────────────────────────
 export {

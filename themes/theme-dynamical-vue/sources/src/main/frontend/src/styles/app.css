@@ -537,6 +537,29 @@
   @apply sr-only;
 }
 
+/* Portable toolbar controls (Control: text, choice, date, date range): same look as the search field. */
+.dynamia-control {
+  @apply inline-flex items-center;
+}
+.dynamia-control-input {
+  @apply rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm text-gray-800 dark:text-white/90 shadow-sm transition-colors;
+  @apply focus:border-transparent focus:ring-2 focus:ring-[color:var(--skin-primary)] focus:outline-none;
+}
+.dynamia-control-text .dynamia-control-input {
+  @apply w-44;
+}
+/* A date range reads as one field: two inputs inside a single bordered group. */
+.dynamia-control-date_range {
+  @apply gap-0 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm;
+  @apply focus-within:ring-2 focus-within:ring-[color:var(--skin-primary)];
+}
+.dynamia-control-date_range .dynamia-control-input {
+  @apply rounded-none border-0 bg-transparent shadow-none focus:ring-0;
+}
+.dynamia-control-date_range .dynamia-control-to {
+  @apply border-l border-gray-300 dark:border-gray-700;
+}
+
 /* Advanced filters: a popover under the button. */
 .dynamia-action-filters {
   @apply relative;

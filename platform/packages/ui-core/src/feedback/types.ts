@@ -58,8 +58,11 @@ export interface PromptOptions {
   defaultValue?: string;
   /** Placeholder shown in the empty input. */
   placeholder?: string;
-  /** `'text'` (default) or `'number'` — mirrors the flow's `INPUT` step answer being a String/Number. */
-  inputType?: 'text' | 'number';
+  /**
+   * What to ask for: `'text'` (default), `'number'`, `'date'` (answer `YYYY-MM-DD`) or `'daterange'`
+   * (answer `start/end`, each an ISO date; either side may be empty for an open range).
+   */
+  inputType?: 'text' | 'number' | 'date' | 'daterange';
   /** Label for the confirming button. Defaults to `'OK'`. */
   confirmLabel?: string;
   /** Label for the cancelling button. Defaults to `'Cancel'`. */

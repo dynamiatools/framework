@@ -86,3 +86,37 @@ describe('CrudResourceApi', () => {
     expect(init.method).toBe('DELETE');
   });
 });
+
+describe('CrudResourceApi.find', () => {
+  it('posts the spec as JSON to /find and normalises the page', async () => {
+    const fetchMock = mockFetch(200, rawPageResponse([{ id: 1, title: 'Clean Code' }], 1, 20));
+    const client = makeClient(fetchMock);
+
+    const result = await client.crud('library/books').find({
+      filters: [{ field: 'publishDate', op: 'between', value: ['2026-01-01', null] }],
+      sort: [{ field: 'title', dir: 'desc' }],
+      size: 20,
+    });
+
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toContain('/api/library/books/find');
+    expect(init.method).toBe('POST');
+    expect(JSON.parse(init.body as string)).toEqual({
+      filters: [{ field: 'publishDate', op: 'between', value: ['2026-01-01', null] }],
+      sort: [{ field: 'title', dir: 'desc' }],
+      size: 20,
+    });
+    expect(result.content).toEqual([{ id: 1, title: 'Clean Code' }]);
+    expect(result.pageSize).toBe(20);
+  });
+
+  it('sends an empty query when called without a spec', async () => {
+    const fetchMock = mockFetch(200, rawPageResponse([]));
+    const client = makeClient(fetchMock);
+
+    await client.crud('books').find();
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(init.body as string)).toEqual({});
+  });
+});

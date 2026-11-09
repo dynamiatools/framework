@@ -6,6 +6,8 @@ import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.ActionRuntimes;
 import tools.dynamia.actions.Action;
 import tools.dynamia.actions.ClassAction;
+import tools.dynamia.actions.Control;
+import tools.dynamia.actions.HeadlessActionRenderer;
 import tools.dynamia.actions.RemoteAction;
 import tools.dynamia.app.controllers.ApplicationMetadataController;
 import tools.dynamia.commons.Streams;
@@ -35,6 +37,9 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ActionMetadata extends BasicMetadata {
 
+    /** Value of {@code renderer} for an action drawn from its {@code control}: a stable key, not a class name. */
+    public static final String CONTROL_RENDERER = "control";
+
     /**
      * The logical group to which this action belongs, used for UI organization.
      */
@@ -44,6 +49,13 @@ public class ActionMetadata extends BasicMetadata {
      * The fully qualified class name of the renderer used to display this action.
      */
     private String renderer;
+
+    /**
+     * What a front end must draw in the toolbar for an action that is a filter or a similar control instead of a button, set
+     * when the action's renderer is a {@link HeadlessActionRenderer}; null otherwise. In that case {@link #renderer} is
+     * {@link #CONTROL_RENDERER}, not a class name.
+     */
+    private Control control;
 
     /**
      * List of class names where this action is applicable. Used for filtering actions by context.
@@ -64,6 +76,8 @@ public class ActionMetadata extends BasicMetadata {
     private String type;
     private String className;
     private String runtime;
+    private boolean menuSupported;
+    private double position;
 
     /**
      * Default constructor for serialization and manual instantiation.
@@ -86,6 +100,7 @@ public class ActionMetadata extends BasicMetadata {
         setDescription(action.getLocalizedDescription());
         setIcon(action.getImage());
         this.runtime = ActionRuntimes.of(action).name();
+        this.position = action.getPosition();
         if (action instanceof RemoteAction) {
             setEndpoint(ApplicationMetadataController.PATH + "/actions/execute/" + getId());
         }
@@ -96,13 +111,20 @@ public class ActionMetadata extends BasicMetadata {
             default -> "Action";
         });
         var actionRenderer = action.getRenderer();
-        this.renderer = actionRenderer != null ? actionRenderer.getClass().getName() : null;
+        if (actionRenderer instanceof HeadlessActionRenderer headless) {
+            this.control = headless.getControl();
+            this.renderer = CONTROL_RENDERER;
+        } else {
+            this.renderer = actionRenderer != null ? actionRenderer.getClass().getName() : null;
+        }
         this.group = action.getGroup() != null ? action.getGroup().getName() : null;
 
         if (action instanceof CrudAction crudAction) {
             this.applicableStates = Streams.mapAndCollect(crudAction.getApplicableStates(), Enum::name);
+            this.menuSupported = crudAction.isMenuSupported();
         } else if (action instanceof CrudRemoteAction crudRemoteAction) {
             this.applicableStates = Streams.mapAndCollect(crudRemoteAction.getApplicableStates(), Enum::name);
+            this.menuSupported = crudRemoteAction.isMenuSupported();
         }
 
         if (action instanceof ClassAction classAction) {
@@ -130,6 +152,29 @@ public class ActionMetadata extends BasicMetadata {
         this.runtime = runtime;
     }
 
+    /**
+     * @return whether a front end lists this action in the context menu of a record; only meaningful for crud actions
+     */
+    public boolean isMenuSupported() {
+        return menuSupported;
+    }
+
+    public void setMenuSupported(boolean menuSupported) {
+        this.menuSupported = menuSupported;
+    }
+
+    /**
+     * @return where the action goes among the others of its list, lower first; the server publishes the actions
+     * already sorted by it, and a front end that merges actions of its own sorts by it again
+     */
+    public double getPosition() {
+        return position;
+    }
+
+    public void setPosition(double position) {
+        this.position = position;
+    }
+
     public String getGroup() {
         return group;
     }
@@ -144,7 +189,19 @@ public class ActionMetadata extends BasicMetadata {
     }
 
     /**
-     * Returns the fully qualified class name of the renderer for this action.
+     * @return the control a front end draws for this action, or null when it is not a control
+     */
+    public Control getControl() {
+        return control;
+    }
+
+    public void setControl(Control control) {
+        this.control = control;
+    }
+
+    /**
+     * Returns the fully qualified class name of the renderer for this action, or {@link #CONTROL_RENDERER} when the action is
+     * a {@link Control}.
      *
      * @return the renderer class name
      */
