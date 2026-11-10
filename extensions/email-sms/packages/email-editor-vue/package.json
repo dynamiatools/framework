@@ -45,7 +45,8 @@
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "build:page": "vite build -c vite.page.config.ts"
   },
   "publishConfig": {
     "access": "public",
