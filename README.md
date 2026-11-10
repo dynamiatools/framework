@@ -213,17 +213,17 @@ Already have a Spring Boot 4 application? Add the platform by hand.
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.app</artifactId>
-        <version>26.11.0</version>
+        <version>26.11.1</version>
     </dependency>
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.zk</artifactId>
-        <version>26.11.0</version>
+        <version>26.11.1</version>
     </dependency>
     <dependency>
         <groupId>tools.dynamia</groupId>
         <artifactId>tools.dynamia.domain.jpa</artifactId>
-        <version>26.11.0</version>
+        <version>26.11.1</version>
     </dependency>
 </dependencies>
 ```
@@ -232,9 +232,9 @@ Already have a Spring Boot 4 application? Add the platform by hand.
 
 ```groovy
 dependencies {
-    implementation 'tools.dynamia:tools.dynamia.app:26.11.0'
-    implementation 'tools.dynamia:tools.dynamia.zk:26.11.0'
-    implementation 'tools.dynamia:tools.dynamia.domain.jpa:26.11.0'
+    implementation 'tools.dynamia:tools.dynamia.app:26.11.1'
+    implementation 'tools.dynamia:tools.dynamia.zk:26.11.1'
+    implementation 'tools.dynamia:tools.dynamia.domain.jpa:26.11.1'
 }
 ```
 
@@ -259,7 +259,7 @@ Every Dynamia artifact, core and extensions alike, shares the same version, so y
 <dependency>
     <groupId>tools.dynamia.modules</groupId>
     <artifactId>tools.dynamia.modules.saas</artifactId>
-    <version>26.11.0</version>
+    <version>26.11.1</version>
 </dependency>
 ```
 
