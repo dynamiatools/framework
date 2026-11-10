@@ -1039,6 +1039,116 @@
         "x": true
       },
       "expected": "{{#if x}}boom{{/if}}!"
+    },
+    {
+      "group": "dates",
+      "name": "default pattern of an ISO date",
+      "template": "${d|date}",
+      "data": {
+        "d": "2026-11-01"
+      },
+      "expected": "01/11/2026"
+    },
+    {
+      "group": "dates",
+      "name": "date and time without zone",
+      "template": "${d|date:yyyy-MM-dd HH:mm}",
+      "data": {
+        "d": "2026-11-01T14:30:00"
+      },
+      "expected": "2026-11-01 14:30"
+    },
+    {
+      "group": "dates",
+      "name": "date and time with seconds and fraction",
+      "template": "${d|date:HH:mm:ss}",
+      "data": {
+        "d": "2026-11-01T14:30:15.250"
+      },
+      "expected": "14:30:15"
+    },
+    {
+      "group": "dates",
+      "name": "month and weekday names in English",
+      "template": "${d|date:EEEE, MMMM d, yyyy}",
+      "data": {
+        "d": "2026-11-01"
+      },
+      "expected": "Sunday, November 1, 2026",
+      "locale": "en-US"
+    },
+    {
+      "group": "dates",
+      "name": "month and weekday names in Spanish with quoted text",
+      "template": "${d|date:EEEE d 'de' MMMM 'de' yyyy}",
+      "data": {
+        "d": "2026-11-01"
+      },
+      "expected": "domingo 1 de noviembre de 2026",
+      "locale": "es-CO"
+    },
+    {
+      "group": "dates",
+      "name": "two digit year and month number",
+      "template": "${d|date:d/M/yy}",
+      "data": {
+        "d": "2026-11-01"
+      },
+      "expected": "1/11/26"
+    },
+    {
+      "group": "dates",
+      "name": "12 hour clock",
+      "template": "${d|date:hh:mm}",
+      "data": {
+        "d": "2026-11-01T14:30:00"
+      },
+      "expected": "02:30"
+    },
+    {
+      "group": "dates",
+      "name": "midnight on a 12 hour clock",
+      "template": "${d|date:h}",
+      "data": {
+        "d": "2026-11-01T00:05:00"
+      },
+      "expected": "12"
+    },
+    {
+      "group": "dates",
+      "name": "text that is not a date is left as it is",
+      "template": "${d|date}",
+      "data": {
+        "d": "soon"
+      },
+      "expected": "soon"
+    },
+    {
+      "group": "dates",
+      "name": "an impossible date is left as it is",
+      "template": "${d|date}",
+      "data": {
+        "d": "2026-02-30"
+      },
+      "expected": "2026-02-30"
+    },
+    {
+      "group": "dates",
+      "name": "a date of null prints nothing",
+      "template": "[${d|date}]",
+      "data": {
+        "d": null
+      },
+      "expected": "[]"
+    },
+    {
+      "group": "dates",
+      "name": "an unsupported pattern letter shows the value",
+      "template": "${d|date:jj}",
+      "data": {
+        "d": "2026-11-01"
+      },
+      "expected": "2026-11-01"
     }
   ]
 }
