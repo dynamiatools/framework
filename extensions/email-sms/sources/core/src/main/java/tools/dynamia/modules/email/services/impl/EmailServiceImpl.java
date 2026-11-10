@@ -51,7 +51,7 @@ import tools.dynamia.modules.email.domain.EmailMessageLog;
 import tools.dynamia.modules.email.domain.EmailTemplate;
 import tools.dynamia.modules.email.services.EmailService;
 import tools.dynamia.modules.saas.api.AccountServiceAPI;
-import tools.dynamia.templates.TemplateEngine;
+import tools.dynamia.modules.email.EmailTemplateRenderer;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -72,14 +72,14 @@ public class EmailServiceImpl implements EmailService {
     private final SimpleCache<Long, MailSender> MAIL_SENDERS = new SimpleCache<>();
 
 
-    private final TemplateEngine templateEngine;
+    private final EmailTemplateRenderer renderer;
     private final CrudService crudService;
     private final AccountServiceAPI accountServiceAPI;
 
     private EmailValidator emailValidator = new EmailValidator();
 
-    public EmailServiceImpl(TemplateEngine templateEngine, CrudService crudService, AccountServiceAPI accountServiceAPI) {
-        this.templateEngine = templateEngine;
+    public EmailServiceImpl(EmailTemplateRenderer renderer, CrudService crudService, AccountServiceAPI accountServiceAPI) {
+        this.renderer = renderer;
         this.crudService = crudService;
         this.accountServiceAPI = accountServiceAPI;
     }
@@ -431,17 +431,10 @@ public class EmailServiceImpl implements EmailService {
             }
         }
 
-        message.setSubject(parse(template.getSubject(), context));
+        message.setSubject(renderer.render(template, template.getSubject(), context));
+        message.setContent(renderContent(template, context));
 
-        String content = parse(template.getContent(), context);
-        if (template.getParent() != null) {
-            context.put("TEMPLATE_CONTENT", content);
-            content = parse(template.getParent().getContent(), context);
-        }
-
-        message.setContent(content);
-
-        String[] tos = parseDestination(template.getTo(), context);
+        String[] tos = parseDestination(template, template.getTo(), context);
         if (tos != null) {
             for (String to : tos) {
                 if (to != null && !to.isEmpty()) {
@@ -450,7 +443,7 @@ public class EmailServiceImpl implements EmailService {
             }
         }
 
-        String[] ccs = parseDestination(template.getCc(), context);
+        String[] ccs = parseDestination(template, template.getCc(), context);
         if (ccs != null) {
             for (String cc : ccs) {
                 if (cc != null && !cc.isEmpty()) {
@@ -459,7 +452,7 @@ public class EmailServiceImpl implements EmailService {
             }
         }
 
-        String[] bccs = parseDestination(template.getBcc(), context);
+        String[] bccs = parseDestination(template, template.getBcc(), context);
         if (bccs != null) {
             for (String bcc : bccs) {
                 if (bcc != null && !bcc.isEmpty()) {
@@ -468,23 +461,35 @@ public class EmailServiceImpl implements EmailService {
             }
         }
 
-        String replyTo = parse(template.getReplyTo(), context);
+        String replyTo = renderer.render(template, template.getReplyTo(), context);
         if (replyTo != null && !replyTo.isBlank()) {
             message.setReplyTo(replyTo);
         }
     }
 
-    private String parse(String templateString, Map<String, Object> context) {
-        if (templateString != null && !templateString.isBlank()) {
-            return templateEngine.evaluate(templateString, context);
-        } else {
-            return templateString;
+    /**
+     * Renders the body of a template, and the body of its parent layout around it. Each one is rendered with its own
+     * engine, and the parent finds the child body as {@code TEMPLATE_CONTENT} (print it with
+     * {@code {{ TEMPLATE_CONTENT | raw }}} in a Dynamia parent that escapes values).
+     */
+    private String renderContent(EmailTemplate template, Map<String, Object> context) {
+        String content = renderer.renderHtml(template, template.getContent(), context);
+        var parent = template.getParent();
+        if (parent != null) {
+            context.put("TEMPLATE_CONTENT", content);
+            content = renderer.renderHtml(parent, parent.getContent(), context);
         }
+        return content;
     }
 
-    private String[] parseDestination(String destination, Map<String, Object> context) {
+    @Override
+    public String render(EmailTemplate template, Map<String, Object> model) {
+        return renderContent(template, model == null ? new HashMap<>() : new HashMap<>(model));
+    }
+
+    private String[] parseDestination(EmailTemplate template, String destination, Map<String, Object> context) {
         if (destination != null && !destination.isBlank()) {
-            destination = parse(destination, context);
+            destination = renderer.render(template, destination, context);
             if (destination.contains(",")) {
                 return StringUtils.split(destination, ",");
             } else {
