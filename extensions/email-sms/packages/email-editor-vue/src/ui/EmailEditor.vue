@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import './tailwind.css';
+import { Redo2, Undo2 } from 'lucide-vue-next';
+import { btn } from './classes.js';
 import { computed, provide, watch } from 'vue';
 import { emptyDesign } from '../model/defaults.js';
 import type { Design } from '../model/types.js';
@@ -47,20 +50,22 @@ defineExpose({ editor, getDesign: () => editor.design.value, setDesign: (design:
 </script>
 
 <template>
-  <div class="editor" @keydown="onKeyDown" @click="editor.select(null)">
-    <header class="toolbar" @click.stop>
-      <button type="button" :disabled="!editor.canUndo.value" data-action="undo" @click="editor.undo()">↶ {{ t('undo') }}</button>
-      <button type="button" :disabled="!editor.canRedo.value" data-action="redo" @click="editor.redo()">↷ {{ t('redo') }}</button>
+  <div class="editor de:flex de:h-full de:min-h-[480px] de:flex-col de:bg-slate-100 de:text-sm de:text-slate-800" @keydown="onKeyDown" @click="editor.select(null)">
+    <header class="toolbar de:z-10 de:flex de:flex-wrap de:items-center de:gap-2 de:border-b de:border-slate-200 de:bg-white de:px-4 de:py-2 de:shadow-sm" @click.stop>
+      <div class="de:flex de:items-center de:gap-1">
+        <button type="button" :class="btn" :disabled="!editor.canUndo.value" data-action="undo" :title="t('undo')" @click="editor.undo()"><Undo2 :size="16" aria-hidden="true" />{{ t('undo') }}</button>
+        <button type="button" :class="btn" :disabled="!editor.canRedo.value" data-action="redo" :title="t('redo')" @click="editor.redo()"><Redo2 :size="16" aria-hidden="true" />{{ t('redo') }}</button>
+      </div>
       <slot name="toolbar" />
     </header>
     <div class="main">
-      <aside class="left" @click.stop><Palette /></aside>
-      <main class="center" :style="{ background: editor.design.value.settings.backgroundColor }">
-        <div class="canvas" :style="canvasStyle" data-canvas @click.stop>
+      <aside class="de:overflow-auto de:border-r de:border-slate-200 de:bg-white de:p-4" @click.stop><Palette /></aside>
+      <main class="de:overflow-auto de:px-4 de:py-10" :style="{ background: editor.design.value.settings.backgroundColor }">
+        <div class="canvas de:mx-auto de:min-h-[200px] de:rounded-sm de:shadow-md de:ring-1 de:ring-black/5" :style="canvasStyle" data-canvas @click.stop>
           <BlockList :blocks="editor.design.value.blocks" :parent-id="null" :parent-type="null" slot-name="children" :empty-label="t('emptyEmail')" />
         </div>
       </main>
-      <aside class="right" @click.stop>
+      <aside class="de:overflow-auto de:border-l de:border-slate-200 de:bg-white de:p-4" @click.stop>
         <slot name="properties" :editor="editor"><PropertiesPanel /></slot>
         <VariablesPanel :variables="variables ?? []" />
       </aside>
@@ -69,18 +74,9 @@ defineExpose({ editor, getDesign: () => editor.design.value, setDesign: (design:
 </template>
 
 <style scoped>
-.editor { display: flex; flex-direction: column; height: 100%; min-height: 480px; background: #f1f3f6; color: #202124; font: 14px/1.4 system-ui, sans-serif; }
-.toolbar { display: flex; gap: 8px; align-items: center; padding: 8px 12px; background: #fff; border-bottom: 1px solid #d4d9e0; }
-.toolbar :deep(button), .toolbar button { padding: 6px 12px; border: 1px solid #d4d9e0; background: #fff; border-radius: 6px; cursor: pointer; font: inherit; }
-.toolbar button:disabled { opacity: 0.45; cursor: default; }
-.main { display: grid; grid-template-columns: 200px minmax(0, 1fr) 300px; flex: 1; min-height: 0; }
-.left, .right { background: #fafbfc; padding: 12px; overflow: auto; }
-.left { border-right: 1px solid #d4d9e0; }
-.right { border-left: 1px solid #d4d9e0; }
-.center { overflow: auto; padding: 36px 16px; }
-.canvas { margin: 0 auto; min-height: 200px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15); }
+.editor { font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; line-height: 1.4; }
+.main { display: grid; grid-template-columns: 232px minmax(0, 1fr) 320px; flex: 1; min-height: 0; }
 @media (max-width: 900px) {
   .main { grid-template-columns: 1fr; grid-auto-rows: auto; }
-  .left, .right { border: 0; border-bottom: 1px solid #d4d9e0; }
 }
 </style>

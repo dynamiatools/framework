@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { ArrowDown, ArrowUp, Copy, Trash2 } from 'lucide-vue-next';
 import { computed, inject } from 'vue';
+import { BLOCK_ICONS } from './icons.js';
 import { tableRows } from '../compiler/mjml.js';
 import type { Block } from '../model/types.js';
 import BlockList from './BlockList.vue';
@@ -63,12 +65,12 @@ function onKeyDown(event: KeyboardEvent): void {
     @dragstart.stop="onDragStart"
     @dragend.stop="editor.dragging.value = null"
   >
-    <div v-if="selected && !isColumn" class="bar" role="toolbar" :aria-label="t(block.type)">
-      <span class="tag">{{ t(block.type) }}</span>
-      <button type="button" :title="t('moveUp')" :aria-label="t('moveUp')" data-action="up" @click.stop="editor.moveBy(block.id, -1)">↑</button>
-      <button type="button" :title="t('moveDown')" :aria-label="t('moveDown')" data-action="down" @click.stop="editor.moveBy(block.id, 1)">↓</button>
-      <button type="button" :title="t('duplicate')" :aria-label="t('duplicate')" data-action="duplicate" @click.stop="editor.duplicateBlock(block.id)">⧉</button>
-      <button type="button" :title="t('delete')" :aria-label="t('delete')" data-action="delete" @click.stop="editor.removeBlock(block.id)">✕</button>
+    <div v-if="selected && !isColumn" class="bar de:absolute de:-top-7 de:right-0 de:z-5 de:flex de:items-center de:gap-0.5 de:rounded-t-md de:bg-blue-600 de:py-0.5 de:pl-2 de:pr-1 de:text-xs de:text-white de:shadow" role="toolbar" :aria-label="t(block.type)">
+      <span class="tag de:mr-1.5 de:inline-flex de:items-center de:gap-1.5 de:font-semibold"><component :is="BLOCK_ICONS[block.type]" :size="13" aria-hidden="true" />{{ t(block.type) }}</span>
+      <button type="button" class="de:inline-flex de:size-6 de:border-0 de:bg-transparent de:p-0 de:cursor-pointer de:items-center de:justify-center de:rounded de:text-white de:transition de:hover:bg-white/25 de:focus-visible:bg-white/25" :title="t('moveUp')" :aria-label="t('moveUp')" data-action="up" @click.stop="editor.moveBy(block.id, -1)"><ArrowUp :size="14" aria-hidden="true" /></button>
+      <button type="button" class="de:inline-flex de:size-6 de:border-0 de:bg-transparent de:p-0 de:cursor-pointer de:items-center de:justify-center de:rounded de:text-white de:transition de:hover:bg-white/25 de:focus-visible:bg-white/25" :title="t('moveDown')" :aria-label="t('moveDown')" data-action="down" @click.stop="editor.moveBy(block.id, 1)"><ArrowDown :size="14" aria-hidden="true" /></button>
+      <button type="button" class="de:inline-flex de:size-6 de:border-0 de:bg-transparent de:p-0 de:cursor-pointer de:items-center de:justify-center de:rounded de:text-white de:transition de:hover:bg-white/25 de:focus-visible:bg-white/25" :title="t('duplicate')" :aria-label="t('duplicate')" data-action="duplicate" @click.stop="editor.duplicateBlock(block.id)"><Copy :size="14" aria-hidden="true" /></button>
+      <button type="button" class="de:inline-flex de:size-6 de:border-0 de:bg-transparent de:p-0 de:cursor-pointer de:items-center de:justify-center de:rounded de:text-white de:transition de:hover:bg-white/25 de:focus-visible:bg-white/25" :title="t('delete')" :aria-label="t('delete')" data-action="delete" @click.stop="editor.removeBlock(block.id)"><Trash2 :size="14" aria-hidden="true" /></button>
     </div>
     <span v-if="hidden" class="hidden-badge">{{ hidden }}</span>
 
@@ -125,15 +127,11 @@ function onKeyDown(event: KeyboardEvent): void {
 </template>
 
 <style scoped>
-.blk { position: relative; outline: 2px solid transparent; outline-offset: -2px; cursor: pointer; min-width: 0; }
-.blk:hover { outline-color: rgba(26, 115, 232, 0.35); }
-.blk.selected { outline-color: #1a73e8; }
-.blk:focus-visible { outline: 2px solid #1a73e8; }
-.bar { position: absolute; top: -26px; right: 0; z-index: 5; display: flex; gap: 2px; background: #1a73e8; color: #fff; border-radius: 4px 4px 0 0; padding: 2px 4px; font-size: 12px; align-items: center; }
-.bar .tag { margin-right: 6px; font-weight: 600; }
-.bar button { background: transparent; color: inherit; border: 0; cursor: pointer; padding: 2px 6px; border-radius: 3px; font-size: 13px; }
-.bar button:hover, .bar button:focus-visible { background: rgba(255, 255, 255, 0.25); }
-.hidden-badge { position: absolute; top: 2px; left: 2px; z-index: 4; background: #5f6368; color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 8px; }
+.blk { position: relative; outline: 2px solid transparent; outline-offset: -2px; border-radius: 2px; transition: outline-color 0.12s; cursor: pointer; min-width: 0; }
+.blk:hover { outline-color: rgba(37, 99, 235, 0.35); }
+.blk.selected { outline-color: #2563eb; }
+.blk:focus-visible { outline: 2px solid #2563eb; }
+.hidden-badge { position: absolute; top: 2px; left: 2px; z-index: 4; background: #475569; color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 8px; }
 .placeholder { color: #8a94a3; padding: 14px; text-align: center; border: 1px dashed #c4cad3; border-radius: 4px; }
 .v-text :deep(p) { margin: 0 0 0.6em; }
 .v-text :deep(p:last-child) { margin-bottom: 0; }

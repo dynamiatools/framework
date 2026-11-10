@@ -1,4 +1,5 @@
 import vue from '@vitejs/plugin-vue';
+import tailwindcss from '@tailwindcss/vite';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { defineConfig } from 'vite';
@@ -9,7 +10,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   root: resolve(here, 'page'),
   base: './',
-  plugins: [vue()],
+  plugins: [vue(), tailwindcss()],
   // the page bundles the engine from its sources, so it does not need the engine package to be built first
   resolve: { alias: { '@dynamia-tools/template-engine': resolve(here, '../../../../platform/packages/template-engine/src/index.ts') } },
   build: { outDir: resolve(here, 'dist-page'), emptyOutDir: true, sourcemap: false, chunkSizeWarningLimit: 2500 },

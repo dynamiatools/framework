@@ -65,3 +65,11 @@ pnpm --filter @dynamia-tools/email-editor-vue typecheck
 pnpm --filter @dynamia-tools/email-editor-vue build      # library
 pnpm --filter @dynamia-tools/email-editor-vue build:page # standalone page
 ```
+
+## Styling
+
+The editor is styled with [Tailwind CSS](https://tailwindcss.com) 4 and [Lucide](https://lucide.dev) icons (`lucide-vue-next`).
+Tailwind runs in the build (`@tailwindcss/vite`), so nothing is needed at runtime. Only the theme and the utilities are
+included, with the prefix `de:` (for example `de:flex`) and **without the preflight reset**, so the editor does not change the look of the
+application that embeds it. Import `@dynamia-tools/email-editor-vue/dist/email-editor-vue.css` once, as before. The shared button and field
+classes are in `src/ui/classes.ts` and the icon of each block in `src/ui/icons.ts`.

@@ -54,17 +54,20 @@
   },
   "dependencies": {
     "@dynamia-tools/template-engine": "workspace:*",
-    "mjml-browser": "5.4.1",
-    "cheerio": "^1.2.0"
+    "cheerio": "^1.2.0",
+    "lucide-vue-next": "^1.0.0",
+    "mjml-browser": "5.4.1"
   },
   "peerDependencies": {
     "vue": "^3.4.0"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.4",
     "@types/node": "^26.6.6",
     "@vitejs/plugin-vue": "^6.0.10",
     "@vue/test-utils": "^2.5.1",
     "happy-dom": "^20.14.6",
+    "tailwindcss": "^4.3.4",
     "typescript": "^6.0.3",
     "vite": "^8.3.6",
     "vite-plugin-dts": "^5.1.2",

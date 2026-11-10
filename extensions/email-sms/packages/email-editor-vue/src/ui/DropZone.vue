@@ -51,9 +51,9 @@ function onDrop(event: DragEvent): void {
 
 <style scoped>
 .zone { min-height: 6px; margin: 2px 0; border-radius: 4px; transition: background 0.1s; }
-.zone.active { min-height: 14px; background: rgba(26, 115, 232, 0.12); }
-.zone.over { background: rgba(26, 115, 232, 0.4); }
-.zone.hint { display: flex; align-items: center; justify-content: center; min-height: 44px; border: 1px dashed #b8bfc9; color: #7a8594; font-size: 13px; background: transparent; }
-.zone.hint.active { background: rgba(26, 115, 232, 0.12); border-color: #1a73e8; }
-.zone.hint.over { background: rgba(26, 115, 232, 0.3); }
+.zone.active { min-height: 14px; background: rgba(37, 99, 235, 0.12); }
+.zone.over { background: rgba(37, 99, 235, 0.4); }
+.zone.hint { display: flex; align-items: center; justify-content: center; min-height: 44px; border: 1px dashed #cbd5e1; color: #64748b; font-size: 13px; background: transparent; }
+.zone.hint.active { background: rgba(37, 99, 235, 0.12); border-color: #2563eb; }
+.zone.hint.over { background: rgba(37, 99, 235, 0.3); }
 </style>

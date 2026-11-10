@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Bold, Italic, Link, List, ListOrdered, RemoveFormatting, Underline } from 'lucide-vue-next';
 import { inject, onMounted, ref, watch } from 'vue';
 import { safeUrl } from '../compiler/mjml.js';
 import { sanitizeHtml } from './sanitize.js';
@@ -99,13 +100,13 @@ function applyLink(): void {
 <template>
   <div class="rich">
     <div class="tools" role="toolbar" :aria-label="label">
-      <button type="button" data-cmd="bold" :title="t('bold')" :aria-label="t('bold')" @mousedown.prevent @click="command('bold')"><b>B</b></button>
-      <button type="button" data-cmd="italic" :title="t('italic')" :aria-label="t('italic')" @mousedown.prevent @click="command('italic')"><i>I</i></button>
-      <button type="button" data-cmd="underline" :title="t('underline')" :aria-label="t('underline')" @mousedown.prevent @click="command('underline')"><u>U</u></button>
-      <button type="button" data-cmd="insertUnorderedList" :title="t('bulletList')" :aria-label="t('bulletList')" @mousedown.prevent @click="command('insertUnorderedList')">•</button>
-      <button type="button" data-cmd="insertOrderedList" :title="t('numberList')" :aria-label="t('numberList')" @mousedown.prevent @click="command('insertOrderedList')">1.</button>
-      <button type="button" data-cmd="link" :title="t('link')" :aria-label="t('link')" @mousedown.prevent @click="openLink">🔗</button>
-      <button type="button" data-cmd="removeFormat" :title="t('clearFormat')" :aria-label="t('clearFormat')" @mousedown.prevent @click="command('removeFormat')">⌫</button>
+      <button type="button" data-cmd="bold" :title="t('bold')" :aria-label="t('bold')" @mousedown.prevent @click="command('bold')"><Bold :size="15" aria-hidden="true" /></button>
+      <button type="button" data-cmd="italic" :title="t('italic')" :aria-label="t('italic')" @mousedown.prevent @click="command('italic')"><Italic :size="15" aria-hidden="true" /></button>
+      <button type="button" data-cmd="underline" :title="t('underline')" :aria-label="t('underline')" @mousedown.prevent @click="command('underline')"><Underline :size="15" aria-hidden="true" /></button>
+      <button type="button" data-cmd="insertUnorderedList" :title="t('bulletList')" :aria-label="t('bulletList')" @mousedown.prevent @click="command('insertUnorderedList')"><List :size="15" aria-hidden="true" /></button>
+      <button type="button" data-cmd="insertOrderedList" :title="t('numberList')" :aria-label="t('numberList')" @mousedown.prevent @click="command('insertOrderedList')"><ListOrdered :size="15" aria-hidden="true" /></button>
+      <button type="button" data-cmd="link" :title="t('link')" :aria-label="t('link')" @mousedown.prevent @click="openLink"><Link :size="15" aria-hidden="true" /></button>
+      <button type="button" data-cmd="removeFormat" :title="t('clearFormat')" :aria-label="t('clearFormat')" @mousedown.prevent @click="command('removeFormat')"><RemoveFormatting :size="15" aria-hidden="true" /></button>
     </div>
     <div v-if="linkOpen" class="link" data-link>
       <input v-model="linkUrl" type="text" inputmode="url" :aria-label="t('linkUrl')" @keydown.enter.prevent="applyLink" />
@@ -116,14 +117,14 @@ function applyLink(): void {
 </template>
 
 <style scoped>
-.rich { border: 1px solid #c4cad3; border-radius: 4px; background: #fff; }
-.tools { display: flex; gap: 2px; padding: 4px; border-bottom: 1px solid #e3e6ea; flex-wrap: wrap; }
-.tools button { min-width: 28px; padding: 3px 6px; border: 1px solid transparent; background: transparent; border-radius: 4px; cursor: pointer; font: inherit; }
-.tools button:hover, .tools button:focus-visible { background: #eef2f8; border-color: #c4cad3; }
-.link { display: flex; gap: 4px; padding: 4px; border-bottom: 1px solid #e3e6ea; }
-.link input { flex: 1; padding: 4px 6px; border: 1px solid #c4cad3; border-radius: 4px; font: inherit; }
-.link button { padding: 4px 8px; border: 1px solid #c4cad3; background: #fff; border-radius: 4px; cursor: pointer; font: inherit; }
-.area { min-height: 110px; max-height: 260px; overflow: auto; padding: 8px; outline: none; }
-.area:focus { box-shadow: inset 0 0 0 2px rgba(26, 115, 232, 0.35); }
+.rich { border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; overflow: hidden; box-shadow: 0 1px 1px rgba(15, 23, 42, 0.04); }
+.rich:focus-within { border-color: #3b82f6; outline: 2px solid #bfdbfe; }
+.tools { display: flex; gap: 2px; padding: 4px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; flex-wrap: wrap; }
+.tools button { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; padding: 0 6px; border: 0; background: transparent; border-radius: 6px; cursor: pointer; color: #475569; font: inherit; }
+.tools button:hover, .tools button:focus-visible { background: #e2e8f0; color: #0f172a; }
+.link { display: flex; gap: 4px; padding: 4px; border-bottom: 1px solid #e2e8f0; }
+.link input { flex: 1; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font: inherit; font-size: 13px; }
+.link button { padding: 4px 10px; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; cursor: pointer; font: inherit; font-size: 12px; }
+.area { min-height: 110px; max-height: 260px; overflow: auto; padding: 8px 10px; outline: none; font-size: 13px; }
 .area :deep(p) { margin: 0 0 0.6em; }
 </style>

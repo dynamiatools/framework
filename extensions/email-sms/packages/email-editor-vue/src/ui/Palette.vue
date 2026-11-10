@@ -1,15 +1,18 @@
 <script setup lang="ts">
+import { Braces } from 'lucide-vue-next';
 import { inject } from 'vue';
 import type { BlockType } from '../model/types.js';
+import { BLOCK_ICONS } from './icons.js';
 import { DRAG_MIME, type EditorState } from './state.js';
 
 const editor = inject<EditorState>('editor')!;
 const t = inject<(key: string, values?: Record<string, string | number>) => string>('t')!;
 
-const ITEMS: { type: BlockType; icon: string }[] = [
-  { type: 'header', icon: '▀' }, { type: 'heading', icon: 'H' }, { type: 'text', icon: 'T' }, { type: 'quote', icon: '❝' }, { type: 'list', icon: '☰' }, { type: 'table', icon: '▦' }, { type: 'image', icon: '▣' }, { type: 'button', icon: '▭' },
-  { type: 'divider', icon: '―' }, { type: 'spacer', icon: '↕' }, { type: 'columns', icon: '▥' }, { type: 'footer', icon: '▄' },
-  { type: 'html', icon: '</>' }, { type: 'repeat', icon: '↻' }, { type: 'condition', icon: '?' },
+/** The blocks the user can add, in groups. Dragging one into the email or clicking it adds a new block. */
+const GROUPS: { title: string; items: BlockType[] }[] = [
+  { title: 'groupContent', items: ['heading', 'text', 'quote', 'list', 'image', 'button', 'divider', 'spacer'] },
+  { title: 'groupLayout', items: ['header', 'columns', 'table', 'footer'] },
+  { title: 'groupLogic', items: ['repeat', 'condition', 'html'] },
 ];
 
 function onDragStart(event: DragEvent, type: BlockType): void {
@@ -22,29 +25,28 @@ function onDragStart(event: DragEvent, type: BlockType): void {
 </script>
 
 <template>
-  <nav class="palette" :aria-label="t('blocks')">
-    <h3>{{ t('blocks') }}</h3>
-    <button
-      v-for="item in ITEMS"
-      :key="item.type"
-      type="button"
-      class="item"
-      draggable="true"
-      :data-palette="item.type"
-      @click="editor.addBlock(item.type)"
-      @dragstart="onDragStart($event, item.type)"
-      @dragend="editor.dragging.value = null"
-    >
-      <span class="icon" aria-hidden="true">{{ item.icon }}</span>
-      <span>{{ t(item.type) }}</span>
-    </button>
+  <nav class="palette de:flex de:flex-col de:gap-5" :aria-label="t('blocks')">
+    <h2 class="de:sr-only">{{ t('blocks') }}</h2>
+    <section v-for="group in GROUPS" :key="group.title">
+      <h3 class="de:mb-2 de:flex de:items-center de:gap-1.5 de:text-[11px] de:font-semibold de:uppercase de:tracking-wider de:text-slate-400">
+        <Braces v-if="group.title === 'groupLogic'" :size="12" aria-hidden="true" />{{ t(group.title) }}
+      </h3>
+      <div class="de:grid de:grid-cols-2 de:gap-2">
+        <button
+          v-for="type in group.items"
+          :key="type"
+          type="button"
+          class="item de:group de:box-border de:[font-family:inherit] de:flex de:cursor-grab de:flex-col de:items-center de:gap-1.5 de:rounded-lg de:border de:border-slate-200 de:bg-white de:px-2 de:py-2.5 de:text-xs de:font-medium de:text-slate-600 de:shadow-sm de:transition de:hover:border-blue-400 de:hover:bg-blue-50 de:hover:text-blue-700 de:hover:shadow de:focus-visible:outline-2 de:focus-visible:outline-blue-500 de:active:cursor-grabbing"
+          draggable="true"
+          :data-palette="type"
+          @click="editor.addBlock(type)"
+          @dragstart="onDragStart($event, type)"
+          @dragend="editor.dragging.value = null"
+        >
+          <component :is="BLOCK_ICONS[type]" :size="20" :stroke-width="1.75" class="de:text-slate-400 de:transition de:group-hover:text-blue-600" aria-hidden="true" />
+          <span>{{ t(type) }}</span>
+        </button>
+      </div>
+    </section>
   </nav>
 </template>
-
-<style scoped>
-.palette { display: flex; flex-direction: column; gap: 6px; }
-h3 { margin: 0 0 4px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: #5f6368; }
-.item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #fff; border: 1px solid #d4d9e0; border-radius: 6px; cursor: grab; font: inherit; text-align: left; }
-.item:hover, .item:focus-visible { border-color: #1a73e8; background: #f1f6fe; }
-.icon { width: 22px; text-align: center; font-weight: 700; color: #1a73e8; }
-</style>

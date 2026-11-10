@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { MousePointer2 } from 'lucide-vue-next';
+import { BLOCK_ICONS } from './icons.js';
 import { computed, inject } from 'vue';
 import { addColumn, find, removeColumn } from '../model/tree.js';
 import { FIELDS, SETTINGS_FIELDS, type Field } from './fields.js';
@@ -93,7 +95,7 @@ const isDocument = computed(() => block.value?.type === 'html' && block.value.pr
 <template>
   <div class="panel">
     <template v-if="block">
-      <h3>{{ t(block.type) }}</h3>
+      <h3 class="head"><span class="badge"><component :is="BLOCK_ICONS[block.type]" :size="16" aria-hidden="true" /></span>{{ t(block.type) }}</h3>
       <p v-if="isDocument" class="note">{{ t('fullDocumentNote') }}</p>
 
       <div v-if="block.type === 'columns'" class="columns">
@@ -138,7 +140,7 @@ const isDocument = computed(() => block.value?.type === 'html' && block.value.pr
     </template>
 
     <template v-else>
-      <h3>{{ t('settings') }}</h3>
+      <h3 class="head"><span class="badge"><MousePointer2 :size="16" aria-hidden="true" /></span>{{ t('settings') }}</h3>
       <div v-for="field in SETTINGS_FIELDS" :key="field.key" class="field">
         <label :for="`s-${field.key}`">{{ t(`f.${field.key}`) }}</label>
         <select v-if="field.kind === 'select'" :id="`s-${field.key}`" :data-setting="field.key" :value="read(field, settings)" @change="write(field, 'settings', ($event.target as HTMLSelectElement).value)">
@@ -157,20 +159,24 @@ const isDocument = computed(() => block.value?.type === 'html' && block.value.pr
 </template>
 
 <style scoped>
-.panel { display: flex; flex-direction: column; gap: 10px; }
-h3 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: #5f6368; }
-.field { display: flex; flex-direction: column; gap: 3px; }
+.panel { display: flex; flex-direction: column; gap: 14px; }
+h3.head { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; font-weight: 600; color: #0f172a; }
+.badge { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border-radius: 8px; background: #eff6ff; color: #2563eb; }
+.field { display: flex; flex-direction: column; gap: 4px; }
 .row { display: flex; gap: 6px; align-items: center; }
 .row label { flex: 1; }
-label { font-size: 12px; color: #5f6368; }
-input[type='text'], input[type='url'], input[type='number'], select, textarea { width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid #c4cad3; border-radius: 4px; font: inherit; background: #fff; }
+label { font-size: 12px; font-weight: 500; color: #475569; }
+input[type='text'], input[type='url'], input[type='number'], select, textarea { width: 100%; box-sizing: border-box; padding: 6px 9px; border: 1px solid #cbd5e1; border-radius: 6px; font: inherit; font-size: 13px; color: #0f172a; background: #fff; box-shadow: 0 1px 1px rgba(15, 23, 42, 0.04); }
+input[type='text']:focus, input[type='url']:focus, input[type='number']:focus, select:focus, textarea:focus { outline: 2px solid #bfdbfe; border-color: #3b82f6; }
 input[type='number'] { max-width: 90px; }
+input[type='checkbox'] { width: 16px; height: 16px; accent-color: #2563eb; }
 textarea.code { font-family: ui-monospace, monospace; font-size: 12px; }
 .color { display: flex; gap: 6px; align-items: center; }
-.color input[type='color'] { width: 34px; height: 30px; padding: 0; border: 1px solid #c4cad3; border-radius: 4px; background: #fff; }
-.error { color: #c5221f; font-size: 12px; }
-.note { color: #7a8594; font-size: 12px; margin: 0; }
-button { padding: 5px 10px; border: 1px solid #c4cad3; background: #fff; border-radius: 4px; cursor: pointer; font: inherit; }
+.color input[type='color'] { width: 34px; height: 30px; padding: 2px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; }
+.error { color: #dc2626; font-size: 12px; }
+.note { color: #64748b; font-size: 12px; margin: 0; }
+button { padding: 5px 10px; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; cursor: pointer; font: inherit; font-size: 12px; color: #334155; transition: background 0.12s; }
+button:hover:not(:disabled) { background: #f1f5f9; }
 button:disabled { opacity: 0.45; cursor: default; }
 .grid { display: flex; flex-direction: column; gap: 4px; }
 .grid-row { display: flex; gap: 4px; align-items: center; }

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { AlertTriangle, CircleAlert, CircleCheck, Eye, Loader, RotateCcw, Save, Send, Wand2 } from 'lucide-vue-next';
+import { btn, btnPrimary, field } from './classes.js';
 import { computed, onBeforeUnmount, onMounted, provide, ref, shallowRef } from 'vue';
 import { EmailApiError, type EmailTemplatesApi, type MigrationReport, type TemplateData } from '../api.js';
 import { compile } from '../compiler/compile.js';
@@ -183,37 +185,37 @@ defineExpose({ save, load });
     <p v-else-if="!template" class="error" role="alert" data-load-error>{{ message }}</p>
 
     <!-- a Velocity template cannot be edited with blocks: offer the migration -->
-    <section v-else-if="template.engine !== 'DYNAMIA'" class="velocity" data-velocity>
-      <h2>{{ template.name }}</h2>
-      <p>{{ t('velocityNotice') }}</p>
-      <div class="actions">
-        <button type="button" data-action="check-migration" :disabled="busy" @click="checkMigration">{{ t('checkMigration') }}</button>
-        <button type="button" data-action="migrate" :disabled="busy || (report !== null && !report.portable)" @click="migrate">{{ t('migrate') }}</button>
+    <section v-else-if="template.engine !== 'DYNAMIA'" class="velocity de:mx-auto de:my-10 de:w-full de:max-w-2xl de:rounded-xl de:border de:border-slate-200 de:bg-white de:p-6 de:shadow-sm" data-velocity>
+      <h2 class="de:mb-1 de:flex de:items-center de:gap-2 de:text-lg de:font-semibold de:text-slate-800"><Wand2 :size="20" class="de:text-blue-600" aria-hidden="true" />{{ template.name }}</h2>
+      <p class="de:text-sm de:text-slate-600">{{ t('velocityNotice') }}</p>
+      <div class="actions de:my-4 de:flex de:gap-2">
+        <button type="button" :class="btn" data-action="check-migration" :disabled="busy" @click="checkMigration">{{ t('checkMigration') }}</button>
+        <button type="button" :class="btnPrimary" data-action="migrate" :disabled="busy || (report !== null && !report.portable)" @click="migrate"><Wand2 :size="16" aria-hidden="true" />{{ t('migrate') }}</button>
       </div>
-      <div v-if="report" class="report" data-report>
+      <div v-if="report" class="report de:rounded-lg de:bg-slate-50 de:p-3 de:text-sm de:text-slate-700" data-report>
         <p v-if="report.portable">{{ t('migrationOk') }}</p>
         <template v-else>
           <p>{{ t('migrationBlocked') }}</p>
-          <ul><li v-for="(issue, i) in report.issues" :key="i"><code>{{ issue.field }}:{{ issue.line }}</code> {{ issue.snippet }} — {{ issue.reason }}</li></ul>
+          <ul class="de:mt-2 de:list-disc de:pl-5"><li v-for="(issue, i) in report.issues" :key="i"><code class="de:rounded de:bg-slate-200 de:px-1 de:text-xs">{{ issue.field }}:{{ issue.line }}</code> {{ issue.snippet }} — {{ issue.reason }}</li></ul>
         </template>
-        <ul v-if="report.warnings.length > 0" class="warnings"><li v-for="w in report.warnings" :key="w">{{ w }}</li></ul>
+        <ul v-if="report.warnings.length > 0" class="warnings de:mt-2 de:list-disc de:pl-5 de:text-xs de:text-slate-500"><li v-for="w in report.warnings" :key="w">{{ w }}</li></ul>
       </div>
-      <p v-if="message" :class="{ error: problem }" role="status" data-message>{{ message }}</p>
+      <p v-if="message" :class="['de:mt-3 de:text-sm', problem ? 'error de:text-red-600' : 'de:text-green-700']" role="status" data-message>{{ message }}</p>
     </section>
 
     <EmailEditor v-else-if="initial" class="fill" :design="initial" :locale="lang" :variables="variables" @change="onChange">
       <template #toolbar>
-        <label class="subject"><span class="sr-only">{{ t('subject') }}</span>
-          <input v-model="subject" type="text" :placeholder="t('subject')" data-subject @input="dirty = true" />
+        <label class="subject de:min-w-[160px] de:flex-1"><span class="de:sr-only">{{ t('subject') }}</span>
+          <input v-model="subject" type="text" :class="field" :placeholder="t('subject')" data-subject @input="dirty = true" />
         </label>
-        <button type="button" data-action="preview" @click="showPreview = true">👁 {{ t('preview') }}</button>
-        <button type="button" data-action="send-test" :disabled="busy" @click="sendTest">✉ {{ t('sendTest') }}</button>
-        <button type="button" class="primary" data-action="save" :disabled="busy || !dirty" @click="save">{{ busy ? t('saving') : t('save') }}</button>
-        <button v-if="template.hasBackup && !revertWarning" type="button" data-action="revert" :disabled="busy" @click="revert(false)">{{ t('revertMigration') }}</button>
-        <span v-if="dirty" class="dirty" data-dirty>{{ t('unsaved') }}</span>
-        <span v-if="message" :class="['status', { error: problem }]" role="status" data-message>{{ message }}</span>
-        <span v-if="revertWarning" class="warn" data-revert-warning>{{ t('revertEdited') }}
-          <button type="button" data-action="confirm-revert" @click="revert(true)">{{ t('confirmRevert') }}</button>
+        <button type="button" :class="btn" data-action="preview" @click="showPreview = true"><Eye :size="16" aria-hidden="true" />{{ t('preview') }}</button>
+        <button type="button" :class="btn" data-action="send-test" :disabled="busy" @click="sendTest"><Send :size="16" aria-hidden="true" />{{ t('sendTest') }}</button>
+        <button type="button" :class="btnPrimary" data-action="save" :disabled="busy || !dirty" @click="save"><Loader v-if="busy" :size="16" class="de:animate-spin" aria-hidden="true" /><Save v-else :size="16" aria-hidden="true" />{{ busy ? t('saving') : t('save') }}</button>
+        <button v-if="template.hasBackup && !revertWarning" type="button" :class="btn" data-action="revert" :disabled="busy" @click="revert(false)"><RotateCcw :size="16" aria-hidden="true" />{{ t('revertMigration') }}</button>
+        <span v-if="dirty" class="dirty de:inline-flex de:items-center de:gap-1 de:rounded-full de:bg-amber-50 de:px-2.5 de:py-0.5 de:text-xs de:font-medium de:text-amber-700" data-dirty><CircleAlert :size="13" aria-hidden="true" />{{ t('unsaved') }}</span>
+        <span v-if="message" :class="['status de:inline-flex de:items-center de:gap-1 de:text-xs de:font-medium', problem ? 'error de:text-red-600' : 'de:text-green-700']" role="status" data-message><component :is="problem ? AlertTriangle : CircleCheck" :size="14" aria-hidden="true" />{{ message }}</span>
+        <span v-if="revertWarning" class="warn de:inline-flex de:items-center de:gap-2 de:rounded-md de:bg-amber-50 de:px-2.5 de:py-1 de:text-xs de:text-amber-800" data-revert-warning>{{ t('revertEdited') }}
+          <button type="button" :class="btn" data-action="confirm-revert" @click="revert(true)">{{ t('confirmRevert') }}</button>
         </span>
       </template>
     </EmailEditor>
@@ -223,20 +225,6 @@ defineExpose({ save, load });
 </template>
 
 <style scoped>
-.host { height: 100%; display: flex; flex-direction: column; }
+.host { height: 100%; display: flex; flex-direction: column; background: #f1f5f9; font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
 .fill { flex: 1; }
-.velocity { max-width: 720px; margin: 24px auto; padding: 0 16px; font: 14px/1.5 system-ui, sans-serif; }
-.actions { display: flex; gap: 8px; margin: 12px 0; }
-button { padding: 6px 12px; border: 1px solid #c4cad3; background: #fff; border-radius: 6px; cursor: pointer; font: inherit; }
-button.primary { background: #1a73e8; color: #fff; border-color: #1a73e8; }
-button:disabled { opacity: 0.5; cursor: default; }
-.subject { flex: 1; min-width: 160px; }
-.subject input { width: 100%; box-sizing: border-box; padding: 6px 10px; border: 1px solid #c4cad3; border-radius: 6px; font: inherit; }
-.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.status { font-size: 13px; color: #188038; }
-.error, .status.error { color: #c5221f; }
-.dirty { font-size: 12px; color: #b06000; }
-.warn { font-size: 12px; color: #b06000; display: flex; gap: 6px; align-items: center; }
-.report { background: #f6f7f9; border-radius: 6px; padding: 8px 12px; font-size: 13px; }
-.warnings { color: #5f6368; font-size: 12px; }
 </style>

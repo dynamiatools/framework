@@ -111,10 +111,16 @@ importers:
       cheerio:
         specifier: ^1.2.0
         version: 1.2.0
+      lucide-vue-next:
+        specifier: ^1.0.0
+        version: 1.0.0(vue@3.5.45(typescript@6.0.3))
       mjml-browser:
         specifier: 5.4.1
         version: 5.4.1
     devDependencies:
+      '@tailwindcss/vite':
+        specifier: ^4.3.4
+        version: 4.3.4(vite@8.3.6(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2))
       '@types/node':
         specifier: ^26.6.6
         version: 26.6.6
@@ -127,6 +133,9 @@ importers:
       happy-dom:
         specifier: ^20.14.6
         version: 20.14.6
+      tailwindcss:
+        specifier: ^4.3.4
+        version: 4.3.4
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -1817,6 +1826,12 @@ packages:
   lru-cache@11.5.3:
     resolution: {integrity: sha512-U4N8FgzmWxc8k1VH8Kr6lQg18U7Fjvby6wXHVRX/ZZ7IwWbRMgrRbP0Wrb5q5NVinryp4SQampHKdvtecItxUg==}
     engines: {node: 20 || >=22}
+
+  lucide-vue-next@1.0.0:
+    resolution: {integrity: sha512-V6SPvx1IHTj/UY+FrIYWV5faISsPSb8BnWSFDxAtezWKvWc9ZZ40PDrdu1/Qb5vg4lHWr1hs1BAMGVGm6V1Xdg==}
+    deprecated: Package deprecated. Please use @lucide/vue instead.
+    peerDependencies:
+      vue: '>=3.0.1'
 
   magic-string-ast@1.0.3:
     resolution: {integrity: sha512-CvkkH1i81zl7mmb94DsRiFeG9V2fR2JeuK8yDgS8oiZSFa++wWLEgZ5ufEOyLHbvSbD1gTRKv9NdX69Rnvr9JA==}
@@ -3664,6 +3679,10 @@ snapshots:
       tslib: 2.9.1
 
   lru-cache@11.5.3: {}
+
+  lucide-vue-next@1.0.0(vue@3.5.45(typescript@6.0.3)):
+    dependencies:
+      vue: 3.5.45(typescript@6.0.3)
 
   magic-string-ast@1.0.3:
     dependencies:
