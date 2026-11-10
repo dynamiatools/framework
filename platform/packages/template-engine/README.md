@@ -28,7 +28,10 @@ engine.evaluate('Hola ${user.name}, total {{total|currency:0}}', { user: { name:
 | Each | `{{#each items as item}}${item.name} ${loop.number}/${loop.count}{{/each}}` |
 
 Filters: `upper`, `lower`, `trim`, `default:x`, `number:pattern`, `currency:decimals`, `date:pattern`, `count`, `sum:field`,
-`avg:field`, `min:field`, `max:field`, `list`, `list_dots`, `list_number`, `join:sep`. Add your own with `registerFilter`.
+`avg:field`, `min:field`, `max:field`, `list`, `list_dots`, `list_number`, `join:sep`, `raw`. Add your own with `registerFilter`.
+
+Pass `{ escapeHtml: true }` to replace `& < > " '` in every printed value (`${body|raw}` prints trusted HTML; text of the
+template is never escaped).
 
 Unknown variables are left as written (`${other}`), which is what a live preview needs; `null` prints nothing.
 Values inserted into the text are never evaluated again. Unbalanced block tags leave the text untouched. Blocks are
