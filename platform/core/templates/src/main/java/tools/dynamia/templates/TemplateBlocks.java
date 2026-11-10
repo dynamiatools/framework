@@ -51,7 +51,7 @@ final class TemplateBlocks {
 
     /** Whether the text has a block tag worth parsing. */
     static boolean hasBlocks(String template) {
-        return template.contains("{{#");
+        return template.contains("{{") && TAG.matcher(template).find();
     }
 
     private static final class Frame {

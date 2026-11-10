@@ -1,0 +1,1044 @@
+{
+  "description": "Cases shared by the Java engine (DynamiaTemplateEngine) and the TypeScript engine (@dynamia-tools/template-engine). Each case renders 'template' with 'data' (plus 'locale' as the locale variable when present) and must give exactly 'expected'. Java is the reference: change a case only together with both engines.",
+  "cases": [
+    {
+      "group": "variables",
+      "name": "dollar and mustache",
+      "template": "A ${name} B {{name}}",
+      "data": {
+        "name": "X"
+      },
+      "expected": "A X B X"
+    },
+    {
+      "group": "variables",
+      "name": "short form",
+      "template": "$user.name",
+      "data": {
+        "user": {
+          "name": "Ada"
+        }
+      },
+      "expected": "Ada"
+    },
+    {
+      "group": "variables",
+      "name": "short form needs a defined root",
+      "template": "$user.name",
+      "data": {},
+      "expected": "$user.name"
+    },
+    {
+      "group": "variables",
+      "name": "bare dollar is not a variable",
+      "template": "$total",
+      "data": {
+        "total": 10
+      },
+      "expected": "$total"
+    },
+    {
+      "group": "variables",
+      "name": "dollar before mustache is a currency symbol",
+      "template": "${{price}}",
+      "data": {
+        "price": 10
+      },
+      "expected": "$10"
+    },
+    {
+      "group": "variables",
+      "name": "price text",
+      "template": "Cost: $5",
+      "data": {},
+      "expected": "Cost: $5"
+    },
+    {
+      "group": "variables",
+      "name": "unknown variable is left as it is",
+      "template": "${other}",
+      "data": {
+        "name": "X"
+      },
+      "expected": "${other}"
+    },
+    {
+      "group": "variables",
+      "name": "unknown mustache is left as it is",
+      "template": "{{other}}",
+      "data": {
+        "name": "X"
+      },
+      "expected": "{{other}}"
+    },
+    {
+      "group": "variables",
+      "name": "null prints nothing",
+      "template": "[${name}]",
+      "data": {
+        "name": null
+      },
+      "expected": "[]"
+    },
+    {
+      "group": "variables",
+      "name": "integer",
+      "template": "${n}",
+      "data": {
+        "n": 1500
+      },
+      "expected": "1500"
+    },
+    {
+      "group": "variables",
+      "name": "decimal",
+      "template": "${n}",
+      "data": {
+        "n": 1.5
+      },
+      "expected": "1.5"
+    },
+    {
+      "group": "variables",
+      "name": "boolean",
+      "template": "${n}",
+      "data": {
+        "n": true
+      },
+      "expected": "true"
+    },
+    {
+      "group": "variables",
+      "name": "spaces inside the braces",
+      "template": "${ name }|{{ name }}",
+      "data": {
+        "name": "X"
+      },
+      "expected": "X|X"
+    },
+    {
+      "group": "variables",
+      "name": "empty template",
+      "template": "",
+      "data": {},
+      "expected": ""
+    },
+    {
+      "group": "variables",
+      "name": "text without variables",
+      "template": "plain text",
+      "data": {
+        "a": 1
+      },
+      "expected": "plain text"
+    },
+    {
+      "group": "variables",
+      "name": "one pass: values are not scanned again",
+      "template": "${v}",
+      "data": {
+        "v": "${w}",
+        "w": "no"
+      },
+      "expected": "${w}"
+    },
+    {
+      "group": "paths",
+      "name": "nested map",
+      "template": "${a.b.c}",
+      "data": {
+        "a": {
+          "b": {
+            "c": "deep"
+          }
+        }
+      },
+      "expected": "deep"
+    },
+    {
+      "group": "paths",
+      "name": "missing property of a defined root prints nothing",
+      "template": "[${a.x}]",
+      "data": {
+        "a": {
+          "b": 1
+        }
+      },
+      "expected": "[]"
+    },
+    {
+      "group": "paths",
+      "name": "missing root is left as it is",
+      "template": "${a.x}",
+      "data": {},
+      "expected": "${a.x}"
+    },
+    {
+      "group": "paths",
+      "name": "a key with a dot wins over the path",
+      "template": "${empresa.nombre}",
+      "data": {
+        "empresa.nombre": "Dyn",
+        "empresa": {
+          "nombre": "Other"
+        }
+      },
+      "expected": "Dyn"
+    },
+    {
+      "group": "paths",
+      "name": "null in the middle of a path",
+      "template": "[${a.b.c}]",
+      "data": {
+        "a": {
+          "b": null
+        }
+      },
+      "expected": "[]"
+    },
+    {
+      "group": "filters",
+      "name": "upper",
+      "template": "${n|upper}",
+      "data": {
+        "n": "ada"
+      },
+      "expected": "ADA"
+    },
+    {
+      "group": "filters",
+      "name": "lower",
+      "template": "${n|lower}",
+      "data": {
+        "n": "ADA"
+      },
+      "expected": "ada"
+    },
+    {
+      "group": "filters",
+      "name": "trim",
+      "template": "[${n|trim}]",
+      "data": {
+        "n": "  x  "
+      },
+      "expected": "[x]"
+    },
+    {
+      "group": "filters",
+      "name": "chain",
+      "template": "${n|trim|upper}",
+      "data": {
+        "n": "  x "
+      },
+      "expected": "X"
+    },
+    {
+      "group": "filters",
+      "name": "default on empty text",
+      "template": "${n|default:-}",
+      "data": {
+        "n": ""
+      },
+      "expected": "-"
+    },
+    {
+      "group": "filters",
+      "name": "default on null",
+      "template": "${n|default:-}",
+      "data": {
+        "n": null
+      },
+      "expected": "-"
+    },
+    {
+      "group": "filters",
+      "name": "default keeps a value",
+      "template": "${n|default:-}",
+      "data": {
+        "n": "x"
+      },
+      "expected": "x"
+    },
+    {
+      "group": "filters",
+      "name": "default on a missing variable is left as it is",
+      "template": "${n|default:-}",
+      "data": {},
+      "expected": "${n|default:-}"
+    },
+    {
+      "group": "filters",
+      "name": "unknown filter lets the value through",
+      "template": "${n|nope}",
+      "data": {
+        "n": "x"
+      },
+      "expected": "x"
+    },
+    {
+      "group": "filters",
+      "name": "whitespace around filters",
+      "template": "{{ n | upper }}",
+      "data": {
+        "n": "x"
+      },
+      "expected": "X"
+    },
+    {
+      "group": "numbers",
+      "name": "number default pattern",
+      "template": "${n|number}",
+      "data": {
+        "n": 1234.5
+      },
+      "expected": "1,234.5",
+      "locale": "en-US"
+    },
+    {
+      "group": "numbers",
+      "name": "number default pattern in es-CO",
+      "template": "${n|number}",
+      "data": {
+        "n": 1234.5
+      },
+      "expected": "1.234,5",
+      "locale": "es-CO"
+    },
+    {
+      "group": "numbers",
+      "name": "number with a pattern",
+      "template": "${n|number:#,##0.00}",
+      "data": {
+        "n": 1234.5
+      },
+      "expected": "1,234.50",
+      "locale": "en-US"
+    },
+    {
+      "group": "numbers",
+      "name": "number with a pattern in es-CO",
+      "template": "${n|number:#,##0.00}",
+      "data": {
+        "n": 1234.5
+      },
+      "expected": "1.234,50",
+      "locale": "es-CO"
+    },
+    {
+      "group": "numbers",
+      "name": "number from numeric text",
+      "template": "${n|number}",
+      "data": {
+        "n": "1234.5"
+      },
+      "expected": "1,234.5",
+      "locale": "en-US"
+    },
+    {
+      "group": "numbers",
+      "name": "number of non numeric text is left as it is",
+      "template": "${n|number}",
+      "data": {
+        "n": "abc"
+      },
+      "expected": "abc",
+      "locale": "en-US"
+    },
+    {
+      "group": "numbers",
+      "name": "number of null prints nothing",
+      "template": "[${n|number}]",
+      "data": {
+        "n": null
+      },
+      "expected": "[]",
+      "locale": "en-US"
+    },
+    {
+      "group": "numbers",
+      "name": "currency with decimals",
+      "template": "${n|currency}",
+      "data": {
+        "n": 1234.5
+      },
+      "expected": "1,234.50",
+      "locale": "en-US"
+    },
+    {
+      "group": "numbers",
+      "name": "currency without decimals",
+      "template": "${n|currency:0}",
+      "data": {
+        "n": 1234567
+      },
+      "expected": "1,234,567",
+      "locale": "en-US"
+    },
+    {
+      "group": "numbers",
+      "name": "currency in es-CO",
+      "template": "${n|currency:2}",
+      "data": {
+        "n": 1234.5
+      },
+      "expected": "1.234,50",
+      "locale": "es-CO"
+    },
+    {
+      "group": "numbers",
+      "name": "rounding is half even: 2.5",
+      "template": "${n|number:#,##0}",
+      "data": {
+        "n": 2.5
+      },
+      "expected": "2",
+      "locale": "en-US"
+    },
+    {
+      "group": "numbers",
+      "name": "rounding is half even: 3.5",
+      "template": "${n|number:#,##0}",
+      "data": {
+        "n": 3.5
+      },
+      "expected": "4",
+      "locale": "en-US"
+    },
+    {
+      "group": "numbers",
+      "name": "rounding is half even: 0.125",
+      "template": "${n|number:0.00}",
+      "data": {
+        "n": 0.125
+      },
+      "expected": "0.12",
+      "locale": "en-US"
+    },
+    {
+      "group": "numbers",
+      "name": "negative number",
+      "template": "${n|number:#,##0.00}",
+      "data": {
+        "n": -1234.5
+      },
+      "expected": "-1,234.50",
+      "locale": "en-US"
+    },
+    {
+      "group": "expressions",
+      "name": "ternary true",
+      "template": "${paid ? 'PAID' : 'PENDING'}",
+      "data": {
+        "paid": true
+      },
+      "expected": "PAID"
+    },
+    {
+      "group": "expressions",
+      "name": "ternary false",
+      "template": "${paid ? 'PAID' : 'PENDING'}",
+      "data": {
+        "paid": false
+      },
+      "expected": "PENDING"
+    },
+    {
+      "group": "expressions",
+      "name": "ternary on a missing variable",
+      "template": "${paid ? 'PAID' : 'PENDING'}",
+      "data": {},
+      "expected": "PENDING"
+    },
+    {
+      "group": "expressions",
+      "name": "ternary with a comparison",
+      "template": "${total > 100 ? 'big' : 'small'}",
+      "data": {
+        "total": 150
+      },
+      "expected": "big"
+    },
+    {
+      "group": "expressions",
+      "name": "ternary with and/or",
+      "template": "${a && b || c ? 'yes' : 'no'}",
+      "data": {
+        "a": false,
+        "b": false,
+        "c": true
+      },
+      "expected": "yes"
+    },
+    {
+      "group": "expressions",
+      "name": "ternary with a variable branch",
+      "template": "${ok ? name : 'none'}",
+      "data": {
+        "ok": true,
+        "name": "Ada"
+      },
+      "expected": "Ada"
+    },
+    {
+      "group": "expressions",
+      "name": "multiplication",
+      "template": "${a * b}",
+      "data": {
+        "a": 3,
+        "b": 4
+      },
+      "expected": "12"
+    },
+    {
+      "group": "expressions",
+      "name": "parentheses and division",
+      "template": "${(a + b) / 2}",
+      "data": {
+        "a": 3,
+        "b": 4
+      },
+      "expected": "3.5"
+    },
+    {
+      "group": "expressions",
+      "name": "division by zero prints nothing",
+      "template": "[${a / b}]",
+      "data": {
+        "a": 1,
+        "b": 0
+      },
+      "expected": "[]"
+    },
+    {
+      "group": "expressions",
+      "name": "arithmetic with a path",
+      "template": "${d.qty * d.price}",
+      "data": {
+        "d": {
+          "qty": 3,
+          "price": 10
+        }
+      },
+      "expected": "30"
+    },
+    {
+      "group": "expressions",
+      "name": "arithmetic then a filter",
+      "template": "${a * b|currency:0}",
+      "data": {
+        "a": 1000,
+        "b": 3
+      },
+      "expected": "3,000",
+      "locale": "en-US"
+    },
+    {
+      "group": "lists",
+      "name": "list",
+      "template": "${tags|list}",
+      "data": {
+        "tags": [
+          "red",
+          "green",
+          "blue"
+        ],
+        "people": [
+          {
+            "name": "Ana",
+            "age": 31
+          },
+          {
+            "name": "Luis",
+            "age": 28
+          }
+        ],
+        "prices": [
+          1.5,
+          2
+        ]
+      },
+      "expected": "red, green, blue"
+    },
+    {
+      "group": "lists",
+      "name": "list of a property",
+      "template": "{{people|list:name}}",
+      "data": {
+        "tags": [
+          "red",
+          "green",
+          "blue"
+        ],
+        "people": [
+          {
+            "name": "Ana",
+            "age": 31
+          },
+          {
+            "name": "Luis",
+            "age": 28
+          }
+        ],
+        "prices": [
+          1.5,
+          2
+        ]
+      },
+      "expected": "Ana, Luis"
+    },
+    {
+      "group": "lists",
+      "name": "list_dots",
+      "template": "{{tags|list_dots}}",
+      "data": {
+        "tags": [
+          "red",
+          "green",
+          "blue"
+        ],
+        "people": [
+          {
+            "name": "Ana",
+            "age": 31
+          },
+          {
+            "name": "Luis",
+            "age": 28
+          }
+        ],
+        "prices": [
+          1.5,
+          2
+        ]
+      },
+      "expected": "• red\n• green\n• blue"
+    },
+    {
+      "group": "lists",
+      "name": "list_number",
+      "template": "{{tags|list_number}}",
+      "data": {
+        "tags": [
+          "red",
+          "green",
+          "blue"
+        ],
+        "people": [
+          {
+            "name": "Ana",
+            "age": 31
+          },
+          {
+            "name": "Luis",
+            "age": 28
+          }
+        ],
+        "prices": [
+          1.5,
+          2
+        ]
+      },
+      "expected": "1. red\n2. green\n3. blue"
+    },
+    {
+      "group": "lists",
+      "name": "join with a separator",
+      "template": "{{tags|join:-}}",
+      "data": {
+        "tags": [
+          "red",
+          "green",
+          "blue"
+        ],
+        "people": [
+          {
+            "name": "Ana",
+            "age": 31
+          },
+          {
+            "name": "Luis",
+            "age": 28
+          }
+        ],
+        "prices": [
+          1.5,
+          2
+        ]
+      },
+      "expected": "red-green-blue"
+    },
+    {
+      "group": "lists",
+      "name": "join with a line break",
+      "template": "{{tags|join:\\n}}",
+      "data": {
+        "tags": [
+          "red",
+          "green",
+          "blue"
+        ],
+        "people": [
+          {
+            "name": "Ana",
+            "age": 31
+          },
+          {
+            "name": "Luis",
+            "age": 28
+          }
+        ],
+        "prices": [
+          1.5,
+          2
+        ]
+      },
+      "expected": "red\ngreen\nblue"
+    },
+    {
+      "group": "lists",
+      "name": "numbers print without extra zeros",
+      "template": "{{prices|list}}",
+      "data": {
+        "tags": [
+          "red",
+          "green",
+          "blue"
+        ],
+        "people": [
+          {
+            "name": "Ana",
+            "age": 31
+          },
+          {
+            "name": "Luis",
+            "age": 28
+          }
+        ],
+        "prices": [
+          1.5,
+          2
+        ]
+      },
+      "expected": "1.5, 2"
+    },
+    {
+      "group": "lists",
+      "name": "count",
+      "template": "${tags|count}",
+      "data": {
+        "tags": [
+          "red",
+          "green",
+          "blue"
+        ],
+        "people": [
+          {
+            "name": "Ana",
+            "age": 31
+          },
+          {
+            "name": "Luis",
+            "age": 28
+          }
+        ],
+        "prices": [
+          1.5,
+          2
+        ]
+      },
+      "expected": "3"
+    },
+    {
+      "group": "lists",
+      "name": "sum of a property",
+      "template": "${items|sum:price}",
+      "data": {
+        "items": [
+          {
+            "price": 10
+          },
+          {
+            "price": 5.5
+          }
+        ]
+      },
+      "expected": "15.5"
+    },
+    {
+      "group": "lists",
+      "name": "average of a property",
+      "template": "${items|avg:price}",
+      "data": {
+        "items": [
+          {
+            "price": 10
+          },
+          {
+            "price": 5.5
+          }
+        ]
+      },
+      "expected": "7.75"
+    },
+    {
+      "group": "lists",
+      "name": "min and max",
+      "template": "${items|min:price}-${items|max:price}",
+      "data": {
+        "items": [
+          {
+            "price": 10
+          },
+          {
+            "price": 5.5
+          }
+        ]
+      },
+      "expected": "5.5-10"
+    },
+    {
+      "group": "lists",
+      "name": "a list filter on a plain value",
+      "template": "${word|list}",
+      "data": {
+        "word": "plain"
+      },
+      "expected": "plain"
+    },
+    {
+      "group": "blocks",
+      "name": "if then",
+      "template": "{{#if paid}}PAID{{else}}DUE{{/if}}",
+      "data": {
+        "paid": true
+      },
+      "expected": "PAID"
+    },
+    {
+      "group": "blocks",
+      "name": "if else",
+      "template": "{{#if paid}}PAID{{else}}DUE{{/if}}",
+      "data": {
+        "paid": false
+      },
+      "expected": "DUE"
+    },
+    {
+      "group": "blocks",
+      "name": "if on a missing variable",
+      "template": "{{#if paid}}PAID{{else}}DUE{{/if}}",
+      "data": {},
+      "expected": "DUE"
+    },
+    {
+      "group": "blocks",
+      "name": "if without else",
+      "template": "[{{#if a}}x{{/if}}]",
+      "data": {
+        "a": false
+      },
+      "expected": "[]"
+    },
+    {
+      "group": "blocks",
+      "name": "if with operators",
+      "template": "[{{#if total > 100 && vip}}big{{/if}}]",
+      "data": {
+        "total": 150,
+        "vip": true
+      },
+      "expected": "[big]"
+    },
+    {
+      "group": "blocks",
+      "name": "if with a negation",
+      "template": "{{#if !done}}todo{{/if}}",
+      "data": {
+        "done": false
+      },
+      "expected": "todo"
+    },
+    {
+      "group": "blocks",
+      "name": "if on an empty list",
+      "template": "{{#if items}}some{{else}}none{{/if}}",
+      "data": {
+        "items": []
+      },
+      "expected": "none"
+    },
+    {
+      "group": "blocks",
+      "name": "if on text compared",
+      "template": "{{#if status == 'paid'}}ok{{/if}}",
+      "data": {
+        "status": "paid"
+      },
+      "expected": "ok"
+    },
+    {
+      "group": "blocks",
+      "name": "each with loop variables",
+      "template": "{{#each items as i}}${loop.number}/${loop.count} ${i.name};{{/each}}",
+      "data": {
+        "items": [
+          {
+            "name": "a"
+          },
+          {
+            "name": "b"
+          }
+        ]
+      },
+      "expected": "1/2 a;2/2 b;"
+    },
+    {
+      "group": "blocks",
+      "name": "each with first and last",
+      "template": "{{#each items as i}}${i}{{#if !loop.last}},{{/if}}{{/each}}",
+      "data": {
+        "items": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      "expected": "a,b,c"
+    },
+    {
+      "group": "blocks",
+      "name": "each loop index starts at zero",
+      "template": "{{#each items as i}}${loop.index}{{/each}}",
+      "data": {
+        "items": [
+          "a",
+          "b"
+        ]
+      },
+      "expected": "01"
+    },
+    {
+      "group": "blocks",
+      "name": "each of a missing variable",
+      "template": "[{{#each items as i}}x{{/each}}]",
+      "data": {},
+      "expected": "[]"
+    },
+    {
+      "group": "blocks",
+      "name": "each of an empty list",
+      "template": "[{{#each items as i}}x{{/each}}]",
+      "data": {
+        "items": []
+      },
+      "expected": "[]"
+    },
+    {
+      "group": "blocks",
+      "name": "each with arithmetic and filters",
+      "template": "{{#each items as i}}${i.qty * i.price|currency:0};{{/each}}",
+      "data": {
+        "items": [
+          {
+            "qty": 2,
+            "price": 10
+          },
+          {
+            "qty": 3,
+            "price": 10
+          }
+        ]
+      },
+      "expected": "20;30;",
+      "locale": "en-US"
+    },
+    {
+      "group": "blocks",
+      "name": "nested each",
+      "template": "{{#each rows as r}}<{{#each r.cells as c}}${c}|{{/each}}>{{/each}}",
+      "data": {
+        "rows": [
+          {
+            "cells": [
+              "a",
+              "b"
+            ]
+          },
+          {
+            "cells": [
+              "c"
+            ]
+          }
+        ]
+      },
+      "expected": "<a|b|><c|>"
+    },
+    {
+      "group": "blocks",
+      "name": "the alias does not leak",
+      "template": "{{#each items as i}}${i}{{/each}}${i}",
+      "data": {
+        "items": [
+          "a",
+          "b"
+        ]
+      },
+      "expected": "ab${i}"
+    },
+    {
+      "group": "blocks",
+      "name": "whitespace in tags",
+      "template": "{{ #if a }}x{{ else }}y{{ /if }}",
+      "data": {
+        "a": true
+      },
+      "expected": "x"
+    },
+    {
+      "group": "blocks",
+      "name": "missing as alias leaves the text",
+      "template": "{{#each items}}x{{/each}}",
+      "data": {
+        "items": [
+          1
+        ]
+      },
+      "expected": "{{#each items}}x{{/each}}"
+    },
+    {
+      "group": "blocks",
+      "name": "unclosed if leaves the text",
+      "template": "{{#if a}}x",
+      "data": {
+        "a": true
+      },
+      "expected": "{{#if a}}x"
+    },
+    {
+      "group": "blocks",
+      "name": "stray end leaves the text",
+      "template": "x{{/if}}",
+      "data": {},
+      "expected": "x{{/if}}"
+    },
+    {
+      "group": "blocks",
+      "name": "mismatched end leaves the text",
+      "template": "{{#if a}}x{{/each}}",
+      "data": {
+        "a": true
+      },
+      "expected": "{{#if a}}x{{/each}}"
+    },
+    {
+      "group": "blocks",
+      "name": "a value cannot inject a block",
+      "template": "{{#if x}}${v}{{/if}}!",
+      "data": {
+        "v": "{{#if x}}boom{{/if}}",
+        "x": true
+      },
+      "expected": "{{#if x}}boom{{/if}}!"
+    }
+  ]
+}
