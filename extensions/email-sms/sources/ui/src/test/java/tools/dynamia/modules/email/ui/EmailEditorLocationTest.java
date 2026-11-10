@@ -56,4 +56,12 @@ class EmailEditorLocationTest {
         assertEquals(1, markup.split("<iframe", -1).length - 1, "a value cannot add another tag");
         assertTrue(SandboxedFrame.markup(null).contains("srcdoc=\"\""));
     }
+
+    @Test
+    void theEditorOpensInAWindowUnlessTabIsRequested() {
+        assertFalse(EmailEditorWindow.opensInTab(null));
+        assertFalse(EmailEditorWindow.opensInTab("window"));
+        assertTrue(EmailEditorWindow.opensInTab(" TAB "));
+        assertEquals("/erp/dynamia-email/editor?id=3&locale=es", EmailEditorWindow.frame("/erp/dynamia-email/editor?id=3&locale=es").getSrc());
+    }
 }

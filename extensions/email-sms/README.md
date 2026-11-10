@@ -109,7 +109,7 @@ image, button, divider, spacer, columns, footer, HTML, repeat, condition), respo
 variables panel, preview on desktop and mobile, test send and the migration. A template stores the editor document in
 `design` (JSON) and the HTML it compiles to in `content`.
 
-In the ZK UI the CRUD of templates gets three actions: **Design** (opens the editor page in a new window),
+In the ZK UI the CRUD of templates gets three actions: **Design** (opens the editor in a ZK window with an iframe; set `dynamia.email.editor.open-in=tab` to use a new browser tab instead),
 **Migrate to editor** and **Revert migration**. The editor page is built and packaged in every build of the UI module (Node and pnpm are
 provisioned in `target/`, nothing is needed on the machine). To skip it, for example in a quick build:
 
