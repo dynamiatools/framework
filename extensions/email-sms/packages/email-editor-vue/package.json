@@ -1,0 +1,77 @@
+{
+  "name": "@dynamia-tools/email-editor-vue",
+  "version": "26.11.0",
+  "website": "https://dynamia.tools",
+  "description": "Block based, responsive email template editor for Vue 3. Compiles to MJML/HTML and keeps ${x} and {{x}} variables for the Dynamia template engine.",
+  "keywords": [
+    "dynamia",
+    "email",
+    "editor",
+    "mjml",
+    "vue",
+    "template"
+  ],
+  "homepage": "https://dynamia.tools",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dynamiatools/framework.git",
+    "directory": "extensions/email-sms/packages/email-editor-vue"
+  },
+  "license": "Apache-2.0",
+  "author": "Dynamia Soluciones IT SAS",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "@dynamia-tools/template-engine": "workspace:*",
+    "mjml-browser": "5.4.1",
+    "cheerio": "^1.2.0"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "@vue/test-utils": "^2.5.1",
+    "happy-dom": "^20.14.6",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.6",
+    "vite-plugin-dts": "^5.1.2",
+    "vitest": "^4.1.12",
+    "vue": "^3.5.45",
+    "vue-tsc": "^2.2.12"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
