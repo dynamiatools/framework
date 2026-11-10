@@ -13,11 +13,11 @@ export interface MjmlResult {
   warnings: string[];
 }
 
-const COLOR = /^(#[0-9a-fA-F]{3,8}|[a-zA-Z]{3,20}|rgba?\([\d\s.,%]+\)|transparent)$/;
-const PADDING = /^\d{1,3}(px|%)?(\s+\d{1,3}(px|%)?){0,3}$/;
-const PATH = /^[A-Za-z_][\w.]*$/;
-const ALIAS = /^[A-Za-z_]\w*$/;
-const CONDITION = /^[\w.'"!=<>&| \-]+$/;
+export const COLOR = /^(#[0-9a-fA-F]{3,8}|[a-zA-Z]{3,20}|rgba?\([\d\s.,%]+\)|transparent)$/;
+export const PADDING = /^\d{1,3}(px|%)?(\s+\d{1,3}(px|%)?){0,3}$/;
+export const PATH = /^[A-Za-z_][\w.]*$/;
+export const ALIAS = /^[A-Za-z_]\w*$/;
+export const CONDITION = /^[\w.'"!=<>&| \-]+$/;
 const ALIGN = ['left', 'center', 'right'];
 
 /** Escapes a value for a double quoted attribute. */
