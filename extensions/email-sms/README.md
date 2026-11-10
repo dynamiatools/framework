@@ -110,14 +110,14 @@ variables panel, preview on desktop and mobile, test send and the migration. A t
 `design` (JSON) and the HTML it compiles to in `content`.
 
 In the ZK UI the CRUD of templates gets three actions: **Design** (opens the editor page in a new window),
-**Migrate to editor** and **Revert migration**. The editor page is built and packaged by an opt-in profile, so the normal
-build needs no Node:
+**Migrate to editor** and **Revert migration**. The editor page is built and packaged in every build of the UI module (Node and pnpm are
+provisioned in `target/`, nothing is needed on the machine). To skip it, for example in a quick build:
 
 ```bash
-mvn -Peditor -pl extensions/email-sms/sources/ui package   # provisions Node and pnpm in target/, builds the page
+mvn -Dskip.editor -pl extensions/email-sms/sources/ui package
 ```
 
-Without `-Peditor` the Design action says the editor is not included.
+With `-Dskip.editor` the Design action says the editor is not included.
 
 ### Migrating a template from Velocity
 

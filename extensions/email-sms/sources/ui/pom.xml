@@ -67,12 +67,17 @@
 	<profiles>
 		<!--
 		  Builds the block editor page (extensions/email-sms/packages/email-editor-vue) and packages it in this jar under
-		  META-INF/resources/dynamia-email/editor/, served at /dynamia-email/editor/. It is opt-in (mvn -Peditor ...) so the
-		  normal build and its tests need no Node. Without it the Design action says the editor is not included.
+		  META-INF/resources/dynamia-email/editor/, served at /dynamia-email/editor/. It is built with every build.
+		  Skip it with -Dskip.editor (then no Node is needed, and the Design action says the editor is not included).
 		  Node and pnpm are provisioned privately in target/ by frontend-maven-plugin, like the Vue theme does.
 		-->
 		<profile>
 			<id>editor</id>
+			<activation>
+				<property>
+					<name>!skip.editor</name>
+				</property>
+			</activation>
 			<properties>
 				<frontend-maven-plugin.version>2.0.2</frontend-maven-plugin.version>
 				<node.version>v24.13.1</node.version>

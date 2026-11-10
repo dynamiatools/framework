@@ -149,7 +149,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
-        <!-- Email templates with the block editor (build the editor page with: mvn -Peditor package) -->
+        <!-- Email templates with the block editor (the editor page is built with the module) -->
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.email.ui</artifactId>

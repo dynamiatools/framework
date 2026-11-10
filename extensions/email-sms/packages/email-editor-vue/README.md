@@ -36,7 +36,7 @@ Pieces you can use alone: `EmailEditor` (canvas, palette, properties and variabl
 `index.html?id=7` edits template 7 of the application that serves it (`&baseUrl=`, `&locale=es`, `&source=sales`), and
 `index.html?demo=1` runs against an in-memory template (`&velocity=1` to try the migration). Inside a frame it sends
 `{ type: 'dynamia-email-editor:saved', id }` to its parent after each save. The email-sms UI module packages this page
-with `mvn -Peditor`.
+in every build (skip it with `mvn -Dskip.editor`).
 
 ## Design and compiler
 

@@ -24,7 +24,7 @@ class EmailEditorLocationTest {
 
     @Test
     void theEditorPageIsDetectedOnTheClasspath() {
-        // present only when the module was built with -Peditor, so both answers are fine: it must not throw
+        // present only when the module was built without -Dskip.editor, so both answers are fine: it must not throw
         assertEquals(EmailEditorLocation.class.getResource("/META-INF/resources/dynamia-email/editor/index.html") != null,
                 EmailEditorLocation.isInstalled());
     }
