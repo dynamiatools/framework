@@ -46,13 +46,13 @@ class HtmlToBlocksTest {
 
     @Test
     void whatHasNoBlockStaysHtmlAndNeighboursAreMerged() {
-        var result = HtmlToBlocks.convert("<h1>Hi</h1><table><tr><td>A</td><td>B</td></tr></table><div class=\"x\"><span>y</span></div><p>Bye</p>");
+        var result = HtmlToBlocks.convert("<h1>Hi</h1><table><tr><td>A</td></tr><tr><td>B</td></tr></table><div class=\"x\"><span>y</span></div><p>Bye</p>");
         var b = blocks(result);
 
         assertEquals(3, result.blocks());
         assertEquals(1, result.htmlBlocks());
         assertEquals("html", b.get(1).path("type").asString());
-        assertTrue(b.get(1).path("props").path("html").asString().startsWith("<table><tbody><tr><td>A</td><td>B</td></tr></tbody></table>"));
+        assertTrue(b.get(1).path("props").path("html").asString().startsWith("<table><tbody><tr><td>A</td></tr><tr><td>B</td></tr></tbody></table>"));
         assertTrue(b.get(1).path("props").path("html").asString().contains("class=\"x\""));
         assertEquals("text", b.get(2).path("type").asString());
     }
@@ -80,5 +80,35 @@ class HtmlToBlocksTest {
             assertEquals("html", blocks(result).get(0).path("type").asString(), html);
             assertEquals(html, blocks(result).get(0).path("props").path("html").asString(), html);
         }
+    }
+
+    @Test
+    void aTableOfOneRowBecomesColumnsWhoseCellsAreConvertedToo() {
+        var result = HtmlToBlocks.convert("<h1>Hi</h1><table><tr><td><h3>Help</h3><p>Call us</p></td><td><img src=\"https://x.com/a.png\"></td></tr></table><p>Bye</p>");
+        var b = blocks(result);
+        var columns = b.get(1);
+
+        assertEquals(3, b.size());
+        assertEquals("columns", columns.path("type").asString());
+        assertEquals(2, columns.path("children").size());
+        assertEquals("column", columns.path("children").get(0).path("type").asString());
+        assertEquals(50, columns.path("children").get(0).path("props").path("width").asInt());
+        assertEquals("heading", columns.path("children").get(0).path("children").get(0).path("type").asString());
+        assertEquals("text", columns.path("children").get(0).path("children").get(1).path("type").asString());
+        assertEquals("image", columns.path("children").get(1).path("children").get(0).path("type").asString());
+        assertEquals(5, result.blocks());
+        assertEquals(0, result.htmlBlocks());
+        var ids = new java.util.HashSet<String>();
+        new JsonMapper().readTree(result.design()).findValues("id").forEach(n -> assertTrue(ids.add(n.asString()), "duplicated id " + n));
+    }
+
+    @Test
+    void declaredPercentagesAreKeptAndOtherTablesStayHtml() {
+        var b = blocks(HtmlToBlocks.convert("<p>x</p><table><tr><td width=\"30%\">A</td><td style=\"width:70%\">B</td></tr></table>"));
+        assertEquals(30, b.get(1).path("children").get(0).path("props").path("width").asInt());
+        assertEquals(70, b.get(1).path("children").get(1).path("props").path("width").asInt());
+
+        var nested = blocks(HtmlToBlocks.convert("<p>x</p><table><tr><td><table><tr><td>a</td></tr></table></td><td>B</td></tr></table>"));
+        assertEquals("html", nested.get(1).path("type").asString());
     }
 }
