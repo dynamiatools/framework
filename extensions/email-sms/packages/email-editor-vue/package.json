@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/email-editor-vue",
-  "version": "26.11.0",
+  "version": "26.11.2",
   "website": "https://dynamia.tools",
   "description": "Block based, responsive email template editor for Vue 3. Compiles to MJML/HTML and keeps ${x} and {{x}} variables for the Dynamia template engine.",
   "keywords": [
