@@ -191,4 +191,15 @@ public interface EmailService {
      * @param account The email account whose cache entries should be invalidated. Must not be {@code null}.
      */
     void clearCache(EmailAccount account);
+
+    /**
+     * Renders the body of a template (and of its parent layout) with the engine the template is written in, without
+     * sending anything. Applications that need the HTML themselves must use this instead of evaluating
+     * {@link EmailTemplate#getContent()} directly, because a template may use the Dynamia engine instead of Velocity.
+     *
+     * @param template the template to render
+     * @param model    the data for the variables, may be null
+     * @return the rendered HTML
+     */
+    String render(EmailTemplate template, java.util.Map<String, Object> model);
 }
