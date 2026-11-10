@@ -6,9 +6,11 @@ import BlockList from './BlockList.vue';
 import { translator } from './i18n.js';
 import Palette from './Palette.vue';
 import PropertiesPanel from './PropertiesPanel.vue';
+import VariablesPanel from './VariablesPanel.vue';
+import type { TemplateVariable } from './variables.js';
 import { useEditorState } from './state.js';
 
-const props = withDefaults(defineProps<{ design?: Design; locale?: string }>(), { locale: 'en' });
+const props = withDefaults(defineProps<{ design?: Design; locale?: string; variables?: TemplateVariable[] }>(), { locale: 'en', variables: () => [] });
 const emit = defineEmits<{ (event: 'change', design: Design): void }>();
 
 const editor = useEditorState(props.design ?? emptyDesign(), (design) => emit('change', design));
@@ -60,6 +62,7 @@ defineExpose({ editor, getDesign: () => editor.design.value, setDesign: (design:
       </main>
       <aside class="right" @click.stop>
         <slot name="properties" :editor="editor"><PropertiesPanel /></slot>
+        <VariablesPanel :variables="variables ?? []" />
       </aside>
     </div>
   </div>

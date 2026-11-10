@@ -56,6 +56,17 @@ export function find(design: Design, id: string): Found | null {
   return search(design.blocks, null, 'children');
 }
 
+/** The blocks that contain a block, from its parent up to the top of the email. */
+export function ancestors(design: Design, id: string): Block[] {
+  const chain: Block[] = [];
+  let found = find(design, id);
+  while (found?.parent) {
+    chain.push(found.parent);
+    found = find(design, found.parent.id);
+  }
+  return chain;
+}
+
 /** Every block of the design, parents before children. */
 export function walk(design: Design, visit: (block: Block, parent: Block | null) => void): void {
   const go = (list: Block[], parent: Block | null): void => {

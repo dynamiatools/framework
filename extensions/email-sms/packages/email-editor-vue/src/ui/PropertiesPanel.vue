@@ -2,6 +2,7 @@
 import { computed, inject } from 'vue';
 import { addColumn, find, removeColumn } from '../model/tree.js';
 import { FIELDS, SETTINGS_FIELDS, type Field } from './fields.js';
+import RichText from './RichText.vue';
 import type { EditorState } from './state.js';
 
 const editor = inject<EditorState>('editor')!;
@@ -37,6 +38,19 @@ function problem(field: Field, source: Record<string, unknown>): string | null {
   return field.invalid ? field.invalid(read(field, source)) : null;
 }
 
+/** The variables panel inserts into the text field the user last had the cursor in. */
+function registerInserter(event: FocusEvent): void {
+  const input = event.target as HTMLInputElement | HTMLTextAreaElement;
+  editor.setInserter((text) => {
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? start;
+    input.value = input.value.slice(0, start) + text + input.value.slice(end);
+    input.setSelectionRange(start + text.length, start + text.length);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.focus();
+  });
+}
+
 const settings = computed(() => editor.design.value.settings as unknown as Record<string, unknown>);
 const isDocument = computed(() => block.value?.type === 'html' && block.value.props['fullDocument'] === true);
 </script>
@@ -62,7 +76,8 @@ const isDocument = computed(() => block.value?.type === 'html' && block.value.pr
 
       <div v-for="field in fields" :key="`${block.id}-${field.key}`" class="field">
         <label :for="`f-${field.key}`">{{ t(`f.${field.key}`) }}</label>
-        <textarea v-if="field.kind === 'rich' || field.kind === 'textarea' || field.kind === 'code'" :id="`f-${field.key}`" :data-field="field.key" rows="6" :class="{ code: field.kind === 'code' }" :value="read(field, block.props)" @input="write(field, 'block', ($event.target as HTMLTextAreaElement).value)" />
+        <RichText v-if="field.kind === 'rich'" :model-value="read(field, block.props)" :label="t(`f.${field.key}`)" :data-field="field.key" @update:model-value="write(field, 'block', $event)" />
+        <textarea v-else-if="field.kind === 'textarea' || field.kind === 'code'" :id="`f-${field.key}`" :data-field="field.key" rows="6" :class="{ code: field.kind === 'code' }" :value="read(field, block.props)" @focus="registerInserter($event)" @input="write(field, 'block', ($event.target as HTMLTextAreaElement).value)" />
         <select v-else-if="field.kind === 'select'" :id="`f-${field.key}`" :data-field="field.key" :value="read(field, block.props)" @change="write(field, 'block', ($event.target as HTMLSelectElement).value)">
           <option v-for="option in field.options" :key="option" :value="option">{{ t(`opt.${option}`) }}</option>
         </select>
@@ -71,7 +86,7 @@ const isDocument = computed(() => block.value?.type === 'html' && block.value.pr
           <input type="color" :aria-label="t(`f.${field.key}`)" :value="/^#[0-9a-f]{6}$/i.test(read(field, block.props)) ? read(field, block.props) : '#000000'" @input="write(field, 'block', ($event.target as HTMLInputElement).value)" />
           <input :id="`f-${field.key}`" :data-field="field.key" type="text" :value="read(field, block.props)" @input="write(field, 'block', ($event.target as HTMLInputElement).value)" />
         </span>
-        <input v-else :id="`f-${field.key}`" :data-field="field.key" :type="field.kind === 'number' ? 'number' : field.kind === 'url' ? 'url' : 'text'" :min="field.min" :max="field.max" :step="field.step" :value="read(field, block.props)" @input="write(field, 'block', ($event.target as HTMLInputElement).value)" />
+        <input v-else :id="`f-${field.key}`" :data-field="field.key" :type="field.kind === 'number' ? 'number' : 'text'" :inputmode="field.kind === 'url' ? 'url' : undefined" :min="field.min" :max="field.max" :step="field.step" :value="read(field, block.props)" @focus="field.kind !== 'number' && registerInserter($event)" @input="write(field, 'block', ($event.target as HTMLInputElement).value)" />
         <small v-if="problem(field, block.props)" class="error" role="alert" :data-error="field.key">{{ t(problem(field, block.props) as string) }}</small>
       </div>
     </template>

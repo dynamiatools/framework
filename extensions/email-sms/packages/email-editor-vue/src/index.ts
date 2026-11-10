@@ -1,6 +1,6 @@
 export * from './model/types.js';
 export { DEFAULT_SETTINGS, defaultProps, createBlock, emptyDesign, newId } from './model/defaults.js';
-export { canContain, find, walk, insert, remove, move, duplicate, updateProps, addColumn, removeColumn, type Found } from './model/tree.js';
+export { canContain, find, ancestors, walk, insert, remove, move, duplicate, updateProps, addColumn, removeColumn, type Found } from './model/tree.js';
 export { History } from './model/history.js';
 export { parseDesign, serializeDesign, isFullDocumentDesign } from './model/validate.js';
 export { toMjml, attr, safeUrl, bodyOf, type MjmlResult } from './compiler/mjml.js';
@@ -11,3 +11,6 @@ export { sanitizeHtml } from './ui/sanitize.js';
 export { translator } from './ui/i18n.js';
 export { default as PropertiesPanel } from './ui/PropertiesPanel.vue';
 export { FIELDS, SETTINGS_FIELDS, type Field, type FieldKind } from './ui/fields.js';
+export { default as RichText } from './ui/RichText.vue';
+export { default as VariablesPanel } from './ui/VariablesPanel.vue';
+export { sampleData, type TemplateVariable } from './ui/variables.js';
