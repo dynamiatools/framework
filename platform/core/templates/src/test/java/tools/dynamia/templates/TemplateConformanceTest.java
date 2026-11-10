@@ -28,6 +28,7 @@ class TemplateConformanceTest {
     private static final String FILE = "platform/contract/fixtures/templates/conformance.json";
 
     private final DynamiaTemplateEngine engine = new DynamiaTemplateEngine();
+    private final DynamiaTemplateEngine escaping = new DynamiaTemplateEngine(null, true);
 
     @TestFactory
     Stream<DynamicTest> conformance() throws IOException {
@@ -42,7 +43,7 @@ class TemplateConformanceTest {
             if (c.get("locale") != null) {
                 data.put("locale", c.get("locale"));
             }
-            assertEquals(c.get("expected"), engine.evaluate((String) c.get("template"), data), String.valueOf(c.get("template")));
+            assertEquals(c.get("expected"), (Boolean.TRUE.equals(c.get("escapeHtml")) ? escaping : engine).evaluate((String) c.get("template"), data), String.valueOf(c.get("template")));
         }));
     }
 

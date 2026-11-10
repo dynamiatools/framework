@@ -371,6 +371,9 @@ final class TemplateExpressions {
                 return value == null ? null : String.valueOf(value).toUpperCase(locale(vars));
             case "lower":
                 return value == null ? null : String.valueOf(value).toLowerCase(locale(vars));
+            case "raw":
+                // marks the value as trusted HTML: the engine does not escape it (see DynamiaTemplateEngine)
+                return value;
             case "trim":
                 return value == null ? null : String.valueOf(value).trim();
             case "default":

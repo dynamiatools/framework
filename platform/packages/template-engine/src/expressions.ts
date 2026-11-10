@@ -455,7 +455,7 @@ export function unwrap(text: string): string {
 
 // ------------------------------------------------------------- filters
 
-const RESERVED = new Set(['upper', 'lower', 'trim', 'default', 'number', 'currency', 'date', 'count', 'sum', 'avg', 'min', 'max']);
+const RESERVED = new Set(['upper', 'lower', 'trim', 'default', 'number', 'currency', 'date', 'count', 'sum', 'avg', 'min', 'max', 'raw']);
 const FILTER_NAME = /^[A-Za-z][A-Za-z0-9_]*$/;
 const filters = new Map<string, TemplateFilter>();
 
@@ -541,6 +541,9 @@ function applyFilter(value: unknown, name: string, arg: string | null, vars: Var
       return value === null ? null : str(value).toLocaleUpperCase(localeOf(vars));
     case 'lower':
       return value === null ? null : str(value).toLocaleLowerCase(localeOf(vars));
+    case 'raw':
+      // marks the value as trusted HTML: the engine does not escape it
+      return value;
     case 'trim':
       return value === null ? null : str(value).trim();
     case 'default':

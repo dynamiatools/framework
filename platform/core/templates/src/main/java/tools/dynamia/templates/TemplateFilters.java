@@ -18,7 +18,7 @@ public final class TemplateFilters {
 
     /** Names of the filters the engine has built in. */
     private static final Set<String> RESERVED = Set.of("upper", "lower", "trim", "default", "number", "currency", "date",
-            "count", "sum", "avg", "min", "max");
+            "count", "sum", "avg", "min", "max", "raw");
     private static final Pattern NAME = Pattern.compile("[A-Za-z][A-Za-z0-9_]*");
 
     private static final Map<String, TemplateFilter> FILTERS = new ConcurrentHashMap<>();

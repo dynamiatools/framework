@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 public class DynamiaTemplateEngine {
 
     private final Locale defaultLocale;
+    private final boolean escapeHtml;
 
     /** Uses the JVM default locale for {@code upper}, {@code lower}, {@code number}, {@code currency} and {@code date}. */
     public DynamiaTemplateEngine() {
@@ -34,7 +35,18 @@ public class DynamiaTemplateEngine {
      *                      default. A {@code locale} variable (Locale or language tag) always wins.
      */
     public DynamiaTemplateEngine(Locale defaultLocale) {
+        this(defaultLocale, false);
+    }
+
+    /**
+     * @param defaultLocale see {@link #DynamiaTemplateEngine(Locale)}
+     * @param escapeHtml    when true every printed value has {@code & < > " '} replaced by HTML entities, so data
+     *                      cannot inject markup into an HTML template; a value that is trusted HTML is printed with the
+     *                      {@code raw} filter ({@code ${body|raw}}). Text written in the template is never escaped.
+     */
+    public DynamiaTemplateEngine(Locale defaultLocale, boolean escapeHtml) {
         this.defaultLocale = defaultLocale;
+        this.escapeHtml = escapeHtml;
     }
 
     /**
@@ -72,7 +84,8 @@ public class DynamiaTemplateEngine {
             if (!shortForm && TemplateExpressions.isTernary(expression)) {
                 // ${cond ? 'a' : 'b'}: the || of a condition is not a filter separator
                 var chosen = TemplateExpressions.ternary(expression, vars);
-                m.appendReplacement(sb, Matcher.quoteReplacement(chosen == null ? "" : String.valueOf(chosen)));
+                var chosenText = chosen == null ? "" : String.valueOf(chosen);
+                m.appendReplacement(sb, Matcher.quoteReplacement(escapeHtml ? escape(chosenText) : chosenText));
                 continue;
             }
             var parts = shortForm ? new String[]{expression} : expression.split("\\|");
@@ -91,10 +104,45 @@ public class DynamiaTemplateEngine {
                     value = TemplateExpressions.applyFilters(value, java.util.Arrays.copyOfRange(parts, 1, parts.length), vars);
                 }
                 replacement = value == null ? "" : String.valueOf(value);
+                if (escapeHtml && !isRaw(parts)) {
+                    replacement = escape(replacement);
+                }
             }
             m.appendReplacement(sb, Matcher.quoteReplacement(replacement));
         }
         m.appendTail(sb);
         return sb.toString();
+    }
+
+    /** Whether the filter chain has {@code raw}: the value is trusted HTML and is printed as it is. */
+    private static boolean isRaw(String[] parts) {
+        for (int i = 1; i < parts.length; i++) {
+            if (parts[i].trim().equals("raw")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Replaces {@code & < > " '} by their HTML entities, in one pass. */
+    static String escape(String text) {
+        StringBuilder out = null;
+        for (int i = 0; i < text.length(); i++) {
+            var replacement = switch (text.charAt(i)) {
+                case '&' -> "&amp;";
+                case '<' -> "&lt;";
+                case '>' -> "&gt;";
+                case '"' -> "&quot;";
+                case '\'' -> "&#39;";
+                default -> null;
+            };
+            if (replacement != null && out == null) {
+                out = new StringBuilder(text.length() + 16).append(text, 0, i);
+            }
+            if (out != null) {
+                out.append(replacement != null ? replacement : String.valueOf(text.charAt(i)));
+            }
+        }
+        return out == null ? text : out.toString();
     }
 }

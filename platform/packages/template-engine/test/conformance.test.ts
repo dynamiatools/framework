@@ -13,11 +13,13 @@ interface Case {
   template: string;
   data: Record<string, unknown>;
   locale?: string;
+  escapeHtml?: boolean;
   expected: string;
 }
 
 const { cases } = JSON.parse(readFileSync(FILE, 'utf8')) as { cases: Case[] };
 const engine = new DynamiaTemplateEngine();
+const escaping = new DynamiaTemplateEngine({ escapeHtml: true });
 
 describe('template conformance with the Java engine', () => {
   it('has cases', () => {
@@ -27,7 +29,7 @@ describe('template conformance with the Java engine', () => {
   for (const c of cases) {
     it(`${c.group}: ${c.name}`, () => {
       const data = c.locale ? { ...c.data, locale: c.locale } : c.data;
-      expect(engine.evaluate(c.template, data)).toBe(c.expected);
+      expect((c.escapeHtml ? escaping : engine).evaluate(c.template, data)).toBe(c.expected);
     });
   }
 });

@@ -10,6 +10,12 @@ const VARIABLE = /\$\{(?!\{)([^}]+)\}|\{\{([^}]+)\}\}|\$([A-Za-z_]\w*(?:\.[A-Za-
 export interface TemplateEngineOptions {
   /** Language tag (`es-CO`) for `upper`, `lower`, `number`, `currency` and `date` when the data has no `locale`. */
   locale?: string;
+  /**
+   * Replaces `& < > " '` by HTML entities in every printed value, so data cannot inject markup into an HTML template.
+   * A value that is trusted HTML is printed with the `raw` filter (`${body|raw}`). Text written in the template is never
+   * escaped. Default false.
+   */
+  escapeHtml?: boolean;
 }
 
 /**
@@ -21,9 +27,11 @@ export interface TemplateEngineOptions {
  */
 export class DynamiaTemplateEngine {
   private readonly locale: string | undefined;
+  private readonly escapeHtml: boolean;
 
   constructor(options: TemplateEngineOptions = {}) {
     this.locale = options.locale;
+    this.escapeHtml = options.escapeHtml === true;
   }
 
   evaluate(template: string | null | undefined, data: Vars = {}): string {
@@ -37,22 +45,23 @@ export class DynamiaTemplateEngine {
     if (hasBlocks(template)) {
       const nodes = parse(template);
       if (nodes !== null) {
-        return render(nodes, vars, substitute);
+        return render(nodes, vars, (text, scope) => substitute(text, scope, this.escapeHtml));
       }
     }
-    return substitute(template, vars);
+    return substitute(template, vars, this.escapeHtml);
   }
 }
 
 /** Replaces the variables of a text that has no block tags. */
-function substitute(template: string, vars: Vars): string {
+function substitute(template: string, vars: Vars, escapeHtml: boolean): string {
   return template.replace(VARIABLE, (match: string, g1?: string, g2?: string, g3?: string) => {
     const shortForm = g3 !== undefined;
     const expression = shortForm ? g3 : (g1 ?? g2 ?? '');
     if (!shortForm && isTernary(expression)) {
       // ${cond ? 'a' : 'b'}: the || of a condition is not a filter separator
       const chosen = ternary(expression, vars);
-      return chosen === null || chosen === undefined ? '' : str(chosen);
+      const chosenText = chosen === null || chosen === undefined ? '' : str(chosen);
+      return escapeHtml ? escape(chosenText) : chosenText;
     }
     const parts = shortForm ? [expression] : expression.split('|');
     const first = parts[0] ?? '';
@@ -69,6 +78,14 @@ function substitute(template: string, vars: Vars): string {
     if (parts.length > 1) {
       value = applyFilters(value, parts.slice(1), vars);
     }
-    return value === null || value === undefined ? '' : str(value);
+    const text = value === null || value === undefined ? '' : str(value);
+    return escapeHtml && !parts.slice(1).some((p) => p.trim() === 'raw') ? escape(text) : text;
   });
+}
+
+const ENTITIES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+/** Replaces `& < > " '` by their HTML entities, in one pass. */
+function escape(text: string): string {
+  return text.replace(/[&<>"']/g, (c) => ENTITIES[c] ?? c);
 }
