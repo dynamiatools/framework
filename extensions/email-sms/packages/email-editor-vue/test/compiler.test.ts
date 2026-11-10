@@ -1,5 +1,6 @@
 import { DynamiaTemplateEngine } from '@dynamia-tools/template-engine';
 import { describe, expect, it } from 'vitest';
+import { tableRows } from '../src/compiler/mjml.js';
 import { attr, bodyOf, compile, createBlock, emptyDesign, insert, parseDesign, safeUrl, toMjml, type Block, type Design } from '../src/index.js';
 
 const root = (index: number) => ({ parentId: null, slot: 'children', index }) as const;
@@ -38,6 +39,41 @@ describe('heading, quote and list blocks', () => {
     expect(errors).toEqual([]);
     expect(html).toContain('<h2 ');
     expect(html).not.toMatch(/<tbody>\s*<(h2|ul|blockquote)/);
+  });
+});
+
+describe('table block', () => {
+  const table = (props: Record<string, unknown>) => toMjml(design(createBlock('table', props))).mjml;
+
+  it('draws the header row with th cells and escapes the cells', () => {
+    const mjml = table({ rows: [['Item', 'Price'], ['<b>x</b> & ${name}', '10']], header: true });
+    expect(mjml).toContain('<mj-table width="100%"');
+    expect(mjml).toContain('<th style="padding:8px 10px;border-bottom:1px solid #dddddd;text-align:left;background:#f1f3f4;font-weight:bold">Item</th>');
+    expect(mjml).toContain('&lt;b&gt;x&lt;/b&gt; &amp; ${name}</td>');
+    expect(table({ rows: [['a'], ['b']], header: false })).not.toContain('<th ');
+  });
+
+  it('repeats the chosen row with each, only when the list and the name are valid', () => {
+    const rows = [['Item'], ['${line.name}']];
+    expect(table({ rows, repeatRow: 2, source: 'order.lines', alias: 'line' })).toContain('{{#each order.lines as line}}<tr><td');
+    expect(table({ rows, repeatRow: 2, source: 'order.lines', alias: 'line' })).toContain('</tr>{{/each}}</mj-table>');
+    expect(table({ rows, repeatRow: 0 })).not.toContain('{{#each');
+    expect(table({ rows, repeatRow: 2, source: 'a b', alias: 'line' })).not.toContain('{{#each');
+  });
+
+  it('limits and squares the cells, and ignores an empty table', () => {
+    expect(tableRows([['a', 'b'], ['c']])).toEqual([['a', 'b'], ['c', '']]);
+    expect(tableRows('x')).toEqual([]);
+    expect(tableRows(Array.from({ length: 80 }, () => Array.from({ length: 12 }, () => 'x')))).toHaveLength(50);
+    expect(tableRows([Array.from({ length: 12 }, () => 'x')])[0]).toHaveLength(8);
+    expect(table({ rows: [] })).not.toContain('mj-table');
+  });
+
+  it('compiles to a real table', async () => {
+    const { html, errors } = await compile(design(createBlock('table', { rows: [['H1', 'H2'], ['a', 'b']], header: true })));
+    expect(errors).toEqual([]);
+    expect(html).toMatch(/<th[^>]*>H1<\/th>/);
+    expect(html).toMatch(/<td[^>]*>b<\/td>/);
   });
 });
 

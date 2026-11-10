@@ -34,6 +34,41 @@ function write(field: Field, source: 'block' | 'settings', raw: string | boolean
   }
 }
 
+const gridRows = computed<string[][]>(() => {
+  const rows = block.value?.props['rows'];
+  return Array.isArray(rows) ? rows.map((row) => (Array.isArray(row) ? row.map((c) => String(c ?? '')) : [])) : [];
+});
+
+function commitRows(rows: string[][]): void {
+  if (block.value) {
+    editor.update(block.value.id, { rows }, 'rows');
+  }
+}
+
+function setCell(r: number, c: number, value: string): void {
+  const rows = gridRows.value.map((row) => [...row]);
+  if (rows[r]) {
+    rows[r][c] = value;
+    commitRows(rows);
+  }
+}
+
+function addRow(): void {
+  commitRows([...gridRows.value, Array<string>(gridRows.value[0]?.length ?? 2).fill('')]);
+}
+
+function addTableColumn(): void {
+  commitRows(gridRows.value.map((row) => [...row, '']));
+}
+
+function removeRow(r: number): void {
+  commitRows(gridRows.value.filter((_, i) => i !== r));
+}
+
+function removeTableColumn(c: number): void {
+  commitRows(gridRows.value.map((row) => row.filter((_, i) => i !== c)));
+}
+
 function problem(field: Field, source: Record<string, unknown>): string | null {
   return field.invalid ? field.invalid(read(field, source)) : null;
 }
@@ -76,7 +111,18 @@ const isDocument = computed(() => block.value?.type === 'html' && block.value.pr
 
       <div v-for="field in fields" :key="`${block.id}-${field.key}`" class="field">
         <label :for="`f-${field.key}`">{{ t(`f.${field.key}`) }}</label>
-        <RichText v-if="field.kind === 'rich'" :model-value="read(field, block.props)" :label="t(`f.${field.key}`)" :data-field="field.key" @update:model-value="write(field, 'block', $event)" />
+        <div v-if="field.kind === 'grid'" class="grid" :data-field="field.key">
+          <div v-for="(row, r) in gridRows" :key="r" class="grid-row">
+            <input v-for="(cell, c) in row" :key="c" type="text" :value="cell" :aria-label="t('cell', { r: r + 1, c: c + 1 })" :data-cell="`${r}-${c}`" @focus="registerInserter($event)" @input="setCell(r, c, ($event.target as HTMLInputElement).value)" />
+            <button type="button" :disabled="gridRows.length <= 1" :aria-label="t('removeRow')" :title="t('removeRow')" data-action="remove-row" @click="removeRow(r)">✕</button>
+          </div>
+          <div class="grid-actions">
+            <button type="button" :disabled="gridRows.length >= 50" data-action="add-row" @click="addRow">+ {{ t('addRow') }}</button>
+            <button type="button" :disabled="(gridRows[0]?.length ?? 0) >= 8" data-action="add-table-column" @click="addTableColumn">+ {{ t('addColumn') }}</button>
+            <button type="button" :disabled="(gridRows[0]?.length ?? 0) <= 1" data-action="remove-table-column" @click="removeTableColumn((gridRows[0]?.length ?? 1) - 1)">− {{ t('removeColumn') }}</button>
+          </div>
+        </div>
+        <RichText v-else-if="field.kind === 'rich'" :model-value="read(field, block.props)" :label="t(`f.${field.key}`)" :data-field="field.key" @update:model-value="write(field, 'block', $event)" />
         <textarea v-else-if="field.kind === 'textarea' || field.kind === 'code'" :id="`f-${field.key}`" :data-field="field.key" rows="6" :class="{ code: field.kind === 'code' }" :value="read(field, block.props)" @focus="registerInserter($event)" @input="write(field, 'block', ($event.target as HTMLTextAreaElement).value)" />
         <select v-else-if="field.kind === 'select'" :id="`f-${field.key}`" :data-field="field.key" :value="read(field, block.props)" @change="write(field, 'block', ($event.target as HTMLSelectElement).value)">
           <option v-for="option in field.options" :key="option" :value="option">{{ t(`opt.${option}`) }}</option>
@@ -126,4 +172,8 @@ textarea.code { font-family: ui-monospace, monospace; font-size: 12px; }
 .note { color: #7a8594; font-size: 12px; margin: 0; }
 button { padding: 5px 10px; border: 1px solid #c4cad3; background: #fff; border-radius: 4px; cursor: pointer; font: inherit; }
 button:disabled { opacity: 0.45; cursor: default; }
+.grid { display: flex; flex-direction: column; gap: 4px; }
+.grid-row { display: flex; gap: 4px; align-items: center; }
+.grid-row input { min-width: 0; flex: 1; }
+.grid-actions { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 </style>

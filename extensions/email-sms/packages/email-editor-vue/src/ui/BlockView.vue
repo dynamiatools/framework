@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue';
+import { tableRows } from '../compiler/mjml.js';
 import type { Block } from '../model/types.js';
 import BlockList from './BlockList.vue';
 import { sanitizeHtml } from './sanitize.js';
@@ -72,23 +73,30 @@ function onKeyDown(event: KeyboardEvent): void {
     <span v-if="hidden" class="hidden-badge">{{ hidden }}</span>
 
     <!-- leaf blocks: an approximation of what the email shows -->
-    <div v-if="block.type === 'header'" class="v-header" :style="{ textAlign: text('align') as never, background: text('backgroundColor') || undefined, padding: pad }">
+    <div v-if="block.type === 'header'" class="v-header" :style="{ textAlign: (text('align') || 'left') as never, background: text('backgroundColor') || undefined, padding: pad }">
       <img v-if="text('logoUrl')" :src="text('logoUrl')" :alt="text('logoAlt')" :width="Number(p['logoWidth']) || 120" />
       <div v-if="text('title')" class="title">{{ text('title') }}</div>
       <div v-if="!text('logoUrl') && !text('title')" class="placeholder">{{ t('header') }}</div>
     </div>
-    <div v-else-if="block.type === 'heading'" class="v-heading" :style="{ textAlign: text('align') as never, color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || ({ h1: 32, h2: 26, h3: 20 } as Record<string, number>)[text('level')] || 26}px`, padding: pad }">{{ text('text') }}</div>
-    <div v-else-if="block.type === 'quote'" class="v-quote" :style="{ textAlign: text('align') as never, color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || 16}px`, padding: pad }"><blockquote :style="{ borderLeft: `4px solid ${text('borderColor') || '#1a73e8'}` }" v-html="html" /></div>
-    <div v-else-if="block.type === 'list'" class="v-text" :style="{ textAlign: text('align') as never, color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || 16}px`, padding: pad }">
+    <div v-else-if="block.type === 'heading'" class="v-heading" :style="{ textAlign: (text('align') || 'left') as never, color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || ({ h1: 32, h2: 26, h3: 20 } as Record<string, number>)[text('level')] || 26}px`, padding: pad }">{{ text('text') }}</div>
+    <div v-else-if="block.type === 'quote'" class="v-quote" :style="{ textAlign: (text('align') || 'left') as never, color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || 16}px`, padding: pad }"><blockquote :style="{ borderLeft: `4px solid ${text('borderColor') || '#1a73e8'}` }" v-html="html" /></div>
+    <div v-else-if="block.type === 'list'" class="v-text" :style="{ textAlign: (text('align') || 'left') as never, color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || 16}px`, padding: pad }">
       <component :is="p['ordered'] === true ? 'ol' : 'ul'" class="v-list"><li v-for="(item, i) in text('items').split('\n').filter((l) => l.trim() !== '')" :key="i">{{ item }}</li></component>
     </div>
-    <div v-else-if="block.type === 'text'" class="v-text" :style="{ textAlign: text('align') as never, color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || 16}px`, lineHeight: String(p['lineHeight'] ?? 1.5), padding: pad }" v-html="html" />
-    <div v-else-if="block.type === 'footer'" class="v-text" :style="{ textAlign: text('align') as never, color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || 12}px`, padding: pad }" v-html="html" />
-    <div v-else-if="block.type === 'image'" class="v-image" :style="{ textAlign: text('align') as never, padding: pad }">
+    <div v-else-if="block.type === 'table'" class="v-text" :style="{ color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || 14}px`, padding: pad }">
+      <table class="v-table" :style="{ textAlign: (text('align') || 'left') as never }">
+        <tr v-for="(row, r) in tableRows(p['rows'])" :key="r" :class="{ repeated: Number(p['repeatRow']) === r + 1 }">
+          <component :is="p['header'] === true && r === 0 ? 'th' : 'td'" v-for="(cell, c) in row" :key="c" :style="{ borderBottom: `1px solid ${text('borderColor') || '#ddd'}`, background: p['header'] === true && r === 0 ? text('headerBackground') || '#f1f3f4' : undefined }">{{ cell }}</component>
+        </tr>
+      </table>
+    </div>
+    <div v-else-if="block.type === 'text'" class="v-text" :style="{ textAlign: (text('align') || 'left') as never, color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || 16}px`, lineHeight: String(p['lineHeight'] ?? 1.5), padding: pad }" v-html="html" />
+    <div v-else-if="block.type === 'footer'" class="v-text" :style="{ textAlign: (text('align') || 'left') as never, color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || 12}px`, padding: pad }" v-html="html" />
+    <div v-else-if="block.type === 'image'" class="v-image" :style="{ textAlign: (text('align') || 'left') as never, padding: pad }">
       <img v-if="text('src')" :src="text('src')" :alt="text('alt')" :style="{ maxWidth: '100%', width: Number(p['width']) > 0 ? `${p['width']}px` : undefined }" />
       <div v-else class="placeholder">{{ t('noImage') }}</div>
     </div>
-    <div v-else-if="block.type === 'button'" class="v-button" :style="{ textAlign: text('align') as never, padding: pad }">
+    <div v-else-if="block.type === 'button'" class="v-button" :style="{ textAlign: (text('align') || 'left') as never, padding: pad }">
       <span class="btn" :style="{ background: text('backgroundColor'), color: text('color'), borderRadius: `${Number(p['borderRadius']) || 0}px`, fontSize: `${Number(p['fontSize']) || 16}px`, display: p['fullWidth'] ? 'block' : 'inline-block' }">{{ text('text') }}</span>
     </div>
     <div v-else-if="block.type === 'divider'" class="v-divider" :style="{ padding: pad }"><hr :style="{ borderTop: `${Number(p['thickness']) || 1}px solid ${text('color')}` }" /></div>
@@ -132,6 +140,9 @@ function onKeyDown(event: KeyboardEvent): void {
 .v-header img, .v-image img { max-width: 100%; height: auto; }
 .v-heading { font-weight: 700; line-height: 1.25; }
 .v-quote blockquote { margin: 0; padding: 4px 0 4px 16px; font-style: italic; }
+.v-table { width: 100%; border-collapse: collapse; }
+.v-table th, .v-table td { padding: 8px 10px; }
+.v-table tr.repeated td { background: #fff8e1; }
 .v-list { margin: 0; padding-left: 24px; }
 .v-header .title { font-size: 24px; font-weight: 700; }
 .btn { padding: 10px 24px; text-align: center; font-family: inherit; }

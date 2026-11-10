@@ -206,7 +206,20 @@ final class HtmlToBlocks {
     private void table(Element table) {
         var cells = columnCells(table);
         if (cells == null) {
-            html(table);
+            var rows = dataRows(table);
+            if (rows == null) {
+                html(table);
+                return;
+            }
+            var header = !table.select("thead").isEmpty() || rows.get(0).stream().allMatch(c -> "th".equals(c.normalName()));
+            add("table", props -> {
+                var array = props.putArray("rows");
+                rows.forEach(row -> {
+                    var out = array.addArray();
+                    row.forEach(c -> out.add(c.text()));
+                });
+                props.put("header", header);
+            });
             return;
         }
         flushHtml();
@@ -228,6 +241,24 @@ final class HtmlToBlocks {
             inner.flushHtml();
             column.set("children", inner.blocks);
         }
+    }
+
+    /** The rows of a data table the editor can hold: two or more rows of plain text cells, no spans, no tables inside. */
+    private static List<List<Element>> dataRows(Element table) {
+        if (table.getElementsByTag("table").size() != 1) {
+            return null;
+        }
+        var rows = new ArrayList<List<Element>>();
+        for (var tr : table.select("tr")) {
+            var cells = new ArrayList<Element>(tr.children());
+            if (cells.isEmpty() || cells.size() > 8
+                    || cells.stream().anyMatch(c -> !("td".equals(c.normalName()) || "th".equals(c.normalName())) || !c.children().isEmpty()
+                    || c.hasAttr("colspan") || c.hasAttr("rowspan"))) {
+                return null;
+            }
+            rows.add(cells);
+        }
+        return rows.size() >= 2 && rows.size() <= 50 ? rows : null;
     }
 
     private static List<Element> columnCells(Element table) {

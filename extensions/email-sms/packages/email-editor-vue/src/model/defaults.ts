@@ -22,6 +22,8 @@ export function defaultProps(type: BlockType): Record<string, unknown> {
       return { ...common, html: '<p>A quote or a highlighted note</p>', align: 'left', color: '#555555', borderColor: '#1a73e8', fontSize: 16, padding: '10px 24px' };
     case 'list':
       return { ...common, items: 'First item\nSecond item\nThird item', ordered: false, align: 'left', color: '', fontSize: 16, padding: '10px 24px' };
+    case 'table':
+      return { ...common, rows: [['Column 1', 'Column 2'], ['', '']], header: true, headerBackground: '#f1f3f4', borderColor: '#dddddd', align: 'left', color: '', fontSize: 14, repeatRow: 0, source: 'items', alias: 'item', padding: '10px 24px' };
     case 'text':
       return { ...common, html: '<p>Write your text here</p>', align: 'left', color: '', fontSize: 16, lineHeight: 1.5, padding: '10px 24px' };
     case 'image':

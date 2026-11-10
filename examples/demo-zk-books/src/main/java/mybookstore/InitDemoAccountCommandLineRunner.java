@@ -79,6 +79,7 @@ public class InitDemoAccountCommandLineRunner implements CommandLineRunner {
                 + "<p>Thanks for your purchase. Your invoice <b>$invoice.number</b> total is $invoice.total.</p>"
                 + "<hr><h3>Your books</h3>"
                 + "<ul><li>Clean Code</li><li>Dune</li></ul>"
+                + "<table><tr><th>Book</th><th>Price</th></tr><tr><td>Clean Code</td><td>$75</td></tr><tr><td>Dune</td><td>$50</td></tr></table>"
                 + "<table><tr><td>Need help?</td><td>support@mybookstore.test</td></tr></table>"
                 + "<p>See you soon!</p>");
         crudService.save(invoiceEmail);

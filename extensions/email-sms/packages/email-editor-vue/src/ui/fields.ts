@@ -2,7 +2,7 @@ import { ALIAS, COLOR, CONDITION, PADDING, PATH } from '../compiler/mjml.js';
 import type { BlockType } from '../model/types.js';
 
 /** How a setting is edited. */
-export type FieldKind = 'text' | 'url' | 'number' | 'color' | 'select' | 'checkbox' | 'textarea' | 'rich' | 'code';
+export type FieldKind = 'text' | 'url' | 'number' | 'color' | 'select' | 'checkbox' | 'textarea' | 'rich' | 'code' | 'grid';
 
 export interface Field {
   key: string;
@@ -35,6 +35,20 @@ export const FIELDS: Record<BlockType, Field[]> = {
   heading: [{ key: 'text', kind: 'text' }, { key: 'level', kind: 'select', options: ['h1', 'h2', 'h3'] }, align, color('color', true), number('fontSize', 0, 72), padding, hideOn],
   quote: [{ key: 'html', kind: 'rich' }, color('borderColor'), align, color('color', true), number('fontSize', 8, 72), padding, hideOn],
   list: [{ key: 'items', kind: 'textarea' }, { key: 'ordered', kind: 'checkbox' }, align, color('color', true), number('fontSize', 8, 72), padding, hideOn],
+  table: [
+    { key: 'rows', kind: 'grid' },
+    { key: 'header', kind: 'checkbox' },
+    number('repeatRow', 0, 50),
+    { key: 'source', kind: 'text', invalid: (v) => (PATH.test(v.trim()) ? null : 'invalidPath') },
+    { key: 'alias', kind: 'text', invalid: (v) => (ALIAS.test(v.trim()) ? null : 'invalidAlias') },
+    color('headerBackground'),
+    color('borderColor'),
+    align,
+    color('color', true),
+    number('fontSize', 8, 72),
+    padding,
+    hideOn,
+  ],
   text: [{ key: 'html', kind: 'rich' }, align, color('color', true), number('fontSize', 8, 72), number('lineHeight', 1, 3, 0.1), padding, hideOn],
   image: [{ key: 'src', kind: 'url' }, { key: 'alt', kind: 'text' }, { key: 'href', kind: 'url' }, number('width', 0, 1200), align, padding, hideOn],
   button: [{ key: 'text', kind: 'text' }, { key: 'href', kind: 'url' }, color('backgroundColor'), color('color'), number('borderRadius', 0, 60), number('fontSize', 8, 72), align, { key: 'fullWidth', kind: 'checkbox' }, padding, hideOn],

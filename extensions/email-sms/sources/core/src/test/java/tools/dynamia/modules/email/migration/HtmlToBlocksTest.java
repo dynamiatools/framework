@@ -46,13 +46,13 @@ class HtmlToBlocksTest {
 
     @Test
     void whatHasNoBlockStaysHtmlAndNeighboursAreMerged() {
-        var result = HtmlToBlocks.convert("<h1>Hi</h1><table><tr><td>A</td></tr><tr><td>B</td></tr></table><div class=\"x\"><span>y</span></div><p>Bye</p>");
+        var result = HtmlToBlocks.convert("<h1>Hi</h1><table><tr><td colspan=\"2\">A</td></tr><tr><td>B</td></tr></table><div class=\"x\"><span>y</span></div><p>Bye</p>");
         var b = blocks(result);
 
         assertEquals(3, result.blocks());
         assertEquals(1, result.htmlBlocks());
         assertEquals("html", b.get(1).path("type").asString());
-        assertTrue(b.get(1).path("props").path("html").asString().startsWith("<table><tbody><tr><td>A</td></tr><tr><td>B</td></tr></tbody></table>"));
+        assertTrue(b.get(1).path("props").path("html").asString().startsWith("<table><tbody><tr><td colspan=\"2\">A</td></tr><tr><td>B</td></tr></tbody></table>"));
         assertTrue(b.get(1).path("props").path("html").asString().contains("class=\"x\""));
         assertEquals("text", b.get(2).path("type").asString());
     }
@@ -110,5 +110,30 @@ class HtmlToBlocksTest {
 
         var nested = blocks(HtmlToBlocks.convert("<p>x</p><table><tr><td><table><tr><td>a</td></tr></table></td><td>B</td></tr></table>"));
         assertEquals("html", nested.get(1).path("type").asString());
+    }
+
+    @Test
+    void aTableOfSeveralRowsOfPlainCellsBecomesATableBlock() {
+        var result = HtmlToBlocks.convert("<p>Lines</p><table><thead><tr><th>Item</th><th>Price</th></tr></thead><tbody><tr><td>Dune</td><td>${price}</td></tr><tr><td>Emma &amp; Co</td><td>5</td></tr></tbody></table>");
+        var table = blocks(result).get(1);
+
+        assertEquals("table", table.path("type").asString());
+        assertEquals(true, table.path("props").path("header").asBoolean());
+        assertEquals(3, table.path("props").path("rows").size());
+        assertEquals("Item", table.path("props").path("rows").get(0).get(0).asString());
+        assertEquals("${price}", table.path("props").path("rows").get(1).get(1).asString());
+        assertEquals("Emma & Co", table.path("props").path("rows").get(2).get(0).asString());
+        assertEquals(0, result.htmlBlocks());
+    }
+
+    @Test
+    void aTableWithoutHeaderCellsHasNoHeaderAndRichOrWideTablesStayHtml() {
+        var plain = blocks(HtmlToBlocks.convert("<p>x</p><table><tr><td>a</td></tr><tr><td>b</td></tr></table>")).get(1);
+        assertEquals("table", plain.path("type").asString());
+        assertEquals(false, plain.path("props").path("header").asBoolean(true));
+
+        assertEquals("html", blocks(HtmlToBlocks.convert("<p>x</p><table><tr><td><b>a</b></td></tr><tr><td>b</td></tr></table>")).get(1).path("type").asString());
+        var wide = "<p>x</p><table><tr>" + "<td>c</td>".repeat(9) + "</tr><tr>" + "<td>c</td>".repeat(9) + "</tr></table>";
+        assertEquals("html", blocks(HtmlToBlocks.convert(wide)).get(1).path("type").asString());
     }
 }

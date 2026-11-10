@@ -104,7 +104,7 @@ Values are HTML-escaped only in templates built in the editor (`escapeValues`); 
 
 ### Block editor
 
-The editor is a Vue package, [`@dynamia-tools/email-editor-vue`](packages/email-editor-vue/README.md): blocks (header, heading H1 to H3, text, quote, list,
+The editor is a Vue package, [`@dynamia-tools/email-editor-vue`](packages/email-editor-vue/README.md): blocks (header, heading H1 to H3, text, quote, list, table,
 image, button, divider, spacer, columns, footer, HTML, repeat, condition), responsive output through MJML, undo/redo,
 variables panel, preview on desktop and mobile, test send and the migration. A template stores the editor document in
 `design` (JSON) and the HTML it compiles to in `content`.
@@ -128,7 +128,7 @@ The page is served by `EmailEditorController` at `/dynamia-email/editor?id=7` (`
 `#include`, method calls, indexes and complex conditions are reported and the template is left untouched. The HTML is turned into
 editor blocks as far as it can: headings (h1 to h3), paragraphs and loose text, images (also inside a link), dividers and
 simple lists get their own block, a table of one row with two or more cells becomes a Columns block (each cell is converted
-the same way), and everything else (other tables, styled containers) stays an HTML block so the email looks the
+the same way), a table of several rows of plain text cells becomes a Table block (a header row when it uses `th`), and everything else (tables with spans, formatting in the cells or other tables inside, styled containers) stays an HTML block so the email looks the
 same; the report says how many. A template with `{{#each}}`/`{{#if}}` blocks or a `<style>` stays one HTML block, as splitting it
 would break it. The original fields are kept so `Revert migration` can restore them (it asks
 before losing edits made to the design afterwards). A migrated template does not escape values, as Velocity never did.

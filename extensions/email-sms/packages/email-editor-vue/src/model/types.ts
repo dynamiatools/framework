@@ -4,7 +4,7 @@
  */
 
 /** Blocks that print something. */
-export const LEAF_TYPES = ['header', 'heading', 'text', 'quote', 'list', 'image', 'button', 'divider', 'spacer', 'footer', 'html'] as const;
+export const LEAF_TYPES = ['header', 'heading', 'text', 'quote', 'list', 'table', 'image', 'button', 'divider', 'spacer', 'footer', 'html'] as const;
 /** Blocks that hold other blocks. */
 export const CONTAINER_TYPES = ['columns', 'column', 'repeat', 'condition'] as const;
 export const BLOCK_TYPES = [...LEAF_TYPES, ...CONTAINER_TYPES] as const;

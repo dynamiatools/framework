@@ -7,7 +7,7 @@ const editor = inject<EditorState>('editor')!;
 const t = inject<(key: string, values?: Record<string, string | number>) => string>('t')!;
 
 const ITEMS: { type: BlockType; icon: string }[] = [
-  { type: 'header', icon: '▀' }, { type: 'heading', icon: 'H' }, { type: 'text', icon: 'T' }, { type: 'quote', icon: '❝' }, { type: 'list', icon: '☰' }, { type: 'image', icon: '▣' }, { type: 'button', icon: '▭' },
+  { type: 'header', icon: '▀' }, { type: 'heading', icon: 'H' }, { type: 'text', icon: 'T' }, { type: 'quote', icon: '❝' }, { type: 'list', icon: '☰' }, { type: 'table', icon: '▦' }, { type: 'image', icon: '▣' }, { type: 'button', icon: '▭' },
   { type: 'divider', icon: '―' }, { type: 'spacer', icon: '↕' }, { type: 'columns', icon: '▥' }, { type: 'footer', icon: '▄' },
   { type: 'html', icon: '</>' }, { type: 'repeat', icon: '↻' }, { type: 'condition', icon: '?' },
 ];

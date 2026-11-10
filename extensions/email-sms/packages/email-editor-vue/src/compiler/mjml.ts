@@ -71,12 +71,22 @@ function num(value: unknown, fallback: number, min = 0, max = 2000): number {
   return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
 }
 
+/** The cells of a table block as text: at most 50 rows of 8 columns, every row as wide as the first. */
+export function tableRows(value: unknown): string[][] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  const rows = value.slice(0, 50).map((row) => (Array.isArray(row) ? row.slice(0, 8).map((c) => String(c ?? '')) : []));
+  const width = Math.max(0, ...rows.map((r) => r.length));
+  return rows.filter(() => width > 0).map((r) => [...r, ...Array<string>(width - r.length).fill('')]);
+}
+
 function cssClass(block: Block): string {
   const hide = block.props['hideOn'];
   return hide === 'mobile' ? ' css-class="hide-mobile"' : hide === 'desktop' ? ' css-class="hide-desktop"' : '';
 }
 
-const LEAVES = ['header', 'heading', 'text', 'quote', 'list', 'image', 'button', 'divider', 'spacer', 'footer', 'html'];
+const LEAVES = ['header', 'heading', 'text', 'quote', 'list', 'table', 'image', 'button', 'divider', 'spacer', 'footer', 'html'];
 
 /** The body of an HTML document (what is between `<body>` and `</body>`), or the text as it is. */
 export function bodyOf(html: string): string {
@@ -124,6 +134,29 @@ class Emitter {
         const tag = p['ordered'] === true ? 'ol' : 'ul';
         const items = String(p['items'] ?? '').split(/\r?\n/).map((l) => l.trim()).filter((l) => l !== '').map((l) => `<li style="margin:0 0 4px">${plain(l)}</li>`).join('');
         return `<mj-text align="${align(p['align'])}"${colorAttr('color', p['color'])} font-size="${num(p['fontSize'], 16, 8, 72)}px" line-height="1.5" padding="${padding(p['padding'], '10px 24px')}"${hide}><${tag} style="margin:0;padding-left:24px">${items}</${tag}></mj-text>`;
+      }
+      case 'table': {
+        const rows = tableRows(p['rows']);
+        if (rows.length === 0) {
+          return '';
+        }
+        const border = color(p['borderColor'], '#dddddd');
+        const headBackground = color(p['headerBackground'], '#f1f3f4');
+        const header = p['header'] === true;
+        const repeatRow = num(p['repeatRow'], 0, 0, rows.length);
+        const source = String(p['source'] ?? '').trim();
+        const alias = String(p['alias'] ?? '').trim();
+        const repeat = repeatRow > 0 && PATH.test(source) && ALIAS.test(alias);
+        const cell = `padding:8px 10px;border-bottom:1px solid ${border};text-align:${align(p['align'])}`;
+        const body = rows
+          .map((cells, i) => {
+            const th = header && i === 0;
+            const style = th ? `${cell};background:${headBackground};font-weight:bold` : cell;
+            const tr = `<tr>${cells.map((c) => `<${th ? 'th' : 'td'} style="${style}">${plain(c)}</${th ? 'th' : 'td'}>`).join('')}</tr>`;
+            return repeat && i === repeatRow - 1 ? `{{#each ${source} as ${alias}}}${tr}{{/each}}` : tr;
+          })
+          .join('');
+        return `<mj-table width="100%"${colorAttr('color', p['color'])} font-size="${num(p['fontSize'], 14, 8, 72)}px" padding="${padding(p['padding'], '10px 24px')}"${hide}>${body}</mj-table>`;
       }
       case 'text':
         return `<mj-text align="${align(p['align'])}"${colorAttr('color', p['color'])} font-size="${num(p['fontSize'], 16, 8, 72)}px" line-height="${num(p['lineHeight'], 1.5, 1, 3)}" padding="${padding(p['padding'], '10px 24px')}"${hide}>${String(p['html'] ?? '')}</mj-text>`;
