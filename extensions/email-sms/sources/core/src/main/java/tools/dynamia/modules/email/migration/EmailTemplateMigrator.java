@@ -125,8 +125,12 @@ public class EmailTemplateMigrator {
             var result = VelocityConverter.convert(original);
             converted.put(field.name(), result.text());
             result.issues().forEach(i -> issues.add(new FieldIssue(field.name(), i.kind(), i.line(), i.snippet(), i.reason())));
-            if (original.contains("{{")) {
-                warnings.add("The " + field.name() + " contains '{{', which the new engine reads as a variable.");
+            int literal = original.indexOf("{{");
+            if (literal >= 0) {
+                // plain text in Velocity, but the new engine would read it as a variable
+                int line = 1 + (int) original.substring(0, literal).chars().filter(c -> c == '\n').count();
+                issues.add(new FieldIssue(field.name(), "LITERAL_BRACES", line, "{{",
+                        "A literal '{{' is plain text in Velocity but the new engine reads it as a variable"));
             }
         }
         warnings.add(DIRECT_EVALUATION_WARNING);

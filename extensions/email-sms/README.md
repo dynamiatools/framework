@@ -132,7 +132,10 @@ before losing edits made to the design afterwards). A migrated template does not
 `/api/email/templates` (get, create, `PUT {id}/design`, `variables`, `{id}/preview`, `{id}/test-send`, `{id}/migrate`,
 `{id}/revert`). Every call needs an authenticated user that an `EmailTemplatePolicy` accepts and works only on templates
 of the current account; the system account's templates are read-only. The default policy lets the roles listed in
-`dynamia.email.editor-roles` (comma separated); **with the property empty nobody can use the API**. A test email goes only
+`dynamia.email.editor-roles` (comma separated); **with the property empty nobody can use the API**. One policy that says
+yes is enough, so to restrict access with your own `EmailTemplatePolicy` leave the property empty. Changing calls must
+carry an `X-Requested-With` header (the client sends it): CSRF protection is off in the framework and the API uses the
+session cookie. A test email goes only
 to the address of the logged in user (their principal name when it is an email, or what your own policy returns).
 Request content is rendered only by the Dynamia engine, never by Velocity.
 

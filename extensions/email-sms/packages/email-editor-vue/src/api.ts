@@ -96,7 +96,7 @@ export class EmailTemplatesClient implements EmailTemplatesApi {
     const response = await this.doFetch(this.base + path, {
       method,
       credentials: 'same-origin',
-      headers: { Accept: 'application/json', ...(body === undefined ? {} : { 'Content-Type': 'application/json' }), ...(this.options.headers ?? {}) },
+      headers: { Accept: 'application/json', 'X-Requested-With': 'dynamia-email-editor', ...(body === undefined ? {} : { 'Content-Type': 'application/json' }), ...(this.options.headers ?? {}) },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
     const text = await response.text();

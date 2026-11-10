@@ -45,7 +45,7 @@ class EmailTemplatesApiControllerTest {
     }
 
     private static MockHttpServletRequestBuilder as(MockHttpServletRequestBuilder request, String user) {
-        return request.principal(() -> user);
+        return request.principal(() -> user).header(EmailTemplatesApiController.REQUESTED_WITH, "test");
     }
 
     private String body(MockHttpServletRequestBuilder request) throws Exception {
@@ -74,6 +74,23 @@ class EmailTemplatesApiControllerTest {
         assertEquals(403, status(as(post("/api/email/templates/1/migrate?dryRun=false"), "ada@x.com")));
         assertEquals(403, status(as(post("/api/email/templates/1/revert?confirm=true"), "ada@x.com")));
         assertEquals(403, status(as(post("/api/email/templates/1/test-send").contentType(MediaType.APPLICATION_JSON).content("{}"), "ada@x.com")));
+    }
+
+    @Test
+    void changingCallsWithoutTheRequestedWithHeaderAreRejected() throws Exception {
+        for (var request : new MockHttpServletRequestBuilder[]{
+                post("/api/email/templates/5/migrate?dryRun=false"), post("/api/email/templates/5/revert?confirm=true"),
+                put("/api/email/templates/7/design").contentType(MediaType.APPLICATION_JSON).content("{}"),
+                post("/api/email/templates").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"x\"}")}) {
+            var plain = request.principal(() -> "ada@x.com");
+            assertEquals(403, status(plain));
+            assertTrue(body(plain).contains("CSRF_HEADER"));
+        }
+        verify(service, never()).migrate(any(), org.mockito.ArgumentMatchers.anyBoolean());
+        verify(service, never()).revert(any(), org.mockito.ArgumentMatchers.anyBoolean());
+        // reading needs no header
+        when(service.get(1L)).thenReturn(null);
+        assertEquals(200, status(get("/api/email/templates/1").principal(() -> "ada@x.com")));
     }
 
     @Test

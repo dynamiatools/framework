@@ -115,11 +115,15 @@ class EmailTemplateMigratorTest {
     }
 
     @Test
-    void literalDoubleBracesProduceAWarning() {
+    void literalDoubleBracesAreNotPortableBecauseTheNewEngineWouldReadThem() {
         var t = new EmailTemplate();
-        t.setContent("<script>var a = {{ x }};</script>$name");
-        var report = migrator.analyze(t);
-        assertTrue(report.warnings().stream().anyMatch(w -> w.contains("'{{'")));
+        t.setContent("<p>$name</p>\n<script>var a = {{ x }};</script>");
+        var report = migrator.migrate(t);
+        assertFalse(report.portable());
+        assertFalse(report.applied());
+        assertEquals("LITERAL_BRACES", report.issues().get(0).kind());
+        assertEquals(2, report.issues().get(0).line());
+        assertEquals(EmailTemplateEngine.VELOCITY, t.getEngine());
     }
 
     @Test

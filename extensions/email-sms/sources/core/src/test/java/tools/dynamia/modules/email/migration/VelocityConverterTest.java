@@ -104,6 +104,7 @@ class VelocityConverterTest {
         assertEquals(List.of("UNBALANCED"), kinds("#if($a)x"));
         assertEquals(List.of("UNBALANCED"), kinds("x#end"));
         assertEquals(List.of("UNBALANCED"), kinds("#else"));
+        assertEquals(List.of("LITERAL"), kinds("price ${5}"));
     }
 
     @Test

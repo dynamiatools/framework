@@ -230,7 +230,7 @@ public class EmailTemplatesApiService {
      * @param data    the data, null to use the samples of the variables
      * @return whether it was sent
      */
-    @Transactional(readOnly = true)
+    @Transactional // not read only: sending logs the message and the address
     public TestResult testSend(Long id, String address, String source, Map<String, Object> data) {
         var t = load(id);
         if (address == null || address.isBlank()) {

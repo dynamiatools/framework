@@ -29,6 +29,14 @@ export function attr(value: unknown): string {
     .replace(/>/g, '&gt;');
 }
 
+/** Escapes a plain text setting (a title, a button label, the preheader) so `<` or `&` cannot break the MJML; `{{ }}` and `${ }` are untouched. */
+export function plain(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 /** Keeps http(s), mailto, tel, anchors and relative links, and links made of variables; drops javascript: and data:. */
 export function safeUrl(url: unknown): string {
   const value = String(url ?? '').trim();
@@ -92,7 +100,7 @@ class Emitter {
         const container = bg ? ` container-background-color="${bg}"` : '';
         const pad = padding(p['padding'], '20px 24px');
         const logo = safeUrl(p['logoUrl']);
-        const title = String(p['title'] ?? '');
+        const title = plain(p['title']);
         return (
           (logo
             ? `<mj-image src="${attr(logo)}" alt="${attr(p['logoAlt'])}" width="${num(p['logoWidth'], 120, 10, 600)}px" align="${align(p['align'])}" padding="${pad}"${container}${hide} />`
@@ -117,7 +125,7 @@ class Emitter {
         return `<mj-image src="${attr(src)}" alt="${attr(p['alt'])}"${href ? ` href="${attr(href)}"` : ''}${width > 0 ? ` width="${width}px"` : ''} align="${align(p['align'])}" padding="${padding(p['padding'], '10px 24px')}"${hide} />`;
       }
       case 'button':
-        return `<mj-button href="${attr(safeUrl(p['href']) || '#')}" background-color="${color(p['backgroundColor'], '#1a73e8')}" color="${color(p['color'], '#ffffff')}" border-radius="${num(p['borderRadius'], 4, 0, 60)}px" font-size="${num(p['fontSize'], 16, 8, 72)}px" align="${align(p['align'])}" padding="${padding(p['padding'], '10px 24px')}"${p['fullWidth'] === true ? ' width="100%"' : ''}${hide}>${String(p['text'] ?? '')}</mj-button>`;
+        return `<mj-button href="${attr(safeUrl(p['href']) || '#')}" background-color="${color(p['backgroundColor'], '#1a73e8')}" color="${color(p['color'], '#ffffff')}" border-radius="${num(p['borderRadius'], 4, 0, 60)}px" font-size="${num(p['fontSize'], 16, 8, 72)}px" align="${align(p['align'])}" padding="${padding(p['padding'], '10px 24px')}"${p['fullWidth'] === true ? ' width="100%"' : ''}${hide}>${plain(p['text'])}</mj-button>`;
       case 'divider':
         return `<mj-divider border-color="${color(p['color'], '#dddddd')}" border-width="${num(p['thickness'], 1, 1, 20)}px" padding="${padding(p['padding'], '10px 24px')}"${hide} />`;
       case 'spacer':
@@ -223,7 +231,7 @@ class Emitter {
   head(): string {
     const s = this.design.settings;
     const family = String(s.fontFamily).replace(/[^\w ,'"-]/g, '');
-    const preheader = String(s.preheader ?? '').trim();
+    const preheader = plain(s.preheader).trim();
     return (
       '<mj-head>' +
       `<mj-attributes><mj-all font-family="${attr(family)}" /><mj-text color="${color(s.textColor, '#333333')}" /></mj-attributes>` +

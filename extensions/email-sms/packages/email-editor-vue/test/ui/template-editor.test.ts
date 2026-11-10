@@ -246,6 +246,7 @@ describe('EmailTemplatesClient', () => {
     const put = fetchMock.mock.calls[1]![1] as RequestInit;
     expect(JSON.parse(put.body as string)).toEqual({ design: '{}', content: '<p/>' });
     expect((put.headers as Record<string, string>)['X-CSRF']).toBe('abc');
+    expect((put.headers as Record<string, string>)['X-Requested-With']).toBe('dynamia-email-editor');
     expect((put.headers as Record<string, string>)['Content-Type']).toBe('application/json');
     expect(put.credentials).toBe('same-origin');
   });

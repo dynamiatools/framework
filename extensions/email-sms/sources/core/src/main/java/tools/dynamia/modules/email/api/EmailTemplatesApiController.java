@@ -98,12 +98,24 @@ public class EmailTemplatesApiController {
         this.policies = policies;
     }
 
+    /** Header every changing call must carry; a page of another site cannot add it to a form post. */
+    public static final String REQUESTED_WITH = "X-Requested-With";
+
+    /**
+     * Rejects anonymous users, users no policy accepts (one policy that says yes is enough, so to restrict access leave
+     * {@code dynamia.email.editor-roles} empty and provide your own policy), and changing calls without the
+     * {@value #REQUESTED_WITH} header. The API uses the session cookie and CSRF protection is off in the framework, so
+     * the header is what keeps a cross-site form from migrating or reverting a template.
+     */
     private void guard(HttpServletRequest request) {
         if (request.getUserPrincipal() == null) {
             throw new EmailApiException(401, "UNAUTHORIZED", "Authentication required");
         }
         if (policies.get().stream().noneMatch(p -> p.canEdit(request))) {
             throw new EmailApiException(403, "ACCESS_DENIED", "You cannot edit email templates");
+        }
+        if (!"GET".equalsIgnoreCase(request.getMethod()) && request.getHeader(REQUESTED_WITH) == null) {
+            throw new EmailApiException(403, "CSRF_HEADER", "Missing the " + REQUESTED_WITH + " header");
         }
     }
 

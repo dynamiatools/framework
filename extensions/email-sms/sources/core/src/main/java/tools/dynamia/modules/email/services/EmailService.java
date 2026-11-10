@@ -201,5 +201,7 @@ public interface EmailService {
      * @param model    the data for the variables, may be null
      * @return the rendered HTML
      */
-    String render(EmailTemplate template, java.util.Map<String, Object> model);
+    default String render(EmailTemplate template, java.util.Map<String, Object> model) {
+        throw new UnsupportedOperationException(getClass().getName() + " does not render templates");
+    }
 }

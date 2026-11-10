@@ -345,6 +345,9 @@ public final class VelocityConverter {
             var m = IDENT.matcher(s);
             m.region(j, n);
             if (!m.lookingAt()) {
+                if (formal) {
+                    issue("LITERAL", i, 3, "A literal ${ is plain text in Velocity but the new engine reads it as a variable");
+                }
                 return false; // "$5", "$ ": plain text
             }
             int segments = 1;

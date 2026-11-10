@@ -108,6 +108,15 @@ describe('toMjml', () => {
     expect(mjml).toContain('href="{{ order.url }}"');
   });
 
+  it('escapes plain text settings so they cannot break the MJML', () => {
+    const d = design(createBlock('header', { title: 'A & B <x>' }), createBlock('button', { text: 'Go </mj-button><b>', href: '#' }));
+    d.settings = { ...d.settings, preheader: 'a </mj-preview> & {{name}}' };
+    const { mjml } = toMjml(d);
+    expect(mjml).toContain('A &amp; B &lt;x&gt;');
+    expect(mjml).toContain('Go &lt;/mj-button&gt;&lt;b&gt;');
+    expect(mjml).toContain('<mj-preview>a &lt;/mj-preview&gt; &amp; {{name}}</mj-preview>');
+  });
+
   it('puts the settings in the head', () => {
     const d = emptyDesign();
     d.settings = { ...d.settings, width: 700, backgroundColor: '#000000', fontFamily: 'Georgia, serif', preheader: 'Your {{x}}', linkColor: '#ff0000' };
