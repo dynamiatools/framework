@@ -31,6 +31,8 @@ server:
 
 
 dynamia:
+  email:
+    editor-roles: ADMIN
   app:
     name: @project.name@
     open-persistence-in-view: false
