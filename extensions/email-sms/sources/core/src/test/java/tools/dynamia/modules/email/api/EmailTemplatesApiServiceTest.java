@@ -8,6 +8,8 @@ import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.modules.email.EmailMessage;
 import tools.dynamia.modules.email.EmailSendResult;
 import tools.dynamia.modules.email.EmailTemplateRenderer;
+import tools.dynamia.modules.email.EmailMessage;
+import tools.dynamia.modules.email.EmailTemplateModelProvider;
 import tools.dynamia.modules.email.TemplateVariable;
 import tools.dynamia.modules.email.domain.EmailTemplate;
 import tools.dynamia.modules.email.domain.EmailTemplateEngine;
@@ -279,5 +281,52 @@ class EmailTemplatesApiServiceTest {
                 new TemplateVariable("user.name.first")));
         assertEquals(Map.of("name", "Ada", "email", "[user.email]"), data.get("user"));
         assertEquals(10, data.get("total"));
+    }
+
+    private static EmailTemplateModelProvider provider(String source, TemplateVariable... variables) {
+        return new EmailTemplateModelProvider() {
+            @Override
+            public String getSource() {
+                return source;
+            }
+
+            @Override
+            public Map<String, Object> getModel(EmailMessage message) {
+                return Map.of();
+            }
+
+            @Override
+            public List<TemplateVariable> getVariables() {
+                return List.of(variables);
+            }
+        };
+    }
+
+    @Test
+    void theVariablesAreMarkedWithTheSourceThatOffersThemAndCanBeFilteredByIt() {
+        var providers = List.of(provider("invoice", new TemplateVariable("invoice.number", "Number", "INV-1")),
+                provider("company", new TemplateVariable("company.name"), new TemplateVariable("invoice.number")));
+
+        var all = EmailTemplatesApiService.variables(null, providers);
+        assertEquals(3, all.size());
+        assertEquals("invoice", all.get(0).group());
+        assertEquals("Number", all.get(0).label());
+        assertEquals("company", all.get(1).group());
+
+        var invoice = EmailTemplatesApiService.variables("invoice", providers);
+        assertEquals(1, invoice.size());
+        assertEquals("invoice.number", invoice.get(0).name());
+        assertEquals(3, EmailTemplatesApiService.variables(" ", providers).size());
+        assertEquals(0, EmailTemplatesApiService.variables("nobody", providers).size());
+    }
+
+    @Test
+    void theTemplateSourceIsUsedWhenNoneIsAskedFor() {
+        var t = new EmailTemplate();
+        t.setSource("invoice");
+        assertEquals("invoice", EmailTemplatesApiService.sourceOf(null, t));
+        assertEquals("invoice", EmailTemplatesApiService.sourceOf(" ", t));
+        assertEquals("welcome", EmailTemplatesApiService.sourceOf("welcome", t));
+        assertEquals(null, EmailTemplatesApiService.sourceOf(null, new EmailTemplate()));
     }
 }

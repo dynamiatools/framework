@@ -413,8 +413,10 @@ public class EmailServiceImpl implements EmailService {
         Map<String, Object> context = new HashMap<>();
 
         // Load model from providers
-        if (message.getSource() != null && !message.getSource().isEmpty()) {
-            Containers.get().findObjects(EmailTemplateModelProvider.class, object -> object.getSource().equals(message.getSource()))
+        // the source of the message wins; a template can name its own so the callers do not have to
+        var source = message.getSource() != null && !message.getSource().isEmpty() ? message.getSource() : template.getSource();
+        if (source != null && !source.isEmpty()) {
+            Containers.get().findObjects(EmailTemplateModelProvider.class, object -> source.equals(object.getSource()))
                     .forEach(p -> {
                         Map<String, Object> model = p.getModel(message);
                         if (model != null) {

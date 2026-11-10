@@ -74,6 +74,7 @@ public class InitDemoAccountCommandLineRunner implements CommandLineRunner {
         invoiceEmail.setAccountId(accountId);
         invoiceEmail.setName("Invoice email");
         invoiceEmail.setDescription("Sent to a customer with the invoice. Try Migrate to editor, then Design.");
+        invoiceEmail.setSource(InvoiceEmailModelProvider.SOURCE); // the editor lists the variables of that provider
         invoiceEmail.setSubject("Your invoice $invoice.number");
         invoiceEmail.setContent("<h1>Hello $customer.firstName</h1>"
                 + "<p>Thanks for your purchase. Your invoice <b>$invoice.number</b> total is $invoice.total.</p>"

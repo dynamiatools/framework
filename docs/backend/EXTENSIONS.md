@@ -509,6 +509,12 @@ and the Velocity migrator with revert are described in the module
 [README](../../extensions/email-sms/README.md#email-templates-and-the-block-editor). Applications that evaluate
 `EmailTemplate.getContent()` with Velocity themselves must move to `EmailService.render` before migrating their templates.
 
+Notes that are easy to miss: the editor is built into the `email.ui` jar (rebuild that module after changing the editor, and restart the
+application); its API lives under `/apps/api` because the security module protects `/api/**` with a stateless JWT chain that ignores the
+login session; the variables the editor lists come from the `EmailTemplateModelProvider` beans whose `getSource()` matches the
+`source` of the message or, when it has none, `EmailTemplate.source`; and the migrator hides the `{{#each}}`/`{{#if}}` tags in comments
+while it parses the HTML, because the parser moves text found between the rows of a table out of the table.
+
 ### When to Use Email & SMS Extension
 
 - Send transactional emails

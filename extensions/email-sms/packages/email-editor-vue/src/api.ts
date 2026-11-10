@@ -12,6 +12,8 @@ export interface TemplateData {
   design: string | null;
   content: string;
   hasBackup: boolean;
+  /** The model source whose variables the template uses, if it has one. */
+  source?: string | null;
   parentId: number | null;
 }
 
@@ -19,6 +21,8 @@ export interface ApiVariable {
   name: string;
   label?: string | null;
   sample?: unknown;
+  /** The model source of the provider that offers the variable. */
+  group?: string | null;
 }
 
 export interface MigrationIssue {

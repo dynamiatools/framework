@@ -48,7 +48,7 @@ public class EmailTemplatesApiService {
      * @param parentId     the layout template, may be null
      */
     public record TemplateData(Long id, String name, String subject, String engine, boolean escapeValues, String design,
-                               String content, boolean hasBackup, Long parentId) {
+                               String content, boolean hasBackup, Long parentId, String source) {
     }
 
     /**
@@ -99,7 +99,12 @@ public class EmailTemplatesApiService {
 
     private static TemplateData data(EmailTemplate t) {
         return new TemplateData(t.getId(), t.getName(), t.getSubject(), t.getEngine().name(), t.isEscapeValues(),
-                t.getDesign(), t.getContent(), t.hasBackup(), t.getParent() == null ? null : t.getParent().getId());
+                t.getDesign(), t.getContent(), t.hasBackup(), t.getParent() == null ? null : t.getParent().getId(), t.getSource());
+    }
+
+    /** The source asked for, or the one of the template when none was asked for. */
+    static String sourceOf(String requested, EmailTemplate t) {
+        return requested != null && !requested.isBlank() ? requested : t.getSource();
     }
 
     private static void requireDynamia(EmailTemplate t) {
@@ -185,10 +190,21 @@ public class EmailTemplatesApiService {
      * @return the variables the providers offer
      */
     public List<TemplateVariable> variables(String source) {
+        return variables(source, Containers.get().findObjects(EmailTemplateModelProvider.class));
+    }
+
+    /**
+     * @param source    the model source to filter by, null for all
+     * @param providers the model providers
+     * @return the variables of the providers of that source, each marked with the source that offers it
+     */
+    static List<TemplateVariable> variables(String source, java.util.Collection<EmailTemplateModelProvider> providers) {
         var all = new ArrayList<TemplateVariable>();
-        for (var provider : Containers.get().findObjects(EmailTemplateModelProvider.class)) {
+        for (var provider : providers) {
             if (source == null || source.isBlank() || source.equals(provider.getSource())) {
-                all.addAll(provider.getVariables());
+                for (var v : provider.getVariables()) {
+                    all.add(new TemplateVariable(v.name(), v.label(), v.sample(), provider.getSource()));
+                }
             }
         }
         return all;
@@ -214,7 +230,7 @@ public class EmailTemplatesApiService {
         if (content != null && content.length() > MAX_CHARS) {
             throw new EmailApiException(413, "TOO_LARGE", "The template is too large");
         }
-        var model = data != null ? data : sampleData(variables(source));
+        var model = data != null ? data : sampleData(variables(sourceOf(source, t)));
         var html = content != null ? renderer.renderHtml(t, content, model) : emailService.render(t, model);
         var renderedSubject = renderer.render(t, subject != null ? subject : t.getSubject(), model);
         return new Preview(html, renderedSubject);
@@ -245,7 +261,7 @@ public class EmailTemplatesApiService {
         copy.setParent(t.getParent());
         copy.setAccountId(t.getAccountId());
         var message = new EmailMessage(copy);
-        message.setTemplateModel(data != null ? data : sampleData(variables(source)));
+        message.setTemplateModel(data != null ? data : sampleData(variables(sourceOf(source, t))));
         message.addTo(address);
         var result = emailService.sendAndWait(message);
         return new TestResult(result.isSended(), result.isSended() ? null : result.getCause());

@@ -48,6 +48,48 @@ describe('EmailTemplateEditor', () => {
     wrapper.unmount();
   });
 
+  it('asks for the variables of the source the template names, unless the page names one', async () => {
+    const named = api({ get: vi.fn(async () => template({ source: 'invoice' })) } as never);
+    (await mountEditor(named)).unmount();
+    expect(named.variables).toHaveBeenCalledWith('invoice');
+
+    const page = api({ get: vi.fn(async () => template({ source: 'invoice' })) } as never);
+    (await mountEditor(page, { source: 'sales' })).unmount();
+    expect(page.variables).toHaveBeenCalledWith('sales');
+
+    const none = api();
+    (await mountEditor(none)).unmount();
+    expect(none.variables).toHaveBeenCalledWith(undefined);
+  });
+
+  it('sends the test with the source of the template', async () => {
+    const a = api({ get: vi.fn(async () => template({ source: 'invoice' })) } as never);
+    const wrapper = await mountEditor(a);
+    await wrapper.get('[data-action="send-test"]').trigger('click');
+    await flushPromises();
+    expect(a.testSend).toHaveBeenCalledWith(7, { source: 'invoice' });
+    wrapper.unmount();
+  });
+
+  it('groups the variables by provider and warns about a name two providers offer', async () => {
+    const a = api({
+      variables: vi.fn(async () => [
+        { name: 'invoice.number', group: 'invoice' }, { name: 'name', group: 'invoice' },
+        { name: 'name', group: 'company' }, { name: 'company.name', group: 'company' },
+      ]),
+    } as never);
+    const wrapper = await mountEditor(a);
+    expect(wrapper.findAll('[data-group]').map((h) => h.text())).toEqual(['invoice', 'company']);
+    expect(wrapper.findAll('[data-variable]')).toHaveLength(4);
+    expect(wrapper.findAll('[data-duplicated]')).toHaveLength(2);
+    wrapper.unmount();
+
+    const single = await mountEditor(api({ variables: vi.fn(async () => [{ name: 'a', group: 'invoice' }, { name: 'b', group: 'invoice' }]) } as never));
+    expect(single.findAll('[data-group]')).toHaveLength(0);
+    expect(single.findAll('[data-duplicated]')).toHaveLength(0);
+    single.unmount();
+  });
+
   it('saves the design with its compiled html and the subject', async () => {
     const a = api();
     const wrapper = await mountEditor(a);

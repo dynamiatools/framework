@@ -69,6 +69,8 @@ public class EmailTemplate extends SimpleEntitySaaS {
 	private boolean sendSMS;
 	private String smsNumber;
 	private String smsText;
+	/** The model source whose variables this template uses (see EmailTemplateModelProvider#getSource); null for none. */
+	private String source;
 
 	/** Language of the template; null (every template created before the editor) means Velocity. */
 	@Enumerated(EnumType.STRING)
@@ -162,6 +164,20 @@ public class EmailTemplate extends SimpleEntitySaaS {
 	@Override
 	public String toString() {
 		return getName();
+	}
+
+	/**
+	 * @return the model source whose variables this template uses, null when it has none
+	 */
+	public String getSource() {
+		return source;
+	}
+
+	/**
+	 * @param source the model source whose variables this template uses, may be null
+	 */
+	public void setSource(String source) {
+		this.source = source;
 	}
 
 	public String getSmsText() {

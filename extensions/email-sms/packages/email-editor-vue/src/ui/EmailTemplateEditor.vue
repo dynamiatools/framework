@@ -47,10 +47,12 @@ async function load(): Promise<void> {
   loading.value = true;
   message.value = '';
   try {
-    const [loaded, vars] = await Promise.all([props.api.get(props.templateId), props.api.variables(props.source).catch(() => [])]);
+    const loaded = await props.api.get(props.templateId);
+    // the source of the page wins; otherwise the one the template names
+    const vars = await props.api.variables(props.source || loaded.source || undefined).catch(() => []);
     template.value = loaded;
     subject.value = loaded.subject;
-    variables.value = vars.map((v) => ({ name: v.name, ...(v.label ? { label: v.label } : {}), ...(v.sample !== undefined && v.sample !== null ? { sample: v.sample } : {}) }));
+    variables.value = vars.map((v) => ({ name: v.name, ...(v.group ? { group: v.group } : {}), ...(v.label ? { label: v.label } : {}), ...(v.sample !== undefined && v.sample !== null ? { sample: v.sample } : {}) }));
     if (loaded.engine === 'DYNAMIA') {
       initial.value = loaded.design ? parseDesign(loaded.design) : emptyDesign();
       current.value = initial.value;
@@ -101,7 +103,7 @@ async function sendTest(): Promise<void> {
   }
   busy.value = true;
   try {
-    const result = await props.api.testSend(props.templateId, props.source ? { source: props.source } : {});
+    const result = await props.api.testSend(props.templateId, props.source || template.value?.source ? { source: props.source || template.value?.source || '' } : {});
     if (result.sent) {
       ok(t.value('testSent'));
     } else {

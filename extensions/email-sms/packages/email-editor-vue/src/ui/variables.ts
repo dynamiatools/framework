@@ -3,6 +3,8 @@ export interface TemplateVariable {
   name: string;
   label?: string;
   sample?: unknown;
+  /** The model source of the provider that offers it, to group the list. */
+  group?: string;
 }
 
 /**

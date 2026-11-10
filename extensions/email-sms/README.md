@@ -162,6 +162,13 @@ Request content is rendered only by the Dynamia engine, never by Velocity.
 
 To list variables in the editor, implement `EmailTemplateModelProvider.getVariables()`.
 
+Which providers apply is decided by the `source`: the `source` of the `EmailMessage` when it has one, otherwise the **Variables source**
+field of the template (`EmailTemplate.source`). The editor uses the template's source on its own, so the page does not need `&source=`
+(when it has one, the page wins). Only the providers whose `getSource()` is that source offer variables and fill the model when the email
+is sent; a template with no source lists the variables of all the providers. When more than one provider is listed, the variables panel
+groups them by provider and marks a name that more than one of them offers: when the email is sent the model of each provider is merged
+in turn, so the last one wins.
+
 ## License
 
 DynamiaTools Email is available under Apache 2 License

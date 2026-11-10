@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Braces, Search } from 'lucide-vue-next';
+import { Braces, Search, TriangleAlert } from 'lucide-vue-next';
 import { computed, inject, ref } from 'vue';
 import { ancestors } from '../model/tree.js';
 import type { TemplateVariable } from './variables.js';
@@ -27,6 +27,25 @@ const shown = computed(() => {
   return { loop: loopVariables.value.filter(match), all: props.variables.filter(match) };
 });
 
+/**
+ * The variables of the providers, grouped by provider when there is more than one, and the names that more than one
+ * provider offers (the last one wins when the email is sent, so the editor warns about them).
+ */
+const groups = computed(() => {
+  const list = shown.value.all;
+  const names = new Set(list.map((v) => v.group ?? ''));
+  const owners = new Map<string, Set<string>>();
+  for (const v of props.variables) {
+    owners.set(v.name, (owners.get(v.name) ?? new Set<string>()).add(v.group ?? ''));
+  }
+  const duplicated = new Set([...owners].filter(([, groupNames]) => groupNames.size > 1).map(([name]) => name));
+  const byGroup = new Map<string, TemplateVariable[]>();
+  for (const v of list) {
+    byGroup.set(v.group ?? '', [...(byGroup.get(v.group ?? '') ?? []), v]);
+  }
+  return { grouped: names.size > 1, duplicated, items: [...byGroup].map(([name, variables]) => ({ name, variables })) };
+});
+
 function insert(name: string): void {
   editor.insertText(`{{${name}}}`);
 }
@@ -45,14 +64,18 @@ function insert(name: string): void {
         </li>
       </ul>
     </template>
-    <ul v-if="shown.all.length > 0">
-      <li v-for="v in shown.all" :key="v.name">
-        <button type="button" data-variable :title="[v.label, v.sample !== undefined && v.sample !== null ? String(v.sample) : ''].filter(Boolean).join(' · ') || t('insertVariable', { name: v.name })" @mousedown.prevent @click="insert(v.name)">
-          <span class="name">{{ v.name }}</span>
-          <span v-if="v.label" class="label">{{ v.label }}</span>
-        </button>
-      </li>
-    </ul>
+    <template v-for="group in groups.items" :key="group.name">
+      <h4 v-if="groups.grouped && group.name" class="group" data-group>{{ group.name }}</h4>
+      <ul>
+        <li v-for="v in group.variables" :key="`${group.name}-${v.name}`">
+          <button type="button" data-variable :title="[v.label, v.sample !== undefined && v.sample !== null ? String(v.sample) : ''].filter(Boolean).join(' · ') || t('insertVariable', { name: v.name })" @mousedown.prevent @click="insert(v.name)">
+            <span class="name">{{ v.name }}</span>
+            <span v-if="v.label" class="label">{{ v.label }}</span>
+            <TriangleAlert v-if="groups.duplicated.has(v.name)" :size="13" class="dup" :title="t('duplicatedVariable')" :aria-label="t('duplicatedVariable')" data-duplicated />
+          </button>
+        </li>
+      </ul>
+    </template>
   </section>
 </template>
 
@@ -69,5 +92,7 @@ button { width: 100%; text-align: left; padding: 5px 9px; border: 1px solid #e2e
 button:hover, button:focus-visible { border-color: #3b82f6; background: #eff6ff; }
 .name { font-family: ui-monospace, monospace; font-size: 12px; color: #1d4ed8; }
 .label { color: #64748b; font-size: 12px; }
+.group { text-transform: uppercase; letter-spacing: 0.05em; font-size: 11px; color: #94a3b8; }
+.dup { margin-left: auto; color: #d97706; align-self: center; }
 .empty { color: #64748b; font-size: 12px; margin: 0; }
 </style>

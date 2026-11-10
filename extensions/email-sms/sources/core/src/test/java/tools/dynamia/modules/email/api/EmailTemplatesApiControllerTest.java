@@ -96,7 +96,7 @@ class EmailTemplatesApiControllerTest {
     @Test
     void getReturnsTheTemplate() throws Exception {
         when(service.get(1L)).thenReturn(new EmailTemplatesApiService.TemplateData(1L, "welcome", "Hi", "DYNAMIA", true,
-                "{\"version\":1,\"blocks\":[]}", "<p/>", false, null));
+                "{\"version\":1,\"blocks\":[]}", "<p/>", false, null, "invoice"));
         var json = body(as(get("/apps/api/email/templates/1"), "ada@x.com"));
         assertTrue(json.contains("\"name\":\"welcome\""), json);
         assertTrue(json.contains("\"engine\":\"DYNAMIA\""), json);
