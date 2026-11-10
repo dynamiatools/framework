@@ -39,6 +39,17 @@ public class AccountCrudListener extends CrudServiceListenerAdapter<Account> {
         this.service = service;
     }
 
+    /**
+     * A new account that initializes itself and has no profile gets the DEFAULT one, otherwise it would load no module.
+     * Accounts that do not auto init, remote accounts and accounts with a profile are left as they are.
+     */
+    @Override
+    public void beforeCreate(Account entity) {
+        if (entity.getProfile() == null && entity.isAutoInit() && !entity.isRemote()) {
+            entity.setProfile(service.checkDefaultProfile());
+        }
+    }
+
     @Override
     public void afterCreate(Account entity) {
         service.clearCache();
