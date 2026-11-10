@@ -17,19 +17,25 @@
 
 package tools.dynamia.modules.email.ui.actions;
 
-import org.zkoss.util.media.AMedia;
-import org.zkoss.zul.Iframe;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.zkoss.zul.Div;
+import org.zkoss.zul.Html;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.crud.CrudState;
+import tools.dynamia.modules.email.api.EmailTemplatesApiService;
 import tools.dynamia.modules.email.domain.EmailTemplate;
+import tools.dynamia.modules.email.ui.SandboxedFrame;
 import tools.dynamia.ui.MessageType;
 import tools.dynamia.ui.UIMessages;
 import tools.dynamia.zk.util.ZKUtil;
 
 @InstallAction
 public class PreviewEmailTemplateAction extends AbstractCrudAction {
+
+    @Autowired
+    private EmailTemplatesApiService previewService;
 
     public PreviewEmailTemplateAction() {
         setName("Preview");
@@ -43,11 +49,23 @@ public class PreviewEmailTemplateAction extends AbstractCrudAction {
     public void actionPerformed(CrudActionEvent evt) {
         EmailTemplate template = (EmailTemplate) evt.getData();
         if (template != null) {
-            Iframe iframe = new Iframe();
-            iframe.setContent(new AMedia(template.getName() + ".html", "html", "text/html", template.getContent()));
-            iframe.setVflex("1");
-            iframe.setHflex("1");
-            ZKUtil.showDialog(template.getSubject(), iframe, "100%", "100%");
+            // saved templates are rendered with sample data of the model providers; the frame cannot run scripts
+            String html = template.getContent();
+            String title = template.getSubject();
+            if (template.getId() != null) {
+                try {
+                    var preview = previewService.preview(template.getId(), null, null, null, null);
+                    html = preview.html();
+                    title = preview.subject();
+                } catch (RuntimeException e) {
+                    // not rendered (for example a template of another account): show the content as it is
+                }
+            }
+            var frame = new Div();
+            frame.setVflex("1");
+            frame.setHflex("1");
+            frame.appendChild(new Html(SandboxedFrame.markup(html)));
+            ZKUtil.showDialog(title, frame, "100%", "100%");
         } else {
             UIMessages.showMessage("Select template", MessageType.ERROR);
         }

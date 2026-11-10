@@ -63,4 +63,85 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<!--
+		  Builds the block editor page (extensions/email-sms/packages/email-editor-vue) and packages it in this jar under
+		  META-INF/resources/dynamia-email/editor/, served at /dynamia-email/editor/. It is opt-in (mvn -Peditor ...) so the
+		  normal build and its tests need no Node. Without it the Design action says the editor is not included.
+		  Node and pnpm are provisioned privately in target/ by frontend-maven-plugin, like the Vue theme does.
+		-->
+		<profile>
+			<id>editor</id>
+			<properties>
+				<frontend-maven-plugin.version>2.0.2</frontend-maven-plugin.version>
+				<node.version>v24.13.1</node.version>
+				<editor.dir>${project.basedir}/../../packages/email-editor-vue</editor.dir>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.eirslett</groupId>
+						<artifactId>frontend-maven-plugin</artifactId>
+						<version>${frontend-maven-plugin.version}</version>
+						<configuration>
+							<workingDirectory>${editor.dir}</workingDirectory>
+							<nodeVersion>${node.version}</nodeVersion>
+						</configuration>
+						<executions>
+							<execution>
+								<id>install-node-and-corepack</id>
+								<goals>
+									<goal>install-node-and-corepack</goal>
+								</goals>
+								<phase>generate-resources</phase>
+							</execution>
+							<execution>
+								<id>pnpm-install</id>
+								<goals>
+									<goal>corepack</goal>
+								</goals>
+								<phase>generate-resources</phase>
+								<configuration>
+									<arguments>pnpm install --frozen-lockfile</arguments>
+								</configuration>
+							</execution>
+							<execution>
+								<id>pnpm-build-page</id>
+								<goals>
+									<goal>corepack</goal>
+								</goals>
+								<phase>generate-resources</phase>
+								<configuration>
+									<arguments>pnpm run build:page</arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>3.4.0</version>
+						<executions>
+							<execution>
+								<id>copy-editor-page</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.outputDirectory}/META-INF/resources/dynamia-email/editor</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${editor.dir}/dist-page</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
