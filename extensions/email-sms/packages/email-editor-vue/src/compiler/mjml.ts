@@ -135,7 +135,9 @@ class Emitter {
         if (p['fullDocument'] === true) {
           this.warnings.push(`The HTML block ${block.id} is a whole document; only its body was kept (styles in its head are lost)`);
         }
-        return `<mj-raw>${p['fullDocument'] === true ? bodyOf(html) : html}</mj-raw>`;
+        // mj-text, not mj-raw: MJML puts raw content straight inside the column's table body, which is invalid HTML and
+        // browsers move it out of the table (the block showed up empty in the preview)
+        return `<mj-text padding="0">${p['fullDocument'] === true ? bodyOf(html) : html}</mj-text>`;
       }
       default:
         return '';

@@ -9,6 +9,13 @@ function design(...blocks: Block[]): Design {
 }
 
 describe('toMjml', () => {
+  it('puts the HTML block inside a text cell, so the browser does not move it out of the table', async () => {
+    const block = createBlock('html', { html: '<h1>Hi ${name}</h1>' });
+    const { html } = await compile(design(block));
+    expect(html).not.toMatch(/<tbody>\s*<h1>/);
+    expect(html).toMatch(/<td[^>]*>\s*<div[^>]*>\s*<h1>Hi \$\{name\}<\/h1>/);
+  });
+
   it('wraps loose blocks in one section and column, and keeps their order', () => {
     const { mjml } = toMjml(design(createBlock('header', { title: 'Hola' }), createBlock('text', { html: '<p>Hi ${name}</p>' }), createBlock('button', { text: 'Pay', href: 'https://x.com/pay' })));
     expect(mjml.match(/<mj-section/g)).toHaveLength(1);
@@ -130,7 +137,7 @@ describe('toMjml', () => {
   it('a whole document block inside a bigger design keeps only its body', () => {
     const html = createBlock('html', { html: '<html><head><style>x{}</style></head><body><p>BODY</p></body></html>', fullDocument: true });
     const out = toMjml(design(createBlock('text'), html));
-    expect(out.mjml).toContain('<mj-raw><p>BODY</p></mj-raw>');
+    expect(out.mjml).toContain('<mj-text padding="0"><p>BODY</p></mj-text>');
     expect(out.mjml).not.toContain('<style>x');
     expect(out.warnings[0]).toMatch(/whole document/);
   });
