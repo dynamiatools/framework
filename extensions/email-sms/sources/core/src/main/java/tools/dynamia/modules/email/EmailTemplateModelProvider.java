@@ -17,6 +17,7 @@
 
 package tools.dynamia.modules.email;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,5 +40,16 @@ public interface EmailTemplateModelProvider {
 	 * @return the model for the email message
 	 */
 	Map<String, Object> getModel(EmailMessage message);
+
+
+	/**
+	 * The variables {@link #getModel} puts in the model, so the template editor can list them and fill the preview.
+	 * Providers that do not override it simply offer none.
+	 *
+	 * @return the variables, never null
+	 */
+	default List<TemplateVariable> getVariables() {
+		return List.of();
+	}
 
 }
