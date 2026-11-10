@@ -5,3 +5,7 @@ export { History } from './model/history.js';
 export { parseDesign, serializeDesign, isFullDocumentDesign } from './model/validate.js';
 export { toMjml, attr, safeUrl, bodyOf, type MjmlResult } from './compiler/mjml.js';
 export { compile, setMjmlLoader, type CompileResult, type MjmlFunction } from './compiler/compile.js';
+export { default as EmailEditor } from './ui/EmailEditor.vue';
+export { useEditorState, DRAG_MIME, type EditorState, type DragPayload } from './ui/state.js';
+export { sanitizeHtml } from './ui/sanitize.js';
+export { translator } from './ui/i18n.js';

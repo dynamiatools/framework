@@ -4,5 +4,5 @@ import vue from '@vitejs/plugin-vue';
 export default defineConfig({
   plugins: [vue()],
   resolve: { conditions: ['development'] },
-  test: { globals: true, environment: 'node', environmentMatchGlobs: [['test/ui/**', 'happy-dom']] },
+  test: { globals: true, environment: 'node' },
 });
