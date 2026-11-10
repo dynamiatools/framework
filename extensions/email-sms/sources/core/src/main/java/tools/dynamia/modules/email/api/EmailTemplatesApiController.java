@@ -89,6 +89,7 @@ public class EmailTemplatesApiController {
     /**
      * @param service the operations
      */
+    @org.springframework.beans.factory.annotation.Autowired
     public EmailTemplatesApiController(EmailTemplatesApiService service) {
         this(service, () -> Containers.get().findObjects(EmailTemplatePolicy.class));
     }
