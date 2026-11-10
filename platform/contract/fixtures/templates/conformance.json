@@ -1,5 +1,5 @@
 {
-  "description": "Cases shared by the Java engine (DynamiaTemplateEngine) and the TypeScript engine (@dynamia-tools/template-engine). Each case renders 'template' with 'data' (plus 'locale' as the locale variable when present) and must give exactly 'expected'. Java is the reference: change a case only together with both engines.",
+  "description": "Cases shared by the Java engine (DynamiaTemplateEngine) and the TypeScript engine (@dynamia-tools/template-engine). Each case renders 'template' with 'data' (plus 'locale' as the locale variable when present; 'escapeHtml': true builds the engine with HTML escaping) and must give exactly 'expected'. Java is the reference: change a case only together with both engines.",
   "cases": [
     {
       "group": "variables",
@@ -1149,6 +1149,181 @@
         "d": "2026-11-01"
       },
       "expected": "2026-11-01"
+    },
+    {
+      "group": "escaping",
+      "name": "values are escaped",
+      "template": "<p>${v}</p>",
+      "data": {
+        "v": "<b>Tom & \"Jerry\" it's</b>"
+      },
+      "expected": "<p>&lt;b&gt;Tom &amp; &quot;Jerry&quot; it&#39;s&lt;/b&gt;</p>",
+      "escapeHtml": true
+    },
+    {
+      "group": "escaping",
+      "name": "mustache is escaped too",
+      "template": "{{v}}",
+      "data": {
+        "v": "<b>Tom & \"Jerry\" it's</b>"
+      },
+      "expected": "&lt;b&gt;Tom &amp; &quot;Jerry&quot; it&#39;s&lt;/b&gt;",
+      "escapeHtml": true
+    },
+    {
+      "group": "escaping",
+      "name": "short form is escaped",
+      "template": "$d.v",
+      "data": {
+        "d": {
+          "v": "<i>"
+        }
+      },
+      "expected": "&lt;i&gt;",
+      "escapeHtml": true
+    },
+    {
+      "group": "escaping",
+      "name": "raw prints trusted html",
+      "template": "${v|raw}",
+      "data": {
+        "v": "<b>Tom & \"Jerry\" it's</b>"
+      },
+      "expected": "<b>Tom & \"Jerry\" it's</b>",
+      "escapeHtml": true
+    },
+    {
+      "group": "escaping",
+      "name": "raw anywhere in the chain",
+      "template": "${v|raw|upper}",
+      "data": {
+        "v": "<b>Tom & \"Jerry\" it's</b>"
+      },
+      "expected": "<B>TOM & \"JERRY\" IT'S</B>",
+      "escapeHtml": true
+    },
+    {
+      "group": "escaping",
+      "name": "raw with spaces",
+      "template": "{{ v | trim | raw }}",
+      "data": {
+        "v": "<b>Tom & \"Jerry\" it's</b>"
+      },
+      "expected": "<b>Tom & \"Jerry\" it's</b>",
+      "escapeHtml": true
+    },
+    {
+      "group": "escaping",
+      "name": "filters output is escaped",
+      "template": "${v|upper}",
+      "data": {
+        "v": "<b>Tom & \"Jerry\" it's</b>"
+      },
+      "expected": "&lt;B&gt;TOM &amp; &quot;JERRY&quot; IT&#39;S&lt;/B&gt;",
+      "escapeHtml": true
+    },
+    {
+      "group": "escaping",
+      "name": "text of the template is not escaped",
+      "template": "<a href=\"x\">&copy; ${n}</a>",
+      "data": {
+        "n": "Tom"
+      },
+      "expected": "<a href=\"x\">&copy; Tom</a>",
+      "escapeHtml": true
+    },
+    {
+      "group": "escaping",
+      "name": "unknown variables are left as written",
+      "template": "<${x}>",
+      "data": {},
+      "expected": "<${x}>",
+      "escapeHtml": true
+    },
+    {
+      "group": "escaping",
+      "name": "numbers and booleans are not affected",
+      "template": "${n} ${b}",
+      "data": {
+        "n": 1.5,
+        "b": true
+      },
+      "expected": "1.5 true",
+      "escapeHtml": true
+    },
+    {
+      "group": "escaping",
+      "name": "a ternary result is escaped",
+      "template": "${ok ? name : 'none'}",
+      "data": {
+        "ok": true,
+        "name": "<Ada>"
+      },
+      "expected": "&lt;Ada&gt;",
+      "escapeHtml": true
+    },
+    {
+      "group": "escaping",
+      "name": "each items are escaped",
+      "template": "{{#each items as i}}[${i}]{{/each}}",
+      "data": {
+        "items": [
+          "<a>",
+          "b&c"
+        ]
+      },
+      "expected": "[&lt;a&gt;][b&amp;c]",
+      "escapeHtml": true
+    },
+    {
+      "group": "escaping",
+      "name": "if branches are plain text and values escaped",
+      "template": "{{#if a}}<b>${v}</b>{{/if}}",
+      "data": {
+        "a": true,
+        "v": "<x>"
+      },
+      "expected": "<b>&lt;x&gt;</b>",
+      "escapeHtml": true
+    },
+    {
+      "group": "escaping",
+      "name": "the escaped text is not evaluated again",
+      "template": "${v}",
+      "data": {
+        "v": "${w}",
+        "w": "no"
+      },
+      "expected": "${w}",
+      "escapeHtml": true
+    },
+    {
+      "group": "escaping",
+      "name": "a parent content passes through raw",
+      "template": "{{ TEMPLATE_CONTENT | raw }}",
+      "data": {
+        "TEMPLATE_CONTENT": "<p>child</p>"
+      },
+      "expected": "<p>child</p>",
+      "escapeHtml": true
+    },
+    {
+      "group": "escaping",
+      "name": "escaping is off by default",
+      "template": "${v}",
+      "data": {
+        "v": "<b>Tom & \"Jerry\" it's</b>"
+      },
+      "expected": "<b>Tom & \"Jerry\" it's</b>"
+    },
+    {
+      "group": "escaping",
+      "name": "raw is harmless when escaping is off",
+      "template": "${v|raw}",
+      "data": {
+        "v": "<b>Tom & \"Jerry\" it's</b>"
+      },
+      "expected": "<b>Tom & \"Jerry\" it's</b>"
     }
   ]
 }
