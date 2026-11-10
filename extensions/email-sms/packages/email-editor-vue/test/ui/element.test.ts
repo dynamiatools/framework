@@ -57,9 +57,9 @@ describe('<dynamia-email-editor>', () => {
     element.setAttribute('base-url', 'https://erp.example.com/');
     document.body.append(element);
     await vi.waitFor(() => expect(element.querySelector('[data-palette]')).not.toBeNull());
-    expect(fetchMock.mock.calls.map((c) => String(c[0]))).toContain('https://erp.example.com/api/email/templates/7');
+    expect(fetchMock.mock.calls.map((c) => String(c[0]))).toContain('https://erp.example.com/apps/api/email/templates/7');
     element.setAttribute('template-id', '8');
-    await vi.waitFor(() => expect(fetchMock.mock.calls.map((c) => String(c[0]))).toContain('https://erp.example.com/api/email/templates/8'));
+    await vi.waitFor(() => expect(fetchMock.mock.calls.map((c) => String(c[0]))).toContain('https://erp.example.com/apps/api/email/templates/8'));
     element.remove();
     expect(element.innerHTML).toBe('');
     vi.unstubAllGlobals();

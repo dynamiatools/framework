@@ -235,13 +235,13 @@ describe('EmailTemplatesClient', () => {
     await c.create('x');
     const calls = fetchMock.mock.calls.map(([url, init]) => `${(init as RequestInit).method} ${url}`);
     expect(calls).toEqual([
-      'GET https://erp.example.com/api/email/templates/7',
-      'PUT https://erp.example.com/api/email/templates/7/design',
-      'GET https://erp.example.com/api/email/templates/variables?source=sales',
-      'POST https://erp.example.com/api/email/templates/7/test-send',
-      'POST https://erp.example.com/api/email/templates/7/migrate?dryRun=true',
-      'POST https://erp.example.com/api/email/templates/7/revert?confirm=false',
-      'POST https://erp.example.com/api/email/templates',
+      'GET https://erp.example.com/apps/api/email/templates/7',
+      'PUT https://erp.example.com/apps/api/email/templates/7/design',
+      'GET https://erp.example.com/apps/api/email/templates/variables?source=sales',
+      'POST https://erp.example.com/apps/api/email/templates/7/test-send',
+      'POST https://erp.example.com/apps/api/email/templates/7/migrate?dryRun=true',
+      'POST https://erp.example.com/apps/api/email/templates/7/revert?confirm=false',
+      'POST https://erp.example.com/apps/api/email/templates',
     ]);
     const put = fetchMock.mock.calls[1]![1] as RequestInit;
     expect(JSON.parse(put.body as string)).toEqual({ design: '{}', content: '<p/>' });

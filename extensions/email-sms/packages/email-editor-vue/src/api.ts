@@ -1,5 +1,5 @@
 /**
- * A small client for the email template REST API (`/api/email/templates`, see `EmailTemplatesApiController`). It uses
+ * A small client for the email template REST API (`/apps/api/email/templates`, see `EmailTemplatesApiController`). It uses
  * `fetch` and the session cookie of the page, and turns error answers into {@link EmailApiError}.
  */
 
@@ -88,7 +88,7 @@ export class EmailTemplatesClient implements EmailTemplatesApi {
   private readonly doFetch: typeof fetch;
 
   constructor(private readonly options: ClientOptions = {}) {
-    this.base = `${(options.baseUrl ?? '').replace(/\/+$/, '')}/api/email/templates`;
+    this.base = `${(options.baseUrl ?? '').replace(/\/+$/, '')}/apps/api/email/templates`;
     this.doFetch = options.fetch ?? ((input, init) => fetch(input, init));
   }
 

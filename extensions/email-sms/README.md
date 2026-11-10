@@ -121,7 +121,7 @@ With `-Dskip.editor` the Design action says the editor is not included.
 
 ### Migrating a template from Velocity
 
-`Migrate to editor` (or `POST /api/email/templates/{id}/migrate?dryRun=false`) converts references, `#if/#elseif/#else`,
+`Migrate to editor` (or `POST /apps/api/email/templates/{id}/migrate?dryRun=false`) converts references, `#if/#elseif/#else`,
 `#foreach` and `$TEMPLATE_CONTENT` in every text field, only when everything is portable. `#set`, macros, `#parse`,
 `#include`, method calls, indexes and complex conditions are reported and the template is left untouched. The HTML becomes
 one block, so the email looks the same, and the original fields are kept so `Revert migration` can restore them (it asks
@@ -129,7 +129,7 @@ before losing edits made to the design afterwards). A migrated template does not
 
 ### REST API
 
-`/api/email/templates` (get, create, `PUT {id}/design`, `variables`, `{id}/preview`, `{id}/test-send`, `{id}/migrate`,
+`/apps/api/email/templates` (get, create, `PUT {id}/design`, `variables`, `{id}/preview`, `{id}/test-send`, `{id}/migrate`,
 `{id}/revert`). Every call needs an authenticated user that an `EmailTemplatePolicy` accepts and works only on templates
 of the current account; the system account's templates are read-only. The default policy lets the roles listed in
 `dynamia.email.editor-roles` (comma separated); **with the property empty nobody can use the API**. One policy that says

@@ -27,13 +27,13 @@ import java.util.function.Supplier;
  * REST API of the email template editor. Every call needs an authenticated user that an {@link EmailTemplatePolicy}
  * accepts, and works only on templates of the current account.
  * <ul>
- *   <li>{@code POST /api/email/templates} creates an empty template for the editor</li>
- *   <li>{@code GET /api/email/templates/{id}} reads it</li>
- *   <li>{@code PUT /api/email/templates/{id}/design} saves the design and its compiled HTML</li>
- *   <li>{@code GET /api/email/templates/variables?source=} lists the variables of the model providers</li>
- *   <li>{@code POST /api/email/templates/{id}/preview} renders it with sample data</li>
- *   <li>{@code POST /api/email/templates/{id}/test-send} sends it to the user's own address</li>
- *   <li>{@code POST /api/email/templates/{id}/migrate?dryRun=} and {@code .../revert?confirm=} move it from and to Velocity</li>
+ *   <li>{@code POST /apps/api/email/templates} creates an empty template for the editor</li>
+ *   <li>{@code GET /apps/api/email/templates/{id}} reads it</li>
+ *   <li>{@code PUT /apps/api/email/templates/{id}/design} saves the design and its compiled HTML</li>
+ *   <li>{@code GET /apps/api/email/templates/variables?source=} lists the variables of the model providers</li>
+ *   <li>{@code POST /apps/api/email/templates/{id}/preview} renders it with sample data</li>
+ *   <li>{@code POST /apps/api/email/templates/{id}/test-send} sends it to the user's own address</li>
+ *   <li>{@code POST /apps/api/email/templates/{id}/migrate?dryRun=} and {@code .../revert?confirm=} move it from and to Velocity</li>
  * </ul>
  */
 @RestController
@@ -41,7 +41,7 @@ import java.util.function.Supplier;
 public class EmailTemplatesApiController {
 
     /** Base path of the API. */
-    public static final String PATH = "/api/email/templates";
+    public static final String PATH = "/apps/api/email/templates";
     private static final LoggingService LOGGER = LoggingService.get(EmailTemplatesApiController.class);
 
     /**

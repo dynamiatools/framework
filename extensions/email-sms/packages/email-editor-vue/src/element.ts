@@ -39,7 +39,7 @@ export function mountEmailEditor(target: Element, options: MountOptions): Mounte
 
 /**
  * `<dynamia-email-editor template-id="7" base-url="" locale="es" source="sales">`: the editor as an HTML tag. It talks
- * to `base-url` + `/api/email/templates` with the session of the page and fires `saved` (a CustomEvent with the
+ * to `base-url` + `/apps/api/email/templates` with the session of the page and fires `saved` (a CustomEvent with the
  * template as `detail`) after each save. Include the CSS of the package in the page.
  */
 // the package is also imported where there is no DOM (tests, server side): only the tag needs a real HTMLElement
