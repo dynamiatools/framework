@@ -116,6 +116,34 @@
             <version>${tools.version}</version>
         </dependency>
 
+        <!-- Stored reports and queries, REST and export -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.reports.ui</artifactId>
+            <version>${tools.version}</version>
+        </dependency>
+
+        <!-- Dashboards with widgets -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.dashboard</artifactId>
+            <version>${tools.version}</version>
+        </dependency>
+
+        <!-- Import data from CSV and Excel files -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.importer.ui</artifactId>
+            <version>${tools.version}</version>
+        </dependency>
+
+        <!-- Versioned HTTP calls to third party APIs -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.functions.ui</artifactId>
+            <version>${tools.version}</version>
+        </dependency>
+
         <!-- Mail API and sender, the email module expects the application to provide them -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
