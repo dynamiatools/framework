@@ -104,7 +104,7 @@ Values are HTML-escaped only in templates built in the editor (`escapeValues`); 
 
 ### Block editor
 
-The editor is a Vue package, [`@dynamia-tools/email-editor-vue`](packages/email-editor-vue/README.md): blocks (header, text,
+The editor is a Vue package, [`@dynamia-tools/email-editor-vue`](packages/email-editor-vue/README.md): blocks (header, heading H1 to H3, text, quote, list,
 image, button, divider, spacer, columns, footer, HTML, repeat, condition), responsive output through MJML, undo/redo,
 variables panel, preview on desktop and mobile, test send and the migration. A template stores the editor document in
 `design` (JSON) and the HTML it compiles to in `content`.
