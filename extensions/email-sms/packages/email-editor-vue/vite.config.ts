@@ -15,7 +15,7 @@ export default defineConfig({
       formats: ['es', 'cjs'],
       fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs'),
     },
-    rollupOptions: { external: ['vue'] },
+    rollupOptions: { external: ['vue', 'mjml-browser', 'cheerio', '@dynamia-tools/template-engine'] },
     sourcemap: true,
     minify: false,
   },
