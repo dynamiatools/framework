@@ -125,8 +125,11 @@ The page is served by `EmailEditorController` at `/dynamia-email/editor?id=7` (`
 
 `Migrate to editor` (or `POST /apps/api/email/templates/{id}/migrate?dryRun=false`) converts references, `#if/#elseif/#else`,
 `#foreach` and `$TEMPLATE_CONTENT` in every text field, only when everything is portable. `#set`, macros, `#parse`,
-`#include`, method calls, indexes and complex conditions are reported and the template is left untouched. The HTML becomes
-one block, so the email looks the same, and the original fields are kept so `Revert migration` can restore them (it asks
+`#include`, method calls, indexes and complex conditions are reported and the template is left untouched. The HTML is turned into
+editor blocks as far as it can: headings (h1 to h3), paragraphs and loose text, images (also inside a link), dividers and
+simple lists get their own block, and everything else (tables, styled containers) stays an HTML block so the email looks the
+same; the report says how many. A template with `{{#each}}`/`{{#if}}` blocks or a `<style>` stays one HTML block, as splitting it
+would break it. The original fields are kept so `Revert migration` can restore them (it asks
 before losing edits made to the design afterwards). A migrated template does not escape values, as Velocity never did.
 
 ### REST API

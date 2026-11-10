@@ -134,6 +134,12 @@ public class EmailTemplateMigrator {
             }
         }
         warnings.add(DIRECT_EVALUATION_WARNING);
+        if (converted.get("content") != null) {
+            var blocks = HtmlToBlocks.convert(converted.get("content"));
+            if (blocks.htmlBlocks() > 0) {
+                warnings.add(blocks.htmlBlocks() + " of " + blocks.blocks() + " blocks keep their HTML because the editor has no block for it yet.");
+            }
+        }
         boolean portable = issues.isEmpty() && converted.containsKey("content");
         if (converted.get("content") == null) {
             warnings.add("The template has no content.");
@@ -151,7 +157,7 @@ public class EmailTemplateMigrator {
         }
         template.setEngine(EmailTemplateEngine.DYNAMIA);
         template.setEscapeValues(false);
-        template.setDesign(htmlBlockDesign(template.getContent()));
+        template.setDesign(HtmlToBlocks.convert(template.getContent()).design());
         // the design stored in the snapshot is compared at revert time to know if it was edited afterwards
         template.setBackupContent(withMigratedDesign(template.getBackupContent(), template.getDesign()));
         return new Report(false, true, true, converted, issues, warnings);
@@ -206,22 +212,6 @@ public class EmailTemplateMigrator {
     private static String withMigratedDesign(String snapshot, String design) {
         var root = (ObjectNode) JSON.readTree(snapshot);
         root.put("migratedDesign", design);
-        return JSON.writeValueAsString(root);
-    }
-
-    /**
-     * The block editor document of a migrated template: one HTML block holding the whole content, so the email looks
-     * exactly as before. The editor sends a full HTML document as it is and wraps a fragment.
-     */
-    static String htmlBlockDesign(String html) {
-        var root = JSON.createObjectNode();
-        root.put("version", 1);
-        var block = root.putArray("blocks").addObject();
-        block.put("id", "html-1");
-        block.put("type", "html");
-        var props = block.putObject("props");
-        props.put("html", html);
-        props.put("fullDocument", html != null && html.toLowerCase().contains("<html"));
         return JSON.writeValueAsString(root);
     }
 }

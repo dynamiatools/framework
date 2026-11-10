@@ -77,7 +77,10 @@ public class InitDemoAccountCommandLineRunner implements CommandLineRunner {
         invoiceEmail.setSubject("Your invoice $invoice.number");
         invoiceEmail.setContent("<h1>Hello $customer.firstName</h1>"
                 + "<p>Thanks for your purchase. Your invoice <b>$invoice.number</b> total is $invoice.total.</p>"
-                + "#foreach($line in $invoice.details)<p>$line.quantity x $line.book</p>#end");
+                + "<hr><h3>Your books</h3>"
+                + "<ul><li>Clean Code</li><li>Dune</li></ul>"
+                + "<table><tr><td>Need help?</td><td>support@mybookstore.test</td></tr></table>"
+                + "<p>See you soon!</p>");
         crudService.save(invoiceEmail);
     }
 }
