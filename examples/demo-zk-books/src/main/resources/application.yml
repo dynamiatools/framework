@@ -1,5 +1,9 @@
 spring:
 
+  datasource:
+    # the saas tables have a column named value, a reserved word in H2 2.x
+    url: jdbc:h2:mem:mybookstore;DB_CLOSE_DELAY=-1;NON_KEYWORDS=VALUE
+
   jpa:
     hibernate:
       ddl-auto: update

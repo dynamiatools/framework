@@ -102,6 +102,31 @@
             <artifactId>tools.dynamia.modules.entityfiles.s3</artifactId>
             <version>${tools.version}</version>
         </dependency>
+        <!-- Users, profiles and login (creates admin / adminadmin on first start) -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.security.ui</artifactId>
+            <version>${tools.version}</version>
+        </dependency>
+
+        <!-- Multi tenant accounts, plans and payments -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.saas.ui</artifactId>
+            <version>${tools.version}</version>
+        </dependency>
+
+        <!-- Mail API and sender, the email module expects the application to provide them -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <!-- Email templates with the block editor (build the editor page with: mvn -Peditor package) -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.email.ui</artifactId>
+            <version>${tools.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
