@@ -7,6 +7,7 @@ import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.modules.email.domain.EmailTemplate;
 import tools.dynamia.modules.saas.api.AccountServiceAPI;
 import tools.dynamia.modules.saas.domain.Account;
+import tools.dynamia.modules.saas.services.AccountService;
 import tools.dynamia.modules.security.services.SecurityService;
 import tools.dynamia.modules.saas.domain.AccountType;
 import tools.dynamia.modules.saas.api.enums.AccountPeriodicity;
@@ -30,8 +31,10 @@ public class InitDemoAccountCommandLineRunner implements CommandLineRunner {
     private final CrudService crudService;
     private final AccountServiceAPI accounts;
     private final SecurityService security;
+    private final AccountService accountService;
 
-    public InitDemoAccountCommandLineRunner(CrudService crudService, AccountServiceAPI accounts, SecurityService security) {
+    public InitDemoAccountCommandLineRunner(CrudService crudService, AccountServiceAPI accounts, SecurityService security, AccountService accountService) {
+        this.accountService = accountService;
         this.security = security;
         this.crudService = crudService;
         this.accounts = accounts;
@@ -57,6 +60,8 @@ public class InitDemoAccountCommandLineRunner implements CommandLineRunner {
         account.setStatus(AccountStatus.ACTIVE);
         account.setStatusDate(LocalDateTime.now());
         account.setIdentification("DEMO-1");
+        // an account without a profile loads no module; DEFAULT allows all of them except SaaS
+        account.setProfile(accountService.checkDefaultProfile());
         account.setAutoInit(true);
         account = crudService.save(account);
 
