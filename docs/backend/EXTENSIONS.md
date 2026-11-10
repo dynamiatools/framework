@@ -500,6 +500,15 @@ dynamia.sms.aws.access-key=${AWS_ACCESS_KEY}
 dynamia.sms.aws.secret-key=${AWS_SECRET_KEY}
 ```
 
+### Template engines and the block editor
+
+Templates use Velocity by default (`engine` empty) or the safe Dynamia engine (`DYNAMIA`); `EmailTemplateRenderer` chooses
+per template and `EmailService.render` gives applications the HTML without sending. The block editor
+(`@dynamia-tools/email-editor-vue`), the REST API (`/api/email/templates`, closed until `dynamia.email.editor-roles` is set)
+and the Velocity migrator with revert are described in the module
+[README](../../extensions/email-sms/README.md#email-templates-and-the-block-editor). Applications that evaluate
+`EmailTemplate.getContent()` with Velocity themselves must move to `EmailService.render` before migrating their templates.
+
 ### When to Use Email & SMS Extension
 
 - Send transactional emails

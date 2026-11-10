@@ -107,18 +107,21 @@ public class EmailTemplatesApiController {
         }
     }
 
+    /** Creates an empty template for the editor in the current account. */
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public EmailTemplatesApiService.TemplateData create(@RequestBody CreateRequest body, HttpServletRequest request) {
         guard(request);
         return service.create(body.name(), body.subject());
     }
 
+    /** Reads a template of the current account. */
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public EmailTemplatesApiService.TemplateData get(@PathVariable Long id, HttpServletRequest request) {
         guard(request);
         return service.get(id);
     }
 
+    /** Saves the editor document and the HTML it compiled to; only for templates on the Dynamia engine. */
     @PutMapping(value = "/{id}/design", produces = MediaType.APPLICATION_JSON_VALUE)
     public EmailTemplatesApiService.TemplateData saveDesign(@PathVariable Long id, @RequestBody SaveRequest body,
                                                             HttpServletRequest request) {
@@ -126,12 +129,14 @@ public class EmailTemplatesApiController {
         return service.saveDesign(id, body.design(), body.content(), body.subject());
     }
 
+    /** Lists the variables the model providers offer, optionally of one source. */
     @GetMapping(value = "/variables", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<TemplateVariable> variables(@RequestParam(required = false) String source, HttpServletRequest request) {
         guard(request);
         return service.variables(source);
     }
 
+    /** Renders a template, or unsaved content, with sample or given data without sending anything. */
     @PostMapping(value = "/{id}/preview", produces = MediaType.APPLICATION_JSON_VALUE)
     public EmailTemplatesApiService.Preview preview(@PathVariable Long id, @RequestBody PreviewRequest body,
                                                     HttpServletRequest request) {
@@ -139,6 +144,7 @@ public class EmailTemplatesApiController {
         return service.preview(id, body.content(), body.subject(), body.source(), body.data());
     }
 
+    /** Sends the stored template to the address of the logged in user only. */
     @PostMapping(value = "/{id}/test-send", produces = MediaType.APPLICATION_JSON_VALUE)
     public EmailTemplatesApiService.TestResult testSend(@PathVariable Long id, @RequestBody TestSendRequest body,
                                                         HttpServletRequest request) {
@@ -148,6 +154,7 @@ public class EmailTemplatesApiController {
         return service.testSend(id, address, body.source(), body.data());
     }
 
+    /** Analyzes (dry run, the default) or applies the migration from Velocity. */
     @PostMapping(value = "/{id}/migrate", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object migrate(@PathVariable Long id, @RequestParam(defaultValue = "true") boolean dryRun,
                           HttpServletRequest request) {
@@ -155,6 +162,7 @@ public class EmailTemplatesApiController {
         return service.migrate(id, dryRun);
     }
 
+    /** Restores a migrated template; losing design edits needs {@code confirm=true}. */
     @PostMapping(value = "/{id}/revert", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object revert(@PathVariable Long id, @RequestParam(defaultValue = "false") boolean confirm,
                          HttpServletRequest request) {
@@ -162,6 +170,7 @@ public class EmailTemplatesApiController {
         return service.revert(id, confirm);
     }
 
+    /** Maps a failure of the service to its HTTP status. */
     @ExceptionHandler(EmailApiException.class)
     public ResponseEntity<ApiError> failed(EmailApiException e) {
         return ResponseEntity.status(e.getStatus()).body(new ApiError(e.getStatus(), e.getCode(), e.getMessage()));
@@ -170,10 +179,12 @@ public class EmailTemplatesApiController {
     @ExceptionHandler({org.springframework.http.converter.HttpMessageNotReadableException.class,
             org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
             org.springframework.web.HttpMediaTypeNotSupportedException.class})
+    /** Maps an unreadable request to 400. */
     public ResponseEntity<ApiError> invalid(Exception e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiError(400, "INVALID_REQUEST", "The request is not valid"));
     }
 
+    /** Maps anything else to 500 without leaking details, with a reference for the log. */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> unexpected(Exception e, HttpServletRequest request) {
         var reference = UUID.randomUUID().toString();
