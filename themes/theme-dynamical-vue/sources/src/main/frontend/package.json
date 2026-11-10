@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/theme-dynamical-vue",
-  "version": "26.11.0",
+  "version": "26.11.1",
   "description": "Vue 3 + Tailwind CSS 4 application shell of the DynamicalVue theme: navigation-driven layout, login, skins, CRUD / config / embedded pages",
   "license": "Apache-2.0",
   "type": "module",
