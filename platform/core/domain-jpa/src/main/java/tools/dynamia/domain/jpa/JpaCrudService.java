@@ -1119,7 +1119,12 @@ public class JpaCrudService extends AbstractCrudService {
     @Override
     @Transactional
     public <T> T reload(T entity, LoadPlan plan) {
-        if (entity instanceof AbstractEntity) {
+        if (entity instanceof BeanMap row) {
+            // a read-only row (Open Persistence In View disabled) is reloaded as the entity it stands for
+            if (row.isLoadable()) {
+                entity = (T) load(row.getBeanClass(), (Serializable) row.getId(), plan);
+            }
+        } else if (entity instanceof AbstractEntity) {
             entity = (T) load(entity.getClass(), ((AbstractEntity) entity).getId(), plan);
         } else {
             try {

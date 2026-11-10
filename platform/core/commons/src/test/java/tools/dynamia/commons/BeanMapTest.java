@@ -104,4 +104,38 @@ class BeanMapTest {
         map.set("a", 1);
         assertTrue(map.toXml().contains("<BeanMap>"));
     }
+
+    @Test
+    void helpersReadTypedValuesAndBeanClass() {
+        BeanMap map = new BeanMap();
+        map.setBeanClass(WithField.class);
+        map.set("selected", true);
+        map.set("flag", "true");
+        map.set("count", 7);
+        map.set("text", "12");
+
+        assertTrue(map.isBeanOf(WithField.class));
+        assertTrue(map.isBeanOf(Object.class));
+        assertFalse(map.isBeanOf(WithMethod.class));
+        assertTrue(BeanMap.isBeanOf(map, WithField.class));
+        assertTrue(BeanMap.isBeanOf(new WithField(), WithField.class));
+        assertFalse(BeanMap.isBeanOf(null, WithField.class));
+        assertEquals(WithField.class, BeanMap.beanClassOf(map));
+        assertEquals(WithMethod.class, BeanMap.beanClassOf(new WithMethod()));
+
+        assertTrue(map.isTrue("selected"));
+        assertTrue(map.isTrue("flag"));
+        assertFalse(map.isTrue("missing"));
+        assertEquals(7L, map.getLong("count"));
+        assertEquals(12, map.getInteger("text"));
+        assertNull(map.getLong("missing"));
+        assertNull(map.getLong("selected"));
+        assertEquals("7", map.getString("count"));
+        assertEquals("x", map.getOrDefault("missing", "x"));
+
+        assertTrue(map.isSelected());
+        map.setSelected(false);
+        assertFalse(map.isSelected());
+        assertEquals(Boolean.FALSE, map.get("selected"));
+    }
 }

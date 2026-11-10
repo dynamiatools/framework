@@ -159,4 +159,25 @@ public final class EntityMapperSupport {
         }
         return row;
     }
+
+    /**
+     * Same as {@link #toEntity(CrudService, Object)}, looking up the application {@link CrudService} by itself.
+     * The row is returned unchanged if it is not a BeanMap or if no CrudService is available.
+     *
+     * <pre>{@code
+     * Venta venta = (Venta) EntityMapperSupport.toEntity(event.getData());
+     * }</pre>
+     *
+     * @param row an entity or a BeanMap row, may be {@code null}
+     * @return the entity, or the same row if it is not a BeanMap
+     */
+    public static Object toEntity(Object row) {
+        if (row instanceof BeanMap) {
+            CrudService crudService = Containers.get().findObject(CrudService.class);
+            if (crudService != null) {
+                return toEntity(crudService, row);
+            }
+        }
+        return row;
+    }
 }
