@@ -31,6 +31,13 @@ export function useEditorState(initial: Design, onChange: (design: Design) => vo
     onChange(design.value);
   }
 
+  /** Makes a design built by the tree operations the new present, as one undo step. */
+  function commitDesign(next: Design): void {
+    if (next !== design.value) {
+      commit(next);
+    }
+  }
+
   function select(id: string | null): void {
     selectedId.value = id;
   }
@@ -154,7 +161,7 @@ export function useEditorState(initial: Design, onChange: (design: Design) => vo
 
   const selected = computed(() => (selectedId.value ? (find(design.value, selectedId.value)?.block ?? null) : null));
 
-  return { design, selectedId, selected, dragging, canUndo, canRedo, select, addBlock, drop, moveTo, moveBy, removeBlock, duplicateBlock, update, updateSettings, undo, redo, load };
+  return { design, selectedId, selected, dragging, canUndo, canRedo, select, commitDesign, addBlock, drop, moveTo, moveBy, removeBlock, duplicateBlock, update, updateSettings, undo, redo, load };
 }
 
 export type EditorState = ReturnType<typeof useEditorState>;

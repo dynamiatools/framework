@@ -9,3 +9,5 @@ export { default as EmailEditor } from './ui/EmailEditor.vue';
 export { useEditorState, DRAG_MIME, type EditorState, type DragPayload } from './ui/state.js';
 export { sanitizeHtml } from './ui/sanitize.js';
 export { translator } from './ui/i18n.js';
+export { default as PropertiesPanel } from './ui/PropertiesPanel.vue';
+export { FIELDS, SETTINGS_FIELDS, type Field, type FieldKind } from './ui/fields.js';

@@ -5,6 +5,7 @@ import type { Design } from '../model/types.js';
 import BlockList from './BlockList.vue';
 import { translator } from './i18n.js';
 import Palette from './Palette.vue';
+import PropertiesPanel from './PropertiesPanel.vue';
 import { useEditorState } from './state.js';
 
 const props = withDefaults(defineProps<{ design?: Design; locale?: string }>(), { locale: 'en' });
@@ -58,9 +59,7 @@ defineExpose({ editor, getDesign: () => editor.design.value, setDesign: (design:
         </div>
       </main>
       <aside class="right" @click.stop>
-        <slot name="properties" :editor="editor">
-          <p class="hint">{{ editor.selected.value ? t(editor.selected.value.type) : t('selectBlock') }}</p>
-        </slot>
+        <slot name="properties" :editor="editor"><PropertiesPanel /></slot>
       </aside>
     </div>
   </div>
@@ -77,7 +76,6 @@ defineExpose({ editor, getDesign: () => editor.design.value, setDesign: (design:
 .right { border-left: 1px solid #d4d9e0; }
 .center { overflow: auto; padding: 36px 16px; }
 .canvas { margin: 0 auto; min-height: 200px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15); }
-.hint { color: #7a8594; }
 @media (max-width: 900px) {
   .main { grid-template-columns: 1fr; grid-auto-rows: auto; }
   .left, .right { border: 0; border-bottom: 1px solid #d4d9e0; }
