@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
  *   <li>property paths: {@code ${d.product.name}} (Map keys and public getters)</li>
  *   <li>filters: {@code ${total|currency:0}}, {@code ${date|date:dd/MM/yyyy}}, {@code ${name|upper|default:-}}</li>
  *   <li>the short form {@code $d.name}, only when {@code d} is a defined variable</li>
+ *   <li>blocks: {@code {{#if cond}}...{{else}}...{{/if}}} and {@code {{#each items as item}}...{{/each}}}; inside
+ *   {@code each} the {@code loop} variable has {@code index}, {@code number}, {@code count}, {@code first}, {@code last}</li>
  * </ul>
  * Unknown variables are left as they are; null values become empty text.
  */
@@ -51,7 +53,17 @@ public class DynamiaTemplateEngine {
             params = new HashMap<>(data);
             params.put(TemplateExpressions.LOCALE_VAR, defaultLocale);
         }
-        final var vars = params;
+        if (TemplateBlocks.hasBlocks(template)) {
+            var nodes = TemplateBlocks.parse(template);
+            if (nodes != null) {
+                return TemplateBlocks.render(nodes, params, this::substitute);
+            }
+        }
+        return substitute(template, params);
+    }
+
+    /** Replaces the variables of a text that has no block tags. */
+    private String substitute(String template, Map<String, Object> vars) {
         Matcher m = VARIABLE.matcher(template);
         var sb = new StringBuilder();
         while (m.find()) {
