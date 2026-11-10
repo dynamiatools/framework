@@ -77,6 +77,11 @@ function onKeyDown(event: KeyboardEvent): void {
       <div v-if="text('title')" class="title">{{ text('title') }}</div>
       <div v-if="!text('logoUrl') && !text('title')" class="placeholder">{{ t('header') }}</div>
     </div>
+    <div v-else-if="block.type === 'heading'" class="v-heading" :style="{ textAlign: text('align') as never, color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || ({ h1: 32, h2: 26, h3: 20 } as Record<string, number>)[text('level')] || 26}px`, padding: pad }">{{ text('text') }}</div>
+    <div v-else-if="block.type === 'quote'" class="v-quote" :style="{ textAlign: text('align') as never, color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || 16}px`, padding: pad }"><blockquote :style="{ borderLeft: `4px solid ${text('borderColor') || '#1a73e8'}` }" v-html="html" /></div>
+    <div v-else-if="block.type === 'list'" class="v-text" :style="{ textAlign: text('align') as never, color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || 16}px`, padding: pad }">
+      <component :is="p['ordered'] === true ? 'ol' : 'ul'" class="v-list"><li v-for="(item, i) in text('items').split('\n').filter((l) => l.trim() !== '')" :key="i">{{ item }}</li></component>
+    </div>
     <div v-else-if="block.type === 'text'" class="v-text" :style="{ textAlign: text('align') as never, color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || 16}px`, lineHeight: String(p['lineHeight'] ?? 1.5), padding: pad }" v-html="html" />
     <div v-else-if="block.type === 'footer'" class="v-text" :style="{ textAlign: text('align') as never, color: text('color') || undefined, fontSize: `${Number(p['fontSize']) || 12}px`, padding: pad }" v-html="html" />
     <div v-else-if="block.type === 'image'" class="v-image" :style="{ textAlign: text('align') as never, padding: pad }">
@@ -125,6 +130,9 @@ function onKeyDown(event: KeyboardEvent): void {
 .v-text :deep(p) { margin: 0 0 0.6em; }
 .v-text :deep(p:last-child) { margin-bottom: 0; }
 .v-header img, .v-image img { max-width: 100%; height: auto; }
+.v-heading { font-weight: 700; line-height: 1.25; }
+.v-quote blockquote { margin: 0; padding: 4px 0 4px 16px; font-style: italic; }
+.v-list { margin: 0; padding-left: 24px; }
 .v-header .title { font-size: 24px; font-weight: 700; }
 .btn { padding: 10px 24px; text-align: center; font-family: inherit; }
 .v-divider hr { margin: 0; border: 0; }

@@ -8,6 +8,39 @@ function design(...blocks: Block[]): Design {
   return blocks.reduce((d, b, i) => insert(d, root(i), b), emptyDesign());
 }
 
+describe('heading, quote and list blocks', () => {
+  it('draws the heading with its tag and a size by level, and an explicit size wins', () => {
+    const h1 = toMjml(design(createBlock('heading', { text: 'Hola ${name}', level: 'h1' }))).mjml;
+    expect(h1).toContain('font-size="32px"');
+    expect(h1).toContain('<h1 style="margin:0;font-size:inherit;line-height:inherit;font-weight:inherit">Hola ${name}</h1>');
+    expect(toMjml(design(createBlock('heading', { level: 'h3' }))).mjml).toContain('font-size="20px"');
+    expect(toMjml(design(createBlock('heading', { level: 'h2', fontSize: 40 }))).mjml).toContain('font-size="40px"');
+    expect(toMjml(design(createBlock('heading', { level: 'script' }))).mjml).toContain('<h2 ');
+  });
+
+  it('escapes the text of a heading and of the list items', () => {
+    const mjml = toMjml(design(createBlock('heading', { text: '<script>x</script>' }), createBlock('list', { items: 'a & b\n\n  <b>c</b>  ' }))).mjml;
+    expect(mjml).not.toContain('<script>');
+    expect(mjml).toContain('<li style="margin:0 0 4px">a &amp; b</li><li style="margin:0 0 4px">&lt;b&gt;c&lt;/b&gt;</li>');
+  });
+
+  it('draws a numbered list and a quote with a bar of the given colour', () => {
+    expect(toMjml(design(createBlock('list', { ordered: true }))).mjml).toContain('<ol style="margin:0;padding-left:24px">');
+    expect(toMjml(design(createBlock('list', { ordered: false }))).mjml).toContain('<ul ');
+    const quote = toMjml(design(createBlock('quote', { html: '<p>Hi</p>', borderColor: '#ff0000' }))).mjml;
+    expect(quote).toContain('border-left:4px solid #ff0000');
+    expect(quote).toContain('<p>Hi</p>');
+    expect(toMjml(design(createBlock('quote', { borderColor: 'red;x' }))).mjml).toContain('border-left:4px solid #1a73e8');
+  });
+
+  it('compiles to a valid email with the new blocks', async () => {
+    const { html, errors } = await compile(design(createBlock('heading', { text: 'Title' }), createBlock('list', {}), createBlock('quote', {})));
+    expect(errors).toEqual([]);
+    expect(html).toContain('<h2 ');
+    expect(html).not.toMatch(/<tbody>\s*<(h2|ul|blockquote)/);
+  });
+});
+
 describe('toMjml', () => {
   it('puts the HTML block inside a text cell, so the browser does not move it out of the table', async () => {
     const block = createBlock('html', { html: '<h1>Hi ${name}</h1>' });

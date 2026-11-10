@@ -76,7 +76,7 @@ function cssClass(block: Block): string {
   return hide === 'mobile' ? ' css-class="hide-mobile"' : hide === 'desktop' ? ' css-class="hide-desktop"' : '';
 }
 
-const LEAVES = ['header', 'text', 'image', 'button', 'divider', 'spacer', 'footer', 'html'];
+const LEAVES = ['header', 'heading', 'text', 'quote', 'list', 'image', 'button', 'divider', 'spacer', 'footer', 'html'];
 
 /** The body of an HTML document (what is between `<body>` and `</body>`), or the text as it is. */
 export function bodyOf(html: string): string {
@@ -109,6 +109,21 @@ class Emitter {
             ? `<mj-text align="${align(p['align'])}" font-size="24px" font-weight="bold" padding="${pad}"${container}${hide}>${title}</mj-text>`
             : '')
         );
+      }
+      case 'heading': {
+        const level = ['h1', 'h2', 'h3'].includes(String(p['level'])) ? String(p['level']) : 'h2';
+        const auto = { h1: 32, h2: 26, h3: 20 }[level as 'h1' | 'h2' | 'h3'];
+        const size = num(p['fontSize'], 0, 0, 72) || auto;
+        return `<mj-text align="${align(p['align'])}"${colorAttr('color', p['color'])} font-size="${size}px" font-weight="bold" line-height="1.25" padding="${padding(p['padding'], '16px 24px 4px')}"${hide}><${level} style="margin:0;font-size:inherit;line-height:inherit;font-weight:inherit">${plain(p['text'])}</${level}></mj-text>`;
+      }
+      case 'quote': {
+        const bar = color(p['borderColor'], '#1a73e8');
+        return `<mj-text align="${align(p['align'])}"${colorAttr('color', p['color'])} font-size="${num(p['fontSize'], 16, 8, 72)}px" padding="${padding(p['padding'], '10px 24px')}"${hide}><blockquote style="margin:0;padding:4px 0 4px 16px;border-left:4px solid ${bar};font-style:italic">${String(p['html'] ?? '')}</blockquote></mj-text>`;
+      }
+      case 'list': {
+        const tag = p['ordered'] === true ? 'ol' : 'ul';
+        const items = String(p['items'] ?? '').split(/\r?\n/).map((l) => l.trim()).filter((l) => l !== '').map((l) => `<li style="margin:0 0 4px">${plain(l)}</li>`).join('');
+        return `<mj-text align="${align(p['align'])}"${colorAttr('color', p['color'])} font-size="${num(p['fontSize'], 16, 8, 72)}px" line-height="1.5" padding="${padding(p['padding'], '10px 24px')}"${hide}><${tag} style="margin:0;padding-left:24px">${items}</${tag}></mj-text>`;
       }
       case 'text':
         return `<mj-text align="${align(p['align'])}"${colorAttr('color', p['color'])} font-size="${num(p['fontSize'], 16, 8, 72)}px" line-height="${num(p['lineHeight'], 1.5, 1, 3)}" padding="${padding(p['padding'], '10px 24px')}"${hide}>${String(p['html'] ?? '')}</mj-text>`;

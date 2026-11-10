@@ -16,6 +16,12 @@ export function defaultProps(type: BlockType): Record<string, unknown> {
   switch (type) {
     case 'header':
       return { ...common, logoUrl: '', logoWidth: 120, logoAlt: '', title: '', align: 'center', backgroundColor: '', padding: '20px 24px' };
+    case 'heading':
+      return { ...common, text: 'Heading', level: 'h2', align: 'left', color: '', fontSize: 0, padding: '16px 24px 4px' };
+    case 'quote':
+      return { ...common, html: '<p>A quote or a highlighted note</p>', align: 'left', color: '#555555', borderColor: '#1a73e8', fontSize: 16, padding: '10px 24px' };
+    case 'list':
+      return { ...common, items: 'First item\nSecond item\nThird item', ordered: false, align: 'left', color: '', fontSize: 16, padding: '10px 24px' };
     case 'text':
       return { ...common, html: '<p>Write your text here</p>', align: 'left', color: '', fontSize: 16, lineHeight: 1.5, padding: '10px 24px' };
     case 'image':

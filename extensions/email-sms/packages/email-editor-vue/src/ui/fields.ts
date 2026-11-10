@@ -32,6 +32,9 @@ const number = (key: string, min: number, max: number, step = 1): Field => ({ ke
 /** The settings of every kind of block, in the order the panel shows them. */
 export const FIELDS: Record<BlockType, Field[]> = {
   header: [{ key: 'logoUrl', kind: 'url' }, number('logoWidth', 10, 600), { key: 'logoAlt', kind: 'text' }, { key: 'title', kind: 'text' }, align, color('backgroundColor', true), padding, hideOn],
+  heading: [{ key: 'text', kind: 'text' }, { key: 'level', kind: 'select', options: ['h1', 'h2', 'h3'] }, align, color('color', true), number('fontSize', 0, 72), padding, hideOn],
+  quote: [{ key: 'html', kind: 'rich' }, color('borderColor'), align, color('color', true), number('fontSize', 8, 72), padding, hideOn],
+  list: [{ key: 'items', kind: 'textarea' }, { key: 'ordered', kind: 'checkbox' }, align, color('color', true), number('fontSize', 8, 72), padding, hideOn],
   text: [{ key: 'html', kind: 'rich' }, align, color('color', true), number('fontSize', 8, 72), number('lineHeight', 1, 3, 0.1), padding, hideOn],
   image: [{ key: 'src', kind: 'url' }, { key: 'alt', kind: 'text' }, { key: 'href', kind: 'url' }, number('width', 0, 1200), align, padding, hideOn],
   button: [{ key: 'text', kind: 'text' }, { key: 'href', kind: 'url' }, color('backgroundColor'), color('color'), number('borderRadius', 0, 60), number('fontSize', 8, 72), align, { key: 'fullWidth', kind: 'checkbox' }, padding, hideOn],
