@@ -15,11 +15,21 @@ class EmailEditorLocationTest {
 
     @Test
     void theUrlOpensTheEditorOnATemplate() {
-        assertEquals("/dynamia-email/editor/index.html?id=7&locale=es", EmailEditorLocation.url("", 7L, "es"));
-        assertEquals("/erp/dynamia-email/editor/index.html?id=7", EmailEditorLocation.url("/erp", 7L, null));
-        assertEquals("/dynamia-email/editor/index.html?id=7", EmailEditorLocation.url("/", 7L, " "));
-        assertEquals("/dynamia-email/editor/index.html?id=7&locale=zh-CN", EmailEditorLocation.url(null, 7L, "zh-CN"));
-        assertEquals("/dynamia-email/editor/index.html?id=7&locale=a%26b", EmailEditorLocation.url(null, 7L, "a&b"));
+        assertEquals("/dynamia-email/editor?id=7&locale=es", EmailEditorLocation.url("", 7L, "es"));
+        assertEquals("/erp/dynamia-email/editor?id=7", EmailEditorLocation.url("/erp", 7L, null));
+        assertEquals("/dynamia-email/editor?id=7", EmailEditorLocation.url("/", 7L, " "));
+        assertEquals("/dynamia-email/editor?id=7&locale=zh-CN", EmailEditorLocation.url(null, 7L, "zh-CN"));
+        assertEquals("/dynamia-email/editor?id=7&locale=a%26b", EmailEditorLocation.url(null, 7L, "a&b"));
+    }
+
+    @Test
+    void theControllerPointsTheRelativeAssetsToTheEditorFolder() {
+        var page = "<html><head><title>x</title></head></html>";
+        assertEquals("<html><head><base href=\"/dynamia-email/editor/\" /><title>x</title></head></html>",
+                EmailEditorController.withBase(page, ""));
+        assertEquals("<html><head><base href=\"/erp/dynamia-email/editor/\" /><title>x</title></head></html>",
+                EmailEditorController.withBase(page, "/erp"));
+        assertEquals("no head", EmailEditorController.withBase("no head", "/erp"));
     }
 
     @Test

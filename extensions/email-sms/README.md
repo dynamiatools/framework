@@ -119,6 +119,8 @@ mvn -Dskip.editor -pl extensions/email-sms/sources/ui package
 
 With `-Dskip.editor` the Design action says the editor is not included.
 
+The page is served by `EmailEditorController` at `/dynamia-email/editor?id=7` (`/dynamia-email/editor/index.html` works too).
+
 ### Migrating a template from Velocity
 
 `Migrate to editor` (or `POST /apps/api/email/templates/{id}/migrate?dryRun=false`) converts references, `#if/#elseif/#else`,

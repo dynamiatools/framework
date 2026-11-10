@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 public final class EmailEditorLocation {
 
     /** URL path of the editor page, relative to the application context path. */
-    public static final String PATH = "/dynamia-email/editor/index.html";
+    public static final String PATH = "/dynamia-email/editor";
     private static final String RESOURCE = "/META-INF/resources/dynamia-email/editor/index.html";
 
     private EmailEditorLocation() {
