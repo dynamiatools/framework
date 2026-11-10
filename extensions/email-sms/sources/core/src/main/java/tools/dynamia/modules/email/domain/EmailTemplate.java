@@ -20,6 +20,8 @@ package tools.dynamia.modules.email.domain;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToOne;
@@ -67,6 +69,23 @@ public class EmailTemplate extends SimpleEntitySaaS {
 	private boolean sendSMS;
 	private String smsNumber;
 	private String smsText;
+
+	/** Language of the template; null (every template created before the editor) means Velocity. */
+	@Enumerated(EnumType.STRING)
+	private EmailTemplateEngine engine;
+	/** Whether printed values are HTML-escaped; only templates made in the block editor turn it on. */
+	private Boolean escapeValues;
+	/** The block editor document (JSON); {@link #content} is what it compiles to. */
+	@Lob
+	@Basic(fetch = FetchType.LAZY)
+	private String design;
+	/** Content before the last migration, kept to revert it. */
+	@Lob
+	@Basic(fetch = FetchType.LAZY)
+	private String backupContent;
+	/** Engine before the last migration; null together with {@link #backupContent} when there is no backup. */
+	@Enumerated(EnumType.STRING)
+	private EmailTemplateEngine backupEngine;
 
 	public EmailTemplate getParent() {
 		return parent;
@@ -175,5 +194,68 @@ public class EmailTemplate extends SimpleEntitySaaS {
 
 	public void setReplyTo(String replyTo) {
 		this.replyTo = replyTo;
+	}
+
+	/**
+	 * @return the language of this template, {@link EmailTemplateEngine#VELOCITY} when none was set
+	 */
+	public EmailTemplateEngine getEngine() {
+		return engine == null ? EmailTemplateEngine.VELOCITY : engine;
+	}
+
+	public void setEngine(EmailTemplateEngine engine) {
+		this.engine = engine;
+	}
+
+	/**
+	 * @return true when printed values are HTML-escaped (templates built in the block editor)
+	 */
+	public boolean isEscapeValues() {
+		return escapeValues != null && escapeValues;
+	}
+
+	public void setEscapeValues(boolean escapeValues) {
+		this.escapeValues = escapeValues;
+	}
+
+	public String getDesign() {
+		return design;
+	}
+
+	public void setDesign(String design) {
+		this.design = design;
+	}
+
+	public String getBackupContent() {
+		return backupContent;
+	}
+
+	public void setBackupContent(String backupContent) {
+		this.backupContent = backupContent;
+	}
+
+	/**
+	 * @return the engine before the last migration, null when there is no backup
+	 */
+	public EmailTemplateEngine getBackupEngine() {
+		return backupEngine;
+	}
+
+	public void setBackupEngine(EmailTemplateEngine backupEngine) {
+		this.backupEngine = backupEngine;
+	}
+
+	/**
+	 * @return true when the template uses the Dynamia engine and so can be edited with the block editor
+	 */
+	public boolean isDynamia() {
+		return getEngine() == EmailTemplateEngine.DYNAMIA;
+	}
+
+	/**
+	 * @return true when a migration left a backup that {@code revert} can restore
+	 */
+	public boolean hasBackup() {
+		return backupEngine != null;
 	}
 }
