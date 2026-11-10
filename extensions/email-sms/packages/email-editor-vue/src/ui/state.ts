@@ -20,6 +20,8 @@ export function useEditorState(initial: Design, onChange: (design: Design) => vo
   const version = ref(0);
   const selectedId = ref<string | null>(null);
   const dragging = ref<BlockType | null>(null);
+  /** Puts text where the user last had the cursor in a text field (the variables panel uses it). */
+  const inserter = shallowRef<((text: string) => void) | null>(null);
 
   const canUndo = computed(() => (version.value, history.canUndo));
   const canRedo = computed(() => (version.value, history.canRedo));
@@ -151,6 +153,19 @@ export function useEditorState(initial: Design, onChange: (design: Design) => vo
     onChange(design.value);
   }
 
+  function setInserter(insert: ((text: string) => void) | null): void {
+    inserter.value = insert;
+  }
+
+  /** Inserts text at the last cursor; returns false when there is no field to insert into. */
+  function insertText(text: string): boolean {
+    if (!inserter.value) {
+      return false;
+    }
+    inserter.value(text);
+    return true;
+  }
+
   /** Replaces the whole design (after loading) and forgets the history. */
   function load(next: Design): void {
     history.reset(next);
@@ -161,7 +176,7 @@ export function useEditorState(initial: Design, onChange: (design: Design) => vo
 
   const selected = computed(() => (selectedId.value ? (find(design.value, selectedId.value)?.block ?? null) : null));
 
-  return { design, selectedId, selected, dragging, canUndo, canRedo, select, commitDesign, addBlock, drop, moveTo, moveBy, removeBlock, duplicateBlock, update, updateSettings, undo, redo, load };
+  return { design, selectedId, selected, dragging, canUndo, canRedo, inserter, setInserter, insertText, select, commitDesign, addBlock, drop, moveTo, moveBy, removeBlock, duplicateBlock, update, updateSettings, undo, redo, load };
 }
 
 export type EditorState = ReturnType<typeof useEditorState>;
