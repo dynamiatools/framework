@@ -65,10 +65,12 @@ class EmailTemplateMigratorTest {
 
         var design = new JsonMapper().readTree(t.getDesign());
         assertEquals(1, design.path("version").asInt());
-        var block = design.path("blocks").get(0);
-        assertEquals("html", block.path("type").asString());
-        assertEquals(t.getContent(), block.path("props").path("html").asString());
-        assertTrue(block.path("props").path("fullDocument").asBoolean());
+        var blocks = design.path("blocks");
+        assertEquals("text", blocks.get(0).path("type").asString());
+        assertEquals("<p>Hi ${user.name}</p>", blocks.get(0).path("props").path("html").asString());
+        assertEquals("condition", blocks.get(1).path("type").asString());
+        assertEquals("vip", blocks.get(1).path("props").path("expression").asString());
+        assertEquals("text", blocks.get(1).path("children").get(0).path("type").asString());
 
         var data = Map.<String, Object>of("user", Map.of("name", "Ada"), "vip", true, "invoice", Map.of("number", 7));
         assertEquals("<html><body><p>Hi Ada</p><b>VIP</b></body></html>", new DynamiaTemplateEngine().evaluate(t.getContent(), data));
@@ -160,7 +162,7 @@ class EmailTemplateMigratorTest {
     void revertIsRefusedWhenTheDesignWasEditedUnlessConfirmed() {
         var t = velocityTemplate();
         migrator.migrate(t);
-        t.setDesign(t.getDesign().replace("html-1", "html-2")); // the editor changed the design
+        t.setDesign(t.getDesign().replace("text-1", "text-9")); // the editor changed the design
         t.setContent("<p>edited</p>");
 
         var refused = migrator.revert(t, false);

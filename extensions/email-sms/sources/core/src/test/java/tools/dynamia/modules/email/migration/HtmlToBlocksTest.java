@@ -73,8 +73,9 @@ class HtmlToBlocksTest {
     }
 
     @Test
-    void controlTagsStylesAndHtmlOnlyTemplatesStayOneHtmlBlock() {
-        for (var html : new String[]{"<h1>Hi</h1>{{#each items as i}}<p>${i}</p>{{/each}}", "<style>p{color:red}</style><p>Hi</p>", "<table><tr><td>x</td></tr></table>", ""}) {
+    void whatCannotBeSplitWithoutBreakingItStaysOneHtmlBlock() {
+        for (var html : new String[]{"<h1>Hi</h1>{{#each items as i}}<p>${i}</p>", "<h1>Hi</h1>{{else}}<p>x</p>", "<h1>Hi</h1>{{#if a}}<p>x</p>{{/each}}", "<style>p{color:red}</style><p>Hi</p>",
+                "<html><body style=\"background:#eee\"><p>Hi</p></body></html>", "<table><tr><td>x</td></tr></table>", ""}) {
             var result = HtmlToBlocks.convert(html);
             assertEquals(1, result.blocks(), html);
             assertEquals("html", blocks(result).get(0).path("type").asString(), html);
@@ -135,5 +136,94 @@ class HtmlToBlocksTest {
         assertEquals("html", blocks(HtmlToBlocks.convert("<p>x</p><table><tr><td><b>a</b></td></tr><tr><td>b</td></tr></table>")).get(1).path("type").asString());
         var wide = "<p>x</p><table><tr>" + "<td>c</td>".repeat(9) + "</tr><tr>" + "<td>c</td>".repeat(9) + "</tr></table>";
         assertEquals("html", blocks(HtmlToBlocks.convert(wide)).get(1).path("type").asString());
+    }
+
+    @Test
+    void eachAndIfBecomeRepeatAndConditionBlocksAroundWhatIsBetweenTheirTags() {
+        var result = HtmlToBlocks.convert("<h1>Hi</h1>{{#each order.lines as line}}<h3>${line.name}</h3><p>${line.qty}</p>{{/each}}"
+                + "{{#if vip}}<p>VIP</p>{{else}}<p>Regular</p>{{/if}}<p>Bye</p>");
+        var b = blocks(result);
+
+        assertEquals(4, b.size());
+        var repeat = b.get(1);
+        assertEquals("repeat", repeat.path("type").asString());
+        assertEquals("order.lines", repeat.path("props").path("source").asString());
+        assertEquals("line", repeat.path("props").path("alias").asString());
+        assertEquals(2, repeat.path("children").size());
+        assertEquals("heading", repeat.path("children").get(0).path("type").asString());
+        var condition = b.get(2);
+        assertEquals("condition", condition.path("type").asString());
+        assertEquals("vip", condition.path("props").path("expression").asString());
+        assertEquals("<p>VIP</p>", condition.path("children").get(0).path("props").path("html").asString());
+        assertEquals("<p>Regular</p>", condition.path("elseChildren").get(0).path("props").path("html").asString());
+        assertEquals("text", b.get(3).path("type").asString());
+        assertEquals(0, result.htmlBlocks());
+    }
+
+    @Test
+    void anElseIfIsAConditionInsideTheElse() {
+        var b = blocks(HtmlToBlocks.convert("<p>x</p>{{#if a}}<p>A</p>{{else}}{{#if b}}<p>B</p>{{else}}<p>C</p>{{/if}}{{/if}}"));
+        var outer = b.get(1);
+        assertEquals("a", outer.path("props").path("expression").asString());
+        var inner = outer.path("elseChildren").get(0);
+        assertEquals("condition", inner.path("type").asString());
+        assertEquals("b", inner.path("props").path("expression").asString());
+        assertEquals("<p>C</p>", inner.path("elseChildren").get(0).path("props").path("html").asString());
+    }
+
+    @Test
+    void controlTagsBetweenTheRowsOfATableStayInPlaceInAnHtmlBlock() {
+        var html = "<p>x</p><table><tr><th>Item</th></tr>{{#each lines as l}}<tr><td>${l.name}</td></tr>{{/each}}</table>";
+        var b = blocks(HtmlToBlocks.convert(html));
+        assertEquals("html", b.get(1).path("type").asString());
+        var kept = b.get(1).path("props").path("html").asString();
+        assertTrue(kept.indexOf("{{#each lines as l}}") < kept.indexOf("<td>${l.name}</td>"), kept);
+        assertTrue(kept.indexOf("<td>${l.name}</td>") < kept.indexOf("{{/each}}"), kept);
+        assertTrue(kept.indexOf("{{#each lines as l}}") > kept.indexOf("<th>Item</th>"), "the tag was not moved out of the table: " + kept);
+    }
+
+    @Test
+    void aControlTagInsideAParagraphStaysInItsTextBlock() {
+        var b = blocks(HtmlToBlocks.convert("<p>Hi {{#if vip}}<b>VIP</b>{{/if}}</p><h2>T</h2>"));
+        assertEquals("text", b.get(0).path("type").asString());
+        assertEquals("<p>Hi {{#if vip}}<b>VIP</b>{{/if}}</p>", b.get(0).path("props").path("html").asString());
+    }
+
+    @Test
+    void aBlockquoteBecomesAQuoteWithItsBarColour() {
+        var b = blocks(HtmlToBlocks.convert("<p>x</p><blockquote style=\"border-left:4px solid #ff0000;color:#555555\">Wise words</blockquote><blockquote><p>Plain</p></blockquote>"));
+        assertEquals("quote", b.get(1).path("type").asString());
+        assertEquals("<p>Wise words</p>", b.get(1).path("props").path("html").asString());
+        assertEquals("#ff0000", b.get(1).path("props").path("borderColor").asString());
+        assertEquals("#555555", b.get(1).path("props").path("color").asString());
+        assertEquals("<p>Plain</p>", b.get(2).path("props").path("html").asString());
+    }
+
+    @Test
+    void aLinkStyledAsAButtonBecomesAButtonWhateverItsContainer() {
+        var b = blocks(HtmlToBlocks.convert("<p>x</p><p style=\"text-align:center\"><a href=\"https://x.com/pay\" style=\"background-color:#0a8a3a;color:#fff000;padding:10px 20px;"
+                + "border-radius:6px;font-size:18px;display:block;width:100%\">Pay ${total}</a></p>"
+                + "<a class=\"btn\" href=\"https://x.com/more\">More</a><p>See <a href=\"https://x.com\">our site</a></p>"));
+        var pay = b.get(1);
+
+        assertEquals("button", pay.path("type").asString());
+        assertEquals("Pay ${total}", pay.path("props").path("text").asString());
+        assertEquals("https://x.com/pay", pay.path("props").path("href").asString());
+        assertEquals("#0a8a3a", pay.path("props").path("backgroundColor").asString());
+        assertEquals("#fff000", pay.path("props").path("color").asString());
+        assertEquals(6, pay.path("props").path("borderRadius").asInt());
+        assertEquals(18, pay.path("props").path("fontSize").asInt());
+        assertEquals(true, pay.path("props").path("fullWidth").asBoolean());
+        assertEquals("center", pay.path("props").path("align").asString());
+        assertEquals("button", b.get(2).path("type").asString());
+        assertEquals("More", b.get(2).path("props").path("text").asString());
+        assertEquals("text", b.get(3).path("type").asString(), "an ordinary link stays inside its text");
+    }
+
+    @Test
+    void aDocumentWithAnEmptyHeadAndPlainBodyIsConverted() {
+        var result = HtmlToBlocks.convert("<!DOCTYPE html><html><head><title>t</title><meta charset=\"utf-8\"></head><body><h1>Hi</h1><p>x</p></body></html>");
+        assertEquals(2, result.blocks());
+        assertEquals("heading", blocks(result).get(0).path("type").asString());
     }
 }

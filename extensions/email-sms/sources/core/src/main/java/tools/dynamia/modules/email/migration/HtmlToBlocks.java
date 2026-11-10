@@ -9,16 +9,27 @@ import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Turns the HTML of a migrated template into the blocks of the email editor, doing its best: headings (h1 to h3), paragraphs,
- * images, dividers and simple lists become their own block, and anything else is kept as an HTML block, so the email still
- * looks the same. The whole template stays one HTML block when it has {@code {{#each}}} or {@code {{#if}}} (they would be
- * split across blocks) or a {@code <style>} (it would be lost).
+ * Turns the HTML of a migrated template into the blocks of the email editor, doing its best: headings (h1 to h3),
+ * paragraphs, quotes, buttons, images, dividers, lists and tables become their own block; {@code {{#each}}} and
+ * {@code {{#if}}} become Repeat and Condition blocks around the blocks between their tags; anything else is kept as an
+ * HTML block, so the email still looks the same.
+ *
+ * <p>The whole template stays one HTML block when it cannot be split without breaking it: a {@code <style>}, a document
+ * with attributes on its {@code <body>}, or control tags that do not nest properly.
+ *
+ * <p>The control tags are hidden in HTML comments before the HTML is parsed, because the parser moves text found between the
+ * rows of a table out of the table, and put back when the HTML is written.
  */
 final class HtmlToBlocks {
 
@@ -26,19 +37,62 @@ final class HtmlToBlocks {
     private static final Set<String> INLINE = Set.of("a", "b", "strong", "i", "em", "u", "span", "br", "small", "sup", "sub", "font", "s");
     private static final Pattern ALIGN = Pattern.compile("text-align\\s*:\\s*(left|center|right)", Pattern.CASE_INSENSITIVE);
     private static final Pattern COLOR = Pattern.compile("(?<![-\\w])color\\s*:\\s*(#[0-9a-fA-F]{3,8})", Pattern.CASE_INSENSITIVE);
+    private static final Pattern BACKGROUND = Pattern.compile("background(?:-color)?\\s*:\\s*(#[0-9a-fA-F]{3,8})", Pattern.CASE_INSENSITIVE);
+    private static final Pattern BORDER_LEFT = Pattern.compile("border-left[^;]*?(#[0-9a-fA-F]{3,8})", Pattern.CASE_INSENSITIVE);
+    private static final Pattern RADIUS = Pattern.compile("border-radius\\s*:\\s*(\\d{1,2})px", Pattern.CASE_INSENSITIVE);
+    private static final Pattern FONT_SIZE = Pattern.compile("font-size\\s*:\\s*(\\d{1,2})px", Pattern.CASE_INSENSITIVE);
+    private static final Pattern FULL_WIDTH = Pattern.compile("width\\s*:\\s*100%", Pattern.CASE_INSENSITIVE);
+    private static final Pattern BUTTON_CLASS = Pattern.compile("\\b(btn|button)\\b", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern CONTROL = Pattern.compile("\\{\\{\\s*(?:#each\\s+[^{}]*?|#if\\s+[^{}]*?|else|/each|/if)\\s*\\}\\}");
+    private static final Pattern HIDDEN_CONTROL = Pattern.compile("<!--dyn:(.*?)-->", Pattern.DOTALL);
+    private static final Pattern EACH = Pattern.compile("^\\{\\{\\s*#each\\s+(\\S+)\\s+as\\s+(\\S+?)\\s*\\}\\}$");
+    private static final Pattern IF = Pattern.compile("^\\{\\{\\s*#if\\s+(.+?)\\s*\\}\\}$");
+    private static final Pattern ELSE = Pattern.compile("^\\{\\{\\s*else\\s*\\}\\}$");
+    private static final Pattern END_EACH = Pattern.compile("^\\{\\{\\s*/each\\s*\\}\\}$");
+    private static final Pattern END_IF = Pattern.compile("^\\{\\{\\s*/if\\s*\\}\\}$");
+    private static final Pattern PATH = Pattern.compile("^[A-Za-z_][\\w.]*$");
+    private static final Pattern ALIAS = Pattern.compile("^[A-Za-z_]\\w*$");
+    private static final Pattern CONDITION = Pattern.compile("^[\\w.'\"!=<>&| \\-]+$");
 
     /**
      * @param design     the editor document (JSON)
-     * @param blocks     how many blocks it has
+     * @param blocks     how many content blocks it has
      * @param htmlBlocks how many of them are kept as HTML
      */
     record Result(String design, int blocks, int htmlBlocks) {
     }
 
+    /** The template cannot be turned into blocks without breaking it. */
+    private static final class Unsupported extends RuntimeException {
+        Unsupported() {
+            super(null, null, false, false);
+        }
+    }
+
+    /** An open Repeat or Condition block: what is found next goes inside it. */
+    private static final class Frame {
+        final boolean repeat;
+        final ArrayNode children;
+        final ArrayNode elseChildren;
+        boolean inElse;
+
+        Frame(boolean repeat, ArrayNode children, ArrayNode elseChildren) {
+            this.repeat = repeat;
+            this.children = children;
+            this.elseChildren = elseChildren;
+        }
+
+        ArrayNode current() {
+            return inElse ? elseChildren : children;
+        }
+    }
+
     private final ArrayNode blocks = JSON.createArrayNode();
+    private final Deque<Frame> frames = new ArrayDeque<>();
     /** Shared with the converters of the cells, so block ids are unique in the whole document. */
     private final int[] counter;
-    /** Shared: [0] leaf blocks, [1] of them kept as HTML. */
+    /** Shared: [0] content blocks, [1] of them kept as HTML. */
     private final int[] stats;
     private final StringBuilder pendingHtml = new StringBuilder();
     private final StringBuilder pendingInline = new StringBuilder();
@@ -48,24 +102,39 @@ final class HtmlToBlocks {
         this.stats = stats;
     }
 
+    /**
+     * Converts the HTML of a template into an editor document.
+     *
+     * @param html the HTML, already in the syntax of the new template engine
+     * @return the document and how many of its blocks keep their HTML
+     */
     static Result convert(String html) {
         if (html == null || html.isBlank()) {
             return single(html);
         }
         var lower = html.toLowerCase();
-        if (lower.contains("{{#") || lower.contains("<style")) {
+        if (lower.contains("<style") || lower.contains("<link")) {
             return single(html);
         }
-        var converter = new HtmlToBlocks(new int[1], new int[2]);
-        var document = Jsoup.parseBodyFragment(html);
-        document.outputSettings().prettyPrint(false); // keep the HTML as written, no new line breaks
-        var body = document.body();
-        body.childNodes().forEach(converter::node);
-        converter.flush();
-        if (converter.stats[0] == 0 || converter.stats[0] == converter.stats[1]) {
+        try {
+            var fullDocument = lower.contains("<html") || lower.contains("<body");
+            var hidden = hideControl(html);
+            var document = fullDocument ? Jsoup.parse(hidden) : Jsoup.parseBodyFragment(hidden);
+            document.outputSettings().prettyPrint(false); // keep the HTML as written, no new line breaks
+            var body = document.body();
+            if (fullDocument && !body.attributes().isEmpty()) {
+                return single(html); // its background or font would be lost
+            }
+            var converter = new HtmlToBlocks(new int[1], new int[2]);
+            body.childNodes().forEach(converter::node);
+            converter.finish();
+            if (converter.stats[0] == 0 || converter.stats[0] == converter.stats[1]) {
+                return single(html);
+            }
+            return new Result(converter.document(), converter.stats[0], converter.stats[1]);
+        } catch (Unsupported e) {
             return single(html);
         }
-        return new Result(converter.document(), converter.stats[0], converter.stats[1]);
     }
 
     private static Result single(String html) {
@@ -80,6 +149,41 @@ final class HtmlToBlocks {
         return new Result(JSON.writeValueAsString(root), 1, 1);
     }
 
+    private static String hideControl(String html) {
+        return CONTROL.matcher(html).replaceAll(m -> {
+            if (m.group().contains("--")) {
+                throw new Unsupported(); // it would end the comment
+            }
+            return Matcher.quoteReplacement("<!--dyn:" + m.group() + "-->");
+        });
+    }
+
+    private static String restore(String html) {
+        return HIDDEN_CONTROL.matcher(html).replaceAll(m -> Matcher.quoteReplacement(m.group(1)));
+    }
+
+    private static boolean hasControl(Element e) {
+        return e.outerHtml().contains("<!--dyn:");
+    }
+
+    /** True when the control tags inside the element open and close in it. */
+    private static boolean balanced(Element e) {
+        int depth = 0;
+        var m = HIDDEN_CONTROL.matcher(e.outerHtml());
+        while (m.find()) {
+            var tag = m.group(1);
+            if (EACH.matcher(tag).matches() || IF.matcher(tag).matches()) {
+                depth++;
+            } else if (END_EACH.matcher(tag).matches() || END_IF.matcher(tag).matches()) {
+                depth--;
+            }
+            if (depth < 0) {
+                return false;
+            }
+        }
+        return depth == 0;
+    }
+
     private String document() {
         var root = JSON.createObjectNode();
         root.put("version", 1);
@@ -87,10 +191,24 @@ final class HtmlToBlocks {
         return JSON.writeValueAsString(root);
     }
 
+    private ArrayNode target() {
+        return frames.isEmpty() ? blocks : frames.peek().current();
+    }
+
+    private void finish() {
+        flushHtml();
+        if (!frames.isEmpty()) {
+            throw new Unsupported(); // a {{#each}} or {{#if}} without its end
+        }
+    }
+
     // ------------------------------------------------------------ nodes
 
     private void node(Node node) {
-        if (node instanceof Comment) {
+        if (node instanceof Comment comment) {
+            if (comment.getData().startsWith("dyn:")) {
+                control(comment.getData().substring(4));
+            }
             return;
         }
         if (node instanceof TextNode text) {
@@ -103,7 +221,15 @@ final class HtmlToBlocks {
         if (!(node instanceof Element e)) {
             return;
         }
+        if (hasControl(e) && !balanced(e)) {
+            throw new Unsupported();
+        }
         var tag = e.normalName();
+        if ("a".equals(tag) && !hasControl(e) && isButton(e)) {
+            flushInline();
+            button(e, null);
+            return;
+        }
         if (INLINE.contains(tag)) {
             if (!"br".equals(tag) || pendingInline.length() > 0) {
                 emitHtml();
@@ -115,6 +241,7 @@ final class HtmlToBlocks {
         switch (tag) {
             case "h1", "h2", "h3" -> heading(e);
             case "p" -> paragraph(e);
+            case "blockquote" -> quote(e);
             case "img" -> image(e, null);
             case "hr" -> add("divider", props -> {
             });
@@ -131,8 +258,57 @@ final class HtmlToBlocks {
         }
     }
 
+    // ------------------------------------------------------------ control tags
+
+    private void control(String tag) {
+        flushHtml();
+        Matcher m;
+        if ((m = EACH.matcher(tag)).matches()) {
+            if (!PATH.matcher(m.group(1)).matches() || !ALIAS.matcher(m.group(2)).matches()) {
+                throw new Unsupported();
+            }
+            var source = m.group(1);
+            var alias = m.group(2);
+            open(true, props -> {
+                props.put("source", source);
+                props.put("alias", alias);
+            });
+        } else if ((m = IF.matcher(tag)).matches()) {
+            if (!CONDITION.matcher(m.group(1)).matches()) {
+                throw new Unsupported();
+            }
+            var expression = m.group(1);
+            open(false, props -> props.put("expression", expression));
+        } else if (ELSE.matcher(tag).matches()) {
+            if (frames.isEmpty() || frames.peek().repeat || frames.peek().inElse) {
+                throw new Unsupported();
+            }
+            frames.peek().inElse = true;
+        } else if (END_EACH.matcher(tag).matches() || END_IF.matcher(tag).matches()) {
+            var each = END_EACH.matcher(tag).matches();
+            if (frames.isEmpty() || frames.peek().repeat != each) {
+                throw new Unsupported();
+            }
+            frames.pop();
+        } else {
+            throw new Unsupported();
+        }
+    }
+
+    private void open(boolean repeat, Consumer<ObjectNode> fill) {
+        var type = repeat ? "repeat" : "condition";
+        var block = target().addObject();
+        block.put("id", type + "-" + (++counter[0]));
+        block.put("type", type);
+        fill.accept(block.putObject("props"));
+        var children = block.putArray("children");
+        frames.push(new Frame(repeat, children, repeat ? null : block.putArray("elseChildren")));
+    }
+
+    // ------------------------------------------------------------ blocks
+
     private void heading(Element e) {
-        if (!e.children().isEmpty()) {
+        if (!e.children().isEmpty() || hasControl(e)) {
             html(e); // formatting inside would be lost in a plain-text heading
             return;
         }
@@ -144,7 +320,7 @@ final class HtmlToBlocks {
     }
 
     private void paragraph(Element e) {
-        var single = e.children().size() == 1 && e.ownText().isBlank() ? e.child(0) : null;
+        var single = !hasControl(e) && e.children().size() == 1 && e.ownText().isBlank() ? e.child(0) : null;
         if (single != null && "img".equals(single.normalName())) {
             image(single, null);
             return;
@@ -154,9 +330,62 @@ final class HtmlToBlocks {
             image(single.child(0), single.attr("href"));
             return;
         }
+        if (single != null && "a".equals(single.normalName()) && isButton(single)) {
+            button(single, e);
+            return;
+        }
         add("text", props -> {
-            props.put("html", "<p>" + e.html() + "</p>");
+            props.put("html", restore("<p>" + e.html() + "</p>"));
             style(e, props);
+        });
+    }
+
+    private void quote(Element e) {
+        if (hasControl(e)) {
+            html(e);
+            return;
+        }
+        var inner = e.html();
+        var wrapped = e.children().stream().anyMatch(c -> "p".equals(c.normalName())) ? inner : "<p>" + inner + "</p>";
+        add("quote", props -> {
+            props.put("html", wrapped);
+            var bar = BORDER_LEFT.matcher(e.attr("style"));
+            if (bar.find()) {
+                props.put("borderColor", bar.group(1));
+            }
+            style(e, props);
+        });
+    }
+
+    /** A link styled as a button: a background colour and padding or display, or a {@code btn}/{@code button} class. */
+    private static boolean isButton(Element a) {
+        if (a.attr("href").isBlank() || a.text().isBlank() || !a.children().isEmpty()) {
+            return false;
+        }
+        var style = a.attr("style").toLowerCase();
+        return BUTTON_CLASS.matcher(a.className()).find() || BACKGROUND.matcher(style).find() && (style.contains("padding") || style.contains("display"));
+    }
+
+    private void button(Element a, Element container) {
+        var style = a.attr("style");
+        add("button", props -> {
+            props.put("text", a.text());
+            props.put("href", a.attr("href"));
+            var background = BACKGROUND.matcher(style);
+            props.put("backgroundColor", background.find() ? background.group(1) : "#1a73e8");
+            var color = COLOR.matcher(style);
+            props.put("color", color.find() ? color.group(1) : "#ffffff");
+            var radius = RADIUS.matcher(style);
+            if (radius.find()) {
+                props.put("borderRadius", Integer.parseInt(radius.group(1)));
+            }
+            var size = FONT_SIZE.matcher(style);
+            if (size.find()) {
+                props.put("fontSize", Integer.parseInt(size.group(1)));
+            }
+            props.put("fullWidth", FULL_WIDTH.matcher(style).find());
+            props.put("align", "left");
+            style(container != null ? container : a, props);
         });
     }
 
@@ -180,6 +409,10 @@ final class HtmlToBlocks {
     }
 
     private void list(Element e) {
+        if (hasControl(e)) {
+            html(e);
+            return;
+        }
         var items = new ArrayList<String>();
         for (var li : e.children()) {
             if (!"li".equals(li.normalName()) || !li.children().isEmpty() || li.text().isBlank()) {
@@ -201,9 +434,14 @@ final class HtmlToBlocks {
 
     /**
      * A table of one row with two or more cells is a layout in columns: each cell becomes a column, with its content
-     * converted by the same rules. Any other table (several rows, one cell, tables inside) stays an HTML block.
+     * converted by the same rules. A table of several rows of plain text cells is a Table block. Any other table (spans,
+     * formatting in the cells, tables inside, control tags between its rows) stays an HTML block.
      */
     private void table(Element table) {
+        if (hasControl(table)) {
+            html(table);
+            return;
+        }
         var cells = columnCells(table);
         if (cells == null) {
             var rows = dataRows(table);
@@ -223,7 +461,7 @@ final class HtmlToBlocks {
             return;
         }
         flushHtml();
-        var columns = blocks.addObject();
+        var columns = target().addObject();
         columns.put("id", "columns-" + (++counter[0]));
         columns.put("type", "columns");
         var props = columns.putObject("props");
@@ -238,7 +476,7 @@ final class HtmlToBlocks {
             column.putObject("props").put("width", widths[i]);
             var inner = new HtmlToBlocks(counter, stats);
             cells.get(i).childNodes().forEach(inner::node);
-            inner.flushHtml();
+            inner.finish();
             column.set("children", inner.blocks);
         }
     }
@@ -289,7 +527,7 @@ final class HtmlToBlocks {
             }
         }
         if (!declared) {
-            java.util.Arrays.fill(widths, Math.max(5, 100 / widths.length));
+            Arrays.fill(widths, Math.max(5, 100 / widths.length));
         }
         return widths;
     }
@@ -315,9 +553,9 @@ final class HtmlToBlocks {
         }
     }
 
-    private void add(String type, java.util.function.Consumer<ObjectNode> fill) {
+    private void add(String type, Consumer<ObjectNode> fill) {
         flushHtml();
-        var block = blocks.addObject();
+        var block = target().addObject();
         stats[0]++;
         block.put("id", type + "-" + (++counter[0]));
         block.put("type", type);
@@ -328,7 +566,7 @@ final class HtmlToBlocks {
         if (pendingInline.length() == 0) {
             return;
         }
-        var html = "<p>" + pendingInline.toString().trim() + "</p>";
+        var html = restore("<p>" + pendingInline.toString().trim() + "</p>");
         pendingInline.setLength(0);
         add("text", props -> props.put("html", html));
     }
@@ -342,19 +580,15 @@ final class HtmlToBlocks {
         if (pendingHtml.length() == 0) {
             return;
         }
-        var html = pendingHtml.toString();
+        var html = restore(pendingHtml.toString());
         pendingHtml.setLength(0);
-        var block = blocks.addObject();
+        var block = target().addObject();
+        stats[0]++;
+        stats[1]++;
         block.put("id", "html-" + (++counter[0]));
         block.put("type", "html");
         var props = block.putObject("props");
         props.put("html", html);
         props.put("fullDocument", false);
-        stats[0]++;
-        stats[1]++;
-    }
-
-    private void flush() {
-        flushHtml();
     }
 }

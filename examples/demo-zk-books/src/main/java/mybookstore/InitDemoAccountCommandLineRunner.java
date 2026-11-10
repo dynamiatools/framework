@@ -81,6 +81,9 @@ public class InitDemoAccountCommandLineRunner implements CommandLineRunner {
                 + "<ul><li>Clean Code</li><li>Dune</li></ul>"
                 + "<table><tr><th>Book</th><th>Price</th></tr><tr><td>Clean Code</td><td>$75</td></tr><tr><td>Dune</td><td>$50</td></tr></table>"
                 + "<table><tr><td>Need help?</td><td>support@mybookstore.test</td></tr></table>"
+                + "#if($customer.vip)<blockquote style=\"border-left:4px solid #1a73e8\">As a VIP you get free shipping.</blockquote>#end"
+                + "<p style=\"text-align:center\"><a href=\"https://mybookstore.test/pay\" style=\"background-color:#1a73e8;color:#ffffff;padding:10px 20px;border-radius:4px\">Pay invoice $invoice.number</a></p>"
+                + "<h3>Details</h3>#foreach($line in $invoice.details)<p>$line.quantity x $line.book</p>#end"
                 + "<p>See you soon!</p>");
         crudService.save(invoiceEmail);
     }
