@@ -31,6 +31,11 @@ import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.domain.query.ApplicationParameters;
 import tools.dynamia.domain.query.QueryConditions;
+import tools.dynamia.modules.saas.domain.AccountProfile;
+import tools.dynamia.modules.saas.domain.AccountProfileRestriction;
+import tools.dynamia.modules.saas.domain.enums.AccessControl;
+import tools.dynamia.navigation.Module;
+import tools.dynamia.navigation.ModuleContainer;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.services.CrudService;
 import tools.dynamia.domain.util.QueryBuilder;
@@ -60,6 +65,9 @@ import java.util.*;
 @Service
 @CacheConfig(cacheNames = AccountConfig.CACHE_NAME)
 public class AccountServiceImpl implements AccountService, ApplicationListener<ContextRefreshedEvent>, Serializable {
+
+    public static final String DEFAULT_PROFILE_NAME = "DEFAULT";
+    static final String SAAS_MODULE_ID = "saas";
 
     private final LoggingService logger = new SLF4JLoggingService(AccountService.class);
 
@@ -234,6 +242,49 @@ public class AccountServiceImpl implements AccountService, ApplicationListener<C
     public void onApplicationEvent(ContextRefreshedEvent evt) {
         logger.info("Context Refreshed.. initializing Accounts");
         initAccount();
+        try {
+            checkDefaultProfile();
+        } catch (Exception e) {
+            logger.error("Cannot check the " + DEFAULT_PROFILE_NAME + " account profile: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public AccountProfile checkDefaultProfile() {
+        var result = new AccountProfile[1];
+        crudService.executeWithinTransaction(() -> {
+            var profile = crudService.findSingle(AccountProfile.class, "name", QueryConditions.eq(DEFAULT_PROFILE_NAME));
+            if (profile == null) {
+                profile = new AccountProfile();
+                profile.setName(DEFAULT_PROFILE_NAME);
+                profile.setDescription("Access to all the registered modules, except SaaS");
+            }
+            var changed = addMissingModules(profile, ModuleContainer.getInstance().getModules());
+            result[0] = changed || profile.getId() == null ? crudService.save(profile) : profile;
+        });
+        return result[0];
+    }
+
+    /**
+     * Adds to the profile an access restriction for each module that has none: allowed, except the SaaS module which is
+     * denied. Restrictions that already exist are never changed, so what an administrator decided is kept.
+     *
+     * @return true if the profile changed
+     */
+    static boolean addMissingModules(AccountProfile profile, java.util.Collection<Module> modules) {
+        var changed = false;
+        for (var module : modules) {
+            var exists = profile.getRestrictions().stream().anyMatch(r -> module.getId().equalsIgnoreCase(r.getValue()));
+            if (exists) {
+                continue;
+            }
+            var restriction = new AccountProfileRestriction(module.getName(), "ACCESS", module.getId());
+            restriction.setAccessControl(SAAS_MODULE_ID.equals(module.getId()) ? AccessControl.DENIED : AccessControl.ALLOWED);
+            restriction.setProfile(profile);
+            profile.getRestrictions().add(restriction);
+            changed = true;
+        }
+        return changed;
     }
 
     @Override
