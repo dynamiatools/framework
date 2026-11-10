@@ -14,3 +14,6 @@ export { FIELDS, SETTINGS_FIELDS, type Field, type FieldKind } from './ui/fields
 export { default as RichText } from './ui/RichText.vue';
 export { default as VariablesPanel } from './ui/VariablesPanel.vue';
 export { sampleData, type TemplateVariable } from './ui/variables.js';
+export { default as EmailTemplateEditor } from './ui/EmailTemplateEditor.vue';
+export { default as PreviewPane } from './ui/PreviewPane.vue';
+export * from './api.js';
