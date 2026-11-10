@@ -17,3 +17,5 @@ export { sampleData, type TemplateVariable } from './ui/variables.js';
 export { default as EmailTemplateEditor } from './ui/EmailTemplateEditor.vue';
 export { default as PreviewPane } from './ui/PreviewPane.vue';
 export * from './api.js';
+export { mountEmailEditor, registerEmailEditorElement, DynamiaEmailEditorElement, type MountOptions, type MountedEditor } from './element.js';
+export { createDemoApi, sampleDesign } from './demo.js';

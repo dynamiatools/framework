@@ -14,6 +14,7 @@ const html = ref('');
 const subject = ref('');
 const notes = ref<string[]>([]);
 const loading = ref(true);
+const renderId = ref(0);
 const failure = ref('');
 const dataText = ref('');
 const dataError = ref('');
@@ -51,6 +52,7 @@ async function render(): Promise<void> {
   } catch (error) {
     failure.value = error instanceof Error ? error.message : String(error);
   } finally {
+    renderId.value++;
     loading.value = false;
   }
 }
@@ -79,8 +81,8 @@ watch(() => [props.design, dataText.value], render, { immediate: true });
       <p v-if="failure" class="error" role="alert">{{ failure }}</p>
       <div class="stage">
         <p v-if="loading" role="status">{{ t('loading') }}</p>
-        <!-- no allow-scripts: the email is shown, never run -->
-        <iframe v-show="!loading" :title="t('preview')" sandbox="" :srcdoc="html" :style="{ width: `${width}px` }" data-frame />
+        <!-- no allow-scripts: the email is shown, never run. A new frame per render: Chrome does not repaint a hidden frame whose srcdoc changes -->
+        <iframe v-if="!loading" :key="renderId" :title="t('preview')" sandbox="" :srcdoc="html" :style="{ width: `${width}px` }" data-frame />
       </div>
     </div>
   </div>
