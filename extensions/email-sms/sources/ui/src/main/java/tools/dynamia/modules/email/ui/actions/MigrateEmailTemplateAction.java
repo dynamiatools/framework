@@ -1,7 +1,9 @@
 package tools.dynamia.modules.email.ui.actions;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.crud.CrudState;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
  * that cannot be migrated automatically is left untouched and the reasons are shown.
  */
 @InstallAction
+@RunsOn(ActionRuntime.HEADLESS)
 public class MigrateEmailTemplateAction extends AbstractCrudAction {
 
     @Autowired

@@ -1,7 +1,9 @@
 package tools.dynamia.modules.email.ui.actions;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import tools.dynamia.actions.ActionRuntime;
 import tools.dynamia.actions.InstallAction;
+import tools.dynamia.actions.RunsOn;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
 import tools.dynamia.crud.CrudState;
@@ -16,6 +18,7 @@ import tools.dynamia.ui.UIMessages;
  * user is asked again, because reverting loses those edits.
  */
 @InstallAction
+@RunsOn(ActionRuntime.HEADLESS)
 public class RevertEmailTemplateAction extends AbstractCrudAction {
 
     @Autowired
