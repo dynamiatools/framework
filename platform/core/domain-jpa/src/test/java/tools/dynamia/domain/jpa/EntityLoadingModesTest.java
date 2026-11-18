@@ -180,4 +180,22 @@ public class EntityLoadingModesTest {
     public void loadOfMissingIdReturnsNull() {
         assertNull(crudService.load(MapperItem.class, Long.MAX_VALUE));
     }
+
+    @Test
+    public void reloadOfABeanMapRowLoadsTheEntity() {
+        BeanMap row = (BeanMap) findRows(byName("alpha").mapWith(new BeanMapEntityMapper("name"))).getFirst();
+
+        Object entity = crudService.reload((Object) row);
+
+        MapperItem item = assertInstanceOf(MapperItem.class, entity);
+        assertEquals("alpha", item.getName());
+    }
+
+    @Test
+    public void reloadOfABeanMapWithoutIdKeepsTheRow() {
+        BeanMap row = new BeanMap();
+        row.setBeanClass(MapperItem.class);
+
+        assertSame(row, crudService.reload((Object) row));
+    }
 }

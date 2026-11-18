@@ -23,20 +23,19 @@ import tools.dynamia.integration.sterotypes.Listener;
 import tools.dynamia.modules.email.domain.EmailAccount;
 import tools.dynamia.modules.email.domain.EmailTemplate;
 import tools.dynamia.modules.email.services.SMSService;
-import tools.dynamia.templates.TemplateEngine;
 
 @Listener
 public class AutoSendSMSFromEmailServiceListener extends EmailServiceListenerAdapter {
 
 
     private final SMSService smsService;
-    private final TemplateEngine templateEngine;
+    private final EmailTemplateRenderer renderer;
 
     private LoggingService logger = new SLF4JLoggingService(AutoSendSMSFromEmailServiceListener.class);
 
-    public AutoSendSMSFromEmailServiceListener(SMSService smsService, TemplateEngine templateEngine) {
+    public AutoSendSMSFromEmailServiceListener(SMSService smsService, EmailTemplateRenderer renderer) {
         this.smsService = smsService;
-        this.templateEngine = templateEngine;
+        this.renderer = renderer;
     }
 
     @Override
@@ -48,8 +47,8 @@ public class AutoSendSMSFromEmailServiceListener extends EmailServiceListenerAda
             EmailAccount account = message.getMailAccount();
 
             SMSMessage sms = new SMSMessage();
-            sms.setPhoneNumber(parse(message, template.getSmsNumber()));
-            sms.setText(parse(message, template.getSmsText()));
+            sms.setPhoneNumber(parse(message, template, template.getSmsNumber()));
+            sms.setText(parse(message, template, template.getSmsText()));
             sms.setCredentials(account.getSmsUsername(), account.getSmsPassword(), account.getSmsRegion());
             sms.setSenderID(account.getSmsSenderID());
             sms.setAccountId(account.getAccountId());
@@ -70,7 +69,7 @@ public class AutoSendSMSFromEmailServiceListener extends EmailServiceListenerAda
         }
     }
 
-    private String parse(EmailMessage message, String text) {
-        return templateEngine.evaluate(text, message.getTemplateModel());
+    private String parse(EmailMessage message, EmailTemplate template, String text) {
+        return renderer.render(template, text, message.getTemplateModel());
     }
 }

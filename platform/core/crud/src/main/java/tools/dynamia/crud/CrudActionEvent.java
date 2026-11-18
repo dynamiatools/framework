@@ -17,6 +17,12 @@
 package tools.dynamia.crud;
 
 import tools.dynamia.actions.ActionEvent;
+import tools.dynamia.commons.BeanMap;
+import tools.dynamia.domain.ValidationError;
+import tools.dynamia.domain.services.CrudService;
+import tools.dynamia.integration.Containers;
+
+import java.io.Serializable;
 
 import java.util.Map;
 
@@ -50,4 +56,44 @@ public class CrudActionEvent extends ActionEvent {
         return controller;
     }
 
+
+    /**
+     * Same as {@link ActionEvent#getData(Class)}, and if the data is still a read-only {@link BeanMap} of that type
+     * (Open Persistence In View disabled) the entity is loaded by id with the application {@link CrudService}.
+     *
+     * @param type the expected type
+     * @param <T>  the expected type
+     * @return the data, or {@code null} if there is none or it is not a {@code type}
+     */
+    @Override
+    public <T> T getData(Class<T> type) {
+        if (super.getData() instanceof BeanMap row && row.isBeanOf(type) && row.isLoadable()) {
+            CrudService crudService = Containers.get().findObject(CrudService.class);
+            if (crudService != null) {
+                setData(crudService.load(row.getBeanClass(), (Serializable) row.getId()));
+            }
+        }
+        return super.getData(type);
+    }
+
+    /**
+     * Returns the data typed like {@link #getData(Class)}, or fails when there is none.
+     *
+     * <pre>{@code
+     * Venta venta = evt.requireData(Venta.class, "Seleccione venta");
+     * }</pre>
+     *
+     * @param type    the expected type
+     * @param message the message of the {@link ValidationError} to throw, shown to the user as is
+     * @param <T>     the expected type
+     * @return the data, never {@code null}
+     * @throws ValidationError if there is no data of that type
+     */
+    public <T> T requireData(Class<T> type, String message) {
+        T data = getData(type);
+        if (data == null) {
+            throw new ValidationError(message);
+        }
+        return data;
+    }
 }

@@ -115,7 +115,8 @@ public class AccountMigrationServiceImpl implements AccountMigrationService {
                     .targetAccountId(target)
                     .chunkSize(options.getChunkSize())
                     .identityStrategy(options.getIdentityStrategy())
-                    .failOnEntityError(options.isFailOnEntityError());
+                    .failOnEntityError(options.isFailOnEntityError())
+                    .skipOrphans(options.isSkipOrphans());
 
             try (InputStream in = new BufferedInputStream(Files.newInputStream(tempFile))) {
                 importPipeline.importTenant(in, importOptions, listener, token);

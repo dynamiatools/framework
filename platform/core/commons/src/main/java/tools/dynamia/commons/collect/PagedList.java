@@ -141,5 +141,29 @@ public class PagedList<T> extends AbstractList<T> {
         dataSource.getPageData().add(index, element);
     }
 
-}
 
+    /**
+     * Returns the rows of a list as a plain list: the data of the current page when the value is a
+     * {@link PagedList} (without loading the other pages), the same list when it is any other {@link java.util.List},
+     * a copy when it is another collection, and an empty list for {@code null} or any other object.
+     *
+     * <pre>{@code
+     * for (Object row : PagedList.pageData(table.getValue())) { ... }
+     * }</pre>
+     *
+     * @param value a list, a PagedList, a collection or {@code null}
+     * @return the rows, never {@code null}
+     */
+    public static java.util.List<?> pageData(Object value) {
+        if (value instanceof PagedList<?> paged) {
+            return paged.getDataSource().getPageData();
+        }
+        if (value instanceof java.util.List<?> list) {
+            return list;
+        }
+        if (value instanceof java.util.Collection<?> collection) {
+            return new java.util.ArrayList<>(collection);
+        }
+        return java.util.List.of();
+    }
+}

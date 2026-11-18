@@ -1,0 +1,292 @@
+import { DynamiaTemplateEngine } from '@dynamia-tools/template-engine';
+import { describe, expect, it } from 'vitest';
+import { tableRows } from '../src/compiler/mjml.js';
+import { attr, bodyOf, compile, createBlock, emptyDesign, insert, parseDesign, safeUrl, toMjml, type Block, type Design } from '../src/index.js';
+
+const root = (index: number) => ({ parentId: null, slot: 'children', index }) as const;
+
+function design(...blocks: Block[]): Design {
+  return blocks.reduce((d, b, i) => insert(d, root(i), b), emptyDesign());
+}
+
+describe('heading, quote and list blocks', () => {
+  it('draws the heading with its tag and a size by level, and an explicit size wins', () => {
+    const h1 = toMjml(design(createBlock('heading', { text: 'Hola ${name}', level: 'h1' }))).mjml;
+    expect(h1).toContain('font-size="32px"');
+    expect(h1).toContain('<h1 style="margin:0;font-size:inherit;line-height:inherit;font-weight:inherit">Hola ${name}</h1>');
+    expect(toMjml(design(createBlock('heading', { level: 'h3' }))).mjml).toContain('font-size="20px"');
+    expect(toMjml(design(createBlock('heading', { level: 'h2', fontSize: 40 }))).mjml).toContain('font-size="40px"');
+    expect(toMjml(design(createBlock('heading', { level: 'script' }))).mjml).toContain('<h2 ');
+  });
+
+  it('escapes the text of a heading and of the list items', () => {
+    const mjml = toMjml(design(createBlock('heading', { text: '<script>x</script>' }), createBlock('list', { items: 'a & b\n\n  <b>c</b>  ' }))).mjml;
+    expect(mjml).not.toContain('<script>');
+    expect(mjml).toContain('<li style="margin:0 0 4px">a &amp; b</li><li style="margin:0 0 4px">&lt;b&gt;c&lt;/b&gt;</li>');
+  });
+
+  it('draws a numbered list and a quote with a bar of the given colour', () => {
+    expect(toMjml(design(createBlock('list', { ordered: true }))).mjml).toContain('<ol style="margin:0;padding-left:24px">');
+    expect(toMjml(design(createBlock('list', { ordered: false }))).mjml).toContain('<ul ');
+    const quote = toMjml(design(createBlock('quote', { html: '<p>Hi</p>', borderColor: '#ff0000' }))).mjml;
+    expect(quote).toContain('border-left:4px solid #ff0000');
+    expect(quote).toContain('<p>Hi</p>');
+    expect(toMjml(design(createBlock('quote', { borderColor: 'red;x' }))).mjml).toContain('border-left:4px solid #1a73e8');
+  });
+
+  it('compiles to a valid email with the new blocks', async () => {
+    const { html, errors } = await compile(design(createBlock('heading', { text: 'Title' }), createBlock('list', {}), createBlock('quote', {})));
+    expect(errors).toEqual([]);
+    expect(html).toContain('<h2 ');
+    expect(html).not.toMatch(/<tbody>\s*<(h2|ul|blockquote)/);
+  });
+});
+
+describe('table block', () => {
+  const table = (props: Record<string, unknown>) => toMjml(design(createBlock('table', props))).mjml;
+
+  it('draws the header row with th cells and escapes the cells', () => {
+    const mjml = table({ rows: [['Item', 'Price'], ['<b>x</b> & ${name}', '10']], header: true });
+    expect(mjml).toContain('<mj-table width="100%"');
+    expect(mjml).toContain('<th style="padding:8px 10px;border-bottom:1px solid #dddddd;text-align:left;background:#f1f3f4;font-weight:bold">Item</th>');
+    expect(mjml).toContain('&lt;b&gt;x&lt;/b&gt; &amp; ${name}</td>');
+    expect(table({ rows: [['a'], ['b']], header: false })).not.toContain('<th ');
+  });
+
+  it('repeats the chosen row with each, only when the list and the name are valid', () => {
+    const rows = [['Item'], ['${line.name}']];
+    expect(table({ rows, repeatRow: 2, source: 'order.lines', alias: 'line' })).toContain('{{#each order.lines as line}}<tr><td');
+    expect(table({ rows, repeatRow: 2, source: 'order.lines', alias: 'line' })).toContain('</tr>{{/each}}</mj-table>');
+    expect(table({ rows, repeatRow: 0 })).not.toContain('{{#each');
+    expect(table({ rows, repeatRow: 2, source: 'a b', alias: 'line' })).not.toContain('{{#each');
+  });
+
+  it('limits and squares the cells, and ignores an empty table', () => {
+    expect(tableRows([['a', 'b'], ['c']])).toEqual([['a', 'b'], ['c', '']]);
+    expect(tableRows('x')).toEqual([]);
+    expect(tableRows(Array.from({ length: 80 }, () => Array.from({ length: 12 }, () => 'x')))).toHaveLength(50);
+    expect(tableRows([Array.from({ length: 12 }, () => 'x')])[0]).toHaveLength(8);
+    expect(table({ rows: [] })).not.toContain('mj-table');
+  });
+
+  it('compiles to a real table', async () => {
+    const { html, errors } = await compile(design(createBlock('table', { rows: [['H1', 'H2'], ['a', 'b']], header: true })));
+    expect(errors).toEqual([]);
+    expect(html).toMatch(/<th[^>]*>H1<\/th>/);
+    expect(html).toMatch(/<td[^>]*>b<\/td>/);
+  });
+});
+
+describe('toMjml', () => {
+  it('puts the HTML block inside a text cell, so the browser does not move it out of the table', async () => {
+    const block = createBlock('html', { html: '<h1>Hi ${name}</h1>' });
+    const { html } = await compile(design(block));
+    expect(html).not.toMatch(/<tbody>\s*<h1>/);
+    expect(html).toMatch(/<td[^>]*>\s*<div[^>]*>\s*<h1>Hi \$\{name\}<\/h1>/);
+  });
+
+  it('wraps loose blocks in one section and column, and keeps their order', () => {
+    const { mjml } = toMjml(design(createBlock('header', { title: 'Hola' }), createBlock('text', { html: '<p>Hi ${name}</p>' }), createBlock('button', { text: 'Pay', href: 'https://x.com/pay' })));
+    expect(mjml.match(/<mj-section/g)).toHaveLength(1);
+    expect(mjml).toContain('<mj-text align="center" font-size="24px"');
+    expect(mjml).toContain('<p>Hi ${name}</p>');
+    expect(mjml.indexOf('Hola')).toBeLessThan(mjml.indexOf('Hi ${name}'));
+    expect(mjml.indexOf('Hi ${name}')).toBeLessThan(mjml.indexOf('Pay'));
+    expect(mjml).toContain('<mj-body width="600px" background-color="#f4f4f4">');
+  });
+
+  it('draws columns with their widths and can keep them together on mobile', () => {
+    const columns = createBlock('columns', {}, 3);
+    const stacked = toMjml(design(columns)).mjml;
+    expect(stacked).toContain('<mj-column width="33%">');
+    expect(stacked).not.toContain('<mj-group>');
+    const together = toMjml(design(createBlock('columns', { stackOnMobile: false }))).mjml;
+    expect(together).toContain('<mj-group>');
+  });
+
+  it('hides blocks per device with a css class', () => {
+    const { mjml } = toMjml(design(createBlock('text', { hideOn: 'mobile' }), createBlock('spacer', { hideOn: 'desktop' })));
+    expect(mjml).toContain('css-class="hide-mobile"');
+    expect(mjml).toContain('css-class="hide-desktop"');
+    expect(mjml).toContain('.hide-mobile');
+  });
+
+  it('writes repeat and condition as engine tags around sections', () => {
+    const repeat = createBlock('repeat', { source: 'order.lines', alias: 'line' });
+    repeat.children = [createBlock('text', { html: '<p>${line.name}</p>' })];
+    const condition = createBlock('condition', { expression: "vip && total > 100" });
+    condition.children = [createBlock('text', { html: 'VIP' })];
+    condition.elseChildren = [createBlock('text', { html: 'Regular' })];
+    const { mjml, warnings } = toMjml(design(repeat, condition));
+    expect(warnings).toEqual([]);
+    expect(mjml).toContain('<mj-raw>{{#each order.lines as line}}</mj-raw><mj-section');
+    expect(mjml).toContain('</mj-section><mj-raw>{{/each}}</mj-raw>');
+    expect(mjml).toContain('<mj-raw>{{#if vip && total > 100}}</mj-raw>');
+    expect(mjml).toContain('<mj-raw>{{else}}</mj-raw>');
+    expect(mjml).toContain('<mj-raw>{{/if}}</mj-raw>');
+  });
+
+  it('allows repeat and condition inside a column', () => {
+    const columns = createBlock('columns');
+    const repeat = createBlock('repeat');
+    repeat.children = [createBlock('text')];
+    columns.children![0]!.children = [repeat];
+    const { mjml } = toMjml(design(columns));
+    expect(mjml).toMatch(/<mj-column width="50%"><mj-raw>\{\{#each items as item\}\}<\/mj-raw><mj-text/);
+  });
+
+  it('skips repeats and conditions that could inject tags', () => {
+    for (const props of [{ source: 'a}} <script>', alias: 'x' }, { source: 'items', alias: 'a b' }, { source: '', alias: 'x' }]) {
+      const repeat = createBlock('repeat', props);
+      repeat.children = [createBlock('text', { html: 'INSIDE' })];
+      const out = toMjml(design(repeat));
+      expect(out.mjml).not.toContain('INSIDE');
+      expect(out.mjml).not.toContain('<script>');
+      expect(out.warnings).toHaveLength(1);
+    }
+    const condition = createBlock('condition', { expression: 'a}}<img onerror=x>{{#if b' });
+    condition.children = [createBlock('text', { html: 'INSIDE' })];
+    const out = toMjml(design(condition));
+    expect(out.mjml).not.toContain('INSIDE');
+    expect(out.warnings).toHaveLength(1);
+  });
+
+  it('validates attributes: colours, paddings, alignment, numbers and links', () => {
+    const { mjml } = toMjml(
+      design(
+        createBlock('button', { href: 'javascript:alert(1)', backgroundColor: 'red;} body{display:none', color: '#fff', padding: '1px"><script>', align: 'evil', borderRadius: 9999, fontSize: 'x' }),
+        createBlock('image', { src: 'data:image/png;base64,AAAA', alt: 'a"b' }),
+        createBlock('image', { src: 'https://x.com/a.png?x=1&y="2"', alt: 'a"b<', href: ' JaVaScRiPt:alert(1)' }),
+      ),
+    );
+    expect(mjml).toContain('href="#"');
+    expect(mjml).toContain('background-color="#1a73e8"');
+    expect(mjml).toContain('padding="10px 24px"');
+    expect(mjml).toContain('align="left"');
+    expect(mjml).toContain('border-radius="60px"');
+    expect(mjml).toContain('font-size="16px"');
+    expect(mjml).not.toContain('script');
+    expect(mjml).not.toContain('javascript');
+    expect(mjml).not.toContain('data:image');
+    expect(mjml).toContain('src="https://x.com/a.png?x=1&amp;y=&quot;2&quot;"');
+    expect(mjml).toContain('alt="a&quot;b&lt;"');
+  });
+
+  it('skips an image without a source and says so', () => {
+    const out = toMjml(design(createBlock('image')));
+    expect(out.mjml).not.toContain('<mj-image');
+    expect(out.warnings[0]).toMatch(/no source/);
+  });
+
+  it('keeps variables with pipes and filters in text and attributes', () => {
+    const { mjml } = toMjml(design(createBlock('text', { html: '<p>{{ total | currency:0 }} ${user.name|upper}</p>' }), createBlock('button', { href: '{{ order.url }}', text: 'Pay {{n}}' })));
+    expect(mjml).toContain('{{ total | currency:0 }} ${user.name|upper}');
+    expect(mjml).toContain('href="{{ order.url }}"');
+  });
+
+  it('escapes plain text settings so they cannot break the MJML', () => {
+    const d = design(createBlock('header', { title: 'A & B <x>' }), createBlock('button', { text: 'Go </mj-button><b>', href: '#' }));
+    d.settings = { ...d.settings, preheader: 'a </mj-preview> & {{name}}' };
+    const { mjml } = toMjml(d);
+    expect(mjml).toContain('A &amp; B &lt;x&gt;');
+    expect(mjml).toContain('Go &lt;/mj-button&gt;&lt;b&gt;');
+    expect(mjml).toContain('<mj-preview>a &lt;/mj-preview&gt; &amp; {{name}}</mj-preview>');
+  });
+
+  it('puts the settings in the head', () => {
+    const d = emptyDesign();
+    d.settings = { ...d.settings, width: 700, backgroundColor: '#000000', fontFamily: 'Georgia, serif', preheader: 'Your {{x}}', linkColor: '#ff0000' };
+    const { mjml } = toMjml(d);
+    expect(mjml).toContain('width="700px" background-color="#000000"');
+    expect(mjml).toContain('font-family="Georgia, serif"');
+    expect(mjml).toContain('<mj-preview>Your {{x}}</mj-preview>');
+    expect(mjml).toContain('a { color: #ff0000; }');
+  });
+
+  it('a whole document block inside a bigger design keeps only its body', () => {
+    const html = createBlock('html', { html: '<html><head><style>x{}</style></head><body><p>BODY</p></body></html>', fullDocument: true });
+    const out = toMjml(design(createBlock('text'), html));
+    expect(out.mjml).toContain('<mj-text padding="0"><p>BODY</p></mj-text>');
+    expect(out.mjml).not.toContain('<style>x');
+    expect(out.warnings[0]).toMatch(/whole document/);
+  });
+});
+
+describe('helpers', () => {
+  it('escape attributes, filter urls and read bodies', () => {
+    expect(attr('a"&<>')).toBe('a&quot;&amp;&lt;&gt;');
+    expect(safeUrl('https://x.com')).toBe('https://x.com');
+    expect(safeUrl('mailto:a@x.com')).toBe('mailto:a@x.com');
+    expect(safeUrl('{{ url }}')).toBe('{{ url }}');
+    expect(safeUrl('java\tscript:alert(1)')).toBe('');
+    expect(safeUrl(' DATA:text/html,x')).toBe('');
+    expect(bodyOf('<html><body class="a"><p>x</p></body></html>')).toBe('<p>x</p>');
+    expect(bodyOf('<p>x</p>')).toBe('<p>x</p>');
+  });
+});
+
+describe('compile with MJML', () => {
+  const engine = new DynamiaTemplateEngine();
+
+  async function build(): Promise<Design> {
+    const columns = createBlock('columns');
+    columns.children![0]!.children = [createBlock('image', { src: 'https://x.com/logo.png', alt: 'Logo' })];
+    columns.children![1]!.children = [createBlock('text', { html: '<p>Hi ${user.name|upper}</p>' })];
+    const repeat = createBlock('repeat', { source: 'lines', alias: 'l' });
+    repeat.children = [createBlock('text', { html: '<p>Row {{l.name}} {{l.price|currency:0}}</p>' })];
+    const condition = createBlock('condition', { expression: 'paid' });
+    condition.children = [createBlock('text', { html: 'PAID' })];
+    condition.elseChildren = [createBlock('button', { text: 'Pay now', href: '{{payUrl}}' })];
+    return design(createBlock('header', { title: 'Invoice' }), columns, repeat, condition, createBlock('footer'));
+  }
+
+  it('gives responsive table HTML that keeps the variables and the blocks', async () => {
+    const result = await compile(await build());
+    expect(result.errors).toEqual([]);
+    expect(result.warnings).toEqual([]);
+    expect(result.html).toContain('@media');
+    expect(result.html).toContain('mso');
+    expect(result.html).toContain('{{#each lines as l}}');
+    expect(result.html).toContain('{{#if paid}}');
+    expect(result.html).toContain('Hi ${user.name|upper}');
+    expect(result.html).toContain('hide-mobile');
+    expect(result.html.length).toBeGreaterThan(3000);
+  }, 20_000);
+
+  it('renders through the Dynamia engine like the server does', async () => {
+    const { html } = await compile(await build());
+    const data = { user: { name: 'ada' }, lines: [{ name: 'A', price: 1000 }, { name: 'B', price: 2500 }, { name: 'C', price: 30 }], paid: false, payUrl: 'https://pay.me/1' };
+    const out = engine.evaluate(html, { ...data, locale: 'en-US' });
+    expect(out).toContain('Hi ADA');
+    expect(out.match(/Row /g)).toHaveLength(3);
+    expect(out).toContain('Row B 2,500');
+    expect(out).not.toContain('PAID');
+    expect(out).toContain('href="https://pay.me/1"');
+    expect(out).not.toContain('{{');
+    expect(out).toContain('mj-column-per-50');
+
+    const paid = engine.evaluate(html, { ...data, paid: true, lines: [] });
+    expect(paid).toContain('PAID');
+    expect(paid).not.toContain('Pay now');
+    expect(paid).not.toContain('Row ');
+  }, 20_000);
+
+  it('escapes data when the template escapes values, and raw opts out', async () => {
+    const d = design(createBlock('text', { html: '<p>${v}</p><p>${v|raw}</p>' }));
+    const { html } = await compile(d);
+    const escaping = new DynamiaTemplateEngine({ escapeHtml: true });
+    const out = escaping.evaluate(html, { v: '<b>x</b>' });
+    expect(out).toContain('<p>&lt;b&gt;x&lt;/b&gt;</p><p><b>x</b></p>');
+  }, 20_000);
+
+  it('returns a whole document design as it is, without MJML', async () => {
+    const source = '<html><body><p>${x}</p></body></html>';
+    const result = await compile(parseDesign({ version: 1, blocks: [{ id: 'html-1', type: 'html', props: { html: source, fullDocument: true } }] }));
+    expect(result).toEqual({ html: source, mjml: '', errors: [], warnings: [] });
+  });
+
+  it('accepts the design as JSON text', async () => {
+    const result = await compile(JSON.stringify(emptyDesign()));
+    expect(result.html).toContain('<body');
+  }, 20_000);
+});

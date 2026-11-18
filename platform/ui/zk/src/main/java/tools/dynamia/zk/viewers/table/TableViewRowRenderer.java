@@ -29,6 +29,7 @@ import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.impl.InputElement;
 import tools.dynamia.actions.*;
 import tools.dynamia.commons.*;
+import tools.dynamia.zk.crud.EntityMapperSupport;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
 import tools.dynamia.commons.reflect.ReflectionException;
@@ -189,7 +190,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                 }
 
                 if (action != null) {
-                    ActionEvent evt = new ActionEvent(data, item);
+                    ActionEvent evt = new RowActionEvent(data, item);
                     evt.setSource(tableView.getSource() != null ? tableView.getSource() : item);
                     ActionRenderer actionRenderer = action.getRenderer() != null ? action.getRenderer() : defaultRenderer;
                     Component actionComp = (Component) Actions.render(actionRenderer, action, (s, p) -> evt);
@@ -313,7 +314,7 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
                     if (comp instanceof InputElement) {
                         event = Events.ON_OK;
                     }
-                    comp.addEventListener(event, e -> action.actionPerformed(new ActionEvent(data, comp, MapBuilder.put("field", field, "tableView", tableView))));
+                    comp.addEventListener(event, e -> action.actionPerformed(new RowActionEvent(data, comp, MapBuilder.put("field", field, "tableView", tableView))));
                 }
             }
         }
@@ -370,4 +371,33 @@ public class TableViewRowRenderer implements ListitemRenderer<Object> {
         }
     }
 
+
+    /**
+     * Action event of a table row. When Open Persistence In View is disabled the row can be a read-only
+     * {@link BeanMap}; the real entity is then loaded by id the first time an action asks for the data, so rendering
+     * a row never costs a query.
+     */
+    static class RowActionEvent extends ActionEvent {
+
+        private boolean resolved;
+
+        RowActionEvent(Object data, Object source) {
+            super(data, source);
+        }
+
+        RowActionEvent(Object data, Object source, Map<String, Object> params) {
+            super(data, source, params);
+        }
+
+        @Override
+        public Object getData() {
+            Object data = super.getData();
+            if (!resolved && data instanceof BeanMap) {
+                resolved = true;
+                data = EntityMapperSupport.toEntity(data);
+                setData(data);
+            }
+            return data;
+        }
+    }
 }

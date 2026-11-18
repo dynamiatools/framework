@@ -47,7 +47,7 @@
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
 
-        <tools.version>26.11.0</tools.version>
+        <tools.version>26.11.2</tools.version>
 
     </properties>
 
@@ -100,6 +100,59 @@
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.entityfiles.s3</artifactId>
+            <version>${tools.version}</version>
+        </dependency>
+        <!-- Users, profiles and login (creates admin / adminadmin on first start) -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.security.ui</artifactId>
+            <version>${tools.version}</version>
+        </dependency>
+
+        <!-- Multi tenant accounts, plans and payments -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.saas.ui</artifactId>
+            <version>${tools.version}</version>
+        </dependency>
+
+        <!-- Stored reports and queries, REST and export -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.reports.ui</artifactId>
+            <version>${tools.version}</version>
+        </dependency>
+
+        <!-- Dashboards with widgets -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.dashboard</artifactId>
+            <version>${tools.version}</version>
+        </dependency>
+
+        <!-- Import data from CSV and Excel files -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.importer.ui</artifactId>
+            <version>${tools.version}</version>
+        </dependency>
+
+        <!-- Versioned HTTP calls to third party APIs -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.functions.ui</artifactId>
+            <version>${tools.version}</version>
+        </dependency>
+
+        <!-- Mail API and sender, the email module expects the application to provide them -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <!-- Email templates with the block editor (the editor page is built with the module) -->
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.email.ui</artifactId>
             <version>${tools.version}</version>
         </dependency>
         <dependency>

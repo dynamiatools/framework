@@ -1,0 +1,8 @@
+/*
+ * The editor uses Tailwind utilities with the prefix "de:" (for example "de:flex"). Only the theme and the utilities are
+ * included, not the preflight reset, so the editor never changes the look of the application that embeds it.
+ */
+@layer theme, utilities;
+@import 'tailwindcss/theme.css' layer(theme) prefix(de);
+@import 'tailwindcss/utilities.css' layer(utilities) prefix(de) source(none);
+@source './**/*.{vue,ts}';

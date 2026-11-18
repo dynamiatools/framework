@@ -17,6 +17,7 @@
 
 package tools.dynamia.modules.saas.services;
 
+import tools.dynamia.modules.saas.domain.AccountProfile;
 import jakarta.servlet.http.HttpServletRequest;
 import tools.dynamia.modules.saas.api.AccountStats;
 import tools.dynamia.modules.saas.api.dto.AccountDTO;
@@ -235,4 +236,13 @@ public interface AccountService {
      * @param account The account to clear the cache for.
      */
     void clearCache(Account account);
+
+    /**
+     * Makes sure the {@code DEFAULT} account profile exists and has an access restriction for every registered module:
+     * allowed for all of them except SaaS. Restrictions already in the profile are kept. It runs when the application
+     * starts, after all the modules are registered.
+     *
+     * @return the DEFAULT profile
+     */
+    AccountProfile checkDefaultProfile();
 }

@@ -23,7 +23,7 @@
     <parent>
         <artifactId>tools.dynamia.modules.email.parent</artifactId>
         <groupId>tools.dynamia.modules</groupId>
-        <version>26.11.0</version>
+        <version>26.11.2</version>
     </parent>
 
     <artifactId>tools.dynamia.modules.email</artifactId>
@@ -50,26 +50,46 @@
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.domain.jpa</artifactId>
-            <version>26.11.0</version>
+            <version>26.11.2</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.crud</artifactId>
-            <version>26.11.0</version>
+            <version>26.11.2</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
             <artifactId>tools.dynamia.templates</artifactId>
-            <version>26.11.0</version>
+            <version>26.11.2</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+        <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- reads the HTML of a migrated template to build the editor blocks -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.19.1</version>
         </dependency>
         <dependency>
             <groupId>jakarta.mail</groupId>

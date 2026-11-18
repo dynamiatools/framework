@@ -1,4 +1,5 @@
 extensions/email-sms/sources/ui/pom.xml
+extensions/email-sms/sources/ui/src/main/java/tools/dynamia/modules/email/ui/EmailEditorWindow.java
 extensions/email-sms/sources/ui/src/main/java/tools/dynamia/modules/email/ui/OTPInputDialog.java
 extensions/email-sms/sources/ui/src/main/java/tools/dynamia/modules/email/ui/actions/PreviewEmailTemplateAction.java
 extensions/email-sms/sources/ui/src/main/java/tools/dynamia/modules/email/ui/actions/TestEmailAccountAction.java

@@ -110,6 +110,24 @@ public class ActionEvent implements Serializable {
      *
      * @param data the event data to set
      */
+    /**
+     * Returns the data of the event only if it is an instance of the given type. It replaces the
+     * {@code (T) evt.getData()} cast and the {@code instanceof} check, and never throws a ClassCastException.
+     *
+     * <pre>{@code
+     * Venta venta = evt.getData(Venta.class);
+     * if (venta != null) { ... }
+     * }</pre>
+     *
+     * @param type the expected type
+     * @param <T>  the expected type
+     * @return the data, or {@code null} if there is none or it is not a {@code type}
+     */
+    public <T> T getData(Class<T> type) {
+        Object value = getData();
+        return type != null && type.isInstance(value) ? type.cast(value) : null;
+    }
+
     public void setData(Object data) {
         this.data = data;
     }

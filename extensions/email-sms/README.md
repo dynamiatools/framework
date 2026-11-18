@@ -85,6 +85,90 @@ will get the preferred account automatically. On the other hand, you can set up 
 If the `EmailMessage` has a `EmailTemplate` and this template has configured an SMS message, when you send 
 the email the SMS will be sent too.
 
+## Email templates and the block editor
+
+An `EmailTemplate` is written in one of two languages, chosen per template (`engine`):
+
+| Engine | What it is |
+|---|---|
+| `VELOCITY` (default, also when empty) | Apache Velocity through the platform `TemplateEngine`. Every template created before the block editor is one, and keeps working exactly as before. |
+| `DYNAMIA` | The safe `DynamiaTemplateEngine` of `tools.dynamia.templates`: `${x}`, `{{x}}`, `$a.b`, pipes (`{{ total \| currency:0 }}`), `{{#if cond}}...{{else}}...{{/if}}` and `{{#each items as item}}...{{/each}}`. It never runs code from the template. The same engine exists in TypeScript (`@dynamia-tools/template-engine`) and both run the same conformance cases. |
+
+`EmailTemplateRenderer` picks the engine for the body, subject, `to/cc/bcc/replyTo` and the SMS number and text; a child
+template and its layout (`parent`) each use their own. Applications that need the HTML themselves must call
+`EmailService.render(template, model)` instead of evaluating `template.getContent()` with Velocity: a template can be
+Dynamia, and a migrated template is.
+
+Values are HTML-escaped only in templates built in the editor (`escapeValues`); print trusted HTML with the `raw` filter
+(`{{ TEMPLATE_CONTENT | raw }}` in a layout). Subjects, addresses and SMS text are never escaped.
+
+### Block editor
+
+The editor is a Vue package, [`@dynamia-tools/email-editor-vue`](packages/email-editor-vue/README.md): blocks (header, heading H1 to H3, text, quote, list, table,
+image, button, divider, spacer, columns, footer, HTML, repeat, condition), responsive output through MJML, undo/redo,
+variables panel, preview on desktop and mobile, test send and the migration. A template stores the editor document in
+`design` (JSON) and the HTML it compiles to in `content`.
+
+In the ZK UI the CRUD of templates gets three actions: **Design** (opens the editor in a new browser tab; set `dynamia.email.editor.open-in=window` to use a ZK window with an iframe instead),
+**Migrate to editor** and **Revert migration**. The editor page is built and packaged in every build of the UI module (Node and pnpm are
+provisioned in `target/`, nothing is needed on the machine). To skip it, for example in a quick build:
+
+```bash
+mvn -Dskip.editor -pl extensions/email-sms/sources/ui package
+```
+
+With `-Dskip.editor` the Design action says the editor is not included.
+
+The page is served by `EmailEditorController` at `/dynamia-email/editor?id=7` (`/dynamia-email/editor/index.html` works too).
+
+### Migrating a template from Velocity
+
+`Migrate to editor` (or `POST /apps/api/email/templates/{id}/migrate?dryRun=false`) converts references, `#if/#elseif/#else`,
+`#foreach` and `$TEMPLATE_CONTENT` in every text field, only when everything is portable. `#set`, macros, `#parse`,
+`#include`, method calls, indexes and complex conditions are reported and the template is left untouched. The HTML is turned into
+editor blocks as far as it can:
+
+| In the HTML | In the editor |
+|---|---|
+| `h1` to `h3` | Heading (alignment and colour are kept) |
+| `p` and loose text | Text |
+| `blockquote` | Quote (with the colour of its left border) |
+| `a` styled as a button (background colour and padding, or a `btn`/`button` class) | Button |
+| `img`, also inside a link | Image |
+| `hr` | Divider |
+| `ul`/`ol` of plain items | List |
+| table of one row with two or more cells | Columns (each cell is converted the same way) |
+| table of several rows of plain text cells | Table (header row when it uses `th`) |
+| `{{#each}}` / `{{#if}}`...`{{else}}`...`{{/if}}` (from `#foreach`/`#if`) | Repeat / Condition around the blocks between the tags |
+| anything else (spans, formatting inside table cells, tables inside tables, styled containers) | HTML block, so the email looks the same |
+
+The report says how many blocks keep their HTML. A template stays one HTML block when it cannot be split without breaking it:
+it has a `<style>`, its `<body>` has attributes (its background or font would be lost), or its `{{#each}}`/`{{#if}}` tags do not
+nest properly. Control tags between the rows of a table, or inside a paragraph, stay where they are inside that HTML or text block.
+The original fields are kept so `Revert migration` can restore them (it asks
+before losing edits made to the design afterwards). A migrated template does not escape values, as Velocity never did.
+
+### REST API
+
+`/apps/api/email/templates` (get, create, `PUT {id}/design`, `variables`, `{id}/preview`, `{id}/test-send`, `{id}/migrate`,
+`{id}/revert`). Every call needs an authenticated user that an `EmailTemplatePolicy` accepts and works only on templates
+of the current account; the system account's templates are read-only. The default policy lets the roles listed in
+`dynamia.email.editor-roles` (comma separated); **with the property empty nobody can use the API**. One policy that says
+yes is enough, so to restrict access with your own `EmailTemplatePolicy` leave the property empty. Changing calls must
+carry an `X-Requested-With` header (the client sends it): CSRF protection is off in the framework and the API uses the
+session cookie. A test email goes only
+to the address of the logged in user (their principal name when it is an email, or what your own policy returns).
+Request content is rendered only by the Dynamia engine, never by Velocity.
+
+To list variables in the editor, implement `EmailTemplateModelProvider.getVariables()`.
+
+Which providers apply is decided by the `source`: the `source` of the `EmailMessage` when it has one, otherwise the **Variables source**
+field of the template (`EmailTemplate.source`). The editor uses the template's source on its own, so the page does not need `&source=`
+(when it has one, the page wins). Only the providers whose `getSource()` is that source offer variables and fill the model when the email
+is sent; a template with no source lists the variables of all the providers. When more than one provider is listed, the variables panel
+groups them by provider and marks a name that more than one of them offers: when the email is sent the model of each provider is merged
+in turn, so the last one wins.
+
 ## License
 
 DynamiaTools Email is available under Apache 2 License

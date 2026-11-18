@@ -248,4 +248,130 @@ public class BeanMap extends HashMap<String, Object> implements Serializable, Js
     public boolean isLoadable() {
         return beanClass != null && id != null;
     }
+
+    /**
+     * Tells whether the bean represented by this map is an instance of the given type.
+     *
+     * @param type the expected entity type
+     * @return {@code true} if the bean class is known and assignable to {@code type}
+     */
+    public boolean isBeanOf(Class<?> type) {
+        return type != null && beanClass != null && type.isAssignableFrom(beanClass);
+    }
+
+    /**
+     * Tells whether an object is an instance of the given type, or a {@link BeanMap} that represents one. Useful in
+     * place of {@code instanceof} when a value may be an entity or its read-only map.
+     *
+     * @param value the entity or BeanMap, may be {@code null}
+     * @param type  the expected entity type
+     * @return {@code true} if {@code value} is a {@code type} or a BeanMap of a {@code type}
+     */
+    public static boolean isBeanOf(Object value, Class<?> type) {
+        if (value instanceof BeanMap map) {
+            return map.isBeanOf(type);
+        }
+        return type != null && type.isInstance(value);
+    }
+
+    /**
+     * Returns the entity class of a value: the {@link #getBeanClass()} of a BeanMap, or the class of any other object.
+     *
+     * @param value the entity or BeanMap, may be {@code null}
+     * @return the entity class, or {@code null} if unknown
+     */
+    public static Class<?> beanClassOf(Object value) {
+        if (value instanceof BeanMap map) {
+            return map.getBeanClass();
+        }
+        return value != null ? value.getClass() : null;
+    }
+
+    /**
+     * Returns the value of a key as a boolean. Booleans are returned as is, other values are parsed from their string form.
+     *
+     * @param key the property name
+     * @return {@code true} only if the value is {@code true} (or the text "true"); {@code false} when missing
+     */
+    public boolean isTrue(String key) {
+        Object value = super.get(key);
+        if (value instanceof Boolean b) {
+            return b;
+        }
+        return value != null && Boolean.parseBoolean(value.toString());
+    }
+
+    /**
+     * Returns the value of a key as text.
+     *
+     * @param key the property name
+     * @return the value's {@code toString()}, or {@code null} when missing
+     */
+    public String getString(String key) {
+        Object value = super.get(key);
+        return value != null ? value.toString() : null;
+    }
+
+    /**
+     * Returns the value of a key as a {@code Long}.
+     *
+     * @param key the property name
+     * @return the numeric value converted to long, the parsed text, or {@code null} when missing or not a number
+     */
+    public Long getLong(String key) {
+        Object value = super.get(key);
+        if (value instanceof Number n) {
+            return n.longValue();
+        }
+        if (value != null) {
+            try {
+                return Long.valueOf(value.toString().trim());
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the value of a key as an {@code Integer}.
+     *
+     * @param key the property name
+     * @return the numeric value converted to int, the parsed text, or {@code null} when missing or not a number
+     */
+    public Integer getInteger(String key) {
+        Long value = getLong(key);
+        return value != null ? Integer.valueOf(value.intValue()) : null;
+    }
+
+    /**
+     * Returns the value of a key, or a default when the key is missing or {@code null}.
+     *
+     * @param key          the property name
+     * @param defaultValue the value to use when there is none
+     * @param <T>          the expected value type
+     * @return the value or {@code defaultValue}
+     */
+    public <T> T getOrDefault(String key, T defaultValue) {
+        T value = get(key);
+        return value != null ? value : defaultValue;
+    }
+
+    /**
+     * Tells whether the row is marked as selected, by the {@code selected} entry that table checkboxes write.
+     *
+     * @return {@code true} if the {@code selected} entry is true
+     */
+    public boolean isSelected() {
+        return isTrue("selected");
+    }
+
+    /**
+     * Marks or unmarks the row by writing the {@code selected} entry.
+     *
+     * @param selected the new selection state
+     */
+    public void setSelected(boolean selected) {
+        put("selected", selected);
+    }
 }
