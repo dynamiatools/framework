@@ -296,6 +296,8 @@ public class DynamiaSecurityConfig {
                         .maxSessionsPreventsLogin(false))
                 .userDetailsService(userDetailsService)
                 .csrf(AbstractHttpConfigurer::disable)
+                // Same-origin frames only: the email editor opens inside an iframe of the application itself.
+                .headers(h -> h.frameOptions(f -> f.sameOrigin()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/login/**", "/logout", "/actuator/**")
                         .permitAll()
