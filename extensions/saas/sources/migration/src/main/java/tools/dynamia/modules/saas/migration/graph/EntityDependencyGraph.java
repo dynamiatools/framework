@@ -127,13 +127,19 @@ public class EntityDependencyGraph {
 
         // Cycle fallback: append remaining unvisited nodes
         if (sorted.size() < entityClasses.size()) {
-            log.warn("[Migration] Dependency graph has cycles; appending {} unresolved entities in original order",
-                    entityClasses.size() - sorted.size());
+            List<Class<?>> unresolved = new ArrayList<>();
             for (Class<?> clazz : entityClasses) {
                 if (!visited.contains(clazz)) {
-                    sorted.add(clazz);
+                    unresolved.add(clazz);
                 }
             }
+            // Children of these classes may be imported before their parents exist; the import pipeline
+            // resolves those references in a second pass, so the order here is only best effort.
+            log.warn("[Migration] Dependency graph has cycles; appending {} unresolved entities in original order",
+                    unresolved.size());
+            log.debug("[Migration] Entities in or depending on a cycle: {}",
+                    unresolved.stream().map(Class::getSimpleName).toList());
+            sorted.addAll(unresolved);
         }
 
         log.debug("[Migration] Topological sort result: {}",

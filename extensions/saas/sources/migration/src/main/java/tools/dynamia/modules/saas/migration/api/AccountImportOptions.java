@@ -42,6 +42,16 @@ public class AccountImportOptions {
      */
     private boolean failOnEntityError = false;
 
+    /**
+     * What to do with references to rows that were not cloned (for example a soft-deleted parent whose
+     * children are alive). When {@code true} (default), an optional reference is left {@code null} and a
+     * row with an unresolvable mandatory reference is skipped; the counts are logged and added to the
+     * final progress message. When {@code false}, the original id is kept, which leaves the new row
+     * pointing at a row of the source account (legacy behaviour).
+     * References to entities that are not part of the export (shared system data) always keep their id.
+     */
+    private boolean skipOrphans = true;
+
     // ─── Fluent builder ────────────────────────────────────────────────────────
 
     public AccountImportOptions targetAccountId(Serializable targetAccountId) {
@@ -61,6 +71,11 @@ public class AccountImportOptions {
 
     public AccountImportOptions failOnEntityError(boolean failOnEntityError) {
         this.failOnEntityError = failOnEntityError;
+        return this;
+    }
+
+    public AccountImportOptions skipOrphans(boolean skipOrphans) {
+        this.skipOrphans = skipOrphans;
         return this;
     }
 
@@ -100,5 +115,12 @@ public class AccountImportOptions {
     public void setFailOnEntityError(boolean failOnEntityError) {
         this.failOnEntityError = failOnEntityError;
     }
-}
 
+    public boolean isSkipOrphans() {
+        return skipOrphans;
+    }
+
+    public void setSkipOrphans(boolean skipOrphans) {
+        this.skipOrphans = skipOrphans;
+    }
+}

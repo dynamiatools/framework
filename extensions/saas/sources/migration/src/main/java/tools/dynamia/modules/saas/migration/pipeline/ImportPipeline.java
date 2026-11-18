@@ -35,6 +35,7 @@ import tools.dynamia.modules.saas.migration.config.AccountMigrationProperties;
 import tools.dynamia.modules.saas.migration.identity.KeepIdsIdentityMapper;
 import tools.dynamia.modules.saas.migration.identity.RegenerateIdsIdentityMapper;
 import tools.dynamia.modules.saas.migration.identity.Uuid7IdentityMapper;
+import tools.dynamia.modules.saas.domain.Account;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
 import tools.jackson.databind.JsonNode;
@@ -49,6 +50,9 @@ import java.util.UUID;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -72,8 +76,19 @@ import java.util.zip.ZipInputStream;
  *
  * <p>Entities arrive in the same topological order they were written by
  * {@link ExportPipeline} — parents before children — so reference
- * resolution via the {@code idMappings} table always finds the parent
+ * resolution via the {@code idMappings} table normally finds the parent
  * already persisted.
+ *
+ * <h3>Dangling references (second pass)</h3>
+ * Two situations break that assumption: entities in a dependency cycle (the child arrives before its
+ * parent) and children whose parent was not exported (soft-deleted rows have a negative
+ * {@code accountId}). For a reference to a class that <em>is</em> in the export but is not mapped yet,
+ * see {@link ReferenceResolver}: optional references are persisted as {@code null} and patched once all
+ * entities are imported; rows with a mandatory reference are held (by their JSON row only) and retried
+ * until no more progress is made. What is still unresolved afterwards points to something that was never
+ * cloned: it is cleared (optional) or the row is skipped (mandatory) when
+ * {@link AccountImportOptions#isSkipOrphans()} is set. References to classes outside the export keep
+ * their original id.
  *
  * @author Mario Serrano Leones
  */
@@ -148,6 +163,7 @@ public class ImportPipeline {
         ZipInputStream zipIn = new ZipInputStream(source);
         ZipEntry entry;
         long total = 0;
+        ImportRun run = newRun(Set.of(), options, identityMapper, idMappings);
 
         while ((entry = zipIn.getNextEntry()) != null) {
             if (token != null && token.isCancelled()) {
@@ -158,28 +174,54 @@ public class ImportPipeline {
             String name = entry.getName();
 
             if (ExportConstants.MANIFEST_FILE.equals(name)) {
-                logManifestInfo(zipIn);
+                Set<String> exported = logManifestInfo(zipIn);
+                run = newRun(exported, options, identityMapper, idMappings);
             } else if (name.endsWith(".json")) {
-                long count = importZipEntityEntry(zipIn, options, identityMapper, idMappings, listener, token);
+                long count = importZipEntityEntry(zipIn, options, identityMapper, idMappings, run, listener, token);
                 total += count;
             }
 
             zipIn.closeEntry();
         }
 
+        if (token == null || !token.isCancelled()) {
+            total += resolveDeferredRows(run, options, identityMapper, idMappings, listener, token);
+            applyPendingReferences(run, options, listener);
+        }
+
+        ReferenceResolver resolver = run.resolver;
+        String summary = "Import complete";
+        if (resolver.skippedRows() > 0 || resolver.clearedReferences() > 0) {
+            summary += " (%d rows skipped because a mandatory parent was not cloned, %d optional references cleared)"
+                    .formatted(resolver.skippedRows(), resolver.clearedReferences());
+            log.warn("[Migration/Import] Orphan references: {} rows skipped {}, {} optional references cleared",
+                    resolver.skippedRows(), resolver.skippedByClass(), resolver.clearedReferences());
+        }
         if (listener != null) {
-            listener.onProgress(MigrationProgress.of(total, total, "Import complete", total));
+            listener.onProgress(MigrationProgress.of(total, total, summary, total));
         }
         log.info("[Migration/Import] ZIP import complete — {} total records", total);
     }
 
+    private ImportRun newRun(Set<String> exportedClasses,
+                             AccountImportOptions options,
+                             IdentityMapper identityMapper,
+                             Map<String, Map<Object, Object>> idMappings) {
+        ImportRun run = new ImportRun();
+        run.resolver = new ReferenceResolver(identityMapper, exportedClasses, idMappings,
+                this::isSharedRow, options.isSkipOrphans());
+        return run;
+    }
+
     /**
-     * Reads and logs metadata from manifest.json without loading it into memory.
+     * Reads and logs metadata from manifest.json and returns the names of the entity classes that are
+     * part of the export (needed to tell "not cloned" apart from "not part of the export").
+     * {@link Account} is excluded: it has no rows in the export, so it is never mapped.
      */
-    private void logManifestInfo(ZipInputStream zipIn) {
+    private Set<String> logManifestInfo(ZipInputStream zipIn) {
+        Set<String> exported = new HashSet<>();
         try {
             JsonParser parser = objectMapper.createParser(new NoCloseInputStream(zipIn));
-            // Read only version and sourceAccountId for logging; skip everything else
             String version = null;
             String sourceAccountId = null;
             if (parser.nextToken() == JsonToken.START_OBJECT) {
@@ -189,15 +231,40 @@ public class ImportPipeline {
                     switch (field) {
                         case ExportConstants.FIELD_VERSION -> version = parser.getText();
                         case ExportConstants.FIELD_SOURCE_ACCOUNT_ID -> sourceAccountId = parser.getValueAsString();
+                        case ExportConstants.FIELD_ENTITIES -> readManifestEntities(parser, exported);
                         default -> parser.skipChildren();
                     }
-                    if (version != null && sourceAccountId != null) break;
                 }
             }
             parser.close();
-            log.info("[Migration/Import] manifest: version={}, sourceAccountId={}", version, sourceAccountId);
+            log.info("[Migration/Import] manifest: version={}, sourceAccountId={}, entityTypes={}",
+                    version, sourceAccountId, exported.size());
         } catch (Exception e) {
             log.debug("[Migration/Import] Could not read manifest metadata: {}", e.getMessage());
+        }
+        exported.remove(Account.class.getName());
+        return exported;
+    }
+
+    private void readManifestEntities(JsonParser parser, Set<String> exported) {
+        if (parser.currentToken() != JsonToken.START_ARRAY) {
+            parser.skipChildren();
+            return;
+        }
+        while (parser.nextToken() != JsonToken.END_ARRAY) {
+            if (parser.currentToken() != JsonToken.START_OBJECT) {
+                parser.skipChildren();
+                continue;
+            }
+            while (parser.nextToken() != JsonToken.END_OBJECT) {
+                String field = parser.currentName();
+                parser.nextToken();
+                if (ExportConstants.FIELD_ENTITY_CLASS.equals(field)) {
+                    exported.add(parser.getText());
+                } else {
+                    parser.skipChildren();
+                }
+            }
         }
     }
 
@@ -213,12 +280,13 @@ public class ImportPipeline {
                                       AccountImportOptions options,
                                       IdentityMapper identityMapper,
                                       Map<String, Map<Object, Object>> idMappings,
+                                      ImportRun run,
                                       MigrationProgressListener listener,
                                       CancellationToken token) throws IOException {
 
         JsonParser parser = objectMapper.createParser(new NoCloseInputStream(zipIn));
         try {
-            return parseEntityEntry(parser, options, identityMapper, idMappings, listener, token);
+            return parseEntityEntry(parser, options, identityMapper, idMappings, run, listener, token);
         } finally {
             parser.close(); // flushes parser buffers; NoCloseInputStream.close() is a no-op
         }
@@ -232,6 +300,7 @@ public class ImportPipeline {
                                   AccountImportOptions options,
                                   IdentityMapper identityMapper,
                                   Map<String, Map<Object, Object>> idMappings,
+                                  ImportRun run,
                                   MigrationProgressListener listener,
                                   CancellationToken token) throws IOException {
 
@@ -263,7 +332,7 @@ public class ImportPipeline {
                     }
                     total = importRowsFromParser(
                             parser, entityClassName, fields, options,
-                            identityMapper, idMappings, listener, token, chunkSize);
+                            identityMapper, idMappings, run, listener, token, chunkSize);
                 }
 
                 default -> parser.skipChildren();
@@ -279,6 +348,7 @@ public class ImportPipeline {
                                       AccountImportOptions options,
                                       IdentityMapper identityMapper,
                                       Map<String, Map<Object, Object>> idMappings,
+                                      ImportRun run,
                                       MigrationProgressListener listener,
                                       CancellationToken token,
                                       int chunkSize) throws IOException {
@@ -304,13 +374,13 @@ public class ImportPipeline {
             chunk.add(rowToObjectNode(parser, fields));
 
             if (chunk.size() >= chunkSize) {
-                total += persistChunk(chunk, entityClass, options, identityMapper, idMappings);
+                total += persistChunk(chunk, entityClass, options, identityMapper, idMappings, run);
                 chunk.clear();
             }
         }
 
         if (!chunk.isEmpty()) {
-            total += persistChunk(chunk, entityClass, options, identityMapper, idMappings);
+            total += persistChunk(chunk, entityClass, options, identityMapper, idMappings, run);
         }
 
         log.info("[Migration/Import] Imported {} records for {}", total, entityClass.getSimpleName());
@@ -332,6 +402,17 @@ public class ImportPipeline {
                             AccountImportOptions options,
                             IdentityMapper identityMapper,
                             Map<String, Map<Object, Object>> idMappings) {
+        // No manifest information: legacy behaviour (unmapped references keep the original id).
+        return persistChunk(chunk, entityClass, options, identityMapper, idMappings,
+                newRun(Set.of(), options, identityMapper, idMappings));
+    }
+
+    private int persistChunk(List<JsonNode> chunk,
+                             Class<?> entityClass,
+                             AccountImportOptions options,
+                             IdentityMapper identityMapper,
+                             Map<String, Map<Object, Object>> idMappings,
+                             ImportRun run) {
         AtomicInteger count = new AtomicInteger();
         EntityType<?> entityType;
         try {
@@ -347,8 +428,23 @@ public class ImportPipeline {
         crud.executeWithinTransaction(() -> {
             for (JsonNode node : chunk) {
                 try {
+                    List<ReferenceResolver.Ref> refs = new ArrayList<>();
                     Object entity = deserializeEntity(node, entityClass, entityType,
-                            options.getTargetAccountId(), identityMapper, idMappings);
+                            options.getTargetAccountId(), refs);
+
+                    ReferenceResolver.RowResult resolved =
+                            run.resolver.resolveRow(refs, run.finalPhase, entityClass.getSimpleName());
+                    if (resolved.verdict() == ReferenceResolver.Verdict.SKIP) {
+                        log.debug("[Migration/Import] Skipping orphan {} row id={}: mandatory parent was not cloned",
+                                entityClass.getSimpleName(), node.get("id"));
+                        continue;
+                    }
+                    if (resolved.verdict() == ReferenceResolver.Verdict.DEFER) {
+                        // Keep only the JSON row; the entity is rebuilt on retry.
+                        run.deferred.computeIfAbsent(entityClass, k -> new ArrayList<>()).add(node);
+                        continue;
+                    }
+                    applyReferences(entity, refs, resolved.ids());
 
                     Object originalId = readId(node);
                     Object mappedId = identityMapper.mapId(originalId, entityClass);
@@ -366,6 +462,11 @@ public class ImportPipeline {
                     if (originalId != null && generatedId != null) {
                         idMappings.computeIfAbsent(entityClass.getName(), k -> new HashMap<>())
                                 .put(originalId, generatedId);
+                    }
+                    if (generatedId != null) {
+                        for (ReferenceResolver.Ref pendingRef : resolved.pending()) {
+                            run.pending.add(new PendingRef(entityClass, generatedId, pendingRef));
+                        }
                     }
 
                     count.getAndIncrement();
@@ -392,8 +493,7 @@ public class ImportPipeline {
                                      Class<?> entityClass,
                                      EntityType<?> entityType,
                                      Serializable targetAccountId,
-                                     IdentityMapper identityMapper,
-                                     Map<String, Map<Object, Object>> idMappings) throws Exception {
+                                     List<ReferenceResolver.Ref> refs) throws Exception {
 
         Object entity = entityClass.getDeclaredConstructor().newInstance();
 
@@ -414,19 +514,9 @@ public class ImportPipeline {
                 String refKey = name + ExportConstants.REF_ID_SUFFIX;
                 JsonNode refIdNode = node.get(refKey);
                 if (refIdNode != null && !refIdNode.isNull()) {
-                    Object originalRefId = refIdNode.asLong();
-                    Class<?> refClass = attr.getJavaType();
-                    Object resolvedId = identityMapper.resolveReferenceId(
-                            originalRefId, refClass, idMappings);
-                    if (resolvedId != null) {
-                        try {
-                            Object ref = em.getReference(refClass, coerceId(resolvedId, refClass));
-                            setField(entity, name, ref);
-                        } catch (Exception e) {
-                            log.debug("[Migration/Import] Could not create reference proxy for {}={}: {}",
-                                    refKey, resolvedId, e.getMessage());
-                        }
-                    }
+                    // Resolved later by the ReferenceResolver (needs the whole row to decide).
+                    refs.add(new ReferenceResolver.Ref(name, attr.getJavaType(), refIdNode.asLong(),
+                            attr.isOptional()));
                 }
 
             } else if (pt != PersistentAttributeType.ONE_TO_MANY
@@ -447,6 +537,158 @@ public class ImportPipeline {
         }
 
         return entity;
+    }
+
+    private void applyReferences(Object entity, List<ReferenceResolver.Ref> refs, Map<String, Object> ids) {
+        for (ReferenceResolver.Ref ref : refs) {
+            Object resolvedId = ids.get(ref.attribute());
+            if (resolvedId == null) continue;
+            try {
+                Object proxy = em.getReference(ref.refClass(), coerceId(resolvedId, ref.refClass()));
+                setField(entity, ref.attribute(), proxy);
+            } catch (Exception e) {
+                log.debug("[Migration/Import] Could not create reference proxy for {}={}: {}",
+                        ref.attribute() + ExportConstants.REF_ID_SUFFIX, resolvedId, e.getMessage());
+            }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Second pass: deferred rows and pending references
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Retries the rows held back because a mandatory parent was not mapped yet. Rounds repeat while they
+     * make progress (a held row may wait for another held row); the last round runs in final phase, where
+     * the parents that are still missing are known to have never been cloned.
+     */
+    private long resolveDeferredRows(ImportRun run,
+                                     AccountImportOptions options,
+                                     IdentityMapper identityMapper,
+                                     Map<String, Map<Object, Object>> idMappings,
+                                     MigrationProgressListener listener,
+                                     CancellationToken token) {
+        long total = 0;
+        while (!run.deferred.isEmpty()) {
+            if (token != null && token.isCancelled()) break;
+
+            Map<Class<?>, List<JsonNode>> batch = run.deferred;
+            run.deferred = new LinkedHashMap<>();
+            int before = countRows(batch);
+            log.info("[Migration/Import] Resolving {} deferred rows (cyclic or late parents)", before);
+            if (listener != null) {
+                listener.onProgress(MigrationProgress.of(0, 0,
+                        "Resolving " + before + " rows with late references", total));
+            }
+
+            total += persistDeferred(batch, options, identityMapper, idMappings, run);
+
+            int after = countRows(run.deferred);
+            if (after > 0 && after >= before) {
+                // No progress: whatever is missing will never exist. Decide with the final rules.
+                batch = run.deferred;
+                run.deferred = new LinkedHashMap<>();
+                run.finalPhase = true;
+                try {
+                    total += persistDeferred(batch, options, identityMapper, idMappings, run);
+                } finally {
+                    run.finalPhase = false;
+                }
+            }
+        }
+        return total;
+    }
+
+    private long persistDeferred(Map<Class<?>, List<JsonNode>> batch,
+                                 AccountImportOptions options,
+                                 IdentityMapper identityMapper,
+                                 Map<String, Map<Object, Object>> idMappings,
+                                 ImportRun run) {
+        int chunkSize = options.getChunkSize() > 0 ? options.getChunkSize() : properties.getChunkSize();
+        long total = 0;
+        for (Map.Entry<Class<?>, List<JsonNode>> e : batch.entrySet()) {
+            List<JsonNode> rows = e.getValue();
+            for (int i = 0; i < rows.size(); i += chunkSize) {
+                List<JsonNode> chunk = new ArrayList<>(rows.subList(i, Math.min(rows.size(), i + chunkSize)));
+                total += persistChunk(chunk, e.getKey(), options, identityMapper, idMappings, run);
+            }
+        }
+        return total;
+    }
+
+    private static int countRows(Map<Class<?>, List<JsonNode>> rows) {
+        return rows.values().stream().mapToInt(List::size).sum();
+    }
+
+    /**
+     * Patches the optional references that were persisted as {@code null} because their parent was not
+     * mapped yet. Uses bulk updates by id so no entity is loaded; unresolved ones stay {@code null}.
+     */
+    private void applyPendingReferences(ImportRun run,
+                                        AccountImportOptions options,
+                                        MigrationProgressListener listener) {
+        if (run.pending.isEmpty()) return;
+
+        log.info("[Migration/Import] Patching {} late optional references", run.pending.size());
+        if (listener != null) {
+            listener.onProgress(MigrationProgress.of(0, 0,
+                    "Patching " + run.pending.size() + " late references", 0));
+        }
+
+        int chunkSize = options.getChunkSize() > 0 ? options.getChunkSize() : properties.getChunkSize();
+        var crud = DomainUtils.lookupCrudService();
+        for (int i = 0; i < run.pending.size(); i += chunkSize) {
+            List<PendingRef> slice = run.pending.subList(i, Math.min(run.pending.size(), i + chunkSize));
+            crud.executeWithinTransaction(() -> {
+                for (PendingRef p : slice) {
+                    try {
+                        ReferenceResolver.Resolution r = run.resolver.resolvePending(p.ref());
+                        if (r.status() != ReferenceResolver.Status.RESOLVED) continue;
+
+                        String entityName = emf.getMetamodel().entity(p.entityClass()).getName();
+                        em.createQuery("UPDATE " + entityName + " e SET e." + p.ref().attribute()
+                                        + " = :ref WHERE e.id = :id")
+                                .setParameter("ref", em.getReference(p.ref().refClass(),
+                                        coerceId(r.id(), p.ref().refClass())))
+                                .setParameter("id", p.entityId())
+                                .executeUpdate();
+                    } catch (Exception e) {
+                        if (options.isFailOnEntityError()) {
+                            throw new MigrationException("Error patching reference "
+                                    + p.entityClass().getSimpleName() + "." + p.ref().attribute(), e);
+                        }
+                        log.warn("[Migration/Import] Could not patch {}.{} of id={}: {}",
+                                p.entityClass().getSimpleName(), p.ref().attribute(), p.entityId(), e.getMessage());
+                    }
+                }
+            });
+        }
+        run.pending.clear();
+    }
+
+    /**
+     * Whether the original row (of a class that is in the export but was not mapped) is shared by every
+     * account ({@code accountId} 0 or null) and so must keep its id. A row that is gone or belongs to
+     * another account (soft-deleted rows have a negative accountId) is an orphan. If the lookup fails,
+     * the legacy behaviour (keep the id) is preferred over nulling data.
+     */
+    private boolean isSharedRow(Class<?> refClass, Object originalId) {
+        EntityManager local = emf.createEntityManager();
+        try {
+            String entityName = emf.getMetamodel().entity(refClass).getName();
+            List<?> result = local.createQuery("SELECT e.accountId FROM " + entityName + " e WHERE e.id = :id")
+                    .setParameter("id", coerceId(originalId, refClass))
+                    .getResultList();
+            if (result.isEmpty()) return false;
+            Object owner = result.get(0);
+            return owner == null || (owner instanceof Number n && n.longValue() == 0L);
+        } catch (Exception e) {
+            log.warn("[Migration/Import] Could not check owner of {}#{}, keeping original id: {}",
+                    refClass.getSimpleName(), originalId, e.getMessage());
+            return true;
+        } finally {
+            local.close();
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -537,6 +779,22 @@ public class ImportPipeline {
     // ─────────────────────────────────────────────────────────────────────────
     // Internal utilities
     // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Per-import mutable state of the second pass. Single-threaded.
+     */
+    private static final class ImportRun {
+        ReferenceResolver resolver;
+        /** True only while retrying held rows in the last round. */
+        boolean finalPhase;
+        /** Rows (JSON only) with a mandatory parent that is not mapped yet, by entity class. */
+        Map<Class<?>, List<JsonNode>> deferred = new LinkedHashMap<>();
+        /** Optional references persisted as null, to patch once all entities exist. Ids only. */
+        final List<PendingRef> pending = new ArrayList<>();
+    }
+
+    private record PendingRef(Class<?> entityClass, Object entityId, ReferenceResolver.Ref ref) {
+    }
 
     /**
      * Wraps an {@link InputStream} and swallows {@link #close()} calls.
