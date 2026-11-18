@@ -32,10 +32,24 @@ public final class EmailEditorLocation {
      * @return the URL that opens the editor on that template
      */
     public static String url(String contextPath, Long templateId, String language) {
+        return url(contextPath, templateId, language, null);
+    }
+
+    /**
+     * @param contextPath  the context path of the application, may be null or empty
+     * @param templateId   the id of a saved template
+     * @param language     the language of the user, for example {@code es}; null for the browser language
+     * @param templateName the name of the template, shown in the title of the page; null or blank to leave it out
+     * @return the URL that opens the editor on that template
+     */
+    public static String url(String contextPath, Long templateId, String language, String templateName) {
         var base = contextPath == null || contextPath.equals("/") ? "" : contextPath;
         var url = new StringBuilder(base).append(PATH).append("?id=").append(templateId);
         if (language != null && !language.isBlank()) {
             url.append("&locale=").append(URLEncoder.encode(language, StandardCharsets.UTF_8));
+        }
+        if (templateName != null && !templateName.isBlank()) {
+            url.append("&name=").append(URLEncoder.encode(templateName, StandardCharsets.UTF_8));
         }
         return url.toString();
     }

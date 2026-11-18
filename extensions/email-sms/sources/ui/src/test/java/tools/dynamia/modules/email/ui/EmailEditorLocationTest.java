@@ -9,6 +9,7 @@ import tools.dynamia.modules.email.domain.EmailTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EmailEditorLocationTest {
@@ -58,10 +59,18 @@ class EmailEditorLocationTest {
     }
 
     @Test
-    void theEditorOpensInAWindowUnlessTabIsRequested() {
-        assertFalse(EmailEditorWindow.opensInTab(null));
-        assertFalse(EmailEditorWindow.opensInTab("window"));
+    void eachTemplateHasItsOwnTabAndTitle() {
+        assertEquals("dynamia-email-editor-3", EmailEditorWindow.tabName(3L));
+        assertNotEquals(EmailEditorWindow.tabName(3L), EmailEditorWindow.tabName(4L));
+        assertEquals("/erp/dynamia-email/editor?id=3&locale=es&name=Welcome+%26+Hi", EmailEditorLocation.url("/erp", 3L, "es", "Welcome & Hi"));
+        assertEquals("/dynamia-email/editor?id=3", EmailEditorLocation.url("/", 3L, null, " "));
+    }
+
+    @Test
+    void theEditorOpensInATabUnlessWindowIsRequested() {
+        assertTrue(EmailEditorWindow.opensInTab(null));
         assertTrue(EmailEditorWindow.opensInTab(" TAB "));
+        assertFalse(EmailEditorWindow.opensInTab(" WINDOW "));
         assertEquals("/erp/dynamia-email/editor?id=3&locale=es", EmailEditorWindow.frame("/erp/dynamia-email/editor?id=3&locale=es").getSrc());
     }
 }

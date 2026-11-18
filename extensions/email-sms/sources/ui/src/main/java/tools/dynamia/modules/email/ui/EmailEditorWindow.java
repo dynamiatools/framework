@@ -10,33 +10,46 @@ import tools.dynamia.ui.UINavigation;
 import tools.dynamia.zk.util.ZKUtil;
 
 /**
- * Shows the block editor inside a ZK modal window with an {@code iframe}, so the user designs a template without
- * leaving the application. The frame is same-origin, so the editor keeps using the session of the user.
+ * Opens the block editor in a new browser tab by default, named after the template so it is reused when the same template is opened again. Set {@code dynamia.email.editor.open-in=window} to show it
+ * inside a ZK modal window with an {@code iframe} instead, so the user designs a template without leaving the
+ * application. The frame is same-origin, so the editor keeps using the session of the user.
  * <p>
- * Set {@code dynamia.email.editor.open-in=tab} to open the editor in a new browser tab instead (the default is
- * {@code window}).
+ * Without a ZK desktop (an action run headless for a REST or Vue client) it asks the client to open the editor in a new
+ * window through {@link UINavigation}, whatever the property says.
  */
 public final class EmailEditorWindow {
 
-    /** Property that chooses where the editor opens: {@code window} (default) or {@code tab}. */
+    /** Property that chooses where the editor opens: {@code tab} (default) or {@code window}. */
     public static final String OPEN_IN_PROPERTY = "dynamia.email.editor.open-in";
 
     private EmailEditorWindow() {
     }
 
     /**
-     * Opens the editor on a template, in a window or a new tab depending on {@link #OPEN_IN_PROPERTY}.
+     * Opens the editor on a template, in a new tab or a window depending on {@link #OPEN_IN_PROPERTY}.
      *
      * @param templateId the id of a saved template
      * @param title      the title of the window
      */
     public static void open(Long templateId, String title) {
-        var url = EmailEditorLocation.url(contextPath(), templateId, Locales.getCurrent().getLanguage());
-        if (opensInTab(property())) {
+        var url = EmailEditorLocation.url(contextPath(), templateId, Locales.getCurrent().getLanguage(), title);
+        if (Executions.getCurrent() == null) {
+            // headless run (REST/Vue client): no ZK desktop, so the client decides how to open the page
             UINavigation.openInNewWindow(url);
+        } else if (opensInTab(property())) {
+            Executions.getCurrent().sendRedirect(url, tabName(templateId));
         } else {
             show(url, title);
         }
+    }
+
+    /**
+     * @param templateId the id of a saved template
+     * @return the name of the browser tab that holds the editor of that template: opening the same template again
+     * reuses its tab, and each template gets its own
+     */
+    static String tabName(Long templateId) {
+        return "dynamia-email-editor-" + templateId;
     }
 
     /**
@@ -71,7 +84,7 @@ public final class EmailEditorWindow {
      * @return true when the editor must open in a new browser tab
      */
     static boolean opensInTab(String openIn) {
-        return openIn != null && openIn.trim().equalsIgnoreCase("tab");
+        return openIn == null || !openIn.trim().equalsIgnoreCase("window");
     }
 
     private static String property() {

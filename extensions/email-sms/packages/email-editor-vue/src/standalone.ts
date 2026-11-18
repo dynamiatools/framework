@@ -5,7 +5,7 @@ import { mountEmailEditor, registerEmailEditorElement } from './element.js';
 
 /**
  * The page of the editor: `index.html?id=7` edits template 7 of the application that serves the page
- * (`&baseUrl=` for another origin, `&locale=es`, `&source=sales`). `?demo=1` runs against an in-memory template.
+ * (`&baseUrl=` for another origin, `&locale=es`, `&source=sales`, `&name=` for the title of the tab). `?demo=1` runs against an in-memory template.
  * When the page is inside a frame it tells the parent after each save with a `postMessage`.
  */
 const params = new URLSearchParams(window.location.search);
@@ -26,6 +26,8 @@ if (root) {
   } else {
     const locale = params.get('locale') ?? navigator.language.split('-')[0] ?? 'en';
     const source = params.get('source');
+    const name = params.get('name');
+    if (name) document.title = `${name} · ${document.title}`;
     mountEmailEditor(root, {
       api: demo ? createDemoApi({ velocity: params.get('velocity') === '1' }) : new EmailTemplatesClient({ baseUrl: params.get('baseUrl') ?? '' }),
       templateId: id,

@@ -13,7 +13,7 @@ import tools.dynamia.ui.MessageType;
 import tools.dynamia.ui.UIMessages;
 
 /**
- * Opens the block editor on the selected template in a ZK window with an iframe (or a new tab, see {@link EmailEditorWindow}). A template that still uses Velocity shows the migration
+ * Opens the block editor on the selected template in a new browser tab (or a ZK window with an iframe, see {@link EmailEditorWindow}). A template that still uses Velocity shows the migration
  * options inside the editor page. The editor talks to the REST API with the session of the user, so it can only touch
  * the templates of the current account.
  */
