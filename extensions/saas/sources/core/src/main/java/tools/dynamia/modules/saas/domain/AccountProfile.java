@@ -17,6 +17,7 @@
 
 package tools.dynamia.modules.saas.domain;
 
+import tools.dynamia.domain.InitializeOnLoad;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +47,7 @@ public class AccountProfile extends BaseEntity {
 	private String description;
 
 
+	@InitializeOnLoad
 	@OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private List<AccountProfileRestriction> restrictions = new ArrayList<>();
 

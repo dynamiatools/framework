@@ -1,6 +1,7 @@
 package tools.dynamia.modules.reports.core.domain;
 
 
+import tools.dynamia.domain.InitializeOnLoad;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -40,10 +41,13 @@ public class Report extends SimpleEntitySaaS implements Transferable<ReportDTO> 
     @Basic(fetch = FetchType.LAZY)
     @NotEmpty
     private String queryScript = "";
+    @InitializeOnLoad
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReportFilter> filters = new ArrayList<>();
+    @InitializeOnLoad
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReportField> fields = new ArrayList<>();
+    @InitializeOnLoad
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReportChart> charts = new ArrayList<>();
     private boolean autofields = true;

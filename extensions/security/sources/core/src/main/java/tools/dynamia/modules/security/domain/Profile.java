@@ -14,6 +14,7 @@
 
 package tools.dynamia.modules.security.domain;
 
+import tools.dynamia.domain.InitializeOnLoad;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Cacheable;
@@ -56,6 +57,7 @@ public class Profile extends BaseEntity implements GrantedAuthority, Cloneable, 
     private String internalName;
     @JsonIgnore
     private boolean editable = true;
+    @InitializeOnLoad
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("value")
     @JsonIgnore
