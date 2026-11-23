@@ -747,9 +747,10 @@ When disabled, `CrudController.query()` attaches a `BeanMapEntityMapper` (built 
 
 Without OSIV an entity returned by `find`, `load`, `reload` or `findSingle` is **detached** as soon as the call
 returns: touching one of its lazy collections throws `LazyInitializationException`. `CrudService` therefore
-initializes the associations an entity needs **before** it leaves the persistence context. This only happens when the
-call is the outermost one (no transaction active, or the call started it); inside a service that already runs in a
-transaction nothing extra is loaded, so there is no cost there.
+initializes the associations an entity needs **before** it leaves the persistence context. `load`, `reload` and
+`findSingle` always do it, even when they join a transaction of the caller: that transaction (for example
+`executeWithinTransaction`) may be the one that hands the entity out. `find(type, id)` is the exception and only
+initializes when the call is the outermost one; inside a transaction use `crudService.initialize(entity)`.
 
 1. **Declare the plan on the aggregate root** with `@InitializeOnLoad`. Paths walk through collections:
 
@@ -779,6 +780,9 @@ transaction nothing extra is loaded, so there is no cost there.
    venta = crudService.reload(venta, "retenciones");          // entity that reached you detached
    var plan = crudService.load(Venta.class, id, LoadPlan.of("detalles"));
    ```
+
+   On an entity that is still attached (inside a transaction), `crudService.initialize(entity, "paths"...)` applies the
+   declared plan plus the paths without reloading it.
 
    An entity that is already detached **cannot** be repaired (Hibernate 7 has no re-attach): reload it with the paths.
 

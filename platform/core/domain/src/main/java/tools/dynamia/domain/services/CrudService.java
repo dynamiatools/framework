@@ -583,6 +583,26 @@ public interface CrudService {
     }
 
     /**
+     * Initializes, on an entity that is still attached, the associations declared with
+     * {@link tools.dynamia.domain.InitializeOnLoad} plus the given property paths. Use it at the end of a callback
+     * that runs inside a transaction (for example {@code executeWithinTransaction}) when the entity is going to be used
+     * after the transaction ends. Implementations without a persistence context return the entity unchanged.
+     * <pre>{@code
+     * crudService.executeWithinTransaction(() -> {
+     *     var venta = crudService.load(Venta.class, id);
+     *     ref.set(crudService.initialize(venta));
+     * });
+     * }</pre>
+     *
+     * @param entity the attached entity, may be {@code null}
+     * @param paths  extra property paths to initialize, relative to the entity
+     * @return the initialized entity
+     */
+    default <T> T initialize(T entity, String... paths) {
+        return entity;
+    }
+
+    /**
      * Execute a query projection like count, sum, max, avg, etc. It returns a
      * single value result.
      *
