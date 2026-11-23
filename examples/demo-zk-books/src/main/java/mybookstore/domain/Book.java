@@ -17,7 +17,6 @@
 
 package mybookstore.domain;
 
-import tools.dynamia.domain.InitializeOnLoad;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
@@ -61,7 +60,6 @@ public class Book extends BaseEntity {
     private StockStatus stockStatus = StockStatus.IN_STOCK;
     private LocalDateTime statusDate;
 
-    @InitializeOnLoad
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookReview> reviews = new ArrayList<>();
 
