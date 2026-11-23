@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/vue",
-  "version": "26.11.3",
+  "version": "26.11.4",
   "description": "Vue 3 adapter for Dynamia Platform UI",
   "keywords": [
     "dynamia",

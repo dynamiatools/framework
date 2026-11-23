@@ -75,7 +75,6 @@ public class AccountProfileCrudVM extends AbstractService implements FormCrudVie
         this.formView = formView;
         formView.addEventListener(FormView.ON_VALUE_CHANGED, e -> {
             this.model = (AccountProfile) e.getData();
-            this.model.getRestrictions().size();
             sortRestrictions();
             update();
         });

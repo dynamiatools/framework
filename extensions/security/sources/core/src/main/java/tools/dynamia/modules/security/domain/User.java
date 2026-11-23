@@ -14,6 +14,7 @@
 
 package tools.dynamia.modules.security.domain;
 
+import tools.dynamia.domain.InitializeOnLoad;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -76,6 +77,7 @@ public class User extends BaseEntity implements UserDetails, AccountAware {
     private String fullname;
 
     private String email;
+    @InitializeOnLoad
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<UserProfile> profiles = new ArrayList<>();

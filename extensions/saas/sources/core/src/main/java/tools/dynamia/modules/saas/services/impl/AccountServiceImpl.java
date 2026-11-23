@@ -291,7 +291,6 @@ public class AccountServiceImpl implements AccountService, ApplicationListener<C
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateStats(Account a) {
         final Account account = crudService.reload(a);
-        account.getStats().size();
         Containers.get().findObjects(AccountStatsProvider.class).forEach(provider -> {
             List<AccountStats> stats = provider.getAccountStats(account.getId());
             if (stats != null && !stats.isEmpty()) {

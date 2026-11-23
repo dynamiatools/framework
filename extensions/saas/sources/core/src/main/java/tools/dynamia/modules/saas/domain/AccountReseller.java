@@ -17,6 +17,7 @@
 
 package tools.dynamia.modules.saas.domain;
 
+import tools.dynamia.domain.InitializeOnLoad;
 import jakarta.persistence.*;
 import org.hibernate.annotations.BatchSize;
 import tools.dynamia.domain.contraints.NotEmpty;
@@ -44,6 +45,7 @@ public class AccountReseller extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Account mainAccount;
     private double comissionRate;
+    @InitializeOnLoad
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "reseller")
     private List<AccountResellerAgent> agents = new ArrayList<>();
     @Temporal(TemporalType.DATE)

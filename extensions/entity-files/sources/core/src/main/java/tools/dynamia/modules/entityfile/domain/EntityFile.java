@@ -17,6 +17,7 @@
 
 package tools.dynamia.modules.entityfile.domain;
 
+import tools.dynamia.domain.InitializeOnLoad;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.BatchSize;
 import org.springframework.core.io.Resource;
@@ -49,6 +50,7 @@ import java.util.List;
 @BatchSize(size = 80)
 public class EntityFile extends BaseEntity implements URLable {
 
+    @InitializeOnLoad
     @OneToMany(mappedBy = "parent")
     @JsonIgnore
     private List<EntityFile> children;
