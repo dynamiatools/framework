@@ -1,5 +1,6 @@
 package mybookstore.domain;
 
+import tools.dynamia.domain.InitializeOnLoad;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import tools.dynamia.domain.jpa.BaseEntity;
@@ -20,6 +21,7 @@ public class Invoice extends BaseEntity {
     private String number;
     private String email;
     private BigDecimal total;
+    @InitializeOnLoad
     @OneToMany(mappedBy = "invoice", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<InvoiceDetail> details = new ArrayList<>();
 

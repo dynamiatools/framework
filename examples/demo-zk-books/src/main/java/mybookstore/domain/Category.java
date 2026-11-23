@@ -17,6 +17,7 @@
 
 package mybookstore.domain;
 
+import tools.dynamia.domain.InitializeOnLoad;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.BatchSize;
 import tools.dynamia.domain.contraints.NotEmpty;
@@ -35,6 +36,7 @@ public class Category extends SimpleEntity {
     @NotEmpty
     private String name;
     private String description;
+    @InitializeOnLoad
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CategoryTag> tags = new ArrayList<>();
 
@@ -50,6 +52,7 @@ public class Category extends SimpleEntity {
         this.name = name;
     }
 
+    @InitializeOnLoad
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Category> subcategories = new ArrayList<>();
 

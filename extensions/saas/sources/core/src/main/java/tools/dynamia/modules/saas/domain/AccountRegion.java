@@ -1,5 +1,6 @@
 package tools.dynamia.modules.saas.domain;
 
+import tools.dynamia.domain.InitializeOnLoad;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -38,6 +39,7 @@ public class AccountRegion extends SimpleEntity {
     @JsonIgnore
     private String invoiceType;
 
+    @InitializeOnLoad
     @OneToMany(mappedBy = "region", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<AccountRegionParameter> parameters = new ArrayList<>();
