@@ -59,7 +59,9 @@ public class CrudServiceMultiFunctionProcessor<T> implements MultiFunctionProces
 
                 query.customSelect("select " + String.join(",", projections));
                 CrudService crudService = DomainUtils.lookupCrudService();
-                var queryResult = crudService.executeQuery(query);
+                // The rows are aggregate values, not entities: the grid's EntityMapper (e.g. BeanMap) must not map them
+                var projectionParams = query.getQueryParameters().clone().mapWith(null);
+                List<Object> queryResult = crudService.executeQuery(query, projectionParams);
                 if (!queryResult.isEmpty()) {
                     for (int i = 0; i < functions.size(); i++) {
                         var function = functions.get(i);
