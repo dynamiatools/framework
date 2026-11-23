@@ -200,7 +200,8 @@ public class JpaCrudService extends AbstractCrudService {
             entity = JpaUtils.initializeEntity(entity);
         }
 
-        return applyLoadPlan(entity, LoadPlan.EMPTY);
+        // find keeps the "outermost call" rule: only load, reload and findSingle initialize inside a caller transaction
+        return leavesPersistenceContext() ? applyLoadPlan(entity, LoadPlan.EMPTY) : entity;
     }
 
     private <T> T findById(Class<T> type, Serializable id) {
@@ -238,13 +239,14 @@ public class JpaCrudService extends AbstractCrudService {
     }
 
     /**
-     * Initializes the associations of the load plan when the entity is about to leave the persistence context, that
-     * is, when the call that produced it is the outermost transactional one. Inside a service that already runs in a
-     * transaction nothing is loaded: the entity stays attached and its collections load on demand.
+     * Initializes the associations of the load plan: the one declared with {@code @InitializeOnLoad} plus
+     * {@code extra}. It does not matter whether the call joined a transaction of the caller: that transaction may be the
+     * one that hands the entity out (for example {@code executeWithinTransaction}), so the plan is always loaded while
+     * the entity is still attached.
      */
     private <T> T applyLoadPlan(T entity, LoadPlan extra) {
-        if (entity == null || !leavesPersistenceContext()) {
-            return entity;
+        if (entity == null) {
+            return null;
         }
 
         LoadPlan plan = loadPlanFor(entity.getClass()).and(extra);
@@ -252,6 +254,20 @@ public class JpaCrudService extends AbstractCrudService {
             return entity;
         }
         return JpaUtils.initializeEntity(entity, plan);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The entity must still be attached (inside the transaction or session that loaded it); to bring a detached
+     * entity back use {@link #reload(Object)}.
+     */
+    @Override
+    public <T> T initialize(T entity, String... paths) {
+        if (entity == null) {
+            return null;
+        }
+        return JpaUtils.initializeEntity(entity, loadPlanFor(entity.getClass()).and(LoadPlan.of(paths)));
     }
 
     /**
@@ -272,7 +288,7 @@ public class JpaCrudService extends AbstractCrudService {
     }
 
     /**
-     * Tells whether the entity returned by the current call will be detached when it ends. It is true when no
+     * Used by {@code find(type, id)}: tells whether the entity returned by the current call will be detached when it ends. It is true when no
      * transaction is active (every query runs in its own persistence context) or when the current call started the
      * transaction. It is false when the call joined a transaction opened by the caller, or when a persistence context
      * is bound to the thread (Open Persistence In View), because the entity stays managed.
@@ -344,17 +360,22 @@ public class JpaCrudService extends AbstractCrudService {
     }
 
     /**
-     * {@code findSingle} is not transactional, so its result is detached when no transaction is active. If the
-     * entity declares a load plan, it is loaded again inside a short transaction to initialize it.
+     * {@code findSingle} is not transactional. When a transaction (or a bound persistence context) is open the result
+     * is attached, so the load plan is initialized right away. Otherwise the result is detached: if the entity
+     * declares a load plan, it is loaded again inside a short transaction to initialize it.
      */
     private <T> T initializeDetachedResult(T result) {
-        if (result == null || !noPersistenceContextOpen()) {
+        if (result == null) {
             return result;
         }
 
         LoadPlan plan = loadPlanFor(result.getClass());
         if (plan.isEmpty()) {
             return result;
+        }
+
+        if (!noPersistenceContextOpen()) {
+            return JpaUtils.initializeEntity(result, plan);
         }
 
         PlatformTransactionManager txManager = Containers.get().findObject(PlatformTransactionManager.class);

@@ -131,28 +131,58 @@ public class LoadPlanTest {
     }
 
     @Test
-    public void callsInsideACallerTransactionDoNotInitializeAnything() {
+    public void loadReloadAndFindSingleInitializeInsideACallerTransaction() {
+        // the caller transaction may be the one that hands the entity out, so the plan is loaded anyway
+        var holder = new java.util.ArrayList<LoadPlanOrder>();
         tx.executeWithoutResult(s -> {
-            var order = crudService.load(LoadPlanOrder.class, orderId);
-            var found = crudService.find(LoadPlanOrder.class, orderId);
-            var single = crudService.findSingle(LoadPlanOrder.class, QueryParameters.with("name", "o1"));
+            holder.add(crudService.load(LoadPlanOrder.class, orderId));
+            holder.add(crudService.reload(new LoadPlanOrderRef(orderId).asOrder()));
+            holder.add(crudService.findSingle(LoadPlanOrder.class, QueryParameters.with("name", "o1")));
+        });
 
-            assertFalse(Hibernate.isInitialized(order.getLines()), "load joined to the caller transaction must stay lazy");
-            assertFalse(Hibernate.isInitialized(found.getLines()));
-            assertFalse(Hibernate.isInitialized(single.getLines()));
-            // and it still loads on demand while the transaction is open
+        holder.forEach(order -> {
+            assertTrue(Hibernate.isInitialized(order.getLines()));
             assertEquals(3, order.getLines().size());
         });
     }
 
     @Test
-    public void executeWithinTransactionCallbackKeepsEntitiesManaged() {
-        crudService.executeWithinTransaction(() -> {
-            var order = crudService.reload(new LoadPlanOrderRef(orderId).asOrder());
+    public void findByIdInsideACallerTransactionStaysLazy() {
+        tx.executeWithoutResult(s -> {
+            var found = crudService.find(LoadPlanOrder.class, orderId);
 
-            assertFalse(Hibernate.isInitialized(order.getLines()));
-            assertEquals(3, order.getLines().size());
+            assertFalse(Hibernate.isInitialized(found.getLines()), "find joined to the caller transaction must stay lazy");
+            assertEquals(3, found.getLines().size());
         });
+    }
+
+    @Test
+    public void initializeLoadsTheDeclaredPlanOfAnAttachedEntity() {
+        var order = new java.util.concurrent.atomic.AtomicReference<LoadPlanOrder>();
+        tx.executeWithoutResult(s -> {
+            var found = crudService.find(LoadPlanOrder.class, orderId);
+            assertFalse(Hibernate.isInitialized(found.getLines()));
+            order.set(crudService.initialize(found));
+        });
+
+        assertEquals(3, order.get().getLines().size());
+        assertEquals(1, order.get().getLines().getFirst().getSubs().size());
+    }
+
+    @Test
+    public void initializeAddsExplicitPaths() {
+        var order = new java.util.concurrent.atomic.AtomicReference<LoadPlanOrder>();
+        tx.executeWithoutResult(s -> order.set(crudService.initialize(crudService.find(LoadPlanOrder.class, orderId), "notes")));
+
+        assertTrue(Hibernate.isInitialized(order.get().getNotes()));
+    }
+
+    @Test
+    public void executeWithinTransactionCallbackInitializesTheDeclaredPlan() {
+        var ref = new java.util.concurrent.atomic.AtomicReference<LoadPlanOrder>();
+        crudService.executeWithinTransaction(() -> ref.set(crudService.reload(new LoadPlanOrderRef(orderId).asOrder())));
+
+        assertEquals(3, ref.get().getLines().size(), "usable after the transaction ended");
     }
 
     // ---------------------------------------------------------------- explicit paths (layer D)

@@ -29,9 +29,11 @@ import java.lang.annotation.Target;
  * <p>
  * Without Open Persistence In View, an entity returned by {@code find}, {@code load}, {@code reload} or
  * {@code findSingle} is detached as soon as the call returns, so touching one of its lazy collections throws
- * {@code LazyInitializationException}. When the entity is annotated, the CrudService initializes the listed paths
- * <strong>only if the call is the outermost one</strong> (the entity is going to leave the persistence context);
- * inside a service that already runs in a transaction nothing is loaded.
+ * {@code LazyInitializationException}. When the entity is annotated, the CrudService initializes the listed paths on
+ * {@code load}, {@code reload} and {@code findSingle}, also when they join a transaction of the caller (that
+ * transaction may be the one that hands the entity out). {@code find(type, id)} initializes them only when the call
+ * is the outermost one; use {@link tools.dynamia.domain.services.CrudService#initialize(Object, String...)} for an
+ * attached entity.
  * <pre>{@code
  * @Entity
  * @InitializeOnLoad({"detalles", "impuestos", "detalles.subdetalles"})

@@ -361,6 +361,11 @@ public class CacheCrudService extends AbstractCrudService {
     }
 
     @Override
+    public <T> T initialize(T entity, String... paths) {
+        return delegate.initialize(entity, paths);
+    }
+
+    @Override
     public <T> T executeProjection(Class<T> resultClass, String projectionQueryText, QueryParameters parameters) {
         return delegate.executeProjection(resultClass, projectionQueryText, parameters);
     }
