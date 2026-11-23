@@ -76,7 +76,6 @@ public class ProfileCrudVM extends AbstractService implements FormCrudViewModel<
         this.crudView = crudView;
         formView.addEventListener(FormView.ON_VALUE_CHANGED, e -> {
             this.model = (Profile) e.getData();
-            this.model.getPermissions().size();
             sortPermisos();
             update();
         });
