@@ -17,6 +17,7 @@
 
 package tools.dynamia.modules.saas.domain;
 
+import tools.dynamia.domain.InitializeOnLoad;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
@@ -128,6 +129,7 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     private Boolean requiredInstanceUuid = Boolean.FALSE;
     private boolean remote;
     @JsonIgnore
+    @InitializeOnLoad
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AccountStatsData> stats = new ArrayList<>();
     @Size(min = 5, message = "El nombre de usuario debe ser minimo de 5 caracteres")
@@ -137,6 +139,7 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     private boolean showGlobalMessage;
     private String globalMessageType;
     @JsonIgnore
+    @InitializeOnLoad
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AccountFeature> features = new ArrayList<>();
     private BigDecimal balance = BigDecimal.ZERO;
@@ -144,6 +147,7 @@ public class Account extends SimpleEntity implements Transferable<AccountDTO> {
     private BigDecimal discount;
 
     private LocalDate discountExpire;
+    @InitializeOnLoad
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<AccountAdditionalService> additionalServices = new ArrayList<>();

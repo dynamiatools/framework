@@ -1,6 +1,7 @@
 package tools.dynamia.modules.functions.domain;
 
 
+import tools.dynamia.domain.InitializeOnLoad;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
@@ -47,6 +48,7 @@ public class DynamiaHttpFunction extends BaseEntitySaaS {
     private String description;
     @Min(1)
     private int functionVersion = 1;
+    @InitializeOnLoad
     @OneToMany(mappedBy = "function", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position")
     private List<DynamiaHttpFunctionParameter> parameters = new ArrayList<>();
