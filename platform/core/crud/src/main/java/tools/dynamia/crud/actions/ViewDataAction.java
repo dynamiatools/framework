@@ -60,21 +60,21 @@ public class ViewDataAction extends AbstractCrudAction implements ReadableOnly {
     }
 
     /**
-     * Reload entity data within transaction a show the data
+     * Reloads the entity with its load plan (see {@link tools.dynamia.domain.InitializeOnLoad}) and shows it. The
+     * reload is the outermost call, so the entity reaches the view fully initialized and the view runs outside any
+     * transaction.
      *
-     * @param data
+     * @param data the entity (or a read-only row) to reload and show
      */
     public void reloadAndView(final Object data) {
-        crudService().executeWithinTransaction(() -> {
-            Object entity = data;
-            Serializable id = DomainUtils.findEntityId(entity);
-            Class entityClass = data instanceof BeanMap bm ? bm.getBeanClass() : entity.getClass();
-            if (id != null) {
-                entity = crudService().load(entityClass, id);
-            }
+        Object entity = data;
+        Serializable id = DomainUtils.findEntityId(entity);
+        Class entityClass = data instanceof BeanMap bm ? bm.getBeanClass() : entity.getClass();
+        if (id != null) {
+            entity = crudService().load(entityClass, id);
+        }
 
-            view(entity);
-        });
+        view(entity);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
