@@ -16,6 +16,9 @@
  */
 package tools.dynamia.zk.converters;
 
+import org.zkoss.bind.BindContext;
+import org.zkoss.zk.ui.Component;
+
 import java.time.format.FormatStyle;
 
 /**
@@ -24,6 +27,19 @@ import java.time.format.FormatStyle;
 
 public class LocalDateTime extends AbstractTemporalConverter {
 
+    private final LocalDate dateConverter = new LocalDate();
+
+    /**
+     * A {@link java.time.LocalDate} has no time fields, so formatting it with a date-time formatter throws.
+     * It is delegated to the {@link LocalDate} converter instead.
+     */
+    @Override
+    public Object coerceToUi(Object val, Component comp, BindContext ctx) {
+        if (val instanceof java.time.LocalDate) {
+            return dateConverter.coerceToUi(val, comp, ctx);
+        }
+        return super.coerceToUi(val, comp, ctx);
+    }
 
     @Override
     protected FormatStyle getDateStyle() {
