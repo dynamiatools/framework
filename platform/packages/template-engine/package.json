@@ -1,6 +1,6 @@
 {
   "name": "@dynamia-tools/template-engine",
-  "version": "26.11.3",
+  "version": "26.11.4",
   "website": "https://dynamia.tools",
   "description": "Safe text template engine shared with the Java DynamiaTemplateEngine: ${x}, {{x}}, pipes, if/each blocks. No code execution.",
   "keywords": [
