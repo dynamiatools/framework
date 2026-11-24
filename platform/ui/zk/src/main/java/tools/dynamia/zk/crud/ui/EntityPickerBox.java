@@ -311,7 +311,11 @@ public class EntityPickerBox extends Span implements CanBeReadonly {
     public Object getSelected() {
         if (resultTable.getSelectedItem() != null) {
             Object row = resultTable.getSelectedItem().getValue();
-            if (row != selectedRow) {
+            if (row == null) {
+                // the empty ("none") row clears the selection
+                selectedRow = null;
+                selected = null;
+            } else if (row != selectedRow) {
                 selectedRow = row;
                 selected = EntityMapperSupport.toEntity(crudService, row);
             }
