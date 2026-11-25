@@ -134,6 +134,21 @@ class HibernateTenancyTest {
     }
 
     @Test
+    void accountServiceRunAsRootSeesEveryAccountWhateverTheCurrentOne() {
+        create(91L, "api-a");
+        create(92L, "api-b");
+        var api = new tools.dynamia.modules.saas.services.impl.AccountServiceAPIImpl(null, null, null, null);
+
+        // as account 91 only its own note is visible, but runAsRoot looks across accounts
+        var visible = AccountTenants.runAs(91L, () -> api.runAsRoot(() ->
+                em.createQuery("select n.text from TenantNote n where n.text like 'api-%'", String.class).getResultList()
+                        .stream().sorted().toList()));
+
+        assertEquals(List.of("api-a", "api-b"), visible);
+        assertEquals(List.of("api-a"), texts(91L));
+    }
+
+    @Test
     void runAsRestoresThePreviousTenantAndRejectsANullAccount() {
         var inner = AccountTenants.runAs(61L, () -> {
             AccountTenants.runAs(62L, () -> null);

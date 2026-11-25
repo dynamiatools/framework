@@ -137,6 +137,35 @@ public interface AccountServiceAPI {
     }
 
     /**
+     * Runs the work as the root tenant, which sees (and may write) the data of every account, whatever the current
+     * account is, in its own new transaction. It is meant for lookups that are not about any account: a credential
+     * (a gateway key, a token) that identifies the account it belongs to, or cross-account administration. Tenant
+     * resolution fails closed, so code with no account bound must use this instead of relying on an implicit root.
+     * Because it opens a new transaction (and so a new session), it can be called from code that is not in a
+     * transaction, and what it returns must not be navigated lazily afterwards. The default implementation just runs
+     * the work.
+     *
+     * @param work the work
+     * @param <T>  the result type
+     * @return the result of the work
+     */
+    default <T> T runAsRoot(Supplier<T> work) {
+        return work.get();
+    }
+
+    /**
+     * Runs the work as the root tenant in its own new transaction, see {@link #runAsRoot(Supplier)}.
+     *
+     * @param work the work
+     */
+    default void runAsRoot(Runnable work) {
+        runAsRoot(() -> {
+            work.run();
+            return null;
+        });
+    }
+
+    /**
      * Retrieves the complete information of the currently active account.
      *
      * @return an {@link AccountDTO} with the current account details

@@ -30,6 +30,10 @@ answers `AccountTenants.NO_TENANT_ID` (`-1`), a tenant that does not exist, so n
 current. The tenant is fixed when the session opens, so that wrapper must be applied before a `@Transactional` method
 is entered, not inside it.
 
+When the lookup is not about any account, for example a credential such as a print gateway key that identifies the
+account it belongs to, use `AccountServiceAPI.runAsRoot` (a new transaction as the root tenant, which sees every
+account) instead of `withRootIfNoAccount`.
+
 ## Making an entity tenant-aware
 
 An entity that owns an `accountId` must declare it as the discriminator. Either:
