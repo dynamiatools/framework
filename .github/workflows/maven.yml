@@ -1,9 +1,19 @@
 # Verificación de PR: compila y corre los tests. Se salta en borradores
 # (se ejecuta al marcar el PR como "Ready for review") y cancela ejecuciones obsoletas.
+# También corre en cada push a next y main: setup-java guarda la caché de Maven de la rama, y los PR, los releases (que
+# corren sobre un tag) y los demás workflows solo pueden leer la de su propio ref y la de la rama por defecto (main).
+# Sin este push, main nunca tenía caché y publish-snapshot (que no compila cuando la versión no es SNAPSHOT) solo
+# guardaba una de 10 MB, así que cada ejecución bajaba todas las dependencias.
 
 name: Maven Build
 
 on:
+  push:
+    branches: [ next, main ]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'platform/packages/**'
   pull_request:
     branches: [ next, main ]
     types: [ opened, reopened, synchronize, ready_for_review ]
