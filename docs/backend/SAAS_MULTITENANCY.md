@@ -34,6 +34,27 @@ When the lookup is not about any account, for example a credential such as a pri
 account it belongs to, use `AccountServiceAPI.runAsRoot` (a new transaction as the root tenant, which sees every
 account) instead of `withRootIfNoAccount`.
 
+## What happens when no account is bound
+
+`dynamia.saas.no-tenant-policy` (a `NoTenantPolicy`) sets what `AccountTenantIdentifierResolver` does when a session is
+opened with no account bound (a public endpoint, an `@Async` or scheduled thread, a thread that lost its context):
+
+| value | behaviour | use |
+|---|---|---|
+| `closed` (default) | tenant `-1`: the session sees no data | production |
+| `strict` | throws `NoTenantException` naming the call site | tests, development, staging |
+| `root` | runs as the root tenant, which sees every account | only as a temporary bridge, never as a default |
+
+`strict` and `root` only apply once the Spring context has refreshed (Hibernate resolves a tenant while it starts).
+Hibernate asks for the tenant when it opens a session, before it knows which entities the work will touch, so `strict`
+also throws for legitimate unbound access to entities that are not tenant-aware (looking up an `Account` by its domain,
+for instance). Use it, or just the log, to enumerate the call sites; it is not a switch to leave on for a whole
+application unless those calls are wrapped.
+In every policy the access is logged once per call site (the first class outside the framework in the stack) and again
+when its count reaches 10, 100, 1000..., so the code that forgot to bind an account can be found. `root` is dangerous:
+an unbound lookup can return or modify the data of any account. A test that needs another policy than the application
+can call `setNoTenantPolicy` on the `AccountTenantIdentifierResolver` bean.
+
 ## Making an entity tenant-aware
 
 An entity that owns an `accountId` must declare it as the discriminator. Either:

@@ -70,4 +70,70 @@ class AccountTenantIdentifierResolverTest {
         assertThrows(IllegalArgumentException.class, () -> new AccountTenantIdentifierResolver(AccountTenants.NO_TENANT_ID));
         assertEquals(AccountTenants.ROOT_TENANT_ID, AccountTenants.rootTenantId());
     }
+
+    @Test
+    void theDefaultPolicyIsClosedAndAnUnboundSessionSeesNothing() {
+        var resolver = new AccountTenantIdentifierResolver();
+        resolver.ready();
+
+        assertEquals(NoTenantPolicy.CLOSED, resolver.getNoTenantPolicy());
+        assertEquals(AccountTenants.NO_TENANT_ID, testapp.TenantlessCaller.run(resolver::resolveCurrentTenantIdentifier));
+    }
+
+    @Test
+    void strictThrowsNamingTheCallSiteOnceTheContextIsUp() {
+        var resolver = new AccountTenantIdentifierResolver(0L, "strict");
+        resolver.ready();
+
+        var e = assertThrows(NoTenantException.class,
+                () -> testapp.TenantlessCaller.run(resolver::resolveCurrentTenantIdentifier));
+
+        assertTrue(e.getMessage().contains("testapp.TenantlessCaller.run"), e.getMessage());
+        assertTrue(e.getMessage().contains("no-tenant-policy=strict"), e.getMessage());
+    }
+
+    @Test
+    void strictDoesNotThrowWhileTheApplicationIsStarting() {
+        var resolver = new AccountTenantIdentifierResolver(0L, "strict");
+
+        // Hibernate resolves a tenant while it starts: that must fail closed, never throw
+        assertEquals(AccountTenants.NO_TENANT_ID, testapp.TenantlessCaller.run(resolver::resolveCurrentTenantIdentifier));
+    }
+
+    @Test
+    void rootRunsAsRootOnceTheContextIsUp() {
+        var resolver = new AccountTenantIdentifierResolver(7L, "root");
+
+        assertEquals(AccountTenants.NO_TENANT_ID, testapp.TenantlessCaller.run(resolver::resolveCurrentTenantIdentifier));
+        resolver.ready();
+        var tenant = testapp.TenantlessCaller.run(resolver::resolveCurrentTenantIdentifier);
+
+        assertEquals(7L, tenant);
+        assertTrue(resolver.isRoot(tenant));
+    }
+
+    @Test
+    void aBoundTenantIsNeverAffectedByThePolicy() {
+        var resolver = new AccountTenantIdentifierResolver(0L, "strict");
+        resolver.ready();
+
+        assertEquals(10L, AccountTenants.with(10L, resolver::resolveCurrentTenantIdentifier));
+    }
+
+    @Test
+    void thePolicyCanBeChangedAtRuntime() {
+        var resolver = new AccountTenantIdentifierResolver(0L, "strict");
+        resolver.ready();
+
+        resolver.setNoTenantPolicy(NoTenantPolicy.CLOSED);
+
+        assertEquals(AccountTenants.NO_TENANT_ID, testapp.TenantlessCaller.run(resolver::resolveCurrentTenantIdentifier));
+    }
+
+    @Test
+    void anUnknownPolicyIsRejected() {
+        assertThrows(IllegalArgumentException.class, () -> new AccountTenantIdentifierResolver(0L, "loose"));
+        assertEquals(NoTenantPolicy.CLOSED, NoTenantPolicy.parse(null));
+        assertEquals(NoTenantPolicy.STRICT, NoTenantPolicy.parse(" Strict "));
+    }
 }
