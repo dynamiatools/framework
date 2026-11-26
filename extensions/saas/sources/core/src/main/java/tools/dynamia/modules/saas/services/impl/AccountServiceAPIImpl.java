@@ -183,6 +183,11 @@ public class AccountServiceAPIImpl extends AbstractService implements AccountSer
     }
 
     @Override
+    public <T> T runAsRoot(Supplier<T> work) {
+        return AccountTenants.runAsRoot(work);
+    }
+
+    @Override
     public AccountDTO getCurrentAccount() {
         try {
             return accountContext.toDTO();
